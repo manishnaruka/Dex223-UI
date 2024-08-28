@@ -203,7 +203,6 @@ export function useAutoListingUpdater() {
                   patch: 1,
                 },
                 tokens: resultData[i].tokens.map(({ token }: any) => {
-                  console.log(token.decimals);
                   return new Token(
                     chainId,
                     token.addressERC20,

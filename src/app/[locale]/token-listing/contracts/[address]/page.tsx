@@ -100,7 +100,7 @@ export default function AutoListingContractDetails({
                 day: "numeric",
               })}
             />
-            <TokenListInfoCard title="Version" value="145.0.0" />
+            <TokenListInfoCard title="Version" value="1.0.0" />
             <TokenListInfoCard
               title="Listing type"
               value={!!listingContract.pricesDetail.length ? "Paid" : "Free"}

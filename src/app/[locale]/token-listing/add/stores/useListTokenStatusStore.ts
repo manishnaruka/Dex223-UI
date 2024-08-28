@@ -12,21 +12,28 @@ export enum ListTokenStatus {
   APPROVE_ERROR,
 }
 
+export enum ListError {
+  OUT_OF_GAS,
+  UNKNOWN,
+}
+
 interface ListTokenStatusStore {
   status: ListTokenStatus;
   approveHash: Address | undefined;
   listTokenHash: Address | undefined;
+  errorType: ListError;
 
   setStatus: (status: ListTokenStatus) => void;
   setApproveHash: (hash: Address) => void;
   setListTokenHash: (hash: Address) => void;
+  setErrorType: (errorType: ListError) => void;
 }
 
 export const useListTokenStatusStore = create<ListTokenStatusStore>((set, get) => ({
   status: ListTokenStatus.INITIAL,
   approveHash: undefined,
   listTokenHash: undefined,
-
+  errorType: ListError.UNKNOWN,
   setStatus: (status) => {
     if (status === ListTokenStatus.INITIAL) {
       set({ status, listTokenHash: undefined, approveHash: undefined });
@@ -34,6 +41,7 @@ export const useListTokenStatusStore = create<ListTokenStatusStore>((set, get) =
 
     set({ status });
   },
+  setErrorType: (errorType) => set({ errorType }),
   setListTokenHash: (hash) => set({ listTokenHash: hash }),
   setApproveHash: (hash) => set({ approveHash: hash }),
 }));

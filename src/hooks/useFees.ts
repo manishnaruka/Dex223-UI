@@ -19,8 +19,6 @@ export function useFees() {
 
   const { data: blockNumber } = useScopedBlockNumber();
 
-  console.log(estimatedFeesPerGasEIP1559);
-
   useEffect(() => {
     refetchLegacy();
     refetchEIP1559();

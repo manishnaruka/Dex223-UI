@@ -20,6 +20,8 @@ export enum RecentTransactionTitleTemplate {
   REMOVE,
   COLLECT,
   WITHDRAW,
+  LIST_SINGLE,
+  LIST_DOUBLE,
 }
 
 type CommonRecentTransaction = {
@@ -83,6 +85,12 @@ export type IRecentTransactionTitle =
   | ({
       template: RecentTransactionTitleTemplate.REMOVE;
     } & TwoTokensTransactionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.LIST_SINGLE;
+    } & Omit<SingleTokenTransactionTitle, "amount"> & { autoListing: string })
+  | ({
+      template: RecentTransactionTitleTemplate.LIST_DOUBLE;
+    } & Omit<TwoTokensTransactionTitle, "amount0" | "amount1"> & { autoListing: string })
   | ({
       template: RecentTransactionTitleTemplate.ADD;
     } & TwoTokensTransactionTitle);

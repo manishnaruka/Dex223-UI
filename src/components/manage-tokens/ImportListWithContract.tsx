@@ -178,7 +178,6 @@ export default function ImportListWithContract({ setContent }: Props) {
                       patch: 1,
                     },
                     tokens: queryRes.tokens.map(({ token }: any) => {
-                      console.log(token.decimals);
                       return new Token(
                         chainId,
                         token.addressERC20,
