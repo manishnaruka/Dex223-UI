@@ -1,4 +1,7 @@
-import { ListTokenStatus, useListTokenStatusStore } from "@/app/[locale]/token-listing/add/stores/useListTokenStatusStore";
+import {
+  ListTokenStatus,
+  useListTokenStatusStore,
+} from "@/app/[locale]/token-listing/add/stores/useListTokenStatusStore";
 
 export function useListTokenStatus() {
   const { status } = useListTokenStatusStore();

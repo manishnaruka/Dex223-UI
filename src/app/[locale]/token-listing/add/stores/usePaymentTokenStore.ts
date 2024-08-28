@@ -1,6 +1,5 @@
-import { create } from "zustand";
-
 import { Address } from "viem";
+import { create } from "zustand";
 
 export type PaymentMethod = { token: Address; price: bigint };
 
