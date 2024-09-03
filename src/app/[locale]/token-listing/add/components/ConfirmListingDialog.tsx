@@ -1,17 +1,12 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { PropsWithChildren, ReactNode, useMemo } from "react";
-import { Address, formatGwei } from "viem";
-import { useGasPrice } from "wagmi";
+import React, { PropsWithChildren, useMemo } from "react";
+import { Address, formatGwei, formatUnits } from "viem";
+import { useGasPrice, useReadContract } from "wagmi";
 
-import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
-import {
-  useSwapGasLimitStore,
-  useSwapGasPriceStore,
-} from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
-import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
+import { useSwapGasPriceStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import useListToken from "@/app/[locale]/token-listing/add/hooks/useListToken";
 import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
@@ -22,6 +17,7 @@ import {
   ListError,
   useListTokenStatusStore,
 } from "@/app/[locale]/token-listing/add/stores/useListTokenStatusStore";
+import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -29,18 +25,16 @@ import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
+import { InputLabel } from "@/components/atoms/TextField";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
+import { ERC20_ABI } from "@/config/abis/erc20";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_hybrid/chains";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 function ApproveRow({
@@ -188,7 +182,7 @@ function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
 
-function ListActionButton() {
+function ListActionButton({ isFree }: { isFree: boolean }) {
   const t = useTranslations("Swap");
   const { tokenA, tokenB } = useListTokensStore();
   const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
@@ -215,66 +209,65 @@ function ListActionButton() {
     );
   }
 
-  if (isPendingApprove) {
-    return (
-      <Rows>
-        <ApproveRow isPending logoURI={tokenA.logoURI} />
-        <ListTokenRow isDisabled />
-      </Rows>
-    );
-  }
-
-  if (isLoadingApprove) {
-    return (
-      <Rows>
-        <ApproveRow hash={approveHash} isLoading logoURI={tokenA.logoURI} />
-        <ListTokenRow isDisabled />
-      </Rows>
-    );
-  }
-
-  if (isRevertedApprove) {
-    return (
-      <>
+  if (!isFree) {
+    if (isPendingApprove) {
+      return (
         <Rows>
-          <ApproveRow hash={approveHash} isReverted logoURI={tokenA.logoURI} />
+          <ApproveRow isPending logoURI={tokenA.logoURI} />
           <ListTokenRow isDisabled />
         </Rows>
-        <div className="flex flex-col gap-5 mt-4">
-          <Alert
-            withIcon={false}
-            type="error"
-            text={
-              <span>
-                Transaction failed due to lack of gas or an internal contract error. Try using
-                higher slippage or gas to ensure your transaction is completed. If you still have
-                issues, click{" "}
-                <a href="#" className="text-green hover:underline">
-                  common errors
-                </a>
-                .
-              </span>
-            }
-          />
-          <Button
-            fullWidth
-            onClick={() => {
-              setIsOpen(false);
-            }}
-          >
-            Try again
-          </Button>
-        </div>
-      </>
-    );
+      );
+    }
+
+    if (isLoadingApprove) {
+      return (
+        <Rows>
+          <ApproveRow hash={approveHash} isLoading logoURI={tokenA.logoURI} />
+          <ListTokenRow isDisabled />
+        </Rows>
+      );
+    }
+    if (isRevertedApprove) {
+      return (
+        <>
+          <Rows>
+            <ApproveRow hash={approveHash} isReverted logoURI={tokenA.logoURI} />
+            <ListTokenRow isDisabled />
+          </Rows>
+          <div className="flex flex-col gap-5 mt-4">
+            <Alert
+              withIcon={false}
+              type="error"
+              text={
+                <span>
+                  Transaction failed due to lack of gas or an internal contract error. Try using
+                  higher slippage or gas to ensure your transaction is completed. If you still have
+                  issues, click{" "}
+                  <a href="#" className="text-green hover:underline">
+                    common errors
+                  </a>
+                  .
+                </span>
+              }
+            />
+            <Button
+              fullWidth
+              onClick={() => {
+                setIsOpen(false);
+              }}
+            >
+              Try again
+            </Button>
+          </div>
+        </>
+      );
+    }
   }
 
   if (isPendingList) {
     return (
       <Rows>
-        {/*{tokenAStandard === Standard.ERC20 && (*/}
-        <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
-        {/*)}*/}
+        {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
         <ListTokenRow isPending />
       </Rows>
     );
@@ -283,9 +276,7 @@ function ListActionButton() {
   if (isLoadingList) {
     return (
       <Rows>
-        {/*{tokenAStandard === Standard.ERC20 && (*/}
-        <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
-        {/*)}*/}
+        {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
         <ListTokenRow hash={listTokenHash} isLoading />
       </Rows>
     );
@@ -294,9 +285,7 @@ function ListActionButton() {
   if (isSuccessList) {
     return (
       <Rows>
-        {/*{tokenAStandard === Standard.ERC20 && (*/}
-        <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
-        {/*)}*/}
+        {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
         <ListTokenRow hash={listTokenHash} isSettled isSuccess />
       </Rows>
     );
@@ -306,9 +295,7 @@ function ListActionButton() {
     return (
       <>
         <Rows>
-          {/*{tokenAStandard === Standard.ERC20 && (*/}
-          <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
-          {/*)}*/}
+          {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
           <ListTokenRow hash={listTokenHash} isSettled isReverted />
         </Rows>
         <div className="flex flex-col gap-5 mt-4">
@@ -368,7 +355,7 @@ function SingleCard({
   return (
     <div
       className={clsx(
-        "rounded-3 flex flex-col overflow-hidden",
+        "rounded-3 flex flex-col overflow-hidden justify-between",
         color === "quaternary" ? "bg-quaternary-bg" : "bg-tertiary-bg",
       )}
     >
@@ -381,7 +368,7 @@ function SingleCard({
         )}
       >
         {underlineText && <div className="text-secondary-text text-14">{underlineText}</div>}
-        <div className="text-18">{title}</div>
+        <div className="text-18 text-center px-4">{title}</div>
       </div>
 
       <div className="bg-quaternary-bg flex items-center text-16 py-4 justify-center">
@@ -390,52 +377,19 @@ function SingleCard({
     </div>
   );
 }
-
-function SwapDetailsRow({
-  title,
-  value,
-  tooltipText,
-}: {
-  title: string;
-  value: string | ReactNode;
-  tooltipText: string;
-}) {
-  return (
-    <div className="flex justify-between items-center">
-      <div className="flex gap-2 items-center text-secondary-text">
-        <Tooltip iconSize={20} text={tooltipText} />
-        {title}
-      </div>
-      <span>{value}</span>
-    </div>
-  );
-}
-
 export default function ConfirmListingDialog() {
   const t = useTranslations("Swap");
   const { tokenA, tokenB, reset: resetTokens } = useListTokensStore();
-  const chainId = useCurrentChainId();
   const { autoListingContract, setAutoListingContract } = useAutoListingContractStore();
 
   const autoListing = useAutoListingContract(autoListingContract);
 
   const { isOpen, setIsOpen } = useConfirmListTokenDialogStore();
 
-  const { trade } = useTrade();
+  const isFree = useMemo(() => {
+    return !autoListing?.pricesDetail.length;
+  }, [autoListing]);
 
-  const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
-    return trade?.outputAmount;
-  }, [trade?.outputAmount]);
-
-  const output = useMemo(() => {
-    if (!trade) {
-      return "";
-    }
-
-    return trade.outputAmount.toSignificant();
-  }, [trade]);
-
-  const { slippage, deadline: _deadline } = useSwapSettingsStore();
   const {
     isPendingList,
     isLoadingList,
@@ -446,7 +400,6 @@ export default function ConfirmListingDialog() {
     isSettledList,
     isRevertedApprove,
   } = useListTokenStatus();
-  const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
 
   const isProcessing = useMemo(() => {
     return (
@@ -489,8 +442,6 @@ export default function ConfirmListingDialog() {
     return "0.00";
   }, [baseFee, gasPriceSettings]);
 
-  console.log(autoListing);
-
   const tokensToList = useMemo(() => {
     if (!autoListing) {
       return [];
@@ -502,9 +453,6 @@ export default function ConfirmListingDialog() {
     const isSecondTokenInList = autoListing.tokens.find((l: any) => {
       return l.token.addressERC20.toLowerCase() === tokenB?.address0.toLowerCase();
     });
-
-    console.log(Boolean(isFirstTokenInList));
-    console.log(!!isSecondTokenInList);
 
     if (isFirstTokenInList && isSecondTokenInList) {
       return [];
@@ -524,6 +472,20 @@ export default function ConfirmListingDialog() {
 
     return [];
   }, [autoListing, tokenA, tokenB]);
+
+  const { paymentToken, setPaymentToken } = usePaymentTokenStore();
+
+  const tokenDecimals = useReadContract({
+    abi: ERC20_ABI,
+    functionName: "decimals",
+    address: paymentToken?.token,
+  });
+
+  const tokenSymbol = useReadContract({
+    abi: ERC20_ABI,
+    functionName: "symbol",
+    address: paymentToken?.token,
+  });
 
   return (
     <DrawerDialog
@@ -588,7 +550,7 @@ export default function ConfirmListingDialog() {
 
                   <div className="relative h-3">
                     <div className="absolute  -translate-x-1/2 -bottom-2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
-                      <Svg className="-rotate-90" iconName="arrow-in" />
+                      <Svg className="rotate-90" iconName="arrow-in" />
                     </div>
                   </div>
 
@@ -620,25 +582,39 @@ export default function ConfirmListingDialog() {
 
               <div className="flex justify-center">
                 <span className="text-20 font-bold text-primary-text mb-1">
-                  {isRevertedList && t("swap_failed")}
-                  {isSuccessList && t("successful_swap")}
+                  {isRevertedList && "Failed to list token"}
+                  {isSuccessList && "Token successfully listed"}
                   {isRevertedApprove && "Approve failed"}
                 </span>
               </div>
+            </div>
+          )}
+          {!isFree && paymentToken && (
+            <div className="mb-5">
+              <InputLabel label="Payment for listing" tooltipText="Tooltip text" />
+              <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
+                {formatUnits(paymentToken.price, tokenDecimals.data ?? 18).slice(0, 7) === "0.00000"
+                  ? truncateMiddle(formatUnits(paymentToken.price, tokenDecimals.data ?? 18), {
+                      charsFromStart: 3,
+                      charsFromEnd: 2,
+                    })
+                  : formatFloat(
+                      formatUnits(
+                        paymentToken.price,
+                        tokenSymbol?.data != null ? +tokenSymbol.data : 18,
+                      ),
+                    )}
+                <span className="flex items-center gap-2">
+                  <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
 
-              <div className="flex justify-center gap-2 items-center">
-                <Image src={tokenA?.logoURI || ""} alt="" width={24} height={24} />
-                <span>{/*{tokenA?.symbol} {typedValue}*/}</span>
-                <Svg iconName="next" />
-                <Image src={tokenB?.logoURI || ""} alt="" width={24} height={24} />
-                <span>
-                  {tokenB?.symbol} {output}
+                  {tokenSymbol.data}
+                  <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
                 </span>
               </div>
             </div>
           )}
           {isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}
-          <ListActionButton />
+          <ListActionButton isFree={isFree} />
         </div>
       </div>
     </DrawerDialog>

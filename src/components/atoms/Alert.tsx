@@ -34,7 +34,6 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         overflow-hidden
         group
         text-14
-        items-center
         `,
         type === "success" && "outline-green bg-green-bg",
         type === "error" && "outline-red-input bg-red-bg",
@@ -47,7 +46,7 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
       {withIcon && (
         <div
           className={clsx(
-            "flex justify-center flex-shrink-0 items-center",
+            "flex justify-center flex-shrink-0 items-stretch",
             type === "success" && "text-green",
             type === "error" && "text-red-input",
             type === "warning" && "text-orange",
@@ -58,7 +57,7 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
           {iconsMap[type]}
         </div>
       )}
-      {text}
+      <div className="flex items-center">{text}</div>
     </div>
   );
 }

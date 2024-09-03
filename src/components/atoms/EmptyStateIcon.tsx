@@ -15,6 +15,7 @@ const emptyStateIconUrlMap = {
   tokens: "/empty/empty-tokens.svg",
   warning: "/empty/empty-warning.svg",
   autolisting: "/empty/empty-autolisting.svg",
+  "search-autolisting": "/empty/empty-autolisting-search.svg",
 };
 
 type EmptyIconName = keyof typeof emptyStateIconUrlMap;

@@ -45,7 +45,7 @@ function ListingVariantCard({
     </div>
   );
 }
-export default function SwapPage() {
+export default function TokenListingPage() {
   return (
     <>
       <Container>
@@ -56,7 +56,7 @@ export default function SwapPage() {
             following methods to get your token listed:
           </p>
         </div>
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 px-4">
           <ListingVariantCard
             heading="Default listing"
             paragraphText={

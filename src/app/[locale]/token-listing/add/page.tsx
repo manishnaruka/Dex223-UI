@@ -1,73 +1,163 @@
 "use client";
 
+import { isZeroAddress } from "@ethereumjs/util";
 import clsx from "clsx";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Address, formatUnits, isAddress, parseUnits } from "viem";
-import { usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import { Address, formatUnits, isAddress } from "viem";
+import { useAccount, usePublicClient, useReadContract } from "wagmi";
 
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
+import ChooseAutoListingDialog from "@/app/[locale]/token-listing/add/components/ChooseAutoListingDialog";
+import ChoosePaymentDialog from "@/app/[locale]/token-listing/add/components/ChoosePaymentDialog";
 import ConfirmListingDialog from "@/app/[locale]/token-listing/add/components/ConfirmListingDialog";
-import useAutoListingContracts, {
-  useAutoListingContract,
-} from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
+import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import { useAutoListingSearchParams } from "@/app/[locale]/token-listing/add/hooks/useAutolistingSearchParams";
+import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
+import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
+import { useChoosePaymentDialogStore } from "@/app/[locale]/token-listing/add/stores/useChoosePaymentDialogStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
-import Dialog from "@/components/atoms/Dialog";
-import DialogHeader from "@/components/atoms/DialogHeader";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Preloader from "@/components/atoms/Preloader";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
-import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
-import SwapButton from "@/components/buttons/SwapButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
-import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
-import TokenInput from "@/components/common/TokenInput";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
-import { PAYABLE_AUTOLISTING_ABI } from "@/config/abis/autolisting";
+import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import { AUTO_LISTING_ABI } from "@/config/abis/autolisting";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
-import { networks } from "@/config/networks";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { PoolState, usePool } from "@/hooks/usePools";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useRouter } from "@/navigation";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { WETH9 } from "@/sdk_hybrid/entities/weth9";
 
+function OpenConfirmListTokenButton({
+  isPoolExists,
+  isBothTokensAlreadyInList,
+}: {
+  isPoolExists: boolean;
+  isBothTokensAlreadyInList: boolean;
+}) {
+  const tWallet = useTranslations("Wallet");
+  const t = useTranslations("Swap");
+  const { isConnected } = useAccount();
+
+  const { tokenA, tokenB } = useListTokensStore();
+
+  const { setIsOpen: setConfirmListTokenDialogOpened } = useConfirmListTokenDialogStore();
+
+  const { isLoadingList, isLoadingApprove, isPendingApprove, isPendingList } = useListTokenStatus();
+  const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
+
+  if (!isConnected) {
+    return (
+      <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+        {tWallet("connect_wallet")}
+      </Button>
+    );
+  }
+
+  if (isLoadingList) {
+    return (
+      <Button fullWidth isLoading>
+        <span className="flex items-center gap-2">
+          <span>Processing list operation</span>
+          <Preloader size={20} color="black" />
+        </span>
+      </Button>
+    );
+  }
+
+  if (isLoadingApprove) {
+    return (
+      <Button fullWidth isLoading>
+        <span className="flex items-center gap-2">
+          <span>{t("approving_in_progress")}</span>
+          <Preloader size={20} color="black" />
+        </span>
+      </Button>
+    );
+  }
+
+  if (isPendingApprove || isPendingList) {
+    return (
+      <Button fullWidth isLoading>
+        <span className="flex items-center gap-2">
+          <span>{t("waiting_for_confirmation")}</span>
+          <Preloader size={20} color="black" />
+        </span>
+      </Button>
+    );
+  }
+
+  if (!tokenA || !tokenB) {
+    return (
+      <Button fullWidth disabled>
+        {t("select_tokens")}
+      </Button>
+    );
+  }
+
+  if (!isPoolExists) {
+    return (
+      <Button fullWidth disabled>
+        Pool doesn&quot;t exists
+      </Button>
+    );
+  }
+
+  if (isBothTokensAlreadyInList) {
+    return (
+      <Button fullWidth disabled>
+        Both tokens are already listed
+      </Button>
+    );
+  }
+
+  return (
+    <Button onClick={() => setConfirmListTokenDialogOpened(true)} fullWidth>
+      List token
+    </Button>
+  );
+}
 export default function ListTokenPage() {
   useAutoListingSearchParams();
+  const t = useTranslations("Swap");
+
   const router = useRouter();
   const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
   const chainId = useCurrentChainId();
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
   const { autoListingContract, setAutoListingContract } = useAutoListingContractStore();
-  const autoListings = useAutoListingContracts();
   useRecentTransactionTracking();
 
   const autoListing = useAutoListingContract(autoListingContract);
 
-  console.log(autoListing);
-
   const { tokenA, tokenB, setTokenA, setTokenB } = useListTokensStore();
+  const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
+
+  const isPoolExists = useMemo(() => pool[0] !== PoolState.NOT_EXISTS, [pool]);
 
   const [tokenAAddress, setTokenAAddress] = useState("");
   const [tokenBAddress, setTokenBAddress] = useState("");
@@ -76,6 +166,8 @@ export default function ListTokenPage() {
 
   const [isPickTokenOpened, setPickTokenOpened] = useState(false);
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
+
+  const { isLoadingList, isLoadingApprove, isPendingApprove, isPendingList } = useListTokenStatus();
 
   const handleChange = useCallback(
     async (
@@ -134,13 +226,13 @@ export default function ListTokenPage() {
 
   const { paymentToken, setPaymentToken } = usePaymentTokenStore();
 
-  // const [paymentMethod, setPaymentMethod] = useState<{ token: Address; price: bigint }>();
-
   const tokensToPay = useReadContract({
-    abi: PAYABLE_AUTOLISTING_ABI,
+    abi: AUTO_LISTING_ABI,
     address: autoListingContract,
     functionName: "getPrices",
   });
+
+  const { setIsOpen: setConfirmListTokenDialogOpened } = useConfirmListTokenDialogStore();
 
   useEffect(() => {
     if (!paymentToken && tokensToPay?.data?.[0]) {
@@ -160,13 +252,41 @@ export default function ListTokenPage() {
     address: paymentToken?.token,
   });
 
-  console.log(tokenDecimals);
-  console.log(tokenSymbol);
+  const { setIsOpen: setPaymentDialogSelectOpened } = useChoosePaymentDialogStore();
+  const { setIsOpen: setAutoListingSelectOpened } = useChooseAutoListingDialogStore();
 
-  const [isAutolistingSelectOpened, setAutoListingSelectOpened] = useState(false);
-  const [isPaymentDialogSelectOpened, setPaymentDialogSelectOpened] = useState(false);
+  const tokensToList = useMemo(() => {
+    if (!autoListing) {
+      return [];
+    }
 
-  const { setIsOpen } = useConfirmListTokenDialogStore();
+    const isFirstTokenInList = autoListing.tokens.find((l: any) => {
+      return l.token.addressERC20.toLowerCase() === tokenA?.address0.toLowerCase();
+    });
+    const isSecondTokenInList = autoListing.tokens.find((l: any) => {
+      return l.token.addressERC20.toLowerCase() === tokenB?.address0.toLowerCase();
+    });
+
+    if (isFirstTokenInList && isSecondTokenInList) {
+      return [];
+    }
+
+    if (isFirstTokenInList && !isSecondTokenInList) {
+      return [tokenB];
+    }
+
+    if (isSecondTokenInList && !isFirstTokenInList) {
+      return [tokenA];
+    }
+
+    if (!isSecondTokenInList && !isFirstTokenInList) {
+      return [tokenA, tokenB];
+    }
+
+    return [];
+  }, [autoListing, tokenA, tokenB]);
+
+  console.log(tokensToPay);
 
   return (
     <>
@@ -194,15 +314,18 @@ export default function ListTokenPage() {
             <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">
               <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
                 <div className="flex justify-between items-center mb-2.5">
+                  <IconButton
+                    onClick={() => router.back()}
+                    iconName="back"
+                    buttonSize={IconButtonSize.LARGE}
+                  />
                   <h3 className="font-bold text-20">List tokens</h3>
-                  <div className="flex items-center">
-                    <IconButton
-                      buttonSize={IconButtonSize.LARGE}
-                      active={showRecentTransactions}
-                      iconName="recent-transactions"
-                      onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-                    />
-                  </div>
+                  <IconButton
+                    buttonSize={IconButtonSize.LARGE}
+                    active={showRecentTransactions}
+                    iconName="recent-transactions"
+                    onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+                  />
                 </div>
                 <p className="text-secondary-text text-14 mb-4">
                   List your token automatically using our smart contract. Click the button below to
@@ -281,6 +404,21 @@ export default function ListTokenPage() {
                     <HelperText helperText="Enter or select the paired token address" />
                   </div>
 
+                  {!isPoolExists && tokenA && tokenB && (
+                    <Alert
+                      text={
+                        <span>
+                          There is no existing pool, so you cannot list the primary token. Please{" "}
+                          <a target="_blank" href="/add" className="text-green hover:underline">
+                            create a pool
+                          </a>{" "}
+                          first.
+                        </span>
+                      }
+                      type="warning"
+                    />
+                  )}
+
                   <Alert
                     text="You can only list a token that has a pool on our exchange"
                     type="info"
@@ -323,18 +461,45 @@ export default function ListTokenPage() {
                       {tokensToPay.data.length > 1 ? (
                         <div>
                           <InputLabel label="Payment for listing" />
-                          <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
+                          <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center pl-5 pr-1">
                             {paymentToken
-                              ? formatUnits(paymentToken.price, tokenDecimals.data || 18)
-                              : "1"}
+                              ? formatUnits(paymentToken.price, tokenDecimals.data ?? 18).slice(
+                                  0,
+                                  7,
+                                ) === "0.00000"
+                                ? truncateMiddle(
+                                    formatUnits(paymentToken.price, tokenDecimals.data ?? 18),
+                                    {
+                                      charsFromStart: 3,
+                                      charsFromEnd: 2,
+                                    },
+                                  )
+                                : formatFloat(
+                                    formatUnits(
+                                      paymentToken.price,
+                                      tokenSymbol?.data != null ? +tokenSymbol.data : 18,
+                                    ),
+                                  )
+                              : 1}
+
                             <SelectButton
+                              variant="rectangle-secondary"
                               onClick={() => setPaymentDialogSelectOpened(true)}
                               className="flex items-center gap-2"
                             >
-                              <>
-                                {tokenSymbol.data}
-                                <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
-                              </>
+                              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                              {paymentToken?.token && isZeroAddress(paymentToken.token)
+                                ? "ETH"
+                                : tokenSymbol.data}
+                              <Badge
+                                variant={BadgeVariant.COLORED}
+                                color="green"
+                                text={
+                                  paymentToken?.token && isZeroAddress(paymentToken.token)
+                                    ? "Native"
+                                    : "ERC-20"
+                                }
+                              />
                             </SelectButton>
                           </div>
                         </div>
@@ -344,8 +509,18 @@ export default function ListTokenPage() {
                           <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
                             {formatUnits(tokensToPay.data[0].price, tokenDecimals.data || 18)}
                             <span className="flex items-center gap-2">
+                              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+
                               {tokenSymbol.data}
-                              <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
+                              <Badge
+                                variant={BadgeVariant.COLORED}
+                                color="green"
+                                text={
+                                  paymentToken?.token && isZeroAddress(paymentToken.token)
+                                    ? "Native"
+                                    : "ERC-20"
+                                }
+                              />
                             </span>
                           </div>
                         </div>
@@ -354,62 +529,39 @@ export default function ListTokenPage() {
                   )}
                 </div>
 
-                <Button onClick={() => setIsOpen(true)} fullWidth>
-                  List token(s)
-                </Button>
+                {(isLoadingList || isPendingList || isPendingApprove || isLoadingApprove) && (
+                  <div className="flex justify-between px-5 py-3 rounded-2 bg-tertiary-bg mb-5">
+                    <div className="flex items-center gap-2 text-14">
+                      <Preloader size={20} />
+
+                      {isLoadingList && <span>List token processing</span>}
+                      {isPendingList && <span>{t("waiting_for_confirmation")}</span>}
+                      {isLoadingApprove && <span>{t("approving_in_progress")}</span>}
+                      {isPendingApprove && <span>{t("waiting_for_confirmation")}</span>}
+                    </div>
+
+                    <Button
+                      onClick={() => {
+                        setConfirmListTokenDialogOpened(true);
+                      }}
+                      size={ButtonSize.EXTRA_SMALL}
+                    >
+                      Review details
+                    </Button>
+                  </div>
+                )}
+
+                <OpenConfirmListTokenButton
+                  isPoolExists={isPoolExists}
+                  isBothTokensAlreadyInList={!tokensToList.length}
+                />
               </div>
             </div>
           </div>
         </div>
 
-        <Dialog isOpen={isAutolistingSelectOpened} setIsOpen={setAutoListingSelectOpened}>
-          <DialogHeader
-            onClose={() => setAutoListingSelectOpened(false)}
-            title="Select auto-listing contract"
-          />
-          <div className="flex flex-col gap-2">
-            {autoListings.data?.autoListings.map((a: any) => {
-              return (
-                <button
-                  onClick={() => {
-                    setAutoListingContract(a.id);
-                    // searchParams.set("autoListingAddress", a.id);
-                    setAutoListingSelectOpened(false);
-                  }}
-                  key={a.id}
-                  className="w-full h-10 flex items-center hover:bg-tertiary-bg duration-200"
-                >
-                  {a.name}
-                </button>
-              );
-            })}
-          </div>
-        </Dialog>
-
-        <Dialog isOpen={isPaymentDialogSelectOpened} setIsOpen={setPaymentDialogSelectOpened}>
-          <DialogHeader
-            onClose={() => setPaymentDialogSelectOpened(false)}
-            title="Select auto-listing contract"
-          />
-          <div className="flex flex-col gap-2">
-            {tokensToPay?.data?.map((a: any) => {
-              return (
-                <button
-                  onClick={() => {
-                    setPaymentToken(a);
-                    // searchParams.set("autoListingAddress", a.id);
-                    setPaymentDialogSelectOpened(false);
-                  }}
-                  key={a.id}
-                  className="w-full h-10 flex items-center hover:bg-tertiary-bg duration-200"
-                >
-                  {formatUnits(a.price, 18)}
-                  <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
-                </button>
-              );
-            })}
-          </div>
-        </Dialog>
+        <ChooseAutoListingDialog />
+        <ChoosePaymentDialog />
 
         <PickTokenDialog
           isOpen={isPickTokenOpened}

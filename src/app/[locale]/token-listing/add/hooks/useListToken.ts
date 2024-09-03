@@ -1,10 +1,12 @@
+import { isZeroAddress } from "@ethereumjs/util";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { getAbiItem } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
+import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import {
   ListError,
@@ -12,7 +14,7 @@ import {
   useListTokenStatusStore,
 } from "@/app/[locale]/token-listing/add/stores/useListTokenStatusStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
-import { PAYABLE_AUTOLISTING_ABI } from "@/config/abis/autolisting";
+import { AUTO_LISTING_ABI } from "@/config/abis/autolisting";
 import { ROUTER_ABI } from "@/config/abis/router";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -33,6 +35,7 @@ export default function useListToken() {
 
   const { tokenA, tokenB } = useListTokensStore();
   const { autoListingContract } = useAutoListingContractStore();
+  const { isOpen: confirmDialogOpened } = useConfirmListTokenDialogStore();
 
   const autoListing = useAutoListingContract(autoListingContract);
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
@@ -44,38 +47,11 @@ export default function useListToken() {
     tier: FeeAmount.MEDIUM,
   });
 
+  const isFree = useMemo(() => {
+    return !autoListing?.pricesDetail.length;
+  }, [autoListing]);
+
   console.log(autoListing, "autoListing");
-
-  const tokensToList = useMemo(() => {
-    if (!autoListing) {
-      return [];
-    }
-
-    const isFirstTokenInList = autoListing.tokens.find((l: any) => {
-      return l.token.addressERC20.toLowerCase() === tokenA?.address0.toLowerCase();
-    });
-    const isSecondTokenInList = autoListing.tokens.find((l: any) => {
-      return l.token.addressERC20.toLowerCase() === tokenB?.address0.toLowerCase();
-    });
-
-    if (isFirstTokenInList && isSecondTokenInList) {
-      return [];
-    }
-
-    if (isFirstTokenInList && !isSecondTokenInList) {
-      return [tokenB];
-    }
-
-    if (isSecondTokenInList && !isSecondTokenInList) {
-      return [tokenA];
-    }
-
-    if (!isSecondTokenInList && !isFirstTokenInList) {
-      return [tokenA, tokenB];
-    }
-
-    return [];
-  }, [autoListing, tokenA, tokenB]);
 
   const { data: walletClient } = useWalletClient();
   const { paymentToken, setPaymentToken } = usePaymentTokenStore();
@@ -101,39 +77,74 @@ export default function useListToken() {
   const chainId = useCurrentChainId();
   const { addRecentTransaction } = useRecentTransactionsStore();
 
+  console.log("Payment token");
+  console.log(paymentToken);
+
   const listParams = useMemo(() => {
-    if (!paymentToken) {
+    if (!poolAddress) {
       return;
     }
 
-    return {
+    const common = {
       address: autoListingContract,
-      abi: PAYABLE_AUTOLISTING_ABI,
+      abi: AUTO_LISTING_ABI,
       functionName: "list",
-      args: [poolAddress, FeeAmount.MEDIUM, paymentToken.token],
+      args: [poolAddress, FeeAmount.MEDIUM],
     };
-  }, [autoListingContract, paymentToken, poolAddress]);
+
+    if (isFree) {
+      return { ...common, args: [...common.args, poolAddress] };
+    } else {
+      if (!paymentToken) {
+        return;
+      }
+
+      if (isZeroAddress(paymentToken.token)) {
+        return { ...common, args: [...common.args, paymentToken.token], value: paymentToken.price };
+      }
+
+      return { ...common, args: [...common.args, paymentToken.token] };
+    }
+  }, [autoListingContract, isFree, paymentToken, poolAddress]);
+
+  useEffect(() => {
+    if (
+      (listTokenStatus === ListTokenStatus.SUCCESS ||
+        listTokenStatus === ListTokenStatus.ERROR ||
+        listTokenStatus === ListTokenStatus.APPROVE_ERROR) &&
+      !confirmDialogOpened
+    ) {
+      setTimeout(() => {
+        setListTokenStatus(ListTokenStatus.INITIAL);
+      }, 400);
+    }
+  }, [confirmDialogOpened, setListTokenStatus, listTokenStatus]);
+
+  console.log(paymentToken);
 
   const { isAllowed, writeTokenApprove, updateAllowance } = useStoreAllowance({
-    token: _paymentToken
-      ? new Token(
-          DexChainId.SEPOLIA,
-          _paymentToken.feeTokenAddress.id,
-          _paymentToken.feeTokenAddress.id,
-          +_paymentToken.feeTokenAddress.decimals,
-          _paymentToken.feeTokenAddress.symbol,
-        )
-      : undefined,
+    token:
+      _paymentToken && !isFree
+        ? new Token(
+            DexChainId.SEPOLIA,
+            _paymentToken.feeTokenAddress.id,
+            _paymentToken.feeTokenAddress.id,
+            +_paymentToken.feeTokenAddress.decimals,
+            _paymentToken.feeTokenAddress.symbol,
+          )
+        : undefined,
     contractAddress: autoListingContract,
     amountToCheck: paymentToken ? paymentToken.price * BigInt(2) : null,
   });
 
   const handleList = useCallback(async () => {
-    if (!poolAddress || !walletClient || !paymentToken || !publicClient) {
+    console.log(!paymentToken && !isFree);
+
+    if (!poolAddress || !walletClient || (!paymentToken && !isFree) || !publicClient) {
       return;
     }
 
-    if (!isAllowed) {
+    if (!isAllowed && !isFree && paymentToken && !isZeroAddress(paymentToken.token)) {
       openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
       setListTokenStatus(ListTokenStatus.PENDING_APPROVE);
@@ -202,6 +213,8 @@ export default function useListToken() {
     //       break;
     //   }
     // }
+
+    console.log(listParams);
 
     try {
       const estimatedGas = await publicClient.estimateContractGas({
@@ -280,8 +293,6 @@ export default function useListToken() {
       console.log(e);
       setListTokenStatus(ListTokenStatus.INITIAL);
     }
-
-    console.log(hash);
   }, [
     addRecentTransaction,
     address,
@@ -289,6 +300,7 @@ export default function useListToken() {
     chainId,
     closeConfirmInWalletAlert,
     isAllowed,
+    isFree,
     listParams,
     openConfirmInWalletAlert,
     paymentToken,

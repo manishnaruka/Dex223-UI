@@ -16,7 +16,6 @@ import { useMintTestTokensDialogStore } from "@/components/dialogs/stores/useMin
 import { Link, usePathname } from "@/navigation";
 
 export default function Header() {
-  const pathname = usePathname();
   const { handleOpen } = useMintTestTokensDialogStore();
   return (
     <div>
@@ -47,20 +46,23 @@ export default function Header() {
           </div>
         </Container>
       </header>
-      <div className="h-[64px] bg-test-tokens-gradient">
+      <div className="pt-2.5 md:pt-2 md:pb-2 pb-4 bg-test-tokens-gradient">
         <Container className="flex h-full items-center px-5">
-          <div className="flex justify-between items-center w-full">
-            <div className="flex items-center gap-2">
+          <div className="flex justify-between items-center w-full flex-wrap gap-2">
+            <div className="flex items-center gap-2 justify-between md:justify-start flex-grow">
               Get test tokens for free
               <Image src="/test-tokens.svg" alt="" width={92} height={48} />
             </div>
-            <Button
-              onClick={handleOpen}
-              colorScheme={ButtonColor.LIGHT_GREEN}
-              size={ButtonSize.MEDIUM}
-            >
-              Get free tokens
-            </Button>
+            <div className="w-full md:w-[168px]">
+              <Button
+                fullWidth
+                onClick={handleOpen}
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                size={ButtonSize.MEDIUM}
+              >
+                Get free tokens
+              </Button>
+            </div>
           </div>
         </Container>
       </div>

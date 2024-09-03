@@ -15,7 +15,12 @@ export default function DialogHeader({ onBack, onClose, title, paragraph, settin
   return (
     <div className={onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10"}>
       <div className={clsx("h-[60px] flex items-center")}>
-        <div className={clsx("grid flex-grow", onBack ? "grid-cols-3" : "grid-cols-2")}>
+        <div
+          className={clsx(
+            "grid flex-grow",
+            onBack ? "grid-cols-3" : "grid-cols-[1fr_48px] md:grid-cols-2",
+          )}
+        >
           {onBack && (
             <IconButton onClick={onBack} iconName="back" buttonSize={IconButtonSize.LARGE} />
           )}

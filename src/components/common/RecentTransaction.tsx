@@ -149,11 +149,11 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
       );
     case RecentTransactionTitleTemplate.LIST_SINGLE:
       return (
-        <span className="text-14 text-secondary-text">{`List ${title.symbol} token in "${title.autoListing}" list`}</span>
+        <span className="text-14 text-secondary-text">{`${title.symbol} in "${title.autoListing}" list`}</span>
       );
     case RecentTransactionTitleTemplate.LIST_DOUBLE:
       return (
-        <span className="text-14 text-secondary-text">{`List ${title.symbol0} and ${title.symbol0} tokens in "${title.autoListing}" list`}</span>
+        <span className="text-14 text-secondary-text">{`${title.symbol0} and ${title.symbol0} in "${title.autoListing}" list`}</span>
       );
   }
 }
