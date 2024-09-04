@@ -4,13 +4,18 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { formatUnits } from "viem";
 
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
+import { formatFloat } from "@/functions/formatFloat";
 import { useTokens } from "@/hooks/useTokenLists";
+
+import { useActiveWalletBalances } from "../stores/balances.hooks";
+import { useWalletsBalances } from "../stores/useWalletsBalances";
 
 export const Balances = () => {
   const t = useTranslations("Portfolio");
@@ -19,13 +24,20 @@ export const Balances = () => {
 
   const loading = false;
 
-  const currentTableData = tokens.map((token) => ({
-    logoURI: token.logoURI,
-    name: token.name,
-    amountERC20: `0.232 ${token.symbol}`,
-    amountERC223: `0.34 ${token.symbol}`,
-    amountFiat: "$23.13",
-  })) as any[];
+  const { balances, setWalletBalances } = useWalletsBalances();
+
+  const { tokenBalances } = useActiveWalletBalances();
+
+  const currentTableData = tokenBalances.map(
+    ({ token, amountERC20, amountERC223, amountFiat }) => ({
+      logoURI: token.logoURI,
+      name: token.name,
+      amountERC20: `${formatFloat(formatUnits(amountERC20 || BigInt(0), token.decimals))} ${token.symbol}`,
+      amountERC223: `${formatFloat(formatUnits(amountERC223 || BigInt(0), token.decimals))} ${token.symbol}`,
+      amountFiat: amountFiat,
+    }),
+  ) as any[];
+
   return (
     <>
       <div className="mt-5 flex gap-5">
@@ -35,14 +47,14 @@ export const Balances = () => {
             <Tooltip iconSize={20} text="Info text" />
           </div>
 
-          <span className="text-32 font-medium">$2234.234</span>
+          <span className="text-32 font-medium">$ —</span>
         </div>
         <div className="flex flex-col bg-portfolio-margin-positions-gradient rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
             <span>Margin positions balance</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
-          <span className="text-32 font-medium">$1234.66</span>
+          <span className="text-32 font-medium">$ —</span>
         </div>
       </div>
       <div className="mt-5 flex gap-5">
@@ -51,9 +63,9 @@ export const Balances = () => {
             <span>Liquidity balance</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
-          <span className="text-24 font-medium">$577.31</span>
+          <span className="text-24 font-medium">$ —</span>
           <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
-            2 liquidity positions
+            — liquidity positions
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
@@ -61,9 +73,9 @@ export const Balances = () => {
             <span>Lending order balance</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
-          <span className="text-24 font-medium">$489.22</span>
+          <span className="text-24 font-medium">$ —</span>
           <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
-            2 lending orders
+            — lending orders
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
@@ -71,8 +83,8 @@ export const Balances = () => {
             <span>Deposited to contract</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
-          <span className="text-24 font-medium">$21.44</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">5 tokens</span>
+          <span className="text-24 font-medium">$ —</span>
+          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">— tokens</span>
         </div>
       </div>
 

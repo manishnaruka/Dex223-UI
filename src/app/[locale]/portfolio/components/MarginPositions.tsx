@@ -28,7 +28,7 @@ export const MarginPositions = () => {
               <span>Margin positions balance</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
-            <span className="text-32 font-medium">$1234.66</span>
+            <span className="text-32 font-medium">$ —</span>
           </div>
           <Button colorScheme={ButtonColor.LIGHT_GREEN}>Withdraw</Button>
         </div>
@@ -55,61 +55,68 @@ export const MarginPositions = () => {
       {/*  */}
 
       <div className="mt-5 min-h-[640px] mb-5 w-full">
-        <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-          <div className="pl-5 h-[60px] flex items-center">ID</div>
-          <div className="h-[60px] flex items-center">Amount, $</div>
-          <div className="h-[60px] flex items-center gap-2">Assets</div>
-          <div className="pr-5 h-[60px] flex items-center justify-end">Action / Owner</div>
+        {!loading && currentTableData.length ? (
+          <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+            <div className="pl-5 h-[60px] flex items-center">ID</div>
+            <div className="h-[60px] flex items-center">Amount, $</div>
+            <div className="h-[60px] flex items-center gap-2">Assets</div>
+            <div className="pr-5 h-[60px] flex items-center justify-end">Action / Owner</div>
 
-          {!loading &&
-            currentTableData.map((o: any, index: number) => {
-              return (
-                <>
-                  <div
-                    className={clsx(
-                      "h-[56px] flex items-center gap-2 pl-5 rounded-l-3",
-                      index % 2 !== 0 && "bg-tertiary-bg",
-                    )}
-                  >
-                    <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
-                    <span>{`${o.name}`}</span>
-                  </div>
-                  <div
-                    className={clsx(
-                      "h-[56px] flex items-center",
-                      index % 2 !== 0 && "bg-tertiary-bg",
-                    )}
-                  >
-                    {o.amountERC20}
-                  </div>
-                  <div
-                    className={clsx(
-                      "h-[56px] flex items-center",
-                      index % 2 !== 0 && "bg-tertiary-bg",
-                    )}
-                  >
-                    {o.amountERC223}
-                  </div>
-                  <div
-                    className={clsx(
-                      "h-[56px] flex items-center",
-                      index % 2 !== 0 && "bg-tertiary-bg",
-                    )}
-                  >
-                    {o.amountFiat}
-                  </div>
-                  <div
-                    className={clsx(
-                      "h-[56px] flex items-center justify-end pr-5 rounded-r-3",
-                      index % 2 !== 0 && "bg-tertiary-bg",
-                    )}
-                  >
-                    <Svg iconName="list" />
-                  </div>
-                </>
-              );
-            })}
-        </div>
+            {!loading &&
+              currentTableData.map((o: any, index: number) => {
+                return (
+                  <>
+                    <div
+                      className={clsx(
+                        "h-[56px] flex items-center gap-2 pl-5 rounded-l-3",
+                        index % 2 !== 0 && "bg-tertiary-bg",
+                      )}
+                    >
+                      <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                      <span>{`${o.name}`}</span>
+                    </div>
+                    <div
+                      className={clsx(
+                        "h-[56px] flex items-center",
+                        index % 2 !== 0 && "bg-tertiary-bg",
+                      )}
+                    >
+                      {o.amountERC20}
+                    </div>
+                    <div
+                      className={clsx(
+                        "h-[56px] flex items-center",
+                        index % 2 !== 0 && "bg-tertiary-bg",
+                      )}
+                    >
+                      {o.amountERC223}
+                    </div>
+                    <div
+                      className={clsx(
+                        "h-[56px] flex items-center",
+                        index % 2 !== 0 && "bg-tertiary-bg",
+                      )}
+                    >
+                      {o.amountFiat}
+                    </div>
+                    <div
+                      className={clsx(
+                        "h-[56px] flex items-center justify-end pr-5 rounded-r-3",
+                        index % 2 !== 0 && "bg-tertiary-bg",
+                      )}
+                    >
+                      <Svg iconName="list" />
+                    </div>
+                  </>
+                );
+              })}
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5">
+            <span className="text-secondary-text">No margin positions yet</span>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center items-center h-full min-h-[550px]">
             <Preloader type="awaiting" size={48} />

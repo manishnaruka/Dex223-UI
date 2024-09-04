@@ -5,7 +5,7 @@ import { clsxMerge } from "@/functions/clsxMerge";
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   checked: boolean;
-  handleChange: () => void;
+  handleChange: (event?: any) => void; // InputHTMLAttributes<HTMLInputElement>["onChange"]
   id: string;
   label?: string;
   labelClassName?: string;

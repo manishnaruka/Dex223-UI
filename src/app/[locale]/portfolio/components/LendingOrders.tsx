@@ -28,7 +28,7 @@ export const LendingOrders = () => {
               <span>Lending order balance</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
-            <span className="text-32 font-medium">$21.44</span>
+            <span className="text-32 font-medium">$ —</span>
           </div>
           <Button colorScheme={ButtonColor.LIGHT_GREEN}>Withdraw</Button>
         </div>
@@ -54,15 +54,15 @@ export const LendingOrders = () => {
       {/*  */}
 
       <div className="mt-5 min-h-[640px] mb-5 w-full">
-        <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-          <div className="pl-5 h-[60px] flex items-center">ID</div>
-          <div className="h-[60px] flex items-center gap-2">Token</div>
-          <div className="h-[60px] flex items-center gap-2">Available balance</div>
-          <div className="h-[60px] flex items-center">Loan, interest balance</div>
-          <div className="pr-5 h-[60px] flex items-center justify-end">Amount, $</div>
+        {!loading && currentTableData.length ? (
+          <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+            <div className="pl-5 h-[60px] flex items-center">ID</div>
+            <div className="h-[60px] flex items-center gap-2">Token</div>
+            <div className="h-[60px] flex items-center gap-2">Available balance</div>
+            <div className="h-[60px] flex items-center">Loan, interest balance</div>
+            <div className="pr-5 h-[60px] flex items-center justify-end">Amount, $</div>
 
-          {!loading &&
-            currentTableData.map((o: any, index: number) => {
+            {currentTableData.map((o: any, index: number) => {
               return (
                 <>
                   <div
@@ -109,7 +109,13 @@ export const LendingOrders = () => {
                 </>
               );
             })}
-        </div>
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5">
+            <span className="text-secondary-text">No lending orders yet</span>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center items-center h-full min-h-[550px]">
             <Preloader type="awaiting" size={48} />
