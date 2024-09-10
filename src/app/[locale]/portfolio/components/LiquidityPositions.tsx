@@ -10,10 +10,9 @@ import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Badge from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button from "@/components/buttons/Button";
-import usePositions, {
+import {
   PositionInfo,
   usePositionFromPositionInfo,
   usePositionRangeStatus,
@@ -21,6 +20,7 @@ import usePositions, {
 import { Link, useRouter } from "@/navigation";
 
 import { useActiveWalletsPositions } from "../stores/positions.hooks";
+import { WalletPositions } from "../stores/useWalletsPosotions";
 
 const PositionTableItem = ({ positionInfo }: { positionInfo: PositionInfo }) => {
   const position = usePositionFromPositionInfo(positionInfo);
@@ -72,14 +72,14 @@ export const LiquidityPositions = () => {
 
   const { loading, positions: walletsPositions } = useActiveWalletsPositions();
 
-  const currentTableData = searchValue
+  const currentTableData: WalletPositions[] = searchValue
     ? walletsPositions
         .map((value) => {
           const positions = value.positions.filter(({ tokenId }) => {
             if (!tokenId) return false;
             return tokenId?.toString() === searchValue;
           });
-          if (!positions.length) return;
+          if (!positions.length) return undefined as any;
           return {
             ...value,
             positions,
@@ -121,7 +121,6 @@ export const LiquidityPositions = () => {
           />
         </div>
       </div>
-      {/*  */}
 
       <div className="mt-5 min-h-[640px] mb-5 w-full">
         {loading ? (

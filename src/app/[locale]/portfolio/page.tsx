@@ -1,6 +1,6 @@
 import { Portfolio } from "./portfolio";
 
 const PortfolioPage = () => {
-  return <Portfolio activeTab="balances" />;
+  return <Portfolio />;
 };
 export default PortfolioPage;

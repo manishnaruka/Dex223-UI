@@ -1,18 +1,15 @@
 import { multicall } from "@wagmi/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Address } from "viem";
 
-import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { config } from "@/config/wagmi/config";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { PositionInfo } from "@/hooks/usePositions";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
-import { Token } from "@/sdk_hybrid/entities/token";
 
 import { useActiveAddresses } from "./hooks";
-import { WalletBalances } from "./useWalletsBalances";
 import { useWalletsPosotions } from "./useWalletsPosotions";
 
 type PositionsCount = {
@@ -44,7 +41,7 @@ const getAmoutOfPositions = async ({
     .map(({ result, status }, index) => {
       const balance = status === "success" ? (result as bigint) : BigInt(0);
       const address = addresses[index];
-      if (!address) return undefined;
+      if (!address) return undefined as any;
 
       const tokenIdRequests = [] as [Address, number][];
       for (let i = 0; i < Number(balance); i++) {
@@ -132,7 +129,7 @@ export const getPositionInfos = async ({
       address: tokenIds[index].address,
       positions: result
         .map(({ result, status }, positionIndex) => {
-          if (status !== "success") return undefined;
+          if (status !== "success") return undefined as any;
           const [
             nonce,
             operator,

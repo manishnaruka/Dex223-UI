@@ -36,13 +36,7 @@ type PositionInfo = {
   tokenId: bigint | undefined;
 };
 
-export function PoolPosition({
-  onClick,
-  positionInfo,
-}: {
-  onClick: any;
-  positionInfo: PositionInfo;
-}) {
+function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: PositionInfo }) {
   const position = usePositionFromPositionInfo(positionInfo);
 
   const [tokenA, tokenB, fee] = useMemo(() => {
