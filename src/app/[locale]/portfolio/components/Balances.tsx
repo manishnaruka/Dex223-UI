@@ -6,37 +6,64 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { formatUnits } from "viem";
 
+import DialogHeader from "@/components/atoms/DialogHeader";
+import DrawerDialog from "@/components/atoms/DrawerDialog";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
-import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
+import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
+import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
-import { useTokens } from "@/hooks/useTokenLists";
+import { Token } from "@/sdk_hybrid/entities/token";
 
 import { useActiveWalletBalances } from "../stores/balances.hooks";
-import { useWalletsBalances } from "../stores/useWalletsBalances";
+
+const filterTable = ({
+  searchValue,
+  value: { token },
+}: {
+  searchValue: string;
+  value: {
+    token: Token;
+    amountERC20: bigint;
+    amountERC223: bigint;
+    amountFiat: string;
+  };
+}) => {
+  if (!searchValue) return true;
+  if (token.address0 === searchValue) return true;
+  if (token.address1 === searchValue) return true;
+  if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
+  if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
+
+  return false;
+};
 
 export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
-  const tokens = useTokens();
+  const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
+  const isTokenInfoOpened = Boolean(tokenForPortfolio);
+  const handleClosTokenInfo = () => {
+    setTokenForPortfolio(null);
+  };
 
   const loading = false;
 
-  const { balances, setWalletBalances } = useWalletsBalances();
+  const { tokenBalances, activeAddresses } = useActiveWalletBalances();
 
-  const { tokenBalances } = useActiveWalletBalances();
-
-  const currentTableData = tokenBalances.map(
-    ({ token, amountERC20, amountERC223, amountFiat }) => ({
+  const currentTableData = tokenBalances
+    .filter((value) => filterTable({ searchValue, value }))
+    .map(({ token, amountERC20, amountERC223, amountFiat }) => ({
       logoURI: token.logoURI,
       name: token.name,
       amountERC20: `${formatFloat(formatUnits(amountERC20 || BigInt(0), token.decimals))} ${token.symbol}`,
       amountERC223: `${formatFloat(formatUnits(amountERC223 || BigInt(0), token.decimals))} ${token.symbol}`,
       amountFiat: amountFiat,
-    }),
-  ) as any[];
+      token,
+    })) as any[];
 
   return (
     <>
@@ -102,19 +129,18 @@ export const Balances = () => {
       {/*  */}
 
       <div className="mt-5 min-h-[640px] mb-5 w-full">
-        <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-          <div className="pl-5 h-[60px] flex items-center">Token</div>
-          <div className="h-[60px] flex items-center gap-2">
-            Amount <Badge color="green" text="ERC-20" />
-          </div>
-          <div className="h-[60px] flex items-center gap-2">
-            Amount <Badge color="green" text="ERC-223" />
-          </div>
-          <div className="h-[60px] flex items-center">Amount, $</div>
-          <div className="pr-5 h-[60px] flex items-center justify-end">Details</div>
-
-          {!loading &&
-            currentTableData.map((o: any, index: number) => {
+        {!loading && activeAddresses.length && currentTableData.length ? (
+          <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+            <div className="pl-5 h-[60px] flex items-center">Token</div>
+            <div className="h-[60px] flex items-center gap-2">
+              Amount <Badge color="green" text="ERC-20" />
+            </div>
+            <div className="h-[60px] flex items-center gap-2">
+              Amount <Badge color="green" text="ERC-223" />
+            </div>
+            <div className="h-[60px] flex items-center">Amount, $</div>
+            <div className="pr-5 h-[60px] flex items-center justify-end">Details</div>
+            {currentTableData.map((o: any, index: number) => {
               return (
                 <>
                   <div
@@ -161,18 +187,40 @@ export const Balances = () => {
                       index % 2 !== 0 && "bg-tertiary-bg",
                     )}
                   >
-                    <Svg iconName="list" />
+                    <IconButton
+                      iconName="details"
+                      variant={IconButtonVariant.DEFAULT}
+                      onClick={() => {
+                        setTokenForPortfolio(o.token);
+                      }}
+                    />
                   </div>
                 </>
               );
             })}
-        </div>
+          </div>
+        ) : Boolean(searchValue) ? (
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
+            <EmptyStateIcon iconName="search" />
+            <span className="text-secondary-text">Token not found</span>
+          </div>
+        ) : (
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
+            <EmptyStateIcon iconName="assets" />
+            <span className="text-secondary-text">Token will appear here</span>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center items-center h-full min-h-[550px]">
             <Preloader type="awaiting" size={48} />
           </div>
         ) : null}
       </div>
+      <DrawerDialog isOpen={isTokenInfoOpened} setIsOpen={handleClosTokenInfo}>
+        <DialogHeader onClose={handleClosTokenInfo} title={tokenForPortfolio?.name || "Unknown"} />
+        {tokenForPortfolio ? <TokenPortfolioDialogContent token={tokenForPortfolio} /> : null}
+      </DrawerDialog>
     </>
   );
 };

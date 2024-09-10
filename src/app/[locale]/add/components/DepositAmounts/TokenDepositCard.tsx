@@ -28,6 +28,8 @@ import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 
+import { RevokeDialog } from "./RevokeDialog";
+
 export const InputRange = ({
   value,
   onChange,
@@ -163,7 +165,6 @@ function InputStandardAmount({
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
   const { address } = useAccount();
-  const chainId = useCurrentChainId();
   const { data: blockNumber } = useBlockNumber({ watch: true });
   const { data: tokenBalance, refetch: refetchBalance } = useBalance({
     address: token ? address : undefined,
@@ -175,25 +176,6 @@ function InputStandardAmount({
   }, [blockNumber, refetchBalance]);
 
   const [isOpenedRevokeDialog, setIsOpenedRevokeDialog] = useState(false);
-
-  const [localValue, setLocalValue] = useState(undefined as undefined | string);
-  const localValueBigInt = useMemo(() => {
-    if (!token || !localValue) return undefined;
-    return parseUnits(localValue, token?.decimals);
-  }, [localValue, token]);
-
-  const [isError, setIsError] = useState(false);
-  const updateValue = (value: string) => {
-    setLocalValue(value);
-    const valueBigInt = token ? parseUnits(value, token.decimals) : undefined;
-    setIsError(!valueBigInt || valueBigInt <= currentAllowance ? false : true);
-  };
-
-  const inputDisabled = [
-    AllowanceStatus.LOADING,
-    AllowanceStatus.PENDING,
-    AllowanceStatus.SUCCESS,
-  ].includes(status);
 
   return (
     <div className="flex flex-col gap-2">
@@ -267,112 +249,17 @@ function InputStandardAmount({
         ) : null}
       </div>
       {token && (
-        <Dialog isOpen={isOpenedRevokeDialog} setIsOpen={setIsOpenedRevokeDialog}>
-          <DialogHeader
-            onClose={() => setIsOpenedRevokeDialog(false)}
-            title={standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
-          />
-          <div className="w-full md:w-[570px] px-4 pb-4 md:px-10 md:pb-10">
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 py-2 items-center">
-                {standard === Standard.ERC20 ? (
-                  <span>{`${t("approve")} 0 ${token.symbol}`}</span>
-                ) : (
-                  <span>{`${t("withdraw")} ${token.symbol}`}</span>
-                )}
-
-                <Badge color="green" text={standard} />
-              </div>
-              <div className="flex items-center gap-2 justify-end">
-                {status === AllowanceStatus.PENDING && (
-                  <>
-                    <Preloader type="linear" />
-                    <span className="text-secondary-text text-14">{t("status_pending")}</span>
-                  </>
-                )}
-                {status === AllowanceStatus.LOADING && <Preloader size={20} />}
-                {(currentAllowance === BigInt(0) || status === AllowanceStatus.SUCCESS) && (
-                  <Svg className="text-green" iconName="done" size={20} />
-                )}
-              </div>
-            </div>
-
-            {standard === "ERC-20" ? (
-              <div className="mt-2">
-                <Alert type="info" text={<span>Info text</span>} />
-              </div>
-            ) : (
-              <>
-                <div
-                  className={clsxMerge(
-                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border border-transparent",
-                    isError ? "border-red" : "",
-                    inputDisabled ? "border-secondary-border" : "",
-                  )}
-                >
-                  <NumericFormat
-                    inputMode="decimal"
-                    placeholder="0.0"
-                    className={clsx(
-                      "bg-transparent text-primary-text outline-0 border-0 w-full peer ",
-                    )}
-                    type="text"
-                    disabled={inputDisabled}
-                    value={
-                      typeof localValue === "undefined"
-                        ? formatUnits(currentAllowance || BigInt(0), token.decimals)
-                        : localValue
-                    }
-                    onValueChange={(values) => {
-                      updateValue(values.value);
-                    }}
-                    allowNegative={false}
-                  />
-                  <span className="text-secondary-text min-w-max">
-                    {t("amount", { symbol: token.symbol })}
-                  </span>
-                </div>
-                {isError ? (
-                  <span className="text-12 mt-2 text-red">{`Must be no more than ${formatUnits(currentAllowance, token.decimals)} ${token.symbol}`}</span>
-                ) : null}
-              </>
-            )}
-
-            <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-5 mt-2">
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("gas_price")}</span>
-                <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("gas_limit")}</span>
-                <span>{estimatedGas?.toString()}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("fee")}</span>
-                <span>{`${gasPrice && estimatedGas ? formatFloat(formatEther(gasPrice * estimatedGas)) : ""} ${getChainSymbol(chainId)}`}</span>
-              </div>
-            </div>
-            {isError ? (
-              <Button fullWidth disabled>
-                <span className="flex items-center gap-2">Enter correct values</span>
-              </Button>
-            ) : [AllowanceStatus.INITIAL].includes(status) ? (
-              <Button onClick={() => revokeHandler(localValueBigInt)} fullWidth>
-                {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
-              </Button>
-            ) : [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
-              <Button fullWidth disabled>
-                <span className="flex items-center gap-2">
-                  <Preloader size={20} color="black" />
-                </span>
-              </Button>
-            ) : [AllowanceStatus.SUCCESS].includes(status) ? (
-              <Button onClick={() => setIsOpenedRevokeDialog(false)} fullWidth>
-                {t("close")}
-              </Button>
-            ) : null}
-          </div>
-        </Dialog>
+        <RevokeDialog
+          isOpen={isOpenedRevokeDialog}
+          setIsOpen={setIsOpenedRevokeDialog}
+          standard={standard}
+          token={token}
+          status={status}
+          currentAllowance={currentAllowance}
+          revokeHandler={revokeHandler}
+          estimatedGas={estimatedGas}
+          gasPrice={gasPrice}
+        />
       )}
     </div>
   );

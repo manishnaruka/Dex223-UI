@@ -71,6 +71,23 @@ export const LiquidityPositions = () => {
   const [searchValue, setSearchValue] = useState("");
 
   const { loading, positions: walletsPositions } = useActiveWalletsPositions();
+
+  const currentTableData = searchValue
+    ? walletsPositions
+        .map((value) => {
+          const positions = value.positions.filter(({ tokenId }) => {
+            if (!tokenId) return false;
+            return tokenId?.toString() === searchValue;
+          });
+          if (!positions.length) return;
+          return {
+            ...value,
+            positions,
+          };
+        })
+        .filter((value) => !!value)
+    : walletsPositions;
+
   return (
     <>
       <div className="mt-5 flex gap-5">
@@ -107,7 +124,11 @@ export const LiquidityPositions = () => {
       {/*  */}
 
       <div className="mt-5 min-h-[640px] mb-5 w-full">
-        {!loading && walletsPositions.length ? (
+        {loading ? (
+          <div className="flex justify-center items-center h-full min-h-[550px]">
+            <Preloader type="awaiting" size={48} />
+          </div>
+        ) : currentTableData.length ? (
           <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
             <div className="pl-5 h-[60px] flex items-center">ID</div>
             <div className="h-[60px] flex items-center gap-2">Amount tokens</div>
@@ -115,7 +136,7 @@ export const LiquidityPositions = () => {
             <div className="h-[60px] flex items-center">Unclaimed fees</div>
             <div className="pr-5 h-[60px] flex items-center">Status</div>
 
-            {walletsPositions?.map(({ positions }, index: number) => {
+            {currentTableData?.map(({ positions }, index: number) => {
               return (
                 <>
                   {positions.map((position) => (
@@ -125,17 +146,17 @@ export const LiquidityPositions = () => {
               );
             })}
           </div>
+        ) : Boolean(searchValue) ? (
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
+            <EmptyStateIcon iconName="search" />
+            <span className="text-secondary-text">Positions not found</span>
+          </div>
         ) : (
-          <div className="flex justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5">
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
+            <EmptyStateIcon iconName="pool" />
             <span className="text-secondary-text">No liquidity positions yet</span>
           </div>
         )}
-
-        {loading ? (
-          <div className="flex justify-center items-center h-full min-h-[550px]">
-            <Preloader type="awaiting" size={48} />
-          </div>
-        ) : null}
       </div>
     </>
   );

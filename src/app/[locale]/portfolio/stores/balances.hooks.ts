@@ -98,5 +98,5 @@ export const useActiveWalletBalances = () => {
     });
   }, [tokens, balances]);
 
-  return { tokenBalances };
+  return { tokenBalances, activeAddresses };
 };

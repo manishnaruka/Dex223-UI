@@ -1,5 +1,6 @@
 import uniqby from "lodash.uniqby";
 import { Address } from "viem";
+import { useAccount } from "wagmi";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -7,11 +8,14 @@ interface PortfolioStore {
   wallets: {
     address: Address;
     isActive: boolean;
+    isConnectedWallet?: boolean;
   }[];
   addWallet: (address: Address) => void;
   removeWallet: (address: Address) => void;
   setIsWalletActive: (address: Address, isActive: boolean) => void;
   setAllWalletActive: () => void;
+  isConnectedWalletActive: boolean;
+  setIsConnectedWalletActive: (isActive: boolean) => void;
 }
 
 const localStorageKey = "portfolio-state";
@@ -45,6 +49,7 @@ export const usePortfolioStore = create<PortfolioStore>()(
       setAllWalletActive: () =>
         set((state) => {
           return {
+            isConnectedWalletActive: true,
             wallets: uniqby(
               state.wallets.map((wallet) => {
                 return {
@@ -56,9 +61,35 @@ export const usePortfolioStore = create<PortfolioStore>()(
             ),
           };
         }),
+      isConnectedWalletActive: true,
+      setIsConnectedWalletActive: (isActive) =>
+        set(() => ({
+          isConnectedWalletActive: isActive,
+        })),
     }),
     {
       name: localStorageKey, // name of the item in the storage (must be unique)
     },
   ),
 );
+
+export enum ActiveTab {
+  balances = "balances",
+  margin = "margin",
+  lending = "lending",
+  liquidity = "liquidity",
+  deposited = "deposited",
+}
+
+interface PortfolioActiveTabStore {
+  activeTab: ActiveTab;
+  setActiveTab: (tab: ActiveTab) => void;
+}
+
+export const usePortfolioActiveTabStore = create<PortfolioActiveTabStore>((set, get) => ({
+  activeTab: ActiveTab.balances,
+  setActiveTab: (tab) =>
+    set(() => ({
+      activeTab: tab,
+    })),
+}));

@@ -307,6 +307,7 @@
   },
   "Portfolio": {
     "title": "Portfolio",
+    "add_wallet_placeholder": "Add address or domain",
     "search_placeholder": "Search wallet address",
     "balances_title": "Wallet assets",
     "balances_search_placeholder": "Search name or paste address",

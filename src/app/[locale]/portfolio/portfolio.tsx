@@ -6,11 +6,12 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { Address, isAddress } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 
 import Checkbox from "@/components/atoms/Checkbox";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Popover from "@/components/atoms/Popover";
 import SelectButton from "@/components/atoms/SelectButton";
@@ -29,6 +30,7 @@ import { copyToClipboard } from "@/functions/copyToClipboard";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { usePortfolioSearchParams } from "@/hooks/usePortfolioSearchParams";
 import { useRouter } from "@/navigation";
 import addToast from "@/other/toast";
 
@@ -37,8 +39,12 @@ import { Deposited } from "./components/Deposited";
 import { LendingOrders } from "./components/LendingOrders";
 import { LiquidityPositions } from "./components/LiquidityPositions";
 import { MarginPositions } from "./components/MarginPositions";
-import { useActiveAddresses } from "./stores/hooks";
-import { usePortfolioStore } from "./stores/usePortfolioStore";
+import { useActiveAddresses, usePortfolioWallets } from "./stores/hooks";
+import {
+  ActiveTab,
+  usePortfolioActiveTabStore,
+  usePortfolioStore,
+} from "./stores/usePortfolioStore";
 
 const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
   const t = useTranslations("Portfolio");
@@ -69,7 +75,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
           className={clsxMerge("pr-12")}
           value={tokenAddressToImport}
           onChange={(e) => setTokenAddressToImport(e.target.value)}
-          placeholder={t("balances_search_placeholder")}
+          placeholder={t("add_wallet_placeholder")}
         />
         <div
           className={clsx("absolute right-1 flex items-center justify-center h-full w-10 top-0")}
@@ -100,10 +106,11 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
   const t = useTranslations("Portfolio");
   const tWallet = useTranslations("Wallet");
   const { isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
 
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
-  const { wallets, setIsWalletActive, setAllWalletActive, removeWallet } = usePortfolioStore();
-
+  const { setAllWalletActive, removeWallet } = usePortfolioStore();
+  const { wallets, setIsWalletActive } = usePortfolioWallets();
   const [content, setContent] = useState<ManageWalletsPopoverContent>(
     wallets.length ? "list" : "add",
   );
@@ -201,7 +208,7 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
                     handleChange={(event) => {
                       setIsWalletActive(address, event.target.checked);
                     }}
-                    id="lol"
+                    id="isActive"
                   />
                   <img
                     key={address}
@@ -232,7 +239,7 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
               />
             </div>
             <div className="flex flex-col gap-3 px-5 max-h-[380px] overflow-auto">
-              {wallets.map(({ address, isActive }) => (
+              {wallets.map(({ address, isActive, isConnectedWallet }) => (
                 <div
                   key={address}
                   className="flex items-center pl-5 pr-1 justify-between py-[10px] bg-tertiary-bg rounded-3 "
@@ -253,13 +260,24 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
                       <span className="text-secondary-text text-14">$22.23</span>
                     </div>
                   </div>
-                  <IconButton
-                    // iconName="add"
-                    variant={IconButtonVariant.DELETE}
-                    handleDelete={() => {
-                      removeWallet(address);
-                    }}
-                  />
+                  {isConnectedWallet ? (
+                    <IconButton
+                      iconName="logout"
+                      className="text-secondary-text"
+                      variant={IconButtonVariant.DEFAULT}
+                      onClick={() => {
+                        disconnect();
+                      }}
+                    />
+                  ) : (
+                    <IconButton
+                      // iconName="add"
+                      variant={IconButtonVariant.DELETE}
+                      handleDelete={() => {
+                        removeWallet(address);
+                      }}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -270,9 +288,8 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
   );
 };
 
-type ActiveTab = "balances" | "margin" | "lending" | "positions" | "deposited";
-export function Portfolio({ activeTab }: { activeTab: ActiveTab }) {
-  // usePortfolioSearchParams();
+export function Portfolio() {
+  usePortfolioSearchParams();
 
   const chainId = useCurrentChainId();
   const router = useRouter();
@@ -282,7 +299,9 @@ export function Portfolio({ activeTab }: { activeTab: ActiveTab }) {
   const [isOpened, setIsOpened] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const { wallets } = usePortfolioStore();
+  const { wallets } = usePortfolioWallets();
+
+  const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
 
   const { activeAddresses } = useActiveAddresses();
   const trigger = useMemo(
@@ -379,62 +398,65 @@ export function Portfolio({ activeTab }: { activeTab: ActiveTab }) {
               ))}
             </>
           ) : (
-            <span className="text-secondary-text">
-              Add address or connect wallet to view portfolio
-            </span>
+            <div className="flex items-center gap-3">
+              <EmptyStateIcon iconName="wallet" size={40} />
+              <span className="text-secondary-text">
+                Add address or connect wallet to view portfolio
+              </span>
+            </div>
           )}
         </div>
         <div className="mt-5 w-full grid grid-cols-5 bg-primary-bg p-1 gap-1 rounded-3">
           <TabButton
             inactiveBackground="bg-secondary-bg"
             size={48}
-            active={activeTab === "balances"}
-            onClick={() => router.push("/portfolio")}
+            active={activeTab === ActiveTab.balances}
+            onClick={() => setActiveTab(ActiveTab.balances)}
           >
             Balances
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
             size={48}
-            active={activeTab === "margin"}
-            onClick={() => router.push("/portfolio/margin")}
+            active={activeTab === ActiveTab.margin}
+            onClick={() => setActiveTab(ActiveTab.margin)}
           >
             Margin positions
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
             size={48}
-            active={activeTab === "lending"}
-            onClick={() => router.push("/portfolio/lending")}
+            active={activeTab === ActiveTab.lending}
+            onClick={() => setActiveTab(ActiveTab.lending)}
           >
             Lending orders
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
             size={48}
-            active={activeTab === "positions"}
-            onClick={() => router.push("/portfolio/liquidity")}
+            active={activeTab === ActiveTab.liquidity}
+            onClick={() => setActiveTab(ActiveTab.liquidity)}
           >
             Liquidity positions
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
             size={48}
-            active={activeTab === "deposited"}
-            onClick={() => router.push("/portfolio/deposited")}
+            active={activeTab === ActiveTab.deposited}
+            onClick={() => setActiveTab(ActiveTab.deposited)}
           >
             Deposited to contract
           </TabButton>
         </div>
-        {activeTab === "balances" ? (
+        {activeTab === ActiveTab.balances ? (
           <Balances />
-        ) : activeTab === "margin" ? (
+        ) : activeTab === ActiveTab.margin ? (
           <MarginPositions />
-        ) : activeTab === "lending" ? (
+        ) : activeTab === ActiveTab.lending ? (
           <LendingOrders />
-        ) : activeTab === "positions" ? (
+        ) : activeTab === ActiveTab.liquidity ? (
           <LiquidityPositions />
-        ) : activeTab === "deposited" ? (
+        ) : activeTab === ActiveTab.deposited ? (
           <Deposited />
         ) : null}
       </div>

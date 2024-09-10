@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
@@ -61,8 +62,11 @@ export const MarginPositions = () => {
             <div className="h-[60px] flex items-center">Amount, $</div>
             <div className="h-[60px] flex items-center gap-2">Assets</div>
             <div className="pr-5 h-[60px] flex items-center justify-end">Action / Owner</div>
-
-            {!loading &&
+            {loading ? (
+              <div className="flex justify-center items-center h-full min-h-[550px]">
+                <Preloader type="awaiting" size={48} />
+              </div>
+            ) : (
               currentTableData.map((o: any, index: number) => {
                 return (
                   <>
@@ -109,19 +113,15 @@ export const MarginPositions = () => {
                     </div>
                   </>
                 );
-              })}
+              })
+            )}
           </div>
         ) : (
-          <div className="flex justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5">
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
+            <EmptyStateIcon iconName="margin-positions" />
             <span className="text-secondary-text">No margin positions yet</span>
           </div>
         )}
-
-        {loading ? (
-          <div className="flex justify-center items-center h-full min-h-[550px]">
-            <Preloader type="awaiting" size={48} />
-          </div>
-        ) : null}
       </div>
     </>
   );
