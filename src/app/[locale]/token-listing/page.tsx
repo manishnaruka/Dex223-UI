@@ -119,7 +119,7 @@ export default function TokenListingPage() {
                 Note that most token lists only support ERC-20 tokens yet.
               </>
             }
-            href="#"
+            href="https://github.com/EthereumCommonwealth/Dex223-listings/tree/main"
             image="/listing-cards/existing-listing.png"
             isExternal={true}
           />
