@@ -70,30 +70,27 @@ export default function AutoListingContractDetails({
   const { handleOpen } = useTokenPortfolioDialogStore();
 
   const listingContract = useAutoListingContract(params.address);
-  const chainId = useCurrentChainId();
 
   const tokens = useMemo(() => {
     if (!listingContract) {
       return [];
     }
 
-    return listingContract.tokens.map(({ token }: any) => {
+    return listingContract.tokens.map((token) => {
       let lists: TokenListId[] = [];
 
       if (tokenLists) {
         lists = tokenLists
           .filter((list) =>
-            list.list.tokens.find(
-              (t) => t.address0.toLowerCase() === token.addressERC20.toLowerCase(),
-            ),
+            list.list.tokens.find((t) => t.address0.toLowerCase() === token.address0.toLowerCase()),
           )
           .map((t) => t.id);
       }
 
       return new Token(
-        chainId,
-        token.addressERC20,
-        token.addressERC223,
+        token.chainId,
+        token.address0,
+        token.address1,
         +token.decimals,
         token.symbol,
         token.name,
@@ -101,7 +98,7 @@ export default function AutoListingContractDetails({
         lists,
       );
     });
-  }, [chainId, listingContract, tokenLists]);
+  }, [listingContract, tokenLists]);
 
   const filteredTokens = useMemo(() => {
     return tokens.filter(
@@ -132,7 +129,7 @@ export default function AutoListingContractDetails({
               <Button>List token(s)</Button>
             </Link>
           </div>
-          <div className="bg-primary-bg rounded-5 grid xl:grid-areas-[first_second_third_fourth_fifth_sixth] pb-4 px-4 pt-3 xl:p-10 gap-3 mb-4 xl:mb-10 grid-cols-2 grid-areas-[first_first,second_second,third_fourth,fifth_sixth]">
+          <div className="bg-primary-bg rounded-5 grid xl:grid-cols-6 xl:grid-areas-[first_second_third_fourth_fifth_sixth] pb-4 px-4 pt-3 xl:p-10 gap-3 mb-4 xl:mb-10 grid-cols-2 grid-areas-[first_first,second_second,third_fourth,fifth_sixth]">
             <div className="flex flex-col justify-center grid-in-[first]">
               <h3 className="text-18 md:text-20 font-medium">{listingContract.name}</h3>
               <p>{listingContract.totalTokens} tokens</p>
@@ -161,7 +158,7 @@ export default function AutoListingContractDetails({
             />
             <TokenListInfoCard
               title="Last updated"
-              value={new Date(listingContract.lastUpdated * 1000).toLocaleString("en-us", {
+              value={new Date(+listingContract.lastUpdated * 1000).toLocaleString("en-us", {
                 month: "short",
                 year: "numeric",
                 day: "numeric",
@@ -171,7 +168,7 @@ export default function AutoListingContractDetails({
             <TokenListInfoCard title="Version" value="1.0.0" className="grid-in-[fifth]" />
             <TokenListInfoCard
               title="Listing type"
-              value={!!listingContract.pricesDetail.length ? "Paid" : "Free"}
+              value={listingContract.isFree ? "Free" : "Paid"}
               className="grid-in-[sixth]"
             />
           </div>
@@ -181,7 +178,7 @@ export default function AutoListingContractDetails({
           >
             <Button fullWidth>List token(s)</Button>
           </Link>
-          {!!listingContract.pricesDetail.length && (
+          {!listingContract.isFree && (
             <>
               <div className="mb-5">
                 <h1 className="text-18 xl:text-40">Listing price</h1>
@@ -189,37 +186,39 @@ export default function AutoListingContractDetails({
               <div className="px-5 pb-5 pt-3 bg-primary-bg rounded-5 mb-10">
                 <div className="flex items-center gap-1 mb-3">
                   <h3 className="text-secondary-text ">
-                    {listingContract.pricesDetail.length} tokens available to pay for listing
+                    {listingContract.tokensToPay.length} tokens available to pay for listing
                   </h3>
                   <Tooltip text="Avalialbe tooltip" />
                 </div>
                 <div className="grid grid-cols-[minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)] gap-x-2 gap-y-3">
-                  {listingContract.pricesDetail.map((v: any, index: number) => {
-                    console.log(v);
+                  {listingContract.tokensToPay.map((tokenToPay, index) => {
                     return (
                       <div
                         key={index}
                         className="bg-tertiary-bg grid grid-cols-[1fr_91px_68px] gap-2 py-2 pr-2 pl-3 rounded-3"
                       >
                         <div className="flex items-center">
-                          {formatUnits(v.price, v.feeTokenAddress.decimals).slice(0, 7) ===
+                          {formatUnits(tokenToPay.price, tokenToPay.token.decimals).slice(0, 7) ===
                           "0.00000"
-                            ? truncateMiddle(formatUnits(v.price, v.feeTokenAddress.decimals), {
-                                charsFromStart: 4,
-                                charsFromEnd: 3,
-                              })
-                            : formatFloat(formatUnits(v.price, v.feeTokenAddress.decimals))}
+                            ? truncateMiddle(
+                                formatUnits(tokenToPay.price, tokenToPay.token.decimals),
+                                {
+                                  charsFromStart: 4,
+                                  charsFromEnd: 3,
+                                },
+                              )
+                            : formatFloat(formatUnits(tokenToPay.price, tokenToPay.token.decimals))}
                         </div>
 
                         <div className="rounded-2 bg-secondary-bg py-1 flex items-center justify-center">
-                          {v.feeTokenAddress.symbol}
+                          {tokenToPay.token.symbol}
                         </div>
                         <div className="flex items-center">
                           <Badge
                             variant={BadgeVariant.COLORED}
                             color="green"
                             text={
-                              v.feeTokenAddress.address && isZeroAddress(v.feeTokenAddress.address)
+                              tokenToPay.token.address && isZeroAddress(tokenToPay.token.address)
                                 ? "Native"
                                 : "ERC-20"
                             }
@@ -260,7 +259,7 @@ export default function AutoListingContractDetails({
                 (!searchValue || (searchValue && filteredTokens.length)),
             ) && (
               <>
-                <div className="flex flex-col gap-4">
+                <div className="xl:hidden flex flex-col gap-4">
                   {filteredTokens.map((token: Token, index: number) => {
                     return (
                       <div

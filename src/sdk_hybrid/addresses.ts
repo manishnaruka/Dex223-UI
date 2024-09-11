@@ -37,12 +37,12 @@ export const POOL_INIT_CODE_HASH: Record<DexChainId, Address> = {
 };
 
 export const CORE_AUTO_LISTING_ADDRESS: Record<DexChainId, Address> = {
-  [DexChainId.SEPOLIA]: "0x87af0FaDc21420d0a572b4709B81CF2E368552D7",
+  [DexChainId.SEPOLIA]: "0x81ff3417eb5f547542fc4491d4ca478343dda925",
   [DexChainId.BSC_TESTNET]: "0xB0085429FF43A2A51Ec1B1ac8956a35c19eC008e",
 };
 
 export const FREE_AUTO_LISTING_ADDRESS: Record<DexChainId, Address> = {
-  [DexChainId.SEPOLIA]: "0x7333D5141F645b354e1517892A725Db88A840436",
+  [DexChainId.SEPOLIA]: "0xb188dab6c8976bad469d64f1bf1265b92f0ec21b",
   [DexChainId.BSC_TESTNET]: "0x364B988CF87add09a63b93aFbe961b99fF9D5Bfa",
 };
 

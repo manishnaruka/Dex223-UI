@@ -12,9 +12,11 @@ import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSw
 import ChooseAutoListingDialog from "@/app/[locale]/token-listing/add/components/ChooseAutoListingDialog";
 import ChoosePaymentDialog from "@/app/[locale]/token-listing/add/components/ChoosePaymentDialog";
 import ConfirmListingDialog from "@/app/[locale]/token-listing/add/components/ConfirmListingDialog";
+import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import { useAutoListingSearchParams } from "@/app/[locale]/token-listing/add/hooks/useAutolistingSearchParams";
 import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
+import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
 import { useChoosePaymentDialogStore } from "@/app/[locale]/token-listing/add/stores/useChoosePaymentDialogStore";
@@ -149,10 +151,9 @@ export default function ListTokenPage() {
   const chainId = useCurrentChainId();
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
-  const { autoListingContract, setAutoListingContract } = useAutoListingContractStore();
   useRecentTransactionTracking();
 
-  const autoListing = useAutoListingContract(autoListingContract);
+  const { autoListing, paymentToken } = useAutoListing();
 
   const { tokenA, tokenB, setTokenA, setTokenB } = useListTokensStore();
   const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
@@ -224,69 +225,20 @@ export default function ListTokenPage() {
     [chainId, publicClient, tokens],
   );
 
-  const { paymentToken, setPaymentToken } = usePaymentTokenStore();
-
-  const tokensToPay = useReadContract({
-    abi: AUTO_LISTING_ABI,
-    address: autoListingContract,
-    functionName: "getPrices",
-  });
+  const { setPaymentToken } = usePaymentTokenStore();
 
   const { setIsOpen: setConfirmListTokenDialogOpened } = useConfirmListTokenDialogStore();
 
   useEffect(() => {
-    if (!paymentToken && tokensToPay?.data?.[0]) {
-      setPaymentToken(tokensToPay?.data?.[0]);
+    if (!paymentToken && autoListing?.tokensToPay[0]) {
+      setPaymentToken(autoListing?.tokensToPay[0]);
     }
-  }, [paymentToken, setPaymentToken, tokensToPay?.data]);
-
-  const tokenDecimals = useReadContract({
-    abi: ERC20_ABI,
-    functionName: "decimals",
-    address: paymentToken?.token,
-  });
-
-  const tokenSymbol = useReadContract({
-    abi: ERC20_ABI,
-    functionName: "symbol",
-    address: paymentToken?.token,
-  });
+  }, [autoListing?.tokensToPay, paymentToken, setPaymentToken]);
 
   const { setIsOpen: setPaymentDialogSelectOpened } = useChoosePaymentDialogStore();
   const { setIsOpen: setAutoListingSelectOpened } = useChooseAutoListingDialogStore();
 
-  const tokensToList = useMemo(() => {
-    if (!autoListing) {
-      return [];
-    }
-
-    const isFirstTokenInList = autoListing.tokens.find((l: any) => {
-      return l.token.addressERC20.toLowerCase() === tokenA?.address0.toLowerCase();
-    });
-    const isSecondTokenInList = autoListing.tokens.find((l: any) => {
-      return l.token.addressERC20.toLowerCase() === tokenB?.address0.toLowerCase();
-    });
-
-    if (isFirstTokenInList && isSecondTokenInList) {
-      return [];
-    }
-
-    if (isFirstTokenInList && !isSecondTokenInList) {
-      return [tokenB];
-    }
-
-    if (isSecondTokenInList && !isFirstTokenInList) {
-      return [tokenA];
-    }
-
-    if (!isSecondTokenInList && !isFirstTokenInList) {
-      return [tokenA, tokenB];
-    }
-
-    return [];
-  }, [autoListing, tokenA, tokenB]);
-
-  console.log(tokensToPay);
+  const tokensToList = useTokensToList();
 
   return (
     <>
@@ -456,19 +408,22 @@ export default function ListTokenPage() {
                     />
                   </div>
 
-                  {!!tokensToPay?.data?.length && (
+                  {!!autoListing?.tokensToPay.length && (
                     <>
-                      {tokensToPay.data.length > 1 ? (
+                      {autoListing?.tokensToPay.length > 1 ? (
                         <div>
                           <InputLabel label="Payment for listing" />
                           <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center pl-5 pr-1">
                             {paymentToken
-                              ? formatUnits(paymentToken.price, tokenDecimals.data ?? 18).slice(
-                                  0,
-                                  7,
-                                ) === "0.00000"
+                              ? formatUnits(
+                                  paymentToken.price,
+                                  paymentToken.token.decimals ?? 18,
+                                ).slice(0, 7) === "0.00000"
                                 ? truncateMiddle(
-                                    formatUnits(paymentToken.price, tokenDecimals.data ?? 18),
+                                    formatUnits(
+                                      paymentToken.price,
+                                      paymentToken.token.decimals ?? 18,
+                                    ),
                                     {
                                       charsFromStart: 3,
                                       charsFromEnd: 2,
@@ -477,7 +432,9 @@ export default function ListTokenPage() {
                                 : formatFloat(
                                     formatUnits(
                                       paymentToken.price,
-                                      tokenSymbol?.data != null ? +tokenSymbol.data : 18,
+                                      paymentToken.token.decimals != null
+                                        ? paymentToken.token.decimals
+                                        : 18,
                                     ),
                                   )
                               : 1}
@@ -488,14 +445,14 @@ export default function ListTokenPage() {
                               className="flex items-center gap-2"
                             >
                               <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
-                              {paymentToken?.token && isZeroAddress(paymentToken.token)
+                              {paymentToken?.token && isZeroAddress(paymentToken.token.address)
                                 ? "ETH"
-                                : tokenSymbol.data}
+                                : paymentToken?.token.symbol}
                               <Badge
                                 variant={BadgeVariant.COLORED}
                                 color="green"
                                 text={
-                                  paymentToken?.token && isZeroAddress(paymentToken.token)
+                                  paymentToken?.token && isZeroAddress(paymentToken.token.address)
                                     ? "Native"
                                     : "ERC-20"
                                 }
@@ -506,23 +463,30 @@ export default function ListTokenPage() {
                       ) : (
                         <div>
                           <InputLabel label="Payment for listing" />
-                          <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
-                            {formatUnits(tokensToPay.data[0].price, tokenDecimals.data || 18)}
-                            <span className="flex items-center gap-2">
-                              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                          {paymentToken && (
+                            <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
+                              {formatUnits(paymentToken.price, paymentToken.token.decimals || 18)}
+                              <span className="flex items-center gap-2">
+                                <Image
+                                  src="/tokens/placeholder.svg"
+                                  width={24}
+                                  height={24}
+                                  alt=""
+                                />
 
-                              {tokenSymbol.data}
-                              <Badge
-                                variant={BadgeVariant.COLORED}
-                                color="green"
-                                text={
-                                  paymentToken?.token && isZeroAddress(paymentToken.token)
-                                    ? "Native"
-                                    : "ERC-20"
-                                }
-                              />
-                            </span>
-                          </div>
+                                {paymentToken?.token.symbol}
+                                <Badge
+                                  variant={BadgeVariant.COLORED}
+                                  color="green"
+                                  text={
+                                    paymentToken?.token && isZeroAddress(paymentToken.token.address)
+                                      ? "Native"
+                                      : "ERC-20"
+                                  }
+                                />
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </>

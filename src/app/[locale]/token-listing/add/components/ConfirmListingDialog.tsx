@@ -7,9 +7,10 @@ import { useGasPrice, useReadContract } from "wagmi";
 
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapGasPriceStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
-import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
+import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import useListToken from "@/app/[locale]/token-listing/add/hooks/useListToken";
 import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
+import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
@@ -29,7 +30,6 @@ import { InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
-import { ERC20_ABI } from "@/config/abis/erc20";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
@@ -108,7 +108,6 @@ function ListTokenRow({
   isPending = false,
   isLoading = false,
   isSuccess = false,
-  isSettled = false,
   isReverted = false,
   isDisabled = false,
   hash,
@@ -185,7 +184,7 @@ function Rows({ children }: PropsWithChildren<{}>) {
 function ListActionButton({ isFree }: { isFree: boolean }) {
   const t = useTranslations("Swap");
   const { tokenA, tokenB } = useListTokensStore();
-  const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
+  const { setIsOpen } = useConfirmSwapDialogStore();
 
   const { handleList } = useListToken();
   const { listTokenHash, approveHash, errorType } = useListTokenStatusStore();
@@ -378,17 +377,11 @@ function SingleCard({
   );
 }
 export default function ConfirmListingDialog() {
-  const t = useTranslations("Swap");
-  const { tokenA, tokenB, reset: resetTokens } = useListTokensStore();
-  const { autoListingContract, setAutoListingContract } = useAutoListingContractStore();
+  const { reset: resetTokens } = useListTokensStore();
 
-  const autoListing = useAutoListingContract(autoListingContract);
+  const { autoListing } = useAutoListing();
 
   const { isOpen, setIsOpen } = useConfirmListTokenDialogStore();
-
-  const isFree = useMemo(() => {
-    return !autoListing?.pricesDetail.length;
-  }, [autoListing]);
 
   const {
     isPendingList,
@@ -442,50 +435,9 @@ export default function ConfirmListingDialog() {
     return "0.00";
   }, [baseFee, gasPriceSettings]);
 
-  const tokensToList = useMemo(() => {
-    if (!autoListing) {
-      return [];
-    }
-
-    const isFirstTokenInList = autoListing.tokens.find((l: any) => {
-      return l.token.addressERC20.toLowerCase() === tokenA?.address0.toLowerCase();
-    });
-    const isSecondTokenInList = autoListing.tokens.find((l: any) => {
-      return l.token.addressERC20.toLowerCase() === tokenB?.address0.toLowerCase();
-    });
-
-    if (isFirstTokenInList && isSecondTokenInList) {
-      return [];
-    }
-
-    if (isFirstTokenInList && !isSecondTokenInList) {
-      return [tokenB];
-    }
-
-    if (isSecondTokenInList && !isFirstTokenInList) {
-      return [tokenA];
-    }
-
-    if (!isSecondTokenInList && !isFirstTokenInList) {
-      return [tokenA, tokenB];
-    }
-
-    return [];
-  }, [autoListing, tokenA, tokenB]);
+  const tokensToList = useTokensToList();
 
   const { paymentToken, setPaymentToken } = usePaymentTokenStore();
-
-  const tokenDecimals = useReadContract({
-    abi: ERC20_ABI,
-    functionName: "decimals",
-    address: paymentToken?.token,
-  });
-
-  const tokenSymbol = useReadContract({
-    abi: ERC20_ABI,
-    functionName: "symbol",
-    address: paymentToken?.token,
-  });
 
   return (
     <DrawerDialog
@@ -523,8 +475,8 @@ export default function ConfirmListingDialog() {
                     </div>
                   </div>
                   <SingleCard
-                    address={autoListingContract!}
-                    title={autoListing.name}
+                    address={autoListing?.id!}
+                    title={autoListing?.name || "Unknown"}
                     underlineText="In the auto-listing contract"
                   />
                 </div>
@@ -555,8 +507,8 @@ export default function ConfirmListingDialog() {
                   </div>
 
                   <SingleCard
-                    address={autoListingContract!}
-                    title={autoListing.name}
+                    address={autoListing?.id!}
+                    title={autoListing?.name || "Unknown"}
                     underlineText="In the auto-listing contract"
                   />
                 </>
@@ -589,32 +541,36 @@ export default function ConfirmListingDialog() {
               </div>
             </div>
           )}
-          {!isFree && paymentToken && (
+          {autoListing && !autoListing.isFree && paymentToken && (
             <div className="mb-5">
               <InputLabel label="Payment for listing" tooltipText="Tooltip text" />
               <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
-                {formatUnits(paymentToken.price, tokenDecimals.data ?? 18).slice(0, 7) === "0.00000"
-                  ? truncateMiddle(formatUnits(paymentToken.price, tokenDecimals.data ?? 18), {
-                      charsFromStart: 3,
-                      charsFromEnd: 2,
-                    })
+                {formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18).slice(0, 7) ===
+                "0.00000"
+                  ? truncateMiddle(
+                      formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18),
+                      {
+                        charsFromStart: 3,
+                        charsFromEnd: 2,
+                      },
+                    )
                   : formatFloat(
                       formatUnits(
                         paymentToken.price,
-                        tokenSymbol?.data != null ? +tokenSymbol.data : 18,
+                        paymentToken.token.decimals != null ? paymentToken.token.decimals : 18,
                       ),
                     )}
                 <span className="flex items-center gap-2">
                   <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
 
-                  {tokenSymbol.data}
+                  {paymentToken.token.symbol}
                   <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
                 </span>
               </div>
             </div>
           )}
           {isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}
-          <ListActionButton isFree={isFree} />
+          {autoListing && <ListActionButton isFree={autoListing.isFree} />}
         </div>
       </div>
     </DrawerDialog>

@@ -14,6 +14,7 @@ import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { Link } from "@/navigation";
@@ -27,20 +28,20 @@ export default function TokenListingPage() {
   console.log(autoListings);
 
   const filteredAutoListings = useMemo(() => {
-    if (!autoListings.data) {
+    if (!autoListings) {
       return null;
     }
 
     if (!searchValue) {
-      return autoListings.data.autoListings;
+      return autoListings;
     } else {
-      return autoListings.data.autoListings.filter(
+      return autoListings.filter(
         (l: any) =>
           l.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
           l.id.toLowerCase().startsWith(searchValue.toLowerCase()),
       );
     }
-  }, [autoListings.data, searchValue]);
+  }, [autoListings, searchValue]);
 
   if (!filteredAutoListings) {
     return <Preloader />;
@@ -74,44 +75,61 @@ export default function TokenListingPage() {
         {(!searchValue || (searchValue && !!filteredAutoListings.length)) && (
           <>
             <div className="grid grid-cols-1 xl:hidden px-4 gap-4">
-              {filteredAutoListings.map((o: any) => {
+              {filteredAutoListings.map((autoListing) => {
                 return (
                   <Link
-                    key={o.id}
-                    href={`/token-listing/contracts/${o.id}`}
+                    key={autoListing.id}
+                    href={`/token-listing/contracts/${autoListing.id}`}
                     className="hover:bg-green-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3"
                   >
-                    <div className="text-18 font-medium">{o.name}</div>
-                    <div className="mb-3">{o.totalTokens} tokens</div>
+                    <div className="text-18 font-medium">{autoListing.name}</div>
+                    <div className="mb-3">{autoListing.totalTokens} tokens</div>
                     <div
                       className={clsxMerge(
                         "flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-3",
-                        !!o.pricesDetail.length && "flex-grow w-full flex-wrap justify-start",
+                        !autoListing.isFree && "flex-grow w-full flex-wrap justify-start",
                       )}
                     >
                       <span
                         className={clsx(
                           "text-secondary-text",
-                          !!o.pricesDetail.length && "basis-full mb-1",
+                          !autoListing.isFree && "basis-full mb-1",
                         )}
                       >
                         Listing price
                       </span>
-                      {o.pricesDetail.length
-                        ? o.pricesDetail.map((c: any) => (
+                      {autoListing.tokensToPay.length
+                        ? autoListing.tokensToPay.map((paymentMethod) => (
                             <span
-                              key={c.feeTokenAddress.id}
+                              key={paymentMethod.token.address}
                               className="flex items-center gap-1 bg-quaternary-bg rounded-2 px-2 py-1"
                             >
                               <span>
                                 <span className="overflow-hidden ">
-                                  {+formatUnits(c.price, c.feeTokenAddress.decimals) <= 0
+                                  {formatUnits(
+                                    paymentMethod.price,
+                                    paymentMethod.token.decimals ?? 18,
+                                  ).slice(0, 7) === "0.00000"
                                     ? truncateMiddle(
-                                        formatUnits(c.price, c.feeTokenAddress.decimals),
+                                        formatUnits(
+                                          paymentMethod.price,
+                                          paymentMethod.token.decimals ?? 18,
+                                        ),
+                                        {
+                                          charsFromStart: 3,
+                                          charsFromEnd: 2,
+                                        },
                                       )
-                                    : formatUnits(c.price, c.feeTokenAddress.decimals)}
+                                    : formatFloat(
+                                        formatUnits(
+                                          paymentMethod.price,
+                                          paymentMethod.token.decimals != null
+                                            ? paymentMethod.token.decimals
+                                            : 18,
+                                        ),
+                                      )}
                                 </span>{" "}
-                                {c.feeTokenAddress.symbol}
+                                {paymentMethod.token.symbol}
                               </span>
                               <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
                             </span>
@@ -123,14 +141,18 @@ export default function TokenListingPage() {
                       <ExternalTextLink
                         onClick={(e) => e.stopPropagation()}
                         color="white"
-                        text={truncateMiddle(o.id)}
-                        href={getExplorerLink(ExplorerLinkType.ADDRESS, o.id, DexChainId.SEPOLIA)}
+                        text={truncateMiddle(autoListing.id)}
+                        href={getExplorerLink(
+                          ExplorerLinkType.ADDRESS,
+                          autoListing.id,
+                          DexChainId.SEPOLIA,
+                        )}
                       />
                     </div>
                     <div className="flex-grow">
                       <Link
                         onClick={(e) => e.stopPropagation()}
-                        href={`/token-listing/add/?autoListingContract=${o.id}`}
+                        href={`/token-listing/add/?autoListingContract=${autoListing.id}`}
                       >
                         <Button
                           fullWidth
@@ -156,36 +178,53 @@ export default function TokenListingPage() {
                 <div className="pr-5 h-[60px] flex items-center relative">Action</div>
               </div>
 
-              {filteredAutoListings.map((o: any) => {
+              {filteredAutoListings.map((autoListing) => {
                 return (
                   <Link
-                    key={o.id}
-                    href={`/token-listing/contracts/${o.id}`}
+                    key={autoListing.id}
+                    href={`/token-listing/contracts/${autoListing.id}`}
                     className="contents hover:bg-green-bg duration-200 group"
                   >
                     <div className="h-[56px] z-10 relative flex items-center group-hover:bg-green-bg gap-2 pl-5 duration-200 pr-2">
-                      {o.name}
+                      {autoListing.name}
                     </div>
 
                     <div className=" h-[56px] z-10 relative flex items-center group-hover:bg-green-bg duration-200 pr-2">
-                      {o.totalTokens} tokens
+                      {autoListing.totalTokens} tokens
                     </div>
                     <div className=" h-[56px] z-10 relative flex items-center gap-2 group-hover:bg-green-bg duration-200 pr-2">
-                      {o.pricesDetail.length
-                        ? o.pricesDetail.map((c: any) => (
+                      {autoListing.tokensToPay.length
+                        ? autoListing.tokensToPay.map((paymentMethod) => (
                             <span
-                              key={c.feeTokenAddress.id}
+                              key={paymentMethod.token.address}
                               className="flex items-center gap-1 bg-tertiary-bg rounded-2 px-2 py-1"
                             >
                               <span>
                                 <span className="overflow-hidden ">
-                                  {+formatUnits(c.price, c.feeTokenAddress.decimals) <= 0
+                                  {formatUnits(
+                                    paymentMethod.price,
+                                    paymentMethod.token.decimals ?? 18,
+                                  ).slice(0, 7) === "0.00000"
                                     ? truncateMiddle(
-                                        formatUnits(c.price, c.feeTokenAddress.decimals),
+                                        formatUnits(
+                                          paymentMethod.price,
+                                          paymentMethod.token.decimals ?? 18,
+                                        ),
+                                        {
+                                          charsFromStart: 3,
+                                          charsFromEnd: 2,
+                                        },
                                       )
-                                    : formatUnits(c.price, c.feeTokenAddress.decimals)}
+                                    : formatFloat(
+                                        formatUnits(
+                                          paymentMethod.price,
+                                          paymentMethod.token.decimals != null
+                                            ? paymentMethod.token.decimals
+                                            : 18,
+                                        ),
+                                      )}
                                 </span>{" "}
-                                {c.feeTokenAddress.symbol}
+                                {paymentMethod.token.symbol}
                               </span>
                               <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
                             </span>
@@ -196,14 +235,18 @@ export default function TokenListingPage() {
                       <ExternalTextLink
                         onClick={(e) => e.stopPropagation()}
                         color="white"
-                        text={truncateMiddle(o.id)}
-                        href={getExplorerLink(ExplorerLinkType.ADDRESS, o.id, DexChainId.SEPOLIA)}
+                        text={truncateMiddle(autoListing.id)}
+                        href={getExplorerLink(
+                          ExplorerLinkType.ADDRESS,
+                          autoListing.id,
+                          DexChainId.SEPOLIA,
+                        )}
                       />
                     </div>
                     <div className="h-[56px] z-10 relative flex items-center pr-5 group-hover:bg-green-bg duration-200">
                       <Link
                         onClick={(e) => e.stopPropagation()}
-                        href={`/token-listing/add/?autoListingContract=${o.id}`}
+                        href={`/token-listing/add/?autoListingContract=${autoListing.id}`}
                       >
                         <Button
                           className="hover:bg-green hover:text-black"

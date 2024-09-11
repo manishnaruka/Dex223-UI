@@ -19,7 +19,7 @@ import { ROUTER_ABI } from "@/config/abis/router";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_hybrid/chains";
-import { FeeAmount } from "@/sdk_hybrid/constants";
+import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
@@ -48,23 +48,13 @@ export default function useListToken() {
   });
 
   const isFree = useMemo(() => {
-    return !autoListing?.pricesDetail.length;
+    return !autoListing?.tokensToPay.length;
   }, [autoListing]);
 
   console.log(autoListing, "autoListing");
 
   const { data: walletClient } = useWalletClient();
-  const { paymentToken, setPaymentToken } = usePaymentTokenStore();
-
-  const _paymentToken = useMemo(() => {
-    if (paymentToken && autoListing) {
-      return autoListing.pricesDetail.find(
-        (o: any) => o.feeTokenAddress.id.toLowerCase() === paymentToken?.token?.toLowerCase(),
-      );
-    }
-
-    return;
-  }, [autoListing, paymentToken]);
+  const { paymentToken } = usePaymentTokenStore();
 
   const {
     status: listTokenStatus,
@@ -99,7 +89,7 @@ export default function useListToken() {
         return;
       }
 
-      if (isZeroAddress(paymentToken.token)) {
+      if (isZeroAddress(paymentToken.token.address)) {
         return { ...common, args: [...common.args, paymentToken.token], value: paymentToken.price };
       }
 
@@ -124,13 +114,13 @@ export default function useListToken() {
 
   const { isAllowed, writeTokenApprove, updateAllowance } = useStoreAllowance({
     token:
-      _paymentToken && !isFree
+      paymentToken && !isFree
         ? new Token(
             DexChainId.SEPOLIA,
-            _paymentToken.feeTokenAddress.id,
-            _paymentToken.feeTokenAddress.id,
-            +_paymentToken.feeTokenAddress.decimals,
-            _paymentToken.feeTokenAddress.symbol,
+            paymentToken.token.address,
+            ADDRESS_ZERO,
+            +paymentToken.token.decimals,
+            paymentToken.token.symbol,
           )
         : undefined,
     contractAddress: autoListingContract,
@@ -144,7 +134,7 @@ export default function useListToken() {
       return;
     }
 
-    if (!isAllowed && !isFree && paymentToken && !isZeroAddress(paymentToken.token)) {
+    if (!isAllowed && !isFree && paymentToken && !isZeroAddress(paymentToken.token.address)) {
       openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
       setListTokenStatus(ListTokenStatus.PENDING_APPROVE);
@@ -263,7 +253,7 @@ export default function useListToken() {
               symbol: tokenA.symbol!,
               template: RecentTransactionTitleTemplate.LIST_SINGLE,
               logoURI: tokenA?.logoURI || "/tokens/placeholder.svg",
-              autoListing: autoListing.name,
+              autoListing: autoListing?.name || "Unknown",
             },
           },
           address,

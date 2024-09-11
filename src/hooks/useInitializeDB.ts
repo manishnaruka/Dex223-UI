@@ -175,6 +175,9 @@ export function useAutoListingUpdater() {
       }
 
       console.log("Updating autolistings...");
+      console.log(addressesToActualize);
+      console.log(Array.from(addressesToActualize).length);
+      console.log(Array.from(addressesToActualize));
 
       const autoListingsToUpdate = await getAutoListings({
         variables: {
@@ -183,7 +186,12 @@ export function useAutoListingUpdater() {
         },
       });
 
+      console.log(autoListingsToUpdate);
+
       const resultData = autoListingsToUpdate.data?.autoListings;
+
+      console.log("RESULT DATA");
+      console.log(resultData);
 
       if (resultData && resultData.length) {
         for (let i = 0; i < resultData.length; i++) {

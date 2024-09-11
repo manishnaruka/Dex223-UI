@@ -27,15 +27,15 @@ export default function ChoosePaymentDialog() {
 
   const payments = useMemo(() => {
     if (!searchValue) {
-      return autoListing?.pricesDetail;
+      return autoListing?.tokensToPay;
     }
 
-    return autoListing?.pricesDetail.filter(
-      (d: any) =>
-        d.feeTokenAddress.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
-        d.feeTokenAddress.symbol.toLowerCase().startsWith(searchValue.toLowerCase()),
+    return autoListing?.tokensToPay.filter(
+      ({ token }) =>
+        token.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
+        token.symbol.toLowerCase().startsWith(searchValue.toLowerCase()),
     );
-  }, [autoListing?.pricesDetail, searchValue]);
+  }, [autoListing?.tokensToPay, searchValue]);
 
   return (
     <DrawerDialog isOpen={isPaymentDialogSelectOpened} setIsOpen={setPaymentDialogSelectOpened}>
@@ -54,20 +54,20 @@ export default function ChoosePaymentDialog() {
       </div>
       <div className="flex flex-col gap-2 pb-4">
         {Boolean(!searchValue || (searchValue && payments?.length)) &&
-          payments?.map((a: any) => {
+          payments?.map((a) => {
             return (
               <button
                 onClick={() => {
-                  setPaymentToken({ token: a.feeTokenAddress.id, price: BigInt(a.price) });
+                  setPaymentToken(a);
                   setPaymentDialogSelectOpened(false);
                 }}
-                key={a.id}
+                key={a.token.address}
                 className="px-4 md:px-10 md:w-full py-2.5 flex justify-between md:grid md:grid-cols-[1fr_1fr_40px] gap-2 items-center hover:bg-tertiary-bg duration-200"
               >
                 <div className="flex items-center gap-2">
                   <Image src="/tokens/placeholder.svg" width={40} height={40} alt="" />
                   <span className="block w-[90px] sm:w-auto overflow-hidden overflow-ellipsis whitespace-nowrap text-left">
-                    {a.feeTokenAddress.name}
+                    {a.token.name}
                   </span>
                 </div>
                 <div className="flex items-center md:grid md:grid-cols-[58px_1fr] gap-1">
@@ -76,26 +76,26 @@ export default function ChoosePaymentDialog() {
                       size="small"
                       variant={BadgeVariant.COLORED}
                       color="green"
-                      text={isZeroAddress(a.feeTokenAddress.address) ? "Native" : "ERC-20"}
+                      text={isZeroAddress(a.token.address) ? "Native" : "ERC-20"}
                     />
                   </div>
                   <div className="flex items-center gap-1">
                     <span>
-                      {formatUnits(a.price, a.feeTokenAddress.decimals).slice(0, 7) === "0.00000"
-                        ? truncateMiddle(formatUnits(a.price, a.feeTokenAddress.decimals), {
+                      {formatUnits(a.price, a.token.decimals).slice(0, 7) === "0.00000"
+                        ? truncateMiddle(formatUnits(a.price, a.token.decimals), {
                             charsFromStart: 3,
                             charsFromEnd: 2,
                           })
-                        : formatFloat(formatUnits(a.price, a.feeTokenAddress.decimals))}
+                        : formatFloat(formatUnits(a.price, a.token.decimals))}
                     </span>
-                    <span>{a.feeTokenAddress.symbol}</span>
+                    <span>{a.token.symbol}</span>
                   </div>
                 </div>
                 <IconButton onClick={(e) => e.stopPropagation()} iconName="details" />
               </button>
             );
           })}
-        {searchValue && !payments.length && (
+        {searchValue && payments && !payments.length && (
           <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col">
             <EmptyStateIcon iconName="search-autolisting" />
             <span className="text-secondary-text">No tokens found</span>

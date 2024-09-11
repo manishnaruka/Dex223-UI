@@ -1,11 +1,9 @@
 import React, { useMemo, useState } from "react";
 
-import useAutoListingContracts, {
-  useAutoListingContract,
-} from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
+import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
+import useAutoListingContracts from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
-import Dialog from "@/components/atoms/Dialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -24,24 +22,24 @@ export default function ChooseAutoListingDialog() {
   const chainId = useCurrentChainId();
   const [searchValue, setSearchValue] = useState("");
   const autoListings = useAutoListingContracts();
-  const { autoListingContract, setAutoListingContract } = useAutoListingContractStore();
-  const autoListing = useAutoListingContract(autoListingContract);
+  const { setAutoListingContract } = useAutoListingContractStore();
+  const { autoListing } = useAutoListing();
 
   const filteredAutoListings = useMemo(() => {
-    if (!autoListings.data) {
+    if (!autoListings) {
       return null;
     }
 
     if (!searchValue) {
-      return autoListings.data.autoListings;
+      return autoListings;
     } else {
-      return autoListings.data.autoListings.filter(
-        (l: any) =>
+      return autoListings.filter(
+        (l) =>
           l.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
           l.id.toLowerCase().startsWith(searchValue.toLowerCase()),
       );
     }
-  }, [autoListings.data, searchValue]);
+  }, [autoListings, searchValue]);
 
   return (
     <DrawerDialog isOpen={isAutoListingSelectOpened} setIsOpen={setAutoListingSelectOpened}>
@@ -59,11 +57,9 @@ export default function ChooseAutoListingDialog() {
         />
       </div>
 
-      {(!searchValue || (searchValue && !!filteredAutoListings.length)) && (
+      {(!searchValue || (searchValue && !!filteredAutoListings?.length)) && (
         <div className="flex flex-col gap-2 pb-4">
-          {filteredAutoListings?.map((a: any) => {
-            const isFree = !a?.pricesDetail.length;
-
+          {filteredAutoListings?.map((a) => {
             return (
               <button
                 onClick={() => {
@@ -83,7 +79,7 @@ export default function ChooseAutoListingDialog() {
                   {a.id === autoListing?.id && (
                     <Svg iconName="check" className="text-green" size={32} />
                   )}
-                  {isFree ? (
+                  {a.isFree ? (
                     <Badge variant={BadgeVariant.COLORED} text="Free" color="green" />
                   ) : (
                     <Badge variant={BadgeVariant.COLORED} text="Paid" color="grey" />
@@ -103,7 +99,7 @@ export default function ChooseAutoListingDialog() {
           })}
         </div>
       )}
-      {searchValue && !filteredAutoListings.length && (
+      {searchValue && !filteredAutoListings?.length && (
         <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col">
           <EmptyStateIcon iconName="search-autolisting" />
           <span className="text-secondary-text">No tokenlists found</span>

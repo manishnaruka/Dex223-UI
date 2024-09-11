@@ -51,6 +51,9 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
   const lists = useTokenLists();
   const [onlyCustom, setOnlyCustom] = useState(false);
 
+  console.log("TOKEN LISTS");
+  console.log(lists);
+
   const tokens = useTokens(onlyCustom);
 
   const [listSearchValue, setListSearchValue] = useState("");
