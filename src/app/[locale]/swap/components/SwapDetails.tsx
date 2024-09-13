@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 
-import useSwap from "@/app/[locale]/swap/hooks/useSwap";
 import { TokenTrade } from "@/app/[locale]/swap/libs/trading";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapDetailsStateStore } from "@/app/[locale]/swap/stores/useSwapDetailsStateStore";
+import { useSwapGasLimitStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import Collapse from "@/components/atoms/Collapse";
 import Svg from "@/components/atoms/Svg";
@@ -54,7 +54,7 @@ export default function SwapDetails({
   }, [trade?.outputAmount]);
 
   const { slippage, deadline: _deadline } = useSwapSettingsStore();
-  const { estimatedGas } = useSwap();
+  const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
 
   return (
     <>
@@ -135,7 +135,11 @@ export default function SwapDetails({
           />
           <SwapDetailsRow
             title={t("gas_limit")}
-            value={estimatedGas?.toString() || "Loading..."}
+            value={
+              customGasLimit
+                ? customGasLimit.toString()
+                : (estimatedGas + BigInt(30000)).toString() || "Loading..."
+            }
             tooltipText={t("gas_limit_tooltip")}
           />
         </div>

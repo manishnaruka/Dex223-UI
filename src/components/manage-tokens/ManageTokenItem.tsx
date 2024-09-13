@@ -23,7 +23,6 @@ export default function ManageTokenItem({
   const t = useTranslations("ManageTokens");
   const lists = useTokenLists();
 
-  const [open, setOpen] = useState(false);
   const [deleteOpened, setDeleteOpened] = useState(false);
 
   const chainId = useCurrentChainId();

@@ -27,7 +27,6 @@ export default function useInitializeDB() {
         const defaultList = await db.tokenLists.get(`default-${DEX_SUPPORTED_CHAINS[i]}`);
 
         if (!defaultList) {
-          console.log("sdd");
           await db.tokenLists.add({
             id: `default-${DEX_SUPPORTED_CHAINS[i]}`,
             list: defaultLists[DEX_SUPPORTED_CHAINS[i]],
@@ -176,6 +175,9 @@ export function useAutoListingUpdater() {
       }
 
       console.log("Updating autolistings...");
+      console.log(addressesToActualize);
+      console.log(Array.from(addressesToActualize).length);
+      console.log(Array.from(addressesToActualize));
 
       const autoListingsToUpdate = await getAutoListings({
         variables: {
@@ -184,7 +186,12 @@ export function useAutoListingUpdater() {
         },
       });
 
+      console.log(autoListingsToUpdate);
+
       const resultData = autoListingsToUpdate.data?.autoListings;
+
+      console.log("RESULT DATA");
+      console.log(resultData);
 
       if (resultData && resultData.length) {
         for (let i = 0; i < resultData.length; i++) {
@@ -204,7 +211,6 @@ export function useAutoListingUpdater() {
                   patch: 1,
                 },
                 tokens: resultData[i].tokens.map(({ token }: any) => {
-                  console.log(token.decimals);
                   return new Token(
                     chainId,
                     token.addressERC20,

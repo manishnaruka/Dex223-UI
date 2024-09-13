@@ -98,7 +98,23 @@ function NotificationTitle({
         <div className="flex items-center gap-1">
           {status === RecentTransactionStatus.SUCCESS
             ? t("add_liquidity_success_notification")
-            : t("remove_liquidity_revert_notification")}
+            : t("add_liquidity_revert_notification")}
+        </div>
+      );
+    case RecentTransactionTitleTemplate.LIST_SINGLE:
+      return (
+        <div className="flex items-center gap-1">
+          {status === RecentTransactionStatus.SUCCESS
+            ? t("list_single_success_notification")
+            : t("list_single_revert_notification")}
+        </div>
+      );
+    case RecentTransactionTitleTemplate.LIST_DOUBLE:
+      return (
+        <div className="flex items-center gap-1">
+          {status === RecentTransactionStatus.SUCCESS
+            ? t("list_double_success_notification")
+            : t("list_double_revert_notification")}
         </div>
       );
   }

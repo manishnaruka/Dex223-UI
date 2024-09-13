@@ -53,6 +53,20 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           <Badge color="green" text="ERC-20" />
         </div>
       );
+    case RecentTransactionTitleTemplate.LIST_SINGLE:
+      return (
+        <div className="flex items-center gap-1">
+          <Svg iconName="listing" />
+          <span className="text-16 font-medium block mr-1">List token</span>
+        </div>
+      );
+    case RecentTransactionTitleTemplate.LIST_DOUBLE:
+      return (
+        <div className="flex items-center gap-1">
+          <Svg iconName="listing" />
+          <span className="text-16 font-medium block mr-1">List tokens</span>
+        </div>
+      );
     case RecentTransactionTitleTemplate.DEPOSIT:
       return (
         <div className="flex items-center gap-1">
@@ -133,6 +147,14 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
           })}
         </span>
       );
+    case RecentTransactionTitleTemplate.LIST_SINGLE:
+      return (
+        <span className="text-14 text-secondary-text">{`${title.symbol} in "${title.autoListing}" list`}</span>
+      );
+    case RecentTransactionTitleTemplate.LIST_DOUBLE:
+      return (
+        <span className="text-14 text-secondary-text">{`${title.symbol0} and ${title.symbol0} in "${title.autoListing}" list`}</span>
+      );
   }
 }
 
@@ -141,6 +163,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.APPROVE:
     case RecentTransactionTitleTemplate.DEPOSIT:
     case RecentTransactionTitleTemplate.WITHDRAW:
+    case RecentTransactionTitleTemplate.LIST_SINGLE:
       return (
         <div className="flex items-center justify-center w-12 h-12">
           <Image width={36} height={36} src={title.logoURI} alt="" />
@@ -150,6 +173,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.REMOVE:
     case RecentTransactionTitleTemplate.COLLECT:
     case RecentTransactionTitleTemplate.ADD:
+    case RecentTransactionTitleTemplate.LIST_DOUBLE:
       return (
         <div className="flex items-center relative w-12 h-12">
           <Image

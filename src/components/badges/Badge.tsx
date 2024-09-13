@@ -9,7 +9,7 @@ export enum BadgeVariant {
 type Props =
   | {
       variant?: BadgeVariant.COLORED;
-      color?: "blue" | "red" | "green" | "purple";
+      color?: "blue" | "red" | "green" | "purple" | "grey";
       size?: "default" | "small";
       text: string;
     }
@@ -35,6 +35,7 @@ export default function Badge(props: Props) {
             color === "green" && "bg-green-bg border-green text-green",
             color === "purple" && "bg-purple-bg border-purple text-purple",
             color === "red" && "bg-red-bg border-red text-red",
+            color === "grey" && "bg-quaternary-bg text-secondary-text border-quaternary-bg",
             size === "default" ? "text-12 py-px " : "text-10",
           )}
         >

@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Abi, Address, formatUnits, getAbiItem } from "viem";
-import {
-  useAccount,
-  useBlockNumber,
-  usePublicClient,
-  useReadContract,
-  useWalletClient,
-} from "wagmi";
+import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Token } from "@/sdk_hybrid/entities/token";
@@ -22,7 +18,6 @@ import {
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
 
-import useCurrentChainId from "./useCurrentChainId";
 import useDeepEffect from "./useDeepEffect";
 
 export enum AllowanceStatus {
@@ -56,15 +51,33 @@ export function useStoreAllowance({
 
   const { allowances, addAllowanceItem, updateAllowedToSpend } = useAllowanceStore();
 
-  const currentAllowanceItem = useMemo(() => {
-    return allowances.find(
-      (allowanceItem) =>
-        allowanceItem.tokenAddress === token?.address0 &&
-        allowanceItem.contractAddress === contractAddress &&
-        allowanceItem.chainId === chainId &&
-        allowanceItem.account === address,
-    );
-  }, [address, allowances, chainId, contractAddress, token]);
+  const { refetch, data: currentAllowanceData } = useReadContract({
+    abi: ERC20_ABI,
+    address: token?.address0 as Address,
+    functionName: "allowance",
+    args: [
+      //set ! to avoid ts errors, make sure it is not undefined with "enable" option
+      address!,
+      contractAddress!,
+    ],
+    scopeKey: `${token?.address0}-${contractAddress}-${address}-${chainId}`,
+    query: {
+      //make sure hook don't run when there is no addresses
+      enabled: Boolean(token?.address0) && Boolean(address) && Boolean(contractAddress),
+    },
+    // cacheTime: 0,
+    // watch: true,
+  });
+
+  // const currentAllowanceItem = useMemo(() => {
+  //   return allowances.find(
+  //     (allowanceItem) =>
+  //       allowanceItem.tokenAddress === token?.address0 &&
+  //       allowanceItem.contractAddress === contractAddress &&
+  //       allowanceItem.chainId === chainId &&
+  //       allowanceItem.account === address,
+  //   );
+  // }, [address, allowances, chainId, contractAddress, token]);
 
   const { addRecentTransaction } = useRecentTransactionsStore();
 
@@ -76,55 +89,54 @@ export function useStoreAllowance({
     return defaultApproveValue;
   }, [chainId]);
 
-  const updateAllowance = useCallback(async () => {
-    if (!publicClient || !address || !contractAddress || !token) {
-      return;
-    }
+  // const updateAllowance = useCallback(async () => {
+  //   if (!publicClient || !address || !contractAddress || !token) {
+  //     return;
+  //   }
+  //
+  //   const data = await publicClient.readContract({
+  //     abi: ERC20_ABI,
+  //     functionName: "allowance",
+  //     address: token.address0,
+  //     args: [address, contractAddress],
+  //   });
+  //
+  //   if (currentAllowanceItem) {
+  //     updateAllowedToSpend(currentAllowanceItem, data);
+  //   } else {
+  //     addAllowanceItem({
+  //       tokenAddress: token.address0,
+  //       contractAddress,
+  //       account: address,
+  //       chainId,
+  //       allowedToSpend: data,
+  //     });
+  //   }
+  // }, [
+  //   addAllowanceItem,
+  //   address,
+  //   chainId,
+  //   contractAddress,
+  //   currentAllowanceItem,
+  //   publicClient,
+  //   token,
+  //   updateAllowedToSpend,
+  // ]);
 
-    console.warn("NODE REQUEST FOR ALLOWANCE");
-    const data = await publicClient.readContract({
-      abi: ERC20_ABI,
-      functionName: "allowance",
-      address: token.address0,
-      args: [address, contractAddress],
-    });
-
-    if (currentAllowanceItem) {
-      updateAllowedToSpend(currentAllowanceItem, data);
-    } else {
-      addAllowanceItem({
-        tokenAddress: token.address0,
-        contractAddress,
-        account: address,
-        chainId,
-        allowedToSpend: data,
-      });
-    }
-  }, [
-    addAllowanceItem,
-    address,
-    chainId,
-    contractAddress,
-    currentAllowanceItem,
-    publicClient,
-    token,
-    updateAllowedToSpend,
-  ]);
-
-  useEffect(() => {
-    if (!currentAllowanceItem) {
-      updateAllowance();
-    }
-  }, [currentAllowanceItem, updateAllowance]);
+  // useEffect(() => {
+  //   if (!currentAllowanceItem) {
+  //     updateAllowance();
+  //   }
+  // }, [currentAllowanceItem, updateAllowance]);
 
   const waitAndReFetch = useCallback(
     async (hash: Address) => {
       if (publicClient) {
         await publicClient.waitForTransactionReceipt({ hash });
-        await updateAllowance();
+        await refetch();
       }
     },
-    [publicClient, updateAllowance],
+    [publicClient, refetch],
   );
 
   const writeTokenApprove = useCallback(
@@ -232,15 +244,12 @@ export function useStoreAllowance({
 
   return {
     isAllowed: Boolean(
-      currentAllowanceItem?.allowedToSpend &&
-        amountToCheck &&
-        currentAllowanceItem.allowedToSpend >= amountToCheck,
+      currentAllowanceData && amountToCheck && currentAllowanceData >= amountToCheck,
     ),
     writeTokenApprove,
-    currentAllowance: currentAllowanceItem?.allowedToSpend,
+    currentAllowance: currentAllowanceData,
     estimatedGas: allowanceGasLimitMap[chainId]?.base || defaultApproveValue,
-    currentAllowanceItem,
-    updateAllowance,
+    updateAllowance: refetch,
   };
 }
 
@@ -278,7 +287,7 @@ export default function useAllowance({
     // watch: true,
   });
 
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: blockNumber } = useScopedBlockNumber();
 
   useEffect(() => {
     // refetch();
