@@ -16,6 +16,7 @@ import Badge from "@/components/badges/Badge";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 
 import { useActiveWalletBalances } from "../stores/balances.hooks";
@@ -26,15 +27,15 @@ const filterTable = ({
 }: {
   searchValue: string;
   value: {
-    token: Token;
+    token: Currency;
     amountERC20: bigint;
     amountERC223: bigint;
     amountFiat: string;
   };
 }) => {
   if (!searchValue) return true;
-  if (token.address0 === searchValue) return true;
-  if (token.address1 === searchValue) return true;
+  if (token.wrapped.address0 === searchValue) return true;
+  if (token.wrapped.address1 === searchValue) return true;
   if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
   if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
 

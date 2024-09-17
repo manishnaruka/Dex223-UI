@@ -66,7 +66,10 @@ export const useActiveWalletBalances = () => {
     (async () => {
       const walletsBalances = await Promise.all(
         activeAddresses.map((address) => {
-          return getWalletBalances(address, tokens);
+          return getWalletBalances(
+            address,
+            tokens.map((token) => token.wrapped),
+          );
         }),
       );
       setAllBalances(walletsBalances);
@@ -77,14 +80,14 @@ export const useActiveWalletBalances = () => {
     return tokens.map((token) => {
       const amountERC20 = balances.reduce((acc, { address, balances }) => {
         const amount = balances.find(
-          ({ address }) => address.toLowerCase() === token.address0.toLowerCase(),
+          ({ address }) => address.toLowerCase() === token.wrapped.address0.toLowerCase(),
         );
         return amount ? acc + (amount.value as any) : acc;
       }, BigInt(0));
 
       const amountERC223 = balances.reduce((acc, { address, balances }) => {
         const amount = balances.find(
-          ({ address }) => address.toLowerCase() === token.address1.toLowerCase(),
+          ({ address }) => address.toLowerCase() === token.wrapped.address1.toLowerCase(),
         );
         return amount ? acc + (amount.value as any) : acc;
       }, BigInt(0));

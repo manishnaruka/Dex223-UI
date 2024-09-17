@@ -82,7 +82,11 @@ export const useActiveWalletsDeposites = () => {
       setIsLoading(true);
       const walletsDeposites = await Promise.all(
         activeAddresses.map((address) => {
-          return getWalletDeposites(address, tokens, contractAddresses);
+          return getWalletDeposites(
+            address,
+            tokens.map((token) => token.wrapped),
+            contractAddresses,
+          );
         }),
       );
       setAllDeposites(walletsDeposites);
