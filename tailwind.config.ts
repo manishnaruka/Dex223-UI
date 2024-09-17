@@ -37,6 +37,8 @@ const config: Config = {
         "swap-gas-gradient-right": "linear-gradient(90deg, #0F0F0F 0%, #1D1E1E 100%)",
         "swap-gas-gradient-left": "linear-gradient(90deg, #1D1E1E 0%, #0F0F0F 100%)",
         "test-tokens-gradient": "linear-gradient(90deg, #3C4C4A 0%, #1D1E1E 100%)",
+        "portfolio-balance-gradient": "linear-gradient(90deg, #3C4C4A 0%, #70C59E 100%)",
+        "portfolio-margin-positions-gradient": "linear-gradient(90deg, #232A2F 0%, #72A4C7 100%)",
       },
       keyframes: {
         appear: {
@@ -96,7 +98,8 @@ const config: Config = {
       blue: "#64B2EA", // changed
       black: "#000000", // changed
       white: "#FFFFFF", // changed
-      purple: "#A380DC", // changed
+      purple: "#9189F0", // changed
+      purple_opacity_20: "#A380DC33", // changed
 
       "green-bg": "#3C4C4A", // changed
       "red-bg": "#443535", // changed
@@ -124,6 +127,8 @@ const config: Config = {
       "secondary-border": "#383C3A", // changed
       "tertiary-border": "#2A2D2C", // changed
       "hover-border": "#7E8281", // changed
+
+      "main-primary": "#70C59E",
     },
     spacing: {
       "0": "0px",

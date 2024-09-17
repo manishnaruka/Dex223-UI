@@ -92,7 +92,7 @@ export function useSwapParams() {
 
   const data = useReadContract({
     abi: POOL_ABI,
-    functionName: "token0",
+    functionName: "token1",
     address: poolAddress.poolAddress,
   });
   console.log(data.data);

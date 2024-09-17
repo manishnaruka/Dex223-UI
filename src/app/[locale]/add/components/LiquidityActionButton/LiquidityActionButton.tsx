@@ -4,6 +4,7 @@ import { Address } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
 import Button, { ButtonVariant } from "@/components/buttons/Button";
+import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { Standard } from "@/sdk_hybrid/standard";
 
 import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
@@ -15,9 +16,9 @@ import {
   useTokensStandards,
 } from "../../stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
+import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
+import { LiquidityStatus, useLiquidityStatusStore } from "../../stores/useLiquidityStatusStore";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
-import { ApproveButton } from "./ApproveButton";
-import { MintButton } from "./MintButton";
 
 export const LiquidityActionButton = ({
   increase = false,
@@ -27,17 +28,22 @@ export const LiquidityActionButton = ({
   tokenId?: string;
 }) => {
   const t = useTranslations("Liquidity");
+  const tWallet = useTranslations("Wallet");
+  const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
+
+  const { setStatus } = useLiquidityStatusStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
 
   const { approveTransactionsCount } = useLiquidityApprove();
+  const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
 
   const { typedValue } = useLiquidityAmountsStore();
 
-  const { parsedAmounts } = useV3DerivedMintInfo({
+  const { parsedAmounts, noLiquidity } = useV3DerivedMintInfo({
     tokenA,
     tokenB,
     tier,
@@ -98,9 +104,17 @@ export const LiquidityActionButton = ({
 
   const isSufficientBalance = isSufficientBalanceA && isSufficientBalanceB;
 
+  if (!isConnected) {
+    return (
+      <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+        {tWallet("connect_wallet")}
+      </Button>
+    );
+  }
+
   if (!tokenA || !tokenB) {
     return (
-      <Button variant={ButtonVariant.OUTLINED} fullWidth disabled>
+      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
         {t("select_tokens")}
       </Button>
     );
@@ -108,7 +122,7 @@ export const LiquidityActionButton = ({
 
   if (!typedValue || typedValue === "0") {
     return (
-      <Button variant={ButtonVariant.OUTLINED} fullWidth disabled>
+      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
         {t("button_enter_amount")}
       </Button>
     );
@@ -116,15 +130,37 @@ export const LiquidityActionButton = ({
 
   if (!isSufficientBalance) {
     return (
-      <Button variant={ButtonVariant.OUTLINED} fullWidth disabled>
+      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
         {t("button_insufficient_balance")}
       </Button>
     );
   }
 
   if (approveTransactionsCount) {
-    return <ApproveButton />;
+    return (
+      <Button
+        variant={ButtonVariant.CONTAINED}
+        fullWidth
+        onClick={() => {
+          setStatus(LiquidityStatus.INITIAL);
+          setIsOpen(true);
+        }}
+      >
+        Approve
+      </Button>
+    );
   }
 
-  return <MintButton increase={increase} tokenId={tokenId} />;
+  return (
+    <Button
+      variant={ButtonVariant.CONTAINED}
+      fullWidth
+      onClick={() => {
+        setStatus(LiquidityStatus.MINT);
+        setIsOpen(true);
+      }}
+    >
+      {increase ? "Add liquidity" : noLiquidity ? "Create Pool & Mint liquidity" : "Mint liquidity"}
+    </Button>
+  );
 };

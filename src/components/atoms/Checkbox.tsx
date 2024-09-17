@@ -5,9 +5,9 @@ import { clsxMerge } from "@/functions/clsxMerge";
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   checked: boolean;
-  handleChange: () => void;
+  handleChange: (event?: any) => void; // InputHTMLAttributes<HTMLInputElement>["onChange"]
   id: string;
-  label: string;
+  label?: string;
   labelClassName?: string;
 }
 
@@ -31,9 +31,11 @@ export default function Checkbox({
         onChange={handleChange}
         checked={checked}
       />
-      <label className={clsxMerge("pl-2 cursor-pointer", labelClassName)} htmlFor={id}>
-        {label}
-      </label>
+      {label ? (
+        <label className={clsxMerge("pl-2 cursor-pointer", labelClassName)} htmlFor={id}>
+          {label}
+        </label>
+      ) : null}
       <Svg
         iconName="check"
         className="duration-200 absolute opacity-0 peer-checked:opacity-100 text-secondary-bg pointer-events-none"

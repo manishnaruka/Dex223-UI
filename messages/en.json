@@ -246,6 +246,7 @@
     "deposited": "Deposited: {deposited} {symbol}",
     "revoke": "Revoke",
     "withdraw": "Withdraw",
+    "approve": "Approve",
     "gas_price": "Gas price",
     "gas_price_tooltip": "gas_price_tooltip",
     "total_fee": "Total fee",
@@ -310,5 +311,21 @@
   },
   "Toast": {
     "successfully_copied": "Successfully copied!"
+  },
+  "Portfolio": {
+    "title": "Portfolio",
+    "add_wallet_placeholder": "Add address or domain",
+    "search_placeholder": "Search wallet address",
+    "balances_title": "Wallet assets",
+    "balances_search_placeholder": "Search name or paste address",
+    "margin_title": "Margin positions",
+    "margin_search_placeholder": "Search by ID",
+    "lending_title": "Lending orders",
+    "lending_search_placeholder": "Search by ID",
+    "liquidity_title": "Liquidity positions",
+    "liquidity_search_placeholder": "Search by ID",
+    "deposited_title": "Deposited to contract",
+    "enter_in_correct_format": "Enter token address in correct format"
+
   }
 }

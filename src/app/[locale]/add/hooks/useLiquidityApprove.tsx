@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
+import { useBlockNumber, useGasPrice } from "wagmi";
 
 import useAllowance, { AllowanceStatus } from "@/hooks/useAllowance";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeposit from "@/hooks/useDeposit";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -30,7 +31,7 @@ export enum ApproveTransactionType {
 }
 
 export const useLiquidityApprove = () => {
-  const { chainId } = useAccount();
+  const chainId = useCurrentChainId();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { price } = usePriceRange();
 
@@ -169,39 +170,44 @@ export const useLiquidityApprove = () => {
     isDepositedB,
   ]);
 
-  const handleApprove = useCallback(async () => {
-    if (tokenAStandard === Standard.ERC20 && (currentAllowanceA || BigInt(0)) < amountToCheckA) {
-      approveA();
-    } else if (
-      tokenAStandard === Standard.ERC223 &&
-      (currentDepositA || BigInt(0)) < amountToCheckA
-    ) {
-      depositA();
-    }
-    if (tokenBStandard === Standard.ERC20 && (currentAllowanceB || BigInt(0)) < amountToCheckB) {
-      approveB();
-    } else if (
-      tokenBStandard === Standard.ERC223 &&
-      (currentDepositB || BigInt(0)) < amountToCheckB
-    ) {
-      depositB();
-    }
-  }, [
-    approveA,
-    approveB,
-    depositA,
-    depositB,
-    tokenAStandard,
-    tokenBStandard,
-    currentAllowanceA,
-    currentAllowanceB,
-    currentDepositA,
-    currentDepositB,
-    amountToCheckA,
-    amountToCheckB,
-    // estimatedGasA,
-    // estimatedGasB,
-  ]);
+  const handleApprove = useCallback(
+    async ({
+      customAmountA,
+      customAmountB,
+    }: {
+      customAmountA?: bigint;
+      customAmountB?: bigint;
+    }) => {
+      const amountA = customAmountA || amountToCheckA;
+      const amountB = customAmountB || amountToCheckB;
+      if (tokenAStandard === Standard.ERC20 && (currentAllowanceA || BigInt(0)) < amountA) {
+        approveA(customAmountA);
+      } else if (tokenAStandard === Standard.ERC223 && (currentDepositA || BigInt(0)) < amountA) {
+        depositA(customAmountA);
+      }
+      if (tokenBStandard === Standard.ERC20 && (currentAllowanceB || BigInt(0)) < amountB) {
+        approveB(customAmountB);
+      } else if (tokenBStandard === Standard.ERC223 && (currentDepositB || BigInt(0)) < amountB) {
+        depositB(customAmountB);
+      }
+    },
+    [
+      approveA,
+      approveB,
+      depositA,
+      depositB,
+      tokenAStandard,
+      tokenBStandard,
+      currentAllowanceA,
+      currentAllowanceB,
+      currentDepositA,
+      currentDepositB,
+      amountToCheckA,
+      amountToCheckB,
+      // estimatedGasA,
+      // estimatedGasB,
+    ],
+  );
 
   const approveTransactionsType = useMemo(() => {
     const isERC20Transaction = approveTransactions.approveA || approveTransactions.approveB;

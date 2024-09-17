@@ -1,10 +1,10 @@
 import JSBI from "jsbi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAccount } from "wagmi";
 
 import { useAllV3TicksQuery } from "@/graphql/thegraph/__generated__/types-and-hooks";
 import { TickData, Ticks } from "@/graphql/thegraph/AllV3TicksQuery";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount, TICK_SPACINGS } from "@/sdk_hybrid/constants";
@@ -105,9 +105,9 @@ function useTicksFromSubgraph(
 
   return useAllV3TicksQuery({
     variables: { poolAddress: poolAddress?.toLowerCase(), skip },
-    skip: !poolAddress,
+    skip: !poolAddress || !apolloClient,
     pollInterval: 30000,
-    client: apolloClient,
+    client: apolloClient || chainToApolloClient[DexChainId.SEPOLIA],
   });
 }
 
@@ -153,7 +153,6 @@ export function usePoolActiveLiquidity(
   currencyA: Currency | undefined,
   currencyB: Currency | undefined,
   feeAmount: FeeAmount | undefined,
-  chainId?: DexChainId,
 ): {
   isLoading: boolean;
   error: any;
@@ -163,8 +162,7 @@ export function usePoolActiveLiquidity(
   sqrtPriceX96?: JSBI;
   data?: TickProcessed[];
 } {
-  const { chainId: accountChainId } = useAccount();
-  const defaultChainId = accountChainId ?? DexChainId.SEPOLIA;
+  const chainId = useCurrentChainId();
 
   const pool = usePool({ currencyA, currencyB, tier: feeAmount });
 
@@ -179,7 +177,7 @@ export function usePoolActiveLiquidity(
     currencyA?.wrapped,
     currencyB?.wrapped,
     feeAmount,
-    chainId ?? defaultChainId,
+    chainId,
   );
 
   return useMemo(() => {

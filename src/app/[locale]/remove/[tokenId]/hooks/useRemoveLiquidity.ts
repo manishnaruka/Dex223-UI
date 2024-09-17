@@ -1,11 +1,12 @@
 import JSBI from "jsbi";
 import { useCallback, useState } from "react";
-import { Address, encodeFunctionData, formatUnits, getAbiItem } from "viem";
+import { Address, formatUnits, getAbiItem } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { AllowanceStatus } from "@/hooks/useAllowance";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
@@ -30,6 +31,7 @@ export default function useRemoveLiquidity({
   tokenId: string | undefined;
 }) {
   const [status, setStatus] = useState(AllowanceStatus.INITIAL);
+  const [removeLiquidityHash, setRemoveLiquidityHash] = useState(undefined as string | undefined);
   const { slippage, deadline: _deadline } = useTransactionSettingsStore();
   const deadline = useTransactionDeadline(_deadline);
   const { address: accountAddress } = useAccount();
@@ -38,10 +40,11 @@ export default function useRemoveLiquidity({
   const { data: walletClient } = useWalletClient();
 
   const { addRecentTransaction } = useRecentTransactionsStore();
-  const { chainId } = useAccount();
+  const chainId = useCurrentChainId();
 
   const handleRemoveLiquidity = useCallback(
     async (tokenA: Token | null, tokenB: Token | null, position?: Position) => {
+      setRemoveLiquidityHash(undefined);
       if (
         !position ||
         !publicClient ||
@@ -104,6 +107,7 @@ export default function useRemoveLiquidity({
         });
 
         const hash = await walletClient.writeContract({ ...request, account: undefined });
+        setRemoveLiquidityHash(hash);
 
         const transaction = await publicClient.getTransaction({
           hash,
@@ -158,8 +162,7 @@ export default function useRemoveLiquidity({
         }
       } catch (e) {
         console.log(e);
-        addToast("Unexpected error, please, contact support", "error");
-        setStatus(AllowanceStatus.INITIAL);
+        setStatus(AllowanceStatus.ERROR);
       }
     },
     [
@@ -171,8 +174,14 @@ export default function useRemoveLiquidity({
       publicClient,
       walletClient,
       tokenId,
+      setRemoveLiquidityHash,
     ],
   );
 
-  return { handleRemoveLiquidity, status };
+  const resetRemoveLiquidity = () => {
+    setStatus(AllowanceStatus.INITIAL);
+    setRemoveLiquidityHash(undefined);
+  };
+
+  return { handleRemoveLiquidity, status, removeLiquidityHash, resetRemoveLiquidity };
 }

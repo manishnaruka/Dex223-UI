@@ -1,27 +1,33 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { Address, formatEther, formatGwei, formatUnits } from "viem";
+import { Address, formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
+import Alert from "@/components/atoms/Alert";
 import Dialog from "@/components/atoms/Dialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
+import { getChainSymbol } from "@/functions/getChainSymbol";
 import { AllowanceStatus } from "@/hooks/useAllowance";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke from "@/hooks/useRevoke";
 import useWithdraw from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
+
+import { RevokeDialog } from "./RevokeDialog";
 
 export const InputRange = ({
   value,
@@ -38,7 +44,10 @@ export const InputRange = ({
         step={100}
         min={0}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(+e.target.value as 0 | 100)}
-        className="w-full accent-green absolute top-2 left-0 right-0 duration-200 !bg-purple"
+        className={clsx(
+          "w-full accent-green absolute top-2 left-0 right-0 duration-200 !bg-purple",
+          value < 50 && "variant-purple",
+        )}
         type="range"
       />
       <div
@@ -78,6 +87,12 @@ function InputTotalAmount({
 
   const totalBalance = (token0Balance?.value || BigInt(0)) + (token1Balance?.value || BigInt(0));
 
+  const maxHandler = () => {
+    if (token) {
+      onChange(formatFloat(formatUnits(totalBalance, token.decimals)));
+    }
+  };
+
   return (
     <div>
       <div className="bg-primary-bg px-5 pt-5 pb-4 rounded-3">
@@ -107,10 +122,20 @@ function InputTotalAmount({
         </div>
         <div className="flex justify-between items-center text-14">
           <span className="text-secondary-text">—</span>
-          <span className="text-14 md:text-16">
-            {token &&
-              `Balance: ${formatFloat(formatUnits(totalBalance, token.decimals))} ${token.symbol}`}
-          </span>
+          <div className="flex gap-1">
+            <span className="text-12 md:text-14">
+              {token &&
+                `Balance: ${formatFloat(formatUnits(totalBalance, token.decimals))} ${token.symbol}`}
+            </span>
+            <Button
+              variant={ButtonVariant.CONTAINED}
+              size={ButtonSize.EXTRA_SMALL}
+              className="bg-tertiary-bg text-main-primary xl:px-2 hover:bg-secondary-bg"
+              onClick={maxHandler}
+            >
+              Max
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -129,17 +154,17 @@ function InputStandardAmount({
   gasPrice,
 }: {
   standard: Standard;
-  value?: number;
+  value?: number | string;
   token?: Currency;
   currentAllowance: bigint; // currentAllowance or currentDeposit
   status: AllowanceStatus;
-  revokeHandler: () => void; // onWithdraw or onWithdraw
+  revokeHandler: (customAmount?: bigint) => void; // onWithdraw or onWithdraw
   gasPrice?: bigint;
   estimatedGas: bigint | null;
 }) {
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
-  const { address, chain } = useAccount();
+  const { address } = useAccount();
   const { data: blockNumber } = useBlockNumber({ watch: true });
   const { data: tokenBalance, refetch: refetchBalance } = useBalance({
     address: token ? address : undefined,
@@ -184,102 +209,57 @@ function InputStandardAmount({
           </span>
         </div>
       </div>
-      <div className="flex justify-between items-center">
-        {token && (
-          <div className="flex items-center gap-1">
-            <Tooltip
-              iconSize={16}
-              text={standard === Standard.ERC20 ? t("approved_tooltip") : t("deposited_tooltip")}
-            />
-            <span className="text-12 text-secondary-text">
-              {standard === Standard.ERC20
-                ? t("approved", {
-                    approved: formatFloat(
-                      formatUnits(currentAllowance || BigInt(0), token.decimals),
-                    ),
-                    symbol: token.symbol,
-                  })
-                : t("deposited", {
-                    deposited: formatFloat(
-                      formatUnits(currentAllowance || BigInt(0), token.decimals),
-                    ),
-                    symbol: token.symbol,
-                  })}
-            </span>
-          </div>
-        )}
-        {!!currentAllowance ? (
-          <span
-            className="text-12 px-2 pt-[1px] pb-[2px] border border-green rounded-3 h-min cursor-pointer hover:text-green duration-200"
-            onClick={() => setIsOpenedRevokeDialog(true)}
-          >
-            {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
-          </span>
+      <div className={clsx("flex justify-between items-center h-4")}>
+        {currentAllowance > 0 ? (
+          <>
+            {token && (
+              <div className="flex items-center gap-1">
+                <Tooltip
+                  iconSize={16}
+                  text={
+                    standard === Standard.ERC20 ? t("approved_tooltip") : t("deposited_tooltip")
+                  }
+                />
+                <span className="text-12 text-secondary-text">
+                  {standard === Standard.ERC20
+                    ? t("approved", {
+                        approved: formatFloat(
+                          formatUnits(currentAllowance || BigInt(0), token.decimals),
+                        ),
+                        symbol: token.symbol,
+                      })
+                    : t("deposited", {
+                        deposited: formatFloat(
+                          formatUnits(currentAllowance || BigInt(0), token.decimals),
+                        ),
+                        symbol: token.symbol,
+                      })}
+                </span>
+              </div>
+            )}
+            {!!currentAllowance ? (
+              <span
+                className="text-12 px-2 pt-[1px] pb-[2px] border border-green rounded-3 h-min cursor-pointer hover:text-green duration-200"
+                onClick={() => setIsOpenedRevokeDialog(true)}
+              >
+                {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
+              </span>
+            ) : null}
+          </>
         ) : null}
       </div>
-      {token && (
-        <Dialog isOpen={isOpenedRevokeDialog} setIsOpen={setIsOpenedRevokeDialog}>
-          <DialogHeader
-            onClose={() => setIsOpenedRevokeDialog(false)}
-            title={standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
-          />
-          <div className="w-full md:w-[570px] px-4 pb-4 md:px-10 md:pb-10">
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 py-2 items-center">
-                <span>{`${standard === Standard.ERC20 ? t("revoke") : t("withdraw")} ${token.symbol}`}</span>
-                <Badge color="green" text={standard} />
-              </div>
-              <div className="flex items-center gap-2 justify-end">
-                {status === AllowanceStatus.PENDING && (
-                  <>
-                    <Preloader type="linear" />
-                    <span className="text-secondary-text text-14">{t("status_pending")}</span>
-                  </>
-                )}
-                {status === AllowanceStatus.LOADING && <Preloader size={20} />}
-                {(currentAllowance === BigInt(0) || status === AllowanceStatus.SUCCESS) && (
-                  <Svg className="text-green" iconName="done" size={20} />
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-between bg-secondary-bg px-5 py-3 rounded-3 text-secondary-text mt-2">
-              <span>{formatUnits(currentAllowance || BigInt(0), token.decimals)}</span>
-              <span>{t("amount", { symbol: token.symbol })}</span>
-            </div>
-            <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-5 mt-2">
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("gas_price")}</span>
-                <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("gas_limit")}</span>
-                <span>{estimatedGas?.toString()}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("fee")}</span>
-                <span>{`${gasPrice && estimatedGas ? formatFloat(formatEther(gasPrice * estimatedGas)) : ""} ${chain?.nativeCurrency.symbol}`}</span>
-              </div>
-            </div>
-            {[AllowanceStatus.INITIAL].includes(status) ? (
-              <Button onClick={revokeHandler} fullWidth>
-                {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
-              </Button>
-            ) : null}
-            {[AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
-              <Button fullWidth disabled>
-                <span className="flex items-center gap-2">
-                  <Preloader size={20} color="black" />
-                </span>
-              </Button>
-            ) : null}
-            {[AllowanceStatus.SUCCESS].includes(status) ? (
-              <Button onClick={() => setIsOpenedRevokeDialog(false)} fullWidth>
-                {t("close")}
-              </Button>
-            ) : null}
-          </div>
-        </Dialog>
+      {token && token.isToken && (
+        <RevokeDialog
+          isOpen={isOpenedRevokeDialog}
+          setIsOpen={setIsOpenedRevokeDialog}
+          standard={standard}
+          token={token}
+          status={status}
+          currentAllowance={currentAllowance}
+          revokeHandler={revokeHandler}
+          estimatedGas={estimatedGas}
+          gasPrice={gasPrice}
+        />
       )}
     </div>
   );
@@ -288,6 +268,7 @@ function InputStandardAmount({
 export default function TokenDepositCard({
   token,
   value,
+  formattedValue,
   onChange,
   isDisabled,
   isOutOfRange,
@@ -296,7 +277,8 @@ export default function TokenDepositCard({
   gasPrice,
 }: {
   token?: Currency;
-  value: string;
+  value: CurrencyAmount<Currency> | undefined;
+  formattedValue: string;
   onChange: (value: string) => void;
   isDisabled: boolean;
   isOutOfRange: boolean;
@@ -306,16 +288,11 @@ export default function TokenDepositCard({
 }) {
   const t = useTranslations("Liquidity");
 
-  const { chainId } = useAccount();
-  // TODO BigInt
-  const ERC223Value =
-    typeof value !== "undefined" && value !== ""
-      ? (parseFloat(value) / 100) * tokenStandardRatio
-      : undefined;
-  const ERC20Value =
-    typeof value !== "undefined" && value !== "" && typeof ERC223Value !== "undefined"
-      ? parseFloat(value) - ERC223Value
-      : undefined;
+  const chainId = useCurrentChainId();
+  const valueBigInt = value ? BigInt(value.quotient.toString()) : BigInt(0);
+
+  const ERC223Value = (valueBigInt * BigInt(tokenStandardRatio)) / BigInt(100);
+  const ERC20Value = valueBigInt - ERC223Value;
 
   const {
     revokeHandler,
@@ -344,6 +321,7 @@ export default function TokenDepositCard({
       </div>
     );
   }
+  if (!token) return;
   return (
     <div className="rounded-3 bg-secondary-bg p-5">
       <div className="flex items-center gap-2 mb-3">
@@ -353,12 +331,17 @@ export default function TokenDepositCard({
         </h3>
       </div>
       <div className="flex flex-col gap-5">
-        <InputTotalAmount token={token} value={value} onChange={onChange} isDisabled={isDisabled} />
+        <InputTotalAmount
+          token={token}
+          value={formattedValue}
+          onChange={onChange}
+          isDisabled={isDisabled}
+        />
         <InputRange value={tokenStandardRatio} onChange={setTokenStandardRatio} />
         <div className="flex flex-col md:flex-row justify-between gap-4 w-full">
           <InputStandardAmount
             standard={Standard.ERC20}
-            value={ERC20Value}
+            value={formatUnits(ERC20Value, token.decimals)}
             currentAllowance={currentAllowance || BigInt(0)}
             token={token}
             revokeHandler={revokeHandler}
@@ -368,7 +351,7 @@ export default function TokenDepositCard({
           />
           <InputStandardAmount
             standard={Standard.ERC223}
-            value={ERC223Value}
+            value={formatUnits(ERC223Value, token.decimals)}
             token={token}
             currentAllowance={currentDeposit || BigInt(0)}
             revokeHandler={withdrawHandler}

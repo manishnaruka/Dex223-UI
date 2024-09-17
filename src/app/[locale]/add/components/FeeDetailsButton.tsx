@@ -1,13 +1,14 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { formatEther, formatGwei, formatUnits } from "viem";
-import { useAccount } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
+import { getChainSymbol } from "@/functions/getChainSymbol";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Standard } from "@/sdk_hybrid/standard";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 
@@ -27,7 +28,7 @@ function isDefinedTransactionItem(item: {
 export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
   const t = useTranslations("Liquidity");
   const [isOpen, setIsOpen] = useState(false);
-  const { chain } = useAccount();
+  const chainId = useCurrentChainId();
 
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
 
@@ -55,6 +56,7 @@ export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
 
   const totalGasLimit = approveTotalGasLimit + estimatedMintGas;
 
+  const chainSymbol = getChainSymbol(chainId);
   return (
     <div className="w-full md:w-auto">
       <Button
@@ -88,8 +90,8 @@ export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
                   </span>
                   <Badge color="green" text={standard} />
                 </div>
-                <div className="flex justify-between bg-secondary-bg px-5 py-3 rounded-3 text-secondary-text mt-2">
-                  <span>
+                <div className="flex justify-between bg-secondary-bg px-5 py-3 rounded-3 text-secondary-text mt-2 border border-secondary-border">
+                  <span className="text-primary-text">
                     {formatUnits(transaction.amount || BigInt(0), transaction.token.decimals)}
                   </span>
                   <span>{t("fee_details_amount", { symbol: transaction.token.symbol })}</span>
@@ -105,7 +107,7 @@ export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-14 text-secondary-text">{t("fee")}</span>
-                    <span>{`${gasPrice && transaction.estimatedGas ? formatFloat(formatEther(gasPrice * transaction.estimatedGas)) : ""} ${chain?.nativeCurrency.symbol}`}</span>
+                    <span>{`${gasPrice && transaction.estimatedGas ? formatFloat(formatEther(gasPrice * transaction.estimatedGas)) : ""} ${chainSymbol}`}</span>
                   </div>
                 </div>
               </div>
@@ -133,7 +135,7 @@ export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-14 text-secondary-text">{t("fee")}</span>
-                  <span>{`${gasPrice ? formatFloat(formatEther(gasPrice * estimatedMintGas)) : ""} ${chain?.nativeCurrency.symbol}`}</span>
+                  <span>{`${gasPrice ? formatFloat(formatEther(gasPrice * estimatedMintGas)) : ""} ${chainSymbol}`}</span>
                 </div>
               </div>
             </div>
@@ -141,7 +143,7 @@ export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
 
           <div className="flex gap-1 justify-center items-center border-t pt-4 border-secondary-border">
             <span className="text-secondary-text">{t("total_fee")}</span>
-            <span className="font-bold">{`${gasPrice && totalGasLimit ? formatFloat(formatEther(gasPrice * totalGasLimit)) : ""} ${chain?.nativeCurrency.symbol}`}</span>
+            <span className="font-bold">{`${gasPrice && totalGasLimit ? formatFloat(formatEther(gasPrice * totalGasLimit)) : ""} ${chainSymbol}`}</span>
           </div>
         </div>
       </DrawerDialog>
