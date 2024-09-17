@@ -212,7 +212,9 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
                   />
                   <img
                     key={address}
-                    className={clsx("w-10 h-10 m-h-10 m-w-10 rounded-2 border-2 border-primary-bg")}
+                    className={clsx(
+                      "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
+                    )}
                     src={toDataUrl(address)}
                     alt={address}
                   />
@@ -220,7 +222,7 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
                     <span className="font-medium">
                       {truncateMiddle(address || "", { charsFromStart: 6, charsFromEnd: 6 })}
                     </span>
-                    <span className="text-secondary-text text-14">$22.23</span>
+                    <span className="text-secondary-text text-14">$ —</span>
                   </div>
                 </div>
               ))}
@@ -248,7 +250,7 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
                     <img
                       key={address}
                       className={clsx(
-                        "w-10 h-10 m-h-10 m-w-10 rounded-2 border-2 border-primary-bg",
+                        "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
                       )}
                       src={toDataUrl(address)}
                       alt={address}
@@ -257,7 +259,7 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
                       <span className="font-medium">
                         {truncateMiddle(address || "", { charsFromStart: 6, charsFromEnd: 6 })}
                       </span>
-                      <span className="text-secondary-text text-14">$22.23</span>
+                      <span className="text-secondary-text text-14">$ —</span>
                     </div>
                   </div>
                   {isConnectedWallet ? (
@@ -307,17 +309,17 @@ export function Portfolio() {
   const trigger = useMemo(
     () => (
       <SelectButton
-        className="py-1 xl:py-2 text-14 xl:text-16 w-full md:w-full flex items-center justify-center"
+        className="py-2 text-16 w-full md:w-full flex items-center justify-between lg:justify-center lg:order-[-1]"
         isOpen={isOpened}
         onClick={() => setIsOpened(!isOpened)}
       >
         {wallets.length ? (
-          <div className="flex ">
+          <div className="flex items-center">
             {wallets.slice(0, 3).map(({ address }, index) => (
               <img
                 key={address}
                 className={clsx(
-                  "w-6 h-6 m-h-6 m-w-6 rounded-1 border-2 border-primary-bg",
+                  "w-6 h-6 min-h-6 min-w-6 rounded-1 border-2 border-primary-bg",
                   index > 0 && "ml-[-8px]",
                 )}
                 src={toDataUrl(address)}
@@ -336,10 +338,16 @@ export function Portfolio() {
 
   return (
     <Container>
-      <div className="p-10 flex flex-col">
-        <div className="flex w-full justify-between">
-          <h1 className="text-40 font-medium">{t("title")}</h1>
-          <div className="flex gap-3">
+      <div className="p-4 lg:p-10 flex flex-col max-w-[100dvw]">
+        <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
+          <h1 className="text-24 lg:text-40 font-medium">{t("title")}</h1>
+          <div className="flex flex-col lg:flex-row gap-2 lg:gap-3">
+            <SearchInput
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder={t("search_placeholder")}
+              className="bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]"
+            />
             <Popover
               isOpened={isOpened}
               setIsOpened={setIsOpened}
@@ -348,23 +356,17 @@ export function Portfolio() {
             >
               <ManageWallets setIsOpened={setIsOpened} />
             </Popover>
-            <SearchInput
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder={t("search_placeholder")}
-              className="bg-primary-bg w-[480px]"
-            />
           </div>
         </div>
-        <div className="mt-5 flex flex-wrap rounded-3 p-5 bg-primary-bg gap-3">
+        <div className="mt-5 flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
           {activeAddresses.length ? (
-            <>
-              <div className="flex">
+            <div className="flex gap-3 lg:gap-0 flex-col lg:flex-row w-full overflow-hidden">
+              <div className="flex px-4 lg:px-5">
                 {activeAddresses.slice(0, 3).map((ad, index) => (
                   <img
                     key={ad}
                     className={clsx(
-                      "w-10 h-10 m-h-10 m-w-10 rounded-2 border-2 border-primary-bg",
+                      "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
                       index > 0 && "ml-[-12px]",
                     )}
                     src={toDataUrl(ad)}
@@ -372,31 +374,36 @@ export function Portfolio() {
                   />
                 ))}
                 {activeAddresses.length > 3 && (
-                  <div className="w-10 h-10 m-h-10 m-w-10 bg-tertiary-bg rounded-2 border-2 border-primary-bg ml-[-12px] flex justify-center items-center">{`+${activeAddresses.length - 3}`}</div>
+                  <div className="w-10 h-10 min-h-10 min-w-10 bg-tertiary-bg rounded-2 border-2 border-primary-bg ml-[-12px] flex justify-center items-center">{`+${activeAddresses.length - 3}`}</div>
                 )}
               </div>
-              {activeAddresses.map((ad) => (
-                <div key={ad} className="flex items-center gap-1 p-r pl-3 bg-tertiary-bg rounded-2">
-                  <a
-                    className="flex gap-2 cursor-pointer hover:text-green-hover"
-                    target="_blank"
-                    href={getExplorerLink(ExplorerLinkType.ADDRESS, ad, chainId)}
+              <div className="flex gap-3 w-full overflow-x-auto px-4 lg:pr-5 lg:pl-0 lg:flex-wrap pb-4 lg:pb-0">
+                {activeAddresses.map((ad) => (
+                  <div
+                    key={ad}
+                    className="flex items-center gap-1 p-r pl-3 bg-tertiary-bg rounded-2"
                   >
-                    {truncateMiddle(ad || "", { charsFromStart: 5, charsFromEnd: 3 })}
-                    <Svg iconName="forward" />
-                  </a>
-                  <IconButton
-                    buttonSize={IconButtonSize.SMALL}
-                    iconName="copy"
-                    iconSize={IconSize.REGULAR}
-                    onClick={async () => {
-                      await copyToClipboard(ad);
-                      addToast(tToast("successfully_copied"));
-                    }}
-                  />
-                </div>
-              ))}
-            </>
+                    <a
+                      className="flex gap-2 cursor-pointer hover:text-green-hover"
+                      target="_blank"
+                      href={getExplorerLink(ExplorerLinkType.ADDRESS, ad, chainId)}
+                    >
+                      {truncateMiddle(ad || "", { charsFromStart: 5, charsFromEnd: 3 })}
+                      <Svg iconName="forward" />
+                    </a>
+                    <IconButton
+                      buttonSize={IconButtonSize.SMALL}
+                      iconName="copy"
+                      iconSize={IconSize.REGULAR}
+                      onClick={async () => {
+                        await copyToClipboard(ad);
+                        addToast(tToast("successfully_copied"));
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="flex items-center gap-3">
               <EmptyStateIcon iconName="wallet" size={40} />
@@ -406,14 +413,14 @@ export function Portfolio() {
             </div>
           )}
         </div>
-        <div className="mt-5 w-full grid grid-cols-5 bg-primary-bg p-1 gap-1 rounded-3">
+        <div className="mt-5 w-full flex lg:grid lg:grid-cols-5 bg-primary-bg p-1 gap-1 rounded-3 overflow-x-auto">
           <TabButton
             inactiveBackground="bg-secondary-bg"
             size={48}
             active={activeTab === ActiveTab.balances}
             onClick={() => setActiveTab(ActiveTab.balances)}
           >
-            Balances
+            <span className="text-nowrap px-4">Balances</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -421,7 +428,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.margin}
             onClick={() => setActiveTab(ActiveTab.margin)}
           >
-            Margin positions
+            <span className="text-nowrap px-4">Margin positions</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -429,7 +436,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.lending}
             onClick={() => setActiveTab(ActiveTab.lending)}
           >
-            Lending orders
+            <span className="text-nowrap px-4">Lending orders</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -437,7 +444,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.liquidity}
             onClick={() => setActiveTab(ActiveTab.liquidity)}
           >
-            Liquidity positions
+            <span className="text-nowrap px-4">Liquidity positions</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -445,7 +452,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.deposited}
             onClick={() => setActiveTab(ActiveTab.deposited)}
           >
-            Deposited to contract
+            <span className="text-nowrap px-4">Deposited to contract</span>
           </TabButton>
         </div>
         {activeTab === ActiveTab.balances ? (

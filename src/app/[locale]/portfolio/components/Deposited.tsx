@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import React from "react";
 import { Address, formatUnits } from "viem";
 import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
 
@@ -29,6 +30,24 @@ import { Standard } from "@/sdk_hybrid/standard";
 import { RevokeDialog } from "../../add/components/DepositAmounts/RevokeDialog";
 import { useActiveWalletsDeposites } from "../stores/deposites.hooks";
 import { WalletDeposite } from "../stores/useWalletsDeposites";
+
+const filterTable = ({
+  searchValue,
+  value: { token },
+}: {
+  searchValue: string;
+  value: {
+    token: Token;
+  };
+}) => {
+  if (!searchValue) return true;
+  if (token.address0 === searchValue) return true;
+  if (token.address1 === searchValue) return true;
+  if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
+  if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
+
+  return false;
+};
 
 const DepositedTokenWithdrawDialog = ({
   isOpen,
@@ -149,30 +168,42 @@ export const Deposited = () => {
 
   const { isLoading, deposites } = useActiveWalletsDeposites();
 
-  const depositesCount = deposites.reduce((acc, { deposites }) => acc + deposites.length, 0);
+  const currentTableData = deposites
+    .reduce(
+      (acc, walletDeposites) => {
+        const deposites: (WalletDeposite & { walletAddress: Address })[] =
+          walletDeposites.deposites.map((deposite) => ({
+            walletAddress: walletDeposites.address,
+            ...deposite,
+          }));
+        return [...acc, ...deposites];
+      },
+      [] as (WalletDeposite & { walletAddress: Address })[],
+    )
+    .filter((value) => filterTable({ searchValue, value }));
 
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-5 py-6 w-[50%]">
+        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
           <div className="flex flex-col ">
             <div className="flex items-center gap-1">
-              <span>Deposited to contract</span>
+              <span className="text-14 lg:text-16">Deposited to contract</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
-            <span className="text-32 font-medium">$ —</span>
+            <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-10 flex w-full justify-between">
-        <h1 className="text-32 font-medium">{t("deposited_title")}</h1>
-        <div className="flex gap-3">
+      <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
+        <h1 className="text-18 lg:text-32 font-medium">{t("deposited_title")}</h1>
+        <div className="flex flex-col lg:flex-row gap-3">
           <SearchInput
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t("balances_search_placeholder")}
-            className="bg-primary-bg w-[480px]"
+            className="bg-primary-bg lg:w-[480px]"
           />
         </div>
       </div>
@@ -182,35 +213,38 @@ export const Deposited = () => {
           <div className="flex justify-center items-center h-full min-h-[550px]">
             <Preloader type="awaiting" size={48} />
           </div>
-        ) : depositesCount ? (
+        ) : currentTableData.length ? (
           <div>
             <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-              <div className="pl-5 h-[60px] flex items-center">Token</div>
-              <div className="h-[60px] flex items-center gap-2">
+              <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
+              <div className="text-secondary-text h-[60px] flex items-center gap-2">
                 Amount <Badge color="green" text="ERC-223" />
               </div>
-              <div className="h-[60px] flex items-center">Amount, $</div>
-              <div className="h-[60px] flex items-center justify-end pr-6">Details</div>
-              <div className="pr-5 h-[60px] flex items-center">Action / Owner</div>
-              {deposites.map((walletDeposites, index: number) => {
+              <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
+              <div className="text-secondary-text h-[60px] flex items-center justify-end pr-6">
+                Details
+              </div>
+              <div className="text-secondary-text pr-5 h-[60px] flex items-center">
+                Action / Owner
+              </div>
+              {currentTableData.map((deposite, index) => {
                 return (
-                  <>
-                    {walletDeposites.deposites.map((deposite, index) => {
-                      return (
-                        <DepositedTokenTableItem
-                          key={`${deposite.contractAddress}`}
-                          deposite={deposite}
-                          walletAddress={walletDeposites.address}
-                          onDetailsClick={() => {
-                            setTokenForPortfolio(deposite.token);
-                          }}
-                        />
-                      );
-                    })}
-                  </>
+                  <DepositedTokenTableItem
+                    key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
+                    deposite={deposite}
+                    walletAddress={deposite.walletAddress}
+                    onDetailsClick={() => {
+                      setTokenForPortfolio(deposite.token);
+                    }}
+                  />
                 );
               })}
             </div>
+          </div>
+        ) : Boolean(searchValue) ? (
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
+            <EmptyStateIcon iconName="search" />
+            <span className="text-secondary-text">Deposite not found</span>
           </div>
         ) : (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">

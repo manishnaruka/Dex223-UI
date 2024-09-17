@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
@@ -91,33 +91,34 @@ export const LiquidityPositions = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-5 py-6 w-[50%]">
+        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
           <div className="flex flex-col ">
             <div className="flex items-center gap-1">
-              <span>Provided liquidity balance</span>
+              <span className="text-14 lg:text-16">Provided liquidity balance</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
-            <span className="text-32 font-medium">$ —</span>
+            <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-10 flex w-full justify-between">
-        <h1 className="text-32 font-medium">{t("liquidity_title")}</h1>
-        <div className="flex gap-3">
-          <Link href="/pools/positions">
-            <Button>
+      <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
+        <h1 className="text-18 lg:text-32 font-medium">{t("liquidity_title")}</h1>
+        <div className="flex flex-col lg:flex-row gap-3">
+          <Link href="/pools/positions" className="w-full lg:w-auto">
+            <Button fullWidth>
               <span className="flex items-center gap-2 w-max">
                 Liquidity positions
                 <Svg iconName="forward" />
               </span>
             </Button>
           </Link>
+
           <SearchInput
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t("liquidity_search_placeholder")}
-            className="bg-primary-bg w-[480px]"
+            className="bg-primary-bg lg:w-[480px]"
           />
         </div>
       </div>
@@ -129,19 +130,21 @@ export const LiquidityPositions = () => {
           </div>
         ) : currentTableData.length ? (
           <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-            <div className="pl-5 h-[60px] flex items-center">ID</div>
-            <div className="h-[60px] flex items-center gap-2">Amount tokens</div>
-            <div className="h-[60px] flex items-center">Amount, $</div>
-            <div className="h-[60px] flex items-center">Unclaimed fees</div>
-            <div className="pr-5 h-[60px] flex items-center">Status</div>
+            <div className="text-secondary-text pl-5 h-[60px] flex items-center">ID</div>
+            <div className="text-secondary-text h-[60px] flex items-center gap-2">
+              Amount tokens
+            </div>
+            <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
+            <div className="text-secondary-text h-[60px] flex items-center">Unclaimed fees</div>
+            <div className="text-secondary-text pr-5 h-[60px] flex items-center">Status</div>
 
             {currentTableData?.map(({ positions }, index: number) => {
               return (
-                <>
+                <React.Fragment key={index}>
                   {positions.map((position) => (
                     <PositionTableItem key={position.tokenId} positionInfo={position} />
                   ))}
-                </>
+                </React.Fragment>
               );
             })}
           </div>

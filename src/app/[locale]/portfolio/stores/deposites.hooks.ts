@@ -24,7 +24,6 @@ const getWalletDeposites = async (
       functionName: "depositedTokens",
       args: [walletAddress, address1],
     }));
-
     return [...acc, ...contractCalls];
   }, [] as any[]);
 
@@ -78,6 +77,7 @@ export const useActiveWalletsDeposites = () => {
   }, [chainId]);
 
   useEffect(() => {
+    if (!tokens.length) return;
     (async () => {
       setIsLoading(true);
       const walletsDeposites = await Promise.all(

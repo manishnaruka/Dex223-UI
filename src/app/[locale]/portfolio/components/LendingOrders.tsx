@@ -10,7 +10,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonColor } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
 export const LendingOrders = () => {
   const t = useTranslations("Portfolio");
@@ -22,35 +22,43 @@ export const LendingOrders = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-5 py-6 w-[50%]">
-          <div className="flex flex-col ">
+        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
+          <div className="flex flex-col">
             <div className="flex items-center gap-1">
-              <span>Lending order balance</span>
+              <span className="text-14 lg:text-16">Lending order balance</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
-            <span className="text-32 font-medium">$ —</span>
+            <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
-          <Button colorScheme={ButtonColor.LIGHT_GREEN}>Withdraw</Button>
+          <Button
+            colorScheme={ButtonColor.LIGHT_GREEN}
+            mobileSize={ButtonSize.MEDIUM}
+            className="px-4 lg:px-6"
+          >
+            Withdraw
+          </Button>
         </div>
       </div>
 
-      <div className="mt-10 flex w-full justify-between">
-        <h1 className="text-32 font-medium">{t("lending_title")}</h1>
-        <div className="flex gap-3">
+      <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
+        <h1 className="text-18 lg:text-32 font-medium">{t("lending_title")}</h1>
+        <div className="flex flex-col lg:flex-row gap-3">
           <Button>
             <span className="flex items-center gap-2 w-max">
               Lending orders
               <Svg iconName="forward" />
             </span>
           </Button>
+
           <SearchInput
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t("lending_search_placeholder")}
-            className="bg-primary-bg w-[480px]"
+            className="bg-primary-bg lg:w-[480px]"
           />
         </div>
       </div>
+
       <div className="mt-5 min-h-[640px] mb-5 w-full">
         {loading ? (
           <div className="flex justify-center items-center h-full min-h-[550px]">
