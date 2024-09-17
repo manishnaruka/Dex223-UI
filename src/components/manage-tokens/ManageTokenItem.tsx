@@ -11,13 +11,15 @@ import { db } from "@/db/db";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 
+//TODO: change manage token item for Native currency, 16.09.2024
 export default function ManageTokenItem({
   token,
   setTokenForPortfolio,
 }: {
-  token: Token;
+  token: Currency;
   setTokenForPortfolio: (token: Token) => void;
 }) {
   const t = useTranslations("ManageTokens");
@@ -38,7 +40,7 @@ export default function ManageTokenItem({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {token.lists?.includes(`custom-${chainId}`) && (
+          {token.wrapped.lists?.includes(`custom-${chainId}`) && (
             <div className="group-hover:opacity-100 opacity-0 duration-200">
               <IconButton
                 variant={IconButtonVariant.DELETE}
@@ -94,7 +96,7 @@ export default function ManageTokenItem({
                           if (currentCustomTokens) {
                             await (db.tokenLists as any).update(`custom-${chainId}`, {
                               "list.tokens": currentCustomTokens.list.tokens.filter(
-                                (t) => t.address0 !== token.address0,
+                                (t) => t.address0 !== token.wrapped.address0,
                               ),
                             });
                           }
@@ -110,11 +112,13 @@ export default function ManageTokenItem({
             </div>
           )}
           <span className="flex gap-0.5 items-center text-secondary-text text-14">
-            {token.lists?.length || 1}
+            {token.wrapped.lists?.length || 1}
             <Svg className="text-tertiary-text" iconName="list" />
           </span>
 
-          <IconButton onClick={() => setTokenForPortfolio(token)} iconName="details" />
+          {token.isToken && (
+            <IconButton onClick={() => setTokenForPortfolio(token)} iconName="details" />
+          )}
         </div>
       </div>
     </div>

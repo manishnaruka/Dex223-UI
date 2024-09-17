@@ -1,5 +1,6 @@
 import JSBI from "jsbi";
 
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { encodeSqrtRatioX96 } from "@/sdk_hybrid/utils/encodeSqrtRatioX96";
 import { TickMath } from "@/sdk_hybrid/utils/tickMath";
 
@@ -33,15 +34,19 @@ export function tickToPrice(
  * @param price for which to return the closest tick that represents a price less than or equal to the input price,
  * i.e. the price of the returned tick is less than or equal to the input price
  */
-export function priceToClosestTick(price: Price<Token, Token>): number {
-  const sorted = price.baseCurrency.sortsBefore(price.quoteCurrency);
+export function priceToClosestTick(price: Price<Currency, Currency>): number {
+  const sorted = price.baseCurrency.wrapped.sortsBefore(price.quoteCurrency.wrapped);
 
   const sqrtRatioX96 = sorted
     ? encodeSqrtRatioX96(price.numerator, price.denominator)
     : encodeSqrtRatioX96(price.denominator, price.numerator);
 
   let tick = TickMath.getTickAtSqrtRatio(sqrtRatioX96);
-  const nextTickPrice = tickToPrice(price.baseCurrency, price.quoteCurrency, tick + 1);
+  const nextTickPrice = tickToPrice(
+    price.baseCurrency.wrapped,
+    price.quoteCurrency.wrapped,
+    tick + 1,
+  );
   if (sorted) {
     if (!price.lessThan(nextTickPrice)) {
       tick++;

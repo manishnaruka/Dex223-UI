@@ -13,6 +13,7 @@ import { FACTORY_ABI } from "@/config/abis/factory";
 import { config } from "@/config/wagmi/config";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { FeeAmount } from "@/sdk_hybrid/constants";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 import { usePoolAddresses } from "@/stores/usePoolsStore";
 
@@ -124,8 +125,8 @@ export const useComputePoolAddressDex = ({
   tokenB,
   tier,
 }: {
-  tokenA?: Token;
-  tokenB?: Token;
+  tokenA?: Currency;
+  tokenB?: Currency;
   tier?: FeeAmount;
 }) => {
   const chainId = useCurrentChainId();
@@ -136,8 +137,8 @@ export const useComputePoolAddressDex = ({
       return;
     }
     return getPoolAddressKey({
-      addressTokenA: tokenA?.address0,
-      addressTokenB: tokenB?.address0,
+      addressTokenA: tokenA?.wrapped.address0,
+      addressTokenB: tokenB?.wrapped.address0,
       tier,
       chainId,
     });
@@ -153,8 +154,8 @@ export const useComputePoolAddressDex = ({
       return;
     }
     const key = getPoolAddressKey({
-      addressTokenA: tokenA.address0,
-      addressTokenB: tokenB.address0,
+      addressTokenA: tokenA.wrapped.address0,
+      addressTokenB: tokenB.wrapped.address0,
       tier,
       chainId,
     });
@@ -163,8 +164,8 @@ export const useComputePoolAddressDex = ({
       isLoading: true,
     });
     computePoolAddressDex({
-      addressTokenA: tokenA.address0,
-      addressTokenB: tokenB.address0,
+      addressTokenA: tokenA.wrapped.address0,
+      addressTokenB: tokenB.wrapped.address0,
       tier,
       chainId,
     }).then((address) => {
@@ -197,8 +198,8 @@ export const useComputePoolAddressesDex = (
         return;
       }
       return getPoolAddressKey({
-        addressTokenA: tokenA?.address0,
-        addressTokenB: tokenB?.address0,
+        addressTokenA: tokenA?.wrapped.address0,
+        addressTokenB: tokenB?.wrapped.address0,
         tier,
         chainId,
       });
@@ -216,8 +217,8 @@ export const useComputePoolAddressesDex = (
         return;
       }
       const key = getPoolAddressKey({
-        addressTokenA: tokenA.address0,
-        addressTokenB: tokenB.address0,
+        addressTokenA: tokenA.wrapped.address0,
+        addressTokenB: tokenB.wrapped.address0,
         tier,
         chainId,
       });
@@ -226,8 +227,8 @@ export const useComputePoolAddressesDex = (
         isLoading: true,
       });
       computePoolAddressDex({
-        addressTokenA: tokenA.address0,
-        addressTokenB: tokenB.address0,
+        addressTokenA: tokenA.wrapped.address0,
+        addressTokenB: tokenB.wrapped.address0,
         tier,
         chainId,
       }).then((address) => {

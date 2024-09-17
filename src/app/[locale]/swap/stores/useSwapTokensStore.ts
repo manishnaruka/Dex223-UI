@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Standard } from "@/sdk_hybrid/standard";
 
 interface SwapTokensStore {
-  tokenA: Token | undefined;
-  tokenB: Token | undefined;
-  setTokenA: (token: Token | undefined) => void;
-  setTokenB: (token: Token | undefined) => void;
+  tokenA: Currency | undefined;
+  tokenB: Currency | undefined;
+  setTokenA: (token: Currency | undefined) => void;
+  setTokenB: (token: Currency | undefined) => void;
   tokenAStandard: Standard;
   tokenBStandard: Standard;
   setTokenAStandard: (address: Standard) => void;

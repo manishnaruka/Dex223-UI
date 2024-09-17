@@ -13,10 +13,10 @@ export default function useTokensToList() {
     }
 
     const isFirstTokenInList = autoListing.tokens.find((l) => {
-      return l.address0.toLowerCase() === tokenA?.address0.toLowerCase();
+      return l.address0.toLowerCase() === tokenA?.wrapped.address0.toLowerCase();
     });
     const isSecondTokenInList = autoListing.tokens.find((l) => {
-      return l.address0.toLowerCase() === tokenB?.address0.toLowerCase();
+      return l.address0.toLowerCase() === tokenB?.wrapped.address0.toLowerCase();
     });
 
     if (isFirstTokenInList && isSecondTokenInList) {

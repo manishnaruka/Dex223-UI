@@ -29,8 +29,8 @@ export const DepositAmounts = ({
 }: {
   parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
   currencies: {
-    CURRENCY_A: Token | undefined;
-    CURRENCY_B: Token | undefined;
+    CURRENCY_A: Currency | undefined;
+    CURRENCY_B: Currency | undefined;
   };
   depositADisabled: boolean;
   depositBDisabled: boolean;

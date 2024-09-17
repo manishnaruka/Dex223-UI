@@ -9,7 +9,7 @@ import {
   getAbiItem,
   parseUnits,
 } from "viem";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, useBalance, usePublicClient, useWalletClient } from "wagmi";
 
 import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -44,6 +44,9 @@ import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount } from "@/sdk_hybrid/constants";
+import { Currency } from "@/sdk_hybrid/entities/currency";
+import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
+import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 import { ONE } from "@/sdk_hybrid/internalConstants";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
@@ -78,7 +81,7 @@ export function useSwapParams() {
 
   const { typedValue } = useSwapAmountsStore();
 
-  const { deadline: _deadline } = useSwapSettingsStore();
+  const { slippage, deadline: _deadline } = useSwapSettingsStore();
   const deadline = useTransactionDeadline(_deadline);
 
   const poolAddress = useComputePoolAddressDex({
@@ -87,6 +90,19 @@ export function useSwapParams() {
     tier: FeeAmount.MEDIUM,
   });
 
+  const { trade, isLoading: isLoadingTrade } = useTrade();
+
+  const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
+    return trade?.outputAmount;
+  }, [trade?.outputAmount]);
+
+  const balance = useBalance({
+    token: tokenB?.wrapped.address0,
+    address,
+  });
+
+  console.log(balance.data);
+
   const swapParams = useMemo(() => {
     if (
       !tokenA ||
@@ -94,20 +110,22 @@ export function useSwapParams() {
       !chainId ||
       !DEX_SUPPORTED_CHAINS.includes(chainId) ||
       !poolAddress ||
-      !typedValue
+      !typedValue ||
+      !trade ||
+      !address
     ) {
       return null;
     }
 
-    const zeroForOne = tokenA.address0 < tokenB.address0;
+    const zeroForOne = tokenA.wrapped.address0 < tokenB.wrapped.address0;
 
     const sqrtPriceLimitX96 = zeroForOne
       ? JSBI.add(TickMath.MIN_SQRT_RATIO, ONE)
       : JSBI.subtract(TickMath.MAX_SQRT_RATIO, ONE);
 
     const routerParams = {
-      tokenIn: tokenA.address0,
-      tokenOut: tokenB.address0,
+      tokenIn: tokenA.wrapped.address0,
+      tokenOut: tokenB.wrapped.address0,
       fee: FeeAmount.MEDIUM,
       recipient: address as Address,
       deadline,
@@ -117,13 +135,69 @@ export function useSwapParams() {
       prefer223Out: tokenBStandard === Standard.ERC223,
     };
 
-    if (tokenAStandard === Standard.ERC20) {
+    if (tokenA.isNative) {
       return {
         address: ROUTER_ADDRESS[chainId as DexChainId],
         abi: ROUTER_ABI,
         functionName: "exactInputSingle" as "exactInputSingle",
         args: [routerParams],
+        value: parseUnits(typedValue, tokenA.decimals),
       };
+    }
+
+    if (tokenAStandard === Standard.ERC20) {
+      const _params = {
+        abi: ROUTER_ABI,
+        functionName: "exactInputSingle" as "exactInputSingle",
+        args: [routerParams],
+      };
+
+      if (tokenB.isNative) {
+        const encodedSwapParams = encodeFunctionData({
+          abi: ROUTER_ABI,
+          functionName: "exactInput",
+          args: [
+            {
+              path: encodeAbiParameters(
+                [{ name: "path", type: "bytes" }],
+                [encodePacked(["address", "address"], [tokenA.address0, tokenB.wrapped.address0])],
+              ),
+              deadline,
+              recipient: address,
+              amountOutMinimum: BigInt(0),
+              amountIn: parseUnits(typedValue, tokenA.decimals),
+              prefer223Out: false,
+            },
+          ],
+        });
+        const encodedUnwrapParams = encodeFunctionData({
+          abi: ROUTER_ABI,
+          functionName: "unwrapWETH9",
+          args: [
+            BigInt(
+              trade
+                .minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
+                .quotient.toString(),
+            ),
+            address,
+          ],
+        });
+        //
+        // return {
+        //   address: ROUTER_ADDRESS[chainId],
+        //   abi: ROUTER_ABI,
+        //   functionName: "unwrapWETH9",
+        //   args: [parseUnits("0.0001", 18), address],
+        // };
+        return {
+          address: ROUTER_ADDRESS[chainId],
+          abi: ROUTER_ABI,
+          functionName: "multicall",
+          args: [[encodedSwapParams]],
+        };
+      } else {
+        return { ..._params, address: ROUTER_ADDRESS[chainId as DexChainId] };
+      }
     }
 
     if (tokenAStandard === Standard.ERC223) {
@@ -151,7 +225,7 @@ export function useSwapParams() {
                 [
                   encodePacked(
                     ["address", "uint24", "address"],
-                    [tokenA.address0, FeeAmount.MEDIUM, tokenB.address0],
+                    [tokenA.address0, FeeAmount.MEDIUM, tokenB.wrapped.address0],
                   ),
                   "0x0000000000000000000000000000000000000000",
                 ],
@@ -170,6 +244,7 @@ export function useSwapParams() {
     tokenAStandard,
     tokenB,
     tokenBStandard,
+    trade,
     typedValue,
   ]);
 
@@ -188,7 +263,7 @@ export function useSwapEstimatedGas() {
   const { isAllowed: isAllowedA } = useStoreAllowance({
     token: tokenA,
     contractAddress: ROUTER_ADDRESS[chainId],
-    amountToCheck: parseUnits(typedValue, tokenA?.decimals || 18),
+    amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
   useDeepEffect(() => {
@@ -258,7 +333,7 @@ export default function useSwap() {
   } = useStoreAllowance({
     token: tokenA,
     contractAddress: ROUTER_ADDRESS[chainId],
-    amountToCheck: parseUnits(typedValue, tokenA?.decimals || 18),
+    amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
   const output = useMemo(() => {
@@ -285,11 +360,11 @@ export default function useSwap() {
   }, [confirmDialogOpened, setSwapStatus, swapStatus]);
 
   const handleSwap = useCallback(async () => {
-    if (!publicClient) {
+    if (!publicClient || !tokenA) {
       return;
     }
 
-    if (!isAllowedA && tokenAStandard === Standard.ERC20) {
+    if (!isAllowedA && tokenAStandard === Standard.ERC20 && tokenA.isToken) {
       openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
       setSwapStatus(SwapStatus.PENDING_APPROVE);
@@ -379,6 +454,8 @@ export default function useSwap() {
           break;
       }
     }
+
+    console.log(swapParams);
 
     try {
       const estimatedGas = await publicClient.estimateContractGas({

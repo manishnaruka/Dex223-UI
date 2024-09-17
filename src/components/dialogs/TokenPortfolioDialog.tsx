@@ -18,6 +18,7 @@ import { copyToClipboard } from "@/functions/copyToClipboard";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 
 function TokenListInfo({ listId }: { listId: TokenListId }) {

@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
@@ -22,6 +21,7 @@ import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/u
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/navigation";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";
@@ -47,7 +47,7 @@ export default function AddPoolPage() {
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
   const handlePick = useCallback(
-    (token: Token) => {
+    (token: Currency) => {
       if (currentlyPicking === "tokenA") {
         if (token === tokenB) {
           setTokenB(tokenA);

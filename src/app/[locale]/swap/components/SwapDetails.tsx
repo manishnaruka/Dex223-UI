@@ -14,7 +14,6 @@ import { formatFloat } from "@/functions/formatFloat";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { Token } from "@/sdk_hybrid/entities/token";
 
 function SwapDetailsRow({
   title,
@@ -41,8 +40,8 @@ export default function SwapDetails({
   tokenB,
 }: {
   trade: TokenTrade;
-  tokenA: Token;
-  tokenB: Token;
+  tokenA: Currency;
+  tokenB: Currency;
 }) {
   const t = useTranslations("Swap");
   const { isDetailsExpanded, setIsDetailsExpanded, setIsPriceInverted, isPriceInverted } =

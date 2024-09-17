@@ -55,7 +55,7 @@ export default function MintTestTokensDialog() {
   const { data: balance, refetch } = useReadContract({
     abi: ERC20_ABI,
     functionName: "balanceOf",
-    address: tokenToMint?.address0! as Address,
+    address: tokenToMint?.wrapped.address0! as Address,
     chainId,
     args: [address as Address],
     query: {
@@ -85,7 +85,7 @@ export default function MintTestTokensDialog() {
       try {
         const hash = await walletClient.writeContract({
           abi: ERC223_ABI,
-          address: tokenToMint?.address0 as Address,
+          address: tokenToMint?.wrapped.address0 as Address,
           functionName: "mint",
           args: [address, parseUnits(amountToMint, tokenToMint.decimals)],
         });
@@ -131,7 +131,7 @@ export default function MintTestTokensDialog() {
               {tokens.map((token) => {
                 return (
                   <div
-                    key={token.address0}
+                    key={token.wrapped.address0}
                     onClick={() => {
                       setTokenToMint(token);
                       setPopoverOpened(false);

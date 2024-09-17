@@ -1,6 +1,6 @@
 import clsx from "clsx";
-import { useLocale, useTranslations } from "next-intl";
-import { ButtonHTMLAttributes, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { ButtonHTMLAttributes, useMemo, useState } from "react";
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";

@@ -72,7 +72,7 @@ export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
         <DialogHeader onClose={() => setIsOpen(false)} title="Fee details" />
         <div className="w-full md:w-[570px] px-4 md:px-10 pb-4 md:pb-10">
           {transactionItems.map(({ transaction, standard }, index) => (
-            <div key={`${transaction.token.address0}_${standard}`} className="flex gap-2">
+            <div key={`${transaction.token.wrapped.address0}_${standard}`} className="flex gap-2">
               <div className="flex flex-col items-center">
                 <div className="flex justify-center items-center rounded-full min-h-10 min-w-10 w-10 h-10 bg-green-bg">
                   {index + 1}

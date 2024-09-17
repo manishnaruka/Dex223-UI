@@ -6,6 +6,8 @@ import { Check, OtherListCheck, Rate, TrustRateCheck } from "@/components/badges
 import { db, TokenList, TokenListId } from "@/db/db";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { Currency } from "@/sdk_hybrid/entities/currency";
+import { NativeCoin } from "@/sdk_hybrid/entities/ether";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 
@@ -181,13 +183,15 @@ export function useTokenLists(onlyCustom: boolean = false) {
   }, [tokenLists]);
 }
 
-export function useTokens(onlyCustom: boolean = false) {
+export function useTokens(onlyCustom: boolean = false): Currency[] {
   const tokenLists = useTokenLists(onlyCustom);
   const chainId = useCurrentChainId();
 
   const pinnedTokens = usePinnedTokensStore((s) => s.tokens?.[chainId] || []);
 
   return useMemo(() => {
+    const native = NativeCoin.onChain(chainId);
+
     if (tokenLists && tokenLists.length >= 1) {
       const inspect = (...arrays: TokenList[]) => {
         // const duplicates = [];
@@ -240,7 +244,7 @@ export function useTokens(onlyCustom: boolean = false) {
         return pinnedTokens.indexOf(b.address0) - pinnedTokens.indexOf(a.address0);
       });
 
-      return [...sortedPinned, ...unpinned];
+      return [native, ...sortedPinned, ...unpinned];
     }
 
     const tokens =
@@ -257,6 +261,6 @@ export function useTokens(onlyCustom: boolean = false) {
       return pinnedTokens.indexOf(b.address0) - pinnedTokens.indexOf(a.address0);
     });
 
-    return [...sortedPinned, ...unpinned];
-  }, [pinnedTokens, tokenLists]);
+    return [native, ...sortedPinned, ...unpinned];
+  }, [chainId, pinnedTokens, tokenLists]);
 }

@@ -3,13 +3,13 @@ import { useMemo } from "react";
 import { getTickToPrice, tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { TICK_SPACINGS } from "@/sdk_hybrid/constants";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Price } from "@/sdk_hybrid/entities/fractions/price";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { nearestUsableTick } from "@/sdk_hybrid/utils/nearestUsableTick";
 import { TickMath } from "@/sdk_hybrid/utils/tickMath";
 
 import { Bound } from "../components/PriceRange/LiquidityChartRangeInput/types";
-import { useTokensStandards } from "../stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityTokensStore } from "../stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "../stores/useLiquidityPriceRangeStore";
 import { useLiquidityTierStore } from "../stores/useLiquidityTierStore";
@@ -97,7 +97,7 @@ export const usePriceRange = () =>
     const [token0, token1] = useMemo(
       () =>
         tokenA && tokenB
-          ? tokenA.sortsBefore(tokenB)
+          ? tokenA.wrapped.sortsBefore(tokenB.wrapped)
             ? [tokenA, tokenB]
             : [tokenB, tokenA]
           : [undefined, undefined],
@@ -109,8 +109,8 @@ export const usePriceRange = () =>
     // always returns the price with 0 as base token
     const pricesAtTicks = useMemo(() => {
       return {
-        [Bound.LOWER]: getTickToPrice(token0, token1, ticks[Bound.LOWER]),
-        [Bound.UPPER]: getTickToPrice(token0, token1, ticks[Bound.UPPER]),
+        [Bound.LOWER]: getTickToPrice(token0?.wrapped, token1?.wrapped, ticks[Bound.LOWER]),
+        [Bound.UPPER]: getTickToPrice(token0?.wrapped, token1?.wrapped, ticks[Bound.UPPER]),
       };
     }, [token0, token1, ticks]);
 
@@ -127,8 +127,8 @@ export const usePriceRange = () =>
           const price =
             baseAmount && parsedQuoteAmount
               ? new Price(
-                  baseAmount.currency,
-                  parsedQuoteAmount.currency,
+                  baseAmount.currency.wrapped,
+                  parsedQuoteAmount.currency.wrapped,
                   baseAmount.quotient,
                   parsedQuoteAmount.quotient,
                 )
@@ -138,7 +138,7 @@ export const usePriceRange = () =>
         return undefined;
       } else {
         // get the amount of quote currency
-        return pool && token0 ? pool.priceOf(token0) : undefined;
+        return pool && token0 ? pool.priceOf(token0.wrapped) : undefined;
       }
     }, [noLiquidity, startPriceTypedValue, invertPrice, token1, token0, pool]);
 
@@ -167,7 +167,7 @@ export const usePriceRange = () =>
       [tickSpaceLimits, tickLower, tickUpper, tier],
     );
 
-    const isSorted = tokenA && tokenB && tokenA.sortsBefore(tokenB);
+    const isSorted = tokenA && tokenB && tokenA.wrapped.sortsBefore(tokenB.wrapped);
     const isFullRange =
       typeof leftRangeTypedValue === "boolean" && typeof rightRangeTypedValue === "boolean";
     const leftPrice = isSorted ? priceLower : priceUpper?.invert();

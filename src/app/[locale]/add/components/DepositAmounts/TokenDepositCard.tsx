@@ -19,6 +19,7 @@ import useRevoke from "@/hooks/useRevoke";
 import useWithdraw from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 
@@ -53,7 +54,7 @@ function InputTotalAmount({
   onChange,
   isDisabled,
 }: {
-  token?: Token;
+  token?: Currency;
   value: string;
   onChange: (value: string) => void;
   isDisabled?: boolean;
@@ -63,11 +64,11 @@ function InputTotalAmount({
   const { data: blockNumber } = useBlockNumber({ watch: true });
   const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
     address: token ? address : undefined,
-    token: token ? (token.address0 as Address) : undefined,
+    token: token ? (token.wrapped.address0 as Address) : undefined,
   });
   const { data: token1Balance, refetch: refetchBalance1 } = useBalance({
     address: token ? address : undefined,
-    token: token ? (token.address1 as Address) : undefined,
+    token: token ? (token.wrapped.address1 as Address) : undefined,
   });
 
   useEffect(() => {
@@ -116,6 +117,7 @@ function InputTotalAmount({
   );
 }
 
+// TODO: change standard inputs for native currency, 16.09.2024
 function InputStandardAmount({
   standard,
   value,
@@ -128,7 +130,7 @@ function InputStandardAmount({
 }: {
   standard: Standard;
   value?: number;
-  token?: Token;
+  token?: Currency;
   currentAllowance: bigint; // currentAllowance or currentDeposit
   status: AllowanceStatus;
   revokeHandler: () => void; // onWithdraw or onWithdraw
@@ -293,7 +295,7 @@ export default function TokenDepositCard({
   setTokenStandardRatio,
   gasPrice,
 }: {
-  token?: Token;
+  token?: Currency;
   value: string;
   onChange: (value: string) => void;
   isDisabled: boolean;

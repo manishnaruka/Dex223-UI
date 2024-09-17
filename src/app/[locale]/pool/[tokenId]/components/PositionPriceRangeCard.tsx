@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 
 export default function PositionPriceRangeCard({
   price,
@@ -10,8 +10,8 @@ export default function PositionPriceRangeCard({
   isMax = false,
 }: {
   price?: string;
-  tokenA: Token | undefined;
-  tokenB: Token | undefined;
+  tokenA: Currency | undefined;
+  tokenB: Currency | undefined;
   showFirst: boolean;
   isMax?: boolean;
 }) {

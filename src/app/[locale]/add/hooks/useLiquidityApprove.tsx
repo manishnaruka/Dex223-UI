@@ -5,7 +5,7 @@ import useAllowance, { AllowanceStatus } from "@/hooks/useAllowance";
 import useDeposit from "@/hooks/useDeposit";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Standard } from "@/sdk_hybrid/standard";
 
 import { Field, useTokensStandards } from "../stores/useAddLiquidityAmountsStore";
@@ -16,7 +16,7 @@ import { useV3DerivedMintInfo } from "./useV3DerivedMintInfo";
 
 // TestApproveTransaction
 export type ApproveTransaction = {
-  token: Token;
+  token: Currency;
   amount: bigint;
   isAllowed: boolean;
   status: AllowanceStatus;

@@ -1,23 +1,23 @@
 import { useCallback } from "react";
 import { useAccount, useBalance } from "wagmi";
 
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 
-export default function useTokenBalances(token: Token | undefined) {
+export default function useTokenBalances(currency: Currency | undefined) {
   const { address } = useAccount();
 
   const { data: erc20Balance, refetch: refetch20 } = useBalance({
-    address: token ? address : undefined,
-    token: token ? token.address0 : undefined,
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address0 : undefined,
     query: {
-      enabled: Boolean(token),
+      enabled: Boolean(currency),
     },
   });
   const { data: erc223Balance, refetch: refetch223 } = useBalance({
-    address: token ? address : undefined,
-    token: token ? token.address1 : undefined,
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address1 : undefined,
     query: {
-      enabled: Boolean(token),
+      enabled: Boolean(currency),
     },
   });
 

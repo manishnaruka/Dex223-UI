@@ -11,6 +11,7 @@ import {
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { IIFE } from "@/functions/iife";
 import addToast from "@/other/toast";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 import {
   GasFeeModel,
@@ -25,7 +26,7 @@ export default function useWithdraw({
   token,
   contractAddress,
 }: {
-  token: Token | undefined;
+  token: Currency | undefined;
   contractAddress: Address | undefined;
 }) {
   const [status, setStatus] = useState(AllowanceStatus.INITIAL);
@@ -42,9 +43,9 @@ export default function useWithdraw({
     address: contractAddress,
     abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
     functionName: "depositedTokens",
-    args: address && token && [address, token.address1 as Address],
+    args: address && token && [address, token.wrapped.address1 as Address],
     query: {
-      enabled: Boolean(address) && Boolean(token?.address1),
+      enabled: Boolean(address) && token?.isToken && Boolean(token?.address1),
     },
   });
   const amountToWithdraw = currentDeposit.data as bigint;
@@ -63,7 +64,8 @@ export default function useWithdraw({
       !walletClient ||
       !address ||
       !chainId ||
-      !publicClient
+      !publicClient ||
+      token.isNative
     ) {
       return;
     }
@@ -164,7 +166,7 @@ export default function useWithdraw({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "withdraw" as "withdraw",
         address: contractAddress,
-        args: [token.address1 as Address, address as Address, amountToWithdraw] as [
+        args: [token.wrapped.address1 as Address, address as Address, amountToWithdraw] as [
           Address,
           Address,
           bigint,

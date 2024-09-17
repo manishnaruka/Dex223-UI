@@ -11,7 +11,7 @@ import {
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { IIFE } from "@/functions/iife";
 import addToast from "@/other/toast";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,
@@ -27,7 +27,7 @@ export default function useRevoke({
   token,
   contractAddress,
 }: {
-  token: Token | undefined;
+  token: Currency | undefined;
   contractAddress: Address | undefined;
 }) {
   const [status, setStatus] = useState(AllowanceStatus.INITIAL);
@@ -39,7 +39,7 @@ export default function useRevoke({
 
   const { refetch, data: currentAllowanceData } = useReadContract({
     abi: ERC20_ABI,
-    address: token?.address0 as Address,
+    address: token?.wrapped.address0 as Address,
     functionName: "allowance",
     args: [
       //set ! to avoid ts errors, make sure it is not undefined with "enable" option
@@ -48,7 +48,7 @@ export default function useRevoke({
     ],
     query: {
       //make sure hook don't run when there is no addresses
-      enabled: Boolean(token?.address0) && Boolean(address) && Boolean(contractAddress),
+      enabled: Boolean(token?.wrapped.address0) && Boolean(address) && Boolean(contractAddress),
     },
     // cacheTime: 0,
     // watch: true,
@@ -74,7 +74,7 @@ export default function useRevoke({
       functionName: "approve";
       args: [Address, bigint];
     } = {
-      address: token.address0 as Address,
+      address: token.wrapped.address0 as Address,
       account: address,
       abi: ERC20_ABI,
       functionName: "approve",
@@ -148,7 +148,7 @@ export default function useRevoke({
         functionName: "approve";
         args: [Address, bigint];
       } = {
-        address: token.address0 as Address,
+        address: token.wrapped.address0 as Address,
         account: address,
         abi: ERC20_ABI,
         functionName: "approve",

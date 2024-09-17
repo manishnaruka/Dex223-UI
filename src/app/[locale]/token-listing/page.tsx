@@ -4,7 +4,6 @@ import Image from "next/image";
 import React, { ReactNode } from "react";
 
 import Container from "@/components/atoms/Container";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Button, { ButtonVariant } from "@/components/buttons/Button";
 import { Link } from "@/navigation";
 

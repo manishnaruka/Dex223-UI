@@ -5,7 +5,6 @@ import { useAccount, useBlockNumber, usePublicClient, useWalletClient } from "wa
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
-import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useDeepEffect from "@/hooks/useDeepEffect";

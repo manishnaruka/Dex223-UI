@@ -14,51 +14,51 @@ import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolio
 import { formatFloat } from "@/functions/formatFloat";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  handlePick: (token: Token) => void;
+  handlePick: (token: Currency) => void;
 }
 
 function TokenRow({
-  token,
+  currency,
   handlePick,
   setTokenForPortfolio,
 }: {
-  token: Token;
-  handlePick: (token: Token) => void;
-  setTokenForPortfolio: (token: Token) => void;
+  currency: Currency;
+  handlePick: (currency: Currency) => void;
+  setTokenForPortfolio: (currency: Currency) => void;
 }) {
   const { toggleToken, isTokenPinned, pinnedTokens } = usePinnedTokensStore((s) => ({
     toggleToken: s.toggleToken,
     pinnedTokens: s.tokens,
-    isTokenPinned: s.tokens[token.chainId].includes(token.address0),
+    isTokenPinned: s.tokens[currency.chainId].includes(currency.wrapped.address0),
   }));
 
   const {
     balance: { erc20Balance, erc223Balance },
-  } = useTokenBalances(isTokenPinned ? token : undefined);
+  } = useTokenBalances(isTokenPinned ? currency : undefined);
 
   return (
     <div
       role="button"
-      onClick={() => handlePick(token)}
+      onClick={() => handlePick(currency)}
       className="px-10 flex justify-between py-2 hover:bg-tertiary-bg duration-200"
     >
       <div className="flex items-center gap-3 flex-grow">
-        <Image width={40} height={40} src={token?.logoURI || ""} alt="" />
+        <Image width={40} height={40} src={currency?.logoURI || ""} alt="" />
         <div className="grid flex-grow">
-          <span>{token.symbol}</span>
+          <span>{currency.symbol}</span>
           <div className="auto-cols-fr grid grid-flow-col gap-2">
             {erc20Balance && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
                 <span className="text-secondary-text text-12">
-                  {formatFloat(erc20Balance?.formatted)} {token.symbol}
+                  {formatFloat(erc20Balance?.formatted)} {currency.symbol}
                 </span>
               </div>
             )}
@@ -66,7 +66,7 @@ function TokenRow({
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
                 <span className="text-secondary-text text-12">
-                  {formatFloat(erc223Balance?.formatted)} {token.symbol}
+                  {formatFloat(erc223Balance?.formatted)} {currency.symbol}
                 </span>
               </div>
             )}
@@ -79,7 +79,7 @@ function TokenRow({
           iconName="details"
           onClick={(e) => {
             e.stopPropagation();
-            setTokenForPortfolio(token);
+            setTokenForPortfolio(currency);
           }}
         />
         <IconButton
@@ -87,7 +87,7 @@ function TokenRow({
           iconName={isTokenPinned ? "pin-fill" : "pin"}
           onClick={(e) => {
             e.stopPropagation();
-            toggleToken(token.address0, token.chainId);
+            toggleToken(currency.wrapped.address0, currency.chainId);
           }}
         />
       </div>
@@ -99,7 +99,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
   const tokens = useTokens();
   const t = useTranslations("ManageTokens");
 
-  const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
+  const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
   const { isOpen: isManageOpened, setIsOpen: setManageOpened } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
@@ -133,7 +133,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
             }}
             title={tokenForPortfolio.name || "Unknown"}
           />
-          <TokenPortfolioDialogContent token={tokenForPortfolio} />
+          {tokenForPortfolio.isToken && <TokenPortfolioDialogContent token={tokenForPortfolio} />}
         </>
       ) : (
         <>
@@ -169,8 +169,8 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                       <TokenRow
                         setTokenForPortfolio={setTokenForPortfolio}
                         handlePick={handlePick}
-                        key={token.address0}
-                        token={token}
+                        key={token.wrapped.address0}
+                        currency={token}
                       />
                     ))}
                   </div>

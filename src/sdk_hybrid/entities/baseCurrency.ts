@@ -35,14 +35,23 @@ export abstract class BaseCurrency {
    */
   public readonly name?: string;
 
+  public readonly logoURI?: string;
+
   /**
    * Constructs an instance of the base class `BaseCurrency`.
    * @param chainId the chain ID on which this currency resides
    * @param decimals decimals of the currency
    * @param symbol symbol of the currency
    * @param name of the currency
+   * @param logoURI image of the currency
    */
-  protected constructor(chainId: number, decimals: number, symbol?: string, name?: string) {
+  protected constructor(
+    chainId: number,
+    decimals: number,
+    symbol?: string,
+    name?: string,
+    logoURI?: string,
+  ) {
     invariant(Number.isSafeInteger(chainId), "CHAIN_ID");
     invariant(decimals >= 0 && decimals < 255 && Number.isInteger(decimals), "DECIMALS");
 
@@ -50,6 +59,7 @@ export abstract class BaseCurrency {
     this.decimals = decimals;
     this.symbol = symbol;
     this.name = name;
+    this.logoURI = logoURI;
   }
 
   /**

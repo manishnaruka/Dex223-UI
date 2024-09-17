@@ -367,7 +367,7 @@ function ReadonlyTokenAmountCard({
   standard,
   title,
 }: {
-  token: Token | undefined;
+  token: Currency | undefined;
   amount: string;
   amountUSD: string | undefined;
   standard: Standard;
@@ -381,7 +381,7 @@ function ReadonlyTokenAmountCard({
         <div className="flex items-center gap-2">
           <Image src={token?.logoURI || ""} alt="" width={32} height={32} />
           {token?.symbol}
-          <Badge color="green" text={standard} />
+          <Badge color="green" text={token?.isNative ? "Native" : standard} />
         </div>
       </div>
       <p className="text-secondary-text text-14">${amountUSD}</p>

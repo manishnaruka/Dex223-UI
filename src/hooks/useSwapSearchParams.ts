@@ -28,13 +28,13 @@ export const useSwapSearchParams = () => {
 
   const updatedPath = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
-    if (tokenA?.address0) {
-      params.set(SwapQueryParams.tokenA, tokenA?.address0);
+    if (tokenA?.wrapped.address0) {
+      params.set(SwapQueryParams.tokenA, tokenA?.wrapped.address0);
     } else {
       params.delete(SwapQueryParams.tokenA);
     }
-    if (tokenB?.address0) {
-      params.set(SwapQueryParams.tokenB, tokenB.address0);
+    if (tokenB?.wrapped.address0) {
+      params.set(SwapQueryParams.tokenB, tokenB.wrapped.address0);
     } else {
       params.delete(SwapQueryParams.tokenB);
     }
@@ -48,13 +48,13 @@ export const useSwapSearchParams = () => {
       const queryTokenB = searchParams.get(SwapQueryParams.tokenB);
 
       if (queryTokenA) {
-        const token = tokens.find((t) => t.address0 === queryTokenA);
+        const token = tokens.find((t) => t.wrapped.address0 === queryTokenA);
         if (token) {
           setTokenA(token);
         }
       }
       if (queryTokenB) {
-        const token = tokens.find((t) => t.address0 === queryTokenB);
+        const token = tokens.find((t) => t.wrapped.address0 === queryTokenB);
         if (token) {
           setTokenB(token);
         }

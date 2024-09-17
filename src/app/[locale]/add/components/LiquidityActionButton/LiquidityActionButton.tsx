@@ -48,20 +48,20 @@ export const LiquidityActionButton = ({
 
   const { data: tokenA0Balance, refetch: refetchBalanceA0 } = useBalance({
     address: tokenA ? address : undefined,
-    token: tokenA ? (tokenA.address0 as Address) : undefined,
+    token: tokenA ? (tokenA.wrapped.address0 as Address) : undefined,
   });
   const { data: tokenA1Balance, refetch: refetchBalanceA1 } = useBalance({
     address: tokenA ? address : undefined,
-    token: tokenA ? (tokenA.address1 as Address) : undefined,
+    token: tokenA ? (tokenA.wrapped.address1 as Address) : undefined,
   });
 
   const { data: tokenB0Balance, refetch: refetchBalanceB0 } = useBalance({
     address: tokenB ? address : undefined,
-    token: tokenB ? (tokenB.address0 as Address) : undefined,
+    token: tokenB ? (tokenB.wrapped.address0 as Address) : undefined,
   });
   const { data: tokenB1Balance, refetch: refetchBalanceB1 } = useBalance({
     address: tokenB ? address : undefined,
-    token: tokenB ? (tokenB.address1 as Address) : undefined,
+    token: tokenB ? (tokenB.wrapped.address1 as Address) : undefined,
   });
 
   useEffect(() => {

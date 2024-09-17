@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import { NumericalInput } from "./NumericalInput";
 
@@ -14,8 +14,8 @@ interface Props {
   increment: () => string;
   prependSymbol?: string;
   maxDecimals?: number;
-  tokenA?: Token | undefined;
-  tokenB?: Token | undefined;
+  tokenA?: Currency | undefined;
+  tokenB?: Currency | undefined;
   noLiquidity?: boolean;
 }
 export default function PriceRangeInput({

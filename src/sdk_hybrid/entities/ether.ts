@@ -5,26 +5,46 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "./currency";
 import { NativeCurrency } from "./nativeCurrency";
 import { Token } from "./token";
-import { WETH9 } from "./weth9";
+import { wrappedTokens } from "./weth9";
 
 /**
- * Ether is the main usage of a 'native' currency, i.e. for Ethereum mainnet and all testnets
+ * Native is the main usage of a 'native' currency, i.e. for Ethereum mainnet and all testnets
  */
-export class Ether extends NativeCurrency {
+
+const nativeCurrenciesMap: Record<DexChainId, { symbol: string; name: string; logoURI: string }> = {
+  [DexChainId.SEPOLIA]: {
+    symbol: "sepETH",
+    name: "Sepolia ETH",
+    logoURI: "/coins/ETH.svg",
+  },
+  [DexChainId.BSC_TESTNET]: {
+    symbol: "tBNB",
+    name: "Testnet BNB",
+    logoURI: "/coins/BNB.svg",
+  },
+};
+
+export class NativeCoin extends NativeCurrency {
   protected constructor(chainId: DexChainId) {
-    super(chainId, 18, "ETH", "Ether");
+    super(
+      chainId,
+      18,
+      nativeCurrenciesMap[chainId].symbol,
+      nativeCurrenciesMap[chainId].name,
+      nativeCurrenciesMap[chainId].logoURI,
+    );
   }
 
   public get wrapped(): Token {
-    const weth9 = WETH9[this.chainId];
+    const weth9 = wrappedTokens[this.chainId];
     invariant(!!weth9, "WRAPPED");
     return weth9;
   }
 
-  private static _etherCache: { [chainId: number]: Ether } = {};
+  private static _etherCache: { [chainId: number]: NativeCoin } = {};
 
-  public static onChain(chainId: number): Ether {
-    return this._etherCache[chainId] ?? (this._etherCache[chainId] = new Ether(chainId));
+  public static onChain(chainId: number): NativeCoin {
+    return this._etherCache[chainId] ?? (this._etherCache[chainId] = new NativeCoin(chainId));
   }
 
   public equals(other: Currency): boolean {

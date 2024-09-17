@@ -8,6 +8,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { useAllowanceStore } from "@/stores/useAllowanceStore";
 import {
@@ -38,7 +39,7 @@ export function useStoreAllowance({
   contractAddress,
   amountToCheck,
 }: {
-  token: Token | undefined;
+  token: Currency | undefined;
   contractAddress: Address | undefined;
   amountToCheck: bigint | null;
 }) {
@@ -51,17 +52,21 @@ export function useStoreAllowance({
 
   const { refetch, data: currentAllowanceData } = useReadContract({
     abi: ERC20_ABI,
-    address: token?.address0 as Address,
+    address: token && token.isToken ? token.address0 : undefined,
     functionName: "allowance",
     args: [
       //set ! to avoid ts errors, make sure it is not undefined with "enable" option
       address!,
       contractAddress!,
     ],
-    scopeKey: `${token?.address0}-${contractAddress}-${address}-${chainId}`,
+    scopeKey: `${token?.wrapped.address0}-${contractAddress}-${address}-${chainId}`,
     query: {
       //make sure hook don't run when there is no addresses
-      enabled: Boolean(token?.address0) && Boolean(address) && Boolean(contractAddress),
+      enabled:
+        Boolean(token?.wrapped.address0) &&
+        Boolean(token?.isToken) &&
+        Boolean(address) &&
+        Boolean(contractAddress),
     },
     // cacheTime: 0,
     // watch: true,
@@ -151,6 +156,10 @@ export function useStoreAllowance({
         !publicClient
       ) {
         console.error("Error: writeTokenApprove ~ something undefined");
+        return;
+      }
+
+      if (token.isNative) {
         return;
       }
 
@@ -251,12 +260,13 @@ export function useStoreAllowance({
   };
 }
 
+//TODO: Rewrite all useAllowance usages to useStoreAllowance, 16.09.2024
 export default function useAllowance({
   token,
   contractAddress,
   amountToCheck,
 }: {
-  token: Token | undefined;
+  token: Currency | undefined;
   contractAddress: Address | undefined;
   amountToCheck: bigint | null;
 }) {
@@ -270,7 +280,7 @@ export default function useAllowance({
 
   const { refetch, data: currentAllowanceData } = useReadContract({
     abi: ERC20_ABI,
-    address: token?.address0 as Address,
+    address: token?.wrapped.address0 as Address,
     functionName: "allowance",
     args: [
       //set ! to avoid ts errors, make sure it is not undefined with "enable" option
@@ -279,7 +289,7 @@ export default function useAllowance({
     ],
     query: {
       //make sure hook don't run when there is no addresses
-      enabled: Boolean(token?.address0) && Boolean(address) && Boolean(contractAddress),
+      enabled: Boolean(token?.wrapped.address0) && Boolean(address) && Boolean(contractAddress),
     },
     // cacheTime: 0,
     // watch: true,
@@ -291,7 +301,6 @@ export default function useAllowance({
     // refetch();
   }, [refetch, blockNumber]);
 
-  // TODO: mb change isAllowed to one of status AllowanceStatus
   const isAllowed = useMemo(() => {
     if (!token) {
       return false;
@@ -331,7 +340,7 @@ export default function useAllowance({
       functionName: "approve";
       args: [Address, bigint];
     } = {
-      address: token.address0 as Address,
+      address: token.wrapped.address0 as Address,
       account: address,
       abi: ERC20_ABI,
       functionName: "approve",
@@ -431,7 +440,7 @@ export default function useAllowance({
         functionName: "approve";
         args: [Address, bigint];
       } = {
-        address: token.address0,
+        address: token.wrapped.address0,
         account: address,
         abi: ERC20_ABI,
         functionName: "approve",

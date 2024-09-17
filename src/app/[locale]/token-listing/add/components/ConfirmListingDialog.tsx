@@ -11,7 +11,6 @@ import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListin
 import useListToken from "@/app/[locale]/token-listing/add/hooks/useListToken";
 import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
 import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
-import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import {
@@ -465,7 +464,7 @@ export default function ConfirmListingDialog() {
               {tokensToList.length === 1 && tokensToList[0] && (
                 <div className="grid grid-cols-[1fr_12px_1fr]">
                   <SingleCard
-                    address={tokensToList[0].address0}
+                    address={tokensToList[0].wrapped.address0}
                     title={tokensToList[0].symbol!}
                     underlineText="You list token"
                   />
@@ -488,13 +487,13 @@ export default function ConfirmListingDialog() {
                     <div className="grid grid-cols-[1fr_12px_1fr]">
                       <SingleCard
                         color="quaternary"
-                        address={tokensToList[0].address0}
+                        address={tokensToList[0].wrapped.address0}
                         title={tokensToList[0].symbol!}
                       />
                       <div />
                       <SingleCard
                         color="quaternary"
-                        address={tokensToList[1].address0}
+                        address={tokensToList[1].wrapped.address0}
                         title={tokensToList[1].symbol!}
                       />
                     </div>

@@ -12,7 +12,7 @@ import { ERC223_ABI } from "@/config/abis/erc223";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { IIFE } from "@/functions/iife";
 import addToast from "@/other/toast";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,
@@ -28,7 +28,7 @@ export default function useDeposit({
   contractAddress,
   amountToCheck,
 }: {
-  token: Token | undefined;
+  token: Currency | undefined;
   contractAddress: Address | undefined;
   amountToCheck: bigint | null;
 }) {
@@ -46,9 +46,9 @@ export default function useDeposit({
     address: contractAddress,
     abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
     functionName: "depositedTokens",
-    args: address && token && [address, token.address1 as Address],
+    args: address && token && [address, token.wrapped.address1 as Address],
     query: {
-      enabled: Boolean(address) && Boolean(token?.address1),
+      enabled: Boolean(address) && Boolean(token?.wrapped.address1),
     },
   });
 
@@ -93,7 +93,7 @@ export default function useDeposit({
         account: address as Address,
         abi: ERC223_ABI,
         functionName: "transfer" as "transfer",
-        address: token.address1 as Address,
+        address: token.wrapped.address1 as Address, // TODO: add check, if currency is native we probably should take address0 of wrapped token, 16.09.2024
         args: [contractAddress, amountToCheck] as any,
       };
 
@@ -176,7 +176,7 @@ export default function useDeposit({
         account: address as Address,
         abi: ERC223_ABI,
         functionName: "transfer" as const,
-        address: token.address1 as Address,
+        address: token.wrapped.address1 as Address,
         args: [contractAddress, amountToCheck] as any,
       };
 

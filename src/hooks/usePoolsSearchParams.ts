@@ -32,13 +32,13 @@ export const usePoolsSearchParams = () => {
 
   const updatedPath = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
-    if (tokenA?.address0) {
-      params.set(PoolsQueryParams.tokenA, tokenA?.address0);
+    if (tokenA?.wrapped.address0) {
+      params.set(PoolsQueryParams.tokenA, tokenA.wrapped.address0);
     } else {
       params.delete(PoolsQueryParams.tokenA);
     }
-    if (tokenB?.address0) {
-      params.set(PoolsQueryParams.tokenB, tokenB.address0);
+    if (tokenB?.wrapped.address0) {
+      params.set(PoolsQueryParams.tokenB, tokenB.wrapped.address0);
     } else {
       params.delete(PoolsQueryParams.tokenB);
     }
@@ -53,13 +53,13 @@ export const usePoolsSearchParams = () => {
       const queryTokenB = searchParams.get(PoolsQueryParams.tokenB);
       const queryTier = parseInt(searchParams.get(PoolsQueryParams.tier) || "");
       if (queryTokenA) {
-        const token = tokens.find((t) => t.address0 === queryTokenA);
+        const token = tokens.find((t) => t.wrapped.address0 === queryTokenA);
         if (token) {
           setTokenA(token);
         }
       }
       if (queryTokenB) {
-        const token = tokens.find((t) => t.address0 === queryTokenB);
+        const token = tokens.find((t) => t.wrapped.address0 === queryTokenB);
         if (token) {
           setTokenB(token);
         }

@@ -35,9 +35,14 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
       return null;
     }
 
-    const [_tokenA, _tokenB] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
+    const [_tokenA, _tokenB] = tokenA.wrapped.sortsBefore(tokenB.wrapped)
+      ? [tokenA, tokenB]
+      : [tokenB, tokenA];
 
-    if (pool.token0.address0 !== _tokenA.address0 || pool.token1.address0 !== _tokenB.address0) {
+    if (
+      pool.token0.address0 !== _tokenA.wrapped.address0 ||
+      pool.token1.address0 !== _tokenB.wrapped.address0
+    ) {
       return null;
     }
 
@@ -51,10 +56,10 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
     account: address || QUOTER_ADDRESS[chainId as DexChainId],
     functionName: "quoteExactInputSingle",
     args: [
-      tokenA?.address0 as Address,
-      tokenB?.address0 as Address,
+      tokenA?.wrapped.address0 as Address,
+      tokenB?.wrapped.address0 as Address,
       FeeAmount.MEDIUM, //3000
-      parseUnits(typedValue, tokenA?.decimals || 18),
+      parseUnits(typedValue, tokenA?.decimals ?? 18),
       BigInt(0),
     ],
     query: {
@@ -78,8 +83,8 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
       !amountOut ||
       !typedValue ||
       !Boolean(+typedValue) ||
-      swapRoute.input.address0 !== tokenA.address0 ||
-      swapRoute.output.address0 !== tokenB.address0
+      swapRoute.input.wrapped.address0 !== tokenA.wrapped.address0 ||
+      swapRoute.output.wrapped.address0 !== tokenB.wrapped.address0
     ) {
       return null;
     }

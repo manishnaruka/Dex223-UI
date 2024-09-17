@@ -1,6 +1,5 @@
 import JSBI from "jsbi";
 import { useMemo } from "react";
-import { useAccount } from "wagmi";
 
 import { tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import { PoolState, usePool } from "@/hooks/usePools";
@@ -10,7 +9,6 @@ import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Price } from "@/sdk_hybrid/entities/fractions/price";
 import { Pool } from "@/sdk_hybrid/entities/pool";
 import { Position } from "@/sdk_hybrid/entities/position";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { encodeSqrtRatioX96 } from "@/sdk_hybrid/utils/encodeSqrtRatioX96";
 import { priceToClosestTick } from "@/sdk_hybrid/utils/priceTickConversions";
 import { TickMath } from "@/sdk_hybrid/utils/tickMath";
@@ -26,10 +24,10 @@ export const useV3DerivedMintInfo = ({
   tier,
   price,
 }: {
-  tokenA?: Token;
-  tokenB?: Token;
+  tokenA?: Currency;
+  tokenB?: Currency;
   tier: FeeAmount;
-  price: Price<Token, Token> | undefined;
+  price: Price<Currency, Currency> | undefined;
 }) => {
   const { ticks } = useLiquidityPriceRangeStore();
   const { LOWER: tickLower, UPPER: tickUpper } = ticks;
@@ -76,7 +74,15 @@ export const useV3DerivedMintInfo = ({
     if (tokenA && tokenB && tier && price && !invalidPrice) {
       const currentTick = priceToClosestTick(price);
       const currentSqrt = TickMath.getSqrtRatioAtTick(currentTick);
-      return new Pool(tokenA, tokenB, tier, currentSqrt, JSBI.BigInt(0), currentTick, []);
+      return new Pool(
+        tokenA.wrapped,
+        tokenB.wrapped,
+        tier,
+        currentSqrt,
+        JSBI.BigInt(0),
+        currentTick,
+        [],
+      );
     } else {
       return undefined;
     }

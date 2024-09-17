@@ -6,18 +6,16 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatUnits, isAddress } from "viem";
-import { useAccount, usePublicClient, useReadContract } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import ChooseAutoListingDialog from "@/app/[locale]/token-listing/add/components/ChooseAutoListingDialog";
 import ChoosePaymentDialog from "@/app/[locale]/token-listing/add/components/ChoosePaymentDialog";
 import ConfirmListingDialog from "@/app/[locale]/token-listing/add/components/ConfirmListingDialog";
 import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
-import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import { useAutoListingSearchParams } from "@/app/[locale]/token-listing/add/hooks/useAutolistingSearchParams";
 import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
 import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
-import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
 import { useChoosePaymentDialogStore } from "@/app/[locale]/token-listing/add/stores/useChoosePaymentDialogStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
@@ -36,7 +34,6 @@ import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
-import { AUTO_LISTING_ABI } from "@/config/abis/autolisting";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { formatFloat } from "@/functions/formatFloat";
@@ -50,8 +47,8 @@ import { useRouter } from "@/navigation";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount } from "@/sdk_hybrid/constants";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
-import { WETH9 } from "@/sdk_hybrid/entities/weth9";
 
 function OpenConfirmListTokenButton({
   isPoolExists,
@@ -173,14 +170,14 @@ export default function ListTokenPage() {
   const handleChange = useCallback(
     async (
       e: ChangeEvent<HTMLInputElement>,
-      setToken: (token: Token) => void,
+      setToken: (token: Currency) => void,
       setTokenAddress: (value: string) => void,
     ) => {
       const value = e.target.value;
       setTokenAddress(value);
 
       if (isAddress(value) && publicClient && chainId) {
-        const tokenToFind = tokens.find((t) => t.address0 === value);
+        const tokenToFind = tokens.find((t) => t.wrapped.address0 === value);
         if (tokenToFind) {
           setToken(tokenToFind);
           return;
@@ -465,7 +462,7 @@ export default function ListTokenPage() {
                           <InputLabel label="Payment for listing" />
                           {paymentToken && (
                             <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
-                              {formatUnits(paymentToken.price, paymentToken.token.decimals || 18)}
+                              {formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18)}
                               <span className="flex items-center gap-2">
                                 <Image
                                   src="/tokens/placeholder.svg"
@@ -533,11 +530,11 @@ export default function ListTokenPage() {
           handlePick={(token) => {
             if (currentlyPicking === "tokenA") {
               setTokenA(token);
-              setTokenAAddress(token.address0);
+              setTokenAAddress(token.wrapped.address0);
             }
             if (currentlyPicking === "tokenB") {
               setTokenB(token);
-              setTokenBAddress(token.address0);
+              setTokenBAddress(token.wrapped.address0);
             }
 
             setPickTokenOpened(false);

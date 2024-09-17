@@ -5,6 +5,7 @@ import { useCallback, useEffect } from "react";
 import Svg from "@/components/atoms/Svg";
 import { tryParseTick } from "@/functions/tryParseTick";
 import { usePool } from "@/hooks/usePools";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Price } from "@/sdk_hybrid/entities/fractions/price";
 import { Token } from "@/sdk_hybrid/entities/token";
 
@@ -51,8 +52,8 @@ export const PriceRange = ({
   isFullRange: boolean;
   leftPrice: Price<Token, Token> | undefined;
   rightPrice: Price<Token, Token> | undefined;
-  token0: Token | undefined;
-  token1: Token | undefined;
+  token0: Currency | undefined;
+  token1: Currency | undefined;
   tickSpaceLimits: {
     LOWER: number | undefined;
     UPPER: number | undefined;
@@ -123,8 +124,18 @@ export const PriceRange = ({
               (!invertPrice && typeof leftRangeTypedValue === "boolean")
             ? tickSpaceLimits[Bound.LOWER]
             : invertPrice
-              ? tryParseTick(token1, token0, tier, rightRangeTypedValue.toString())
-              : tryParseTick(token0, token1, tier, leftRangeTypedValue.toString()),
+              ? tryParseTick(
+                  token1?.wrapped,
+                  token0?.wrapped,
+                  tier,
+                  rightRangeTypedValue.toString(),
+                )
+              : tryParseTick(
+                  token0?.wrapped,
+                  token1?.wrapped,
+                  tier,
+                  leftRangeTypedValue.toString(),
+                ),
       [Bound.UPPER]:
         typeof existingPosition?.tickUpper === "number"
           ? existingPosition.tickUpper
@@ -132,8 +143,13 @@ export const PriceRange = ({
               (invertPrice && typeof leftRangeTypedValue === "boolean")
             ? tickSpaceLimits[Bound.UPPER]
             : invertPrice
-              ? tryParseTick(token1, token0, tier, leftRangeTypedValue.toString())
-              : tryParseTick(token0, token1, tier, rightRangeTypedValue.toString()),
+              ? tryParseTick(token1?.wrapped, token0?.wrapped, tier, leftRangeTypedValue.toString())
+              : tryParseTick(
+                  token0?.wrapped,
+                  token1?.wrapped,
+                  tier,
+                  rightRangeTypedValue.toString(),
+                ),
     });
   }, [
     existingPosition,

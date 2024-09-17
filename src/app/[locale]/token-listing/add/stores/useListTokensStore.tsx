@@ -1,12 +1,12 @@
 import { create } from "zustand";
 
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 
 interface ListTokensStore {
-  tokenA: Token | undefined;
-  tokenB: Token | undefined;
-  setTokenA: (token: Token | undefined) => void;
-  setTokenB: (token: Token | undefined) => void;
+  tokenA: Currency | undefined;
+  tokenB: Currency | undefined;
+  setTokenA: (token: Currency | undefined) => void;
+  setTokenB: (token: Currency | undefined) => void;
   reset: () => void;
 }
 

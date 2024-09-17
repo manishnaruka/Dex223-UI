@@ -181,7 +181,7 @@ export default function TradeForm() {
   const { isAllowed: isAllowedA } = useStoreAllowance({
     token: tokenA,
     contractAddress: ROUTER_ADDRESS[chainId],
-    amountToCheck: parseUnits(typedValue, tokenA?.decimals || 18),
+    amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
   const { trade, isLoading: isLoadingTrade } = useTrade();
@@ -246,7 +246,7 @@ export default function TradeForm() {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
   const handlePick = useCallback(
-    (token: Token) => {
+    (token: Currency) => {
       if (currentlyPicking === "tokenA") {
         if (token === tokenB) {
           setTokenB(tokenA);
