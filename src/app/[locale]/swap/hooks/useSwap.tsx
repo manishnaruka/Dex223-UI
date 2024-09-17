@@ -9,7 +9,7 @@ import {
   getAbiItem,
   parseUnits,
 } from "viem";
-import { useAccount, useBalance, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, useBalance, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
 import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -29,11 +29,7 @@ import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStor
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
-import {
-  baseFeeMultipliers,
-  isEip1559Supported,
-  SCALING_FACTOR,
-} from "@/config/constants/baseFeeMultipliers";
+import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
 import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
@@ -74,6 +70,10 @@ export function useSwapStatus() {
   };
 }
 
+function encodePath(address0: Address, address1: Address, fee: FeeAmount): Address {
+  return `${address0}${fee.toString(16).padStart(6, "0")}${address1.slice(2)}`;
+}
+
 export function useSwapParams() {
   const { tokenA, tokenB, tokenAStandard, tokenBStandard } = useSwapTokensStore();
   const chainId = useCurrentChainId();
@@ -90,6 +90,13 @@ export function useSwapParams() {
     tier: FeeAmount.MEDIUM,
   });
 
+  const data = useReadContract({
+    abi: POOL_ABI,
+    functionName: "token0",
+    address: poolAddress.poolAddress,
+  });
+  console.log(data.data);
+
   const { trade, isLoading: isLoadingTrade } = useTrade();
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
@@ -98,7 +105,7 @@ export function useSwapParams() {
 
   const balance = useBalance({
     token: tokenB?.wrapped.address0,
-    address,
+    address: ROUTER_ADDRESS[chainId],
   });
 
   console.log(balance.data);
@@ -158,12 +165,9 @@ export function useSwapParams() {
           functionName: "exactInput",
           args: [
             {
-              path: encodeAbiParameters(
-                [{ name: "path", type: "bytes" }],
-                [encodePacked(["address", "address"], [tokenA.address0, tokenB.wrapped.address0])],
-              ),
+              path: encodePath(tokenA.address0, tokenB.wrapped.address0, FeeAmount.MEDIUM),
               deadline,
-              recipient: address,
+              recipient: ROUTER_ADDRESS[chainId],
               amountOutMinimum: BigInt(0),
               amountIn: parseUnits(typedValue, tokenA.decimals),
               prefer223Out: false,
@@ -173,14 +177,7 @@ export function useSwapParams() {
         const encodedUnwrapParams = encodeFunctionData({
           abi: ROUTER_ABI,
           functionName: "unwrapWETH9",
-          args: [
-            BigInt(
-              trade
-                .minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
-                .quotient.toString(),
-            ),
-            address,
-          ],
+          args: [parseUnits("0.001", 18), address],
         });
         //
         // return {
@@ -193,7 +190,7 @@ export function useSwapParams() {
           address: ROUTER_ADDRESS[chainId],
           abi: ROUTER_ABI,
           functionName: "multicall",
-          args: [[encodedSwapParams]],
+          args: [[encodedSwapParams, encodedUnwrapParams]],
         };
       } else {
         return { ..._params, address: ROUTER_ADDRESS[chainId as DexChainId] };
