@@ -98,7 +98,7 @@ function serializeAutoListing(gqlAutoListing: GqlAutoListing, chainId: DexChainI
         price: BigInt(price),
       };
     }),
-    isFree: Boolean(gqlAutoListing.pricesDetail.length),
+    isFree: !Boolean(gqlAutoListing.pricesDetail.length),
   };
 }
 
