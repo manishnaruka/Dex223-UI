@@ -30,12 +30,15 @@ export default function Badge(props: Props) {
       return (
         <div
           className={clsx(
-            "rounded-5 px-2 border font-medium",
-            color === "blue" && "bg-blue-bg border-blue text-blue",
-            color === "green" && "bg-green-bg border-green text-green",
-            color === "purple" && "bg-purple-bg border-purple text-purple",
-            color === "red" && "bg-red-bg border-red text-red",
-            color === "grey" && "bg-quaternary-bg text-secondary-text border-quaternary-bg",
+            "rounded-5 px-2 font-medium box-border",
+            color === "blue" && "bg-blue-bg shadow-[0_0_0_1px_theme(colors.blue)_inset] text-blue",
+            color === "green" &&
+              "bg-green-bg shadow-[0_0_0_1px_theme(colors.green)_inset] text-green",
+            color === "purple" &&
+              "bg-purple-bg shadow-[0_0_0_1px_theme(colors.purple)_inset] text-purple",
+            color === "red" && "bg-red-bg shadow-[0_0_0_1px_theme(colors.red)_inset] text-red",
+            color === "grey" &&
+              "bg-quaternary-bg text-secondary-text shadow-[0_0_0_1px_theme(colors.quaternary-bg)_inset]",
             size === "default" ? "text-12 py-px " : "text-10",
           )}
         >

@@ -16,6 +16,7 @@ interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   placement?: "left" | "bottom";
+  handlers?: any;
 }
 
 export default function Drawer({
@@ -23,6 +24,7 @@ export default function Drawer({
   setIsOpen,
   children,
   placement = "bottom",
+  handlers = {},
 }: PropsWithChildren<Props>) {
   const { refs, context } = useFloating({
     open: isOpen,
@@ -74,7 +76,7 @@ export default function Drawer({
   return (
     <>
       <FloatingPortal>
-        <>
+        <div {...handlers}>
           {isMounted && (
             <FloatingOverlay
               className="drawer-overlay"
@@ -105,7 +107,7 @@ export default function Drawer({
               </div>
             </FloatingFocusManager>
           )}
-        </>
+        </div>
       </FloatingPortal>
     </>
   );
