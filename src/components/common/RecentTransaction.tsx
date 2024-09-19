@@ -253,7 +253,7 @@ export default function RecentTransaction({
         </div>
 
         <a
-          className="w-10 h-10 flex items-center justify-center"
+          className="text-primary-text w-10 h-10 flex items-center justify-center hover:text-green duration-200"
           target="_blank"
           href={getExplorerLink(
             ExplorerLinkType.TRANSACTION,

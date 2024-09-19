@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useSwipeable } from "react-swipeable";
 
 import Collapse from "@/components/atoms/Collapse";
 import Drawer from "@/components/atoms/Drawer";
@@ -88,10 +89,16 @@ export default function MobileMenu() {
   const pathname = usePathname();
   const { setIsOpen: setOpenFeedbackDialog } = useFeedbackDialogStore();
 
+  const handlers = useSwipeable({
+    onSwipedLeft: (eventData) => {
+      setMobileMenuOpened(false);
+    },
+  });
+
   return (
     <div className="xl:hidden">
       <Drawer placement="left" isOpen={mobileMenuOpened} setIsOpen={setMobileMenuOpened}>
-        <div className="flex flex-col justify-between h-full">
+        <div className="flex flex-col justify-between h-full" {...handlers}>
           <div className="py-6 grid gap-1">
             {[
               mobileLinks.map(({ href, iconName, title }) => {

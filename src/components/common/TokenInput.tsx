@@ -143,6 +143,7 @@ export default function TokenInput({
       <div className="flex items-center mb-5 justify-between">
         <div>
           <NumericFormat
+            decimalScale={token?.decimals}
             inputMode="decimal"
             placeholder="0.0"
             className={clsx(

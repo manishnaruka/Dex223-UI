@@ -90,13 +90,6 @@ export function useSwapParams() {
     tier: FeeAmount.MEDIUM,
   });
 
-  const data = useReadContract({
-    abi: POOL_ABI,
-    functionName: "token1",
-    address: poolAddress.poolAddress,
-  });
-  console.log(data.data);
-
   const { trade, isLoading: isLoadingTrade } = useTrade();
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
@@ -177,7 +170,14 @@ export function useSwapParams() {
         const encodedUnwrapParams = encodeFunctionData({
           abi: ROUTER_ABI,
           functionName: "unwrapWETH9",
-          args: [parseUnits("0.001", 18), address],
+          args: [
+            BigInt(
+              trade
+                ?.minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
+                .quotient.toString(),
+            ),
+            address,
+          ],
         });
         //
         // return {
@@ -198,6 +198,24 @@ export function useSwapParams() {
     }
 
     if (tokenAStandard === Standard.ERC223) {
+      // if (tokenB.isNative) {
+      //   return {
+      //     address: getTokenAddressForStandard(tokenA, tokenAStandard),
+      //     abi: ERC223_ABI,
+      //     functionName: "transfer",
+      //     args: [
+      //       ROUTER_ADDRESS[chainId],
+      //       poolAddress.poolAddress,
+      //       parseUnits(typedValue, tokenA.decimals), // amountSpecified
+      //       encodeFunctionData({
+      //         abi: ROUTER_ABI,
+      //         functionName: "exactInputSingle",
+      //         args: [routerParams],
+      //       }),
+      //     ],
+      //   };
+      // }
+
       return {
         address: getTokenAddressForStandard(tokenA, tokenAStandard),
         abi: ERC223_ABI,

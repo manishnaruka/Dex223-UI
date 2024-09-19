@@ -98,6 +98,7 @@ function InputTotalAmount({
       <div className="bg-primary-bg px-5 pt-5 pb-4 rounded-3">
         <div className="mb-1 flex justify-between items-center">
           <NumericFormat
+            decimalScale={token?.decimals}
             inputMode="decimal"
             placeholder="0.0"
             className={clsx("bg-transparent outline-0 border-0 text-20 w-full peer")}

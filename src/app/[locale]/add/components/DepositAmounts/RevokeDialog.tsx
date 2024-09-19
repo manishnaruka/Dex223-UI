@@ -110,6 +110,7 @@ export const RevokeDialog = ({
                   )}
                 >
                   <NumericFormat
+                    decimalScale={token.decimals}
                     inputMode="decimal"
                     placeholder="0.0"
                     className={clsx(

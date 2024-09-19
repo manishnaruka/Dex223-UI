@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { PropsWithChildren, ReactNode, useMemo } from "react";
+import React, { PropsWithChildren, ReactNode, useEffect, useMemo } from "react";
 import { Address, formatGwei } from "viem";
 import { useGasPrice } from "wagmi";
 
@@ -188,8 +188,11 @@ function SwapActionButton() {
   const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
   const { typedValue } = useSwapAmountsStore();
   const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
+  const { status: swapStatus } = useSwapStatusStore();
 
   const { handleSwap } = useSwap();
+
+  console.log(tokenA);
 
   const {
     isPendingApprove,
@@ -220,7 +223,7 @@ function SwapActionButton() {
     );
   }
 
-  if (tokenAStandard === Standard.ERC20) {
+  if (tokenA.isToken && tokenAStandard === Standard.ERC20) {
     if (isPendingApprove) {
       return (
         <Rows>
@@ -279,7 +282,7 @@ function SwapActionButton() {
   if (isPendingSwap) {
     return (
       <Rows>
-        {tokenAStandard === Standard.ERC20 && (
+        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
           <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
         )}
         <SwapRow isPending />
@@ -290,7 +293,7 @@ function SwapActionButton() {
   if (isLoadingSwap) {
     return (
       <Rows>
-        {tokenAStandard === Standard.ERC20 && (
+        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
           <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
         )}
         <SwapRow hash={swapHash} isLoading />
@@ -301,7 +304,7 @@ function SwapActionButton() {
   if (isSuccessSwap) {
     return (
       <Rows>
-        {tokenAStandard === Standard.ERC20 && (
+        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
           <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
         )}
         <SwapRow hash={swapHash} isSettled isSuccess />
@@ -313,7 +316,7 @@ function SwapActionButton() {
     return (
       <>
         <Rows>
-          {tokenAStandard === Standard.ERC20 && (
+          {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
             <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
           )}
           <SwapRow hash={swapHash} isSettled isReverted />
@@ -491,6 +494,12 @@ export default function ConfirmSwapDialog() {
 
     return "0.00";
   }, [baseFee, gasPriceSettings]);
+
+  useEffect(() => {
+    if (isSettledSwap && !isOpen) {
+      resetAmounts();
+    }
+  }, [isOpen, isSettledSwap, resetAmounts, resetTokens]);
 
   return (
     <DrawerDialog

@@ -111,6 +111,7 @@ export const TransactionItem = ({
           )}
         >
           <NumericFormat
+            decimalScale={token?.decimals}
             inputMode="decimal"
             placeholder="0.0"
             className={clsx("bg-transparent text-primary-text outline-0 border-0 w-full peer")}
