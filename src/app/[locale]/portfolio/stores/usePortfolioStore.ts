@@ -16,6 +16,8 @@ interface PortfolioStore {
   setAllWalletActive: () => void;
   isConnectedWalletActive: boolean;
   setIsConnectedWalletActive: (isActive: boolean) => void;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
 }
 
 const localStorageKey = "portfolio-state";
@@ -65,6 +67,11 @@ export const usePortfolioStore = create<PortfolioStore>()(
       setIsConnectedWalletActive: (isActive) =>
         set(() => ({
           isConnectedWalletActive: isActive,
+        })),
+      searchValue: "",
+      setSearchValue: (value) =>
+        set(() => ({
+          searchValue: value,
         })),
     }),
     {

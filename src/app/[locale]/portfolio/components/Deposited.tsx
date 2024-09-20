@@ -157,6 +157,139 @@ const DepositedTokenTableItem = ({
   );
 };
 
+const DesktopTable = ({
+  tableData,
+  setTokenForPortfolio,
+}: {
+  tableData: (WalletDeposite & { walletAddress: Address })[];
+  setTokenForPortfolio: any;
+}) => {
+  return (
+    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+      <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
+      <div className="text-secondary-text h-[60px] flex items-center gap-2">
+        Amount <Badge color="green" text="ERC-223" />
+      </div>
+      <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
+      <div className="text-secondary-text h-[60px] flex items-center justify-end pr-6">Details</div>
+      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action / Owner</div>
+      {tableData.map((deposite, index) => {
+        return (
+          <DepositedTokenTableItem
+            key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
+            deposite={deposite}
+            walletAddress={deposite.walletAddress}
+            onDetailsClick={() => {
+              setTokenForPortfolio(deposite.token);
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+const DepositedTokenMobileTableItem = ({
+  deposite,
+  walletAddress,
+  onDetailsClick,
+}: {
+  deposite: WalletDeposite;
+  walletAddress: Address;
+  onDetailsClick: () => void;
+}) => {
+  const chainId = useCurrentChainId();
+  const { address } = useAccount();
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+
+  return (
+    <>
+      <div
+        className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2"
+        key={deposite.token.address0}
+      >
+        <div className="flex justify-start items-start gap-1">
+          <div className="flex gap-2">
+            <Image src={"/tokens/placeholder.svg"} width={32} height={32} alt="" />
+            <div className="flex flex-col">
+              <span className="text-14">{`${deposite.token.name}`}</span>
+              <span className="text-12">{"$ —"}</span>
+            </div>
+          </div>
+          <div
+            className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center"
+            onClick={() => {
+              onDetailsClick();
+            }}
+          >
+            {deposite.token.symbol}
+          </div>
+        </div>
+        <div className="flex gap-1 items-center">
+          <Badge color="green" text="ERC-223" />
+          <span className="text-12 text-secondary-text">{`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}</span>
+        </div>
+        <div className="flex flex-col justify-center mt-1">
+          {address === walletAddress ? (
+            <Button
+              variant={ButtonVariant.CONTAINED}
+              size={ButtonSize.MEDIUM}
+              onClick={() => setIsWithdrawOpen(true)}
+            >
+              Withdraw
+            </Button>
+          ) : (
+            <div className="flex justify-between items-center bg-tertiary-bg px-4 py-[10px] rounded-2">
+              <span className="text-14 text-secondary-text">Token owner</span>
+              <a
+                className="flex items-center gap-2 cursor-pointer text-14 hover:text-green-hover"
+                target="_blank"
+                href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddress, chainId)}
+              >
+                {truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
+                <Svg iconName="forward" />
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+      {isWithdrawOpen ? (
+        <DepositedTokenWithdrawDialog
+          isOpen={isWithdrawOpen}
+          setIsOpen={setIsWithdrawOpen}
+          token={deposite.token}
+          contractAddress={deposite.contractAddress}
+        />
+      ) : null}
+    </>
+  );
+};
+
+const MobileTable = ({
+  tableData,
+  setTokenForPortfolio,
+}: {
+  tableData: (WalletDeposite & { walletAddress: Address })[];
+  setTokenForPortfolio: any;
+}) => {
+  return (
+    <div className="flex lg:hidden flex-col gap-4">
+      {tableData.map((deposite, index: number) => {
+        return (
+          <DepositedTokenMobileTableItem
+            key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
+            deposite={deposite}
+            walletAddress={deposite.walletAddress}
+            onDetailsClick={() => {
+              setTokenForPortfolio(deposite.token);
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
 export const Deposited = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
@@ -214,33 +347,13 @@ export const Deposited = () => {
             <Preloader type="awaiting" size={48} />
           </div>
         ) : currentTableData.length ? (
-          <div>
-            <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-              <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
-              <div className="text-secondary-text h-[60px] flex items-center gap-2">
-                Amount <Badge color="green" text="ERC-223" />
-              </div>
-              <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
-              <div className="text-secondary-text h-[60px] flex items-center justify-end pr-6">
-                Details
-              </div>
-              <div className="text-secondary-text pr-5 h-[60px] flex items-center">
-                Action / Owner
-              </div>
-              {currentTableData.map((deposite, index) => {
-                return (
-                  <DepositedTokenTableItem
-                    key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
-                    deposite={deposite}
-                    walletAddress={deposite.walletAddress}
-                    onDetailsClick={() => {
-                      setTokenForPortfolio(deposite.token);
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </div>
+          <>
+            <DesktopTable
+              tableData={currentTableData}
+              setTokenForPortfolio={setTokenForPortfolio}
+            />
+            <MobileTable tableData={currentTableData} setTokenForPortfolio={setTokenForPortfolio} />
+          </>
         ) : Boolean(searchValue) ? (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
             <EmptyStateIcon iconName="search" />

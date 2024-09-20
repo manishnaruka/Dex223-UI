@@ -119,7 +119,7 @@ const MobileTable = ({
       {tableData.map((o: any, index: number) => {
         return (
           <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2" key={o.token.address0}>
-            <div className="flex justify-between">
+            <div className="flex justify-start items-start gap-1">
               <div className="flex gap-2">
                 <Image src={o.logoURI || "/tokens/placeholder.svg"} width={32} height={32} alt="" />
                 <div className="flex flex-col">
@@ -127,13 +127,14 @@ const MobileTable = ({
                   <span className="text-12">{`${o.amountFiat}`}</span>
                 </div>
               </div>
-              <IconButton
-                iconName="details"
-                variant={IconButtonVariant.DEFAULT}
+              <div
+                className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center"
                 onClick={() => {
                   setTokenForPortfolio(o.token);
                 }}
-              />
+              >
+                {o.token.symbol}
+              </div>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-1 items-center">

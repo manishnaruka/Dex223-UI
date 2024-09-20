@@ -22,7 +22,7 @@ import { Link, useRouter } from "@/navigation";
 import { useActiveWalletsPositions } from "../stores/positions.hooks";
 import { WalletPositions } from "../stores/useWalletsPosotions";
 
-const PositionTableItem = ({ positionInfo }: { positionInfo: PositionInfo }) => {
+const PositionTableItemDesktop = ({ positionInfo }: { positionInfo: PositionInfo }) => {
   const position = usePositionFromPositionInfo(positionInfo);
   const { inRange, removed } = usePositionRangeStatus({ position });
 
@@ -66,6 +66,96 @@ const PositionTableItem = ({ positionInfo }: { positionInfo: PositionInfo }) => 
     </>
   );
 };
+
+const DesktopTable = ({ tableData }: { tableData: WalletPositions[] }) => {
+  return (
+    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+      <div className="text-secondary-text pl-5 h-[60px] flex items-center">ID</div>
+      <div className="text-secondary-text h-[60px] flex items-center gap-2">Amount tokens</div>
+      <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
+      <div className="text-secondary-text h-[60px] flex items-center">Unclaimed fees</div>
+      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Status</div>
+
+      {tableData?.map(({ positions }, index: number) => {
+        return (
+          <React.Fragment key={index}>
+            {positions.map((position) => (
+              <PositionTableItemDesktop key={position.tokenId} positionInfo={position} />
+            ))}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
+const PositionTableItemMobile = ({ positionInfo }: { positionInfo: PositionInfo }) => {
+  const position = usePositionFromPositionInfo(positionInfo);
+  const { inRange, removed } = usePositionRangeStatus({ position });
+
+  return (
+    <>
+      <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-2 text-14">
+            <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+            <Image
+              src="/tokens/placeholder.svg"
+              width={24}
+              height={24}
+              alt=""
+              className="ml-[-20px] bg-primary-bg rounded-full"
+            />
+
+            {position
+              ? `${position.amount0.toSignificant()} ${position.pool.token0.symbol}/${position.amount1.toSignificant()} ${position.pool.token1.symbol}`
+              : "Loading..."}
+          </div>
+          <RangeBadge
+            status={
+              removed
+                ? PositionRangeStatus.CLOSED
+                : inRange
+                  ? PositionRangeStatus.IN_RANGE
+                  : PositionRangeStatus.OUT_OF_RANGE
+            }
+          />
+        </div>
+        <div className="flex justify-between gap-2">
+          <div className="flex w-full items-center gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-14 text-secondary-text">ID:</span>
+            <span className="text-14 font-medium">{`${positionInfo.tokenId}`}</span>
+          </div>
+          <div className="flex w-full items-center gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-14 text-secondary-text">Amount:</span>
+            <span className="text-14 font-medium">{`$ —`}</span>
+          </div>
+        </div>
+        <div className="flex w-full items-center gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+          <span className="text-14 text-secondary-text">Unclaimed fees:</span>
+          <span className="text-14 font-medium">{`$ —`}</span>
+        </div>
+      </div>
+    </>
+  );
+};
+
+const MobileTable = ({ tableData }: { tableData: WalletPositions[] }) => {
+  return (
+    <div className="flex lg:hidden flex-col gap-4">
+      {tableData?.map(({ positions }, index: number) => {
+        return (
+          <React.Fragment key={index}>
+            {positions.map((position) => (
+              <PositionTableItemMobile key={position.tokenId} positionInfo={position} />
+            ))}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
 export const LiquidityPositions = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
@@ -129,25 +219,10 @@ export const LiquidityPositions = () => {
             <Preloader type="awaiting" size={48} />
           </div>
         ) : currentTableData.length ? (
-          <div className="pr-5 pl-5 grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-            <div className="text-secondary-text pl-5 h-[60px] flex items-center">ID</div>
-            <div className="text-secondary-text h-[60px] flex items-center gap-2">
-              Amount tokens
-            </div>
-            <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
-            <div className="text-secondary-text h-[60px] flex items-center">Unclaimed fees</div>
-            <div className="text-secondary-text pr-5 h-[60px] flex items-center">Status</div>
-
-            {currentTableData?.map(({ positions }, index: number) => {
-              return (
-                <React.Fragment key={index}>
-                  {positions.map((position) => (
-                    <PositionTableItem key={position.tokenId} positionInfo={position} />
-                  ))}
-                </React.Fragment>
-              );
-            })}
-          </div>
+          <>
+            <DesktopTable tableData={currentTableData} />
+            <MobileTable tableData={currentTableData} />
+          </>
         ) : Boolean(searchValue) ? (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
             <EmptyStateIcon iconName="search" />

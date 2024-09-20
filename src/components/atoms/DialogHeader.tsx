@@ -24,7 +24,12 @@ export default function DialogHeader({ onBack, onClose, title, paragraph, settin
           {onBack && (
             <IconButton onClick={onBack} iconName="back" buttonSize={IconButtonSize.LARGE} />
           )}
-          <h2 className={clsx("text-20 font-bold flex items-center", onBack && "justify-center")}>
+          <h2
+            className={clsx(
+              "text-18 lg:text-20 font-bold flex items-center text-nowrap",
+              onBack && "justify-center",
+            )}
+          >
             {title}
           </h2>
           <div className="flex items-center gap-2 justify-end">
