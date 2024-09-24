@@ -2,23 +2,15 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import React from "react";
 import { Address, formatUnits } from "viem";
 import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
 
-import DialogHeader from "@/components/atoms/DialogHeader";
-import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import { SearchInput } from "@/components/atoms/Input";
-import Preloader from "@/components/atoms/Preloader";
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
-import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
-import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -27,27 +19,7 @@ import useWithdraw from "@/hooks/useWithdraw";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
 
-import { RevokeDialog } from "../../add/components/DepositAmounts/RevokeDialog";
-import { useActiveWalletsDeposites } from "../stores/deposites.hooks";
-import { WalletDeposite } from "../stores/useWalletsDeposites";
-
-const filterTable = ({
-  searchValue,
-  value: { token },
-}: {
-  searchValue: string;
-  value: {
-    token: Token;
-  };
-}) => {
-  if (!searchValue) return true;
-  if (token.address0 === searchValue) return true;
-  if (token.address1 === searchValue) return true;
-  if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-  if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-
-  return false;
-};
+import { WalletDeposite } from "../../stores/useWalletsDeposites";
 
 const DepositedTokenWithdrawDialog = ({
   isOpen,
@@ -92,7 +64,7 @@ const DepositedTokenWithdrawDialog = ({
   );
 };
 
-const DepositedTokenTableItem = ({
+const WithdrawTableItem = ({
   deposite,
   walletAddress,
   onDetailsClick,
@@ -107,25 +79,38 @@ const DepositedTokenTableItem = ({
 
   return (
     <>
-      <div className={clsx("h-[56px] flex items-center gap-2 pl-5 rounded-l-3")}>
-        <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
-        <span>{`${deposite.token.name}`}</span>
+      <div className={clsx("h-[56px] flex justify-start items-center gap-2 pl-5 rounded-l-3")}>
+        <div className="flex gap-2">
+          <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+          <span>{`${deposite.token.name}`}</span>
+        </div>
+        <div
+          className="px-2 py-1 text-16 text-secondary-text bg-quaternary-bg rounded-2 flex justify-center items-center hover:bg-green-bg cursor-pointer duration-200"
+          onClick={() => {
+            onDetailsClick();
+          }}
+        >
+          {deposite.token.symbol}
+        </div>
       </div>
+
       <div className={clsx("h-[56px] flex items-center")}>
         {`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}
       </div>
-      <div className={clsx("h-[56px] flex items-center")}>$ —</div>
-      <div className={clsx("h-[56px] flex items-center justify-end pr-8")}>
-        <IconButton
-          iconName="details"
-          variant={IconButtonVariant.DEFAULT}
-          onClick={onDetailsClick}
-        />
+      <div className={clsx("h-[56px] flex items-center")}>
+        <a
+          className="flex gap-2 cursor-pointer hover:text-green-hover"
+          target="_blank"
+          href={getExplorerLink(ExplorerLinkType.ADDRESS, deposite.contractAddress, chainId)}
+        >
+          {truncateMiddle(deposite.contractAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
+          <Svg iconName="forward" />
+        </a>
       </div>
-      <div className={clsx("h-[56px] flex pr-5 rounded-r-3 flex-col justify-center")}>
+      <div className={clsx("h-[56px] flex rounded-r-3 flex-col justify-center")}>
         {address === walletAddress ? (
           <Button
-            variant={ButtonVariant.OUTLINED}
+            variant={ButtonVariant.CONTAINED}
             size={ButtonSize.MEDIUM}
             onClick={() => setIsWithdrawOpen(true)}
           >
@@ -157,7 +142,7 @@ const DepositedTokenTableItem = ({
   );
 };
 
-const DesktopTable = ({
+export const WithdrawDesktopTable = ({
   tableData,
   setTokenForPortfolio,
 }: {
@@ -165,17 +150,16 @@ const DesktopTable = ({
   setTokenForPortfolio: any;
 }) => {
   return (
-    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(87px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative min-w-[720px]">
       <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
       <div className="text-secondary-text h-[60px] flex items-center gap-2">
         Amount <Badge color="green" text="ERC-223" />
       </div>
-      <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
-      <div className="text-secondary-text h-[60px] flex items-center justify-end pr-6">Details</div>
-      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action / Owner</div>
+      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Contract address</div>
+      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action</div>
       {tableData.map((deposite, index) => {
         return (
-          <DepositedTokenTableItem
+          <WithdrawTableItem
             key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
             deposite={deposite}
             walletAddress={deposite.walletAddress}
@@ -189,7 +173,7 @@ const DesktopTable = ({
   );
 };
 
-const DepositedTokenMobileTableItem = ({
+const WithdrawMobileTableItem = ({
   deposite,
   walletAddress,
   onDetailsClick,
@@ -205,7 +189,7 @@ const DepositedTokenMobileTableItem = ({
   return (
     <>
       <div
-        className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2"
+        className="flex flex-col bg-tertiary-bg p-4 rounded-3 gap-2"
         key={deposite.token.address0}
       >
         <div className="flex justify-start items-start gap-1">
@@ -217,7 +201,7 @@ const DepositedTokenMobileTableItem = ({
             </div>
           </div>
           <div
-            className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center"
+            className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center hover:bg-green-bg cursor-pointer duration-200"
             onClick={() => {
               onDetailsClick();
             }}
@@ -228,6 +212,17 @@ const DepositedTokenMobileTableItem = ({
         <div className="flex gap-1 items-center">
           <Badge color="green" text="ERC-223" />
           <span className="text-12 text-secondary-text">{`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}</span>
+        </div>
+        <div className="flex justify-between items-center rounded-2 bg-quaternary-bg px-4 py-[10px]">
+          <span className="text-14 text-secondary-text">Contract address</span>
+          <a
+            className="flex gap-2 text-14 cursor-pointer items-center hover:text-green-hover"
+            target="_blank"
+            href={getExplorerLink(ExplorerLinkType.ADDRESS, deposite.contractAddress, chainId)}
+          >
+            {truncateMiddle(deposite.contractAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
+            <Svg iconName="forward" />
+          </a>
         </div>
         <div className="flex flex-col justify-center mt-1">
           {address === walletAddress ? (
@@ -265,7 +260,7 @@ const DepositedTokenMobileTableItem = ({
   );
 };
 
-const MobileTable = ({
+export const WithdrawMobileTable = ({
   tableData,
   setTokenForPortfolio,
 }: {
@@ -276,7 +271,7 @@ const MobileTable = ({
     <div className="flex lg:hidden flex-col gap-4">
       {tableData.map((deposite, index: number) => {
         return (
-          <DepositedTokenMobileTableItem
+          <WithdrawMobileTableItem
             key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
             deposite={deposite}
             walletAddress={deposite.walletAddress}
@@ -287,92 +282,5 @@ const MobileTable = ({
         );
       })}
     </div>
-  );
-};
-
-export const Deposited = () => {
-  const t = useTranslations("Portfolio");
-  const [searchValue, setSearchValue] = useState("");
-  const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
-  const isTokenInfoOpened = Boolean(tokenForPortfolio);
-  const handleClosTokenInfo = () => {
-    setTokenForPortfolio(null);
-  };
-
-  const { isLoading, deposites } = useActiveWalletsDeposites();
-
-  const currentTableData = deposites
-    .reduce(
-      (acc, walletDeposites) => {
-        const deposites: (WalletDeposite & { walletAddress: Address })[] =
-          walletDeposites.deposites.map((deposite) => ({
-            walletAddress: walletDeposites.address,
-            ...deposite,
-          }));
-        return [...acc, ...deposites];
-      },
-      [] as (WalletDeposite & { walletAddress: Address })[],
-    )
-    .filter((value) => filterTable({ searchValue, value }));
-
-  return (
-    <>
-      <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
-          <div className="flex flex-col ">
-            <div className="flex items-center gap-1">
-              <span className="text-14 lg:text-16">Deposited to contract</span>
-              <Tooltip iconSize={20} text="Info text" />
-            </div>
-            <span className="text-24 lg:text-32 font-medium">$ —</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
-        <h1 className="text-18 lg:text-32 font-medium">{t("deposited_title")}</h1>
-        <div className="flex flex-col lg:flex-row gap-3">
-          <SearchInput
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder={t("balances_search_placeholder")}
-            className="bg-primary-bg lg:w-[480px]"
-          />
-        </div>
-      </div>
-      {/*  */}
-      <div className="mt-5 min-h-[640px] mb-5 w-full">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-full min-h-[550px]">
-            <Preloader type="awaiting" size={48} />
-          </div>
-        ) : currentTableData.length ? (
-          <>
-            <DesktopTable
-              tableData={currentTableData}
-              setTokenForPortfolio={setTokenForPortfolio}
-            />
-            <MobileTable tableData={currentTableData} setTokenForPortfolio={setTokenForPortfolio} />
-          </>
-        ) : Boolean(searchValue) ? (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="search" />
-            <span className="text-secondary-text">Deposite not found</span>
-          </div>
-        ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="deposited-tokens" />
-            <span className="text-secondary-text">No deposited tokens yet</span>
-          </div>
-        )}
-        <DrawerDialog isOpen={isTokenInfoOpened} setIsOpen={handleClosTokenInfo}>
-          <DialogHeader
-            onClose={handleClosTokenInfo}
-            title={tokenForPortfolio?.name || "Unknown"}
-          />
-          {tokenForPortfolio ? <TokenPortfolioDialogContent token={tokenForPortfolio} /> : null}
-        </DrawerDialog>
-      </div>
-    </>
   );
 };

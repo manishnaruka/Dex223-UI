@@ -96,6 +96,54 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
   );
 };
 
+const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
+  const { searchValue, setSearchValue, errorSearch } = useActiveAddresses();
+
+  const t = useTranslations("Portfolio");
+
+  const error = Boolean(searchValue) && !isAddress(searchValue) ? t("enter_in_correct_format") : "";
+
+  const { addWallet } = usePortfolioStore();
+
+  const handleAddWallet = useCallback(() => {
+    if (searchValue && !error) {
+      addWallet(searchValue as Address);
+      setSearchValue("");
+      addToast("Successfully added!");
+      if (onAdd) {
+        onAdd();
+      }
+    }
+  }, [addWallet, onAdd, searchValue, error, setSearchValue]);
+
+  return (
+    <div className="relative">
+      <SearchInput
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        placeholder={t("search_placeholder")}
+        className={clsx(
+          "bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]",
+          searchValue && "pr-[92px]",
+        )}
+      />
+      {<p className="text-12 text-red-input mt-1 h-4">{errorSearch}</p>}
+      {searchValue ? (
+        <div className={clsx("absolute right-[48px] top-1 flex items-center justify-center")}>
+          <IconButton
+            variant={IconButtonVariant.ADD}
+            buttonSize={IconButtonSize.REGULAR}
+            iconSize={IconSize.REGULAR}
+            disabled={!!error}
+            handleAdd={handleAddWallet}
+            className="h-8 w-8 lg:h-10 lg:w-10"
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 export type ManageWalletsPopoverContent = "add" | "list" | "manage";
 
 const PopoverTitles: { [key in ManageWalletsPopoverContent]: string } = {
@@ -370,15 +418,7 @@ export function Portfolio() {
         <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
           <h1 className="text-24 lg:text-40 font-medium">{t("title")}</h1>
           <div className="flex flex-col lg:flex-row gap-2 lg:gap-3">
-            <div className="">
-              <SearchInput
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder={t("search_placeholder")}
-                className="bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]"
-              />
-              {<p className="text-12 text-red-input mt-1 h-4">{errorSearch}</p>}
-            </div>
+            <WalletSearchInput />
             <ManageWallets />
           </div>
         </div>
