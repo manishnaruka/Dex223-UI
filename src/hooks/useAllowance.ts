@@ -10,8 +10,6 @@ import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { useAllowanceStore } from "@/stores/useAllowanceStore";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,
@@ -49,8 +47,6 @@ export function useStoreAllowance({
   const chainId = useCurrentChainId();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
-
-  const { allowances, addAllowanceItem, updateAllowedToSpend } = useAllowanceStore();
 
   const { refetch, data: currentAllowanceData } = useReadContract({
     abi: ERC20_ABI,

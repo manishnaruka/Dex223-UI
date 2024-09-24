@@ -244,6 +244,10 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
         return pinnedTokens.indexOf(b.address0) - pinnedTokens.indexOf(a.address0);
       });
 
+      if (onlyCustom) {
+        return [...sortedPinned, ...unpinned];
+      }
+
       return [native, ...sortedPinned, ...unpinned];
     }
 
@@ -261,6 +265,10 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
       return pinnedTokens.indexOf(b.address0) - pinnedTokens.indexOf(a.address0);
     });
 
+    if (onlyCustom) {
+      return [...sortedPinned, ...unpinned];
+    }
+
     return [native, ...sortedPinned, ...unpinned];
-  }, [chainId, pinnedTokens, tokenLists]);
+  }, [chainId, onlyCustom, pinnedTokens, tokenLists]);
 }

@@ -8,7 +8,9 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
+import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
+import { Check, rateToScore, TrustMarker, TrustRateCheck } from "@/components/badges/TrustBadge";
 import IconButton from "@/components/buttons/IconButton";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
@@ -22,6 +24,27 @@ interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handlePick: (token: Currency) => void;
+}
+
+function FoundInOtherListMarker() {
+  return (
+    <Tooltip
+      text="There is a token with a same name but different address"
+      renderTrigger={(ref, refProps) => {
+        return (
+          <div
+            className="rounded-full p-0.5 bg-primary-bg group-hover:bg-tertiary-bg duration-200"
+            ref={ref.setReference}
+            {...refProps}
+          >
+            <div className="rounded-full p-0.5 flex items-center gap-1 cursor-pointer text-12 text-orange bg-orange-bg">
+              <Svg size={20} iconName="duplicate-found" />
+            </div>
+          </div>
+        );
+      }}
+    />
+  );
 }
 
 function TokenRow({
@@ -43,16 +66,47 @@ function TokenRow({
     balance: { erc20Balance, erc223Balance },
   } = useTokenBalances(isTokenPinned ? currency : undefined);
 
+  const scoreObj = useMemo((): [number, boolean] | undefined => {
+    if (currency.isToken && currency.rate) {
+      return [
+        rateToScore(currency.rate),
+        currency.rate[Check.SAME_NAME_IN_OTHER_LIST] === TrustRateCheck.TRUE,
+      ];
+    }
+
+    return;
+  }, [currency]);
+
   return (
     <div
       role="button"
       onClick={() => handlePick(currency)}
-      className="px-10 flex justify-between py-2 hover:bg-tertiary-bg duration-200"
+      className="px-10 flex justify-between py-2 hover:bg-tertiary-bg duration-200 group"
     >
       <div className="flex items-center gap-3 flex-grow">
         <Image width={40} height={40} src={currency?.logoURI || ""} alt="" />
         <div className="grid flex-grow">
-          <span>{currency.symbol}</span>
+          <div className="flex items-center gap-2">
+            <span>{currency.name}</span>
+            <div className="flex relative items-center">
+              {scoreObj && (
+                <>
+                  {scoreObj[0] < 20 && (
+                    <>
+                      {currency.isToken && currency.rate && (
+                        <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
+                      )}
+                    </>
+                  )}
+                  {scoreObj[1] && (
+                    <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
+                      <FoundInOtherListMarker />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
           <div className="auto-cols-fr grid grid-flow-col gap-2">
             {erc20Balance && (
               <div className="flex items-center gap-1">

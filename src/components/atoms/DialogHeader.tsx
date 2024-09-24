@@ -18,13 +18,18 @@ export default function DialogHeader({ onBack, onClose, title, paragraph, settin
         <div
           className={clsx(
             "grid flex-grow",
-            onBack ? "grid-cols-3" : "grid-cols-[1fr_48px] md:grid-cols-2",
+            onBack ? "grid-cols-3" : "grid-cols-[1fr_auto] md:grid-cols-2",
           )}
         >
           {onBack && (
             <IconButton onClick={onBack} iconName="back" buttonSize={IconButtonSize.LARGE} />
           )}
-          <h2 className={clsx("text-20 font-bold flex items-center", onBack && "justify-center")}>
+          <h2
+            className={clsx(
+              "text-18 md:text-20 font-bold flex items-center",
+              onBack && "justify-center",
+            )}
+          >
             {title}
           </h2>
           <div className="flex items-center gap-2 justify-end">

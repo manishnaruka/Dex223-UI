@@ -14,7 +14,6 @@ import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 
-//TODO: change manage token item for Native currency, 16.09.2024
 export default function ManageTokenItem({
   token,
   setTokenForPortfolio,
@@ -111,10 +110,12 @@ export default function ManageTokenItem({
               </DrawerDialog>
             </div>
           )}
-          <span className="flex gap-0.5 items-center text-secondary-text text-14">
-            {token.wrapped.lists?.length || 1}
-            <Svg className="text-tertiary-text" iconName="list" />
-          </span>
+          {token.isToken && (
+            <span className="flex gap-0.5 items-center text-secondary-text text-14">
+              {token.wrapped.lists?.length || 1}
+              <Svg className="text-tertiary-text" iconName="list" />
+            </span>
+          )}
 
           {token.isToken && (
             <IconButton onClick={() => setTokenForPortfolio(token)} iconName="details" />

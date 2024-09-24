@@ -508,7 +508,6 @@ export default function ConfirmSwapDialog() {
         setIsOpen(isOpen);
         if (isSettledSwap) {
           resetAmounts();
-          resetTokens();
         }
       }}
     >
@@ -517,7 +516,6 @@ export default function ConfirmSwapDialog() {
           onClose={() => {
             if (isSettledSwap) {
               resetAmounts();
-              resetTokens();
             }
             setIsOpen(false);
           }}

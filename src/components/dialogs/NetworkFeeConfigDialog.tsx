@@ -497,7 +497,9 @@ function NetworkFeeDialogContent({ setIsOpen }: { setIsOpen: (isOpen: boolean) =
                   {!isAdvanced && isEip1559Supported(chainId) && (
                     <div className={clsx("px-5 pb-4")}>
                       <div className="flex justify-between items-center pb-3 pt-3">
-                        Custom gas settings
+                        <span>
+                          <span className="hidden md:inline">Custom gas settings</span>
+                        </span>
                         <TextButton
                           onClick={() => {
                             const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
@@ -556,7 +558,9 @@ function NetworkFeeDialogContent({ setIsOpen }: { setIsOpen: (isOpen: boolean) =
                   {!isAdvanced && !isEip1559Supported(chainId) && (
                     <div className={clsx("px-5 pb-4")}>
                       <div className="flex justify-between items-center pb-3 pt-3">
-                        Custom gas settings
+                        <span>
+                          <span className="hidden md:inline">Custom gas settings</span>
+                        </span>
                         <TextButton
                           onClick={() => {
                             const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
@@ -632,7 +636,9 @@ function NetworkFeeDialogContent({ setIsOpen }: { setIsOpen: (isOpen: boolean) =
                   {isAdvanced && !isEip1559Supported(chainId) && (
                     <div className={clsx("px-5 pb-4 flex flex-col gap-4")}>
                       <div className="flex justify-between items-center pb-3 pt-3">
-                        Custom gas settings
+                        <span>
+                          <span className="hidden md:inline">Custom gas settings</span>
+                        </span>
                         <TextButton
                           onClick={() => {
                             const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
@@ -740,7 +746,9 @@ function NetworkFeeDialogContent({ setIsOpen }: { setIsOpen: (isOpen: boolean) =
                   {isAdvanced && isEip1559Supported(chainId) && (
                     <div className="px-5 pb-4">
                       <div className="flex justify-between items-center pb-3 pt-3">
-                        Custom gas settings
+                        <span>
+                          <span className="hidden md:inline">Custom gas settings</span>
+                        </span>
                         <TextButton
                           onClick={() => {
                             const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];

@@ -127,6 +127,8 @@ export const svgIconsNames = [
   "change-network",
   "arrow-in",
   "listing-details",
+  "duplicate-found",
+  "warning-outline",
 ] as const;
 
 export const socialIconNames = [""] as const;
