@@ -12,6 +12,60 @@ import { clsxMerge } from "@/functions/clsxMerge";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
 
+function MobileStandardOption({
+  balance,
+  symbol,
+  standard,
+  active,
+  setIsActive,
+  token,
+}: {
+  balance: string | undefined;
+  symbol: string | undefined;
+  standard: Standard;
+  active: Standard;
+  setIsActive: (isActive: Standard) => void;
+  token: Token | undefined;
+}) {
+  const t = useTranslations("Swap");
+  const isActive = useMemo(() => {
+    return active === standard;
+  }, [active, standard]);
+
+  return (
+    <div className="flex flex-col">
+      <div
+        role="button"
+        onClick={() => setIsActive(standard)}
+        className={clsxMerge(
+          "*:z-10 pt-10 flex flex-col gap-1 px-3 pb-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-standard-gradient hover:cursor-pointer text-12 group",
+          isActive ? "before:opacity-100" : "before:opacity-0 hover:before:opacity-100",
+          standard === Standard.ERC223 && "before:rotate-180 items-end bg-swap-radio-right",
+          standard === Standard.ERC20 && "bg-swap-radio-left",
+          !token && "before:opacity-0 hover:before:opacity-0 before:cursor-default cursor-default",
+        )}
+      >
+        {!token ? (
+          <div className="text-tertiary-text cursor-default">—</div>
+        ) : (
+          <span
+            className={clsx(
+              "flex flex-col",
+              standard === active ? "text-primary-text" : "text-tertiary-text",
+              standard === Standard.ERC223 && "items-end",
+            )}
+          >
+            {t("balance")}{" "}
+            <span className="whitespace-nowrap">
+              {balance || "0.0"} {symbol}
+            </span>
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function StandardOption({
   balance,
   symbol,
@@ -180,7 +234,49 @@ export default function TokenInput({
           )}
         </SelectButton>
       </div>
-      <div className="flex flex-col md:grid md:grid-cols-2 gap-1 md:gap-3 relative">
+      <div className="md:hidden pb-2 relative grid grid-cols-2">
+        <MobileStandardOption
+          token={token}
+          setIsActive={setStandard}
+          active={standard}
+          standard={Standard.ERC20}
+          symbol={token?.symbol}
+          balance={balance0}
+        />
+        <div
+          className={clsxMerge(
+            "mx-auto z-10 text-10 w-[calc(100%-24px)] left-1/2 -translate-x-1/2 h-[32px] absolute top-1 rounded-20 border-green border p-1 flex gap-1 items-center",
+            !token && "border-secondary-border",
+          )}
+        >
+          {[Standard.ERC20, Standard.ERC223].map((st) => {
+            return (
+              <button
+                key={st}
+                className={clsxMerge(
+                  "h-6 rounded-3 duration-200 px-2 min-w-[58px] w-full text-10",
+                  standard === st ? "bg-green text-black shadow-checkbox" : "hover:bg-green-bg",
+                  !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
+                  !token && "text-tertiary-text pointer-events-none",
+                )}
+                onClick={() => setStandard(st)}
+              >
+                Standard {st}
+              </button>
+            );
+          })}
+        </div>
+
+        <MobileStandardOption
+          token={token}
+          setIsActive={setStandard}
+          active={standard}
+          standard={Standard.ERC223}
+          symbol={token?.symbol}
+          balance={balance1}
+        />
+      </div>
+      <div className="hidden md:grid md:grid-cols-2 gap-1 md:gap-3 relative">
         <StandardOption
           token={token}
           setIsActive={setStandard}
