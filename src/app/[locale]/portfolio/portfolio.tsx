@@ -469,7 +469,7 @@ export function Portfolio() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0">
               <EmptyStateIcon iconName="wallet" size={40} />
               <span className="text-secondary-text">
                 Add address or connect wallet to view portfolio
