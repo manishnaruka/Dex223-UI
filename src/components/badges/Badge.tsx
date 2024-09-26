@@ -30,7 +30,7 @@ export default function Badge(props: Props) {
       return (
         <div
           className={clsx(
-            "rounded-5 px-2 border font-medium",
+            "rounded-5 px-2 border font-medium text-nowrap",
             color === "blue" && "bg-blue-bg border-blue text-blue",
             color === "green" && "bg-green-bg border-green text-green",
             color === "purple" && "bg-purple-bg border-purple text-purple",

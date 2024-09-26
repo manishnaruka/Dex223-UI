@@ -116,62 +116,74 @@ export default function IconButton(_props: Props) {
       );
 
     case IconButtonVariant.DELETE: {
-      const { handleDelete, ...props } = _props;
+      const { handleDelete, className, ...props } = _props;
 
       return (
         <IconButtonFrame
           iconName="delete"
           onClick={_props.handleDelete}
-          className="rounded-full bg-transparent hover:bg-red-bg text-tertiary-text hover:text-red duration-200"
+          className={clsxMerge(
+            "rounded-full bg-transparent hover:bg-red-bg text-tertiary-text hover:text-red duration-200",
+            className,
+          )}
           {...props}
         />
       );
     }
     case IconButtonVariant.ADD: {
-      const { handleAdd, ...props } = _props;
+      const { handleAdd, className, ...props } = _props;
 
       return (
         <IconButtonFrame
           iconName="add"
           onClick={_props.handleAdd}
-          className="bg-green text-black hover:bg-green-hover rounded-2 duration-200"
+          className={clsxMerge(
+            "bg-green text-black hover:bg-green-hover rounded-2 duration-200",
+            className,
+          )}
           {...props}
         />
       );
     }
     case IconButtonVariant.CLOSE: {
-      const { handleClose, ...props } = _props;
+      const { handleClose, className, ...props } = _props;
 
       return (
         <IconButtonFrame
           iconName="close"
           onClick={(e) => _props.handleClose(e)}
-          className="text-secondary-text hover:text-primary-text duration-200"
+          className={clsxMerge(
+            "text-secondary-text hover:text-primary-text duration-200",
+            className,
+          )}
           {...props}
         />
       );
     }
     case IconButtonVariant.CONTROL: {
-      const { iconName, buttonSize, ...props } = _props;
+      const { iconName, buttonSize, className, ...props } = _props;
 
       return (
         <IconButtonFrame
           iconName={iconName}
           buttonSize={buttonSize || IconButtonSize.SMALL}
-          className="rounded-2 hover:bg-green-bg bg-transparent duration-200 text-primary-text"
+          className={clsxMerge(
+            "rounded-2 hover:bg-green-bg bg-transparent duration-200 text-primary-text",
+            className,
+          )}
           {...props}
         />
       );
     }
     case IconButtonVariant.COPY: {
-      const { handleCopy, buttonSize, ...props } = _props;
+      const { handleCopy, buttonSize, className, ...props } = _props;
 
       return (
         <IconButtonFrame
           iconName="copy"
           onClick={_props.handleCopy}
           buttonSize={buttonSize || IconButtonSize.SMALL}
-          className="hover:text-green duration-200 text-primary-text"
+          className={clsxMerge("hover:text-green duration-200 text-primary-text", className)}
           {...props}
         />
       );
