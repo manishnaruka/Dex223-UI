@@ -10,7 +10,6 @@ import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
 export const MarginPositions = () => {

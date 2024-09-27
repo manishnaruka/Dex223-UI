@@ -5,12 +5,14 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { Address, isAddress } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
 
 import Checkbox from "@/components/atoms/Checkbox";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
+import Drawer from "@/components/atoms/Drawer";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Popover from "@/components/atoms/Popover";
@@ -94,6 +96,54 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
   );
 };
 
+const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
+  const { searchValue, setSearchValue, errorSearch } = useActiveAddresses();
+
+  const t = useTranslations("Portfolio");
+
+  const error = Boolean(searchValue) && !isAddress(searchValue) ? t("enter_in_correct_format") : "";
+
+  const { addWallet } = usePortfolioStore();
+
+  const handleAddWallet = useCallback(() => {
+    if (searchValue && !error) {
+      addWallet(searchValue as Address);
+      setSearchValue("");
+      addToast("Successfully added!");
+      if (onAdd) {
+        onAdd();
+      }
+    }
+  }, [addWallet, onAdd, searchValue, error, setSearchValue]);
+
+  return (
+    <div className="relative">
+      <SearchInput
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        placeholder={t("search_placeholder")}
+        className={clsx(
+          "bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]",
+          searchValue && "pr-[92px]",
+        )}
+      />
+      {<p className="text-12 text-red-input mt-1 h-4">{errorSearch}</p>}
+      {searchValue ? (
+        <div className={clsx("absolute right-[48px] top-1 flex items-center justify-center")}>
+          <IconButton
+            variant={IconButtonVariant.ADD}
+            buttonSize={IconButtonSize.REGULAR}
+            iconSize={IconSize.REGULAR}
+            disabled={!!error}
+            handleAdd={handleAddWallet}
+            className="h-8 w-8 lg:h-10 lg:w-10"
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 export type ManageWalletsPopoverContent = "add" | "list" | "manage";
 
 const PopoverTitles: { [key in ManageWalletsPopoverContent]: string } = {
@@ -102,7 +152,7 @@ const PopoverTitles: { [key in ManageWalletsPopoverContent]: string } = {
   manage: "Manage wallets",
 };
 
-const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => void }) => {
+const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => void }) => {
   const t = useTranslations("Portfolio");
   const tWallet = useTranslations("Wallet");
   const { isConnected } = useAccount();
@@ -136,7 +186,7 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
   }, [content, wallets.length]);
 
   return (
-    <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popup min-w-[450px]">
+    <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popup lg:min-w-[450px]">
       <DialogHeader
         onClose={() => {
           setIsOpened(false);
@@ -149,8 +199,8 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
               size={ButtonSize.MEDIUM}
               onClick={() => setContent("add")}
             >
-              <div className="flex items-center gap-2 ml-[-8px] mr-[-12px]">
-                <span>Add address</span>
+              <div className="flex items-center gap-2 ml-[-8px] mr-[-12px] text-nowrap">
+                <span>Add wallet</span>
                 <Svg iconName="add" />
               </div>
             </Button>
@@ -290,26 +340,15 @@ const ManageWallets = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => vo
   );
 };
 
-export function Portfolio() {
-  usePortfolioSearchParams();
-
-  const chainId = useCurrentChainId();
-  const router = useRouter();
-  const t = useTranslations("Portfolio");
-  const tToast = useTranslations("Toast");
-
+const ManageWallets = () => {
   const [isOpened, setIsOpened] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-
   const { wallets } = usePortfolioWallets();
+  const _isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
-  const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
-
-  const { activeAddresses } = useActiveAddresses();
   const trigger = useMemo(
     () => (
       <SelectButton
-        className="py-2 text-16 w-full md:w-full flex items-center justify-between lg:justify-center lg:order-[-1]"
+        className="lg:h-[48px] py-2 text-16 w-full md:w-full flex items-center justify-between lg:justify-center lg:order-[-1]"
         isOpen={isOpened}
         onClick={() => setIsOpened(!isOpened)}
       >
@@ -337,25 +376,50 @@ export function Portfolio() {
   );
 
   return (
+    <>
+      {_isMobile ? (
+        <>
+          {trigger}
+          <Drawer placement="bottom" isOpen={isOpened} setIsOpen={setIsOpened}>
+            <ManageWalletsContent setIsOpened={setIsOpened} />
+          </Drawer>
+        </>
+      ) : (
+        <Popover
+          isOpened={isOpened}
+          setIsOpened={setIsOpened}
+          placement={"bottom-start"}
+          trigger={trigger}
+        >
+          <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popup">
+            <ManageWalletsContent setIsOpened={setIsOpened} />
+          </div>
+        </Popover>
+      )}
+    </>
+  );
+};
+
+export function Portfolio() {
+  usePortfolioSearchParams();
+
+  const chainId = useCurrentChainId();
+  const router = useRouter();
+  const t = useTranslations("Portfolio");
+  const tToast = useTranslations("Toast");
+
+  const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
+
+  const { activeAddresses, searchValue, setSearchValue, errorSearch } = useActiveAddresses();
+
+  return (
     <Container>
       <div className="p-4 lg:p-10 flex flex-col max-w-[100dvw]">
         <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
           <h1 className="text-24 lg:text-40 font-medium">{t("title")}</h1>
           <div className="flex flex-col lg:flex-row gap-2 lg:gap-3">
-            <SearchInput
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder={t("search_placeholder")}
-              className="bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]"
-            />
-            <Popover
-              isOpened={isOpened}
-              setIsOpened={setIsOpened}
-              placement={"bottom-end"}
-              trigger={trigger}
-            >
-              <ManageWallets setIsOpened={setIsOpened} />
-            </Popover>
+            <WalletSearchInput />
+            <ManageWallets />
           </div>
         </div>
         <div className="mt-5 flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
@@ -405,7 +469,7 @@ export function Portfolio() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0">
               <EmptyStateIcon iconName="wallet" size={40} />
               <span className="text-secondary-text">
                 Add address or connect wallet to view portfolio

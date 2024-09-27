@@ -187,8 +187,6 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
   const tokenLists = useTokenLists(onlyCustom);
   const chainId = useCurrentChainId();
 
-  const pinnedTokens = usePinnedTokensStore((s) => s.tokens?.[chainId] || []);
-
   return useMemo(() => {
     const native = NativeCoin.onChain(chainId);
 
@@ -236,19 +234,11 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
 
       const _t = inspect(...tokensArrays);
 
-      const pinned = _t.filter((t) => pinnedTokens.includes(t.address0));
-      const unpinned = _t.filter((t) => !pinnedTokens.includes(t.address0));
-
-      // Sort pinned tokens according to the order in pinnedTokens array
-      const sortedPinned = pinned.sort((a, b) => {
-        return pinnedTokens.indexOf(b.address0) - pinnedTokens.indexOf(a.address0);
-      });
-
       if (onlyCustom) {
-        return [...sortedPinned, ...unpinned];
+        return _t;
       }
 
-      return [native, ...sortedPinned, ...unpinned];
+      return [native, ..._t];
     }
 
     const tokens =
@@ -257,18 +247,10 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
         .map((l) => l.list.tokens)
         .flat() || [];
 
-    const pinned = tokens.filter((t) => pinnedTokens.includes(t.address0));
-    const unpinned = tokens.filter((t) => !pinnedTokens.includes(t.address0));
-
-    // Sort pinned tokens according to the order in pinnedTokens array
-    const sortedPinned = pinned.sort((a, b) => {
-      return pinnedTokens.indexOf(b.address0) - pinnedTokens.indexOf(a.address0);
-    });
-
     if (onlyCustom) {
-      return [...sortedPinned, ...unpinned];
+      return tokens;
     }
 
-    return [native, ...sortedPinned, ...unpinned];
-  }, [chainId, onlyCustom, pinnedTokens, tokenLists]);
+    return [native, ...tokens];
+  }, [chainId, onlyCustom, tokenLists]);
 }

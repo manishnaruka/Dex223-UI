@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -13,7 +14,9 @@ import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import { Check, rateToScore, TrustMarker, TrustRateCheck } from "@/components/badges/TrustBadge";
 import IconButton from "@/components/buttons/IconButton";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
+import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -129,13 +132,17 @@ function TokenRow({
       </div>
       <div className="flex items-center gap-3">
         <span>$0.00</span>
-        <IconButton
-          iconName="details"
-          onClick={(e) => {
-            e.stopPropagation();
-            setTokenForPortfolio(currency);
-          }}
-        />
+        {currency.isToken ? (
+          <IconButton
+            iconName="details"
+            onClick={(e) => {
+              e.stopPropagation();
+              setTokenForPortfolio(currency);
+            }}
+          />
+        ) : (
+          <span className="block w-10" />
+        )}
         <IconButton
           className={clsx("duration-200", isTokenPinned ? "text-green" : "hover:text-green")}
           iconName={isTokenPinned ? "pin-fill" : "pin"}
@@ -152,8 +159,15 @@ function TokenRow({
 export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props) {
   const tokens = useTokens();
   const t = useTranslations("ManageTokens");
+  const chainId = useCurrentChainId();
+  const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();
+
+  const pinnedTokens = useMemo(() => {
+    return tokens.filter((t) => pinnedTokensAddresses[chainId].includes(t.wrapped.address0));
+  }, [chainId, pinnedTokensAddresses, tokens]);
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
+  const [isEditActivated, setEditActivated] = useState<boolean>(true);
   const { isOpen: isManageOpened, setIsOpen: setManageOpened } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
@@ -175,6 +189,13 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
         ]
       : [tokens, false];
   }, [tokens, tokensSearchValue]);
+  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+
+  useEffect(() => {
+    if (!isMobile) {
+      setEditActivated(false);
+    }
+  }, [isMobile]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
@@ -202,19 +223,58 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     onChange={(e) => setTokensSearchValue(e.target.value)}
                     placeholder={t("search_name_or_paste_address")}
                   />
-                  <div className="mt-3 grid grid-cols-3 gap-3">
-                    <button className="opacity-50 pointer-events-none items-center justify-center duration-200 h-10 rounded-1 border border-primary-border hover:border-green flex gap-2">
-                      <Image width={24} height={24} src="/tokens/ETH.svg" alt="" />
-                      ETH
-                    </button>
-                    <button className="opacity-50 pointer-events-none items-center justify-center duration-200 h-10 rounded-1 border border-primary-border hover:border-green flex gap-2">
-                      <Image width={24} height={24} src="/tokens/USDT.svg" alt="" />
-                      USDT
-                    </button>
-                    <button className="opacity-50 pointer-events-none items-center justify-center duration-200 h-10 rounded-1 border border-primary-border hover:border-green flex gap-2">
-                      <Image width={24} height={24} src="/tokens/DEX.svg" alt="" />
-                      DEX223
-                    </button>
+                  <div
+                    className={clsx(
+                      "flex flex-wrap gap-3 mt-3",
+                      !!pinnedTokens.length && "border-b border-secondary-border pb-3",
+                    )}
+                  >
+                    {pinnedTokens.map((pinnedToken) => {
+                      return (
+                        <div key={pinnedToken.wrapped.address0} className="group relative">
+                          <button
+                            onClick={() => {
+                              if (isMobile && isEditActivated) {
+                                toggleToken(pinnedToken.wrapped.address0, pinnedToken.chainId);
+                              } else {
+                                handlePick(pinnedToken);
+                              }
+                            }}
+                            className="items-center justify-center px-4 duration-200 h-10 rounded-1 bg-tertiary-bg hover:bg-green-bg flex gap-2"
+                          >
+                            <Image
+                              width={24}
+                              height={24}
+                              src={pinnedToken.logoURI || "/tokens/placeholder.svg"}
+                              alt=""
+                            />
+                            {pinnedToken.symbol}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleToken(pinnedToken.wrapped.address0, pinnedToken.chainId);
+                            }}
+                            className={clsxMerge(
+                              "group-hover:opacity-100 opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text hover:text-primary-text -right-1 -top-1",
+                              isEditActivated && "opacity-100",
+                            )}
+                          >
+                            <Svg size={16} iconName="close" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                    {
+                      <span className="md:hidden">
+                        <IconButton
+                          onClick={() => {
+                            setEditActivated(!isEditActivated);
+                          }}
+                          iconName="edit"
+                        />
+                      </span>
+                    }
                   </div>
                 </div>
                 {Boolean(filteredTokens.length) && (

@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { className } from "postcss-selector-parser";
 import { ChangeEvent, forwardRef, InputHTMLAttributes, useRef } from "react";
 
 import Svg from "@/components/atoms/Svg";
@@ -49,7 +48,7 @@ export function SearchInput(props: Props) {
 
   return (
     <div className="relative w-full">
-      <Input className={clsxMerge(props.className, "pr-12")} ref={ref} {...props} />
+      <Input className={clsxMerge("pr-12", props.className)} ref={ref} {...props} />
       <span
         className={clsx(
           "absolute right-2 flex items-center justify-center h-full w-10 top-0",
