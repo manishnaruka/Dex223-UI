@@ -78,7 +78,7 @@ export default function PriceRangeInput({
 
   return (
     <div
-      className="bg-primary-bg rounded-3 p-5 flex justify-between items-center"
+      className="bg-secondary-bg rounded-3 p-5 flex justify-between items-center"
       onFocus={handleOnFocus}
       onBlur={handleOnBlur}
     >
@@ -106,14 +106,14 @@ export default function PriceRangeInput({
           variant={IconButtonVariant.CONTROL}
           iconName="add"
           onClick={handleIncrement}
-          className="rounded-2 bg-secondary-bg hover:bg-green-bg duration-200 text-primary-text"
+          className="rounded-2 bg-primary-bg hover:bg-green-bg duration-200 text-primary-text"
           disabled={noLiquidity}
         />
         <IconButton
           variant={IconButtonVariant.CONTROL}
           iconName="minus"
           onClick={handleDecrement}
-          className="rounded-2 bg-secondary-bg hover:bg-green-bg duration-200 text-primary-text"
+          className="rounded-2 bg-primary-bg hover:bg-green-bg duration-200 text-primary-text"
           disabled={noLiquidity}
         />
       </div>

@@ -95,7 +95,7 @@ function InputTotalAmount({
 
   return (
     <div>
-      <div className="bg-primary-bg px-5 pt-5 pb-4 rounded-3">
+      <div className="bg-secondary-bg p-4 lg:p-5 pb-3 lg:pb-4 rounded-3">
         <div className="mb-1 flex justify-between items-center">
           <NumericFormat
             decimalScale={token?.decimals}
@@ -110,7 +110,7 @@ function InputTotalAmount({
             allowNegative={false}
             disabled={isDisabled}
           />
-          <div className="bg-secondary-bg rounded-5 py-1 pl-1 pr-3 flex items-center gap-2 min-w-[100px]">
+          <div className="bg-secondary-bg rounded-5 py-1 pl-1 pr-3 flex items-center gap-2 min-w-[88px]">
             {token ? (
               <>
                 <Image src={token?.logoURI || ""} alt="" width={24} height={24} />
@@ -121,8 +121,8 @@ function InputTotalAmount({
             )}
           </div>
         </div>
-        <div className="flex justify-between items-center text-14">
-          <span className="text-secondary-text">—</span>
+        <div className="flex justify-between items-center">
+          <span className="text-secondary-text text-12 lg:text-14">—</span>
           <div className="flex gap-1">
             <span className="text-12 md:text-14">
               {token &&
@@ -131,7 +131,7 @@ function InputTotalAmount({
             <Button
               variant={ButtonVariant.CONTAINED}
               size={ButtonSize.EXTRA_SMALL}
-              className="bg-tertiary-bg text-main-primary xl:px-2 hover:bg-secondary-bg"
+              className="bg-tertiary-bg text-main-primary px-2 hover:bg-secondary-bg"
               onClick={maxHandler}
             >
               Max
@@ -179,19 +179,19 @@ function InputStandardAmount({
   const [isOpenedRevokeDialog, setIsOpenedRevokeDialog] = useState(false);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <span>{t("standard")}</span>
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex items-center gap-1 lg:gap-2">
+        <span className="text-secondary-text">{t("standard")}</span>
         <Badge color={standard === Standard.ERC20 ? "purple" : "green"} text={standard} />
         <Tooltip
           iconSize={20}
           text={standard === Standard.ERC20 ? tSwap("erc20_tooltip") : tSwap("erc223_tooltip")}
         />
       </div>
-      <div className="bg-primary-bg px-4 py-2 md:p-5 w-full rounded-2">
+      <div className="bg-secondary-bg px-4 lg:px-5 pt-2 lg:pt-3 pb-3 lg:pb-4 w-full rounded-2">
         <div className="mb-1 flex justify-between items-center">
           <input
-            className="bg-transparent outline-0 text-16 md:text-20 w-full"
+            className="bg-transparent outline-0 text-16 w-full"
             placeholder="0"
             type="text"
             value={value || ""}
@@ -200,7 +200,7 @@ function InputStandardAmount({
             onChange={() => {}}
           />
         </div>
-        <div className="flex justify-end items-center text-10 md:text-14">
+        <div className="flex justify-end items-center text-10 lg:text-12 text-secondary-text">
           <span>
             {token &&
               t("balance", {
@@ -324,14 +324,14 @@ export default function TokenDepositCard({
   }
   if (!token) return;
   return (
-    <div className="rounded-3 bg-secondary-bg p-5">
+    <div className="rounded-3 bg-tertiary-bg px-4 py-3 lg:p-5">
       <div className="flex items-center gap-2 mb-3">
         {token && <Image width={24} height={24} src={token?.logoURI || ""} alt="" />}
         <h3 className="text-16 font-bold">
           {token ? t("token_deposit_amounts", { symbol: token?.symbol }) : t("select_token")}
         </h3>
       </div>
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 lg:gap-5">
         <InputTotalAmount
           token={token}
           value={formattedValue}

@@ -44,19 +44,23 @@ export const SelectButton = forwardRef(
             : variant !== "rounded-secondary" && variant !== "rectangle-secondary"
               ? "bg-primary-bg"
               : "bg-secondary-bg",
-          size === "large" && "p-2 md:px-5 md:py-3.5 md:text-24 ",
+          size === "large" && "p-2 lg:px-5 lg:py-2.5 lg:text-24 ",
           size === "regular" && "py-2 px-3",
-          size === "medium" && "py-3 px-3",
+          size === "medium" && "py-2 lg:py-3 px-3",
           fullWidth && withArrow && "w-full justify-between",
           fullWidth && !withArrow && "w-full justify-center",
           className,
         )}
       >
         {children}
-
         {withArrow && (
           <Svg
-            className={clsx(isOpen ? "-rotate-180" : "", "duration-200", "flex-shrink-0")}
+            className={clsx(
+              "text-secondary-text",
+              isOpen ? "-rotate-180" : "",
+              "duration-200",
+              "flex-shrink-0",
+            )}
             iconName="small-expand-arrow"
           />
         )}
