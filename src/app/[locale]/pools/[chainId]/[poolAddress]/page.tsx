@@ -5,7 +5,7 @@ import Image from "next/image";
 import Container from "@/components/atoms/Container";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
@@ -111,7 +111,7 @@ export default function ExplorePoolPage({
         </div>
         <div className="flex gap-4 mt-4">
           <Link href={`/swap?tokenA=${pool.token0.id}&tokenB=${pool.token1.id}`} className="w-full">
-            <Button variant={ButtonVariant.OUTLINED} fullWidth>
+            <Button colorScheme={ButtonColor.LIGHT_GREEN} fullWidth>
               <span className="flex items-center gap-2">
                 Swap
                 <Svg iconName="swap" />

@@ -365,7 +365,7 @@ export default function TradeForm() {
             />
             {computed.isModified && (
               <div className="absolute w-2 h-2 right-[13px] top-[13px] bg-primary-bg flex items-center justify-center rounded-full">
-                <div className="w-1 h-1 bg-red-input rounded-full" />
+                <div className="w-1 h-1 bg-red-light rounded-full" />
               </div>
             )}
           </span>

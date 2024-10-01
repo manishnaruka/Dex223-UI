@@ -16,7 +16,7 @@ const menuItems: Array<
   {
     label: "trade",
     submenu: (handleClose, t) => (
-      <div className="flex flex-col py-1 bg-primary-bg rounded-2 shadow-popover">
+      <div className="flex flex-col py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
         <MobileLink href="/swap" iconName="swap" title={t("swap")} handleClose={handleClose} />
         <MobileLink
           disabled
@@ -48,7 +48,7 @@ const menuItems: Array<
   {
     label: "",
     submenu: (handleClose, t) => (
-      <div className="flex flex-col py-4 px-5 bg-primary-bg rounded-2 shadow-popover gap-5">
+      <div className="flex flex-col py-4 px-5 bg-primary-bg rounded-2 shadow-popover shadow-black/70 gap-5">
         <div className="flex flex-col text-16 text-primary-text gap-2">
           <div className="text-secondary-text">{t("token")}</div>
           <div className="opacity-50 pointer-events-none">{t("token_statistics")}</div>

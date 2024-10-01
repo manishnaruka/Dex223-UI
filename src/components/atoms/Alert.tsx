@@ -36,7 +36,7 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         text-14
         `,
         type === "success" && "outline-green bg-green-bg",
-        type === "error" && "outline-red-input bg-red-bg",
+        type === "error" && "outline-red-light bg-red-bg",
         type === "warning" && "outline-orange bg-orange-bg",
         type === "info" && "outline-blue bg-blue-bg",
         type === "info-border" &&
@@ -48,7 +48,7 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
           className={clsx(
             "flex justify-center flex-shrink-0 items-stretch",
             type === "success" && "text-green",
-            type === "error" && "text-red-input",
+            type === "error" && "text-red-light",
             type === "warning" && "text-orange",
             type === "info" && "text-blue",
             type === "info-border" && "text-blue",

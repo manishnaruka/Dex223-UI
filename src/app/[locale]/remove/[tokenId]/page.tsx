@@ -237,7 +237,7 @@ export default function DecreaseLiquidityPage({
                 <Svg className="text-green" iconName="done" size={24} />
               )}
               {status === AllowanceStatus.ERROR && (
-                <Svg className="text-red-input" iconName="warning" size={24} />
+                <Svg className="text-red-light" iconName="warning" size={24} />
               )}
             </div>
           </div>

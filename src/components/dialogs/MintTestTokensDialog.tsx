@@ -127,7 +127,7 @@ export default function MintTestTokensDialog() {
               </SelectButton>
             }
           >
-            <div className="py-1 grid gap-1 bg-primary-bg shadow-popover rounded-3 overflow-hidden w-full">
+            <div className="py-1 grid gap-1 bg-primary-bg rounded-3 overflow-hidden w-full">
               {tokens.map((token) => {
                 return (
                   <div

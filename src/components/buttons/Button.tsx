@@ -49,7 +49,7 @@ const buttonVariantClassnameMap: Record<ButtonVariant, Record<ButtonColor, strin
     [ButtonColor.RED]: "bg-red text-primary-text hover:bg-red-hover",
     [ButtonColor.GREEN]: "bg-green text-black hover:bg-green-hover",
     [ButtonColor.LIGHT_GREEN]:
-      "bg-green-bg text-primary-text border-transparent border hover:border-green",
+      "bg-green-bg text-secondary-text border-transparent border hover:border-green hover:bg-green-bg-hover hover:text-primary-text",
   },
   [ButtonVariant.OUTLINED]: {
     [ButtonColor.RED]:

@@ -21,7 +21,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import TextButton from "@/components/buttons/TextButton";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import addToast from "@/other/toast";
@@ -42,7 +42,7 @@ function SettingsButton({ text, isActive = false, ...props }: SettingsButtonProp
       className={clsx(
         "duration-200 py-2.5 px-6 w-full border flex justify-center rounded-2 ",
         isActive
-          ? "bg-green-bg shadow-checkbox border-green text-primary-text"
+          ? "bg-green-bg shadow shadow-green/60 border-green text-primary-text"
           : "bg-secondary-bg border-transparent hover:bg-green-bg text-secondary-text",
       )}
     >
@@ -76,12 +76,12 @@ function SettingsInput({ isActive, isError, ...props }: SettingsInputProps) {
         " focus:outline-0  rounded-2 duration-200  py-2.5 px-3 text-center placeholder:text-center placeholder:text-secondary-text w-full border",
         isActive &&
           !isError &&
-          "bg-green-bg shadow-checkbox border-green text-primary-text hover:bg-green-bg ",
+          "bg-green-bg shadow shadow-green/60 border-green text-primary-text hover:bg-green-bg ",
         isError &&
-          "bg-secondary-bg shadow-error border-red-input text-primary-text hover:bg-red-bg",
+          "bg-secondary-bg shadow shadow-red/60 border-red-light text-primary-text hover:bg-red-bg",
         !isError &&
           !isActive &&
-          "focus:border-green bg-secondary-bg border-transparent hover:bg-green-bg text-secondary-text  focus:bg-green-bg focus:shadow-checkbox",
+          "focus:border-green bg-secondary-bg border-transparent hover:bg-green-bg text-secondary-text focus:bg-green-bg focus::shadow focus::shadow-green/60",
       )}
     />
   );
@@ -102,7 +102,7 @@ function getTitle(slippageType: SlippageType, value: string, t: any) {
           className={clsx(
             "flex items-center gap-2",
             Boolean(+value) && (+value > 1 || +value < 0.05) && "text-orange",
-            +value > 50 && "text-red-input",
+            +value > 50 && "text-red-light",
           )}
         >
           {value}% {t("custom")}{" "}
@@ -316,13 +316,13 @@ export default function SwapSettingsDialog() {
               {t("minutes")}
             </span>
           </div>
-          <div className="h-3 text-12 text-red-input">{deadlineError && deadlineError}</div>
+          <div className="h-3 text-12 text-red-light">{deadlineError && deadlineError}</div>
 
           <div className="text-12 mt-0.5 h-4" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button fullWidth variant={ButtonVariant.OUTLINED} onClick={handleCancel}>
+          <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} onClick={handleCancel}>
             {t("cancel")}
           </Button>
           <Button disabled={isButtonDisabled} fullWidth onClick={handleSave}>

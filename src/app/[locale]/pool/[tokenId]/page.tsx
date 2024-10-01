@@ -15,7 +15,7 @@ import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
@@ -165,7 +165,7 @@ export default function PoolPage({
           <Button
             size={ButtonSize.MEDIUM}
             onClick={() => router.push(`/increase/${params.tokenId}`)}
-            variant={ButtonVariant.OUTLINED}
+            colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >
             Increase liquidity
@@ -173,7 +173,7 @@ export default function PoolPage({
           <Button
             size={ButtonSize.MEDIUM}
             onClick={() => router.push(`/remove/${params.tokenId}`)}
-            variant={ButtonVariant.OUTLINED}
+            colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >
             Remove liquidity
@@ -356,7 +356,7 @@ export default function PoolPage({
                   <Svg className="text-green" iconName="done" size={20} />
                 )}
                 {status === AllowanceStatus.ERROR && (
-                  <Svg className="text-red-input" iconName="warning" size={24} />
+                  <Svg className="text-red-light" iconName="warning" size={24} />
                 )}
               </div>
             </div>

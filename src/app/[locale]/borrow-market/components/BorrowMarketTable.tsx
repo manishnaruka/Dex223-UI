@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useCallback, useState } from "react";
 
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
@@ -232,7 +232,7 @@ export default function BorrowMarketTable() {
                 : `${o.period} days`}
             </div>
             <div className=" h-[56px] flex items-center">
-              <Button variant={ButtonVariant.OUTLINED} size={ButtonSize.MEDIUM}>
+              <Button colorScheme={ButtonColor.LIGHT_GREEN} size={ButtonSize.MEDIUM}>
                 Borrow
               </Button>
             </div>

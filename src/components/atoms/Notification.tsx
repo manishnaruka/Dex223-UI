@@ -122,7 +122,7 @@ function NotificationTitle({
 
 export default function Notification({ onDismiss, transactionTitle, transactionStatus }: Props) {
   return (
-    <div className="grid grid-cols-[1fr_48px] rounded-3 border border-secondary-border shadow-popover bg-primary-bg w-full">
+    <div className="grid grid-cols-[1fr_48px] rounded-3 border border-secondary-border shadow-popover shadow-black/70 bg-primary-bg w-full">
       <div className="flex gap-2 items-center p-5 whitespace-nowrap">
         {transactionStatus === RecentTransactionStatus.SUCCESS ? (
           <RecentTransactionLogo title={transactionTitle} />

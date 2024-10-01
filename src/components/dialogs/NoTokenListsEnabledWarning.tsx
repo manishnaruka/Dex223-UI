@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
@@ -36,7 +36,7 @@ export default function NoTokenListsEnabledWarning() {
   return (
     <>
       {isOpened && (
-        <div className="z-[1000] fixed w-full bg-orange-bg border-orange border-t shadow-warning-alert bottom-0">
+        <div className="z-[1000] fixed w-full bg-orange-bg border-orange border-t shadow-notification shadow-orange-hover/30 bottom-0">
           <Container>
             <div className="min-h-[80px] py-4 flex justify-between items-center px-5">
               <div className="flex gap-3 items-center">
@@ -48,7 +48,7 @@ export default function NoTokenListsEnabledWarning() {
                   <Button
                     onClick={() => setManageOpened(true)}
                     size={ButtonSize.SMALL}
-                    variant={ButtonVariant.OUTLINED}
+                    colorScheme={ButtonColor.LIGHT_GREEN}
                   >
                     {t("manage_lists")}
                   </Button>

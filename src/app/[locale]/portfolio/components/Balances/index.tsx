@@ -66,7 +66,7 @@ export const Balances = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex flex-col bg-portfolio-balance-gradient rounded-3 px-5 py-6 w-full">
+        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
             <span className="text-14 lg:text-16">Wallet balance</span>
             <Tooltip iconSize={20} text="Info text" />
@@ -74,7 +74,8 @@ export const Balances = () => {
 
           <span className="text-24 lg:text-32 font-medium">$ —</span>
         </div>
-        <div className="flex flex-col bg-portfolio-margin-positions-gradient rounded-3 px-5 py-6 w-full">
+        {/*TODO: Extract card to separate component. 01.10.2024*/}
+        <div className="flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
             <span className="text-14 lg:text-16">Margin positions balance</span>
             <Tooltip iconSize={20} text="Info text" />

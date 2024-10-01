@@ -298,7 +298,7 @@ export default function ListTokenPage() {
                         placeholder="Token contract address"
                       />
                       <button
-                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hover:bg-green-bg hover:border-green duration-200 hover:shadow-checkbox"
+                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hover:bg-green-bg hover:border-green duration-200 hover:shadow hover:shadow-green/60"
                         onClick={() => {
                           setCurrentlyPicking("tokenA");
                           setPickTokenOpened(true);
@@ -314,7 +314,7 @@ export default function ListTokenPage() {
                         {tokenA?.symbol || "Select token"}
                         <Svg iconName="small-expand-arrow" />
                       </button>
-                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow-checkbox peer-focus:shadow-checkbox peer-focus:border-green top-0 left-0" />
+                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow peer-hover:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
                     </div>
                     <HelperText helperText="Enter the contract address of the token you want to list" />
                   </div>
@@ -332,7 +332,7 @@ export default function ListTokenPage() {
                         placeholder="Token contract address"
                       />
                       <button
-                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hover:bg-green-bg hover:border-green duration-200 hover:shadow-checkbox"
+                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hover:bg-green-bg hover:border-green duration-200 hover:shadow hover:shadow-green/60"
                         onClick={() => {
                           setCurrentlyPicking("tokenB");
                           setPickTokenOpened(true);
@@ -348,7 +348,7 @@ export default function ListTokenPage() {
                         {tokenB?.symbol || "Select token"}
                         <Svg iconName="small-expand-arrow" />
                       </button>
-                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow-checkbox peer-focus:shadow-checkbox peer-focus:border-green top-0 left-0" />
+                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow peer-hover:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
                     </div>
                     <HelperText helperText="Enter or select the paired token address" />
                   </div>

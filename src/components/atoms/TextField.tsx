@@ -49,7 +49,7 @@ export function HelperText({
           {helperText}
         </div>
       )}
-      {typeof error !== "undefined" && <p className="text-12 text-red-input mt-1">{error}</p>}
+      {typeof error !== "undefined" && <p className="text-12 text-red-light mt-1">{error}</p>}
       {warning && <p className="text-12 text-orange mt-1">{warning}</p>}
     </div>
   );

@@ -130,7 +130,7 @@ export default function TokenListItem({
                   </button>
                 }
               >
-                <div className="flex flex-col gap-1 px-5 py-3 border-secondary-border border bg-primary-bg rounded-1 shadow-popover">
+                <div className="flex flex-col gap-1 px-5 py-3 border-secondary-border border bg-primary-bg rounded-1 shadow-popover shadow-black/70">
                   <ListPopoverOption
                     variant={ListActionOption.VIEW}
                     href={
@@ -209,7 +209,7 @@ export default function TokenListItem({
                               </p>
                               <div className="grid grid-cols-2 gap-2">
                                 <Button
-                                  variant={ButtonVariant.OUTLINED}
+                                  colorScheme={ButtonColor.LIGHT_GREEN}
                                   onClick={() => setDeleteOpened(false)}
                                 >
                                   {t("cancel")}

@@ -131,7 +131,7 @@ function InputTotalAmount({
             <Button
               variant={ButtonVariant.CONTAINED}
               size={ButtonSize.EXTRA_SMALL}
-              className="bg-tertiary-bg text-main-primary xl:px-2 hover:bg-secondary-bg"
+              className="bg-tertiary-bg text-green xl:px-2 hover:bg-secondary-bg"
               onClick={maxHandler}
             >
               Max

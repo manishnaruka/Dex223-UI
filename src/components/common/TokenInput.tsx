@@ -39,10 +39,11 @@ function MobileStandardOption({
         role="button"
         onClick={() => setIsActive(standard)}
         className={clsxMerge(
-          "*:z-10 pt-10 flex flex-col gap-1 px-3 pb-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-standard-gradient hover:cursor-pointer text-12 group",
+          "*:z-10 pt-10 flex flex-col gap-1 px-3 pb-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hover:cursor-pointer text-12 group",
           isActive ? "before:opacity-100" : "before:opacity-0 hover:before:opacity-100",
-          standard === Standard.ERC223 && "before:rotate-180 items-end bg-swap-radio-right",
-          standard === Standard.ERC20 && "bg-swap-radio-left",
+          standard === Standard.ERC223 &&
+            "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
+          standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
           !token && "before:opacity-0 hover:before:opacity-0 before:cursor-default cursor-default",
         )}
       >
@@ -95,10 +96,11 @@ function StandardOption({
         role="button"
         onClick={() => setIsActive(standard)}
         className={clsxMerge(
-          "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-standard-gradient hover:cursor-pointer text-12 group",
+          "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hover:cursor-pointer text-12 group",
           isActive ? "before:opacity-100" : "before:opacity-0 hover:before:opacity-100",
-          standard === Standard.ERC223 && "before:rotate-180 items-end bg-swap-radio-right",
-          standard === Standard.ERC20 && "bg-swap-radio-left",
+          standard === Standard.ERC223 &&
+            "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
+          standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
           !token &&
             "before:opacity-0 hover:before:opacity-0 before:cursor-default cursor-default pointer-events-none",
           gas && standard === Standard.ERC20 && "rounded-b-0 before:rounded-b-0",
@@ -135,8 +137,10 @@ function StandardOption({
         <div
           className={clsx(
             "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center",
-            standard === Standard.ERC20 && "bg-swap-gas-gradient-left rounded-bl-2",
-            standard === Standard.ERC223 && "bg-swap-gas-gradient-right rounded-br-2 justify-end",
+            standard === Standard.ERC20 &&
+              "bg-gradient-to-r from-primary-bg to-secondary-bg rounded-bl-2",
+            standard === Standard.ERC223 &&
+              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end",
             gas === "—" ? "text-tertiary-text" : "text-secondary-text",
           )}
         >
@@ -213,7 +217,7 @@ export default function TokenInput({
             allowNegative={false}
           />
           <span className="text-12 block -mt-1 text-secondary-text">$0.00</span>
-          <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow-checkbox peer-focus:shadow-checkbox peer-focus:border-green top-0 left-0" />
+          <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow peer-hover:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
         <SelectButton
           className="flex-shrink-0"
@@ -261,7 +265,9 @@ export default function TokenInput({
                     key={st}
                     className={clsxMerge(
                       "h-6 rounded-3 duration-200 px-2 min-w-[58px] w-full text-10",
-                      standard === st ? "bg-green text-black shadow-checkbox" : "hover:bg-green-bg",
+                      standard === st
+                        ? "bg-green text-black shadow shadow-green/60"
+                        : "hover:bg-green-bg",
                       !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
                       !token && "text-tertiary-text pointer-events-none",
                     )}
@@ -304,7 +310,9 @@ export default function TokenInput({
                     key={st}
                     className={clsxMerge(
                       "h-6 rounded-3 duration-200 px-2 min-w-[58px]",
-                      standard === st ? "bg-green text-black shadow-checkbox" : "hover:bg-green-bg",
+                      standard === st
+                        ? "bg-green text-black shadow shadow-green/60"
+                        : "hover:bg-green-bg",
                       !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
                       !token && "text-tertiary-text pointer-events-none",
                     )}
@@ -331,9 +339,10 @@ export default function TokenInput({
         <div className="flex flex-col">
           <div
             className={clsxMerge(
-              "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-standard-gradient hover:cursor-pointer text-12 group",
-              standard === Standard.ERC223 && "before:rotate-180 items-end bg-swap-radio-right",
-              standard === Standard.ERC20 && "bg-swap-radio-left",
+              "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hover:cursor-pointer text-12 group",
+              standard === Standard.ERC223 &&
+                "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
+              standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
               !token &&
                 "before:opacity-0 hover:before:opacity-0 before:cursor-default cursor-default",
             )}

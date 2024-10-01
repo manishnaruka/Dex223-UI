@@ -6,7 +6,7 @@ import BorrowMarketTable from "@/app/[locale]/borrow-market/components/BorrowMar
 import Container from "@/components/atoms/Container";
 import SelectButton from "@/components/atoms/SelectButton";
 import { InputLabel } from "@/components/atoms/TextField";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import TabButton from "@/components/buttons/TabButton";
 
 export default function BorrowMarket({}) {
@@ -63,7 +63,7 @@ export default function BorrowMarket({}) {
               <div className="flex items-end">
                 <Button
                   onClick={() => setDrawerOpened(true)}
-                  variant={ButtonVariant.OUTLINED}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
                   endIcon="filter"
                 >
                   Filter

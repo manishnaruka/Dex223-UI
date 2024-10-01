@@ -5,7 +5,7 @@ import Drawer from "@/components/atoms/Drawer";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 
 function ButtonRow({ children }: PropsWithChildren) {
@@ -168,7 +168,7 @@ export default function BorrowMarketFilter({
           </div>
         </div>
         <ButtonRow>
-          <Button variant={ButtonVariant.OUTLINED}>Cancel</Button>
+          <Button colorScheme={ButtonColor.LIGHT_GREEN}>Cancel</Button>
           <Button>Apply</Button>
         </ButtonRow>
       </div>

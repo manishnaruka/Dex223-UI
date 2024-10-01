@@ -4,7 +4,7 @@ import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from
 
 import Checkbox from "@/components/atoms/Checkbox";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { db, TokenList } from "@/db/db";
 import addToast from "@/other/toast";
@@ -109,7 +109,7 @@ export default function ImportListWithJSON({ setContent }: Props) {
                 fileInput.current.click();
               }
             }}
-            variant={ButtonVariant.OUTLINED}
+            colorScheme={ButtonColor.LIGHT_GREEN}
           >
             {t("browse")}
           </Button>

@@ -41,12 +41,13 @@ const meta = {
       },
     },
     colorScheme: {
-      options: [ButtonColor.GREEN, ButtonColor.RED],
+      options: [ButtonColor.GREEN, ButtonColor.RED, ButtonColor.LIGHT_GREEN],
       control: {
         type: "radio",
         labels: {
           [ButtonColor.GREEN]: "GREEN",
           [ButtonColor.RED]: "RED",
+          [ButtonColor.LIGHT_GREEN]: "LIGHT_GREEN",
         },
       },
     },

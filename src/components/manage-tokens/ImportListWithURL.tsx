@@ -92,14 +92,14 @@ export default function ImportListWithURL({ setContent }: Props) {
       {tokenListAddressToImport && !isValidUrl(tokenListAddressToImport) && (
         <div className="flex-grow flex justify-center items-center flex-col gap-2">
           <EmptyStateIcon iconName="warning" />
-          <p className="text-red-input text-center">Enter valid list location</p>
+          <p className="text-red-light text-center">Enter valid list location</p>
         </div>
       )}
 
       {tokenListAddressToImport && isValidUrl(tokenListAddressToImport) && !tokenListToImport && (
         <div className="flex-grow flex justify-center items-center flex-col gap-2">
           <EmptyStateIcon iconName="warning" />
-          <p className="text-red-input text-center">
+          <p className="text-red-light text-center">
             Requested source does not contain a token list
           </p>
         </div>

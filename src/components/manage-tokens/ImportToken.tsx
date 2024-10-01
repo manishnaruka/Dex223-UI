@@ -58,7 +58,7 @@ function EmptyState({
     return (
       <div className="flex items-center justify-center gap-2 flex-col flex-grow">
         <EmptyStateIcon iconName="warning" />
-        <span className="text-red-input">{t("enter_valid")}</span>
+        <span className="text-red-light">{t("enter_valid")}</span>
       </div>
     );
   }

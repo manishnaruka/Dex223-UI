@@ -178,7 +178,7 @@ function InternalTrustBadge({ rateRange }: { rateRange: BadgeTrustRate }) {
         "rounded-5 py-1 flex items-center gap-1 pl-2 pr-2 text-12",
         rateRange === "high" && "text-green bg-green-bg",
         rateRange === "medium" && "text-orange bg-orange-bg",
-        rateRange === "low" && "text-red-input bg-red-bg",
+        rateRange === "low" && "text-red-light bg-red-bg",
       )}
     >
       {iconsMap[rateRange]}
@@ -214,13 +214,13 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
         </div>
       </div>
       <div className="mt-5 grid grid-cols-[2fr_1fr_2fr] h-[5px] relative">
-        <div className="h-full bg-red-input" />
+        <div className="h-full bg-red-light" />
         <div className="h-full bg-orange" />
         <div className="h-full bg-green" />
         <div
           className={clsx(
             "absolute border-[2px]  top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full w-6 h-6 bg-primary-bg",
-            rateRange === "low" && "border-red-input",
+            rateRange === "low" && "border-red-light",
             rateRange === "medium" && "border-orange -translate-x-1/2 ",
             rateRange === "high" && "border-green",
           )}
@@ -245,7 +245,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
               <div key={key} className="flex justify-between items-center gap-2">
                 <div className="flex items-center gap-2">
                   <Svg
-                    className={score >= 0 ? "text-green" : "text-red-input"}
+                    className={score >= 0 ? "text-green" : "text-red-light"}
                     iconName={score >= 0 ? "success" : "warning"}
                   />
                   <span>{text}</span>
@@ -253,7 +253,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
                 {score >= 0 ? (
                   <span className="text-green">+{score}</span>
                 ) : (
-                  <span className="text-red-input">-{score}</span>
+                  <span className="text-red-light">-{score}</span>
                 )}
               </div>
             );
@@ -266,7 +266,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
                 <div className="flex items-center gap-2">
                   <Svg
                     size={20}
-                    className={score >= 0 ? "text-green" : "text-red-input"}
+                    className={score >= 0 ? "text-green" : "text-red-light"}
                     iconName={score >= 0 ? "success" : "warning"}
                   />
                   <span>{text}</span>
@@ -274,7 +274,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
                 {score >= 0 ? (
                   <span className="text-green">+{score}</span>
                 ) : (
-                  <span className="text-red-input">{score}</span>
+                  <span className="text-red-light">{score}</span>
                 )}
               </div>
             );
@@ -285,7 +285,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
       <div className="flex mt-4 justify-between items-center text-14">
         <span>Total score</span>
         <span
-          className={clsx(internalTokenScore > 0 ? "text-green" : "text-red-input", "font-bold")}
+          className={clsx(internalTokenScore > 0 ? "text-green" : "text-red-light", "font-bold")}
         >
           {internalTokenScore}
         </span>
@@ -367,7 +367,7 @@ export default function TrustBadge({ rate, logoURI }: Props) {
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
             {...getFloatingProps()}
-            className="p-5 bg-primary-bg border border-secondary-border rounded-3 shadow-popup relative z-[100]"
+            className="p-5 bg-primary-bg border border-secondary-border rounded-3 relative z-[100]"
           >
             <TooltipContent
               rate={rate}
@@ -468,7 +468,7 @@ export function TrustMarker({ rate, logoURI, totalScore }: TrustMarkerProps) {
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
             {...getFloatingProps()}
-            className="p-5 bg-primary-bg border border-secondary-border rounded-3 shadow-popup relative z-[100]"
+            className="p-5 bg-primary-bg border border-secondary-border rounded-3 relative z-[100]"
           >
             <TooltipContent
               rate={rate}

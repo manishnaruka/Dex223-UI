@@ -82,7 +82,7 @@ export default function ManageTokenItem({
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        variant={ButtonVariant.OUTLINED}
+                        colorScheme={ButtonColor.LIGHT_GREEN}
                         onClick={() => setDeleteOpened(false)}
                       >
                         {t("cancel")}

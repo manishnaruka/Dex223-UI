@@ -121,18 +121,21 @@ input[type="range"]::-webkit-slider-thumb {
   width: 24px;
   transition: outline-color 200ms;
   outline: 12px solid transparent;
-  box-shadow: theme("boxShadow.checkbox");
+  box-shadow: theme("boxShadow.DEFAULT");
+
+  --tw-shadow-color: theme("colors.green / 80%");
 }
 input[type="range"].variant-purple::-webkit-slider-thumb {
   background-color: theme("colors.purple");
-  box-shadow: 0 0 8px 0 rgba(145, 137, 240, 0.8) !important;
+  --tw-shadow-color: theme("colors.purple / 80%");
 }
 
 input[type="range"]:focus::-webkit-slider-thumb {
-  outline: 12px solid theme("colors.green_opacity_20");
+  outline: 12px solid theme('colors.green / 20%');
 }
+
 input[type="range"].variant-purple:focus::-webkit-slider-thumb {
-  outline: 12px solid theme("colors.purple_opacity_20");
+  outline: 12px solid theme('colors.purple / 20%');
 }
 
 /******** Firefox styles ********/
@@ -156,18 +159,19 @@ input[type="range"]::-moz-range-thumb {
 
 input[type="range"].variant-purple::-moz-range-thumb {
   background-color: theme("colors.purple");
-  box-shadow: 0 0 8px 0 rgba(145, 137, 240, 0.8) !important;
+
+  --tw-shadow-color: theme("colors.purple / 80%");
 }
 
 
 input[type="range"]:hover::-moz-range-thumb,
 input[type="range"]:focus::-moz-range-thumb {
-  outline: 12px solid theme("colors.green_opacity_20");
+  outline: 12px solid theme('colors.green / 20%');
 }
 
 input[type="range"].variant-purple:hover::-moz-range-thumb,
 input[type="range"].variant-purple:focus::-moz-range-thumb {
-  outline: 12px solid theme("colors.purple_opacity_20");
+  outline: 12px solid theme('colors.purple / 20%');
 }
 
 
@@ -268,12 +272,12 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
 
 .sorting-asc {
   --sorting-arrow-up-fill: theme("colors.green");
-  --sorting-arrow-up-drop-shadow: drop-shadow(0 0 2px #B3FFE2CC);
+  --sorting-arrow-up-drop-shadow: drop-shadow(0 0 2px theme("colors.green / 80%"));
 }
 
 .sorting-desc {
   --sorting-arrow-down-fill: theme("colors.green");
-  --sorting-arrow-down-drop-shadow: drop-shadow(0 0 2px #B3FFE2CC);
+  --sorting-arrow-down-drop-shadow: drop-shadow(0 0 2px theme("colors.green / 80%"));
 }
 
 [data-sonner-toast] {

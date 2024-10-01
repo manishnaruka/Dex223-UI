@@ -19,7 +19,7 @@ export default function Header() {
   const { handleOpen } = useMintTestTokensDialogStore();
   return (
     <div>
-      <header className="md:mb-3 xl:before:hidden before:h-[1px] before:bg-footer-border before:w-full before:absolute relative before:bottom-0 before:left-0">
+      <header className="md:mb-3 xl:before:hidden before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:bottom-0 before:left-0">
         <Container className="pl-4 pr-1 md:px-5">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-5">
@@ -46,7 +46,7 @@ export default function Header() {
           </div>
         </Container>
       </header>
-      <div className="pt-2.5 md:pt-2 md:pb-2 pb-4 bg-test-tokens-gradient">
+      <div className="pt-2.5 md:pt-2 md:pb-2 pb-4 bg-gradient-to-r from-green-bg to-green-bg/0">
         <Container className="flex h-full items-center px-5">
           <div className="flex justify-between items-center w-full flex-wrap gap-2">
             <div className="flex items-center gap-2 justify-between md:justify-start flex-grow">

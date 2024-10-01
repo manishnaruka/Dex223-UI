@@ -7,7 +7,7 @@ import Collapse from "@/components/atoms/Collapse";
 import Drawer from "@/components/atoms/Drawer";
 import LocaleSwitcher from "@/components/atoms/LocaleSwitcher";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
 import { IconName } from "@/config/types/IconName";
@@ -138,7 +138,7 @@ export default function MobileMenu() {
                 />
               </button>
               <Collapse open={moreOpened}>
-                <div className="flex flex-col py-4 px-5 bg-primary-bg rounded-2 shadow-popover gap-5">
+                <div className="flex flex-col py-4 px-5 bg-primary-bg rounded-2 shadow-popover shadow-black/70 gap-5">
                   <div className="flex flex-col text-16 text-primary-text gap-2">
                     <div className="text-secondary-text">{t("token")}</div>
                     <div className="opacity-50 pointer-events-none">{t("token_statistics")}</div>
@@ -208,7 +208,7 @@ export default function MobileMenu() {
             <Button
               size={ButtonSize.MEDIUM}
               fullWidth
-              variant={ButtonVariant.OUTLINED}
+              colorScheme={ButtonColor.LIGHT_GREEN}
               endIcon="star"
               onClick={() => {
                 setMobileMenuOpened(false);

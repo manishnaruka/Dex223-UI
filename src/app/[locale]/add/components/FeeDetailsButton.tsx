@@ -5,7 +5,7 @@ import { formatEther, formatGwei, formatUnits } from "viem";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
 import { getChainSymbol } from "@/functions/getChainSymbol";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -62,7 +62,7 @@ export const FeeDetailsButton = ({ isDisabled }: { isDisabled: boolean }) => {
       <Button
         onClick={() => !isDisabled && setIsOpen(true)}
         size={ButtonSize.EXTRA_SMALL}
-        variant={ButtonVariant.OUTLINED}
+        colorScheme={ButtonColor.LIGHT_GREEN}
         disabled={isDisabled}
         mobileSize={ButtonSize.SMALL}
         fullWidth

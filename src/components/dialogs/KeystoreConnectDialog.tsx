@@ -6,7 +6,7 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import TextField from "@/components/atoms/TextField";
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import { useConnectWalletStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { keystore } from "@/config/connectors/keystore/connector";
 import { unlockKeystore } from "@/functions/keystore";
@@ -97,7 +97,7 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
                     fileInput.current.click();
                   }
                 }}
-                variant={ButtonVariant.OUTLINED}
+                colorScheme={ButtonColor.LIGHT_GREEN}
               >
                 {t("browse")}
               </Button>

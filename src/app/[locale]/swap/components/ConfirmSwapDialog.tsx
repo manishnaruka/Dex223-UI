@@ -100,7 +100,7 @@ function ApproveRow({
         )}
         {isLoading && <Preloader size={20} />}
         {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-input" iconName="warning" size={20} />}
+        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
       </div>
     </div>
   );
@@ -139,7 +139,7 @@ function SwapRow({
             className={clsxMerge(
               "rotate-90",
               isDisabled ? "text-tertiary-text" : "text-secondary-bg",
-              isReverted && "text-red-input",
+              isReverted && "text-red-light",
             )}
             iconName="swap"
           />
@@ -174,7 +174,7 @@ function SwapRow({
         )}
         {isLoading && <Preloader size={20} />}
         {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-input" iconName="warning" size={20} />}
+        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
       </div>
     </div>
   );
@@ -511,7 +511,7 @@ export default function ConfirmSwapDialog() {
         }
       }}
     >
-      <div className="shadow-popup bg-primary-bg rounded-5 w-full md:w-[600px]">
+      <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
         <DialogHeader
           onClose={() => {
             if (isSettledSwap) {

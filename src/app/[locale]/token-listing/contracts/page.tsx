@@ -12,7 +12,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
@@ -157,7 +157,7 @@ export default function TokenListingPage() {
                         <Button
                           fullWidth
                           className="hover:bg-green hover:text-black"
-                          variant={ButtonVariant.OUTLINED}
+                          colorScheme={ButtonColor.LIGHT_GREEN}
                           size={ButtonSize.MEDIUM}
                         >
                           List tokens
@@ -250,7 +250,7 @@ export default function TokenListingPage() {
                       >
                         <Button
                           className="hover:bg-green hover:text-black"
-                          variant={ButtonVariant.OUTLINED}
+                          colorScheme={ButtonColor.LIGHT_GREEN}
                           size={ButtonSize.MEDIUM}
                         >
                           List tokens

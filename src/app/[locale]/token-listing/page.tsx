@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { ReactNode } from "react";
 
 import Container from "@/components/atoms/Container";
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import { Link } from "@/navigation";
 
 function ListingVariantCard({
@@ -30,13 +30,13 @@ function ListingVariantCard({
 
       {isExternal ? (
         <a target="_blank" href={href}>
-          <Button fullWidth variant={ButtonVariant.OUTLINED} endIcon="forward">
+          <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} endIcon="forward">
             Apply
           </Button>
         </a>
       ) : (
         <Link href={href}>
-          <Button fullWidth variant={ButtonVariant.OUTLINED} endIcon="next">
+          <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} endIcon="next">
             Apply
           </Button>
         </Link>

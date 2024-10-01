@@ -91,7 +91,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
           />
         </div>
       </div>
-      {error && <p className="text-12 text-red-input mt-1">{error}</p>}
+      {error && <p className="text-12 text-red-light mt-1">{error}</p>}
     </>
   );
 };
@@ -127,7 +127,7 @@ const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
           searchValue && "pr-[92px]",
         )}
       />
-      {<p className="text-12 text-red-input mt-1 h-4">{errorSearch}</p>}
+      {<p className="text-12 text-red-light mt-1 h-4">{errorSearch}</p>}
       {searchValue ? (
         <div className={clsx("absolute right-[48px] top-1 flex items-center justify-center")}>
           <IconButton
@@ -186,7 +186,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   }, [content, wallets.length]);
 
   return (
-    <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popup lg:min-w-[450px]">
+    <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
       <DialogHeader
         onClose={() => {
           setIsOpened(false);
@@ -391,7 +391,7 @@ const ManageWallets = () => {
           placement={"bottom-start"}
           trigger={trigger}
         >
-          <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popup">
+          <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popover shadow-black/70">
             <ManageWalletsContent setIsOpened={setIsOpened} />
           </div>
         </Popover>

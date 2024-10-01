@@ -114,7 +114,7 @@ export default function FeedbackDialog() {
       <button
         onClick={() => setIsOpen(true)}
         style={{ transform: "rotate(-90deg) translateX(50%)" }}
-        className="hidden xl:flex px-5 h-10 origin-bottom-right fixed right-0 bottom-1/2 bg-green hover:bg-green-hover duration-200 rounded-t-2 shadow-checkbox text-secondary-bg items-center gap-2"
+        className="hidden xl:flex px-5 h-10 origin-bottom-right fixed right-0 bottom-1/2 bg-green hover:bg-green-hover duration-200 rounded-t-2 shadow shadow-green/60 text-secondary-bg items-center gap-2"
       >
         {t("feedback")}
         <Svg iconName="star" />

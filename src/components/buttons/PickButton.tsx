@@ -25,7 +25,7 @@ export default function PickButton({
       className={clsx(
         "flex flex-col gap-2 justify-center items-center py-4 border rounded-3 w-full duration-200 px-2 hover:",
         isActive
-          ? "text-primary-text bg-green-bg border-green shadow-checkbox"
+          ? "text-primary-text bg-green-bg border-green shadow shadow-green/60"
           : "text-secondary-text bg-secondary-bg border-transparent hover:bg-green-bg",
       )}
       {...props}

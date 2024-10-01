@@ -512,7 +512,7 @@ function ApproveRow({
         )}
         {isLoading && <Preloader size={20} />}
         {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-input" iconName="warning" size={20} />}
+        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
       </div>
     </div>
   );
@@ -554,7 +554,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
           <span
             className={clsx(
               "text-20 font-bold mb-1",
-              isError ? "text-red-input" : "text-primary-text",
+              isError ? "text-red-light" : "text-primary-text",
             )}
           >
             {isError ? "Failed to add liquidity" : "Liquidity added successfully"}
@@ -588,7 +588,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
             <div
               className={clsx(
                 "p-1 rounded-full h-8 w-8",
-                isError ? "bg-red-bg text-red-input" : "bg-green text-secondary-bg",
+                isError ? "bg-red-bg text-red-light" : "bg-green text-secondary-bg",
               )}
             >
               <Svg className="" iconName="add" />
@@ -614,7 +614,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
               </a>
             )}
             {isError ? (
-              <Svg className="text-red-input" iconName="warning" size={24} />
+              <Svg className="text-red-light" iconName="warning" size={24} />
             ) : (
               <Svg className="text-green" iconName="done" size={24} />
             )}
@@ -669,7 +669,7 @@ export default function ConfirmLiquidityDialog({
         setIsOpen(isOpen);
       }}
     >
-      <div className="shadow-popup bg-primary-bg rounded-5 w-full md:w-[600px]">
+      <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
         {[
           LiquidityStatus.INITIAL,
           LiquidityStatus.APPROVE_PENDING,

@@ -8,7 +8,7 @@ import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import TabButton from "@/components/buttons/TabButton";
 import ManageTokenItem from "@/components/manage-tokens/ManageTokenItem";
 import TokenListItem from "@/components/manage-tokens/TokenListItem";
@@ -115,7 +115,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             <div className="w-full flex items-center mt-3">
               <Button
                 endIcon="import-list"
-                variant={ButtonVariant.OUTLINED}
+                colorScheme={ButtonColor.LIGHT_GREEN}
                 onClick={() => setContent("import-list")}
                 className="rounded-r-0 xl:rounded-r-0 flex-grow"
               >
@@ -190,7 +190,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             <div className="w-full flex items-center mt-3">
               <Button
                 endIcon="import-token"
-                variant={ButtonVariant.OUTLINED}
+                colorScheme={ButtonColor.LIGHT_GREEN}
                 onClick={() => setContent("import-token")}
                 className="rounded-r-0 xl:rounded-r-0 flex-grow"
               >

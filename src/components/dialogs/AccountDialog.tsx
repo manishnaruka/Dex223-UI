@@ -209,7 +209,7 @@ export default function AccountDialog() {
                 placement={"bottom-start"}
                 trigger={trigger}
               >
-                <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popup">
+                <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popover shadow-black/70">
                   <AccountDialogContent
                     setIsOpenedAccount={setIsOpenedAccount}
                     activeTab={activeTab}

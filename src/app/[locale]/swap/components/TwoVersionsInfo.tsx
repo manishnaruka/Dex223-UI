@@ -11,7 +11,7 @@ export default function TwoVersionsInfo() {
   const { isOpened, setIsOpened } = useTwoVersionsInfoStore();
 
   return (
-    <div className="bg-standard-gradient border-l-4 border-green rounded-2 overflow-hidden text-14">
+    <div className="bg-gradient-to-r from-green-bg to-green-bg/0 border-l-4 border-green rounded-2 overflow-hidden text-14">
       <button
         onClick={() => setIsOpened(!isOpened)}
         className="px-5 py-2 flex justify-between font-medium w-full items-center"

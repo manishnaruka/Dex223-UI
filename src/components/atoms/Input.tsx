@@ -21,9 +21,11 @@ const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
         "duration-200 focus:outline-0 h-12 pl-5 placeholder:text-tertiary-text text-16 w-full bg-secondary-bg rounded-2 border",
         !isError &&
           !isWarning &&
-          "border-transparent hover:shadow-checkbox focus:shadow-checkbox focus:border-green",
-        isError && "border-red-input hover:shadow-error focus:shadow-error",
-        isWarning && "border-orange hover:shadow-warning focus:shadow-warning",
+          "border-transparent hover:shadow hover:shadow-green/60 focus:shadow focus:shadow-green focus:border-green",
+        isError &&
+          "border-red-light hover:shadow hover:shadow-red/60 focus:shadow focus:shadow-red/60",
+        isWarning &&
+          "border-orange hover:shadow hover:shadow-yellow/60 focus:shadow focus:shadow-yellow/60",
         props.disabled && "opacity-50 pointer-events-none",
         props.readOnly && "pointer-events-none bg-primary-bg border-secondary-border",
         className,

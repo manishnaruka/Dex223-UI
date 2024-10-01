@@ -22,7 +22,7 @@ export const MarginPositions = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-portfolio-margin-positions-gradient rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
           <div className="flex flex-col">
             <div className="flex items-center gap-1">
               <span className="text-14 lg:text-16">Margin positions balance</span>

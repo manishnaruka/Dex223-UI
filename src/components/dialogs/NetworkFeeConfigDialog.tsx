@@ -25,7 +25,7 @@ import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
 import TextField from "@/components/atoms/TextField";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import TextButton from "@/components/buttons/TextButton";
 import {
   baseFeeMultipliers,
@@ -923,7 +923,12 @@ function NetworkFeeDialogContent({ setIsOpen }: { setIsOpen: (isOpen: boolean) =
       </div>
 
       <div className="px-4 pb-4 md:px-10 md:pb-10 pt-5 grid grid-cols-2 gap-3">
-        <Button type="button" fullWidth onClick={handleCancel} variant={ButtonVariant.OUTLINED}>
+        <Button
+          type="button"
+          fullWidth
+          onClick={handleCancel}
+          colorScheme={ButtonColor.LIGHT_GREEN}
+        >
           Cancel
         </Button>
         <Button

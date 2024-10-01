@@ -9,36 +9,54 @@ const config: Config = {
   theme: {
     extend: {
       boxShadow: {
-        tooltip: "0 0 32px 24px rgba(20, 19, 22, 0.50)",
-        select: "0 0 10px 0 #8EFFCB99",
-        checkbox: "0 0 8px 0 #B3FFE2CC",
-        popup: "0 4px 42px 0px #000000E6",
-        popover: "0 4px 42px 0px #000000CC",
-        error: "0px 0px 10px 0px #D13B3B99",
-        warning: "0px 0px 10px 0px #D9A25199",
-        notification: "0px -8px 24px 0px #B3FFE24D",
-        "warning-alert": "0px -8px 24px 0px #D9A2514D",
+        DEFAULT: "0px 0px 8px 0px var(--tw-shadow-color)",
+        notification: "0px -8px 24px 0px var(--tw-shadow-color)",
+        icon: "0px 0px 24px 0px var(--tw-shadow-color)",
+        popover: "0 4px 42px 0px var(--tw-shadow-color)",
       },
       backgroundImage: {
         "account-card-pattern": "url('/account-bg.svg')",
         "drag-and-drop-dashed-pattern":
           "url(\"data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%2370C59EFF' stroke-width='1' stroke-dasharray='8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e\")",
-        "standard-gradient": "linear-gradient(90deg, #3C4C4A 0%, #0F0F0F 100%)",
-        "footer-border":
-          "linear-gradient(90deg, rgba(56, 59, 58, 0.2) 0%, #383B3A 50%, rgba(56, 59, 58, 0.2) 100%)",
-        "swap-radio-right": "linear-gradient(90deg, #0F0F0F 0%, #1D1E1E 100%)",
-        "swap-radio-left": "linear-gradient(270deg, #0F0F0F 0%, #1D1E1E 100%)",
+
+        // empty state gradients
+        "gradient-empty-state-green-dark":
+          "linear-gradient(229.81deg, #4D5F5D -62.55%, #262B28 75.05%)",
+        "gradient-empty-state-green-light":
+          "linear-gradient(220.65deg, #4D5F5D -14.6%, #2C2F2D 75.96%)",
+        "gradient-empty-state-grey-light":
+          "linear-gradient(220.65deg, #555555 -14.6%, #292A2A 75.96%)",
+        "gradient-empty-state-grey-dark":
+          "linear-gradient(214.18deg, #2E2F2F -10.66%, #262626 95.55%)",
+        "gradient-empty-state-purple-dark":
+          "linear-gradient(214.18deg, #4A4A58 -10.66%, #21202A 95.55%)",
+        "gradient-empty-state-purple-light":
+          "linear-gradient(211.18deg, #635F78 0%, #29273C 84.73%)",
+
+        //navigation
         "navigation-active":
-          "linear-gradient(180deg, #0B0B0B -6.77%, #283631 87.04%, #70C59E 100%)",
-        "navigation-hover": "linear-gradient(180deg, #0F0F0F -6.77%, #3B4E47 100%);",
+          "linear-gradient(180deg, #0F0F0F -6.77%, #283633 87.04%, #7DA491 100%)",
+        "navigation-hover": "linear-gradient(180deg, #0F0F0F -6.77%, #3B4E47 100%)",
         "navigation-active-mobile":
-          "linear-gradient(270deg, #1D1E1E 13.5%, #283631 97.85%, #70C59E 100%)",
+          "linear-gradient(270deg, #1D1E1E 13.5%, #283633 97.85%, #7DA491 100%)",
+
+        //cards
+        "gradient-card-blue-light-fill": "linear-gradient(90deg, #22282C 0%, #545C61 100%)",
+        "gradient-card-green-light-fill": "linear-gradient(90deg, #27322C 0%, #5B6864 100%)",
+
+        "gradient-card-blue-dark-fill": "linear-gradient(78.4deg, #21272C 4.02%, #5C6369 111.77%)",
+        "gradient-card-green-dark-fill": "linear-gradient(78.4deg, #212C26 4.02%, #667471 111.77%)",
+        "gradient-card-purple-dark-fill":
+          "linear-gradient(78.4deg, #2C2636 4.02%, #51477D 111.77%)",
+
+        "gradient-card-blue-dark-border":
+          "linear-gradient(251.06deg, #627985 11.76%, #2A3A45 59.71%)",
+        "gradient-card-green-dark-border":
+          "linear-gradient(251.06deg, #6D8C7D 11.76%, #3C4C4A 59.71%)",
+        "gradient-card-purple-dark-border":
+          "linear-gradient(251.06deg, #7E71AD 11.76%, #3D354D 59.71%)",
+
         "table-gradient": "linear-gradient(to bottom, #272727 60px, #1D1E1E 60px, #1D1E1E 100%)",
-        "swap-gas-gradient-right": "linear-gradient(90deg, #0F0F0F 0%, #1D1E1E 100%)",
-        "swap-gas-gradient-left": "linear-gradient(90deg, #1D1E1E 0%, #0F0F0F 100%)",
-        "test-tokens-gradient": "linear-gradient(90deg, #3C4C4A 0%, #1D1E1E 100%)",
-        "portfolio-balance-gradient": "linear-gradient(90deg, #3C4C4A 0%, #70C59E 100%)",
-        "portfolio-margin-positions-gradient": "linear-gradient(90deg, #232A2F 0%, #72A4C7 100%)",
       },
       keyframes: {
         appear: {
@@ -86,49 +104,65 @@ const config: Config = {
       transparent: "transparent",
       current: "currentColor",
 
-      "primary-bg": "#1D1E1E", // changed
-      "secondary-bg": "#0F0F0F", // changed
-      "tertiary-bg": "#272727", // changed
-      "quaternary-bg": "#2E2F2F", // changed
+      // main background colors
 
-      green: "#70C59E", // changed
-      green_opacity_20: "#70C59E33", // changed
-      red: "#D24B4B", // changed
-      orange: "#D9A251", // changed
-      blue: "#64B2EA", // changed
-      black: "#000000", // changed
-      white: "#FFFFFF", // changed
-      purple: "#9189F0", // changed
-      purple_opacity_20: "#A380DC33", // changed
+      "primary-bg": "#1D1E1E",
+      "secondary-bg": "#0F0F0F",
+      "tertiary-bg": "#272727",
+      "quaternary-bg": "#2E2F2F",
 
-      "green-bg": "#3C4C4A", // changed
-      "red-bg": "#443535", // changed
-      "orange-bg": "#4A4237", // changed
-      "blue-bg": "#2A3A45", // changed
-      "purple-bg": "#3E3851", // changed
+      // core colors
 
-      "global-bg": "#121312", // changed
+      green: "#7DA491",
+      orange: "#AF9A7A",
+      yellow: "#ECD245",
+      "yellow-light": "#D2BD8B",
+      red: "#D24B4B",
+      "red-light": "#CD8C8C",
+      blue: "#7D97A4",
+      purple: "#8089BD",
 
-      "green-hover": "#6FF8B8", // changed
-      "red-hover": "#E83737", // changed
-      "purple-hover": "#7552D7", // changed
-      "blue-hover": "#D27E1A", // changed
-      "orange-hover": "#D27E1A", // changed
-      "white-hover": "rgba(255, 255, 255, 0.1)", // changed
-      "tertiary-hover": "#3A3A3A", // changed
+      black: "#000000",
+      white: "#FFFFFF",
 
-      "red-input": "#FF8F8F",
+      // snackbar, badges, warnings colored backgrounds
 
-      "primary-text": "#F5FFF9", // changed
-      "secondary-text": "#BCC3C2", // changed
-      "tertiary-text": "#798180", // changed
+      "green-bg": "#3C4C4A",
+      "red-bg": "#443535",
+      "orange-bg": "#4A4237",
+      "blue-bg": "#2A3A45",
+      "purple-bg": "#3C3D4C",
 
-      "primary-border": "#575A58", // changed
-      "secondary-border": "#383C3A", // changed
-      "tertiary-border": "#2A2D2C", // changed
-      "hover-border": "#7E8281", // changed
+      "erc-20-bg": "#434B4A",
+      "erc-223-bg": "#44434B",
 
-      "main-primary": "#70C59E",
+      "global-bg": "#0F0F0F",
+
+      // hover colors
+
+      "green-hover": "#A5E7C5",
+      "green-bg-hover": "#495C5A",
+      "green-hover-icon": "#A5E7E6",
+      "red-light-hover": "#F6B4B4",
+      "red-hover": "#DA5D57",
+      "purple-hover": "#A5AEE7",
+      "purple-bg-hover": "#56586F",
+      "purple-hover-icon": "#B8C4FF",
+      "blue-hover": "#96B5C4",
+      "orange-hover": "#B89158",
+
+      "primary-text": "#D1DEDF",
+      "secondary-text": "#A2AAA9",
+      "tertiary-text": "#798180",
+
+      "erc-20-text": "#B0C7CB",
+      "erc-223-text": "#B2B0CB",
+
+      "primary-border": "#575A58",
+      "secondary-border": "#383C3A",
+
+      "erc-20-border": "#B0C7CB",
+      "erc-223-border": "#B2B0CB",
     },
     spacing: {
       "0": "0px",

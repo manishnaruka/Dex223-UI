@@ -61,7 +61,7 @@ export default function LocaleSwitcher({ isMobile = false }: { isMobile?: boolea
           </SelectButton>
         }
       >
-        <div className="py-1 bg-primary-bg rounded-2 shadow-popover">
+        <div className="py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
           <ul>
             {locales.map((locale) => {
               return (
