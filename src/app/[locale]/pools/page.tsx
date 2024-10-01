@@ -54,9 +54,9 @@ export default function PoolsPage() {
 
   return (
     <Container>
-      <div className="py-[40px] px-10 flex flex-col items-center">
-        <div className="flex w-full justify-between items-center mb-6">
-          <div className="w-[384px] grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3">
+      <div className="p-4 lg:p-10 flex flex-col items-center">
+        <div className="flex flex-col lg:flex-row w-full justify-between items-center mb-6 gap-2">
+          <div className="w-full lg:w-[384px] grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3">
             <TabButton inactiveBackground="bg-primary-bg" size={48} active>
               Pools
             </TabButton>
@@ -69,7 +69,7 @@ export default function PoolsPage() {
               Liquidity positions
             </TabButton>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex w-full lg:w-auto gap-2 items-center">
             <SelectButton
               variant="rectangle-primary"
               fullWidth
@@ -110,7 +110,7 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">Select token</span>
+                <span className="text-tertiary-text">Token</span>
               )}
             </SelectButton>
             <span>—</span>
@@ -154,7 +154,7 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">Select token</span>
+                <span className="text-tertiary-text">Token</span>
               )}
             </SelectButton>
           </div>

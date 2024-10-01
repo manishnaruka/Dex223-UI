@@ -4,12 +4,15 @@ import { useCallback, useMemo, useState } from "react";
 import { Address } from "viem";
 
 import Preloader from "@/components/atoms/Preloader";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
+import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
   IconSize,
 } from "@/components/buttons/IconButton";
 import Pagination from "@/components/common/Pagination";
+import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
@@ -59,6 +62,179 @@ function HeaderItem({
 
 const PAGE_SIZE = 10;
 
+const PoolsTableDesktop = ({
+  tableData,
+  currentPage,
+  sorting,
+  handleSort,
+  openPoolHandler,
+}: {
+  tableData: any[];
+  currentPage: number;
+  sorting: SortingType;
+  handleSort: () => any;
+  openPoolHandler: (id: Address) => any;
+}) => {
+  return (
+    <div className="hidden lg:grid pr-5 pl-2 rounded-2 overflow-hidden gap-x-2 bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2">
+      <div className=" h-[60px] flex items-center justify-center">#</div>
+      <div className=" h-[60px] flex items-center">Pool</div>
+      <HeaderItem label="Transactions" sorting={sorting} handleSort={handleSort} />
+      <div className=" h-[60px] flex items-center">TVL</div>
+      <div className=" h-[60px] flex items-center">1 day volume</div>
+      <div className=" h-[60px] flex items-center">7 day volume</div>
+
+      {tableData.map((o: any, index: number) => {
+        return (
+          <>
+            <div
+              onClick={() => openPoolHandler(o.id)}
+              className="h-[56px] cursor-pointer flex items-center justify-center"
+            >
+              {(currentPage - 1) * PAGE_SIZE + index + 1}
+            </div>
+            <div
+              onClick={() => openPoolHandler(o.id)}
+              className="h-[56px] cursor-pointer flex items-center gap-2"
+            >
+              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+              <Image
+                src="/tokens/placeholder.svg"
+                width={24}
+                height={24}
+                alt=""
+                className="-ml-5 bg-primary-bg rounded-full"
+              />
+              <span>{`${o.token0.symbol}/${o.token1.symbol}`}</span>
+            </div>
+            <div
+              onClick={() => openPoolHandler(o.id)}
+              className="h-[56px] cursor-pointer flex items-center"
+            >
+              {o.txCount}
+            </div>
+            <div
+              onClick={() => openPoolHandler(o.id)}
+              className="h-[56px] cursor-pointer flex items-center"
+            >
+              ${o.totalValueLockedUSD}
+            </div>
+            <div
+              onClick={() => openPoolHandler(o.id)}
+              className="h-[56px] cursor-pointer flex items-center"
+            >
+              ${o.poolDayData?.[0]?.volumeUSD || 0}
+            </div>
+            <div
+              onClick={() => openPoolHandler(o.id)}
+              className="h-[56px] cursor-pointer flex items-center"
+            >
+              $0
+            </div>
+          </>
+        );
+      })}
+    </div>
+  );
+};
+
+const PoolsTableItemMobile = ({
+  pool,
+  openPoolHandler,
+  index,
+}: {
+  pool: any;
+  openPoolHandler: (id: Address) => any;
+  index: number;
+}) => {
+  return (
+    <>
+      <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-3">
+        <div className="flex justify-between gap-2">
+          <div className="flex items-center gap-2 text-14">
+            <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+            <Image
+              src="/tokens/placeholder.svg"
+              width={24}
+              height={24}
+              alt=""
+              className="ml-[-20px] bg-primary-bg rounded-full"
+            />
+            <span>{`${pool.token0.symbol}/${pool.token1.symbol}`}</span>
+          </div>
+          <div className="flex gap-2 items-center">
+            <Badge
+              size="small"
+              variant={BadgeVariant.DEFAULT}
+              text={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
+            />
+            <span className="text-secondary-text font-normal">{`# ${index}`}</span>
+          </div>
+        </div>
+        <div className="flex justify-between gap-2">
+          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-12 text-secondary-text">Transactions</span>
+            <span className="text-12">{pool.txCount}</span>
+          </div>
+          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-12 text-secondary-text">TVL</span>
+            <span className="text-12">{`$ ${pool.totalValueLockedUSD || "—"}`}</span>
+          </div>
+          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-12 text-secondary-text">Turnover</span>
+            <span className="text-12">{`— %`}</span>
+          </div>
+        </div>
+        <div className="flex justify-between gap-2">
+          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-12 text-secondary-text">1 day volume</span>
+            <span className="text-12">{`$ ${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
+          </div>
+          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-12 text-secondary-text">7 day volume</span>
+            <span className="text-12">{`$ ${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
+          </div>
+        </div>
+        <Button
+          variant={ButtonVariant.CONTAINED}
+          size={ButtonSize.MEDIUM}
+          onClick={() => openPoolHandler(pool.id)}
+        >
+          View pool
+        </Button>
+      </div>
+    </>
+  );
+};
+
+const PoolsTableMobile = ({
+  tableData,
+  currentPage,
+  sorting,
+  handleSort,
+  openPoolHandler,
+}: {
+  tableData: any[];
+  currentPage: number;
+  sorting: SortingType;
+  handleSort: () => any;
+  openPoolHandler: (id: Address) => any;
+}) => {
+  return (
+    <div className="flex lg:hidden flex-col gap-4">
+      {tableData.map((pool: any, index: number) => {
+        return (
+          <PoolsTableItemMobile
+            key={pool.id}
+            index={(currentPage - 1) * PAGE_SIZE + index + 1}
+            pool={pool}
+            openPoolHandler={openPoolHandler}
+          />
+        );
+      })}
+    </div>
+  );
+};
 export default function PoolsTable({
   filter,
 }: {
@@ -107,71 +283,28 @@ export default function PoolsTable({
   return (
     <>
       <div className="min-h-[640px] mb-5 w-full">
-        <div className="pr-5 pl-2 grid rounded-2 overflow-hidden gap-x-2 bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2">
-          <div className=" h-[60px] flex items-center justify-center">#</div>
-          <div className=" h-[60px] flex items-center">Pool</div>
-          <HeaderItem label="Transactions" sorting={sorting} handleSort={handleSort} />
-          <div className=" h-[60px] flex items-center">TVL</div>
-          <div className=" h-[60px] flex items-center">1 day volume</div>
-          <div className=" h-[60px] flex items-center">7 day volume</div>
-
-          {!loading &&
-            currentTableData.map((o: any, index: number) => {
-              return (
-                <>
-                  <div
-                    onClick={() => openPoolHandler(o.id)}
-                    className="h-[56px] cursor-pointer flex items-center justify-center"
-                  >
-                    {(currentPage - 1) * PAGE_SIZE + index + 1}
-                  </div>
-                  <div
-                    onClick={() => openPoolHandler(o.id)}
-                    className="h-[56px] cursor-pointer flex items-center gap-2"
-                  >
-                    <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
-                    <Image
-                      src="/tokens/placeholder.svg"
-                      width={24}
-                      height={24}
-                      alt=""
-                      className="-ml-5 bg-primary-bg rounded-full"
-                    />
-                    <span>{`${o.token0.symbol}/${o.token1.symbol}`}</span>
-                  </div>
-                  <div
-                    onClick={() => openPoolHandler(o.id)}
-                    className="h-[56px] cursor-pointer flex items-center"
-                  >
-                    {o.txCount}
-                  </div>
-                  <div
-                    onClick={() => openPoolHandler(o.id)}
-                    className="h-[56px] cursor-pointer flex items-center"
-                  >
-                    ${o.totalValueLockedUSD}
-                  </div>
-                  <div
-                    onClick={() => openPoolHandler(o.id)}
-                    className="h-[56px] cursor-pointer flex items-center"
-                  >
-                    ${o.poolDayData?.[0]?.volumeUSD || 0}
-                  </div>
-                  <div
-                    onClick={() => openPoolHandler(o.id)}
-                    className="h-[56px] cursor-pointer flex items-center"
-                  >
-                    $0
-                  </div>
-                </>
-              );
-            })}
-        </div>
         {loading ? (
           <div className="flex justify-center items-center h-full min-h-[550px]">
             <Preloader type="awaiting" size={48} />
           </div>
-        ) : null}
+        ) : (
+          <>
+            <PoolsTableDesktop
+              tableData={currentTableData}
+              sorting={sorting}
+              currentPage={currentPage}
+              handleSort={handleSort}
+              openPoolHandler={openPoolHandler}
+            />
+            <PoolsTableMobile
+              tableData={currentTableData}
+              sorting={sorting}
+              currentPage={currentPage}
+              handleSort={handleSort}
+              openPoolHandler={openPoolHandler}
+            />
+          </>
+        )}
       </div>
 
       <Pagination

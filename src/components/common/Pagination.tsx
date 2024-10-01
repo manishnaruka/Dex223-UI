@@ -45,7 +45,7 @@ export default function Pagination({
       {/* Left navigation arrow */}
       <li
         className={clsx(
-          "text-primary-text w-12 h-12 hover:bg-green-bg rounded-full text-16 flex items-center duration-200 justify-center cursor-pointer",
+          "text-primary-text w-10 lg:w-12 h-10 lg:h-12 hover:bg-green-bg rounded-full text-16 flex items-center duration-200 justify-center cursor-pointer",
           currentPage === 1 && "opacity-50 pointer-events-none",
         )}
         onClick={onPrevious}
@@ -58,7 +58,7 @@ export default function Pagination({
           return (
             <li
               key={`${pageNumber}-${index}`}
-              className="w-12 h-12 rounded-full text-16 flex items-center justify-center duration-200"
+              className="w-10 lg:w-12 h-10 lg:h-12 rounded-full text-16 flex items-center justify-center duration-200"
             >
               &#8230;
             </li>
@@ -70,7 +70,7 @@ export default function Pagination({
           <li
             key={`${pageNumber}-${index}`}
             className={clsx(
-              "w-12 h-12 rounded-full text-16 cursor-pointer flex items-center justify-center duration-200",
+              "w-10 lg:w-12 h-10 lg:h-12 rounded-full text-16 cursor-pointer flex items-center justify-center duration-200",
               pageNumber === currentPage
                 ? "bg-green text-black"
                 : "bg-transparent hover:bg-green-bg text-primary-text",
@@ -84,7 +84,7 @@ export default function Pagination({
       {/*  Right Navigation arrow */}
       <li
         className={clsx(
-          "text-primary-text w-12 h-12 rounded-full hover:bg-green-bg text-16 cursor-pointer duration-200 flex items-center justify-center",
+          "text-primary-text w-10 lg:w-12 h-10 lg:h-12 rounded-full hover:bg-green-bg text-16 cursor-pointer duration-200 flex items-center justify-center",
           currentPage === lastPage && "opacity-50 pointer-events-none",
         )}
         onClick={onNext}

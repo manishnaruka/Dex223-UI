@@ -150,7 +150,7 @@ export const PriceRange = ({
   return (
     <div
       className={clsx(
-        "flex flex-col gap-5 bg-secondary-bg px-5 py-6 rounded-3",
+        "flex flex-col gap-3 bg-tertiary-bg px-4 lg:px-5 py-3 lg:py-4 rounded-3",
         isFormDisabled && "opacity-20",
       )}
     >

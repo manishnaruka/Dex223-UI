@@ -58,10 +58,10 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
   return (
     <div
       role="button"
-      className="px-5 py-4 rounded-3 bg-secondary-bg hover:bg-green-bg duration-200 cursor-pointer"
+      className="px-4 lg:px-5 py-4 rounded-3 bg-secondary-bg hover:bg-green-bg duration-200 cursor-pointer"
       onClick={onClick}
     >
-      <div className="justify-between flex items-center mb-2">
+      <div className="justify-between flex items-center mb-2 gap-2">
         <div className="flex items-center gap-2">
           <TokensPair tokenA={tokenA} tokenB={tokenB} />
           {fee ? (
@@ -179,9 +179,9 @@ export default function PoolsPage() {
 
   return (
     <Container>
-      <div className="py-[40px] px-10 flex flex-col items-center">
-        <div className="flex w-full justify-between items-center mb-6">
-          <div className="w-[384px] grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3">
+      <div className="py-4 lg:p-10 flex flex-col items-center">
+        <div className="flex flex-col lg:flex-row w-full justify-between items-center mb-6 gap-2 px-4 lg:px-0">
+          <div className="w-full lg:w-[384px] grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3">
             <TabButton
               inactiveBackground="bg-primary-bg"
               size={48}
@@ -194,7 +194,13 @@ export default function PoolsPage() {
               Liquidity positions
             </TabButton>
           </div>
-          <Button size={ButtonSize.LARGE} onClick={() => router.push("/add")}>
+          <Button
+            size={ButtonSize.LARGE}
+            mobileSize={ButtonSize.MEDIUM}
+            onClick={() => router.push("/add")}
+            fullWidth
+            className="lg:w-auto"
+          >
             <span className="flex items-center gap-2">
               New position
               <Svg iconName="add" />

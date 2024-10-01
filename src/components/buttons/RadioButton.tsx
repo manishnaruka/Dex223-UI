@@ -10,7 +10,7 @@ export default function RadioButton({ isActive, children, ...props }: PropsWithC
   return (
     <button
       className={clsx(
-        "duration-200 h-10 flex px-5 items-center rounded-2 group hover:shadow-checkbox gap-2 bg-secondary-bg hover:text-primary-text disabled:pointer-events-none disabled:opacity-50",
+        "duration-200 h-10 flex px-4 lg:px-5 items-center rounded-2 group hover:shadow-checkbox gap-2 bg-secondary-bg hover:text-primary-text disabled:pointer-events-none disabled:opacity-50",
         isActive ? "text-primary-text" : "text-secondary-text",
       )}
       {...props}

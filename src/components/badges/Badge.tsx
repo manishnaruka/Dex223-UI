@@ -61,7 +61,7 @@ export default function Badge(props: Props) {
       return (
         <div
           className={clsx(
-            "border border-secondary-text text-secondary-text px-3 rounded-5 h-6 flex items-center justify-center",
+            "border border-secondary-text text-secondary-text px-2 lg:px-3 rounded-5 h-5 lg:h-6 flex items-center justify-center text-12 lg:text-16",
           )}
         >
           {typeof percentage === "number" ? `${percentage}% select` : percentage}

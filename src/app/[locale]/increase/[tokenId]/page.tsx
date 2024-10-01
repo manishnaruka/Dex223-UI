@@ -119,30 +119,35 @@ export default function IncreaseLiquidityPage({
 
   return (
     <Container>
-      <div className="w-[1200px] mx-auto my-[40px]">
-        <div className="flex justify-between items-center bg-primary-bg rounded-t-3 py-2.5 px-6">
-          <IconButton
-            onClick={() => router.push(`/pool/${params.tokenId}`)}
-            buttonSize={IconButtonSize.LARGE}
-            iconName="back"
-            iconSize={IconSize.LARGE}
-          />
-          <h2 className="text-20 font-bold">Increase Liquidity</h2>
-          <div className="flex">
+      <div className="lg:w-[1200px] mx-auto my-4 lg:my-[40px]">
+        <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
+          <div className="w-[96px] md:w-[104px]">
+            <IconButton
+              onClick={() => router.push(`/pool/${params.tokenId}`)}
+              buttonSize={IconButtonSize.LARGE}
+              iconName="back"
+              iconSize={IconSize.LARGE}
+              className="text-tertiary-text"
+            />
+          </div>
+          <h2 className="text-18 md:text-20 font-bold">Increase Liquidity</h2>
+          <div className="w-[96px] md:w-[104px] flex items-center gap-0 lg:gap-2 justify-end">
             <IconButton
               buttonSize={IconButtonSize.LARGE}
               iconName="recent-transactions"
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+              className={showRecentTransactions ? "text-green" : "text-tertiary-text"}
             />
             <IconButton
               buttonSize={IconButtonSize.LARGE}
               iconName="settings"
               onClick={() => setIsOpen(true)}
+              className="text-tertiary-text"
             />
           </div>
         </div>
-        <div className="flex flex-col bg-primary-bg px-10 pb-10 mb-5 rounded-3 rounded-t-0">
-          <div className="flex items-start mb-5 gap-2">
+        <div className="flex flex-col bg-primary-bg p-4 lg:p-10 pt-0 mb-5 rounded-3 rounded-t-0">
+          <div className="flex items-start mb-4 lg:mb-5 gap-2">
             <TokensPair tokenA={tokenA} tokenB={tokenB} />
             <RangeBadge
               status={
@@ -155,7 +160,7 @@ export default function IncreaseLiquidityPage({
             />
           </div>
 
-          <div className="grid gap-5 grid-cols-2 mb-5">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-5 mb-4 lg:mb-5">
             <DepositAmounts
               parsedAmounts={parsedAmounts}
               currencies={currencies}
@@ -163,9 +168,9 @@ export default function IncreaseLiquidityPage({
               depositBDisabled={depositBDisabled}
               isFormDisabled={false}
             />
-            <div className="rounded-3 p-5 bg-tertiary-bg h-min">
+            <div className="rounded-3 p-4 lg:p-5 bg-tertiary-bg h-min">
               <div className="rounded-3 bg-quaternary-bg mb-4">
-                <div className="grid gap-3 px-5 py-3 border-b border-secondary-border">
+                <div className="grid gap-3 px-4 py-3 lg:p-5">
                   <PositionLiquidityCard
                     token={tokenA}
                     amount={existedPosition?.amount0.toSignificant() || "Loading..."}
@@ -181,8 +186,8 @@ export default function IncreaseLiquidityPage({
                 </div>
               </div>
               <div className="flex items-center justify-between mb-5">
-                <span className="font-bold">Fee tier</span>
-                <span>
+                <span className="text-14 lg:text-16">Fee tier</span>
+                <span className="text-14 lg:text-16">
                   {existedPosition
                     ? FEE_AMOUNT_DETAIL[existedPosition?.pool.fee].label
                     : "Loading..."}
@@ -192,11 +197,11 @@ export default function IncreaseLiquidityPage({
 
               <div className="flex justify-between items-center mb-3">
                 <span className="font-bold text-secondary-text">Selected range</span>
-                <div className="flex gap-1">
+                <div className="flex p-0.5 gap-0.5 rounded-2 bg-secondary-bg">
                   <button
                     onClick={() => setShowFirst(true)}
                     className={clsx(
-                      "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
+                      "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                       showFirst
                         ? "bg-green-bg border-green text-primary-text"
                         : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
@@ -207,7 +212,7 @@ export default function IncreaseLiquidityPage({
                   <button
                     onClick={() => setShowFirst(false)}
                     className={clsx(
-                      "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
+                      "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                       !showFirst
                         ? "bg-green-bg border-green text-primary-text"
                         : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
@@ -218,7 +223,7 @@ export default function IncreaseLiquidityPage({
                 </div>
               </div>
 
-              <div className="grid grid-cols-[1fr_12px_1fr] mb-3">
+              <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_12px_1fr] mb-2 lg:mb-3">
                 <PositionPriceRangeCard
                   showFirst={showFirst}
                   tokenA={tokenA}
@@ -226,7 +231,7 @@ export default function IncreaseLiquidityPage({
                   price={minPriceString}
                 />
                 <div className="relative">
-                  <div className="bg-primary-bg w-12 h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <div className="bg-primary-bg w-10 lg:w-12 h-10 lg:h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                     <Svg iconName="double-arrow" />
                   </div>
                 </div>
@@ -240,9 +245,9 @@ export default function IncreaseLiquidityPage({
               </div>
 
               <div className="bg-quaternary-bg flex items-center justify-center flex-col py-3 px-5 rounded-3">
-                <div className="text-14 text-secondary-text">Current price</div>
-                <div className="text-18">{currentPriceString}</div>
-                <div className="text-14 text-secondary-text">
+                <div className="text-12 lg:text-14 text-secondary-text">Current price</div>
+                <div className="text-16 lg:text-18">{currentPriceString}</div>
+                <div className="text-12 lg:text-14 text-tertiary-text">
                   {showFirst
                     ? `${tokenA?.symbol} per ${tokenB?.symbol}`
                     : `${tokenB?.symbol} per ${tokenA?.symbol}`}

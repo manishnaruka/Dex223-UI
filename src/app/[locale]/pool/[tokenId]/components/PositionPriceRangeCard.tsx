@@ -25,16 +25,16 @@ export default function PositionPriceRangeCard({
 
   return (
     <div className="rounded-3 overflow-hidden">
-      <div className="py-3 px-5 flex items-center justify-center flex-col bg-tertiary-bg">
-        <div className="text-14 text-secondary-text">{isMax ? "Max" : "Min"} price</div>
-        <div className="text-18">{price}</div>
-        <div className="text-14 text-secondary-text">
+      <div className="py-2 lg:py-3 px-2 lg:px-5 flex items-center justify-center flex-col bg-quaternary-bg">
+        <div className="text-12 lg:text-14 text-secondary-text">{isMax ? "Max" : "Min"} price</div>
+        <div className="text-16 lg:text-18">{price}</div>
+        <div className="text-12 lg:text-14 text-tertiary-text">
           {showFirst
             ? `${tokenB?.symbol} per ${tokenA?.symbol}`
             : `${tokenA?.symbol} per ${tokenB?.symbol}`}
         </div>
       </div>
-      <div className="bg-quaternary-bg py-3 px-5 text-14 border-t-2 border-tertiary-bg text-secondary-text text-center">
+      <div className="text-12 lg:text-14 bg-quaternary-bg py-2 lg:py-3 px-2 lg:px-5 border-t-2 border-tertiary-bg text-tertiary-text text-center">
         Your position will be 100% {symbol} at this price
       </div>
     </div>
