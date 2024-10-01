@@ -109,24 +109,26 @@ export default function AddPoolPage() {
   return (
     <Container>
       <div className="md:w-[1200px] mx-auto my-4 md:my-[40px]">
-        <div className="flex justify-between items-center bg-primary-bg rounded-t-5 py-2.5 px-6">
-          <div className="w-[80px] md:w-[104px]">
+        <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
+          <div className="w-[48px] md:w-[104px]">
             <IconButton
               variant={IconButtonVariant.DEFAULT}
               iconSize={IconSize.REGULAR}
               iconName="back"
               buttonSize={IconButtonSize.LARGE}
               onClick={() => router.push("/pools/positions")}
+              className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">{t("add_liquidity_title")}</h2>
-          <div className="w-[80px] md:w-[104px] flex items-center gap-2 justify-end">
+          <div className="w-[48px] md:w-[104px] flex items-center gap-2 justify-end">
             <IconButton
               variant={IconButtonVariant.DEFAULT}
               buttonSize={IconButtonSize.LARGE}
               iconName="recent-transactions"
               active={showRecentTransactions}
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+              className="text-tertiary-text"
             />
             {/* <IconButton
               variant={IconButtonVariant.DEFAULT}
@@ -137,7 +139,7 @@ export default function AddPoolPage() {
           </div>
         </div>
         <div className="rounded-b-5 border-t-0 p-4 pt-0 md:p-10 md:pt-0 bg-primary-bg mb-4 md:mb-5">
-          <h3 className="text-16 font-bold mb-4">{t("select_pair")}</h3>
+          <h3 className="text-16 font-bold mb-1 lg:mb-4">{t("select_pair")}</h3>
           <div className="flex gap-3 mb-4 md:mb-5">
             <SelectButton
               variant="rounded-secondary"
@@ -169,7 +171,7 @@ export default function AddPoolPage() {
                   </span>
                 </span>
               ) : (
-                <span className="text-tertiary-text">{t("select_token")}</span>
+                <span className="text-tertiary-text pl-2">{t("select_token")}</span>
               )}
             </SelectButton>
             <SelectButton
@@ -202,12 +204,12 @@ export default function AddPoolPage() {
                   </span>
                 </span>
               ) : (
-                <span className="text-tertiary-text">{t("select_token")}</span>
+                <span className="text-tertiary-text pl-2">{t("select_token")}</span>
               )}
             </SelectButton>
           </div>
           <FeeAmountSettings />
-          <div className="gap-5 md:grid md:grid-cols-2 mb-5">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-5 mb-4 lg:mb-5">
             <DepositAmounts
               parsedAmounts={parsedAmounts}
               currencies={currencies}

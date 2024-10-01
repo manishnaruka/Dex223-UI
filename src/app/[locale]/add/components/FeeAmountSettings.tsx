@@ -133,7 +133,7 @@ export default function FeeAmountSettings() {
   });
 
   return (
-    <div className={clsx("rounded-3 mb-4 md:mb-5 bg-secondary-bg", isDisabled && "opacity-20")}>
+    <div className={clsx("rounded-3 mb-4 md:mb-5 bg-tertiary-bg", isDisabled && "opacity-20")}>
       <div
         role="button"
         onClick={() => {
@@ -141,20 +141,20 @@ export default function FeeAmountSettings() {
           setIsFeeOpened(!isFeeOpened);
         }}
         className={clsx(
-          "flex justify-between items-center px-4 py-2 md:p-5 rounded-3 duration-200",
+          "flex justify-between items-center px-4 py-2 md:px-5 md:py-4 rounded-3 duration-200",
           !isFeeOpened && !isDisabled && "hover:bg-green-bg",
           isDisabled && "cursor-default",
         )}
       >
         <div className="flex items-center gap-2">
-          <span className="font-bold">
+          <span className="font-medium">
             {t("fee_tier", { tier: FEE_AMOUNT_DETAIL[tier].label })}
           </span>
           <Badge variant={BadgeVariant.PERCENTAGE} percentage={getDistributionText(tier)} />
         </div>
 
-        <span className="flex items-center gap-2 group">
-          <span className="">{t(isFeeOpened ? "hide" : "edit")}</span>
+        <span className="flex items-center gap-2 group text-secondary-text">
+          <span>{t(isFeeOpened ? "hide" : "edit")}</span>
           <Svg
             iconName="small-expand-arrow"
             className={isFeeOpened ? "duration-200 -rotate-180" : "duration-200 "}
