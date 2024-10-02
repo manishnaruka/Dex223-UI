@@ -39,7 +39,7 @@ import { useFees } from "@/hooks/useFees";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
-import { FeeAmount } from "@/sdk_hybrid/constants";
+import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
@@ -179,13 +179,7 @@ export function useSwapParams() {
             address,
           ],
         });
-        //
-        // return {
-        //   address: ROUTER_ADDRESS[chainId],
-        //   abi: ROUTER_ABI,
-        //   functionName: "unwrapWETH9",
-        //   args: [parseUnits("0.0001", 18), address],
-        // };
+
         return {
           address: ROUTER_ADDRESS[chainId],
           abi: ROUTER_ABI,
@@ -198,24 +192,6 @@ export function useSwapParams() {
     }
 
     if (tokenAStandard === Standard.ERC223) {
-      // if (tokenB.isNative) {
-      //   return {
-      //     address: getTokenAddressForStandard(tokenA, tokenAStandard),
-      //     abi: ERC223_ABI,
-      //     functionName: "transfer",
-      //     args: [
-      //       ROUTER_ADDRESS[chainId],
-      //       poolAddress.poolAddress,
-      //       parseUnits(typedValue, tokenA.decimals), // amountSpecified
-      //       encodeFunctionData({
-      //         abi: ROUTER_ABI,
-      //         functionName: "exactInputSingle",
-      //         args: [routerParams],
-      //       }),
-      //     ],
-      //   };
-      // }
-
       return {
         address: getTokenAddressForStandard(tokenA, tokenAStandard),
         abi: ERC223_ABI,
@@ -225,11 +201,12 @@ export function useSwapParams() {
           parseUnits(typedValue, tokenA.decimals), // amountSpecified
           encodeFunctionData({
             abi: POOL_ABI,
-            functionName: "swap",
+            functionName: "swapExactInput",
             args: [
-              (address as Address) || poolAddress.poolAddress, // account address
+              (address as Address) || poolAddress.poolAddress, // recipient
               zeroForOne, //zeroForOne
               parseUnits(typedValue, tokenA.decimals), // amountSpecified
+              BigInt(0), //amountOutMinimum
               BigInt(sqrtPriceLimitX96.toString()), //sqrtPriceLimitX96
               tokenBStandard === Standard.ERC223, // prefer223Out
               encodeAbiParameters(
@@ -242,9 +219,11 @@ export function useSwapParams() {
                     ["address", "uint24", "address"],
                     [tokenA.address0, FeeAmount.MEDIUM, tokenB.wrapped.address0],
                   ),
-                  "0x0000000000000000000000000000000000000000",
+                  ADDRESS_ZERO,
                 ],
               ),
+              deadline,
+              tokenB.isNative,
             ],
           }),
         ],
@@ -254,7 +233,9 @@ export function useSwapParams() {
     address,
     chainId,
     deadline,
+    dependentAmount,
     poolAddress,
+    slippage,
     tokenA,
     tokenAStandard,
     tokenB,

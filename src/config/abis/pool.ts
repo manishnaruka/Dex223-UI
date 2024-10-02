@@ -392,6 +392,16 @@ export const POOL_ABI = [
         name: "amount1Requested",
         type: "uint128",
       },
+      {
+        internalType: "bool",
+        name: "token0_223",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "token1_223",
+        type: "bool",
+      },
     ],
     name: "collect",
     outputs: [
@@ -425,6 +435,16 @@ export const POOL_ABI = [
         internalType: "uint128",
         name: "amount1Requested",
         type: "uint128",
+      },
+      {
+        internalType: "bool",
+        name: "token0_223",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "token1_223",
+        type: "bool",
       },
     ],
     name: "collectProtocol",
@@ -749,6 +769,11 @@ export const POOL_ABI = [
         name: "_library",
         type: "address",
       },
+      {
+        internalType: "address",
+        name: "_converter",
+        type: "address",
+      },
     ],
     name: "set",
     outputs: [],
@@ -874,7 +899,7 @@ export const POOL_ABI = [
       },
       {
         internalType: "bool",
-        name: "prefer223Out",
+        name: "prefer223",
         type: "bool",
       },
       {
@@ -894,6 +919,65 @@ export const POOL_ABI = [
         internalType: "int256",
         name: "amount1",
         type: "int256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "recipient",
+        type: "address",
+      },
+      {
+        internalType: "bool",
+        name: "zeroForOne",
+        type: "bool",
+      },
+      {
+        internalType: "int256",
+        name: "amountSpecified",
+        type: "int256",
+      },
+      {
+        internalType: "uint256",
+        name: "amountOutMinimum",
+        type: "uint256",
+      },
+      {
+        internalType: "uint160",
+        name: "sqrtPriceLimitX96",
+        type: "uint160",
+      },
+      {
+        internalType: "bool",
+        name: "prefer223",
+        type: "bool",
+      },
+      {
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "unwrapETH",
+        type: "bool",
+      },
+    ],
+    name: "swapExactInput",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amountOut",
+        type: "uint256",
       },
     ],
     stateMutability: "nonpayable",
@@ -1062,5 +1146,32 @@ export const POOL_ABI = [
     ],
     stateMutability: "nonpayable",
     type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "recipient",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "WETH9",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amountOut",
+        type: "uint256",
+      },
+    ],
+    name: "unwrapWETH9",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
   },
 ] as const;

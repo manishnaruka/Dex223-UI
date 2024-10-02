@@ -8,16 +8,16 @@ import { Token } from "./token";
 export const wrappedTokens: Record<DexChainId, Token> = {
   [DexChainId.SEPOLIA]: new Token(
     DexChainId.SEPOLIA,
-    "0xb16F35c0Ae2912430DAc15764477E179D9B9EbEa",
-    "0x4b113093b80700b3c6cfbcaf6c2600e99f419dc2",
+    "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+    "0x6dB85a3187c3a606913D26e651E1f932A44C4f0D",
     18,
     "WETH",
     "Wrapped Ether",
   ),
   [DexChainId.BSC_TESTNET]: new Token(
     97,
-    "0x094616f0bdfb0b526bd735bf66eca0ad254ca81f",
-    "0xf0a9AC13a76D5A6f9057dd2d0dcc6198FA959453",
+    "0xae13d989dac2f0debff460ac112a837c89baa7cd",
+    "0xe76C629580279b9B3972643AB4444EdC0F292DC4",
     18,
     "WBNB",
     "Wrapped BNB",

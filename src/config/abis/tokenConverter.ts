@@ -62,30 +62,6 @@ export const TOKEN_CONVERTER_ABI = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-    ],
-    name: "depositERC20",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     anonymous: false,
     inputs: [
       {
@@ -131,7 +107,7 @@ export const TOKEN_CONVERTER_ABI = [
         type: "address",
       },
     ],
-    name: "rescueERC20",
+    name: "extractStuckERC20",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -150,7 +126,7 @@ export const TOKEN_CONVERTER_ABI = [
       },
       {
         internalType: "bytes",
-        name: "_data",
+        name: "",
         type: "bytes",
       },
     ],
@@ -162,19 +138,6 @@ export const TOKEN_CONVERTER_ABI = [
         type: "bytes4",
       },
     ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -355,11 +318,6 @@ export const TOKEN_CONVERTER_ABI = [
         name: "",
         type: "address",
       },
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
     ],
     stateMutability: "view",
     type: "function",
@@ -398,11 +356,6 @@ export const TOKEN_CONVERTER_ABI = [
         name: "",
         type: "address",
       },
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
     ],
     stateMutability: "view",
     type: "function",
@@ -421,19 +374,6 @@ export const TOKEN_CONVERTER_ABI = [
         internalType: "bool",
         name: "",
         type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "ownerMultisig",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
       },
     ],
     stateMutability: "view",

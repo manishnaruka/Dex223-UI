@@ -141,12 +141,12 @@ export default function ImportToken({ setContent, handleClose }: Props) {
   }, [custom, tokenAddressToImport]);
 
   const isERC223TokenExists = useMemo(() => {
-    return !!(erc223Address?.[0] && erc223Address[0] !== ADDRESS_ZERO);
+    return !!(erc223Address && erc223Address !== ADDRESS_ZERO);
   }, [erc223Address]);
 
   const erc223AddressToShow = useMemo(() => {
     if (isERC223TokenExists) {
-      return erc223Address![0];
+      return erc223Address;
     }
 
     if (predictedErc223Address) {
@@ -284,7 +284,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     tokenName &&
                     tokenDecimals &&
                     tokenSymbol &&
-                    erc223Address?.[0] &&
+                    erc223Address &&
                     predictedErc223Address
                   ) {
                     const currentCustomList = tokenLists?.find((t) => t.id === `custom-${chainId}`);
@@ -292,7 +292,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     const token = new Token(
                       chainId,
                       tokenAddressToImport as Address,
-                      isERC223TokenExists ? erc223Address[0] : predictedErc223Address,
+                      isERC223TokenExists ? erc223Address : predictedErc223Address,
                       tokenDecimals,
                       tokenSymbol,
                       tokenName,
