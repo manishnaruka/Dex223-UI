@@ -186,6 +186,7 @@ export function useAutoListingUpdater() {
         },
       });
 
+      console.log("TO UPDATE");
       console.log(autoListingsToUpdate);
 
       const resultData = autoListingsToUpdate.data?.autoListings;
