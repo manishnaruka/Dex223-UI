@@ -102,8 +102,8 @@ export default function Tooltip({ text, iconSize = 24, renderTrigger, customOffs
               ref={arrowRef}
               context={context}
               strokeWidth={1}
-              stroke={"#5A5A5A"}
-              fill={"#1D1E1E"}
+              stroke={"transparent"}
+              fill={"#2E2F2F"}
             />
           </div>
         )}

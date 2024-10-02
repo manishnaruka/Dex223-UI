@@ -34,7 +34,7 @@ function ButtonTooltip({ text }: { text: string }) {
           <div
             ref={ref.setReference}
             {...refProps}
-            className="w-12 h-full rounded-r-2 border-r border-y border-green flex items-center justify-center hover:bg-green-bg duration-200 cursor-pointer"
+            className="bg-green-bg text-secondary-text border-transparent border hover:border-green hover:bg-green-bg-hover hover:text-primary-text w-12 h-full rounded-r-2 border-r-2 border-primary-bg flex items-center justify-center duration-200 cursor-pointer"
           >
             <Svg iconName="info" />
           </div>
@@ -112,7 +112,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               />
             </div>
 
-            <div className="w-full flex items-center mt-3">
+            <div className="w-full flex items-center mt-3 gap-px">
               <Button
                 endIcon="import-list"
                 colorScheme={ButtonColor.LIGHT_GREEN}
@@ -187,7 +187,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               />
             </div>
 
-            <div className="w-full flex items-center mt-3">
+            <div className="w-full flex items-center mt-3 gap-px">
               <Button
                 endIcon="import-token"
                 colorScheme={ButtonColor.LIGHT_GREEN}

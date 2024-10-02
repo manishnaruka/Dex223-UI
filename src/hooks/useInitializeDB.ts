@@ -56,7 +56,7 @@ export default function useInitializeDB() {
   }, []);
 }
 
-const query = gql`
+const query = gql(`
   query AutoListings($first: Int!, $addresses: [String!]) {
     autoListings(first: $first, where: { id_in: $addresses }) {
       id
@@ -77,9 +77,9 @@ const query = gql`
       }
     }
   }
-`;
+`);
 
-const queryLastUpdated = gql`
+const queryLastUpdated = gql(`
   query AutoListings($first: Int!, $addresses: [String!]) {
     autoListings(first: $first, where: { id_in: $addresses }) {
       id
@@ -87,7 +87,7 @@ const queryLastUpdated = gql`
       totalTokens
     }
   }
-`;
+`);
 
 export function useAutoListingUpdater() {
   const chainId = useCurrentChainId();
