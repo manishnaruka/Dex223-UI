@@ -150,8 +150,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     return "predictWrapperAddress";
   }, [isWrapper, standard]);
 
-  console.log(otherAddressFunctionName);
-
   const otherAddressCheckFunctionName = useMemo(() => {
     if (otherAddressFunctionName !== "predictWrapperAddress") {
       return null;
@@ -190,8 +188,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
         Boolean(otherAddressFunctionName),
     },
   });
-
-  console.log(otherAddress);
 
   const { erc20AddressToImport, erc223AddressToImport, isErc20Exist, isErc223Exist } =
     useMemo(() => {
@@ -335,19 +331,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                           </>
                         )}
                       </div>
-
-                      {erc223AddressToImport && !isErc223Exist && (
-                        <Alert
-                          text="ERC223 Version of this token does not exists yet"
-                          type="info-border"
-                        />
-                      )}
-                      {erc20AddressToImport && !isErc20Exist && (
-                        <Alert
-                          text="ERC20 Version of this token does not exists yet"
-                          type="info-border"
-                        />
-                      )}
                     </div>
                     <div className="px-5 py-3 flex gap-2 rounded-1 border border-orange bg-orange-bg">
                       <Svg className="text-orange shrink-0" iconName="warning" />
