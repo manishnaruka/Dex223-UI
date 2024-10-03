@@ -71,9 +71,9 @@ export default function TokenListingPage() {
                 provided in the corresponding issue comment thread on github.
               </>
             }
-            href="/contracts"
+            href="https://github.com/EthereumCommonwealth/Dex223-listings"
             image="/listing-cards/default-listing.png"
-            isExternal={true}
+            isExternal
           />
           <ListingVariantCard
             heading="Auto-listing contracts"

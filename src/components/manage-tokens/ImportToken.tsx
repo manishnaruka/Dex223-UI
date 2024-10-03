@@ -1,3 +1,4 @@
+import { isZeroAddress } from "@ethereumjs/util";
 import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { Address, isAddress } from "viem";
@@ -19,6 +20,7 @@ import IconButton, {
 } from "@/components/buttons/IconButton";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { ERC20_ABI } from "@/config/abis/erc20";
+import { ERC223_ABI } from "@/config/abis/erc223";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { db } from "@/db/db";
 import { copyToClipboard } from "@/functions/copyToClipboard";
@@ -72,7 +74,6 @@ function EmptyState({
     );
   }
 }
-
 export default function ImportToken({ setContent, handleClose }: Props) {
   const t = useTranslations("ManageTokens");
   const tToast = useTranslations("Toast");
@@ -110,9 +111,19 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  const { data: erc223Address } = useReadContract({
+  const { data: standard } = useReadContract({
+    abi: ERC223_ABI,
+    functionName: "standard",
+    address: tokenAddressToImport as Address,
+    chainId,
+    query: {
+      enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
+    },
+  });
+
+  const { data: isWrapper } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
-    functionName: "getERC223WrapperFor",
+    functionName: "isWrapper",
     address: CONVERTER_ADDRESS[chainId],
     args: [tokenAddressToImport as Address],
     chainId,
@@ -121,16 +132,85 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  const { data: predictedErc223Address } = useReadContract({
+  console.log(standard);
+  console.log(isWrapper);
+
+  const otherAddressFunctionName = useMemo(() => {
+    if (isWrapper == null) {
+      return null;
+    }
+
+    if (isWrapper) {
+      if (standard === 223) {
+        return "getERC20OriginFor";
+      }
+      return "getERC223OriginFor";
+    }
+
+    return "predictWrapperAddress";
+  }, [isWrapper, standard]);
+
+  console.log(otherAddressFunctionName);
+
+  const otherAddressCheckFunctionName = useMemo(() => {
+    if (otherAddressFunctionName !== "predictWrapperAddress") {
+      return null;
+    }
+
+    if (standard === 223) {
+      return "getERC20WrapperFor";
+    }
+    return "getERC223WrapperFor";
+  }, [otherAddressFunctionName, standard]);
+
+  const { data: otherAddress } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
-    functionName: "predictWrapperAddress",
+    functionName: otherAddressCheckFunctionName!,
     address: CONVERTER_ADDRESS[chainId],
-    args: [tokenAddressToImport as Address, true],
+    args: [tokenAddressToImport as Address],
     chainId,
     query: {
-      enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
+      enabled:
+        !!tokenAddressToImport &&
+        isAddress(tokenAddressToImport) &&
+        Boolean(otherAddressCheckFunctionName),
     },
   });
+
+  const { data: predictedOtherAddress } = useReadContract({
+    abi: TOKEN_CONVERTER_ABI,
+    functionName: otherAddressFunctionName!,
+    address: CONVERTER_ADDRESS[chainId],
+    args: [tokenAddressToImport as Address, standard !== 223],
+    chainId,
+    query: {
+      enabled:
+        !!tokenAddressToImport &&
+        isAddress(tokenAddressToImport) &&
+        Boolean(otherAddressFunctionName),
+    },
+  });
+
+  console.log(otherAddress);
+
+  const { erc20AddressToImport, erc223AddressToImport, isErc20Exist, isErc223Exist } =
+    useMemo(() => {
+      if (standard === 223) {
+        return {
+          erc20AddressToImport: predictedOtherAddress,
+          erc223AddressToImport: tokenAddressToImport,
+          isErc20Exist: otherAddress && isAddress(otherAddress) && !isZeroAddress(otherAddress),
+          isErc223Exist: true,
+        };
+      }
+
+      return {
+        erc223AddressToImport: predictedOtherAddress,
+        erc20AddressToImport: tokenAddressToImport,
+        isErc223Exist: otherAddress && isAddress(otherAddress) && !isZeroAddress(otherAddress),
+        isErc20Exist: true,
+      };
+    }, [otherAddress, predictedOtherAddress, standard, tokenAddressToImport]);
 
   const [checkedUnderstand, setCheckedUnderstand] = useState<boolean>(false);
 
@@ -140,21 +220,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     return !!(custom && custom?.[0]?.list.tokens.find((v) => v.address0 === tokenAddressToImport));
   }, [custom, tokenAddressToImport]);
 
-  const isERC223TokenExists = useMemo(() => {
-    return !!(erc223Address && erc223Address !== ADDRESS_ZERO);
-  }, [erc223Address]);
-
-  const erc223AddressToShow = useMemo(() => {
-    if (isERC223TokenExists) {
-      return erc223Address;
-    }
-
-    if (predictedErc223Address) {
-      return predictedErc223Address;
-    }
-
-    return;
-  }, [erc223Address, isERC223TokenExists, predictedErc223Address]);
+  console.log(predictedOtherAddress);
 
   return (
     <>
@@ -179,159 +245,188 @@ export default function ImportToken({ setContent, handleClose }: Props) {
         <EmptyState
           tokenAddressToImport={tokenAddressToImport}
           isFound={Boolean(
-            tokenName && typeof tokenDecimals !== "undefined" && tokenSymbol && erc223Address?.[0],
+            tokenName &&
+              typeof tokenDecimals !== "undefined" &&
+              tokenSymbol &&
+              predictedOtherAddress,
           )}
         />
 
-        {tokenName && typeof tokenDecimals !== "undefined" && tokenSymbol && erc223Address?.[0] && (
-          <>
-            <div className="flex-grow">
-              <div className="flex items-center gap-3 pb-2.5 mt-0.5 mb-3">
-                <img
-                  className="w-12 h-12"
-                  width={48}
-                  height={48}
-                  src="/tokens/placeholder.svg"
-                  alt=""
-                />
-                <div className="flex flex-col text-16">
-                  <span className="text-primary-text">{tokenSymbol}</span>
-                  <span className="text-secondary-text">
-                    {tokenName} ({t("decimals_amount", { decimals: tokenDecimals })})
-                  </span>
+        {tokenName &&
+          typeof tokenDecimals !== "undefined" &&
+          tokenSymbol &&
+          predictedOtherAddress && (
+            <>
+              <div className="flex-grow">
+                <div className="flex items-center gap-3 pb-2.5 mt-0.5 mb-3">
+                  <img
+                    className="w-12 h-12"
+                    width={48}
+                    height={48}
+                    src="/tokens/placeholder.svg"
+                    alt=""
+                  />
+                  <div className="flex flex-col text-16">
+                    <span className="text-primary-text">{tokenSymbol}</span>
+                    <span className="text-secondary-text">
+                      {tokenName} ({t("decimals_amount", { decimals: tokenDecimals })})
+                    </span>
+                  </div>
                 </div>
-              </div>
-              {!alreadyImported && erc223AddressToShow && (
-                <>
-                  <div className="mb-4 flex flex-col gap-4 px-5 pb-5 pt-4 bg-tertiary-bg rounded-3">
-                    <div className="grid grid-cols-[1fr_auto_32px] gap-x-2">
-                      <span className="text-secondary-text flex items-center gap-1">
-                        {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
-                      </span>
-                      <ExternalTextLink
-                        color="white"
-                        text={truncateMiddle(tokenAddressToImport)}
-                        href={getExplorerLink(
-                          ExplorerLinkType.ADDRESS,
-                          tokenAddressToImport,
-                          chainId,
+                {!alreadyImported && erc223AddressToImport && erc20AddressToImport && (
+                  <>
+                    <div className="mb-4 flex flex-col gap-4 px-5 pb-5 pt-4 bg-tertiary-bg rounded-3">
+                      <div className="grid grid-cols-[1fr_auto_32px] gap-x-2">
+                        <span className="text-secondary-text flex items-center gap-1">
+                          {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
+                        </span>
+                        <ExternalTextLink
+                          color="green"
+                          text={truncateMiddle(erc20AddressToImport)}
+                          href={getExplorerLink(
+                            ExplorerLinkType.ADDRESS,
+                            erc20AddressToImport,
+                            chainId,
+                          )}
+                          className="justify-between"
+                        />
+                        <IconButton
+                          iconSize={IconSize.SMALL}
+                          variant={IconButtonVariant.DEFAULT}
+                          buttonSize={IconButtonSize.SMALL}
+                          iconName="copy"
+                          onClick={async () => {
+                            await copyToClipboard(erc20AddressToImport);
+                            addToast(tToast("successfully_copied"));
+                          }}
+                        />
+                        <span className="text-secondary-text flex items-center gap-1">
+                          {t("address")}{" "}
+                          <Badge variant={BadgeVariant.COLORED} text="ERC-223" color="green" />
+                        </span>
+                        {erc223AddressToImport && isErc223Exist && (
+                          <>
+                            <ExternalTextLink
+                              color="green"
+                              text={truncateMiddle(erc223AddressToImport)}
+                              href={getExplorerLink(
+                                ExplorerLinkType.ADDRESS,
+                                erc20AddressToImport,
+                                chainId,
+                              )}
+                              className="justify-between"
+                            />
+                            <IconButton
+                              iconSize={IconSize.SMALL}
+                              variant={IconButtonVariant.DEFAULT}
+                              buttonSize={IconButtonSize.SMALL}
+                              iconName="copy"
+                              onClick={async () => {
+                                await copyToClipboard(erc223AddressToImport);
+                                addToast(tToast("successfully_copied"));
+                              }}
+                            />
+                          </>
                         )}
-                        className="justify-between"
-                      />
-                      <IconButton
-                        iconSize={IconSize.SMALL}
-                        variant={IconButtonVariant.DEFAULT}
-                        buttonSize={IconButtonSize.SMALL}
-                        iconName="copy"
-                        onClick={async () => {
-                          await copyToClipboard(tokenAddressToImport);
-                          addToast(tToast("successfully_copied"));
-                        }}
-                      />
-                      <span className="text-secondary-text flex items-center gap-1">
-                        {t("address")}{" "}
-                        <Badge
-                          variant={BadgeVariant.COLORED}
-                          text="ERC-223"
-                          color={isERC223TokenExists ? "green" : "blue"}
-                        />{" "}
-                      </span>
-                      <div className="h-8 flex items-center">
-                        {truncateMiddle(erc223AddressToShow)}
+                        {erc223AddressToImport && !isErc223Exist && (
+                          <>
+                            <span></span>
+                            <span className="text-tertiary-text">—</span>
+                          </>
+                        )}
                       </div>
-                      <IconButton
-                        iconSize={IconSize.SMALL}
-                        variant={IconButtonVariant.DEFAULT}
-                        buttonSize={IconButtonSize.SMALL}
-                        iconName="copy"
-                        onClick={async () => {
-                          await copyToClipboard(erc223AddressToShow);
-                          addToast(tToast("successfully_copied"));
-                        }}
-                      />
+
+                      {erc223AddressToImport && !isErc223Exist && (
+                        <Alert
+                          text="ERC223 Version of this token does not exists yet"
+                          type="info-border"
+                        />
+                      )}
+                      {erc20AddressToImport && !isErc20Exist && (
+                        <Alert
+                          text="ERC20 Version of this token does not exists yet"
+                          type="info-border"
+                        />
+                      )}
                     </div>
+                    <div className="px-5 py-3 flex gap-2 rounded-1 border border-orange bg-orange-bg">
+                      <Svg className="text-orange shrink-0" iconName="warning" />
+                      <p className="text-16 text-secondary-text flex-grow">
+                        {t("import_token_warning")}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
 
-                    {predictedErc223Address && !isERC223TokenExists && (
-                      <Alert text={t("predicted_alert")} type="info-border" />
-                    )}
-                  </div>
-                  <div className="px-5 py-3 flex gap-2 rounded-1 border border-orange bg-orange-bg">
-                    <Svg className="text-orange shrink-0" iconName="warning" />
-                    <p className="text-16 text-primary-text flex-grow">
-                      {t("import_token_warning")}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
+              <div className="flex flex-col gap-5 mt-5">
+                {!alreadyImported && (
+                  <Checkbox
+                    checked={checkedUnderstand}
+                    handleChange={() => setCheckedUnderstand(!checkedUnderstand)}
+                    id="approve-list-import"
+                    label={t("i_understand")}
+                  />
+                )}
+                <Button
+                  fullWidth
+                  size={ButtonSize.MEDIUM}
+                  disabled={!checkedUnderstand || alreadyImported}
+                  onClick={async () => {
+                    if (
+                      chainId &&
+                      tokenName &&
+                      tokenDecimals &&
+                      tokenSymbol &&
+                      predictedOtherAddress
+                    ) {
+                      const currentCustomList = tokenLists?.find(
+                        (t) => t.id === `custom-${chainId}`,
+                      );
 
-            <div className="flex flex-col gap-5 mt-5">
-              {!alreadyImported && (
-                <Checkbox
-                  checked={checkedUnderstand}
-                  handleChange={() => setCheckedUnderstand(!checkedUnderstand)}
-                  id="approve-list-import"
-                  label={t("i_understand")}
-                />
-              )}
-              <Button
-                fullWidth
-                size={ButtonSize.MEDIUM}
-                disabled={!checkedUnderstand || alreadyImported}
-                onClick={async () => {
-                  if (
-                    chainId &&
-                    tokenName &&
-                    tokenDecimals &&
-                    tokenSymbol &&
-                    erc223Address &&
-                    predictedErc223Address
-                  ) {
-                    const currentCustomList = tokenLists?.find((t) => t.id === `custom-${chainId}`);
-
-                    const token = new Token(
-                      chainId,
-                      tokenAddressToImport as Address,
-                      isERC223TokenExists ? erc223Address : predictedErc223Address,
-                      tokenDecimals,
-                      tokenSymbol,
-                      tokenName,
-                      "/tokens/placeholder.svg",
-                    );
-
-                    if (!currentCustomList) {
-                      await db.tokenLists.add({
-                        id: `custom-${chainId}`,
-                        enabled: true,
+                      const token = new Token(
                         chainId,
-                        list: {
-                          name: "Custom token list",
-                          version: {
-                            minor: 0,
-                            major: 0,
-                            patch: 0,
+                        tokenAddressToImport as Address,
+                        predictedOtherAddress,
+                        tokenDecimals,
+                        tokenSymbol,
+                        tokenName,
+                        "/tokens/placeholder.svg",
+                      );
+
+                      if (!currentCustomList) {
+                        await db.tokenLists.add({
+                          id: `custom-${chainId}`,
+                          enabled: true,
+                          chainId,
+                          list: {
+                            name: "Custom token list",
+                            version: {
+                              minor: 0,
+                              major: 0,
+                              patch: 0,
+                            },
+                            tokens: [token],
+                            logoURI: "/token-list-placeholder.svg",
                           },
-                          tokens: [token],
-                          logoURI: "/token-list-placeholder.svg",
-                        },
-                      });
-                    } else {
-                      (db.tokenLists as any).update(`custom-${chainId}`, {
-                        "list.tokens": [...currentCustomList.list.tokens, token],
-                      });
+                        });
+                      } else {
+                        (db.tokenLists as any).update(`custom-${chainId}`, {
+                          "list.tokens": [...currentCustomList.list.tokens, token],
+                        });
+                      }
                     }
-                  }
-                  setContent("default");
-                  addToast(t("imported_successfully"));
-                }}
-              >
-                {alreadyImported
-                  ? t("already_imported")
-                  : t("import_symbol", { symbol: tokenSymbol })}
-              </Button>
-            </div>
-          </>
-        )}
+                    setContent("default");
+                    addToast(t("imported_successfully"));
+                  }}
+                >
+                  {alreadyImported
+                    ? t("already_imported")
+                    : t("import_symbol", { symbol: tokenSymbol })}
+                </Button>
+              </div>
+            </>
+          )}
       </div>
     </>
   );

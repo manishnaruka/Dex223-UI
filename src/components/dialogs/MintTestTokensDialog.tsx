@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Address, formatUnits, parseUnits } from "viem";
+import { Address, formatUnits, isAddress, parseUnits } from "viem";
 import {
   useAccount,
   useBlockNumber,
@@ -19,11 +19,13 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { useMintTestTokensDialogStore } from "@/components/dialogs/stores/useMintTestTokensDialogStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
+import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
+import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 
 export default function MintTestTokensDialog() {
   const { isOpen, handleOpen, handleClose } = useMintTestTokensDialogStore();
@@ -52,10 +54,21 @@ export default function MintTestTokensDialog() {
     }
   }, [tokenToMint, tokens]);
 
+  const { data: isAddress1Wrapper } = useReadContract({
+    abi: TOKEN_CONVERTER_ABI,
+    functionName: "isWrapper",
+    address: CONVERTER_ADDRESS[chainId],
+    args: [tokenToMint.wrapped.address1],
+    chainId,
+    query: {
+      enabled: tokenToMint.isToken,
+    },
+  });
+
   const { data: balance, refetch } = useReadContract({
     abi: ERC20_ABI,
     functionName: "balanceOf",
-    address: tokenToMint?.wrapped.address0! as Address,
+    address: isAddress1Wrapper ? tokenToMint?.wrapped.address0! : tokenToMint?.wrapped.address1,
     chainId,
     args: [address as Address],
     query: {
@@ -85,7 +98,9 @@ export default function MintTestTokensDialog() {
       try {
         const hash = await walletClient.writeContract({
           abi: ERC223_ABI,
-          address: tokenToMint?.wrapped.address0 as Address,
+          address: isAddress1Wrapper
+            ? tokenToMint?.wrapped.address0!
+            : tokenToMint?.wrapped.address1,
           functionName: "mint",
           args: [address, parseUnits(amountToMint, tokenToMint.decimals)],
         });
@@ -101,7 +116,15 @@ export default function MintTestTokensDialog() {
         setIsPending(false);
       }
     });
-  }, [connector, tokenToMint, walletClient, publicClient, address, amountToMint]);
+  }, [
+    connector,
+    tokenToMint,
+    walletClient,
+    publicClient,
+    address,
+    isAddress1Wrapper,
+    amountToMint,
+  ]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
