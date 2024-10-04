@@ -84,10 +84,7 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
             iconSize={IconSize.REGULAR}
             variant={IconButtonVariant.COPY}
             buttonSize={IconButtonSize.SMALL}
-            handleCopy={async () => {
-              await copyToClipboard(token.address0);
-              addToast(tToast("successfully_copied"));
-            }}
+            text={token.address0}
           />
           <span className="text-secondary-text flex items-center gap-1">
             {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-223" />{" "}
@@ -101,10 +98,7 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
             iconSize={IconSize.REGULAR}
             variant={IconButtonVariant.COPY}
             buttonSize={IconButtonSize.SMALL}
-            handleCopy={async () => {
-              await copyToClipboard(token.address1);
-              addToast(tToast("successfully_copied"));
-            }}
+            text={token.address1}
           />
         </div>
         <div className="flex justify-between">

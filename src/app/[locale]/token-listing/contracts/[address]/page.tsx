@@ -148,10 +148,7 @@ export default function AutoListingContractDetails({
                     text={truncateMiddle(params.address, { charsFromEnd: 3, charsFromStart: 3 })}
                     href="#"
                   />{" "}
-                  <IconButton
-                    variant={IconButtonVariant.COPY}
-                    handleCopy={() => copyToClipboard(params.address)}
-                  />{" "}
+                  <IconButton variant={IconButtonVariant.COPY} text={params.address} />{" "}
                 </span>
               }
               className="grid-in-[second] xl:grid-in-[third] justify-between flex-row items-center xl:flex-col xl:items-start"
@@ -334,10 +331,7 @@ export default function AutoListingContractDetails({
                               <IconButton
                                 buttonSize={IconButtonSize.LARGE}
                                 variant={IconButtonVariant.COPY}
-                                handleCopy={() => {
-                                  copyToClipboard(token.address0);
-                                  addToast("Copied!");
-                                }}
+                                text={token.address0}
                               />
                             </div>
                           </div>
@@ -362,10 +356,7 @@ export default function AutoListingContractDetails({
                               <IconButton
                                 buttonSize={IconButtonSize.LARGE}
                                 variant={IconButtonVariant.COPY}
-                                handleCopy={() => {
-                                  copyToClipboard(token.address1);
-                                  addToast("Copied!");
-                                }}
+                                text={token.address1}
                               />
                             </div>
                           </div>
@@ -411,13 +402,7 @@ export default function AutoListingContractDetails({
                                 DexChainId.SEPOLIA,
                               )}
                             />{" "}
-                            <IconButton
-                              variant={IconButtonVariant.COPY}
-                              handleCopy={() => {
-                                copyToClipboard(token.address0);
-                                addToast("Copied!");
-                              }}
-                            />
+                            <IconButton variant={IconButtonVariant.COPY} text={token.address0} />
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
@@ -429,13 +414,7 @@ export default function AutoListingContractDetails({
                                 DexChainId.SEPOLIA,
                               )}
                             />{" "}
-                            <IconButton
-                              variant={IconButtonVariant.COPY}
-                              handleCopy={() => {
-                                copyToClipboard(token.address1);
-                                addToast("Copied!");
-                              }}
-                            />
+                            <IconButton variant={IconButtonVariant.COPY} text={token.address1} />
                           </div>
                           <div className="flex items-center"></div>
                           <div className="flex items-center">{token.lists?.length || 0} list</div>
