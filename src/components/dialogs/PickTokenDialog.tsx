@@ -144,7 +144,6 @@ function TokenRow({
           <span className="block w-10" />
         )}
         <IconButton
-          className={clsx("duration-200", isTokenPinned ? "text-green" : "hover:text-green")}
           iconName={isTokenPinned ? "pin-fill" : "pin"}
           onClick={(e) => {
             e.stopPropagation();

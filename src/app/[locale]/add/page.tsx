@@ -130,12 +130,6 @@ export default function AddPoolPage() {
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
               className="text-tertiary-text"
             />
-            {/* <IconButton
-              variant={IconButtonVariant.DEFAULT}
-              buttonSize={IconButtonSize.LARGE}
-              iconName="settings"
-              onClick={() => setIsOpen(true)}
-            /> */}
           </div>
         </div>
         <div className="rounded-b-5 border-t-0 p-4 pt-0 md:p-10 md:pt-0 bg-primary-bg mb-4 md:mb-5">

@@ -156,14 +156,14 @@ const config: Config = {
       "secondary-text": "#A2AAA9",
       "tertiary-text": "#798180",
 
-      "erc-20-text": "#B0C7CB",
-      "erc-223-text": "#B2B0CB",
+      "erc-20-text": "#97B9B6",
+      "erc-223-text": "#949ED4",
 
       "primary-border": "#575A58",
       "secondary-border": "#383C3A",
 
-      "erc-20-border": "#B0C7CB",
-      "erc-223-border": "#B2B0CB",
+      "erc-20-border": "#97B9B6",
+      "erc-223-border": "#949ED4",
     },
     spacing: {
       "0": "0px",

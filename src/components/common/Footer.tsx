@@ -50,7 +50,7 @@ function FooterLink({ href, title, icon }: SocialLink) {
       <a
         target="_blank"
         href={href}
-        className="lg:w-auto flex gap-2 bg-primary-bg rounded-5 py-2 pr-4 pl-5 hover:bg-green-bg duration-200 w-full whitespace-nowrap justify-center"
+        className="lg:w-auto flex gap-2 bg-primary-bg rounded-5 py-2 pr-4 pl-5 hover:bg-green-bg hover:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center"
       >
         {t(title)}
         <Svg iconName={icon} />
@@ -79,8 +79,8 @@ export default function Footer() {
       <div>
         <Container>
           <div className="py-5 px-5 flex justify-end items-center gap-2">
-            <div className="flex items-center gap-1 text-12">
-              <Svg size={16} className="text-secondary-text" iconName="gas" />
+            <div className="flex items-center gap-1 text-12 text-secondary-text">
+              <Svg size={16} className="text-tertiary-text" iconName="gas" />
               <span>
                 {t("gas")}{" "}
                 <a

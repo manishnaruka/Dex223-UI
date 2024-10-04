@@ -33,9 +33,9 @@ export default function Badge(props: Props) {
             "rounded-5 px-2 font-medium box-border text-nowrap",
             color === "blue" && "bg-blue-bg shadow-[0_0_0_1px_theme(colors.blue)_inset] text-blue",
             color === "green" &&
-              "bg-green-bg shadow-[0_0_0_1px_theme(colors.green)_inset] text-green",
+              "bg-erc-20-bg shadow-[0_0_0_1px_theme(colors.erc-20-border)_inset] text-erc-20-text",
             color === "purple" &&
-              "bg-purple-bg shadow-[0_0_0_1px_theme(colors.purple)_inset] text-purple",
+              "bg-erc-223-bg shadow-[0_0_0_1px_theme(colors.erc-223-border)_inset] text-erc-20-text",
             color === "red" && "bg-red-bg shadow-[0_0_0_1px_theme(colors.red)_inset] text-red",
             color === "grey" &&
               "bg-quaternary-bg text-secondary-text shadow-[0_0_0_1px_theme(colors.quaternary-bg)_inset]",

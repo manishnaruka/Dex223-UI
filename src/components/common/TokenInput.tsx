@@ -108,10 +108,12 @@ function StandardOption({
         )}
       >
         <div className="flex items-center gap-1 cursor-default">
-          <span className={clsxMerge("text-12", !token && "text-tertiary-text")}>
+          <span
+            className={clsxMerge("text-12 text-secondary-text", !token && "text-tertiary-text")}
+          >
             {t("standard")}
           </span>
-          <Badge color="green" text={standard} />
+          <Badge size="small" color="green" text={standard} />
           <Tooltip
             iconSize={16}
             text={standard === Standard.ERC20 ? t("erc20_tooltip") : t("erc223_tooltip")}
@@ -264,10 +266,10 @@ export default function TokenInput({
                   <button
                     key={st}
                     className={clsxMerge(
-                      "h-6 rounded-3 duration-200 px-2 min-w-[58px] w-full text-10",
+                      "h-6 rounded-3 duration-200 px-2 min-w-[58px] w-full text-10 text-secondary-text",
                       standard === st
                         ? "bg-green text-black shadow shadow-green/60"
-                        : "hover:bg-green-bg",
+                        : "hover:bg-green-bg hover:text-primary-text",
                       !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
                       !token && "text-tertiary-text pointer-events-none",
                     )}
@@ -309,10 +311,10 @@ export default function TokenInput({
                   <button
                     key={st}
                     className={clsxMerge(
-                      "h-6 rounded-3 duration-200 px-2 min-w-[58px]",
+                      "h-6 rounded-3 duration-200 px-2 min-w-[58px] text-secondary-text",
                       standard === st
                         ? "bg-green text-black shadow shadow-green/60"
-                        : "hover:bg-green-bg",
+                        : "hover:bg-green-bg hover:text-primary-text",
                       !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
                       !token && "text-tertiary-text pointer-events-none",
                     )}

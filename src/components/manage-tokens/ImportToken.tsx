@@ -4,7 +4,6 @@ import React, { useMemo, useState } from "react";
 import { Address, isAddress } from "viem";
 import { useReadContract } from "wagmi";
 
-import Alert from "@/components/atoms/Alert";
 import Checkbox from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -13,24 +12,18 @@ import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize } from "@/components/buttons/Button";
-import IconButton, {
-  IconButtonSize,
-  IconButtonVariant,
-  IconSize,
-} from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { db } from "@/db/db";
-import { copyToClipboard } from "@/functions/copyToClipboard";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { ADDRESS_ZERO } from "@/sdk_hybrid/constants";
 import { Token } from "@/sdk_hybrid/entities/token";
 
 interface Props {
@@ -76,7 +69,6 @@ function EmptyState({
 }
 export default function ImportToken({ setContent, handleClose }: Props) {
   const t = useTranslations("ManageTokens");
-  const tToast = useTranslations("Toast");
   const [tokenAddressToImport, setTokenAddressToImport] = useState("");
   const chainId = useCurrentChainId();
   const tokenLists = useTokenLists();
@@ -131,9 +123,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
       enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
     },
   });
-
-  console.log(standard);
-  console.log(isWrapper);
 
   const otherAddressFunctionName = useMemo(() => {
     if (isWrapper == null) {
@@ -216,8 +205,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     return !!(custom && custom?.[0]?.list.tokens.find((v) => v.address0 === tokenAddressToImport));
   }, [custom, tokenAddressToImport]);
 
-  console.log(predictedOtherAddress);
-
   return (
     <>
       <DialogHeader
@@ -271,8 +258,8 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                 </div>
                 {!alreadyImported && erc223AddressToImport && erc20AddressToImport && (
                   <>
-                    <div className="mb-4 flex flex-col gap-4 px-5 pb-5 pt-4 bg-tertiary-bg rounded-3">
-                      <div className="grid grid-cols-[1fr_auto_32px] gap-x-2">
+                    <div className="mb-4 flex flex-col gap-4 pl-5 pr-3 pb-5 pt-4 bg-tertiary-bg rounded-3">
+                      <div className="grid grid-cols-[1fr_auto_32px] gap-y-1">
                         <span className="text-secondary-text flex items-center gap-1">
                           {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
                         </span>
@@ -287,14 +274,9 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                           className="justify-between"
                         />
                         <IconButton
-                          iconSize={IconSize.SMALL}
-                          variant={IconButtonVariant.DEFAULT}
+                          variant={IconButtonVariant.COPY}
                           buttonSize={IconButtonSize.SMALL}
-                          iconName="copy"
-                          onClick={async () => {
-                            await copyToClipboard(erc20AddressToImport);
-                            addToast(tToast("successfully_copied"));
-                          }}
+                          text={erc20AddressToImport}
                         />
                         <span className="text-secondary-text flex items-center gap-1">
                           {t("address")}{" "}
@@ -313,21 +295,18 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                               className="justify-between"
                             />
                             <IconButton
-                              iconSize={IconSize.SMALL}
-                              variant={IconButtonVariant.DEFAULT}
+                              variant={IconButtonVariant.COPY}
                               buttonSize={IconButtonSize.SMALL}
-                              iconName="copy"
-                              onClick={async () => {
-                                await copyToClipboard(erc223AddressToImport);
-                                addToast(tToast("successfully_copied"));
-                              }}
+                              text={erc223AddressToImport}
                             />
                           </>
                         )}
                         {erc223AddressToImport && !isErc223Exist && (
                           <>
                             <span></span>
-                            <span className="text-tertiary-text">—</span>
+                            <span className="text-tertiary-text text-right flex w-8 items-center justify-center">
+                              —
+                            </span>
                           </>
                         )}
                       </div>

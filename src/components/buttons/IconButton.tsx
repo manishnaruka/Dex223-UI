@@ -1,10 +1,13 @@
-import { ButtonHTMLAttributes } from "react";
+import { useTranslations } from "next-intl";
+import { ButtonHTMLAttributes, useCallback, useState } from "react";
 import { MouseEvent } from "react";
 
 import { SortingType } from "@/app/[locale]/borrow-market/components/BorrowMarketTable";
 import Svg from "@/components/atoms/Svg";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { copyToClipboard } from "@/functions/copyToClipboard";
+import addToast from "@/other/toast";
 export enum IconSize {
   SMALL = 20,
   REGULAR = 24,
@@ -72,7 +75,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
         handleClose: (e: MouseEvent<HTMLButtonElement>) => void;
       }
     | { variant: IconButtonVariant.CONTROL; iconName: IconName }
-    | { variant: IconButtonVariant.COPY; handleCopy: () => void }
+    | { variant: IconButtonVariant.COPY; text: string }
     | { variant?: IconButtonVariant.DEFAULT | undefined; iconName: IconName; active?: boolean }
     | {
         variant: IconButtonVariant.SORTING;
@@ -80,6 +83,38 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
         handleSort?: () => void;
       }
   );
+
+type CopyIconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  Omit<FrameProps, "iconName"> & { text: string };
+
+function CopyIconButton(_props: CopyIconButtonProps) {
+  const t = useTranslations("Toast");
+  const [isCopied, setIsCopied] = useState(false);
+  const { text, buttonSize, className, ...props } = _props;
+
+  const handleCopy = useCallback(async () => {
+    await copyToClipboard(text);
+    setIsCopied(true);
+    addToast(t("successfully_copied"));
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 800);
+  }, [t, text]);
+
+  return (
+    <IconButtonFrame
+      iconName={isCopied ? "done" : "copy"}
+      onClick={handleCopy}
+      buttonSize={buttonSize || IconButtonSize.SMALL}
+      className={clsxMerge(
+        "hover:text-green duration-200 text-tertiary-text",
+        className,
+        isCopied && "text-green",
+      )}
+      {...props}
+    />
+  );
+}
 export default function IconButton(_props: Props) {
   switch (_props.variant) {
     case IconButtonVariant.DEFAULT:
@@ -89,7 +124,7 @@ export default function IconButton(_props: Props) {
         <IconButtonFrame
           iconName={_props.iconName}
           className={clsxMerge(
-            "text-primary-text rounded-full bg-transparent hover:bg-green-bg duration-200",
+            "text-tertiary-text  hover:text-green-hover-icon relative before:opacity-0 before:duration-200 hover:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[20px] duration-200",
             active && "text-green",
             className,
           )}
@@ -176,17 +211,7 @@ export default function IconButton(_props: Props) {
       );
     }
     case IconButtonVariant.COPY: {
-      const { handleCopy, buttonSize, className, ...props } = _props;
-
-      return (
-        <IconButtonFrame
-          iconName="copy"
-          onClick={_props.handleCopy}
-          buttonSize={buttonSize || IconButtonSize.SMALL}
-          className={clsxMerge("hover:text-green duration-200 text-primary-text", className)}
-          {...props}
-        />
-      );
+      return <CopyIconButton {..._props} />;
     }
   }
 }
