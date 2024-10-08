@@ -39,7 +39,7 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
   const { pools, addPool } = usePoolsStore();
   const chainId = useCurrentChainId();
 
-  const poolTokens: ({ token0: Token; token1: Token; tier: FeeAmount } | undefined)[] =
+  const poolTokens: ({ token0: Currency; token1: Currency; tier: FeeAmount } | undefined)[] =
     useMemo(() => {
       if (!chainId) return [...Array(poolsParams.length)];
 
@@ -47,12 +47,12 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
         if (!currencyA || !currencyB || !tier) {
           return undefined;
         }
-        const tokenA = currencyA.wrapped;
-        const tokenB = currencyB.wrapped;
+        const tokenA = currencyA;
+        const tokenB = currencyB;
         if (tokenA.equals(tokenB)) return undefined;
         return {
-          token0: tokenA.sortsBefore(tokenB) ? tokenA : tokenB,
-          token1: tokenA.sortsBefore(tokenB) ? tokenB : tokenA,
+          token0: tokenA.wrapped.sortsBefore(tokenB.wrapped) ? tokenA : tokenB,
+          token1: tokenA.wrapped.sortsBefore(tokenB.wrapped) ? tokenB : tokenA,
           tier,
         };
       });
@@ -117,8 +117,8 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
       const { token0, token1, tier } = tokens;
 
       const key = getPoolAddressKey({
-        addressTokenA: token0.address0,
-        addressTokenB: token1.address0,
+        addressTokenA: token0.wrapped.address0,
+        addressTokenB: token1.wrapped.address0,
         chainId,
         tier,
       });
@@ -162,8 +162,8 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
       const { tier, token0, token1 } = poolToken;
       if (!token0 || !token1 || !tier || !chainId) return undefined;
       const key = getPoolAddressKey({
-        addressTokenA: token0.address0,
-        addressTokenB: token1.address0,
+        addressTokenA: token0.wrapped.address0,
+        addressTokenB: token1.wrapped.address0,
         chainId,
         tier,
       });

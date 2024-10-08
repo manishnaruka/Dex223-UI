@@ -43,7 +43,7 @@ import { LiquidityStatus, useLiquidityStatusStore } from "../../stores/useLiquid
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { TransactionItem } from "./TransactionItem";
 
-const APPROVE_BUTTON_TEXT = {
+export const APPROVE_BUTTON_TEXT = {
   [ApproveTransactionType.ERC20_AND_ERC223]: "button_approve_and_deposit",
   [ApproveTransactionType.ERC20]: "button_approve",
   [ApproveTransactionType.ERC223]: "button_deposit",
@@ -562,12 +562,12 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
         </div>
 
         <div className="flex justify-center gap-2 items-center mb-3">
-          <Image src={tokenA?.logoURI || ""} alt="" width={24} height={24} />
+          <Image src={tokenA?.logoURI || "/tokens/placeholder.svg"} alt="" width={24} height={24} />
           <span>
             {formatFloat(parsedAmounts[Field.CURRENCY_A]?.toSignificant() || "")} {tokenA?.symbol}
           </span>
           <Svg iconName="add" />
-          <Image src={tokenB?.logoURI || ""} alt="" width={24} height={24} />
+          <Image src={tokenB?.logoURI || "/tokens/placeholder.svg"} alt="" width={24} height={24} />
           <span>
             {formatFloat(parsedAmounts[Field.CURRENCY_B]?.toSignificant() || "")} {tokenB?.symbol}
           </span>

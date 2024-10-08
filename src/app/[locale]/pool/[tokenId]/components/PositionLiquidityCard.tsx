@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import Badge from "@/components/badges/Badge";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 
 export default function PositionLiquidityCard({
   token,
@@ -9,7 +9,7 @@ export default function PositionLiquidityCard({
   percentage,
   standards,
 }: {
-  token: Token | undefined;
+  token: Currency | undefined;
   amount: string;
   percentage?: number | string;
   standards?: string[];
@@ -17,7 +17,12 @@ export default function PositionLiquidityCard({
   return (
     <div className="flex flex-col lg:flex-row gap-1 lg:gap-0 justify-between items-center">
       <div className="flex items-center gap-2">
-        <Image src={token?.logoURI || ""} alt={token?.symbol || ""} width={24} height={24} />
+        <Image
+          src={token?.logoURI || "/tokens/placeholder.svg"}
+          alt={token?.symbol || ""}
+          width={24}
+          height={24}
+        />
         <span className="text-secondary-text">{token?.symbol}</span>
         {standards?.map((standard) => {
           return <Badge key={standard} color="green" text={standard} />;

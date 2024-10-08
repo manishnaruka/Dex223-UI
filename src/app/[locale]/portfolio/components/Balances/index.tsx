@@ -42,7 +42,7 @@ const filterTable = ({
 export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
-  const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
+  const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
   const isTokenInfoOpened = Boolean(tokenForPortfolio);
   const handleClosTokenInfo = () => {
     setTokenForPortfolio(null);
@@ -56,7 +56,7 @@ export const Balances = () => {
     .filter((value) => filterTable({ searchValue, value }))
     .map(({ token, amountERC20, amountERC223, amountFiat }) => ({
       logoURI: token.logoURI,
-      name: token.name,
+      name: token.wrapped.name,
       amountERC20: `${formatFloat(formatUnits(amountERC20 || BigInt(0), token.decimals))} ${token.symbol}`,
       amountERC223: `${formatFloat(formatUnits(amountERC223 || BigInt(0), token.decimals))} ${token.symbol}`,
       amountFiat: amountFiat,
@@ -159,7 +159,9 @@ export const Balances = () => {
       </div>
       <DrawerDialog isOpen={isTokenInfoOpened} setIsOpen={handleClosTokenInfo}>
         <DialogHeader onClose={handleClosTokenInfo} title={tokenForPortfolio?.name || "Unknown"} />
-        {tokenForPortfolio ? <TokenPortfolioDialogContent token={tokenForPortfolio} /> : null}
+        {tokenForPortfolio ? (
+          <TokenPortfolioDialogContent token={tokenForPortfolio.wrapped} />
+        ) : null}
       </DrawerDialog>
     </>
   );

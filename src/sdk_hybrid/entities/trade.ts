@@ -466,11 +466,11 @@ export class Trade<
     const inputCurrency = routes[0].inputAmount.currency;
     const outputCurrency = routes[0].outputAmount.currency;
     invariant(
-      routes.every(({ route }) => inputCurrency.wrapped.equals(route.input.wrapped)),
+      routes.every(({ route }) => inputCurrency.equals(route.input)),
       "INPUT_CURRENCY_MATCH",
     );
     invariant(
-      routes.every(({ route }) => outputCurrency.wrapped.equals(route.output.wrapped)),
+      routes.every(({ route }) => outputCurrency.equals(route.output)),
       "OUTPUT_CURRENCY_MATCH",
     );
 
@@ -485,8 +485,8 @@ export class Trade<
           computePoolAddress({
             factoryAddress: FACTORY_ADDRESS[DexChainId.SEPOLIA],
             fee: pool.fee,
-            tokenA: pool.token0,
-            tokenB: pool.token1,
+            tokenA: pool.token0.wrapped,
+            tokenB: pool.token1.wrapped,
             standardA: Standard.ERC20, // TODO,
             standardB: Standard.ERC20, // TODO,
           }),
@@ -589,7 +589,10 @@ export class Trade<
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
       // pool irrelevant
-      if (!pool.token0.equals(amountIn.currency) && !pool.token1.equals(amountIn.currency))
+      if (
+        !pool.token0.wrapped.equals(amountIn.currency) &&
+        !pool.token1.wrapped.equals(amountIn.currency)
+      )
         continue;
 
       let amountOut: CurrencyAmount<Token>;
@@ -672,7 +675,10 @@ export class Trade<
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
       // pool irrelevant
-      if (!pool.token0.equals(amountOut.currency) && !pool.token1.equals(amountOut.currency))
+      if (
+        !pool.token0.wrapped.equals(amountOut.currency) &&
+        !pool.token1.wrapped.equals(amountOut.currency)
+      )
         continue;
 
       let amountIn: CurrencyAmount<Token>;

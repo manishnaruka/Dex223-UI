@@ -40,8 +40,8 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
       : [tokenB, tokenA];
 
     if (
-      pool.token0.address0 !== _tokenA.wrapped.address0 ||
-      pool.token1.address0 !== _tokenB.wrapped.address0
+      pool.token0.wrapped.address0 !== _tokenA.wrapped.address0 ||
+      pool.token1.wrapped.address0 !== _tokenB.wrapped.address0
     ) {
       return null;
     }

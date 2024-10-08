@@ -6,13 +6,14 @@ import React from "react";
 
 import Badge from "@/components/badges/Badge";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 
 export const BalancesDesktopTable = ({
   tableData,
   setTokenForPortfolio,
 }: {
   tableData: any;
-  setTokenForPortfolio: any;
+  setTokenForPortfolio: (currency: Currency | null) => void;
 }) => {
   return (
     <div className="hidden lg:grid pr-5 pl-5 pb-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] relative">
@@ -78,7 +79,7 @@ export const BalancesMobileTable = ({
   setTokenForPortfolio,
 }: {
   tableData: any;
-  setTokenForPortfolio: any;
+  setTokenForPortfolio: (currency: Currency | null) => void;
 }) => {
   return (
     <div className="flex lg:hidden flex-col gap-4">

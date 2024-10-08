@@ -9,6 +9,7 @@ import { ZERO } from "../internalConstants";
 import { tickToPrice } from "../utils/priceTickConversions";
 import { SqrtPriceMath } from "../utils/sqrtPriceMath";
 import { TickMath } from "../utils/tickMath";
+import { Currency } from "./currency";
 import { CurrencyAmount } from "./fractions/currencyAmount";
 import { Percent } from "./fractions/percent";
 import { Price } from "./fractions/price";
@@ -32,8 +33,8 @@ export class Position {
   public readonly liquidity: JSBI;
 
   // cached resuts for the getters
-  private _token0Amount: CurrencyAmount<Token> | null = null;
-  private _token1Amount: CurrencyAmount<Token> | null = null;
+  private _token0Amount: CurrencyAmount<Currency> | null = null;
+  private _token1Amount: CurrencyAmount<Currency> | null = null;
   private _mintAmounts: Readonly<{ amount0: JSBI; amount1: JSBI }> | null = null;
 
   /**
@@ -58,20 +59,20 @@ export class Position {
    * Returns the price of token0 at the lower tick
    */
   public get token0PriceLower(): Price<Token, Token> {
-    return tickToPrice(this.pool.token0, this.pool.token1, this.tickLower);
+    return tickToPrice(this.pool.token0.wrapped, this.pool.token1.wrapped, this.tickLower);
   }
 
   /**
    * Returns the price of token0 at the upper tick
    */
   public get token0PriceUpper(): Price<Token, Token> {
-    return tickToPrice(this.pool.token0, this.pool.token1, this.tickUpper);
+    return tickToPrice(this.pool.token0.wrapped, this.pool.token1.wrapped, this.tickUpper);
   }
 
   /**
    * Returns the amount of token0 that this position's liquidity could be burned for at the current pool price
    */
-  public get amount0(): CurrencyAmount<Token> {
+  public get amount0(): CurrencyAmount<Currency> {
     if (this._token0Amount === null) {
       if (this.pool.tickCurrent < this.tickLower) {
         this._token0Amount = CurrencyAmount.fromRawAmount(
@@ -103,7 +104,7 @@ export class Position {
   /**
    * Returns the amount of token1 that this position's liquidity could be burned for at the current pool price
    */
-  public get amount1(): CurrencyAmount<Token> {
+  public get amount1(): CurrencyAmount<Currency> {
     if (this._token1Amount === null) {
       if (this.pool.tickCurrent < this.tickLower) {
         this._token1Amount = CurrencyAmount.fromRawAmount(this.pool.token1, ZERO);

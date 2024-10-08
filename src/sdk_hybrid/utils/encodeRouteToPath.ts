@@ -23,7 +23,9 @@ export function encodeRouteToPath(route: Route<Currency, Currency>, exactOutput:
       pool: Pool,
       index,
     ): { inputToken: Token; path: (string | number)[]; types: string[] } => {
-      const outputToken: Token = pool.token0.equals(inputToken) ? pool.token1 : pool.token0;
+      const outputToken: Token = pool.token0.wrapped.equals(inputToken)
+        ? pool.token1.wrapped
+        : pool.token0.wrapped;
       if (index === 0) {
         return {
           inputToken: outputToken,

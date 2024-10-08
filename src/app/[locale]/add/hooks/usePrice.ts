@@ -13,6 +13,7 @@ import { Bound } from "../components/PriceRange/LiquidityChartRangeInput/types";
 import { useAddLiquidityTokensStore } from "../stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "../stores/useLiquidityPriceRangeStore";
 import { useLiquidityTierStore } from "../stores/useLiquidityTierStore";
+import { useSortedTokens } from "./useSortedTokens";
 
 // export const usePrice = ({
 //   pool,
@@ -94,15 +95,10 @@ export const usePriceRange = () =>
     const [poolState, pool] = usePool({ currencyA: tokenA, currencyB: tokenB, tier });
     const noLiquidity = poolState === PoolState.NOT_EXISTS;
 
-    const [token0, token1] = useMemo(
-      () =>
-        tokenA && tokenB
-          ? tokenA.wrapped.sortsBefore(tokenB.wrapped)
-            ? [tokenA, tokenB]
-            : [tokenB, tokenA]
-          : [undefined, undefined],
-      [tokenA, tokenB],
-    );
+    const { token0, token1 } = useSortedTokens({
+      tokenA,
+      tokenB,
+    });
 
     const invertPrice = Boolean(tokenA && token0 && !tokenA.equals(token0));
 
