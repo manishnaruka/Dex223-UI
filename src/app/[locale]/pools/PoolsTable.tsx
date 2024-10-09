@@ -13,6 +13,7 @@ import IconButton, {
 } from "@/components/buttons/IconButton";
 import Pagination from "@/components/common/Pagination";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
+import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
@@ -117,19 +118,19 @@ const PoolsTableDesktop = ({
               onClick={() => openPoolHandler(o.id)}
               className="h-[56px] cursor-pointer flex items-center"
             >
-              ${o.totalValueLockedUSD}
+              ${formatFloat(o.totalValueLockedUSD)}
             </div>
             <div
               onClick={() => openPoolHandler(o.id)}
               className="h-[56px] cursor-pointer flex items-center"
             >
-              ${o.poolDayData?.[0]?.volumeUSD || 0}
+              ${formatFloat(o.poolDayData?.[0]?.volumeUSD || 0)}
             </div>
             <div
               onClick={() => openPoolHandler(o.id)}
               className="h-[56px] cursor-pointer flex items-center"
             >
-              $0
+              ${formatFloat(0)}
             </div>
           </>
         );
@@ -178,7 +179,7 @@ const PoolsTableItemMobile = ({
           </div>
           <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
             <span className="text-12 text-secondary-text">TVL</span>
-            <span className="text-12">{`$ ${pool.totalValueLockedUSD || "—"}`}</span>
+            <span className="text-12">{`$ ${formatFloat(pool.totalValueLockedUSD)}`}</span>
           </div>
           <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
             <span className="text-12 text-secondary-text">Turnover</span>
@@ -188,7 +189,7 @@ const PoolsTableItemMobile = ({
         <div className="flex justify-between gap-2">
           <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
             <span className="text-12 text-secondary-text">1 day volume</span>
-            <span className="text-12">{`$ ${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
+            <span className="text-12">{`$ ${formatFloat(pool.poolDayData?.[0]?.volumeUSD || 0)}`}</span>
           </div>
           <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
             <span className="text-12 text-secondary-text">7 day volume</span>
