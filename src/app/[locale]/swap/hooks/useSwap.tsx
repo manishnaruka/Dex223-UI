@@ -101,6 +101,18 @@ export function useSwapParams() {
     address: ROUTER_ADDRESS[chainId],
   });
 
+  const minimumAmountOut = useMemo(() => {
+    if (!trade) {
+      return BigInt(0);
+    }
+
+    return BigInt(
+      trade
+        .minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
+        .quotient.toString(),
+    );
+  }, [dependentAmount, slippage, trade]);
+
   console.log(balance.data);
 
   const swapParams = useMemo(() => {
@@ -170,14 +182,7 @@ export function useSwapParams() {
         const encodedUnwrapParams = encodeFunctionData({
           abi: ROUTER_ABI,
           functionName: "unwrapWETH9",
-          args: [
-            BigInt(
-              trade
-                ?.minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
-                .quotient.toString(),
-            ),
-            address,
-          ],
+          args: [minimumAmountOut, address],
         });
 
         return {
@@ -233,9 +238,8 @@ export function useSwapParams() {
     address,
     chainId,
     deadline,
-    dependentAmount,
+    minimumAmountOut,
     poolAddress,
-    slippage,
     tokenA,
     tokenAStandard,
     tokenB,
@@ -470,7 +474,7 @@ export default function useSwap() {
         gas: gasToUse,
       } as any);
 
-      hash = await walletClient.writeContract({ ...request, account: undefined }); // TODO: remove any
+      hash = await walletClient.writeContract({ ...request, account: undefined });
 
       closeConfirmInWalletAlert();
 
