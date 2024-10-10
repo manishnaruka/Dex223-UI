@@ -28,12 +28,12 @@ import {
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Link, useRouter } from "@/navigation";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { Token } from "@/sdk_hybrid/entities/token";
 
 import PositionLiquidityCard from "../../pool/[tokenId]/components/PositionLiquidityCard";
 
-const RemoveLiquidityRow = ({ token, amount }: { token: Token | undefined; amount: string }) => {
+const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-2">
@@ -41,7 +41,12 @@ const RemoveLiquidityRow = ({ token, amount }: { token: Token | undefined; amoun
       </div>
       <div className="flex items-center gap-2">
         <span className="font-bold">{amount}</span>
-        <Image src={token?.logoURI || ""} alt={token?.symbol || ""} width={24} height={24} />
+        <Image
+          src={token?.logoURI || "/tokens/placeholder.svg"}
+          alt={token?.symbol || ""}
+          width={24}
+          height={24}
+        />
       </div>
     </div>
   );
@@ -148,7 +153,7 @@ export default function DecreaseLiquidityPage({
             </div>
           </div>
           <div className="rounded-3 bg-tertiary-bg mb-4 lg:mb-5 p-5">
-            <div className="flex justify-between lg:grid gap-3">
+            <div className="flex justify-between lg:flex-col gap-3">
               <PositionLiquidityCard
                 token={tokenA}
                 amount={
@@ -195,7 +200,7 @@ export default function DecreaseLiquidityPage({
         }}
       >
         <DialogHeader onClose={handleClose} title="Confirm removing liquidity" />
-        <div className="px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 lg:h-[80dvh] md:h-auto overflow-y-auto">
+        <div className="px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 md:h-auto overflow-y-auto">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">

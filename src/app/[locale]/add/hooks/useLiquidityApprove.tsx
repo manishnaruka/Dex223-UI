@@ -104,7 +104,7 @@ export const useLiquidityApprove = () => {
     let approveB = undefined as undefined | ApproveTransaction;
     let depositA = undefined as undefined | ApproveTransaction;
     let depositB = undefined as undefined | ApproveTransaction;
-    if (tokenA && tokenAStandard && amountToCheckA) {
+    if (tokenA && tokenAStandard && amountToCheckA && !tokenA.isNative) {
       if (tokenAStandard === Standard.ERC20) {
         approveA = {
           token: tokenA,
@@ -123,7 +123,7 @@ export const useLiquidityApprove = () => {
         };
       }
     }
-    if (tokenB && tokenBStandard && amountToCheckB) {
+    if (tokenB && tokenBStandard && amountToCheckB && !tokenB.isNative) {
       if (tokenBStandard === Standard.ERC20) {
         approveB = {
           token: tokenB,

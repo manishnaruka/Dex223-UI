@@ -1,13 +1,13 @@
 import Image from "next/image";
 
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 
 export default function TokensPair({
   tokenA,
   tokenB,
 }: {
-  tokenA?: Token | undefined;
-  tokenB?: Token | undefined;
+  tokenA?: Currency | undefined;
+  tokenB?: Currency | undefined;
 }) {
   return (
     <div className="flex items-center gap-2.5">

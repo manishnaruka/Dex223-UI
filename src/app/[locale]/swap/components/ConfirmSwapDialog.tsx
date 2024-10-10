@@ -382,7 +382,7 @@ function ReadonlyTokenAmountCard({
       <div className="flex justify-between items-center text-20">
         <span>{amount}</span>
         <div className="flex items-center gap-2">
-          <Image src={token?.logoURI || ""} alt="" width={32} height={32} />
+          <Image src={token?.logoURI || "/tokens/placeholder.svg"} alt="" width={32} height={32} />
           {token?.symbol}
           <Badge color="green" text={token?.isNative ? "Native" : standard} />
         </div>
@@ -566,12 +566,22 @@ export default function ConfirmSwapDialog() {
               </div>
 
               <div className="flex justify-center gap-2 items-center">
-                <Image src={tokenA?.logoURI || ""} alt="" width={24} height={24} />
+                <Image
+                  src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                  alt=""
+                  width={24}
+                  height={24}
+                />
                 <span>
                   {tokenA?.symbol} {typedValue}
                 </span>
                 <Svg iconName="next" />
-                <Image src={tokenB?.logoURI || ""} alt="" width={24} height={24} />
+                <Image
+                  src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                  alt=""
+                  width={24}
+                  height={24}
+                />
                 <span>
                   {tokenB?.symbol} {output}
                 </span>

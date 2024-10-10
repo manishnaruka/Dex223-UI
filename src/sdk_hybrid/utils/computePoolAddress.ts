@@ -184,8 +184,8 @@ export const useComputePoolAddressDex = ({
 
 export const useComputePoolAddressesDex = (
   params: {
-    tokenA?: Token;
-    tokenB?: Token;
+    tokenA?: Currency;
+    tokenB?: Currency;
     tier?: FeeAmount;
   }[],
 ) => {

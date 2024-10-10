@@ -8,12 +8,11 @@ import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePosit
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
-import addToast from "@/other/toast";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 import { Position } from "@/sdk_hybrid/entities/position";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { toHex } from "@/sdk_hybrid/utils/calldata";
 import {
   GasFeeModel,
@@ -43,7 +42,7 @@ export default function useRemoveLiquidity({
   const chainId = useCurrentChainId();
 
   const handleRemoveLiquidity = useCallback(
-    async (tokenA: Token | null, tokenB: Token | null, position?: Position) => {
+    async (tokenA: Currency | null, tokenB: Currency | null, position?: Position) => {
       setRemoveLiquidityHash(undefined);
       if (
         !position ||

@@ -58,12 +58,12 @@ export const InputRange = ({
   );
 };
 function InputTotalAmount({
-  token,
+  currency,
   value,
   onChange,
   isDisabled,
 }: {
-  token?: Currency;
+  currency?: Currency;
   value: string;
   onChange: (value: string) => void;
   isDisabled?: boolean;
@@ -72,12 +72,18 @@ function InputTotalAmount({
 
   const { data: blockNumber } = useBlockNumber({ watch: true });
   const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
-    address: token ? address : undefined,
-    token: token ? (token.wrapped.address0 as Address) : undefined,
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address0 : undefined,
+    query: {
+      enabled: Boolean(currency),
+    },
   });
   const { data: token1Balance, refetch: refetchBalance1 } = useBalance({
-    address: token ? address : undefined,
-    token: token ? (token.wrapped.address1 as Address) : undefined,
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address1 : undefined,
+    query: {
+      enabled: Boolean(currency),
+    },
   });
 
   useEffect(() => {
@@ -85,11 +91,13 @@ function InputTotalAmount({
     refetchBalance1();
   }, [blockNumber, refetchBalance0, refetchBalance1]);
 
-  const totalBalance = (token0Balance?.value || BigInt(0)) + (token1Balance?.value || BigInt(0));
+  const totalBalance = currency?.isNative
+    ? token0Balance?.value || BigInt(0)
+    : (token0Balance?.value || BigInt(0)) + (token1Balance?.value || BigInt(0));
 
   const maxHandler = () => {
-    if (token) {
-      onChange(formatFloat(formatUnits(totalBalance, token.decimals)));
+    if (currency) {
+      onChange(formatFloat(formatUnits(totalBalance, currency.decimals)));
     }
   };
 
@@ -98,7 +106,7 @@ function InputTotalAmount({
       <div className="bg-secondary-bg p-4 lg:p-5 pb-3 lg:pb-4 rounded-3">
         <div className="mb-1 flex justify-between items-center">
           <NumericFormat
-            decimalScale={token?.decimals}
+            decimalScale={currency?.decimals}
             inputMode="decimal"
             placeholder="0.0"
             className={clsx("bg-transparent outline-0 border-0 text-20 w-full peer")}
@@ -111,10 +119,15 @@ function InputTotalAmount({
             disabled={isDisabled}
           />
           <div className="bg-secondary-bg rounded-5 py-1 pl-1 pr-3 flex items-center gap-2 min-w-[88px]">
-            {token ? (
+            {currency ? (
               <>
-                <Image src={token?.logoURI || ""} alt="" width={24} height={24} />
-                <span>{token.symbol}</span>
+                <Image
+                  src={currency?.logoURI || "/tokens/placeholder.svg"}
+                  alt=""
+                  width={24}
+                  height={24}
+                />
+                <span>{currency.symbol}</span>
               </>
             ) : (
               <span>Select token</span>
@@ -125,8 +138,8 @@ function InputTotalAmount({
           <span className="text-secondary-text text-12 lg:text-14">—</span>
           <div className="flex gap-1">
             <span className="text-12 md:text-14">
-              {token &&
-                `Balance: ${formatFloat(formatUnits(totalBalance, token.decimals))} ${token.symbol}`}
+              {currency &&
+                `Balance: ${formatFloat(formatUnits(totalBalance, currency.decimals))} ${currency.symbol}`}
             </span>
             <Button
               variant={ButtonVariant.CONTAINED}
@@ -147,7 +160,7 @@ function InputTotalAmount({
 function InputStandardAmount({
   standard,
   value,
-  token,
+  currency,
   status,
   currentAllowance,
   revokeHandler,
@@ -156,7 +169,7 @@ function InputStandardAmount({
 }: {
   standard: Standard;
   value?: number | string;
-  token?: Currency;
+  currency?: Currency;
   currentAllowance: bigint; // currentAllowance or currentDeposit
   status: AllowanceStatus;
   revokeHandler: (customAmount?: bigint) => void; // onWithdraw or onWithdraw
@@ -168,8 +181,8 @@ function InputStandardAmount({
   const { address } = useAccount();
   const { data: blockNumber } = useBlockNumber({ watch: true });
   const { data: tokenBalance, refetch: refetchBalance } = useBalance({
-    address: token ? address : undefined,
-    token: token ? getTokenAddressForStandard(token, standard) : undefined,
+    address: currency ? address : undefined,
+    token: currency ? getTokenAddressForStandard(currency, standard) : undefined,
   });
 
   useEffect(() => {
@@ -202,10 +215,12 @@ function InputStandardAmount({
         </div>
         <div className="flex justify-end items-center text-10 lg:text-12 text-secondary-text">
           <span>
-            {token &&
+            {currency &&
               t("balance", {
-                balance: formatFloat(formatUnits(tokenBalance?.value || BigInt(0), token.decimals)),
-                symbol: token.symbol,
+                balance: formatFloat(
+                  formatUnits(tokenBalance?.value || BigInt(0), currency.decimals),
+                ),
+                symbol: currency.symbol,
               })}
           </span>
         </div>
@@ -213,7 +228,7 @@ function InputStandardAmount({
       <div className={clsx("flex justify-between items-center h-4")}>
         {currentAllowance > 0 ? (
           <>
-            {token && (
+            {currency && (
               <div className="flex items-center gap-1">
                 <Tooltip
                   iconSize={16}
@@ -225,15 +240,15 @@ function InputStandardAmount({
                   {standard === Standard.ERC20
                     ? t("approved", {
                         approved: formatFloat(
-                          formatUnits(currentAllowance || BigInt(0), token.decimals),
+                          formatUnits(currentAllowance || BigInt(0), currency.decimals),
                         ),
-                        symbol: token.symbol,
+                        symbol: currency.symbol,
                       })
                     : t("deposited", {
                         deposited: formatFloat(
-                          formatUnits(currentAllowance || BigInt(0), token.decimals),
+                          formatUnits(currentAllowance || BigInt(0), currency.decimals),
                         ),
-                        symbol: token.symbol,
+                        symbol: currency.symbol,
                       })}
                 </span>
               </div>
@@ -249,12 +264,12 @@ function InputStandardAmount({
           </>
         ) : null}
       </div>
-      {token && token.isToken && (
+      {currency && currency.isToken && (
         <RevokeDialog
           isOpen={isOpenedRevokeDialog}
           setIsOpen={setIsOpenedRevokeDialog}
           standard={standard}
-          token={token}
+          token={currency}
           status={status}
           currentAllowance={currentAllowance}
           revokeHandler={revokeHandler}
@@ -267,7 +282,7 @@ function InputStandardAmount({
 }
 
 export default function TokenDepositCard({
-  token,
+  currency,
   value,
   formattedValue,
   onChange,
@@ -277,7 +292,7 @@ export default function TokenDepositCard({
   setTokenStandardRatio,
   gasPrice,
 }: {
-  token?: Currency;
+  currency?: Currency;
   value: CurrencyAmount<Currency> | undefined;
   formattedValue: string;
   onChange: (value: string) => void;
@@ -301,7 +316,7 @@ export default function TokenDepositCard({
     revokeStatus,
     revokeEstimatedGas,
   } = useRevoke({
-    token,
+    token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
 
@@ -311,7 +326,7 @@ export default function TokenDepositCard({
     estimatedGas: depositEstimatedGas,
     withdrawStatus,
   } = useWithdraw({
-    token,
+    token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
 
@@ -322,45 +337,56 @@ export default function TokenDepositCard({
       </div>
     );
   }
-  if (!token) return;
+  if (!currency) return;
   return (
     <div className="rounded-3 bg-tertiary-bg px-4 py-3 lg:p-5">
       <div className="flex items-center gap-2 mb-3">
-        {token && <Image width={24} height={24} src={token?.logoURI || ""} alt="" />}
+        {currency && (
+          <Image
+            width={24}
+            height={24}
+            src={currency?.logoURI || "/tokens/placeholder.svg"}
+            alt=""
+          />
+        )}
         <h3 className="text-16 font-bold">
-          {token ? t("token_deposit_amounts", { symbol: token?.symbol }) : t("select_token")}
+          {currency ? t("token_deposit_amounts", { symbol: currency?.symbol }) : t("select_token")}
         </h3>
       </div>
       <div className="flex flex-col gap-4 lg:gap-5">
         <InputTotalAmount
-          token={token}
+          currency={currency}
           value={formattedValue}
           onChange={onChange}
           isDisabled={isDisabled}
         />
-        <InputRange value={tokenStandardRatio} onChange={setTokenStandardRatio} />
-        <div className="flex flex-col md:flex-row justify-between gap-4 w-full">
-          <InputStandardAmount
-            standard={Standard.ERC20}
-            value={formatUnits(ERC20Value, token.decimals)}
-            currentAllowance={currentAllowance || BigInt(0)}
-            token={token}
-            revokeHandler={revokeHandler}
-            status={revokeStatus}
-            estimatedGas={revokeEstimatedGas}
-            gasPrice={gasPrice}
-          />
-          <InputStandardAmount
-            standard={Standard.ERC223}
-            value={formatUnits(ERC223Value, token.decimals)}
-            token={token}
-            currentAllowance={currentDeposit || BigInt(0)}
-            revokeHandler={withdrawHandler}
-            estimatedGas={depositEstimatedGas}
-            status={withdrawStatus}
-            gasPrice={gasPrice}
-          />
-        </div>
+        {currency.isNative ? null : (
+          <>
+            <InputRange value={tokenStandardRatio} onChange={setTokenStandardRatio} />
+            <div className="flex flex-col md:flex-row justify-between gap-4 w-full">
+              <InputStandardAmount
+                standard={Standard.ERC20}
+                value={formatUnits(ERC20Value, currency.decimals)}
+                currentAllowance={currentAllowance || BigInt(0)}
+                currency={currency}
+                revokeHandler={revokeHandler}
+                status={revokeStatus}
+                estimatedGas={revokeEstimatedGas}
+                gasPrice={gasPrice}
+              />
+              <InputStandardAmount
+                standard={Standard.ERC223}
+                value={formatUnits(ERC223Value, currency.decimals)}
+                currency={currency}
+                currentAllowance={currentDeposit || BigInt(0)}
+                revokeHandler={withdrawHandler}
+                estimatedGas={depositEstimatedGas}
+                status={withdrawStatus}
+                gasPrice={gasPrice}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

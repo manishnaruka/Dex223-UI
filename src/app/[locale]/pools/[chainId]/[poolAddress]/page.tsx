@@ -31,7 +31,7 @@ const formatNumber = (num: number | string): string => {
   } else if (number >= 1000) {
     return (number / 1000).toFixed(1).replace(/\.0$/, "") + "K";
   } else {
-    return number.toString();
+    return formatFloat(number);
   }
 };
 
@@ -168,15 +168,15 @@ export default function ExplorePoolPage({
         <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-4 mt-4">
           <div className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] p-4 w-full">
             <span className="text-secondary-text text-14 lg:text-16">TVL</span>
-            <span className="text-20 lg:text-24 font-medium">{`$${pool.totalValueLockedUSD}`}</span>
+            <span className="text-20 lg:text-24 font-medium">{`$${formatFloat(pool.totalValueLockedUSD)}`}</span>
           </div>
           <div className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] p-4 w-full">
             <span className="text-secondary-text text-14 lg:text-16">24H volume</span>
-            <span className="text-20 lg:text-24 font-medium">{`$${pool.poolDayData?.[0]?.volumeUSD || 0}`}</span>
+            <span className="text-20 lg:text-24 font-medium">{`$${formatFloat(pool.poolDayData?.[0]?.volumeUSD || 0)}`}</span>
           </div>
           <div className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] p-4 w-full">
             <span className="text-secondary-text text-14 lg:text-16">24H fees</span>
-            <span className="text-20 lg:text-24 font-medium">{`$${pool.poolDayData?.[0]?.feesUSD || 0}`}</span>
+            <span className="text-20 lg:text-24 font-medium">{`$${formatFloat(pool.poolDayData?.[0]?.feesUSD || 0)}`}</span>
           </div>
         </div>
       </div>

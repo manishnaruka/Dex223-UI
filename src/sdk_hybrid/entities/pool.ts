@@ -9,6 +9,7 @@ import { SwapMath } from "@/sdk_hybrid/utils/swapMath";
 
 import { NEGATIVE_ONE, ONE, Q192, ZERO } from "../internalConstants";
 import { TickMath } from "../utils/tickMath";
+import { Currency } from "./currency";
 import { CurrencyAmount } from "./fractions/currencyAmount";
 import { Price } from "./fractions/price";
 import { Tick, TickConstructorArgs } from "./tick";
@@ -33,8 +34,8 @@ const NO_TICK_DATA_PROVIDER_DEFAULT = new NoTickDataProvider();
  * Represents a V3 pool
  */
 export class Pool {
-  public readonly token0: Token;
-  public readonly token1: Token;
+  public readonly token0: Currency;
+  public readonly token1: Currency;
   public readonly fee: FeeAmount;
   public readonly sqrtRatioX96: JSBI;
   public readonly liquidity: JSBI;
@@ -55,8 +56,8 @@ export class Pool {
    * @param ticks The current state of the pool ticks or a data provider that can return tick data
    */
   public constructor(
-    tokenA: Token,
-    tokenB: Token,
+    tokenA: Currency,
+    tokenB: Currency,
     fee: FeeAmount,
     sqrtRatioX96: BigintIsh,
     liquidity: BigintIsh,
@@ -73,7 +74,9 @@ export class Pool {
       "PRICE_BOUNDS",
     );
     // always create a copy of the list since we want the pool's tick list to be immutable
-    [this.token0, this.token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
+    [this.token0, this.token1] = tokenA.wrapped.sortsBefore(tokenB.wrapped)
+      ? [tokenA, tokenB]
+      : [tokenB, tokenA];
     this.fee = fee;
     this.sqrtRatioX96 = JSBI.BigInt(sqrtRatioX96);
     this.liquidity = JSBI.BigInt(liquidity);
@@ -89,7 +92,7 @@ export class Pool {
    * @returns True if token is either token0 or token
    */
   public involvesToken(token: Token): boolean {
-    return token.equals(this.token0) || token.equals(this.token1);
+    return token.equals(this.token0.wrapped) || token.equals(this.token1.wrapped);
   }
 
   /**
@@ -99,8 +102,8 @@ export class Pool {
     return (
       this._token0Price ??
       (this._token0Price = new Price(
-        this.token0,
-        this.token1,
+        this.token0.wrapped,
+        this.token1.wrapped,
         Q192,
         JSBI.multiply(this.sqrtRatioX96, this.sqrtRatioX96),
       ))
@@ -114,8 +117,8 @@ export class Pool {
     return (
       this._token1Price ??
       (this._token1Price = new Price(
-        this.token1,
-        this.token0,
+        this.token1.wrapped,
+        this.token0.wrapped,
         JSBI.multiply(this.sqrtRatioX96, this.sqrtRatioX96),
         Q192,
       ))
@@ -129,7 +132,7 @@ export class Pool {
    */
   public priceOf(token: Token): Price<Token, Token> {
     invariant(this.involvesToken(token), "TOKEN");
-    return token.equals(this.token0) ? this.token0Price : this.token1Price;
+    return token.equals(this.token0.wrapped) ? this.token0Price : this.token1Price;
   }
 
   /**
@@ -151,7 +154,7 @@ export class Pool {
   ): Promise<[CurrencyAmount<Token>, Pool]> {
     invariant(this.involvesToken(inputAmount.currency), "TOKEN");
 
-    const zeroForOne = inputAmount.currency.equals(this.token0);
+    const zeroForOne = inputAmount.currency.equals(this.token0.wrapped);
 
     const {
       amountCalculated: outputAmount,
@@ -159,7 +162,7 @@ export class Pool {
       liquidity,
       tickCurrent,
     } = await this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX96);
-    const outputToken = zeroForOne ? this.token1 : this.token0;
+    const outputToken = zeroForOne ? this.token1.wrapped : this.token0.wrapped;
     return [
       CurrencyAmount.fromRawAmount(outputToken, JSBI.multiply(outputAmount, NEGATIVE_ONE)),
       new Pool(
@@ -186,7 +189,7 @@ export class Pool {
   ): Promise<[CurrencyAmount<Token>, Pool]> {
     invariant(outputAmount.currency.isToken && this.involvesToken(outputAmount.currency), "TOKEN");
 
-    const zeroForOne = outputAmount.currency.equals(this.token1);
+    const zeroForOne = outputAmount.currency.equals(this.token1.wrapped);
 
     const {
       amountCalculated: inputAmount,
@@ -198,7 +201,7 @@ export class Pool {
       JSBI.multiply(outputAmount.quotient, NEGATIVE_ONE),
       sqrtPriceLimitX96,
     );
-    const inputToken = zeroForOne ? this.token0 : this.token1;
+    const inputToken = zeroForOne ? this.token0.wrapped : this.token1.wrapped;
     return [
       CurrencyAmount.fromRawAmount(inputToken, inputAmount),
       new Pool(

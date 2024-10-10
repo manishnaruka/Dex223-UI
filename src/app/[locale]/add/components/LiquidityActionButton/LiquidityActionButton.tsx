@@ -19,6 +19,7 @@ import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensSt
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
 import { LiquidityStatus, useLiquidityStatusStore } from "../../stores/useLiquidityStatusStore";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
+import { APPROVE_BUTTON_TEXT } from "./ConfirmLiquidityDialog";
 
 export const LiquidityActionButton = ({
   increase = false,
@@ -38,7 +39,7 @@ export const LiquidityActionButton = ({
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
   const { address, isConnected } = useAccount();
 
-  const { approveTransactionsCount } = useLiquidityApprove();
+  const { approveTransactionsCount, approveTransactionsType } = useLiquidityApprove();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
 
   const { typedValue } = useLiquidityAmountsStore();
@@ -54,20 +55,32 @@ export const LiquidityActionButton = ({
 
   const { data: tokenA0Balance, refetch: refetchBalanceA0 } = useBalance({
     address: tokenA ? address : undefined,
-    token: tokenA ? (tokenA.wrapped.address0 as Address) : undefined,
+    token: tokenA && !tokenA.isNative ? tokenA.address0 : undefined,
+    query: {
+      enabled: Boolean(tokenA),
+    },
   });
   const { data: tokenA1Balance, refetch: refetchBalanceA1 } = useBalance({
     address: tokenA ? address : undefined,
-    token: tokenA ? (tokenA.wrapped.address1 as Address) : undefined,
+    token: tokenA && !tokenA.isNative ? tokenA.address1 : undefined,
+    query: {
+      enabled: Boolean(tokenA),
+    },
   });
 
   const { data: tokenB0Balance, refetch: refetchBalanceB0 } = useBalance({
     address: tokenB ? address : undefined,
-    token: tokenB ? (tokenB.wrapped.address0 as Address) : undefined,
+    token: tokenB && !tokenB.isNative ? tokenB.address0 : undefined,
+    query: {
+      enabled: Boolean(tokenB),
+    },
   });
   const { data: tokenB1Balance, refetch: refetchBalanceB1 } = useBalance({
     address: tokenB ? address : undefined,
-    token: tokenB ? (tokenB.wrapped.address1 as Address) : undefined,
+    token: tokenB && !tokenB.isNative ? tokenB.address1 : undefined,
+    query: {
+      enabled: Boolean(tokenB),
+    },
   });
 
   useEffect(() => {
@@ -146,7 +159,7 @@ export const LiquidityActionButton = ({
           setIsOpen(true);
         }}
       >
-        Approve
+        {t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)}
       </Button>
     );
   }

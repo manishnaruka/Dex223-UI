@@ -73,7 +73,7 @@ export const DepositAmounts = ({
         value={parsedAmounts[Field.CURRENCY_A]}
         formattedValue={formattedAmounts[Field.CURRENCY_A]}
         onChange={(value) => setTypedValue({ field: Field.CURRENCY_A, typedValue: value })}
-        token={currencies[Field.CURRENCY_A]}
+        currency={currencies[Field.CURRENCY_A]}
         isDisabled={isFormDisabled}
         isOutOfRange={depositADisabled}
         tokenStandardRatio={tokenAStandardRatio}
@@ -116,7 +116,7 @@ export const DepositAmounts = ({
         value={parsedAmounts[Field.CURRENCY_B]}
         formattedValue={formattedAmounts[Field.CURRENCY_B]}
         onChange={(value) => setTypedValue({ field: Field.CURRENCY_B, typedValue: value })}
-        token={currencies[Field.CURRENCY_B]}
+        currency={currencies[Field.CURRENCY_B]}
         isDisabled={isFormDisabled}
         isOutOfRange={depositBDisabled}
         tokenStandardRatio={tokenBStandardRatio}

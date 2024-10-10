@@ -74,15 +74,7 @@ export const useV3DerivedMintInfo = ({
     if (tokenA && tokenB && tier && price && !invalidPrice) {
       const currentTick = priceToClosestTick(price);
       const currentSqrt = TickMath.getSqrtRatioAtTick(currentTick);
-      return new Pool(
-        tokenA.wrapped,
-        tokenB.wrapped,
-        tier,
-        currentSqrt,
-        JSBI.BigInt(0),
-        currentTick,
-        [],
-      );
+      return new Pool(tokenA, tokenB, tier, currentSqrt, JSBI.BigInt(0), currentTick, []);
     } else {
       return undefined;
     }
@@ -114,7 +106,7 @@ export const useV3DerivedMintInfo = ({
         return undefined;
       }
       const position: Position | undefined = wrappedIndependentAmount.currency.equals(
-        poolForPosition.token0,
+        poolForPosition.token0.wrapped,
       )
         ? Position.fromAmount0({
             pool: poolForPosition,
@@ -130,7 +122,9 @@ export const useV3DerivedMintInfo = ({
             amount1: independentAmount.quotient,
           });
 
-      const dependentTokenAmount = wrappedIndependentAmount.currency.equals(poolForPosition.token0)
+      const dependentTokenAmount = wrappedIndependentAmount.currency.equals(
+        poolForPosition.token0.wrapped,
+      )
         ? position.amount1
         : position.amount0;
       return (

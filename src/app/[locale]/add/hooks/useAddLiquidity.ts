@@ -28,6 +28,7 @@ import {
 import { useTransactionSettingsStore } from "@/stores/useTransactionSettingsStore";
 
 import { LiquidityStatus, useLiquidityStatusStore } from "../stores/useLiquidityStatusStore";
+import { useSortedTokens } from "./useSortedTokens";
 
 const TEST_ALLOWED_SLIPPAGE = new Percent(2, 100);
 
@@ -51,6 +52,11 @@ export function useAddLiquidityParams({
   const { slippage, deadline: _deadline } = useTransactionSettingsStore();
   const deadline = useTransactionDeadline(_deadline);
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
+  const { token0, token1 } = useSortedTokens({
+    tokenA,
+    tokenB,
+  });
+
   const chainId = useCurrentChainId();
   const { address: accountAddress } = useAccount();
 
@@ -69,8 +75,8 @@ export function useAddLiquidityParams({
       !publicClient ||
       !walletClient ||
       !accountAddress ||
-      !tokenA ||
-      !tokenB ||
+      !token0 ||
+      !token1 ||
       !chainId
     ) {
       return null;
@@ -84,20 +90,26 @@ export function useAddLiquidityParams({
     const amount0Min = toHex(minimumAmounts.amount0);
     const amount1Min = toHex(minimumAmounts.amount1);
 
+    const value = token0.isNative
+      ? BigInt(amount0Desired.toString())
+      : token1.isNative
+        ? BigInt(amount1Desired.toString())
+        : undefined;
+
     if (addLiquidityType === ADD_LIQUIDITY_TYPE.CREATE_AND_MINT) {
       // CREATE + MINT
       const createParams = [
-        position.pool.token0.address0,
-        position.pool.token1.address0,
-        position.pool.token0.address1,
-        position.pool.token1.address1,
+        position.pool.token0.wrapped.address0,
+        position.pool.token1.wrapped.address0,
+        position.pool.token0.wrapped.address1,
+        position.pool.token1.wrapped.address1,
         position.pool.fee,
         toHex(position.pool.sqrtRatioX96) as any,
       ] as [Address, Address, Address, Address, FeeAmount, bigint];
 
       const mintParams = {
-        token0: position.pool.token0.address0,
-        token1: position.pool.token1.address0,
+        token0: position.pool.token0.wrapped.address0,
+        token1: position.pool.token1.wrapped.address0,
         fee: position.pool.fee,
         tickLower: position.tickLower,
         tickUpper: position.tickUpper,
@@ -127,12 +139,14 @@ export function useAddLiquidityParams({
         abi: Abi;
         functionName: "multicall";
         args: [`0x${string}`[]];
+        value?: bigint;
       } = {
         address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
         account: accountAddress,
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "multicall" as const,
         args: [[encodedCreateParams, encodedMintParams]],
+        value,
       };
       return params;
     } else if (addLiquidityType === ADD_LIQUIDITY_TYPE.INCREASE) {
@@ -164,19 +178,21 @@ export function useAddLiquidityParams({
             deadline: bigint;
           },
         ];
+        value?: bigint;
       } = {
         address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
         account: accountAddress,
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "increaseLiquidity" as const,
         args: [increaseParams],
+        value,
       };
       return params;
     } else if (addLiquidityType === ADD_LIQUIDITY_TYPE.MINT) {
       //  MINT
       const mintParams = {
-        token0: position.pool.token0.address0,
-        token1: position.pool.token1.address0,
+        token0: position.pool.token0.wrapped.address0,
+        token1: position.pool.token1.wrapped.address0,
         fee: position.pool.fee,
         tickLower: position.tickLower,
         tickUpper: position.tickUpper,
@@ -194,12 +210,14 @@ export function useAddLiquidityParams({
         abi: Abi;
         functionName: "mint";
         args: [any];
+        value?: bigint;
       } = {
         address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
         account: accountAddress,
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "mint" as const,
         args: [mintParams],
+        value,
       };
       return params;
     }
@@ -208,8 +226,8 @@ export function useAddLiquidityParams({
     accountAddress,
     deadline,
     publicClient,
-    tokenA,
-    tokenB,
+    token0,
+    token1,
     walletClient,
     chainId,
     addLiquidityType,
