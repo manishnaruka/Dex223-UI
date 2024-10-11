@@ -299,6 +299,7 @@
     "category_comment": "Comment",
     "category_bug": "Bug",
     "category_feature": "Feature request",
+    "category_feature_mobile": "Feature",
     "category_other": "Other",
     "send_feedback": "Send feedback",
     "submitting": "Submitting",

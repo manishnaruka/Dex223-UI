@@ -136,7 +136,8 @@ export default function AddPoolPage() {
           <h3 className="text-16 font-bold mb-1 lg:mb-4">{t("select_pair")}</h3>
           <div className="flex gap-3 mb-4 md:mb-5">
             <SelectButton
-              variant="rounded-secondary"
+              variant="rounded"
+              className="bg-tertiary-bg"
               fullWidth
               onClick={() => {
                 setCurrentlyPicking("tokenA");
@@ -169,7 +170,8 @@ export default function AddPoolPage() {
               )}
             </SelectButton>
             <SelectButton
-              variant="rounded-secondary"
+              variant="rounded"
+              className="bg-tertiary-bg"
               fullWidth
               onClick={() => {
                 setCurrentlyPicking("tokenB");

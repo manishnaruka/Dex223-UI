@@ -10,8 +10,6 @@ import Navigation from "@/components/common/Navigation";
 import NetworkPicker from "@/components/common/NetworkPicker";
 import TokenListsSettings from "@/components/common/TokenListsSettings";
 import AccountDialog from "@/components/dialogs/AccountDialog";
-import ConnectWalletDialog from "@/components/dialogs/ConnectWalletDialog";
-import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { useMintTestTokensDialogStore } from "@/components/dialogs/stores/useMintTestTokensDialogStore";
 import { Link, usePathname } from "@/navigation";
 

@@ -19,8 +19,8 @@
 }
 
 body {
-  background: #0F0F0F;
-  color: #F5FFF9;
+  background: theme("colors.global-bg");
+  color: theme("colors.primary-text");
 }
 
 

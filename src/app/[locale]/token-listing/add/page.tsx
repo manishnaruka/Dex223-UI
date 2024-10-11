@@ -437,9 +437,8 @@ export default function ListTokenPage() {
                               : 1}
 
                             <SelectButton
-                              variant="rectangle-secondary"
                               onClick={() => setPaymentDialogSelectOpened(true)}
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 bg-tertiary-bg"
                             >
                               <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
                               {paymentToken?.token && isZeroAddress(paymentToken.token.address)

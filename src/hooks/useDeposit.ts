@@ -135,7 +135,7 @@ export default function useDeposit({
             title: {
               symbol: token.symbol!,
               template: RecentTransactionTitleTemplate.DEPOSIT,
-              amount: formatFloat(formatUnits(amount, token.decimals)),
+              amount: formatUnits(amount, token.decimals),
               logoURI: token?.logoURI || "/tokens/placeholder.svg",
             },
           },

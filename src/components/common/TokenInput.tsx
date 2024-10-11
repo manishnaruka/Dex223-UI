@@ -223,7 +223,7 @@ export default function TokenInput({
         </div>
         <SelectButton
           className="flex-shrink-0"
-          variant="rounded-primary"
+          variant="rounded"
           onClick={handleClick}
           size="large"
         >

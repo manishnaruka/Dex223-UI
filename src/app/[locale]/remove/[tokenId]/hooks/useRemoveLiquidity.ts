@@ -133,20 +133,8 @@ export default function useRemoveLiquidity({
               symbol0: tokenA.symbol!,
               symbol1: tokenB.symbol!,
               template: RecentTransactionTitleTemplate.REMOVE,
-              amount0: (+formatUnits(
-                BigInt(minimumAmounts.amount0.toString()),
-                tokenA.decimals,
-              )).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }),
-              amount1: (+formatUnits(
-                BigInt(minimumAmounts.amount1.toString()),
-                tokenB.decimals,
-              )).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }),
+              amount0: formatUnits(BigInt(minimumAmounts.amount0.toString()), tokenA.decimals),
+              amount1: formatUnits(BigInt(minimumAmounts.amount1.toString()), tokenB.decimals),
               logoURI0: tokenA.logoURI || "",
               logoURI1: tokenB.logoURI || "",
             },

@@ -62,7 +62,9 @@ function TokenRow({
   const { toggleToken, isTokenPinned, pinnedTokens } = usePinnedTokensStore((s) => ({
     toggleToken: s.toggleToken,
     pinnedTokens: s.tokens,
-    isTokenPinned: s.tokens[currency.chainId].includes(currency.wrapped.address0),
+    isTokenPinned: s.tokens[currency.chainId].includes(
+      currency.isNative ? "native" : currency.address0,
+    ),
   }));
 
   const {
@@ -84,34 +86,74 @@ function TokenRow({
     <div
       role="button"
       onClick={() => handlePick(currency)}
-      className="px-10 flex justify-between py-2 hover:bg-tertiary-bg duration-200 group"
+      className="px-10 hover:bg-tertiary-bg duration-200 group pb-2"
     >
-      <div className="flex items-center gap-3 flex-grow">
-        <Image width={40} height={40} src={currency?.logoURI || ""} alt="" />
-        <div className="grid flex-grow">
-          <div className="flex items-center gap-2">
-            <span>{currency.name}</span>
-            <div className="flex relative items-center">
-              {scoreObj && (
-                <>
-                  {scoreObj[0] < 20 && (
-                    <>
-                      {currency.isToken && currency.rate && (
-                        <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
-                      )}
-                    </>
-                  )}
-                  {scoreObj[1] && (
-                    <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
-                      <FoundInOtherListMarker />
-                    </div>
-                  )}
-                </>
+      <div className="grid grid-cols-[40px_1fr] gap-2">
+        <div className="flex items-center pt-3">
+          <Image width={40} height={40} src={currency?.logoURI || ""} alt="" />
+        </div>
+        <div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span>{currency.name}</span>
+              <div className="flex relative items-center">
+                {scoreObj && (
+                  <>
+                    {scoreObj[0] < 20 && (
+                      <>
+                        {currency.isToken && currency.rate && (
+                          <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
+                        )}
+                      </>
+                    )}
+                    {scoreObj[1] && (
+                      <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
+                        <FoundInOtherListMarker />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-primary-text text-12">$0.00</span>
+              {currency.isToken ? (
+                <IconButton
+                  iconName="details"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTokenForPortfolio(currency);
+                  }}
+                />
+              ) : (
+                <span className="block w-10" />
               )}
+              <IconButton
+                iconName={isTokenPinned ? "pin-fill" : "pin"}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (pinnedTokens[currency.chainId].length < 8 || isTokenPinned) {
+                    toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
+                  }
+                }}
+              />
             </div>
           </div>
+
           <div className="auto-cols-fr grid grid-flow-col gap-2">
-            {erc20Balance && (
+            {!isTokenPinned && (
+              <span className="text-secondary-text text-12">{currency.symbol}</span>
+            )}
+            {erc20Balance && currency.isNative && (
+              <div className="flex items-center gap-1">
+                <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
+                <span className="text-secondary-text text-12">
+                  {formatFloat(erc20Balance?.formatted)} {currency.symbol}
+                </span>
+              </div>
+            )}
+            {erc20Balance && !currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
                 <span className="text-secondary-text text-12">
@@ -119,7 +161,7 @@ function TokenRow({
                 </span>
               </div>
             )}
-            {erc223Balance && (
+            {erc223Balance && !currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
                 <span className="text-secondary-text text-12">
@@ -129,27 +171,6 @@ function TokenRow({
             )}
           </div>
         </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <span>$0.00</span>
-        {currency.isToken ? (
-          <IconButton
-            iconName="details"
-            onClick={(e) => {
-              e.stopPropagation();
-              setTokenForPortfolio(currency);
-            }}
-          />
-        ) : (
-          <span className="block w-10" />
-        )}
-        <IconButton
-          iconName={isTokenPinned ? "pin-fill" : "pin"}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleToken(currency.wrapped.address0, currency.chainId);
-          }}
-        />
       </div>
     </div>
   );
@@ -162,7 +183,9 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
   const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();
 
   const pinnedTokens = useMemo(() => {
-    return tokens.filter((t) => pinnedTokensAddresses[chainId].includes(t.wrapped.address0));
+    return tokens.filter((t) =>
+      pinnedTokensAddresses[chainId].includes(t.isNative ? "native" : t.address0),
+    );
   }, [chainId, pinnedTokensAddresses, tokens]);
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
@@ -234,7 +257,10 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                           <button
                             onClick={() => {
                               if (isMobile && isEditActivated) {
-                                toggleToken(pinnedToken.wrapped.address0, pinnedToken.chainId);
+                                toggleToken(
+                                  pinnedToken.isNative ? "native" : pinnedToken.address0,
+                                  pinnedToken.chainId,
+                                );
                               } else {
                                 handlePick(pinnedToken);
                               }
@@ -252,7 +278,10 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              toggleToken(pinnedToken.wrapped.address0, pinnedToken.chainId);
+                              toggleToken(
+                                pinnedToken.isNative ? "native" : pinnedToken.address0,
+                                pinnedToken.chainId,
+                              );
                             }}
                             className={clsxMerge(
                               "group-hover:opacity-100 opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text hover:text-primary-text -right-1 -top-1",
