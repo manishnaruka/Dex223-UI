@@ -15,7 +15,6 @@ import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
-  GasOption,
   useSwapGasLimitStore,
   useSwapGasPriceStore,
 } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
@@ -47,6 +46,7 @@ import { ONE } from "@/sdk_hybrid/internalConstants";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
 import { TickMath } from "@/sdk_hybrid/utils/tickMath";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   GasFeeModel,

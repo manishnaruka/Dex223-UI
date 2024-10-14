@@ -5,7 +5,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Address, formatUnits, isAddress } from "viem";
+import { Address, formatEther, formatGwei, formatUnits, isAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
@@ -14,11 +14,17 @@ import ChoosePaymentDialog from "@/app/[locale]/token-listing/add/components/Cho
 import ConfirmListingDialog from "@/app/[locale]/token-listing/add/components/ConfirmListingDialog";
 import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import { useAutoListingSearchParams } from "@/app/[locale]/token-listing/add/hooks/useAutolistingSearchParams";
+import { useListTokenEstimatedGas } from "@/app/[locale]/token-listing/add/hooks/useListToken";
 import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
 import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
 import { useChoosePaymentDialogStore } from "@/app/[locale]/token-listing/add/stores/useChoosePaymentDialogStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
+import {
+  useListTokensGasLimitStore,
+  useListTokensGasModeStore,
+  useListTokensGasPriceStore,
+} from "@/app/[locale]/token-listing/add/stores/useListTokensGasSettings";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import Alert from "@/components/atoms/Alert";
@@ -29,17 +35,20 @@ import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonSize } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
+import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useFees } from "@/hooks/useFees";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokens } from "@/hooks/useTokenLists";
@@ -49,6 +58,7 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
+import { GasFeeModel, GasOption } from "@/stores/factories/createGasPriceStore";
 
 function OpenConfirmListTokenButton({
   isPoolExists,
@@ -120,7 +130,7 @@ function OpenConfirmListTokenButton({
   if (!isPoolExists) {
     return (
       <Button fullWidth disabled>
-        Pool doesn&quot;t exists
+        Pool doesn&apos;t exists
       </Button>
     );
   }
@@ -139,6 +149,12 @@ function OpenConfirmListTokenButton({
     </Button>
   );
 }
+
+const gasOptionTitle: Record<GasOption, any> = {
+  [GasOption.CHEAP]: "cheap",
+  [GasOption.FAST]: "fast",
+  [GasOption.CUSTOM]: "custom",
+};
 export default function ListTokenPage() {
   useAutoListingSearchParams();
   const t = useTranslations("Swap");
@@ -148,7 +164,11 @@ export default function ListTokenPage() {
   const chainId = useCurrentChainId();
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
+
   useRecentTransactionTracking();
+  useListTokenEstimatedGas();
+
+  const [isOpenedFee, setIsOpenedFee] = useState(false);
 
   const { autoListing, paymentToken } = useAutoListing();
 
@@ -166,6 +186,14 @@ export default function ListTokenPage() {
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
   const { isLoadingList, isLoadingApprove, isPendingApprove, isPendingList } = useListTokenStatus();
+
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useListTokensGasPriceStore();
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useListTokensGasLimitStore();
+
+  console.log("Estimated:" + estimatedGas);
+  const { isAdvanced, setIsAdvanced } = useListTokensGasModeStore();
 
   const handleChange = useCallback(
     async (
@@ -236,6 +264,36 @@ export default function ListTokenPage() {
   const { setIsOpen: setAutoListingSelectOpened } = useChooseAutoListingDialogStore();
 
   const tokensToList = useTokensToList();
+
+  console.log(gasPriceSettings, gasPriceOption);
+  console.log(customGasLimit, estimatedGas);
+
+  const { baseFee, gasPrice, priorityFee } = useFees();
+
+  const formattedGasPrice = useMemo(() => {
+    if (gasPriceOption !== GasOption.CUSTOM) {
+      const multiplier = baseFeeMultipliers[chainId][gasPriceOption];
+      switch (gasPriceSettings.model) {
+        case GasFeeModel.EIP1559:
+          if (baseFee) {
+            return (baseFee * multiplier) / SCALING_FACTOR;
+          }
+          break;
+
+        case GasFeeModel.LEGACY:
+          if (gasPrice) {
+            return (gasPrice * multiplier) / SCALING_FACTOR;
+          }
+      }
+    } else {
+      switch (gasPriceSettings.model) {
+        case GasFeeModel.EIP1559:
+          return gasPriceSettings.maxFeePerGas;
+        case GasFeeModel.LEGACY:
+          return gasPriceSettings.gasPrice;
+      }
+    }
+  }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
 
   return (
     <>
@@ -489,6 +547,50 @@ export default function ListTokenPage() {
                   )}
                 </div>
 
+                <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3">
+                  <div className="flex items-center gap-8">
+                    <p className="flex flex-col text-tertiary-text">
+                      <span>Gas price:</span>
+                      <span> {formatFloat(formatGwei(formattedGasPrice || BigInt(0)))} GWEI</span>
+                    </p>
+
+                    <p className="flex flex-col text-tertiary-text">
+                      <span>Gas limit:</span>
+                      <span>
+                        {customGasLimit ? customGasLimit.toString() : estimatedGas?.toString()}
+                      </span>
+                    </p>
+                    <p className="flex flex-col">
+                      <span className="text-tertiary-text">Network fee:</span>
+                      <span>
+                        {formatFloat(
+                          formatEther(
+                            (formattedGasPrice || BigInt(0)) *
+                              (customGasLimit ? customGasLimit : estimatedGas),
+                            "wei",
+                          ),
+                        )}{" "}
+                        ETH
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {gasPriceOption === GasOption.CUSTOM && (
+                      <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
+                        {t(gasOptionTitle[gasPriceOption])}
+                      </span>
+                    )}
+                    <Button
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                      size={ButtonSize.EXTRA_SMALL}
+                      onClick={() => setIsOpenedFee(true)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+
                 {(isLoadingList || isPendingList || isPendingApprove || isLoadingApprove) && (
                   <div className="flex justify-between px-5 py-3 rounded-2 bg-tertiary-bg mb-5">
                     <div className="flex items-center gap-2 text-14">
@@ -522,6 +624,21 @@ export default function ListTokenPage() {
 
         <ChooseAutoListingDialog />
         <ChoosePaymentDialog />
+
+        <NetworkFeeConfigDialog
+          isAdvanced={isAdvanced}
+          setIsAdvanced={setIsAdvanced}
+          estimatedGas={estimatedGas}
+          setEstimatedGas={setEstimatedGas}
+          gasPriceSettings={gasPriceSettings}
+          gasPriceOption={gasPriceOption}
+          customGasLimit={customGasLimit}
+          setCustomGasLimit={setCustomGasLimit}
+          setGasPriceOption={setGasPriceOption}
+          setGasPriceSettings={setGasPriceSettings}
+          isOpen={isOpenedFee}
+          setIsOpen={setIsOpenedFee}
+        />
 
         <PickTokenDialog
           isOpen={isPickTokenOpened}
