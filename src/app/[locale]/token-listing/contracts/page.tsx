@@ -80,7 +80,7 @@ export default function TokenListingPage() {
                   <Link
                     key={autoListing.id}
                     href={`/token-listing/contracts/${autoListing.id}`}
-                    className="hover:bg-green-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3"
+                    className="hover:bg-tertiary-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3"
                   >
                     <div className="text-18 font-medium">{autoListing.name}</div>
                     <div className="mb-3">{autoListing.totalTokens} tokens</div>
