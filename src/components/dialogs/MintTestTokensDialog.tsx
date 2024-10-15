@@ -67,10 +67,15 @@ export default function MintTestTokensDialog() {
     },
   });
 
+  console.log(tokenToMint);
+  console.log(isAddress1Wrapper);
+  console.log(isAddress1Wrapper ? tokenToMint?.wrapped.address0! : tokenToMint?.wrapped.address1);
+
   const { data: balance, refetch } = useReadContract({
     abi: ERC20_ABI,
     functionName: "balanceOf",
-    address: isAddress1Wrapper ? tokenToMint?.wrapped.address0! : tokenToMint?.wrapped.address1,
+    // address: isAddress1Wrapper ? tokenToMint?.wrapped.address0! : tokenToMint?.wrapped.address1,
+    address: tokenToMint.wrapped.address0,
     chainId,
     args: [address as Address],
     query: {
@@ -100,9 +105,10 @@ export default function MintTestTokensDialog() {
       try {
         const hash = await walletClient.writeContract({
           abi: ERC223_ABI,
-          address: isAddress1Wrapper
-            ? tokenToMint?.wrapped.address0!
-            : tokenToMint?.wrapped.address1,
+          // address: isAddress1Wrapper
+          //   ? tokenToMint?.wrapped.address0!
+          //   : tokenToMint?.wrapped.address1,
+          address: tokenToMint.wrapped.address0,
           functionName: "mint",
           args: [address, parseUnits(amountToMint, tokenToMint.decimals)],
         });
