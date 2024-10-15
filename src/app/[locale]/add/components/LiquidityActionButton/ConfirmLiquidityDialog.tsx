@@ -35,6 +35,7 @@ import {
   useLiquidityApprove,
 } from "../../hooks/useLiquidityApprove";
 import { usePriceRange } from "../../hooks/usePrice";
+import { useSortedTokens } from "../../hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../hooks/useV3DerivedMintInfo";
 import { Field, useTokensStandards } from "../../stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
@@ -235,6 +236,10 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const chainId = useCurrentChainId();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
+  const { token0, token1 } = useSortedTokens({
+    tokenA,
+    tokenB,
+  });
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
@@ -384,8 +389,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           <div className="grid grid-cols-[1fr_20px_1fr] mb-3">
             <PositionPriceRangeCard
               showFirst={showFirst}
-              tokenA={tokenA}
-              tokenB={tokenB}
+              token0={token0}
+              token1={token1}
               price={minPriceString}
             />
             <div className="relative">
@@ -395,8 +400,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
             </div>
             <PositionPriceRangeCard
               showFirst={showFirst}
-              tokenA={tokenA}
-              tokenB={tokenB}
+              token0={token0}
+              token1={token1}
               price={maxPriceString}
               isMax
             />
@@ -407,8 +412,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
               <div className="text-18">{currentPriceString}</div>
               <div className="text-14 text-secondary-text">
                 {showFirst
-                  ? `${tokenB?.symbol} per ${tokenA?.symbol}`
-                  : `${tokenA?.symbol} per ${tokenB?.symbol}`}
+                  ? `${token0?.symbol} per ${token1?.symbol}`
+                  : `${token1?.symbol} per ${token0?.symbol}`}
               </div>
             </div>
           </div>
