@@ -124,7 +124,7 @@ export default function IconButton(_props: Props) {
         <IconButtonFrame
           iconName={_props.iconName}
           className={clsxMerge(
-            "text-tertiary-text  hover:text-green-hover-icon relative before:opacity-0 before:duration-200 hover:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[20px] duration-200",
+            "text-tertiary-text  hover:text-green-hover-icon relative before:opacity-0 before:duration-200 hover:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[9px] duration-200",
             active && "text-green",
             className,
           )}

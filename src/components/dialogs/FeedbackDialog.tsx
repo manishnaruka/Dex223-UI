@@ -1,6 +1,7 @@
 import { Form, Formik, FormikHelpers } from "formik";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import * as Yup from "yup";
 
 import { CheckboxButton } from "@/components/atoms/Checkbox";
@@ -19,6 +20,7 @@ import addToast from "@/other/toast";
 type FeedbackTagTranslationTag =
   | "category_comment"
   | "category_feature"
+  | "category_feature_mobile"
   | "category_bug"
   | "category_other";
 
@@ -26,6 +28,13 @@ const feedbackTagLabelsMap: Record<FeedbackTag, FeedbackTagTranslationTag> = {
   [FeedbackTag.COMMENT]: "category_comment",
   [FeedbackTag.BUG]: "category_bug",
   [FeedbackTag.FEATURE_REQUEST]: "category_feature",
+  [FeedbackTag.OTHER]: "category_other",
+};
+
+const feedbackTagLabelsMapMobile: Record<FeedbackTag, FeedbackTagTranslationTag> = {
+  [FeedbackTag.COMMENT]: "category_comment",
+  [FeedbackTag.BUG]: "category_bug",
+  [FeedbackTag.FEATURE_REQUEST]: "category_feature_mobile",
   [FeedbackTag.OTHER]: "category_other",
 };
 
@@ -108,6 +117,8 @@ export default function FeedbackDialog() {
     description: description,
     tags: tags,
   };
+
+  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
   return (
     <>
@@ -245,7 +256,11 @@ export default function FeedbackDialog() {
                               }
                             }}
                             id={feedbackTag + "_feedback_tag"}
-                            label={t(feedbackTagLabelsMap[feedbackTag])}
+                            label={
+                              isMobile
+                                ? t(feedbackTagLabelsMapMobile[feedbackTag])
+                                : t(feedbackTagLabelsMap[feedbackTag])
+                            }
                           />
                         );
                       })}

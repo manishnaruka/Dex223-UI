@@ -11,13 +11,6 @@ import React, {
 } from "react";
 import { formatGwei, parseGwei } from "viem";
 
-import {
-  GasOption,
-  GasSettings,
-  useSwapGasLimitStore,
-  useSwapGasPriceStore,
-  useSwapGasSettingsStore,
-} from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -25,7 +18,7 @@ import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
 import TextField from "@/components/atoms/TextField";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import TextButton from "@/components/buttons/TextButton";
 import {
   baseFeeMultipliers,
@@ -38,11 +31,25 @@ import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+
+  isAdvanced: boolean;
+  setIsAdvanced: (isAdvanced: boolean) => void;
+
+  gasPriceOption: GasOption;
+  gasPriceSettings: GasSettings;
+  setGasPriceOption: (gasOption: GasOption) => void;
+  setGasPriceSettings: (gasSettings: GasSettings) => void;
+
+  customGasLimit: bigint | undefined;
+  estimatedGas: bigint;
+  setCustomGasLimit: (customGas: bigint | undefined) => void;
+  setEstimatedGas: (estimatedGas: bigint) => void;
 }
 
 const gasOptionTitle: Record<GasOption, string> = {
@@ -197,14 +204,19 @@ type HandleApplyArgs =
   | { option: GasOption.CHEAP }
   | { option: GasOption.FAST }
   | { option: GasOption.CUSTOM; gasSettings: GasSettings; gasLimit: bigint };
-function NetworkFeeDialogContent({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) {
-  const { isAdvanced } = useSwapGasSettingsStore();
-
+function NetworkFeeDialogContent({
+  isAdvanced,
+  setIsOpen,
+  gasPriceOption,
+  gasPriceSettings,
+  setGasPriceSettings,
+  setGasPriceOption,
+  estimatedGas,
+  setEstimatedGas,
+  customGasLimit,
+  setCustomGasLimit,
+}: Omit<Props, "isOpen" | "setIsAdvanced">) {
   const chainId = useCurrentChainId();
-
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useSwapGasPriceStore();
-  const { estimatedGas, customGasLimit, setCustomGasLimit } = useSwapGasLimitStore();
 
   const { baseFee, priorityFee, gasPrice } = useFees();
 
@@ -950,9 +962,13 @@ function NetworkFeeDialogContent({ setIsOpen }: { setIsOpen: (isOpen: boolean) =
     </form>
   );
 }
-export default function NetworkFeeConfigDialog({ isOpen, setIsOpen }: Props) {
-  const { isAdvanced, setIsAdvanced } = useSwapGasSettingsStore();
-
+export default function NetworkFeeConfigDialog({
+  isOpen,
+  setIsOpen,
+  isAdvanced,
+  setIsAdvanced,
+  ...props
+}: Props) {
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <div className="w-full md:w-[800px] duration-200">
@@ -966,7 +982,7 @@ export default function NetworkFeeConfigDialog({ isOpen, setIsOpen }: Props) {
             </div>
           }
         />
-        <NetworkFeeDialogContent setIsOpen={setIsOpen} />
+        <NetworkFeeDialogContent {...props} setIsOpen={setIsOpen} isAdvanced={isAdvanced} />
       </div>
     </DrawerDialog>
   );

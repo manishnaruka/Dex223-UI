@@ -15,7 +15,6 @@ import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
-  GasOption,
   useSwapGasLimitStore,
   useSwapGasPriceStore,
 } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
@@ -47,6 +46,7 @@ import { ONE } from "@/sdk_hybrid/internalConstants";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
 import { TickMath } from "@/sdk_hybrid/utils/tickMath";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   GasFeeModel,
@@ -100,6 +100,18 @@ export function useSwapParams() {
     token: tokenB?.wrapped.address0,
     address: ROUTER_ADDRESS[chainId],
   });
+
+  const minimumAmountOut = useMemo(() => {
+    if (!trade) {
+      return BigInt(0);
+    }
+
+    return BigInt(
+      trade
+        .minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
+        .quotient.toString(),
+    );
+  }, [dependentAmount, slippage, trade]);
 
   console.log(balance.data);
 
@@ -170,14 +182,7 @@ export function useSwapParams() {
         const encodedUnwrapParams = encodeFunctionData({
           abi: ROUTER_ABI,
           functionName: "unwrapWETH9",
-          args: [
-            BigInt(
-              trade
-                ?.minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
-                .quotient.toString(),
-            ),
-            address,
-          ],
+          args: [minimumAmountOut, address],
         });
 
         return {
@@ -233,9 +238,8 @@ export function useSwapParams() {
     address,
     chainId,
     deadline,
-    dependentAmount,
+    minimumAmountOut,
     poolAddress,
-    slippage,
     tokenA,
     tokenAStandard,
     tokenB,
@@ -470,7 +474,7 @@ export default function useSwap() {
         gas: gasToUse,
       } as any);
 
-      hash = await walletClient.writeContract({ ...request, account: undefined }); // TODO: remove any
+      hash = await walletClient.writeContract({ ...request, account: undefined });
 
       closeConfirmInWalletAlert();
 
@@ -499,8 +503,8 @@ export default function useSwap() {
               symbol0: tokenA.symbol!,
               symbol1: tokenB.symbol!,
               template: RecentTransactionTitleTemplate.SWAP,
-              amount0: formatFloat(typedValue),
-              amount1: formatFloat(output.toString()),
+              amount0: typedValue,
+              amount1: output.toString(),
               logoURI0: tokenA?.logoURI || "/tokens/placeholder.svg",
               logoURI1: tokenB?.logoURI || "/tokens/placeholder.svg",
             },

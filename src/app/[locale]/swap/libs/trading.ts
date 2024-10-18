@@ -7,7 +7,7 @@ import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsSt
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import { QUOTER_ABI } from "@/config/abis/quoter";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { PoolState, usePool } from "@/hooks/usePools";
+import { PoolState, usePools } from "@/hooks/usePools";
 import { QUOTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount, TradeType } from "@/sdk_hybrid/constants";
@@ -17,18 +17,28 @@ import { Route } from "@/sdk_hybrid/entities/route";
 import { Trade } from "@/sdk_hybrid/entities/trade";
 
 export type TokenTrade = Trade<Currency, Currency, TradeType>;
-
+const poolsFees = [FeeAmount.LOWEST, FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
 export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
   const { tokenA, tokenB } = useSwapTokensStore();
   // const { typedValue, independentField, dependentField, setTypedValue } = useSwapAmountsStore();
   const { address } = useAccount();
   const chainId = useCurrentChainId();
   const { typedValue } = useSwapAmountsStore();
-  const [poolState, pool] = usePool({
-    currencyA: tokenA,
-    currencyB: tokenB,
-    tier: FeeAmount.MEDIUM,
-  });
+  const pools = usePools(
+    poolsFees.map((feeAmount) => {
+      return {
+        currencyA: tokenA,
+        currencyB: tokenB,
+        tier: feeAmount,
+      };
+    }),
+  );
+
+  const [poolState, pool] = useMemo(() => {
+    return pools.find(([_poolState, _pool]) => _poolState === PoolState.EXISTS) || pools[0];
+  }, [pools]);
+
+  console.log(pool);
 
   const swapRoute = useMemo(() => {
     if (!pool || !tokenA || !tokenB) {

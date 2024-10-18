@@ -71,7 +71,6 @@ export default function PoolsPage() {
           </div>
           <div className="flex w-full lg:w-auto gap-2 items-center">
             <SelectButton
-              variant="rectangle-primary"
               fullWidth
               onClick={() => {
                 setCurrentlyPicking("tokenA");
@@ -115,7 +114,6 @@ export default function PoolsPage() {
             </SelectButton>
             <span>—</span>
             <SelectButton
-              variant="rectangle-primary"
               fullWidth
               onClick={() => {
                 setCurrentlyPicking("tokenB");

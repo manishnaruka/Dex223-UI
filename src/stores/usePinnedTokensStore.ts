@@ -5,11 +5,11 @@ import { persist } from "zustand/middleware";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
 
 interface PinnedTokensStore {
-  tokens: Record<DexChainId, Array<Address>>;
-  pinToken: (address: Address, chainId: DexChainId) => void;
-  unpinToken: (address: Address, chainId: DexChainId) => void;
-  toggleToken: (address: Address, chainId: DexChainId) => void;
-  getPinnedTokens: (chainId: DexChainId) => Array<Address>;
+  tokens: Record<DexChainId, Array<Address | "native">>;
+  pinToken: (address: Address | "native", chainId: DexChainId) => void;
+  unpinToken: (address: Address | "native", chainId: DexChainId) => void;
+  toggleToken: (address: Address | "native", chainId: DexChainId) => void;
+  getPinnedTokens: (chainId: DexChainId) => Array<Address | "native">;
 }
 
 const f = DEX_SUPPORTED_CHAINS.map((chainId) => [chainId, []]);

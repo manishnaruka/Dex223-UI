@@ -80,7 +80,7 @@ export default function TokenListingPage() {
                   <Link
                     key={autoListing.id}
                     href={`/token-listing/contracts/${autoListing.id}`}
-                    className="hover:bg-green-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3"
+                    className="hover:bg-tertiary-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3"
                   >
                     <div className="text-18 font-medium">{autoListing.name}</div>
                     <div className="mb-3">{autoListing.totalTokens} tokens</div>
@@ -169,9 +169,9 @@ export default function TokenListingPage() {
               })}
             </div>
 
-            <div className="hidden xl:grid rounded-2 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(77px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,max-content)]">
+            <div className="hidden xl:grid rounded-2 overflow-hidden bg-table-gradient pb-2.5 grid-cols-[minmax(50px,1.33fr),_minmax(77px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,max-content)]">
               <div className="contents">
-                <div className="pl-5 h-[60px] flex items-center relative">Contract name</div>
+                <div className="pl-5 h-[60px] flex items-center relative mb-2.5">Contract name</div>
                 <div className="h-[60px] flex items-center relative">Token amount</div>
                 <div className="h-[60px] flex items-center relative">Listing price</div>
                 <div className="h-[60px] flex items-center relative">Contact link</div>
@@ -183,21 +183,21 @@ export default function TokenListingPage() {
                   <Link
                     key={autoListing.id}
                     href={`/token-listing/contracts/${autoListing.id}`}
-                    className="contents hover:bg-green-bg duration-200 group"
+                    className="contents hover:bg-tertiary-bg duration-200 group"
                   >
-                    <div className="h-[56px] z-10 relative flex items-center group-hover:bg-green-bg gap-2 pl-5 duration-200 pr-2">
+                    <div className="h-[56px] z-10 relative flex items-center group-hover:bg-tertiary-bg gap-2 pl-2.5 ml-2.5 rounded-l-3 duration-200 pr-2">
                       {autoListing.name}
                     </div>
 
-                    <div className=" h-[56px] z-10 relative flex items-center group-hover:bg-green-bg duration-200 pr-2">
+                    <div className=" h-[56px] z-10 relative flex items-center group-hover:bg-tertiary-bg duration-200 pr-2">
                       {autoListing.totalTokens} tokens
                     </div>
-                    <div className=" h-[56px] z-10 relative flex items-center gap-2 group-hover:bg-green-bg duration-200 pr-2">
+                    <div className=" h-[56px] z-10 relative flex items-center gap-2 group-hover:bg-tertiary-bg duration-200 pr-2">
                       {autoListing.tokensToPay.length
                         ? autoListing.tokensToPay.map((paymentMethod) => (
                             <span
                               key={paymentMethod.token.address}
-                              className="flex items-center gap-1 bg-tertiary-bg rounded-2 px-2 py-1"
+                              className="flex items-center gap-1 bg-transparent border border-secondary-border rounded-2 px-2 py-1"
                             >
                               <span>
                                 <span className="overflow-hidden ">
@@ -231,10 +231,10 @@ export default function TokenListingPage() {
                           ))
                         : "Free"}
                     </div>
-                    <div className=" h-[56px] z-10 relative flex items-center group-hover:bg-green-bg duration-200 pr-2">
+                    <div className=" h-[56px] z-10 relative flex items-center group-hover:bg-tertiary-bg duration-200 pr-2">
                       <ExternalTextLink
                         onClick={(e) => e.stopPropagation()}
-                        color="white"
+                        color="green"
                         text={truncateMiddle(autoListing.id)}
                         href={getExplorerLink(
                           ExplorerLinkType.ADDRESS,
@@ -243,7 +243,7 @@ export default function TokenListingPage() {
                         )}
                       />
                     </div>
-                    <div className="h-[56px] z-10 relative flex items-center pr-5 group-hover:bg-green-bg duration-200">
+                    <div className="h-[56px] z-10 relative flex items-center pr-2.5 mr-2.5 rounded-r-3 group-hover:bg-tertiary-bg duration-200">
                       <Link
                         onClick={(e) => e.stopPropagation()}
                         href={`/token-listing/add/?autoListingContract=${autoListing.id}`}

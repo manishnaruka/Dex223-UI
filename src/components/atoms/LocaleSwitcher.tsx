@@ -52,8 +52,7 @@ export default function LocaleSwitcher({ isMobile = false }: { isMobile?: boolea
         placement={"bottom-start"}
         trigger={
           <SelectButton
-            className="px-3"
-            variant={isMobile ? "rectangle-secondary" : "rectangle-primary"}
+            className={clsx("px-3", isMobile && "bg-tertiary-bg")}
             isOpen={isOpened}
             onClick={() => setIsOpened(!isOpened)}
           >

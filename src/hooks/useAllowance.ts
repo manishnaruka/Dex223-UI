@@ -390,7 +390,7 @@ export default function useAllowance({
               title: {
                 symbol: token.symbol!,
                 template: RecentTransactionTitleTemplate.APPROVE,
-                amount: formatFloat(formatUnits(amount, token.decimals)),
+                amount: formatUnits(amount, token.decimals),
                 logoURI: token?.logoURI || "/tokens/placeholder.svg",
               },
             },

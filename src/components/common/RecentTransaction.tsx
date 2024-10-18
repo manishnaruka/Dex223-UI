@@ -7,6 +7,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import {
   IRecentTransaction,
@@ -128,7 +129,7 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
       return (
         <span className="text-14 text-secondary-text">
           {t("single_subtitle", {
-            amount: title.amount,
+            amount: formatFloat(title.amount, { trimZero: true }),
             symbol: title.symbol,
           })}
         </span>
@@ -140,8 +141,8 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
       return (
         <span className="text-14 text-secondary-text">
           {t("double_tokens_subtitle", {
-            amount0: title.amount0,
-            amount1: title.amount1,
+            amount0: formatFloat(title.amount0, { trimZero: true }),
+            amount1: formatFloat(title.amount1, { trimZero: true }),
             symbol0: title.symbol0,
             symbol1: title.symbol1,
           })}

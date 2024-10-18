@@ -1,5 +1,5 @@
-import { GasOption } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
 
 type GasOptionWithoutCustom = Exclude<GasOption, GasOption.CUSTOM>;
 

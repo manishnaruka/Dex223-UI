@@ -26,7 +26,7 @@ export default function DialogHeader({ onBack, onClose, title, paragraph, settin
           )}
           <h2
             className={clsx(
-              "text-18 md:text-20 font-bold flex items-center text-nowrap",
+              "text-18 md:text-20 font-bold flex items-center text-nowrap text-primary-text",
               onBack && "justify-center",
             )}
           >

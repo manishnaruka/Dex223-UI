@@ -10,7 +10,8 @@ import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
-  GasOption,
+  useSwapGasLimitStore,
+  useSwapGasModeStore,
   useSwapGasPriceStore,
 } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
@@ -37,10 +38,9 @@ import useTokenBalances from "@/hooks/useTokenBalances";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
-
 function OpenConfirmDialogButton({
   isSufficientBalance,
   isTradeReady,
@@ -297,7 +297,11 @@ export default function TradeForm() {
     refetchBBalance();
   }, [blockNumber, refetchABalance, refetchBBalance]);
 
-  const { gasPriceOption, gasPriceSettings } = useSwapGasPriceStore();
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useSwapGasPriceStore();
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useSwapGasLimitStore();
+  const { isAdvanced, setIsAdvanced } = useSwapGasModeStore();
 
   const { isLoadingSwap, isPendingSwap, isLoadingApprove, isPendingApprove } = useSwapStatus();
 
@@ -308,8 +312,6 @@ export default function TradeForm() {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
       return formatFloat(formatGwei(gasPriceSettings.gasPrice));
     }
-
-    console.log(gasPriceSettings);
 
     if (
       gasPriceSettings.model === GasFeeModel.EIP1559 &&
@@ -580,7 +582,20 @@ export default function TradeForm() {
 
       {trade && tokenA && tokenB && <SwapDetails trade={trade} tokenA={tokenA} tokenB={tokenB} />}
 
-      <NetworkFeeConfigDialog isOpen={isOpenedFee} setIsOpen={setIsOpenedFee} />
+      <NetworkFeeConfigDialog
+        isAdvanced={isAdvanced}
+        setIsAdvanced={setIsAdvanced}
+        estimatedGas={estimatedGas}
+        setEstimatedGas={setEstimatedGas}
+        gasPriceSettings={gasPriceSettings}
+        gasPriceOption={gasPriceOption}
+        customGasLimit={customGasLimit}
+        setCustomGasLimit={setCustomGasLimit}
+        setGasPriceOption={setGasPriceOption}
+        setGasPriceSettings={setGasPriceSettings}
+        isOpen={isOpenedFee}
+        setIsOpen={setIsOpenedFee}
+      />
       <PickTokenDialog
         handlePick={handlePick}
         isOpen={isOpenedTokenPick}

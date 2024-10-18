@@ -26,7 +26,7 @@ export function InputLabel({ label, tooltipText, ...props }: Omit<Props, "helper
   return (
     <p
       className={clsx(
-        "text-16 font-bold mb-1 flex items-center gap-1",
+        "text-16 font-bold mb-1 flex items-center gap-1 text-secondary-text",
         props.disabled && "opacity-50",
       )}
     >

@@ -16,7 +16,7 @@ export default function NavigationItem({ href, title, active }: Props) {
   return (
     <Link
       className={clsx(
-        "px-3 py-5 duration-200 inline-flex",
+        "px-3 py-5 duration-200 inline-flex text-primary-text",
         active ? "bg-navigation-active" : "hover:bg-navigation-hover",
         !["/swap", "/pools", "/token-listing", "/portfolio"].includes(href) &&
           "opacity-50 pointer-events-none",
@@ -51,7 +51,7 @@ export function NavigationItemWithSubmenu({
         <button
           onClick={() => setSubmenuOpened(!isSubmenuOpened)}
           className={clsx(
-            "px-3 py-5 inline-flex items-center gap-1 duration-200",
+            "px-3 py-5 inline-flex items-center gap-1 duration-200 text-primary-text",
             isSubmenuOpened || active ? "bg-navigation-active" : "hover:bg-navigation-hover",
           )}
         >

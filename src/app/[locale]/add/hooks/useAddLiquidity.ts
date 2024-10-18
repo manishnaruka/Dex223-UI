@@ -370,17 +370,13 @@ export const useAddLiquidity = ({
             template: RecentTransactionTitleTemplate.ADD,
             symbol0: position.pool.token0.symbol!,
             symbol1: position.pool.token1.symbol!,
-            amount0: formatFloat(
-              formatUnits(
-                BigInt(JSBI.toNumber(position.mintAmounts.amount0)),
-                position.pool.token0.decimals,
-              ),
+            amount0: formatUnits(
+              BigInt(JSBI.toNumber(position.mintAmounts.amount0)),
+              position.pool.token0.decimals,
             ),
-            amount1: formatFloat(
-              formatUnits(
-                BigInt(JSBI.toNumber(position.mintAmounts.amount1)),
-                position.pool.token1.decimals,
-              ),
+            amount1: formatUnits(
+              BigInt(JSBI.toNumber(position.mintAmounts.amount1)),
+              position.pool.token1.decimals,
             ),
             logoURI0: position.pool.token0?.logoURI || "/tokens/placeholder.svg",
             logoURI1: position.pool.token1?.logoURI || "/tokens/placeholder.svg",

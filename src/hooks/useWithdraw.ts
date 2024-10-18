@@ -122,7 +122,7 @@ export default function useWithdraw({
             title: {
               symbol: token.symbol!,
               template: RecentTransactionTitleTemplate.WITHDRAW,
-              amount: formatFloat(formatUnits(amount, token.decimals)),
+              amount: formatUnits(amount, token.decimals),
               logoURI: token?.logoURI || "/tokens/placeholder.svg",
             },
           },

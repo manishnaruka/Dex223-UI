@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import clsx from "clsx";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatUnits, isAddress, parseUnits } from "viem";
 import {
   useAccount,
@@ -13,6 +14,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Popover from "@/components/atoms/Popover";
 import Preloader from "@/components/atoms/Preloader";
 import SelectButton from "@/components/atoms/SelectButton";
+import Svg from "@/components/atoms/Svg";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button from "@/components/buttons/Button";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
@@ -65,10 +67,30 @@ export default function MintTestTokensDialog() {
     },
   });
 
+  const { data: erc223Origin } = useReadContract({
+    abi: TOKEN_CONVERTER_ABI,
+    functionName: "getERC223OriginFor",
+    address: CONVERTER_ADDRESS[chainId],
+    args: [tokenToMint.wrapped.address0],
+    chainId,
+    query: {
+      enabled: tokenToMint.isToken && !isAddress1Wrapper,
+    },
+  });
+
+  const mintErc223 = useMemo(() => {
+    return !isAddress1Wrapper && Boolean(erc223Origin);
+  }, [erc223Origin, isAddress1Wrapper]);
+
+  console.log(tokenToMint);
+  console.log(isAddress1Wrapper);
+  console.log(mintErc223 ? tokenToMint?.wrapped.address1! : tokenToMint?.wrapped.address0);
+
   const { data: balance, refetch } = useReadContract({
     abi: ERC20_ABI,
     functionName: "balanceOf",
-    address: isAddress1Wrapper ? tokenToMint?.wrapped.address0! : tokenToMint?.wrapped.address1,
+    address: mintErc223 ? tokenToMint?.wrapped.address1 : tokenToMint?.wrapped.address0,
+    // address: tokenToMint.wrapped.address0,
     chainId,
     args: [address as Address],
     query: {
@@ -98,9 +120,8 @@ export default function MintTestTokensDialog() {
       try {
         const hash = await walletClient.writeContract({
           abi: ERC223_ABI,
-          address: isAddress1Wrapper
-            ? tokenToMint?.wrapped.address0!
-            : tokenToMint?.wrapped.address1,
+          address: mintErc223 ? tokenToMint?.wrapped.address1 : tokenToMint?.wrapped.address0,
+          // address: tokenToMint.wrapped.address0,
           functionName: "mint",
           args: [address, parseUnits(amountToMint, tokenToMint.decimals)],
         });
@@ -116,20 +137,12 @@ export default function MintTestTokensDialog() {
         setIsPending(false);
       }
     });
-  }, [
-    connector,
-    tokenToMint,
-    walletClient,
-    publicClient,
-    address,
-    isAddress1Wrapper,
-    amountToMint,
-  ]);
+  }, [connector, tokenToMint, walletClient, publicClient, address, mintErc223, amountToMint]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
       <DialogHeader onClose={handleClose} title="Get test tokens" />
-      <div className="mx-auto pb-4 px-4 md:px-10 md:pb-10 rounded-2 bg-primary-bg md:w-[600px] w-full">
+      <div className="mx-auto pb-4 px-4 md:px-10 md:pb-10 rounded-2 bg-primary-bg md:w-[600px] w-full border border-transparent">
         <InputLabel label="Token for mint" />
         <div className="flex flex-col gap-4 relative">
           <Popover
@@ -140,17 +153,20 @@ export default function MintTestTokensDialog() {
             customStyles={{ width: "100%" }}
             trigger={
               <SelectButton
-                variant="rectangle-secondary"
                 onClick={() => setPopoverOpened(!isPopoverOpened)}
                 fullWidth
-                size="medium"
-                className="flex-shrink-0 pl-5"
+                size="large"
+                className={clsx(
+                  "flex-shrink-0 pl-5 bg-tertiary-bg border border-transparent text-16 lg:text-16 lg:py-2",
+                  isPopoverOpened && "bg-green-bg border-green shadow-green/60 shadow",
+                )}
+                isOpen={isPopoverOpened}
               >
                 {tokenToMint?.symbol || "Select token"}
               </SelectButton>
             }
           >
-            <div className="py-1 grid gap-1 bg-primary-bg rounded-3 overflow-hidden w-full">
+            <div className="py-1 grid gap-1 bg-tertiary-bg rounded-3 w-full h-[172px] md:h-[200px] overflow-scroll">
               {tokens.map((token) => {
                 return (
                   <div
@@ -160,9 +176,16 @@ export default function MintTestTokensDialog() {
                       setPopoverOpened(false);
                     }}
                     role="button"
-                    className="flex items-center gap-3 bg-primary-bg hover:bg-tertiary-bg duration-300 w-full min-w-[250px] px-10 h-10 justify-between"
+                    className="flex items-center gap-3 bg-tertiary-bg-bg hover:bg-quaternary-bg duration-300 w-full min-w-[250px] px-5 h-10 md:h-12 justify-between"
                   >
-                    <span className="text-secondary-text">{token.symbol}</span>
+                    <span
+                      className={token.equals(tokenToMint) ? "text-green" : "text-secondary-text"}
+                    >
+                      {token.symbol}
+                    </span>
+                    {token.equals(tokenToMint) && (
+                      <Svg iconName="check" className="text-green" size={20} />
+                    )}
                   </div>
                 );
               })}

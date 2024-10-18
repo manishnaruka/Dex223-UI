@@ -1,3 +1,4 @@
+import { Formik } from "formik";
 import { useTranslations } from "next-intl";
 import { ChangeEvent, useRef, useState } from "react";
 import { useConnect } from "wagmi";
@@ -7,7 +8,10 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
-import { useConnectWalletStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import {
+  useConnectWalletDialogStateStore,
+  useConnectWalletStore,
+} from "@/components/dialogs/stores/useConnectWalletStore";
 import { keystore } from "@/config/connectors/keystore/connector";
 import { unlockKeystore } from "@/functions/keystore";
 
@@ -18,6 +22,7 @@ interface Props {
 
 export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
   const t = useTranslations("Wallet");
+  const { setIsOpened: setConnectWalletDialogOpened } = useConnectWalletDialogStateStore();
 
   const fileInput = useRef<HTMLInputElement | null>(null);
   const { chainToConnect } = useConnectWalletStore();
@@ -67,11 +72,13 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
         connect({ chainId: chainToConnect, connector });
 
         setIsOpen(false);
+        setConnectWalletDialogOpened(false);
       } else {
         setError(t("wrong_password"));
       }
     } catch (error) {
       console.log("importKeystoreFileHandler ~ error:", error);
+      setError(t("wrong_password"));
     } finally {
       setIsUnlockingKeystore(false);
     }
@@ -83,59 +90,67 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
         <DialogHeader onClose={() => setIsOpen(false)} title={t("import_wallet_with_JSON")} />
 
         <div className="p-10">
-          <input
-            type="file"
-            onChange={(e) => handleFileChange(e)}
-            style={{ display: "none" }}
-            ref={fileInput}
-          />
-          <div className="flex items-center justify-between">
-            <div className="w-[120px]">
-              <Button
-                onClick={() => {
-                  if (fileInput.current && fileInput.current) {
-                    fileInput.current.click();
-                  }
-                }}
-                colorScheme={ButtonColor.LIGHT_GREEN}
-              >
-                {t("browse")}
-              </Button>
-            </div>
-            <p className="overflow-hidden overflow-ellipsis whitespace-nowrap w-[200px]">
-              {selectedFile?.name ? (
-                `${selectedFile?.name}`
-              ) : (
-                <span className="text-secondary-text">{t("select_keystore_file")}</span>
-              )}
-            </p>
-          </div>
-          <div className="text-red text-12 pb-4 pt-1 h-10">{fileError && fileError}</div>
-          <div>
-            <TextField
-              disabled={!selectedFile || Boolean(fileError)}
-              label={t("keystore_password")}
-              value={password}
-              type="password"
-              required
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError(null);
-              }}
-              placeholder={t("keystore_password")}
-              error={error || undefined}
-              helperText={""}
-            />
-            <div className="mt-6">
-              <Button
-                disabled={!selectedFile || Boolean(fileError)}
-                fullWidth
-                onClick={() => importKeystoreFileHandler()}
-              >
-                {!isUnlockingKeystore ? t("unlock") : <Preloader size={30} type="awaiting" />}
-              </Button>
-            </div>
-          </div>
+          <Formik
+            initialValues={{ name: "jared" }}
+            onSubmit={(values, actions) => {
+              importKeystoreFileHandler();
+            }}
+          >
+            {(props) => (
+              <form onSubmit={props.handleSubmit}>
+                <input
+                  type="file"
+                  onChange={(e) => handleFileChange(e)}
+                  style={{ display: "none" }}
+                  ref={fileInput}
+                />
+                <div className="flex items-center justify-between">
+                  <div className="w-[120px]">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (fileInput.current && fileInput.current) {
+                          fileInput.current.click();
+                        }
+                      }}
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                    >
+                      {t("browse")}
+                    </Button>
+                  </div>
+                  <p className="overflow-hidden overflow-ellipsis whitespace-nowrap w-[200px]">
+                    {selectedFile?.name ? (
+                      `${selectedFile?.name}`
+                    ) : (
+                      <span className="text-secondary-text">{t("select_keystore_file")}</span>
+                    )}
+                  </p>
+                </div>
+                <div className="text-red text-12 pb-4 pt-1 h-10">{fileError && fileError}</div>
+                <div>
+                  <TextField
+                    disabled={!selectedFile || Boolean(fileError)}
+                    label={t("keystore_password")}
+                    value={password}
+                    type="password"
+                    required
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder={t("keystore_password")}
+                    error={error || undefined}
+                    helperText={""}
+                  />
+                  <div className="mt-6">
+                    <Button type="submit" disabled={!selectedFile || Boolean(fileError)} fullWidth>
+                      {!isUnlockingKeystore ? t("unlock") : <Preloader size={30} type="awaiting" />}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </Formik>
         </div>
       </div>
     </DrawerDialog>

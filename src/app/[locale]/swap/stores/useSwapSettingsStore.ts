@@ -11,7 +11,7 @@ export enum SlippageType {
 export type DefaultType = Exclude<SlippageType, SlippageType.AUTO | SlippageType.CUSTOM>;
 
 export const values: Record<DefaultType, number> = {
-  [SlippageType.LOW]: 0.01,
+  [SlippageType.LOW]: 0.1,
   [SlippageType.MEDIUM]: 0.5,
   [SlippageType.HIGH]: 1,
 };
