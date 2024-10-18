@@ -55,6 +55,8 @@ export type PositionInfo = {
   tokenId: bigint | undefined;
 };
 
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 export function usePositionFromTokenId(tokenId: bigint) {
   const { positions, loading } = usePositionsFromTokenIds(tokenId ? [tokenId] : undefined);
 
@@ -331,24 +333,24 @@ export function usePositionFees({
   status: AllowanceStatus;
   claimFeesHash?: string;
   resetCollectFees: () => void;
-  tokenAStandard: Standard;
-  tokenBStandard: Standard;
-  setTokenAStandard: (standard: Standard) => void;
-  setTokenBStandard: (standard: Standard) => void;
+  token0Standard: Standard;
+  token1Standard: Standard;
+  setToken0Standard: (standard: Standard) => void;
+  setToken1Standard: (standard: Standard) => void;
 } {
-  const [tokenAStandard, setTokenAStandard] = useState(Standard.ERC20);
-  const [tokenBStandard, setTokenBStandard] = useState(Standard.ERC20);
+  const [token0Standard, setToken0Standard] = useState(Standard.ERC20);
+  const [token1Standard, setToken1Standard] = useState(Standard.ERC20);
   const tokensOutCode = useMemo(() => {
     // 0 >> both ERC-20
     // 1 >> 0 ERC-20, 1 ERC-223
     // 2 >> 0 ERC-223, 1 ERC-20
     // 3 >> both ERC-223
-    if (tokenAStandard === Standard.ERC20 && tokenBStandard === Standard.ERC20) return 0;
-    if (tokenAStandard === Standard.ERC20 && tokenBStandard === Standard.ERC223) return 1;
-    if (tokenAStandard === Standard.ERC223 && tokenBStandard === Standard.ERC20) return 2;
-    if (tokenAStandard === Standard.ERC223 && tokenBStandard === Standard.ERC223) return 3;
+    if (token0Standard === Standard.ERC20 && token1Standard === Standard.ERC20) return 0;
+    if (token0Standard === Standard.ERC20 && token1Standard === Standard.ERC223) return 1;
+    if (token0Standard === Standard.ERC223 && token1Standard === Standard.ERC20) return 2;
+    if (token0Standard === Standard.ERC223 && token1Standard === Standard.ERC223) return 3;
     return 0;
-  }, [tokenAStandard, tokenBStandard]);
+  }, [token0Standard, token1Standard]);
 
   const [status, setStatus] = useState(AllowanceStatus.INITIAL);
   const [claimFeesHash, setClaimFeesHash] = useState(undefined as undefined | string);
@@ -410,28 +412,38 @@ export function usePositionFees({
       : pool.token1.isNative
         ? fees[1]
         : undefined;
-    const nativeCoinAmountHalf = nativeCoinAmount ? nativeCoinAmount / BigInt(2) : undefined;
 
-    if (nativeCoinAmountHalf) {
+    const tokenAddress = !pool.token0.isNative
+      ? token0Standard === Standard.ERC20
+        ? pool.token0.wrapped.address0
+        : pool.token0.wrapped.address1
+      : token1Standard === Standard.ERC20
+        ? pool.token1.wrapped.address0
+        : pool.token1.wrapped.address1;
+
+    if (nativeCoinAmount) {
       const encodedCoolectParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "collect" as const,
-        args: [
-          { ...collectArgs, recipient: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId] },
-        ] as const,
+        args: [{ ...collectArgs, recipient: ZERO_ADDRESS }] as const,
       });
 
       const encodedUnwrapParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "unwrapWETH9",
-        args: [nativeCoinAmountHalf, recipient],
+        args: [nativeCoinAmount, recipient],
+      });
+      const encodedSweepParams = encodeFunctionData({
+        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
+        functionName: "sweepToken",
+        args: [tokenAddress, nativeCoinAmount, recipient],
       });
 
       return {
         address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "multicall" as const,
-        args: [[encodedCoolectParams, encodedUnwrapParams]] as const,
+        args: [[encodedCoolectParams, encodedUnwrapParams, encodedSweepParams]] as const,
       };
     }
 
@@ -544,10 +556,10 @@ export function usePositionFees({
     status,
     claimFeesHash,
     resetCollectFees,
-    tokenAStandard,
-    tokenBStandard,
-    setTokenAStandard,
-    setTokenBStandard,
+    token0Standard,
+    token1Standard,
+    setToken0Standard,
+    setToken1Standard,
   };
 }
 

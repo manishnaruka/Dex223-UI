@@ -75,10 +75,10 @@ export default function PoolPage({
     status,
     resetCollectFees,
     claimFeesHash,
-    tokenAStandard,
-    tokenBStandard,
-    setTokenAStandard,
-    setTokenBStandard,
+    token0Standard,
+    token1Standard,
+    setToken0Standard,
+    setToken1Standard,
   } = usePositionFees({
     pool: position?.pool,
     poolAddress,
@@ -406,10 +406,10 @@ export default function PoolPage({
               {token0?.isNative ? null : (
                 <div className="flex flex-col gap-2 mt-3">
                   <RadioButton
-                    isActive={tokenAStandard === Standard.ERC20}
-                    onClick={() => setTokenAStandard(Standard.ERC20)}
+                    isActive={token0Standard === Standard.ERC20}
+                    onClick={() => setToken0Standard(Standard.ERC20)}
                     disabled={
-                      tokenAStandard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL
+                      token0Standard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
@@ -421,10 +421,10 @@ export default function PoolPage({
                     </div>
                   </RadioButton>
                   <RadioButton
-                    isActive={tokenAStandard === Standard.ERC223}
-                    onClick={() => setTokenAStandard(Standard.ERC223)}
+                    isActive={token0Standard === Standard.ERC223}
+                    onClick={() => setToken0Standard(Standard.ERC223)}
                     disabled={
-                      tokenAStandard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
+                      token0Standard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
@@ -462,10 +462,10 @@ export default function PoolPage({
               {token1?.isNative ? null : (
                 <div className="flex flex-col gap-2 mt-3">
                   <RadioButton
-                    isActive={tokenBStandard === Standard.ERC20}
-                    onClick={() => setTokenBStandard(Standard.ERC20)}
+                    isActive={token1Standard === Standard.ERC20}
+                    onClick={() => setToken1Standard(Standard.ERC20)}
                     disabled={
-                      tokenBStandard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL
+                      token1Standard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
@@ -479,10 +479,10 @@ export default function PoolPage({
                     </div>
                   </RadioButton>
                   <RadioButton
-                    isActive={tokenBStandard === Standard.ERC223}
-                    onClick={() => setTokenBStandard(Standard.ERC223)}
+                    isActive={token1Standard === Standard.ERC223}
+                    onClick={() => setToken1Standard(Standard.ERC223)}
                     disabled={
-                      tokenBStandard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
+                      token1Standard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
