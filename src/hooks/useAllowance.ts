@@ -30,6 +30,7 @@ export enum AllowanceStatus {
 const allowanceGasLimitMap: Record<DexChainId, { base: bigint; additional: bigint }> = {
   [DexChainId.SEPOLIA]: { base: BigInt(46200), additional: BigInt(10000) },
   [DexChainId.BSC_TESTNET]: { base: BigInt(46200), additional: BigInt(10000) },
+  [DexChainId.EOS]: { base: BigInt(46200), additional: BigInt(10000) },
 };
 
 const defaultApproveValue = BigInt(46000);

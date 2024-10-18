@@ -11,6 +11,7 @@ const explorerMap: Record<DexChainId, string> = {
   [DexChainId.SEPOLIA]: "https://sepolia.etherscan.io",
   // [DexChainId.CALLISTO]: "https://explorer.callisto.network",
   [DexChainId.BSC_TESTNET]: "https://testnet.bscscan.com",
+  [DexChainId.EOS]: "https://explorer.evm.eosnetwork.com/",
 };
 export default function getExplorerLink(
   type: ExplorerLinkType,
@@ -25,7 +26,16 @@ export default function getExplorerLink(
     case ExplorerLinkType.BLOCK:
       return `${explorerMap[chainId]}/block/${value}`;
     case ExplorerLinkType.GAS_TRACKER:
-      return `${explorerMap[chainId]}/gastracker`;
+      switch (chainId) {
+        case DexChainId.BSC_TESTNET:
+        case DexChainId.SEPOLIA:
+          return `${explorerMap[chainId]}/gastracker`;
+        case DexChainId.EOS:
+          return `${explorerMap[chainId]}`;
+        default:
+          return `${explorerMap[chainId]}`;
+      }
+
     default:
       return `${explorerMap[chainId]}`;
   }

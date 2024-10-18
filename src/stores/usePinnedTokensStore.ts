@@ -28,7 +28,7 @@ export const usePinnedTokensStore = create<PinnedTokensStore>()(
         });
       },
       toggleToken: (address, chainId) => {
-        const currentPinned = get().tokens[chainId];
+        const currentPinned = get().tokens[chainId] || [];
         if (currentPinned.includes(address)) {
           set({
             tokens: {
@@ -58,6 +58,16 @@ export const usePinnedTokensStore = create<PinnedTokensStore>()(
     }),
     {
       name: "d223-pinned-tokens", // name of the item in the storage (must be unique)
+      version: 2,
+      migrate: (persistedState: any, version) => {
+        const tempState = { ...persistedState.tokens };
+        DEX_SUPPORTED_CHAINS.forEach((value) => {
+          if (!tempState[value]) {
+            tempState[value] = [];
+          }
+        });
+        return { ...persistedState, tokens: tempState };
+      },
     },
   ),
 );

@@ -18,4 +18,10 @@ export const networks: Array<{
     symbol: "BNB",
     logo: "/chains/bsc.svg",
   },
+  {
+    chainId: DexChainId.EOS,
+    name: "EOS EVM Network",
+    symbol: "EOS",
+    logo: "/chains/eos.svg",
+  },
 ];

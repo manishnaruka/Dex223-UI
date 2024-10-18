@@ -22,6 +22,11 @@ const nativeCurrenciesMap: Record<DexChainId, { symbol: string; name: string; lo
     name: "Testnet BNB",
     logoURI: "/coins/BNB.svg",
   },
+  [DexChainId.EOS]: {
+    symbol: "EOS",
+    name: "EOS",
+    logoURI: "/coins/EOS.svg",
+  },
 };
 
 export class NativeCoin extends NativeCurrency {

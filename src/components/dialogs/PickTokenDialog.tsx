@@ -62,7 +62,7 @@ function TokenRow({
   const { toggleToken, isTokenPinned, pinnedTokens } = usePinnedTokensStore((s) => ({
     toggleToken: s.toggleToken,
     pinnedTokens: s.tokens,
-    isTokenPinned: s.tokens[currency.chainId].includes(
+    isTokenPinned: s.tokens[currency.chainId]?.includes(
       currency.isNative ? "native" : currency.address0,
     ),
   }));
@@ -133,7 +133,7 @@ function TokenRow({
                 iconName={isTokenPinned ? "pin-fill" : "pin"}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (pinnedTokens[currency.chainId].length < 8 || isTokenPinned) {
+                  if (pinnedTokens[currency.chainId]?.length < 8 || isTokenPinned) {
                     toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
                   }
                 }}
@@ -184,7 +184,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
 
   const pinnedTokens = useMemo(() => {
     return tokens.filter((t) =>
-      pinnedTokensAddresses[chainId].includes(t.isNative ? "native" : t.address0),
+      pinnedTokensAddresses[chainId]?.includes(t.isNative ? "native" : t.address0),
     );
   }, [chainId, pinnedTokensAddresses, tokens]);
 

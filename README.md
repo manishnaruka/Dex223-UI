@@ -42,12 +42,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 1. Add new network to src/config/wagmi/config.ts 
    1. Networks
    2. Transports
-2. Add new network to src/config/networks/index.ts 
-   1. Networks
-   2. Transports
+2. Add new network to src/config/networks/index.ts
 3. Modify DexChainId to src/sdk_hybrid/chains.ts
    1. Add new chain to DexChainId enum with [chainId] as value
-   2. Add chain to DEX_SUPPORTED_CHAINS array
 4. Add contract addresses in src/sdk_hybrid/addresses.ts
    1. CONVERTER_ADDRESS
    2. FACTORY_ADDRESS
@@ -55,7 +52,13 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
    4. QUOTER_ADDRESS
    5. NONFUNGIBLE_POSITION_MANAGER_ADDRESS
    6. POOL_INIT_CODE_HASH
+   7. CORE_AUTOLISTING
+   8. FREE_AUTOLISTING
 5. Add WETH9 token in src/sdk_hybrid/entities.ts
-6. Add default tokenlist in src/db/lists/index.ts
-7. Add subrgaph url in src/graphql/thegraph/apollo.ts
-8. Add explorer links in src/functions/getExplorerLink.ts
+6. Add native currency in src/sdk_hybrid/entities/ether.ts
+7. Add default tokenlist in src/db/lists/index.ts
+8. Add subrgaph url in src/graphql/thegraph/apollo.ts
+9. Add autolisting subgraph in src/hooks/useAutolistingAppoloClient.ts
+10. Add allowanceGasLimit on src/hooks/useAllowance.ts
+11. Modify baseFeeMultipliers and eip1559SupportMap in src/config/constants/baseFeeMultilpiers.ts
+12. Add explorer links in src/functions/getExplorerLink.ts
