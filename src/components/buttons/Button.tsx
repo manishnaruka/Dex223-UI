@@ -85,7 +85,7 @@ const mobileButtonSizeClassnameMap: Record<ButtonSize, string> = {
 };
 
 const disabledClassnameMap: Record<ButtonVariant, string> = {
-  [ButtonVariant.CONTAINED]: "disabled:bg-tertiary-bg disabled:text-secondary-text",
+  [ButtonVariant.CONTAINED]: "disabled:bg-quaternary-bg disabled:text-secondary-text",
   [ButtonVariant.OUTLINED]: "disabled:text-secondary-text disabled:border-secondary-border",
 };
 
