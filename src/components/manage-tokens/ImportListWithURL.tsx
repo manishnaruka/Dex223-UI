@@ -8,6 +8,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonSize } from "@/components/buttons/Button";
+import { convertList } from "@/components/manage-tokens/scripts/convertTokenList";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { db, TokenList } from "@/db/db";
 import { IIFE } from "@/functions/iife";
@@ -41,11 +42,13 @@ export default function ImportListWithURL({ setContent }: Props) {
           return;
         }
 
-        const data = await fetchTokenList(tokenListAddressToImport);
+        const data = await convertList(tokenListAddressToImport);
 
+        console.log(data);
         //TODO: Check that all tokens in list from same chain
         const listChainId = data.tokens[0].chainId;
 
+        console.log(listChainId);
         if (data && listChainId) {
           setTokenListToImport({
             enabled: true,
