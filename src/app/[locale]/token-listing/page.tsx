@@ -23,11 +23,11 @@ function ListingVariantCard({
   buttonText?: string;
 }) {
   return (
-    <div className="px-5 pb-5 pt-6 bg-primary-bg flex flex-col">
+    <div className="px-4 md:px-5 pb-4 md:pb-5 pt-6 bg-primary-bg flex flex-col">
       <div className="flex-grow flex flex-col">
         <Image src={image} alt="" width={320} height={170} className="mb-6 mx-auto" />
         <h3 className="mb-1 text-20 font-bold">{heading}</h3>
-        <p className="mb-4 text-secondary-text">{paragraphText}</p>
+        <p className="text-14 md:text-16 mb-4 text-secondary-text">{paragraphText}</p>
       </div>
 
       {isExternal ? (
@@ -50,8 +50,8 @@ export default function TokenListingPage() {
   return (
     <>
       <Container>
-        <div className="py-10">
-          <h1 className="mb-3 text-40">Token listing</h1>
+        <div className="md:py-10 px-4 py-4">
+          <h1 className="mb-3 text-24 lg:text-40">Token listing</h1>
           <p className="text-14 text-secondary-text">
             Listing your token on our platform is straightforward. You can choose one of the
             following methods to get your token listed:

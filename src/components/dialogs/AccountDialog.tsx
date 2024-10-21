@@ -229,7 +229,7 @@ export default function AccountDialog() {
             size={ButtonSize.MEDIUM}
             tabletSize={ButtonSize.SMALL}
             mobileSize={ButtonSize.SMALL}
-            className="md:rounded-2 md:font-normal w-full md:w-auto"
+            className="rounded-2 md:rounded-2 md:font-normal w-full md:w-auto"
             onClick={() => setOpenedWallet(true)}
           >
             Connect wallet

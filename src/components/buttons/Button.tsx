@@ -78,7 +78,7 @@ const tabletButtonSizeClassnameMap: Record<ButtonSize, string> = {
 
 const mobileButtonSizeClassnameMap: Record<ButtonSize, string> = {
   [ButtonSize.EXTRA_SMALL]: "text-12 min-h-5 rounded-20 px-4",
-  [ButtonSize.SMALL]: "text-14 font-medium rounded-20 min-h-8 px-6",
+  [ButtonSize.SMALL]: "text-14 font-medium rounded-2 min-h-8 px-6",
   [ButtonSize.MEDIUM]: "text-16 font-medium rounded-2 min-h-10 px-6",
   [ButtonSize.LARGE]: "text-16 font-medium rounded-3 min-h-12 px-6",
   [ButtonSize.EXTRA_LARGE]: "text-18 font-medium rounded-3 min-h-[60px] px-6",
