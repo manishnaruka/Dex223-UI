@@ -13,12 +13,14 @@ function ListingVariantCard({
   image,
   heading,
   paragraphText,
+  buttonText = "Apply",
 }: {
   href: string;
   isExternal: boolean;
   image: string;
   heading: string;
   paragraphText: ReactNode;
+  buttonText?: string;
 }) {
   return (
     <div className="px-5 pb-5 pt-6 bg-primary-bg flex flex-col">
@@ -31,13 +33,13 @@ function ListingVariantCard({
       {isExternal ? (
         <a target="_blank" href={href}>
           <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} endIcon="forward">
-            Apply
+            {buttonText}
           </Button>
         </a>
       ) : (
         <Link href={href}>
           <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} endIcon="next">
-            Apply
+            {buttonText}
           </Button>
         </Link>
       )}
@@ -118,9 +120,10 @@ export default function TokenListingPage() {
                 Note that most token lists only support ERC-20 tokens yet.
               </>
             }
-            href="https://github.com/EthereumCommonwealth/Dex223-listings/tree/main"
+            href="https://tokenlists.org/"
             image="/listing-cards/existing-listing.png"
             isExternal={true}
+            buttonText={"View Uniswap token lists"}
           />
         </div>
       </Container>
