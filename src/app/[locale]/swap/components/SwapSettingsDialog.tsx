@@ -24,10 +24,11 @@ import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import TextButton from "@/components/buttons/TextButton";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
+import { clsxMerge } from "@/functions/clsxMerge";
 import addToast from "@/other/toast";
 
 function SettingsButtons({ children }: PropsWithChildren) {
-  return <div className="grid rounded-2 flex-grow grid-cols-4 gap-3">{children}</div>;
+  return <div className="grid rounded-2 flex-grow grid-cols-4 gap-2 lg:gap-3">{children}</div>;
 }
 
 interface SettingsButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -35,15 +36,16 @@ interface SettingsButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isActive?: boolean;
 }
 
-function SettingsButton({ text, isActive = false, ...props }: SettingsButtonProps) {
+function SettingsButton({ text, isActive = false, className, ...props }: SettingsButtonProps) {
   return (
     <button
       {...props}
-      className={clsx(
-        "duration-200 py-2.5 px-6 w-full border flex justify-center rounded-2 ",
+      className={clsxMerge(
+        "duration-200 px-6 w-full border flex items-center justify-center rounded-2 text-12 lg:text-16 h-10",
         isActive
           ? "bg-green-bg shadow shadow-green/60 border-green text-primary-text"
-          : "bg-secondary-bg border-transparent hover:bg-green-bg text-secondary-text",
+          : "bg-tertiary-bg border-transparent hover:bg-green-bg text-secondary-text",
+        className,
       )}
     >
       {text}
@@ -73,7 +75,7 @@ function SettingsInput({ isActive, isError, ...props }: SettingsInputProps) {
       allowNegative={false}
       {...props}
       className={clsx(
-        " focus:outline-0  rounded-2 duration-200  py-2.5 px-3 text-center placeholder:text-center placeholder:text-secondary-text w-full border",
+        " focus:outline-0  rounded-2 duration-200  py-2.5 px-1.5 md:px-3 text-center placeholder:text-center placeholder:text-secondary-text w-full border text-12 lg:text-16",
         isActive &&
           !isError &&
           "bg-green-bg shadow shadow-green/60 border-green text-primary-text hover:bg-green-bg ",
@@ -232,7 +234,7 @@ export default function SwapSettingsDialog() {
           </div>
           <span className="text-secondary-text">{getTitle(slippageType, customSlippage, t)}</span>
         </div>
-        <div className="flex gap-5">
+        <div className="flex gap-3 md:gap-5">
           <span>
             <SettingsButton
               onClick={() => {
@@ -241,6 +243,7 @@ export default function SwapSettingsDialog() {
               }}
               isActive={slippageType === SlippageType.AUTO}
               text={t("auto")}
+              className="w-[58px] md:w-full"
             />
           </span>
           <SettingsButtons>
