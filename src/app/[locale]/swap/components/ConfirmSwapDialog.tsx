@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, ReactNode, useEffect, useMemo, useState } from "react";
-import { Address, formatGwei } from "viem";
+import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
@@ -31,7 +31,9 @@ import { networks } from "@/config/networks";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
@@ -510,6 +512,12 @@ export default function ConfirmSwapDialog() {
 
   const [isEditApproveActive, setEditApproveActive] = useState(false);
 
+  const { isAllowed: isAllowedA } = useStoreAllowance({
+    token: tokenA,
+    contractAddress: ROUTER_ADDRESS[chainId],
+    amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
+  });
+
   return (
     <DrawerDialog
       isOpen={isOpen}
@@ -656,7 +664,7 @@ export default function ConfirmSwapDialog() {
                 tooltipText={t("gas_limit_tooltip")}
               />
 
-              {tokenA?.isToken && tokenAStandard === Standard.ERC20 && (
+              {tokenA?.isToken && tokenAStandard === Standard.ERC20 && !isAllowedA && (
                 <div
                   className={clsx(
                     "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-2 gap-5",

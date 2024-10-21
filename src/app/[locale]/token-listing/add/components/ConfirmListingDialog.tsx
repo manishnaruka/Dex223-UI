@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { PropsWithChildren, useMemo } from "react";
-import { Address, formatGwei, formatUnits } from "viem";
+import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { Address, formatGwei, formatUnits, parseUnits } from "viem";
 import { useGasPrice, useReadContract } from "wagmi";
 
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -11,6 +11,7 @@ import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListin
 import useListToken from "@/app/[locale]/token-listing/add/hooks/useListToken";
 import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
 import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
+import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import {
@@ -23,17 +24,23 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import Input from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
+import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
+import { useStoreAllowance } from "@/hooks/useAllowance";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { ADDRESS_ZERO } from "@/sdk_hybrid/constants";
+import { Token } from "@/sdk_hybrid/entities/token";
+import { Standard } from "@/sdk_hybrid/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 function ApproveRow({
@@ -180,7 +187,15 @@ function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
 
-function ListActionButton({ isFree }: { isFree: boolean }) {
+function ListActionButton({
+  isFree,
+  amountToApprove,
+  isEditApproveActive,
+}: {
+  isFree: boolean;
+  amountToApprove: string;
+  isEditApproveActive: boolean;
+}) {
   const t = useTranslations("Swap");
   const { tokenA, tokenB } = useListTokensStore();
   const { setIsOpen } = useConfirmSwapDialogStore();
@@ -333,7 +348,7 @@ function ListActionButton({ isFree }: { isFree: boolean }) {
   }
 
   return (
-    <Button onClick={handleList} fullWidth>
+    <Button disabled={isEditApproveActive} onClick={() => handleList(amountToApprove)} fullWidth>
       Confirm
     </Button>
   );
@@ -437,6 +452,38 @@ export default function ConfirmListingDialog() {
   const tokensToList = useTokensToList();
 
   const { paymentToken, setPaymentToken } = usePaymentTokenStore();
+  const [isEditApproveActive, setEditApproveActive] = useState(false);
+
+  const [amountToApprove, setAmountToApprove] = useState(
+    paymentToken ? formatUnits(paymentToken.price, paymentToken.token.decimals) : "0",
+  );
+
+  const { autoListingContract } = useAutoListingContractStore();
+
+  useEffect(() => {
+    if (!+amountToApprove && paymentToken) {
+      setAmountToApprove(formatUnits(paymentToken.price, paymentToken.token.decimals));
+    }
+  }, [amountToApprove, paymentToken]);
+
+  const isFree = useMemo(() => {
+    return !autoListing?.tokensToPay.length;
+  }, [autoListing]);
+
+  const { isAllowed } = useStoreAllowance({
+    token:
+      paymentToken && !isFree
+        ? new Token(
+            DexChainId.SEPOLIA,
+            paymentToken.token.address,
+            ADDRESS_ZERO,
+            +paymentToken.token.decimals,
+            paymentToken.token.symbol,
+          )
+        : undefined,
+    contractAddress: autoListingContract,
+    amountToCheck: paymentToken ? paymentToken.price * BigInt(2) : null,
+  });
 
   return (
     <DrawerDialog
@@ -469,7 +516,7 @@ export default function ConfirmListingDialog() {
                     underlineText="You list token"
                   />
                   <div className="relative">
-                    <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
+                    <div className="text-tertiary-text absolute top-1/2 -translate-x-1/2 -translate-y-1/2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
                       <Svg iconName="arrow-in" />
                     </div>
                   </div>
@@ -500,7 +547,7 @@ export default function ConfirmListingDialog() {
                   </div>
 
                   <div className="relative h-3">
-                    <div className="absolute  -translate-x-1/2 -bottom-2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
+                    <div className="text-tertiary-text absolute  -translate-x-1/2 -bottom-2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
                       <Svg className="rotate-90" iconName="arrow-in" />
                     </div>
                   </div>
@@ -543,7 +590,7 @@ export default function ConfirmListingDialog() {
           {autoListing && !autoListing.isFree && paymentToken && (
             <div className="mb-5">
               <InputLabel label="Payment for listing" tooltipText="Tooltip text" />
-              <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
+              <div className="h-12 rounded-2  w-full bg-tertiary-bg text-primary-text flex justify-between items-center px-5">
                 {formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18).slice(0, 7) ===
                 "0.00000"
                   ? truncateMiddle(
@@ -566,10 +613,83 @@ export default function ConfirmListingDialog() {
                   <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
                 </span>
               </div>
+              {paymentToken?.token && !isAllowed && (
+                <div
+                  className={clsx(
+                    "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5",
+                    parseUnits(amountToApprove, paymentToken.token.decimals) < paymentToken.price &&
+                      "pb-[26px]",
+                  )}
+                >
+                  <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
+                    <Tooltip text={"Tooltip_text"} />
+                    <span>Approve amount</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-grow justify-end">
+                    {!isEditApproveActive ? (
+                      <span>
+                        {amountToApprove} {paymentToken.token.symbol}
+                      </span>
+                    ) : (
+                      <div className="flex-grow">
+                        <div className="relative w-full flex-grow">
+                          <Input
+                            isError={
+                              parseUnits(amountToApprove, paymentToken.token.decimals) <
+                              paymentToken.price
+                            }
+                            className="h-8 pl-3"
+                            value={amountToApprove}
+                            onChange={(e) => setAmountToApprove(e.target.value)}
+                            type="text"
+                          />
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
+                            {paymentToken?.token.symbol}
+                          </span>
+                        </div>
+                        {parseUnits(amountToApprove, paymentToken.token.decimals) <
+                          paymentToken.price && (
+                          <span className="text-red-light absolute text-12 translate-y-0.5">
+                            Must be higher or equal{" "}
+                            {formatUnits(paymentToken.price, paymentToken.token.decimals)}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {!isEditApproveActive ? (
+                      <Button
+                        size={ButtonSize.EXTRA_SMALL}
+                        colorScheme={ButtonColor.LIGHT_GREEN}
+                        onClick={() => setEditApproveActive(true)}
+                      >
+                        Edit
+                      </Button>
+                    ) : (
+                      <Button
+                        disabled={
+                          parseUnits(amountToApprove, paymentToken.token.decimals) <
+                          paymentToken.price
+                        }
+                        size={ButtonSize.EXTRA_SMALL}
+                        colorScheme={ButtonColor.LIGHT_GREEN}
+                        onClick={() => setEditApproveActive(false)}
+                      >
+                        Save
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}
-          {autoListing && <ListActionButton isFree={autoListing.isFree} />}
+          {autoListing && (
+            <ListActionButton
+              isEditApproveActive={isEditApproveActive}
+              amountToApprove={amountToApprove}
+              isFree={autoListing.isFree}
+            />
+          )}
         </div>
       </div>
     </DrawerDialog>
