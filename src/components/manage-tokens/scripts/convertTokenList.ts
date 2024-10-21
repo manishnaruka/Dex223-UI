@@ -4,9 +4,11 @@ import { Address, encodeAbiParameters, getAddress, keccak256 } from "viem";
 
 import { Token } from "@/sdk_hybrid/entities/token";
 
-import { bytecode20, bytecode223 } from "./converter.json";
+import { bytecodes } from "./converter";
 import schemaJson from "./tokenlist.schema.json";
 const ajv = new Ajv({ allErrors: true, verbose: true });
+
+const { bytecode20, bytecode223 } = bytecodes;
 
 type uniToken = {
   chainId: number;

@@ -117,9 +117,6 @@ export function useListTokenEstimatedGas() {
   useDeepEffect(() => {
     IIFE(async () => {
       if (!listTokenParams || !address || (!isAllowed && !isFree)) {
-        console.log(address);
-        console.log(isAllowed);
-        console.log(listTokenParams);
         setEstimatedGas(BigInt(195000));
         console.log("Can't estimate gas");
         return;
@@ -130,8 +127,6 @@ export function useListTokenEstimatedGas() {
           account: address,
           ...listTokenParams,
         } as any);
-
-        console.log(estimated);
 
         if (estimated) {
           setEstimatedGas(estimated + BigInt(10000));
@@ -166,8 +161,6 @@ export default function useListToken() {
   const isFree = useMemo(() => {
     return !autoListing?.tokensToPay.length;
   }, [autoListing]);
-
-  console.log(autoListing, "autoListing");
 
   const { data: walletClient } = useWalletClient();
   const { paymentToken } = usePaymentTokenStore();
@@ -219,8 +212,6 @@ export default function useListToken() {
 
   const handleList = useCallback(
     async (amountToApprove: string) => {
-      console.log(!paymentToken && !isFree);
-
       if (!poolAddress || !walletClient || (!paymentToken && !isFree) || !publicClient) {
         return;
       }
@@ -299,8 +290,6 @@ export default function useListToken() {
         }
       }
 
-      console.log(listParams);
-
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
@@ -309,8 +298,6 @@ export default function useListToken() {
 
         // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
-        console.log(gasToUse);
 
         const { request } = await publicClient.simulateContract({
           ...listParams,

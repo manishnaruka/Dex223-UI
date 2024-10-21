@@ -112,7 +112,6 @@ export function useSwapParams() {
         .quotient.toString(),
     );
   }, [dependentAmount, slippage, trade]);
-
   console.log(balance.data);
 
   const swapParams = useMemo(() => {
@@ -279,8 +278,6 @@ export function useSwapEstimatedGas() {
           account: address,
           ...swapParams,
         } as any);
-
-        console.log(estimated);
 
         if (estimated) {
           setEstimatedGas(estimated + BigInt(10000));
@@ -458,8 +455,6 @@ export default function useSwap() {
         }
       }
 
-      console.log(swapParams);
-
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
@@ -467,8 +462,6 @@ export default function useSwap() {
         } as any);
 
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
-        console.log(gasToUse);
 
         const { request } = await publicClient.simulateContract({
           ...swapParams,

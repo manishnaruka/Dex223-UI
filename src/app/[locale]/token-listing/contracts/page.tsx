@@ -25,8 +25,6 @@ export default function TokenListingPage() {
 
   const autoListings = useAutoListingContracts();
 
-  console.log(autoListings);
-
   const filteredAutoListings = useMemo(() => {
     if (!autoListings) {
       return null;

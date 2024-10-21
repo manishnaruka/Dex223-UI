@@ -200,8 +200,6 @@ function SwapActionButton({
 
   const { handleSwap } = useSwap();
 
-  console.log(tokenA);
-
   const {
     isPendingApprove,
     isLoadingApprove,
@@ -480,6 +478,14 @@ export default function ConfirmSwapDialog() {
 
   const [amountToApprove, setAmountToApprove] = useState(typedValue);
   // const { gasOption, gasPrice, gasLimit } = useSwapGasSettingsStore();
+
+  console.log(typedValue);
+  console.log(amountToApprove);
+  useEffect(() => {
+    if (typedValue) {
+      setAmountToApprove(typedValue);
+    }
+  }, [typedValue]);
 
   const { gasPriceSettings } = useSwapGasPriceStore();
   const { data: baseFee } = useGasPrice();

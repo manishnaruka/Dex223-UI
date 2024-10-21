@@ -461,10 +461,10 @@ export default function ConfirmListingDialog() {
   const { autoListingContract } = useAutoListingContractStore();
 
   useEffect(() => {
-    if (!+amountToApprove && paymentToken) {
+    if (paymentToken) {
       setAmountToApprove(formatUnits(paymentToken.price, paymentToken.token.decimals));
     }
-  }, [amountToApprove, paymentToken]);
+  }, [paymentToken]);
 
   const isFree = useMemo(() => {
     return !autoListing?.tokensToPay.length;

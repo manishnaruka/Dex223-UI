@@ -38,8 +38,6 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
     return pools.find(([_poolState, _pool]) => _poolState === PoolState.EXISTS) || pools[0];
   }, [pools]);
 
-  console.log(pool);
-
   const swapRoute = useMemo(() => {
     if (!pool || !tokenA || !tokenB) {
       return null;

@@ -114,8 +114,6 @@ export default function AutoListingContractDetails({
     return <div>Whoops, this autolisting not found.</div>;
   }
 
-  console.log(listingContract);
-
   return (
     <>
       <Container>
