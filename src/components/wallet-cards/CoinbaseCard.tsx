@@ -21,6 +21,7 @@ export default function CoinbaseCard() {
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
 
+  console.log(connectors);
   return (
     <PickButton
       onClick={() => {
@@ -32,7 +33,7 @@ export default function CoinbaseCard() {
         }
 
         connectAsync({
-          connector: connectors[3],
+          connector: connectorToConnect,
           chainId: chainToConnect,
         })
           .then(() => {
@@ -43,6 +44,7 @@ export default function CoinbaseCard() {
             if (e.code && e.code === 4001) {
               addToast(t("user_rejected"), "error");
             } else {
+              console.log(e);
               addToast(t("something_went_wrong"), "error");
             }
           });
