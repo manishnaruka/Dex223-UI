@@ -25,7 +25,7 @@ export default function CoinbaseCard() {
     <PickButton
       onClick={() => {
         setName("coinbase");
-        const connectorToConnect = connectors.find((c) => c.id === rdnsMap.coinbase);
+        const connectorToConnect = connectors[1];
 
         if (!connectorToConnect) {
           return addToast(t("install_coinbase"), "error");
