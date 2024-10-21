@@ -73,7 +73,10 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
             </div>
           </div>
           <button
-            onClick={() => disconnect()}
+            onClick={() => {
+              setIsOpenedAccount(false);
+              disconnect();
+            }}
             className="flex items-center gap-2 hover:text-green duration-200"
           >
             {t("disconnect")}
