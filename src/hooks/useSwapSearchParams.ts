@@ -43,7 +43,7 @@ export const useSwapSearchParams = () => {
   }, [pathname, searchParams, tokenA, tokenB]);
 
   useEffect(() => {
-    if (!isInitialized && tokens.length) {
+    if (!isInitialized && tokens.length > 1) {
       const queryTokenA = searchParams.get(SwapQueryParams.tokenA);
       const queryTokenB = searchParams.get(SwapQueryParams.tokenB);
 

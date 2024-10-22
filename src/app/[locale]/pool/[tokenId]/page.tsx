@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
@@ -25,10 +25,9 @@ import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { AllowanceStatus } from "@/hooks/useAllowance";
+import { useCollectFeesEstimatedGas, usePositionFees } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import {
-  usePositionFees,
   usePositionFromPositionInfo,
   usePositionFromTokenId,
   usePositionPrices,
@@ -39,6 +38,10 @@ import { useRouter } from "@/navigation";
 import { Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
 
+import { CollectFeesGasSettings } from "./components/CollectFeesGasSettings";
+import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
+import { useCollectFeesStore } from "./stores/useCollectFeesStore";
+
 export default function PoolPage({
   params,
 }: {
@@ -47,6 +50,8 @@ export default function PoolPage({
   };
 }) {
   useRecentTransactionTracking();
+  useCollectFeesEstimatedGas();
+
   const chainId = useCurrentChainId();
   const [showRecentTransactions, setShowRecentTransactions] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -70,20 +75,24 @@ export default function PoolPage({
   });
 
   const {
-    fees,
-    handleCollectFees,
-    status,
-    resetCollectFees,
-    claimFeesHash,
     token0Standard,
     token1Standard,
+    reset,
     setToken0Standard,
     setToken1Standard,
-  } = usePositionFees({
-    pool: position?.pool,
-    poolAddress,
-    tokenId: positionInfo?.tokenId,
-  });
+    setPool,
+    setPoolAddress,
+    setTokenId,
+  } = useCollectFeesStore();
+  const { status, hash } = useCollectFeesStatusStore();
+
+  useEffect(() => {
+    setPool(position?.pool);
+    setPoolAddress(poolAddress);
+    setTokenId(positionInfo?.tokenId);
+  }, [position?.pool, poolAddress, positionInfo?.tokenId, setPool, setPoolAddress, setTokenId]);
+
+  const { fees, handleCollectFees } = usePositionFees();
 
   const { inRange, removed } = usePositionRangeStatus({ position });
   const { minPriceString, maxPriceString, currentPriceString, ratio } = usePositionPrices({
@@ -92,18 +101,18 @@ export default function PoolPage({
   });
 
   const handleClose = () => {
-    resetCollectFees();
+    reset();
     setIsOpen(false);
   };
 
-  if (
-    loading ? (
+  if (loading || poolAddressLoading) {
+    return (
       <div className="flex justify-center items-center h-full min-h-[550px]">
         <Preloader type="awaiting" size={48} />
       </div>
-    ) : null
-  )
-    if (!token0 || !token1) return <div>Error: Token A or B undefined</div>;
+    );
+  }
+  if (!token0 || !token1) return <div>Error: Token A or B undefined</div>;
 
   const token0FeeFormatted = formatFloat(formatUnits(fees[0] || BigInt(0), token0?.decimals || 18));
   const token1FeeFormatted = formatFloat(formatUnits(fees[1] || BigInt(0), token1?.decimals || 18));
@@ -194,7 +203,7 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={["ERC-20", "ERC-223"]}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={position?.amount0.toSignificant() || "Loading..."}
                   percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -202,7 +211,7 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={["ERC-20", "ERC-223"]}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={position?.amount1.toSignificant() || "Loading..."}
                   percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -221,6 +230,7 @@ export default function PoolPage({
                 onClick={() => setIsOpen(true)}
                 size={ButtonSize.MEDIUM}
                 mobileSize={ButtonSize.SMALL}
+                disabled={!fees[0]}
               >
                 Collect fees
               </Button>
@@ -230,14 +240,14 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={["ERC-20", "ERC-223"]}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={token0FeeFormatted}
                 />
               </div>
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={["ERC-20", "ERC-223"]}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={token1FeeFormatted}
                 />
               </div>
@@ -356,26 +366,26 @@ export default function PoolPage({
                 <span className="text-16 lg:text-18 font-bold">{`${token0?.symbol} and ${token1?.symbol}`}</span>
               </div>
               <div className="flex items-center gap-2 justify-end">
-                {claimFeesHash && (
+                {hash && (
                   <a
                     target="_blank"
-                    href={getExplorerLink(ExplorerLinkType.TRANSACTION, claimFeesHash, chainId)}
+                    href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
                   >
                     <IconButton iconName="forward" />
                   </a>
                 )}
 
-                {status === AllowanceStatus.PENDING && (
+                {status === CollectFeesStatus.PENDING && (
                   <>
                     <Preloader type="linear" />
                     <span className="text-secondary-text text-14">Proceed in your wallet</span>
                   </>
                 )}
-                {status === AllowanceStatus.LOADING && <Preloader size={20} />}
-                {status === AllowanceStatus.SUCCESS && (
+                {status === CollectFeesStatus.LOADING && <Preloader size={20} />}
+                {status === CollectFeesStatus.SUCCESS && (
                   <Svg className="text-green" iconName="done" size={20} />
                 )}
-                {status === AllowanceStatus.ERROR && (
+                {status === CollectFeesStatus.ERROR && (
                   <Svg className="text-red-light" iconName="warning" size={24} />
                 )}
               </div>
@@ -409,7 +419,7 @@ export default function PoolPage({
                     isActive={token0Standard === Standard.ERC20}
                     onClick={() => setToken0Standard(Standard.ERC20)}
                     disabled={
-                      token0Standard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL
+                      token0Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
@@ -424,7 +434,7 @@ export default function PoolPage({
                     isActive={token0Standard === Standard.ERC223}
                     onClick={() => setToken0Standard(Standard.ERC223)}
                     disabled={
-                      token0Standard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
+                      token0Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
@@ -465,7 +475,7 @@ export default function PoolPage({
                     isActive={token1Standard === Standard.ERC20}
                     onClick={() => setToken1Standard(Standard.ERC20)}
                     disabled={
-                      token1Standard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL
+                      token1Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
@@ -482,7 +492,7 @@ export default function PoolPage({
                     isActive={token1Standard === Standard.ERC223}
                     onClick={() => setToken1Standard(Standard.ERC223)}
                     disabled={
-                      token1Standard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
+                      token1Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
                     }
                   >
                     <div className="flex items-center justify-between w-full">
@@ -501,20 +511,21 @@ export default function PoolPage({
             <div className="text-secondary-text my-4 text-14 lg:text-16">
               Collecting fees will withdraw currently available fees for you
             </div>
+            <CollectFeesGasSettings />
 
-            {[AllowanceStatus.INITIAL].includes(status) ? (
+            {[CollectFeesStatus.INITIAL].includes(status) ? (
               <Button onClick={() => handleCollectFees()} fullWidth>
                 Collect fees
               </Button>
             ) : null}
-            {[AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
+            {[CollectFeesStatus.LOADING, CollectFeesStatus.PENDING].includes(status) ? (
               <Button fullWidth disabled>
                 <span className="flex items-center gap-2">
                   <Preloader size={20} color="black" />
                 </span>
               </Button>
             ) : null}
-            {[AllowanceStatus.ERROR].includes(status) ? (
+            {[CollectFeesStatus.ERROR].includes(status) ? (
               <div className="flex flex-col gap-5">
                 <Alert
                   withIcon={false}
@@ -536,7 +547,7 @@ export default function PoolPage({
                 </Button>
               </div>
             ) : null}
-            {[AllowanceStatus.SUCCESS].includes(status) ? (
+            {[CollectFeesStatus.SUCCESS].includes(status) ? (
               <Button onClick={handleClose} fullWidth>
                 Close
               </Button>

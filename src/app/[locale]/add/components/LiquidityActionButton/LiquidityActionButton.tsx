@@ -30,7 +30,7 @@ export const LiquidityActionButton = ({
 }) => {
   const t = useTranslations("Liquidity");
   const tWallet = useTranslations("Wallet");
-  const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
+  const { setIsOpen } = useConfirmLiquidityDialogStore();
 
   const { setStatus } = useLiquidityStatusStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();

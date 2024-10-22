@@ -2,9 +2,13 @@
 
 import JSBI from "jsbi";
 import Image from "next/image";
-import { ChangeEvent, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { useAccount } from "wagmi";
 
-import useRemoveLiquidity from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
+import useRemoveLiquidity, {
+  useRemoveLiquidityEstimatedGas,
+} from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -18,8 +22,8 @@ import InputButton from "@/components/buttons/InputButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
+import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import {
   usePositionFromPositionInfo,
@@ -32,6 +36,12 @@ import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 
 import PositionLiquidityCard from "../../pool/[tokenId]/components/PositionLiquidityCard";
+import { RemoveLiquidityGasSettings } from "./components/RemoveLiquidityGasSettings";
+import {
+  RemoveLiquidityStatus,
+  useRemoveLiquidityStatusStore,
+} from "./stores/useRemoveLiquidityStatusStore";
+import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
@@ -60,13 +70,22 @@ export default function DecreaseLiquidityPage({
   };
 }) {
   useRecentTransactionTracking();
+  useRemoveLiquidityEstimatedGas();
 
   const [isOpen, setIsOpen] = useState(false);
+  const tokenId = useMemo(() => {
+    return BigInt(params.tokenId);
+  }, [params.tokenId]);
+
   const router = useRouter();
-  const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
+  const { address, isConnected } = useAccount();
+  const tWallet = useTranslations("Wallet");
+  const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
+
+  const { position: positionInfo, loading } = usePositionFromTokenId(tokenId);
   const position = usePositionFromPositionInfo(positionInfo);
   const chainId = useCurrentChainId();
-  const [value, setValue] = useState(25);
+  // const [value, setValue] = useState(25);
   const [tokenA, tokenB, fee] = useMemo(() => {
     return position?.pool.token0 && position?.pool.token1 && position?.pool.fee
       ? [position.pool.token0, position.pool.token1, position.pool.fee]
@@ -76,16 +95,40 @@ export default function DecreaseLiquidityPage({
   const { inRange, removed } = usePositionRangeStatus({ position });
   const [showRecentTransactions, setShowRecentTransactions] = useState(true);
 
-  const { handleRemoveLiquidity, status, removeLiquidityHash, resetRemoveLiquidity } =
-    useRemoveLiquidity({
-      percentage: value,
-      tokenId: params.tokenId,
-    });
+  const {
+    reset,
+    percentage,
+    setPercentage,
+    setPosition,
+    setTokenA,
+    setTokenB,
+    setTokenId,
+    position: storedPosition,
+  } = useRemoveLiquidityStore();
+  const { status, hash } = useRemoveLiquidityStatusStore();
+
+  const { handleRemoveLiquidity } = useRemoveLiquidity();
 
   const handleClose = () => {
-    resetRemoveLiquidity();
+    reset();
     setIsOpen(false);
   };
+
+  useEffect(() => {
+    // TODO: recursion, idk why
+    if (position && !storedPosition) {
+      setPosition(position);
+    }
+  }, [position, storedPosition, setPosition]);
+  useEffect(() => {
+    setTokenA(tokenA);
+  }, [tokenA, setTokenA]);
+  useEffect(() => {
+    setTokenB(tokenB);
+  }, [tokenB, setTokenB]);
+  useEffect(() => {
+    setTokenId(tokenId);
+  }, [tokenId, setTokenId]);
 
   if (!tokenA || !tokenB) return <div>Error: Token A or B undefined</div>;
 
@@ -128,27 +171,43 @@ export default function DecreaseLiquidityPage({
           <div className="mb-4 lg:mb-5">
             <text className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</text>
             <div className="flex justify-between items-center mb-4">
-              <span className="text-24 lg:text-32">{value}%</span>
+              <span className="text-24 lg:text-32">{percentage}%</span>
               <div className="flex gap-3">
-                <InputButton text={"25%"} isActive={value === 25} onClick={() => setValue(25)} />
-                <InputButton text={"50%"} isActive={value === 50} onClick={() => setValue(50)} />
-                <InputButton text={"75%"} isActive={value === 75} onClick={() => setValue(75)} />
-                <InputButton text={"MAX"} isActive={value === 100} onClick={() => setValue(100)} />
+                <InputButton
+                  text={"25%"}
+                  isActive={percentage === 25}
+                  onClick={() => setPercentage(25)}
+                />
+                <InputButton
+                  text={"50%"}
+                  isActive={percentage === 50}
+                  onClick={() => setPercentage(50)}
+                />
+                <InputButton
+                  text={"75%"}
+                  isActive={percentage === 75}
+                  onClick={() => setPercentage(75)}
+                />
+                <InputButton
+                  text={"MAX"}
+                  isActive={percentage === 100}
+                  onClick={() => setPercentage(100)}
+                />
               </div>
             </div>
 
             <div className="relative h-6">
               <input
-                value={value}
+                value={percentage}
                 max={100}
                 min={1}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(+e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setPercentage(+e.target.value)}
                 className="w-full accent-green absolute top-2 left-0 right-0 duration-200"
                 type="range"
               />
               <div
                 className="pointer-events-none absolute bg-green h-2 rounded-1 left-0 top-2"
-                style={{ width: value === 1 ? 0 : `calc(${value}% - 2px)` }}
+                style={{ width: percentage === 1 ? 0 : `calc(${percentage}% - 2px)` }}
               ></div>
             </div>
           </div>
@@ -158,7 +217,7 @@ export default function DecreaseLiquidityPage({
                 token={tokenA}
                 amount={
                   position?.amount0
-                    .multiply(new Percent(value))
+                    .multiply(new Percent(percentage))
                     .divide(JSBI.BigInt(100))
                     .toSignificant() || "Loading..."
                 }
@@ -167,17 +226,26 @@ export default function DecreaseLiquidityPage({
                 token={tokenB}
                 amount={
                   position?.amount1
-                    .multiply(new Percent(value))
+                    .multiply(new Percent(percentage))
                     .divide(JSBI.BigInt(100))
                     .toSignificant() || "Loading..."
                 }
               />
             </div>
           </div>
-          {position && tokenA && tokenB && (
-            <Button onClick={() => setIsOpen(true)} fullWidth>
-              Remove
+          <RemoveLiquidityGasSettings />
+          {!isConnected ? (
+            <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+              {tWallet("connect_wallet")}
             </Button>
+          ) : (
+            position &&
+            tokenA &&
+            tokenB && (
+              <Button onClick={() => setIsOpen(true)} fullWidth>
+                Remove
+              </Button>
+            )
           )}
         </div>
       </div>
@@ -218,26 +286,26 @@ export default function DecreaseLiquidityPage({
               <span className="text-16 lg:text-18 font-bold">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
             </div>
             <div className="flex items-center gap-2 justify-end">
-              {removeLiquidityHash && (
+              {hash && (
                 <a
                   target="_blank"
-                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, removeLiquidityHash, chainId)}
+                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
                 >
                   <IconButton iconName="forward" />
                 </a>
               )}
 
-              {status === AllowanceStatus.PENDING && (
+              {status === RemoveLiquidityStatus.PENDING && (
                 <>
                   <Preloader type="linear" />
                   <span className="text-secondary-text text-14">Proceed in your wallet</span>
                 </>
               )}
-              {status === AllowanceStatus.LOADING && <Preloader size={24} />}
-              {status === AllowanceStatus.SUCCESS && (
+              {status === RemoveLiquidityStatus.LOADING && <Preloader size={24} />}
+              {status === RemoveLiquidityStatus.SUCCESS && (
                 <Svg className="text-green" iconName="done" size={24} />
               )}
-              {status === AllowanceStatus.ERROR && (
+              {status === RemoveLiquidityStatus.ERROR && (
                 <Svg className="text-red-light" iconName="warning" size={24} />
               )}
             </div>
@@ -248,7 +316,7 @@ export default function DecreaseLiquidityPage({
                 token={tokenA}
                 amount={
                   position?.amount0
-                    .multiply(new Percent(value))
+                    .multiply(new Percent(percentage))
                     .divide(JSBI.BigInt(100))
                     .toSignificant() || "Loading..."
                 }
@@ -257,7 +325,7 @@ export default function DecreaseLiquidityPage({
                 token={tokenB}
                 amount={
                   position?.amount1
-                    .multiply(new Percent(value))
+                    .multiply(new Percent(percentage))
                     .divide(JSBI.BigInt(100))
                     .toSignificant() || "Loading..."
                 }
@@ -265,17 +333,17 @@ export default function DecreaseLiquidityPage({
             </div>
           </div>
 
-          {[AllowanceStatus.INITIAL].includes(status) ? (
+          {[RemoveLiquidityStatus.INITIAL].includes(status) ? (
             <Button
               onClick={() => {
-                handleRemoveLiquidity(tokenA, tokenB, position);
+                handleRemoveLiquidity();
               }}
               fullWidth
             >
               Confirm removing liquidity
             </Button>
           ) : null}
-          {[AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
+          {[RemoveLiquidityStatus.LOADING, RemoveLiquidityStatus.PENDING].includes(status) ? (
             <Button fullWidth disabled>
               <span className="flex items-center gap-2">
                 <Preloader size={20} color="black" />
@@ -283,7 +351,7 @@ export default function DecreaseLiquidityPage({
             </Button>
           ) : null}
 
-          {[AllowanceStatus.ERROR].includes(status) ? (
+          {[RemoveLiquidityStatus.ERROR].includes(status) ? (
             <div className="flex flex-col gap-5">
               <Alert
                 withIcon={false}
@@ -302,7 +370,7 @@ export default function DecreaseLiquidityPage({
               />
               <Button
                 onClick={() => {
-                  handleRemoveLiquidity(tokenA, tokenB, position);
+                  handleRemoveLiquidity();
                 }}
                 fullWidth
               >
@@ -310,7 +378,7 @@ export default function DecreaseLiquidityPage({
               </Button>
             </div>
           ) : null}
-          {[AllowanceStatus.SUCCESS].includes(status) ? (
+          {[RemoveLiquidityStatus.SUCCESS].includes(status) ? (
             <div className="flex flex-col gap-5">
               <Alert
                 withIcon={false}

@@ -1,9 +1,8 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Address, formatEther, formatGwei } from "viem";
-import { useBlockNumber, useGasPrice } from "wagmi";
 
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import Alert from "@/components/atoms/Alert";
@@ -38,6 +37,10 @@ import { usePriceRange } from "../../hooks/usePrice";
 import { useSortedTokens } from "../../hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../hooks/useV3DerivedMintInfo";
 import { Field, useTokensStandards } from "../../stores/useAddLiquidityAmountsStore";
+import {
+  useAddLiquidityGasLimitStore,
+  useAddLiquidityGasPrice,
+} from "../../stores/useAddLiquidityGasSettings";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
 import { LiquidityStatus, useLiquidityStatusStore } from "../../stores/useLiquidityStatusStore";
@@ -65,8 +68,8 @@ function isDefinedTransactionItem(item: {
 const ApproveDialog = () => {
   const t = useTranslations("Liquidity");
 
-  const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
-  const { status, setStatus } = useLiquidityStatusStore();
+  const { setIsOpen } = useConfirmLiquidityDialogStore();
+  const { setStatus } = useLiquidityStatusStore();
 
   const chainId = useCurrentChainId();
   const chainSymbol = getChainSymbol(chainId);
@@ -244,6 +247,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   const { price } = usePriceRange();
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
   const [showFirst, setShowFirst] = useState(true);
+  const { liquidityHash } = useLiquidityStatusStore();
 
   const { parsedAmounts, position, noLiquidity } = useV3DerivedMintInfo({
     tokenA,
@@ -253,12 +257,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   });
 
   // Gas price
-  const { data: gasPrice, refetch: refetchGasPrice } = useGasPrice();
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-
-  useEffect(() => {
-    refetchGasPrice();
-  }, [blockNumber, refetchGasPrice]);
+  const gasPrice = useAddLiquidityGasPrice();
 
   const buttonText = increase
     ? "Add liquidity"
@@ -286,7 +285,9 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
     tokenId,
   });
 
+  const { customGasLimit } = useAddLiquidityGasLimitStore();
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
+  const gasToUse = customGasLimit ? customGasLimit : estimatedMintGas + BigInt(30000); // set custom gas here if user changed it
 
   if (!tokenA || !tokenB) {
     return null;
@@ -316,6 +317,14 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
             />
           </div>
           <div className="flex items-center gap-2 justify-end">
+            {liquidityHash && (
+              <a
+                target="_blank"
+                href={getExplorerLink(ExplorerLinkType.TRANSACTION, liquidityHash, chainId)}
+              >
+                <IconButton iconName="forward" />
+              </a>
+            )}
             {status === AllowanceStatus.PENDING && (
               <>
                 <Preloader type="linear" />
@@ -427,11 +436,11 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           </div>
           <div className="flex flex-col">
             <span className="text-14 text-secondary-text">Gas limit</span>
-            <span>{estimatedMintGas?.toString()}</span>
+            <span>{gasToUse?.toString()}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-14 text-secondary-text">Fee</span>
-            <span>{`${gasPrice && formatFloat(formatEther(gasPrice * estimatedMintGas))} ${getChainSymbol(chainId)}`}</span>
+            <span>{`${gasPrice && formatFloat(formatEther(gasPrice * gasToUse))} ${getChainSymbol(chainId)}`}</span>
           </div>
         </div>
 
@@ -524,7 +533,7 @@ function ApproveRow({
 }
 
 const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
-  const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
+  const { setIsOpen } = useConfirmLiquidityDialogStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();

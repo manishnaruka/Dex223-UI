@@ -104,9 +104,6 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
     contracts: liquidityContracts,
   });
 
-  console.log(liquidityData);
-  console.log(liquidityData);
-
   useDeepEffect(() => {
     poolTokens.forEach((tokens, index) => {
       if (!tokens || slot0Loading || liquidityLoading || !chainId) return;

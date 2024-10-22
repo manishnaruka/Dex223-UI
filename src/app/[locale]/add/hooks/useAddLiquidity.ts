@@ -27,6 +27,7 @@ import {
 } from "@/stores/useRecentTransactionsStore";
 import { useTransactionSettingsStore } from "@/stores/useTransactionSettingsStore";
 
+import { useAddLiquidityGasSettings } from "../stores/useAddLiquidityGasSettings";
 import { LiquidityStatus, useLiquidityStatusStore } from "../stores/useLiquidityStatusStore";
 import { useSortedTokens } from "./useSortedTokens";
 
@@ -315,6 +316,8 @@ export const useAddLiquidity = ({
     tokenId,
   });
 
+  const { gasSettings, gasModel, customGasLimit } = useAddLiquidityGasSettings();
+
   const handleAddLiquidity = useCallback(async () => {
     if (
       !position ||
@@ -332,9 +335,12 @@ export const useAddLiquidity = ({
     try {
       const estimatedGas = await publicClient.estimateContractGas(addLiquidityParams);
 
+      const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
+
       const { request } = await publicClient.simulateContract({
         ...addLiquidityParams,
-        gas: estimatedGas + BigInt(30000),
+        ...gasSettings,
+        gas: gasToUse,
       });
       const hash = await walletClient.writeContract({ ...request, account: undefined });
 
@@ -352,10 +358,8 @@ export const useAddLiquidity = ({
           nonce,
           chainId,
           gas: {
-            model: GasFeeModel.EIP1559,
-            gas: (estimatedGas + BigInt(30000)).toString(),
-            maxFeePerGas: undefined,
-            maxPriorityFeePerGas: undefined,
+            ...stringifyObject({ ...gasSettings, model: gasModel }),
+            gas: gasToUse.toString(),
           },
           params: {
             ...stringifyObject(addLiquidityParams),
@@ -407,6 +411,9 @@ export const useAddLiquidity = ({
     position,
     setLiquidityHash,
     setLiquidityStatus,
+    gasSettings,
+    customGasLimit,
+    gasModel,
   ]);
 
   return {
