@@ -9,7 +9,7 @@ import {
   getAbiItem,
   parseUnits,
 } from "viem";
-import { useAccount, useBalance, usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import { useAccount, useBalance, usePublicClient, useWalletClient } from "wagmi";
 
 import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -29,7 +29,6 @@ import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
-import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -96,11 +95,6 @@ export function useSwapParams() {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
 
-  const balance = useBalance({
-    token: tokenB?.wrapped.address0,
-    address: ROUTER_ADDRESS[chainId],
-  });
-
   const minimumAmountOut = useMemo(() => {
     if (!trade) {
       return BigInt(0);
@@ -112,7 +106,6 @@ export function useSwapParams() {
         .quotient.toString(),
     );
   }, [dependentAmount, slippage, trade]);
-  console.log(balance.data);
 
   const swapParams = useMemo(() => {
     if (
@@ -297,7 +290,7 @@ export default function useSwap() {
   const { data: walletClient } = useWalletClient();
   const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
   const { trade } = useTrade();
-  const { address } = useAccount();
+  const { address, connector } = useAccount();
   const publicClient = usePublicClient();
 
   const chainId = useCurrentChainId();
@@ -470,14 +463,18 @@ export default function useSwap() {
           gas: gasToUse,
         } as any);
 
-        const { nonce } = await walletClient.prepareTransactionRequest({
+        const { nonce: _nonce } = await walletClient.prepareTransactionRequest({
           ...swapParams,
           account: address,
           ...gasPriceFormatted,
           gas: gasToUse,
         });
 
-        hash = await walletClient.writeContract({ ...request, account: undefined });
+        hash = await walletClient.writeContract({
+          ...request,
+          nonce: connector?.id === "walletConnect" ? _nonce : undefined,
+          account: undefined,
+        });
 
         closeConfirmInWalletAlert();
 
@@ -547,6 +544,7 @@ export default function useSwap() {
       baseFee,
       chainId,
       closeConfirmInWalletAlert,
+      connector?.id,
       customGasLimit,
       gasPrice,
       gasPriceOption,

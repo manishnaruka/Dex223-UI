@@ -479,8 +479,6 @@ export default function ConfirmSwapDialog() {
   const [amountToApprove, setAmountToApprove] = useState(typedValue);
   // const { gasOption, gasPrice, gasLimit } = useSwapGasSettingsStore();
 
-  console.log(typedValue);
-  console.log(amountToApprove);
   useEffect(() => {
     if (typedValue) {
       setAmountToApprove(typedValue);
