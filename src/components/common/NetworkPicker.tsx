@@ -30,7 +30,6 @@ export default function NetworkPicker() {
     useUnknownNetworkWarningStore();
 
   useEffect(() => {
-    console.log(currentNetwork);
     if (!currentNetwork) {
       openNoTokenListsEnabledWarning();
     } else {

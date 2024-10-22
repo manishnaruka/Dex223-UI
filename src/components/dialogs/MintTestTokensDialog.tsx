@@ -82,10 +82,6 @@ export default function MintTestTokensDialog() {
     return !isAddress1Wrapper && Boolean(erc223Origin);
   }, [erc223Origin, isAddress1Wrapper]);
 
-  console.log(tokenToMint);
-  console.log(isAddress1Wrapper);
-  console.log(mintErc223 ? tokenToMint?.wrapped.address1! : tokenToMint?.wrapped.address0);
-
   const { data: balance, refetch } = useReadContract({
     abi: ERC20_ABI,
     functionName: "balanceOf",
@@ -104,8 +100,6 @@ export default function MintTestTokensDialog() {
     refetch();
   }, [latestBlock, refetch]);
   const handleMint = useCallback(() => {
-    console.log(connector);
-
     if (!tokenToMint || !walletClient || !publicClient) {
       addToast("Not correct data", "error");
       return;

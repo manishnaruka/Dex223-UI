@@ -75,8 +75,8 @@ const mobileLinks: {
     title: "portfolio",
   },
   {
-    href: "#",
-    iconName: "token",
+    href: "/token-listing",
+    iconName: "listing",
     title: "token",
   },
 ];
@@ -115,7 +115,7 @@ export default function MobileMenu() {
                     title={t(title)}
                     handleClose={() => setMobileMenuOpened(false)}
                     isActive={pathname.includes(href)}
-                    disabled={!["/swap", "/pools", "/portfolio"].includes(href)}
+                    disabled={!["/swap", "/pools", "/portfolio", "/token-listing"].includes(href)}
                   />
                 );
               }),

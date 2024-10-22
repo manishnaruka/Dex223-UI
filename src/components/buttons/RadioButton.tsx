@@ -1,17 +1,25 @@
 import clsx from "clsx";
 import React, { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
+import { clsxMerge } from "@/functions/clsxMerge";
+
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   isActive: boolean;
   onClick: () => void;
 }
 
-export default function RadioButton({ isActive, children, ...props }: PropsWithChildren<Props>) {
+export default function RadioButton({
+  isActive,
+  children,
+  className,
+  ...props
+}: PropsWithChildren<Props>) {
   return (
     <button
-      className={clsx(
-        "duration-200 h-10 flex px-4 lg:px-5 items-center rounded-2 group hover:shadow hover:shadow-green/60 gap-2 bg-secondary-bg hover:text-primary-text disabled:pointer-events-none disabled:opacity-50",
+      className={clsxMerge(
+        "duration-200 text-14 md:text-16 h-10 flex px-3 md:px-4 lg:px-5 items-center rounded-2 group hover:shadow hover:shadow-green/60 gap-2 bg-tertiary-bg hover:text-primary-text disabled:pointer-events-none disabled:opacity-50",
         isActive ? "text-primary-text" : "text-secondary-text",
+        className,
       )}
       {...props}
     >

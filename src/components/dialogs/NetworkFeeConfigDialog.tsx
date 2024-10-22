@@ -352,7 +352,6 @@ function NetworkFeeDialogContent({
 
       setIsOpen(false);
       addToast("Settings applied");
-      console.log(values);
     },
   });
 

@@ -26,7 +26,7 @@ export default function TrustWalletCard() {
     <PickButton
       onClick={() => {
         setName("trustWallet");
-        const connectorToConnect = connectors.find((c) => c.id === rdnsMap.trust);
+        const connectorToConnect = connectors[3];
 
         if (!connectorToConnect) {
           return addToast(t("install_trust"), "error");

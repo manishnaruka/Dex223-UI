@@ -21,18 +21,19 @@ export default function CoinbaseCard() {
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
 
+  console.log(connectors);
   return (
     <PickButton
       onClick={() => {
         setName("coinbase");
-        const connectorToConnect = connectors.find((c) => c.id === rdnsMap.coinbase);
+        const connectorToConnect = connectors[1];
 
         if (!connectorToConnect) {
           return addToast(t("install_coinbase"), "error");
         }
 
         connectAsync({
-          connector: connectors[3],
+          connector: connectorToConnect,
           chainId: chainToConnect,
         })
           .then(() => {
@@ -43,6 +44,7 @@ export default function CoinbaseCard() {
             if (e.code && e.code === 4001) {
               addToast(t("user_rejected"), "error");
             } else {
+              console.log(e);
               addToast(t("something_went_wrong"), "error");
             }
           });

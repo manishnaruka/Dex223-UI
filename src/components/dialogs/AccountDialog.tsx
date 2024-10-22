@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
@@ -42,7 +42,10 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
 
     return [];
   }, [address, transactions]);
+  const { connector, isConnected } = useAccount();
 
+  console.log(connector);
+  console.log(isConnected);
   return (
     <>
       <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
@@ -73,7 +76,10 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
             </div>
           </div>
           <button
-            onClick={() => disconnect()}
+            onClick={() => {
+              setIsOpenedAccount(false);
+              disconnect({ connector });
+            }}
             className="flex items-center gap-2 hover:text-green duration-200"
           >
             {t("disconnect")}
@@ -226,7 +232,7 @@ export default function AccountDialog() {
             size={ButtonSize.MEDIUM}
             tabletSize={ButtonSize.SMALL}
             mobileSize={ButtonSize.SMALL}
-            className="md:rounded-2 md:font-normal w-full md:w-auto"
+            className="rounded-2 md:rounded-2 md:font-normal w-full md:w-auto"
             onClick={() => setOpenedWallet(true)}
           >
             Connect wallet

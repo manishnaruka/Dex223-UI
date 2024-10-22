@@ -114,7 +114,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                 endIcon="import-list"
                 colorScheme={ButtonColor.LIGHT_GREEN}
                 onClick={() => setContent("import-list")}
-                className="rounded-r-0 xl:rounded-r-0 flex-grow"
+                className="rounded-r-0 xl:rounded-r-0 md:rounded-r-0 flex-grow"
               >
                 {t("import_list")}
               </Button>
@@ -123,7 +123,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
 
             {Boolean(filteredLists?.length) && (
-              <div className="flex flex-col mt-3 overflow-auto flex-grow">
+              <div className="flex flex-col mt-3">
                 {filteredLists
                   ?.filter((l) => Boolean(l.list.tokens.length))
                   ?.map((tokenList) => {

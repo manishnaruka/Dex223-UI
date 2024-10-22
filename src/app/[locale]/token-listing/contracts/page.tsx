@@ -25,8 +25,6 @@ export default function TokenListingPage() {
 
   const autoListings = useAutoListingContracts();
 
-  console.log(autoListings);
-
   const filteredAutoListings = useMemo(() => {
     if (!autoListings) {
       return null;
@@ -50,7 +48,7 @@ export default function TokenListingPage() {
   return (
     <>
       <Container>
-        <div className="my-10 px-4">
+        <div className="my-3 md:my-10 px-4">
           <Link href="/token-listing">
             <button className="flex items-center gap-2">
               <Svg iconName="back" />
@@ -60,8 +58,8 @@ export default function TokenListingPage() {
         </div>
         <div className="pb-10">
           <div className="flex justify-between mb-20 flex-col xl:flex-row px-4">
-            <h1 className="mb-3 text-40 font-medium">Auto-listing contracts</h1>
-            <div className="w-[480px]">
+            <h1 className="mb-3 font-medium  text-24 lg:text-40">Auto-listing contracts</h1>
+            <div className="w-full md:w-[480px]">
               <SearchInput
                 className="bg-tertiary-bg"
                 value={searchValue}

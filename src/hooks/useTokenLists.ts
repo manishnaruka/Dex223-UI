@@ -187,6 +187,8 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
   const tokenLists = useTokenLists(onlyCustom);
   const chainId = useCurrentChainId();
 
+  console.log(chainId);
+
   return useMemo(() => {
     const native = NativeCoin.onChain(chainId);
 

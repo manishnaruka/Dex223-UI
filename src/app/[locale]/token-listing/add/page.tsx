@@ -265,9 +265,6 @@ export default function ListTokenPage() {
 
   const tokensToList = useTokensToList();
 
-  console.log(gasPriceSettings, gasPriceOption);
-  console.log(customGasLimit, estimatedGas);
-
   const { baseFee, gasPrice, priorityFee } = useFees();
 
   const formattedGasPrice = useMemo(() => {

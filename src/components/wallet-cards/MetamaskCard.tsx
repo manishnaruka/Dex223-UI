@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useConnect } from "wagmi";
+import { useAccount, useConnect, useReconnect } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
 import {
@@ -14,19 +14,20 @@ const { image, name } = wallets.metamask;
 export default function MetamaskCard() {
   const t = useTranslations("Wallet");
   const { connectors, connectAsync, isPending } = useConnect();
-
+  const { connector, isConnected } = useAccount();
   const { setName, chainToConnect } = useConnectWalletStore();
   const { setIsOpened } = useConnectWalletDialogStateStore();
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
-
+  const { reconnect } = useReconnect();
   console.log(connectors);
-
+  console.log(connector);
+  console.log(isConnected);
   return (
     <PickButton
       onClick={() => {
         setName("metamask");
-        console.log(connectors);
+        console.log(connectors[2]);
         const connectorToConnect = connectors[2];
 
         console.log(connectorToConnect);
@@ -43,6 +44,7 @@ export default function MetamaskCard() {
             addToast(t("successfully_connected"));
           })
           .catch((e) => {
+            console.log(e);
             if (e.code && e.code === 4001) {
               addToast(t("user_rejected"), "error");
             } else {
