@@ -191,6 +191,7 @@ export function useStoreAllowance({
       }
     },
     [
+      connector?.id,
       amountToCheck,
       contractAddress,
       token,
