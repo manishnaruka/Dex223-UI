@@ -43,7 +43,7 @@ export function useStoreAllowance({
   contractAddress: Address | undefined;
   amountToCheck: bigint | null;
 }) {
-  const { address } = useAccount();
+  const { address, connector } = useAccount();
   const chainId = useCurrentChainId();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -129,10 +129,19 @@ export function useStoreAllowance({
           gas: gasLimit,
         });
 
+        const { nonce: _nonce } = await walletClient.prepareTransactionRequest({
+          ...params,
+          gas: gasLimit,
+        });
+
         let hash;
 
         try {
-          hash = await walletClient.writeContract({ ...request, account: undefined });
+          hash = await walletClient.writeContract({
+            ...request,
+            nonce: connector?.id === "walletConnect" ? _nonce : undefined,
+            account: undefined,
+          });
         } catch (e) {
           console.log(e);
         }
