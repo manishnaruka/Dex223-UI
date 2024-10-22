@@ -470,6 +470,13 @@ export default function useSwap() {
           gas: gasToUse,
         } as any);
 
+        const { nonce } = await walletClient.prepareTransactionRequest({
+          ...swapParams,
+          account: address,
+          ...gasPriceFormatted,
+          gas: gasToUse,
+        });
+
         hash = await walletClient.writeContract({ ...request, account: undefined });
 
         closeConfirmInWalletAlert();
