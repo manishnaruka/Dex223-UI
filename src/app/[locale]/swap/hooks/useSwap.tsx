@@ -290,7 +290,7 @@ export default function useSwap() {
   const { data: walletClient } = useWalletClient();
   const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
   const { trade } = useTrade();
-  const { address, connector } = useAccount();
+  const { address } = useAccount();
   const publicClient = usePublicClient();
 
   const chainId = useCurrentChainId();
@@ -463,16 +463,8 @@ export default function useSwap() {
           gas: gasToUse,
         } as any);
 
-        const { nonce: _nonce } = await walletClient.prepareTransactionRequest({
-          ...swapParams,
-          account: address,
-          ...gasPriceFormatted,
-          gas: gasToUse,
-        });
-
         hash = await walletClient.writeContract({
           ...request,
-          nonce: connector?.id === "walletConnect" ? _nonce : undefined,
           account: undefined,
         });
 
@@ -544,7 +536,6 @@ export default function useSwap() {
       baseFee,
       chainId,
       closeConfirmInWalletAlert,
-      connector?.id,
       customGasLimit,
       gasPrice,
       gasPriceOption,
