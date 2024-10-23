@@ -50,7 +50,7 @@ function FooterLink({ href, title, icon }: SocialLink) {
       <a
         target="_blank"
         href={href}
-        className="lg:w-auto flex gap-2 bg-primary-bg rounded-5 py-2 pr-4 pl-5 hover:bg-green-bg hover:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center"
+        className="lg:w-auto flex gap-2 bg-primary-bg rounded-5 py-2 pr-4 pl-5 hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center"
       >
         {t(title)}
         <Svg iconName={icon} />
@@ -105,7 +105,7 @@ export default function Footer() {
               ) : null}
               <div className="w-1.5 h-1.5 rounded-full bg-green" />
 
-              <div className="whitespace-nowrap text-14 opacity-0 pointer-events-none px-5 py-4 absolute group-hover:opacity-100 duration-200 bottom-9 rounded-3 right-0 bg-primary-bg border border-secondary-border before:w-2.5 before:h-2.5 before:-bottom-[6px] before:bg-primary-bg before:absolute before:right-9 before:rotate-45 before:border-secondary-border before:border-r before:border-b">
+              <div className="whitespace-nowrap text-14 opacity-0 pointer-events-none px-5 py-4 absolute group-hocus:opacity-100 duration-200 bottom-9 rounded-3 right-0 bg-primary-bg border border-secondary-border before:w-2.5 before:h-2.5 before:-bottom-[6px] before:bg-primary-bg before:absolute before:right-9 before:rotate-45 before:border-secondary-border before:border-r before:border-b">
                 <p>{t("most_recent_block")}</p>
                 <p>{t("prices_update_on_every_block")}</p>
               </div>

@@ -70,12 +70,12 @@ function SuccessFeedback() {
       <h3 className="text-secondary-text text-center">
         {t.rich("thank_you_for_the_feedback", {
           telegram: (chunks) => (
-            <a href="https://t.me/Dex223_defi" className="text-green hover:underline">
+            <a href="https://t.me/Dex223_defi" className="text-green hocus:underline">
               {chunks}
             </a>
           ),
           discord: (chunks) => (
-            <a href="https://discord.gg/t5bdeGC5Jk" className="text-green hover:underline">
+            <a href="https://discord.gg/t5bdeGC5Jk" className="text-green hocus:underline">
               {chunks}
             </a>
           ),
@@ -125,7 +125,7 @@ export default function FeedbackDialog() {
       <button
         onClick={() => setIsOpen(true)}
         style={{ transform: "rotate(-90deg) translateX(50%)" }}
-        className="hidden xl:flex px-5 h-10 origin-bottom-right fixed right-0 bottom-1/2 bg-green hover:bg-green-hover duration-200 rounded-t-2 shadow shadow-green/60 text-secondary-bg items-center gap-2"
+        className="hidden xl:flex px-5 h-10 origin-bottom-right fixed right-0 bottom-1/2 bg-green hocus:bg-green-hover duration-200 rounded-t-2 shadow shadow-green/60 text-secondary-bg items-center gap-2"
       >
         {t("feedback")}
         <Svg iconName="star" />
@@ -142,7 +142,7 @@ export default function FeedbackDialog() {
                 github: (chunks) => (
                   <a
                     href="https://github.com/EthereumCommonwealth/Dex223-UI/issues"
-                    className="text-green hover:underline"
+                    className="text-green hocus:underline"
                   >
                     {chunks}
                   </a>

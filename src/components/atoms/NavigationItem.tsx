@@ -19,7 +19,7 @@ export default function NavigationItem({ href, title, active }: Props) {
         "px-3 py-5 duration-200 inline-flex text-secondary-text",
         active
           ? "bg-navigation-active text-green shadow-green/60 text-shadow"
-          : "hover:bg-navigation-hover hover:text-green hover:shadow-green/60 hover:text-shadow",
+          : "hocus:bg-navigation-hover hocus:text-green hocus:shadow-green/60 hocus:text-shadow",
         !["/swap", "/pools", "/token-listing", "/portfolio"].includes(href) &&
           "opacity-50 pointer-events-none",
       )}
@@ -56,13 +56,13 @@ export function NavigationItemWithSubmenu({
             "px-3 py-5 inline-flex items-center gap-1 duration-200 group",
             isSubmenuOpened || active
               ? "bg-navigation-active text-green shadow-green/60 text-shadow"
-              : "hover:bg-navigation-hover hover:text-green hover:shadow-green/60 hover:text-shadow text-secondary-text",
+              : "hocus:bg-navigation-hover hocus:text-green hocus:shadow-green/60 hocus:text-shadow text-secondary-text",
           )}
         >
           {title ? <span>{title}</span> : null}
           <Svg
             className={clsx(
-              "group-hover:drop-shadow-[0_0_2px_var(--tw-shadow-color)] group-hover:shadow-green/60",
+              "group-hocus:drop-shadow-[0_0_2px_var(--tw-shadow-color)] group-hocus:shadow-green/60",
               isSubmenuOpened ? "rotate-180" : "",
               (active || isSubmenuOpened) &&
                 "drop-shadow-[0_0_2px_var(--tw-shadow-color)] shadow-green/60",

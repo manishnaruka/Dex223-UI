@@ -56,19 +56,19 @@ const menuItems: Array<
         </div>
         <div className="flex flex-col text-16 text-primary-text gap-2">
           <div className="text-secondary-text">{t("social_media")}</div>
-          <a className="hover:text-green duration-200" href="https://t.me/Dex223_Defi">
+          <a className="hocus:text-green duration-200" href="https://t.me/Dex223_Defi">
             {t("social_telegram_discussions")}
           </a>
-          <a className="hover:text-green duration-200" href="https://t.me/Dex_223">
+          <a className="hocus:text-green duration-200" href="https://t.me/Dex_223">
             {t("social_telegram_announcements")}
           </a>
-          <a className="hover:text-green duration-200" href="https://x.com/Dex_223">
+          <a className="hocus:text-green duration-200" href="https://x.com/Dex_223">
             {t("social_x_account")}
           </a>
-          <a className="hover:text-green duration-200" href="https://discord.gg/t5bdeGC5Jk">
+          <a className="hocus:text-green duration-200" href="https://discord.gg/t5bdeGC5Jk">
             {t("social_discord")}
           </a>
-          <a className="hover:text-green duration-200" href="https://x.com/Dexaran">
+          <a className="hocus:text-green duration-200" href="https://x.com/Dexaran">
             {t("social_dex_x_account")}
           </a>
         </div>
@@ -76,22 +76,22 @@ const menuItems: Array<
           <div className="text-secondary-text">{t("useful_links")}</div>
 
           <a
-            className="hover:text-green duration-200"
+            className="hocus:text-green duration-200"
             href="https://dexaran.github.io/token-converter/"
           >
             {t("useful_converter")}
           </a>
           <a
-            className="hover:text-green duration-200"
+            className="hocus:text-green duration-200"
             href="https://dexaran.github.io/erc20-losses/"
           >
             {t("useful_losses_calculator")}
           </a>
-          <a className="hover:text-green duration-200" href="https://dexaran.github.io/erc223/">
+          <a className="hocus:text-green duration-200" href="https://dexaran.github.io/erc223/">
             {t("useful_front_page")}
           </a>
           <a
-            className="hover:text-green duration-200"
+            className="hocus:text-green duration-200"
             href="https://github.com/Dalcor/dex-exchange"
           >
             {t("useful_page_source_codes")}
@@ -99,7 +99,7 @@ const menuItems: Array<
         </div>
         <div className="flex flex-col text-16 text-primary-text gap-2">
           <div className="text-secondary-text">{t("partners")}</div>
-          <a className="hover:text-green duration-200" href="https://eossupport.io/">
+          <a className="hocus:text-green duration-200" href="https://eossupport.io/">
             {t("partners_eos_support")}
           </a>
         </div>

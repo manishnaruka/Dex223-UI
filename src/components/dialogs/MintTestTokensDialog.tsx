@@ -163,14 +163,13 @@ export default function MintTestTokensDialog() {
             <div className="py-1 grid gap-1 bg-tertiary-bg rounded-3 w-full h-[172px] md:h-[200px] overflow-scroll">
               {tokens.map((token) => {
                 return (
-                  <div
+                  <button
                     key={token.wrapped.address0}
                     onClick={() => {
                       setTokenToMint(token);
                       setPopoverOpened(false);
                     }}
-                    role="button"
-                    className="flex items-center gap-3 bg-tertiary-bg-bg hover:bg-quaternary-bg duration-300 w-full min-w-[250px] px-5 h-10 md:h-12 justify-between"
+                    className="flex items-center gap-3 bg-tertiary-bg-bg hocus:bg-quaternary-bg duration-300 w-full min-w-[250px] px-5 h-10 md:h-12 justify-between"
                   >
                     <span
                       className={token.equals(tokenToMint) ? "text-green" : "text-secondary-text"}
@@ -180,7 +179,7 @@ export default function MintTestTokensDialog() {
                     {token.equals(tokenToMint) && (
                       <Svg iconName="check" className="text-green" size={20} />
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>

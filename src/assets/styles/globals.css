@@ -23,7 +23,14 @@ body {
   color: theme("colors.primary-text");
 }
 
-
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+select:focus,
+div[role="button"] {
+  outline: none;
+}
 
 .Dialog-overlay {
   backdrop-filter: blur(4px);

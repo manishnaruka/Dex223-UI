@@ -80,7 +80,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
               setIsOpenedAccount(false);
               disconnect({ connector });
             }}
-            className="flex items-center gap-2 hover:text-green duration-200"
+            className="flex items-center gap-2 hocus:text-green duration-200"
           >
             {t("disconnect")}
             <Svg iconName="logout" />
@@ -128,7 +128,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                   </span>
                   <button
                     onClick={clearTransactions}
-                    className="border-primary-border flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hover:bg-white/20 duration-200 hover:border-primary-text"
+                    className="border-primary-border flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hocus:bg-white/20 duration-200 hocus:border-primary-text"
                   >
                     {tRecentTransactions("clear_all")}
                     <Svg iconName="delete" />

@@ -31,8 +31,8 @@ function RecentTransactionActionButton({
       className={clsx(
         "h-8 rounded-5 border px-6 disabled:border-secondary-border disabled:text-tertiary-text duration-300 ease-in-out disabled:pointer-events-none",
         color === "primary"
-          ? "border-green text-primary-text hover:bg-green-bg hover:border-green-hover"
-          : "border-primary-border text-secondary-text hover:border-primary-text hover:text-primary-text hover:bg-red-bg",
+          ? "border-green text-primary-text hocus:bg-green-bg hocus:border-green-hover"
+          : "border-primary-border text-secondary-text hocus:border-primary-text hocus:text-primary-text hocus:bg-red-bg",
       )}
     >
       {children}
@@ -254,7 +254,7 @@ export default function RecentTransaction({
         </div>
 
         <a
-          className="text-primary-text w-10 h-10 flex items-center justify-center hover:text-green duration-200"
+          className="text-primary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
           target="_blank"
           href={getExplorerLink(
             ExplorerLinkType.TRANSACTION,

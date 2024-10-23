@@ -24,7 +24,7 @@ export default function Checkbox({
       <input
         id={id}
         className={clsxMerge(
-          "appearance-none peer shrink-0 w-6 h-6 border border-secondary-border bg-secondary-bg rounded-2 hover:border-green hover:bg-primary-bg checked:hover:shadow checked:hover:shadow-green/60 checked:bg-green checked:hover:bg-green checked:border-green checked:hover:border-green cursor-pointer relative duration-200",
+          "appearance-none peer shrink-0 w-6 h-6 border border-secondary-border bg-secondary-bg rounded-2 hocus:border-green hocus:bg-primary-bg checked:hocus:shadow checked:hocus:shadow-green/60 checked:bg-green checked:hocus:bg-green checked:border-green checked:hocus:border-green cursor-pointer relative duration-200",
           className,
         )}
         type="checkbox"
@@ -48,12 +48,12 @@ export function CheckboxButton({ checked, handleChange, id, label }: Props) {
   return (
     <button
       type="button"
-      className="w-full p-3 rounded-3 hover:bg-green-bg duration-200 bg-tertiary-bg group"
+      className="w-full p-3 rounded-3 hocus:bg-green-bg duration-200 bg-tertiary-bg group"
       onClick={handleChange}
     >
       <Checkbox
         labelClassName="pointer-events-none"
-        className="group-hover:border-green pointer-events-none"
+        className="group-hocus:border-green pointer-events-none"
         checked={checked}
         handleChange={handleChange}
         id={id}
