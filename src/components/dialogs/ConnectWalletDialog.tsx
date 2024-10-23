@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
-// import { isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
+// import { browserName, CustomView } from "react-device-detect";
 import { useSwitchChain } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -15,6 +16,7 @@ import MetamaskCard from "@/components/wallet-cards/MetamaskCard";
 import TrustWalletCard from "@/components/wallet-cards/TrustWalletCard";
 import WalletConnectCard from "@/components/wallet-cards/WalletConnectCard";
 import { networks } from "@/config/networks";
+import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 
 function StepLabel({ step, label }: { step: string; label: string }) {
   return (
@@ -65,7 +67,7 @@ export default function ConnectWalletDialog() {
             <MetamaskCard />
             <WalletConnectCard />
             <CoinbaseCard />
-            <TrustWalletCard />
+            {!isMobile && <TrustWalletCard />}
             <KeystoreCard />
           </div>
         </div>

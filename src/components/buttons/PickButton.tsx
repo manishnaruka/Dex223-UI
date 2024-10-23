@@ -7,7 +7,6 @@ import Svg from "@/components/atoms/Svg";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   isActive?: boolean;
-  onClick: any;
   image: string;
   label: string;
   loading?: boolean;

@@ -9,7 +9,7 @@ import {
   getAbiItem,
   parseUnits,
 } from "viem";
-import { useAccount, useBalance, usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -29,7 +29,6 @@ import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
-import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -96,11 +95,6 @@ export function useSwapParams() {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
 
-  const balance = useBalance({
-    token: tokenB?.wrapped.address0,
-    address: ROUTER_ADDRESS[chainId],
-  });
-
   const minimumAmountOut = useMemo(() => {
     if (!trade) {
       return BigInt(0);
@@ -112,7 +106,6 @@ export function useSwapParams() {
         .quotient.toString(),
     );
   }, [dependentAmount, slippage, trade]);
-  console.log(balance.data);
 
   const swapParams = useMemo(() => {
     if (
@@ -470,7 +463,10 @@ export default function useSwap() {
           gas: gasToUse,
         } as any);
 
-        hash = await walletClient.writeContract({ ...request, account: undefined });
+        hash = await walletClient.writeContract({
+          ...request,
+          account: undefined,
+        });
 
         closeConfirmInWalletAlert();
 
@@ -569,6 +565,5 @@ export default function useSwap() {
     handleSwap,
     isAllowedA: isAllowedA,
     handleApprove: () => null,
-    // estimatedGas: gasLimit,
   };
 }
