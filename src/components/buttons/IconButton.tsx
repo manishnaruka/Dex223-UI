@@ -120,7 +120,7 @@ function CopyIconButton(_props: CopyIconButtonProps) {
       onClick={handleCopy}
       buttonSize={buttonSize || IconButtonSize.SMALL}
       className={clsxMerge(
-        "hover:text-green duration-200 text-tertiary-text",
+        "hocus:text-green duration-200 text-tertiary-text",
         className,
         isCopied && "text-green",
       )}
@@ -137,7 +137,7 @@ export default function IconButton(_props: Props) {
         <IconButtonFrame
           iconName={_props.iconName}
           className={clsxMerge(
-            "text-tertiary-text  hover:text-green-hover-icon relative before:opacity-0 before:duration-200 hover:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[9px] duration-200",
+            "text-tertiary-text  hocus:text-green-hover-icon relative before:opacity-0 before:duration-200 hocus:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[9px] duration-200",
             active && "text-green",
             className,
           )}
@@ -171,7 +171,7 @@ export default function IconButton(_props: Props) {
           iconName="delete"
           onClick={_props.handleDelete}
           className={clsxMerge(
-            "rounded-full bg-transparent hover:bg-red-bg text-tertiary-text hover:text-red duration-200",
+            "rounded-full bg-transparent hocus:bg-red-bg text-tertiary-text hocus:text-red duration-200",
             className,
           )}
           {...props}
@@ -186,7 +186,7 @@ export default function IconButton(_props: Props) {
           iconName="add"
           onClick={_props.handleAdd}
           className={clsxMerge(
-            "bg-green text-black hover:bg-green-hover rounded-2 duration-200",
+            "bg-green text-black hocus:bg-green-hover rounded-2 duration-200",
             className,
           )}
           {...props}
@@ -201,7 +201,7 @@ export default function IconButton(_props: Props) {
           iconName="close"
           onClick={(e) => _props.handleClose(e)}
           className={clsxMerge(
-            "text-secondary-text hover:text-primary-text duration-200",
+            "text-secondary-text hocus:text-primary-text duration-200",
             className,
           )}
           {...props}
@@ -216,7 +216,7 @@ export default function IconButton(_props: Props) {
           iconName={iconName}
           buttonSize={buttonSize || IconButtonSize.SMALL}
           className={clsxMerge(
-            "rounded-2 hover:bg-green-bg bg-transparent duration-200 text-primary-text",
+            "rounded-2 hocus:bg-green-bg bg-transparent duration-200 text-primary-text",
             className,
           )}
           {...props}

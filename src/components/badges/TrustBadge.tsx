@@ -455,7 +455,7 @@ export function TrustMarker({ rate, logoURI, totalScore }: TrustMarkerProps) {
 
   return (
     <div
-      className="p-0.5 rounded-full bg-primary-bg relative z-10 group-hover:bg-tertiary-bg duration-200"
+      className="p-0.5 rounded-full bg-primary-bg relative z-10 group-hocus:bg-tertiary-bg duration-200"
       ref={refs.setReference}
       {...getReferenceProps()}
     >

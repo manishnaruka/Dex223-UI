@@ -264,7 +264,7 @@ function SwapActionButton({
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .
@@ -337,7 +337,7 @@ function SwapActionButton({
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .

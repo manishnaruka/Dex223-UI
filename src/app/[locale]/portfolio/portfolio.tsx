@@ -233,13 +233,13 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
           <>
             <div className="flex justify-between text-green text-18 font-medium px-5">
               <span
-                className="py-2 cursor-pointer hover:text-green-hover"
+                className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => setAllWalletActive()}
               >
                 Select all
               </span>
               <span
-                className="py-2 cursor-pointer hover:text-green-hover"
+                className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => {
                   setContent("manage");
                 }}
@@ -448,7 +448,7 @@ export function Portfolio() {
                     className="flex items-center gap-1 p-r pl-3 bg-tertiary-bg rounded-2"
                   >
                     <a
-                      className="flex gap-2 cursor-pointer hover:text-green-hover"
+                      className="flex gap-2 cursor-pointer hocus:text-green-hover"
                       target="_blank"
                       href={getExplorerLink(ExplorerLinkType.ADDRESS, ad, chainId)}
                     >

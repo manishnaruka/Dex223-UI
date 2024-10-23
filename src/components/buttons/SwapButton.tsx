@@ -17,12 +17,12 @@ export default function SwapButton({ onClick, ...props }: Props) {
         onClick();
       }}
       {...props}
-      className="group border-[3px] text-green border-tertiary-bg outline outline-tertiary-bg  w-10 h-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-secondary-bg rounded-full flex items-center justify-center duration-200 hover:outline-green hover:shadow hover:shadow-green/60 before:opacity-0 before:duration-200 hover:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[20px]"
+      className="group border-[3px] text-green border-tertiary-bg outline outline-tertiary-bg  w-10 h-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-secondary-bg rounded-full flex items-center justify-center duration-200 hocus:outline-green hocus:shadow hocus:shadow-green/60 before:opacity-0 before:duration-200 hocus:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[20px]"
     >
       <Svg
         className={clsx(
           effect ? "animate-swap" : "",
-          "relative group-hover:text-green-hover-icon duration-200",
+          "relative group-hocus:text-green-hover-icon duration-200",
         )}
         onAnimationEnd={() => setEffect(false)}
         iconName="swap"

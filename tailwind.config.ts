@@ -214,10 +214,19 @@ const config: Config = {
     require("@tailwindcss/container-queries"),
     require("@savvywombat/tailwindcss-grid-areas"),
     require("tailwind-scrollbar")({ preferredStrategy: "pseudoelements", nocompatible: true }),
-    plugin(function ({ addVariant }) {
+    plugin(function ({ addVariant, e }) {
       addVariant("hocus", ["&:hover", "&:focus"]);
-      addVariant("group-hocus", ["&:group-hover", "&:group-focus"]);
+      addVariant("group-hocus", [".group:hover &", ".group:focus &"]);
     }),
+    function ({ addUtilities }: any) {
+      const newUtilities = {
+        ".text-shadow": {
+          textShadow: "0px 0px 8px var(--tw-shadow-color)",
+        },
+      };
+
+      addUtilities(newUtilities, ["responsive", "hover"]);
+    },
   ],
 };
 export default config;

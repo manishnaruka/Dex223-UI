@@ -377,7 +377,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                   "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                   showFirst
                     ? "bg-green-bg border-green text-primary-text"
-                    : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
                 {tokenA?.symbol}
@@ -388,7 +388,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                   "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                   !showFirst
                     ? "bg-green-bg border-green text-primary-text"
-                    : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
                 {tokenB?.symbol}
@@ -644,7 +644,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .
