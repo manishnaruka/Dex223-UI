@@ -11,10 +11,10 @@ export default function TwoVersionsInfo() {
   const { isOpened, setIsOpened } = useTwoVersionsInfoStore();
 
   return (
-    <div className="bg-gradient-to-r from-green-bg to-green-bg/0 border-l-4 border-green rounded-2 overflow-hidden text-14">
+    <div className="overflow-hidden text-14 rounded-2 bg-gradient-to-r from-primary-bg to-secondary-bg">
       <button
         onClick={() => setIsOpened(!isOpened)}
-        className="px-5 py-2 flex justify-between font-medium w-full items-center"
+        className="h-10 px-5 py-2 flex items-center justify-between font-medium w-full text-14 text-secondary-text bg-gradient-to-r from-green-bg to-green-bg/0 border-l-4 border-green rounded-2"
       >
         {t("tokens_in_two_standards_title")}
         <Svg
@@ -23,7 +23,7 @@ export default function TwoVersionsInfo() {
         />
       </button>
       <Collapse open={isOpened}>
-        <div className="px-5 pb-2.5">
+        <div className="px-5 py-3 text-tertiary-text">
           {t.rich("tokens_in_two_standards_paragraph", {
             convert: (chunks) => (
               <a

@@ -82,7 +82,7 @@ export default function Tooltip({ text, iconSize = 24, renderTrigger, customOffs
         renderTrigger(refs, getReferenceProps())
       ) : (
         <span
-          className="cursor-pointer text-secondary-text"
+          className="cursor-pointer text-tertiary-text"
           ref={refs.setReference}
           {...getReferenceProps()}
         >

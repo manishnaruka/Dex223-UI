@@ -107,11 +107,15 @@ function StandardOption({
       >
         <div className="flex items-center gap-1 cursor-default">
           <span
-            className={clsxMerge("text-12 text-secondary-text", !token && "text-tertiary-text")}
+            className={clsxMerge(
+              "text-12 text-secondary-text",
+              (!token || standard !== active) && "text-tertiary-text",
+            )}
           >
             {t("standard")}
           </span>
           <Badge size="small" color="green" text={standard} />
+
           <Tooltip
             iconSize={16}
             text={standard === Standard.ERC20 ? t("erc20_tooltip") : t("erc223_tooltip")}
@@ -123,11 +127,16 @@ function StandardOption({
           <span
             className={clsx(
               "block",
-              standard === active ? "text-primary-text" : "text-tertiary-text",
+              standard === active ? "text-secondary-text" : "text-tertiary-text",
             )}
           >
             {t("balance")}{" "}
-            <span className="whitespace-nowrap">
+            <span
+              className={clsx(
+                "whitespace-nowrap",
+                standard === active ? "text-primary-text" : "text-tertiary-text",
+              )}
+            >
               {balance || "0.0"} {symbol}
             </span>
           </span>
@@ -136,12 +145,11 @@ function StandardOption({
       {gas && (
         <div
           className={clsx(
-            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center",
+            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center text-tertiary-text",
             standard === Standard.ERC20 &&
               "bg-gradient-to-r from-primary-bg to-secondary-bg rounded-bl-2",
             standard === Standard.ERC223 &&
               "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end",
-            gas === "—" ? "text-tertiary-text" : "text-secondary-text",
           )}
         >
           {gas}
