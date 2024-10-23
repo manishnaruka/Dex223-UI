@@ -253,7 +253,14 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                   >
                     {pinnedTokens.map((pinnedToken) => {
                       return (
-                        <div key={pinnedToken.wrapped.address0} className="group relative">
+                        <div
+                          key={
+                            pinnedToken.isToken
+                              ? pinnedToken.address0
+                              : `native-${pinnedToken.wrapped.address0}`
+                          }
+                          className="group relative"
+                        >
                           <button
                             onClick={() => {
                               if (isMobile && isEditActivated) {

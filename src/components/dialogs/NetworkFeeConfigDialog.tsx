@@ -497,6 +497,15 @@ function NetworkFeeDialogContent({
                   </span>
                   <span className="text-secondary-text">~0.00$</span>
                 </div>
+                {_gasOption !== GasOption.CUSTOM &&
+                  baseFee &&
+                  `${formatFloat(
+                    formatGwei(
+                      (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR,
+                    ),
+                  )} GWEI`}
+                {_gasOption === GasOption.CUSTOM &&
+                  `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
               </div>
 
               {_gasOption === GasOption.CUSTOM && (
