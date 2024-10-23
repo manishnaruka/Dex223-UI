@@ -25,13 +25,13 @@ export default function RadioButton({
     >
       <span
         className={clsx(
-          "duration-200 w-4 h-4 rounded-full border flex items-center bg-tertiary-bg justify-center group-hover:border-green",
+          "duration-200 w-4 h-4 rounded-full border relative bg-tertiary-bg justify-center group-hover:border-green",
           isActive ? "border-green" : "border-secondary-border",
         )}
       >
         <span
           className={clsx(
-            "duration-200 w-2.5 h-2.5 rounded-full bg-green",
+            "duration-200 w-2.5 h-2.5 rounded-full bg-green absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             isActive ? "opacity-100 shadow shadow-green/60" : "opacity-0",
           )}
         />
