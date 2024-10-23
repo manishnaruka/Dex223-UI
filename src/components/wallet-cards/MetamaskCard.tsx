@@ -26,15 +26,17 @@ export default function MetamaskCard() {
   console.log(connectors);
   console.log(connector);
   console.log(isConnected);
+  if (isMobile && !isMetamaskMobile) {
+    return (
+      <a href="https://metamask.app.link/dapp/dex-exchange-git-feature-metamask-mobile-absolute-wallet.vercel.app">
+        <PickButton image={image} label={name} loading={loading} />
+      </a>
+    );
+  }
+
   return (
     <PickButton
       onClick={() => {
-        if (isMobile && !isMetamaskMobile) {
-          window.open(
-            "https://dex-exchange-git-feature-metamask-mobile-absolute-wallet.vercel.app",
-          );
-          return;
-        }
         setName("metamask");
         console.log(connectors[2]);
         const connectorToConnect = connectors[2];
