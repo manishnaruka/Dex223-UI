@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-// import { isMobile } from "react-device-detect";
-import { browserName, CustomView } from "react-device-detect";
+import { isMobile } from "react-device-detect";
+// import { browserName, CustomView } from "react-device-detect";
 import { useSwitchChain } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -67,7 +67,7 @@ export default function ConnectWalletDialog() {
             <MetamaskCard />
             <WalletConnectCard />
             <CoinbaseCard />
-            <TrustWalletCard />
+            {!isMobile && <TrustWalletCard />}
             <KeystoreCard />
           </div>
         </div>
