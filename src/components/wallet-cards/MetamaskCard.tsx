@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { isMobile } from "react-device-detect";
 import { useAccount, useConnect, useReconnect } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
@@ -7,6 +8,7 @@ import {
   useConnectWalletStore,
 } from "@/components/dialogs/stores/useConnectWalletStore";
 import { wallets } from "@/config/wallets";
+import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 import usePreloaderTimeout from "@/hooks/usePreloader";
 import addToast from "@/other/toast";
 
@@ -17,6 +19,7 @@ export default function MetamaskCard() {
   const { connector, isConnected } = useAccount();
   const { setName, chainToConnect } = useConnectWalletStore();
   const { setIsOpened } = useConnectWalletDialogStateStore();
+  const isMetamaskMobile = useDetectMetaMaskMobile();
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
   const { reconnect } = useReconnect();
@@ -26,6 +29,12 @@ export default function MetamaskCard() {
   return (
     <PickButton
       onClick={() => {
+        if (isMobile && !isMetamaskMobile) {
+          window.open(
+            "https://dex-exchange-git-feature-metamask-mobile-absolute-wallet.vercel.app",
+          );
+          return;
+        }
         setName("metamask");
         console.log(connectors[2]);
         const connectorToConnect = connectors[2];

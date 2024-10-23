@@ -16,6 +16,7 @@ import MetamaskCard from "@/components/wallet-cards/MetamaskCard";
 import TrustWalletCard from "@/components/wallet-cards/TrustWalletCard";
 import WalletConnectCard from "@/components/wallet-cards/WalletConnectCard";
 import { networks } from "@/config/networks";
+import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 
 function StepLabel({ step, label }: { step: string; label: string }) {
   return (
@@ -62,7 +63,6 @@ export default function ConnectWalletDialog() {
             })}
           </div>
           <StepLabel step="2" label={t("choose_wallet")} />
-          Browser: {browserName}
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
             <MetamaskCard />
             <WalletConnectCard />
