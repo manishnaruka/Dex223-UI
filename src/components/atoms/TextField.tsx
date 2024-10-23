@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { InputHTMLAttributes, ReactNode } from "react";
+import { NumericFormat } from "react-number-format";
 
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Tooltip from "@/components/atoms/Tooltip";
@@ -14,6 +15,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   internalTextClassName?: string;
   isError?: boolean;
   isWarning?: boolean;
+  isNumeric?: boolean;
 } & (
     | {
         error?: boolean | string;
@@ -65,6 +67,7 @@ export default function TextField({
   internalText,
   isError = false,
   isWarning = false,
+  isNumeric = false,
   ...props
 }: Props) {
   return (
@@ -72,11 +75,20 @@ export default function TextField({
       <InputLabel label={label} tooltipText={tooltipText} />
       {variant === "default" ? (
         <div className="relative">
-          <Input
-            isError={Boolean(error) || isError}
-            isWarning={Boolean(warning) || isWarning}
-            {...props}
-          />
+          {isNumeric ? (
+            <NumericFormat
+              isError={Boolean(error) || isError}
+              isWarning={Boolean(warning) || isWarning}
+              customInput={Input}
+              {...props}
+            />
+          ) : (
+            <Input
+              isError={Boolean(error) || isError}
+              isWarning={Boolean(warning) || isWarning}
+              {...props}
+            />
+          )}
           {internalText && (
             <span className="absolute right-5 text-tertiary-text top-1/2 -translate-y-1/2">
               {internalText}

@@ -9,11 +9,13 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { NumericFormat } from "react-number-format";
 import { formatGwei, parseGwei } from "viem";
 
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
 import TextField from "@/components/atoms/TextField";
@@ -114,6 +116,7 @@ function EIP1559Fields({
   return (
     <div className="grid gap-3 grid-cols-2">
       <TextField
+        isNumeric
         isError={maxFeePerGasError}
         isWarning={maxFeePerGasWarning}
         placeholder="Max fee"
@@ -149,6 +152,7 @@ function EIP1559Fields({
       />
 
       <TextField
+        isNumeric
         isError={maxPriorityFeePerGasError}
         isWarning={maxPriorityFeePerGasWarning}
         placeholder="Priority fee"
@@ -617,6 +621,7 @@ function NetworkFeeDialogContent({
                         </TextButton>
                       </div>
                       <TextField
+                        isNumeric
                         placeholder="Gas price"
                         label="Gas price"
                         name="gasPrice"
@@ -695,6 +700,7 @@ function NetworkFeeDialogContent({
                         </TextButton>
                       </div>
                       <TextField
+                        isNumeric
                         placeholder="Gas price"
                         label="Gas price"
                         name="gasPrice"
@@ -730,6 +736,7 @@ function NetworkFeeDialogContent({
                       />
 
                       <TextField
+                        isNumeric
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"
@@ -868,6 +875,7 @@ function NetworkFeeDialogContent({
                         {values.gasPriceModel === GasFeeModel.LEGACY && (
                           <div className="mt-4">
                             <TextField
+                              isNumeric
                               placeholder="Gas price"
                               label="Gas price"
                               name="gasPrice"
@@ -905,6 +913,7 @@ function NetworkFeeDialogContent({
                         )}
                       </div>
                       <TextField
+                        isNumeric
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"
