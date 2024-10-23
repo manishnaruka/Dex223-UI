@@ -9,7 +9,7 @@ import {
   getAbiItem,
   parseUnits,
 } from "viem";
-import { useAccount, useBalance, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -565,6 +565,5 @@ export default function useSwap() {
     handleSwap,
     isAllowedA: isAllowedA,
     handleApprove: () => null,
-    // estimatedGas: gasLimit,
   };
 }
