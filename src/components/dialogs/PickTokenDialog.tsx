@@ -213,6 +213,11 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
   }, [tokens, tokensSearchValue]);
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
+  console.log("Pick token dialog");
+  console.log(tokens);
+  console.log(filteredTokens);
+  console.log(isTokenFilterActive);
+
   useEffect(() => {
     if (!isMobile) {
       setEditActivated(false);
@@ -311,7 +316,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                       <TokenRow
                         setTokenForPortfolio={setTokenForPortfolio}
                         handlePick={handlePick}
-                        key={token.wrapped.address0}
+                        key={token.isToken ? token.address0 : `native-${token.wrapped.address0}`}
                         currency={token}
                       />
                     ))}
