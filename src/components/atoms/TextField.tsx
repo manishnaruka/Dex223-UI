@@ -4,7 +4,6 @@ import { NumericFormat } from "react-number-format";
 
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Tooltip from "@/components/atoms/Tooltip";
-import { clsxMerge } from "@/functions/clsxMerge";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -15,13 +14,23 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   internalTextClassName?: string;
   isError?: boolean;
   isWarning?: boolean;
-  isNumeric?: boolean;
 } & (
     | {
         error?: boolean | string;
         warning?: never;
       }
     | { warning?: string | boolean; error?: never }
+  ) &
+  (
+    | {
+        isNumeric?: never;
+      }
+    | {
+        isNumeric?: true;
+        defaultValue?: string | number | null | undefined;
+        value?: string | number | null | undefined;
+        type?: "tel" | "text" | "password";
+      }
   );
 
 export function InputLabel({ label, tooltipText, ...props }: Omit<Props, "helperText">) {
@@ -67,7 +76,6 @@ export default function TextField({
   internalText,
   isError = false,
   isWarning = false,
-  isNumeric = false,
   ...props
 }: Props) {
   return (
@@ -75,7 +83,7 @@ export default function TextField({
       <InputLabel label={label} tooltipText={tooltipText} />
       {variant === "default" ? (
         <div className="relative">
-          {isNumeric ? (
+          {props.isNumeric ? (
             <NumericFormat
               isError={Boolean(error) || isError}
               isWarning={Boolean(warning) || isWarning}
