@@ -173,8 +173,8 @@ export default function AccountDialog() {
         isOpen={isOpenedAccount}
         onClick={() => setIsOpenedAccount(!isOpenedAccount)}
       >
-        <span className="flex gap-2 items-center">
-          <Svg iconName="wallet" />
+        <span className="flex gap-2 items-center text-secondary-text">
+          <Svg className="text-tertiary-text" iconName="wallet" />
           {truncateMiddle(address || "", { charsFromStart: 5, charsFromEnd: 3 })}
         </span>
       </SelectButton>

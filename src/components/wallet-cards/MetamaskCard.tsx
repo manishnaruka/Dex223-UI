@@ -25,7 +25,7 @@ export default function MetamaskCard() {
 
   if (isMobile && !isMetamaskMobile) {
     return (
-      <a href="https://metamask.app.link/dapp/dex-exchange-git-feature-metamask-mobile-absolute-wallet.vercel.app">
+      <a href="https://metamask.app.link/dapp/test-app.dex223.io">
         <PickButton disabled={isConnecting} image={image} label={name} loading={loading} />
       </a>
     );

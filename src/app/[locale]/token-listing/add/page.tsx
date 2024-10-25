@@ -388,14 +388,16 @@ export default function ListTokenPage() {
                           setPickTokenOpened(true);
                         }}
                       >
-                        <Image
-                          className="mr-1"
-                          width={24}
-                          height={24}
-                          src={tokenA?.logoURI || "/tokens/placeholder.svg"}
-                          alt=""
-                        />
-                        {tokenA?.symbol || "Select token"}
+                        {tokenA && (
+                          <Image
+                            className="mr-1"
+                            width={24}
+                            height={24}
+                            src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                            alt=""
+                          />
+                        )}
+                        {tokenA?.symbol || <span className="text-tertiary-text">Select token</span>}
                         <Svg iconName="small-expand-arrow" />
                       </button>
                       <div
@@ -432,14 +434,16 @@ export default function ListTokenPage() {
                           setPickTokenOpened(true);
                         }}
                       >
-                        <Image
-                          className="mr-1"
-                          width={24}
-                          height={24}
-                          src={tokenB?.logoURI || "/tokens/placeholder.svg"}
-                          alt=""
-                        />
-                        {tokenB?.symbol || "Select token"}
+                        {tokenB && (
+                          <Image
+                            className="mr-1"
+                            width={24}
+                            height={24}
+                            src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                            alt=""
+                          />
+                        )}
+                        {tokenB?.symbol || <span className="text-tertiary-text">Select token</span>}
                         <Svg iconName="small-expand-arrow" />
                       </button>
                       <div
@@ -485,7 +489,9 @@ export default function ListTokenPage() {
                       className="bg-secondary-bg justify-between pl-5"
                       onClick={() => setAutoListingSelectOpened(true)}
                     >
-                      {autoListing?.name || "Select token list"}
+                      {autoListing?.name || (
+                        <span className="text-tertiary-text">Select token list</span>
+                      )}
                     </SelectButton>
                     <HelperText
                       helperText={

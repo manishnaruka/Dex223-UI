@@ -45,7 +45,7 @@ export default function NetworkPicker() {
         placement="bottom-start"
         trigger={
           <SelectButton
-            className="pl-2 pr-1 py-1 xl:py-2 gap-0 md:gap-2 xl:px-3"
+            className="pl-2 pr-1 py-1 xl:py-2 gap-0 md:gap-2 xl:px-3 text-secondary-text"
             isOpen={isOpened}
             onClick={() => setIsOpened(!isOpened)}
           >
