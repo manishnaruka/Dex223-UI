@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useConnect } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
 import {
@@ -15,6 +15,7 @@ const { image, name } = wallets.trustWallet;
 
 export default function TrustWalletCard() {
   const t = useTranslations("Wallet");
+  const { isConnecting } = useAccount();
   const { connectors, connectAsync, isPending } = useConnect();
 
   const { setName, chainToConnect } = useConnectWalletStore();
@@ -24,6 +25,7 @@ export default function TrustWalletCard() {
 
   return (
     <PickButton
+      disabled={isConnecting}
       onClick={() => {
         setName("trustWallet");
         const connectorToConnect = connectors[3];

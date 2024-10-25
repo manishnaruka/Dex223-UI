@@ -22,10 +22,10 @@ export default function PickButton({
   return (
     <button
       className={clsx(
-        "flex flex-col gap-2 justify-center items-center py-4 border rounded-3 w-full duration-200 px-2 hocus:",
+        "flex flex-col gap-2 justify-center items-center py-4 border rounded-3 w-full duration-200 px-2 disabled:pointer-events-none disabled:opacity-50",
         isActive
           ? "text-primary-text bg-green-bg border-green shadow shadow-green/60"
-          : "text-secondary-text bg-tertiary-bg border-transparent hocus:bg-green-bg",
+          : "text-secondary-text bg-tertiary-bg border-transparent hocus:bg-green-bg ",
       )}
       {...props}
     >

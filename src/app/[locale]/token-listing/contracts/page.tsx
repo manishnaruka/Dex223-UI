@@ -138,7 +138,6 @@ export default function TokenListingPage() {
                       <span className="text-secondary-text">Contract link</span>
                       <ExternalTextLink
                         onClick={(e) => e.stopPropagation()}
-                        color="white"
                         text={truncateMiddle(autoListing.id)}
                         href={getExplorerLink(
                           ExplorerLinkType.ADDRESS,

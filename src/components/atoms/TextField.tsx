@@ -30,6 +30,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
         defaultValue?: string | number | null | undefined;
         value?: string | number | null | undefined;
         type?: "tel" | "text" | "password";
+        decimalScale?: number;
       }
   );
 
@@ -89,6 +90,7 @@ export default function TextField({
               isWarning={Boolean(warning) || isWarning}
               customInput={Input}
               {...props}
+              decimalScale={props.decimalScale}
             />
           ) : (
             <Input

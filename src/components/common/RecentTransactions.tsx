@@ -76,7 +76,7 @@ export default function RecentTransactions({
             <div>
               {currentTableData.length ? (
                 <>
-                  <div className="pb-5 flex flex-col gap-1">
+                  <div className="pb-5 flex flex-col gap-3">
                     {currentTableData.map((transaction) => {
                       return (
                         <RecentTransaction

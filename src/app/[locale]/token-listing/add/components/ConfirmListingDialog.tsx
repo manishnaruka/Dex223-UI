@@ -385,7 +385,7 @@ function SingleCard({
       </div>
 
       <div className="bg-quaternary-bg flex items-center text-16 py-4 justify-center">
-        <ExternalTextLink color="white" text={truncateMiddle(address)} href="#" />
+        <ExternalTextLink text={truncateMiddle(address)} href="#" />
       </div>
     </div>
   );

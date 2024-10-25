@@ -16,26 +16,24 @@ const { image, name } = wallets.metamask;
 export default function MetamaskCard() {
   const t = useTranslations("Wallet");
   const { connectors, connectAsync, isPending } = useConnect();
-  const { connector, isConnected } = useAccount();
+  const { connector, isConnected, isConnecting } = useAccount();
   const { setName, chainToConnect } = useConnectWalletStore();
   const { setIsOpened } = useConnectWalletDialogStateStore();
   const isMetamaskMobile = useDetectMetaMaskMobile();
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
-  const { reconnect } = useReconnect();
-  console.log(connectors);
-  console.log(connector);
-  console.log(isConnected);
+
   if (isMobile && !isMetamaskMobile) {
     return (
       <a href="https://metamask.app.link/dapp/dex-exchange-git-feature-metamask-mobile-absolute-wallet.vercel.app">
-        <PickButton image={image} label={name} loading={loading} />
+        <PickButton disabled={isConnecting} image={image} label={name} loading={loading} />
       </a>
     );
   }
 
   return (
     <PickButton
+      disabled={isConnecting}
       onClick={() => {
         setName("metamask");
         console.log(connectors[2]);

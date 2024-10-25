@@ -44,6 +44,7 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -175,7 +176,12 @@ export default function ListTokenPage() {
   const { tokenA, tokenB, setTokenA, setTokenB } = useListTokensStore();
   const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
 
-  const isPoolExists = useMemo(() => pool[0] !== PoolState.NOT_EXISTS, [pool]);
+  const isPoolExists = useMemo(
+    () => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID,
+    [pool],
+  );
+
+  console.log(pool);
 
   const [tokenAAddress, setTokenAAddress] = useState("");
   const [tokenBAddress, setTokenBAddress] = useState("");
@@ -292,6 +298,23 @@ export default function ListTokenPage() {
     }
   }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
 
+  const firstFieldError = useMemo(() => {
+    if (tokenAAddress && !isAddress(tokenAAddress)) {
+      return "Token address is invalid";
+    }
+    return;
+  }, [tokenAAddress]);
+
+  const secondFieldError = useMemo(() => {
+    if (tokenBAddress && !isAddress(tokenBAddress)) {
+      return "Token address is invalid";
+    }
+
+    if (tokenAAddress && tokenAAddress === tokenBAddress) {
+      return "Second token should be different";
+    }
+  }, [tokenAAddress, tokenBAddress]);
+
   return (
     <>
       <Container>
@@ -342,7 +365,7 @@ export default function ListTokenPage() {
                 <div className="flex flex-col gap-4 pb-5">
                   <div>
                     <InputLabel label="Token contract address" />
-                    <div className="bg-secondary-bg relative flex items-center border border-transparent rounded-2 pr-[3px]">
+                    <div className="bg-secondary-bg relative flex items-center rounded-3 pr-[3px]">
                       <input
                         className="bg-transparent peer duration-200 focus:outline-0 h-12 pl-5 placeholder:text-tertiary-text text-16 w-full rounded-2 pr-2"
                         value={tokenAAddress}
@@ -369,14 +392,24 @@ export default function ListTokenPage() {
                         {tokenA?.symbol || "Select token"}
                         <Svg iconName="small-expand-arrow" />
                       </button>
-                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
+                      <div
+                        className={clsx(
+                          "duration-200 rounded-2 pointer-events-none absolute w-full h-full border peer-hocus:shadow top-0 left-0",
+                          firstFieldError
+                            ? "border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
+                            : "border-transparent peer-hocus:border-green peer-hocus:shadow-green/60",
+                        )}
+                      />
                     </div>
-                    <HelperText helperText="Enter the contract address of the token you want to list" />
+                    <HelperText
+                      error={firstFieldError}
+                      helperText="Enter the contract address of the token you want to list"
+                    />
                   </div>
 
                   <div>
                     <InputLabel label="Paired token contract address" />
-                    <div className="bg-secondary-bg relative flex items-center border border-transparent rounded-2 pr-[3px]">
+                    <div className="bg-secondary-bg relative flex items-center rounded-3 pr-[3px]">
                       <input
                         className="bg-transparent peer duration-200 focus:outline-0 h-12 pl-5 placeholder:text-tertiary-text text-16 w-full rounded-2 pr-2"
                         value={tokenBAddress}
@@ -403,9 +436,19 @@ export default function ListTokenPage() {
                         {tokenB?.symbol || "Select token"}
                         <Svg iconName="small-expand-arrow" />
                       </button>
-                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
+                      <div
+                        className={clsx(
+                          "duration-200 rounded-2 pointer-events-none absolute w-full h-full border peer-hocus:shadow top-0 left-0",
+                          secondFieldError
+                            ? "border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
+                            : "border-transparent peer-hocus:border-green peer-hocus:shadow-green/60",
+                        )}
+                      />
                     </div>
-                    <HelperText helperText="Enter or select the paired token address" />
+                    <HelperText
+                      error={secondFieldError}
+                      helperText="Enter or select the paired token address"
+                    />
                   </div>
 
                   {!isPoolExists && tokenA && tokenB && (
@@ -446,7 +489,6 @@ export default function ListTokenPage() {
                           <span className="flex items-center gap-2">
                             Contract address:{" "}
                             <ExternalTextLink
-                              color="white"
                               text={truncateMiddle(autoListing.id)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,

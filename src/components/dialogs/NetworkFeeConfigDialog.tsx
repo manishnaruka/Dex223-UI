@@ -737,6 +737,7 @@ function NetworkFeeDialogContent({
 
                       <TextField
                         isNumeric
+                        decimalScale={0}
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"
@@ -914,6 +915,7 @@ function NetworkFeeDialogContent({
                       </div>
                       <TextField
                         isNumeric
+                        decimalScale={0}
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"

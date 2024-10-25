@@ -86,7 +86,6 @@ export default function ChooseAutoListingDialog() {
                   )}
                   <ExternalTextLink
                     onClick={(e) => e.stopPropagation()}
-                    color="white"
                     text={truncateMiddle(a.id, { charsFromEnd: 3, charsFromStart: 3 })}
                     href={getExplorerLink(ExplorerLinkType.ADDRESS, a.id, chainId)}
                   />

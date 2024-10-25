@@ -47,7 +47,7 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
     case RecentTransactionTitleTemplate.APPROVE:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="check" />
+          <Svg className="text-tertiary-text" iconName="check" />
           <span className="text-16 font-medium block mr-1">
             {t("approve_title", { symbol: title.symbol })}
           </span>
@@ -57,21 +57,21 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
     case RecentTransactionTitleTemplate.LIST_SINGLE:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="listing" />
+          <Svg className="text-tertiary-text" iconName="listing" />
           <span className="text-16 font-medium block mr-1">List token</span>
         </div>
       );
     case RecentTransactionTitleTemplate.LIST_DOUBLE:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="listing" />
+          <Svg className="text-tertiary-text" iconName="listing" />
           <span className="text-16 font-medium block mr-1">List tokens</span>
         </div>
       );
     case RecentTransactionTitleTemplate.DEPOSIT:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="deposit" />
+          <Svg className="text-tertiary-text" iconName="deposit" />
           <span className="text-16 font-medium block mr-1">
             {t("deposit_title", { symbol: title.symbol })}
           </span>
@@ -81,7 +81,7 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
     case RecentTransactionTitleTemplate.WITHDRAW:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="withdraw" />
+          <Svg className="text-tertiary-text" iconName="withdraw" />
           <span className="text-16 font-medium block mr-1">
             {t("withdraw_title", { symbol: title.symbol })}
           </span>
@@ -91,28 +91,28 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
     case RecentTransactionTitleTemplate.SWAP:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="swap" />
+          <Svg className="text-tertiary-text" iconName="swap" />
           <span className="text-16 font-medium">{t("swap_title")}</span>
         </div>
       );
     case RecentTransactionTitleTemplate.COLLECT:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="collect" />
+          <Svg className="text-tertiary-text" iconName="collect" />
           <span className="text-16 font-medium">{t("collect_fees_title")}</span>
         </div>
       );
     case RecentTransactionTitleTemplate.REMOVE:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="minus" />
+          <Svg className="text-tertiary-text" iconName="minus" />
           <span className="text-16 font-medium">{t("remove_liquidity_title")}</span>
         </div>
       );
     case RecentTransactionTitleTemplate.ADD:
       return (
         <div className="flex items-center gap-1">
-          <Svg iconName="add" />
+          <Svg className="text-tertiary-text" iconName="add" />
           <span className="text-16 font-medium">{t("add_liquidity_title")}</span>
         </div>
       );
@@ -166,7 +166,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.LIST_SINGLE:
       return (
-        <div className="flex items-center justify-center w-12 h-12">
+        <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
           <Image width={36} height={36} src={title.logoURI} alt="" />
         </div>
       );
@@ -176,7 +176,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.ADD:
     case RecentTransactionTitleTemplate.LIST_DOUBLE:
       return (
-        <div className="flex items-center relative w-12 h-12">
+        <div className="flex items-center relative w-12 h-12 flex-shrink-0">
           <Image
             className="absolute left-0 top-0"
             width={32}
@@ -254,7 +254,7 @@ export default function RecentTransaction({
         </div>
 
         <a
-          className="text-primary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
+          className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
           target="_blank"
           href={getExplorerLink(
             ExplorerLinkType.TRANSACTION,

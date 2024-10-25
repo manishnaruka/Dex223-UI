@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useConnect } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
 import {
@@ -15,7 +15,7 @@ const { image, name } = wallets.coinbase;
 export default function CoinbaseCard() {
   const t = useTranslations("Wallet");
   const { connectors, connectAsync, isPending } = useConnect();
-
+  const { isConnecting } = useAccount();
   const { setName, chainToConnect } = useConnectWalletStore();
   const { setIsOpened } = useConnectWalletDialogStateStore();
 
@@ -24,6 +24,7 @@ export default function CoinbaseCard() {
   console.log(connectors);
   return (
     <PickButton
+      disabled={isConnecting}
       onClick={() => {
         setName("coinbase");
         const connectorToConnect = connectors[1];

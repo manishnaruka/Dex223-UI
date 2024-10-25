@@ -215,8 +215,9 @@ const config: Config = {
     require("@savvywombat/tailwindcss-grid-areas"),
     require("tailwind-scrollbar")({ preferredStrategy: "pseudoelements", nocompatible: true }),
     plugin(function ({ addVariant, e }) {
-      addVariant("hocus", ["&:hover", "&:focus"]);
-      addVariant("group-hocus", [".group:hover &", ".group:focus &"]);
+      addVariant("hocus", ["&:hover", "&:focus-visible"]);
+      addVariant("group-hocus", [".group:hover &", ".group:focus-visible &"]);
+      addVariant("peer-hocus", [".peer:hover ~ &", ".peer:focus-visible ~ &"]);
     }),
     function ({ addUtilities }: any) {
       const newUtilities = {
