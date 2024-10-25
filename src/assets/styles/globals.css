@@ -28,7 +28,8 @@ a:focus,
 input:focus,
 textarea:focus,
 select:focus,
-div[role="button"] {
+div[role="button"]:focus,
+div[role="dialog"]:focus {
   outline: none;
 }
 

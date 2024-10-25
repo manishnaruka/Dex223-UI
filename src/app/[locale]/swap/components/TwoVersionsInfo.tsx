@@ -14,7 +14,7 @@ export default function TwoVersionsInfo() {
     <div className="overflow-hidden text-14 rounded-2 bg-gradient-to-r from-primary-bg to-secondary-bg">
       <button
         onClick={() => setIsOpened(!isOpened)}
-        className="h-10 px-5 py-2 flex items-center justify-between font-medium w-full text-14 text-secondary-text bg-gradient-to-r from-green-bg to-green-bg/0 border-l-4 border-green rounded-2"
+        className="h-10 px-5 py-2 flex items-center justify-between font-medium w-full text-14 text-secondary-text bg-gradient-to-r via-50% via-primary-bg from-green-bg to-green-bg/0 border-l-4 border-green rounded-2"
       >
         {t("tokens_in_two_standards_title")}
         <Svg
