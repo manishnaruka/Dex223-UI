@@ -52,12 +52,17 @@ function MobileStandardOption({
           <span
             className={clsx(
               "flex flex-col",
-              standard === active ? "text-primary-text" : "text-tertiary-text",
+              standard === active ? "text-secondary-text" : "text-tertiary-text",
               standard === Standard.ERC223 && "items-end",
             )}
           >
             {t("balance")}{" "}
-            <span className="whitespace-nowrap">
+            <span
+              className={clsx(
+                "whitespace-nowrap",
+                standard === active ? "text-primary-text" : "text-tertiary-text",
+              )}
+            >
               {balance || "0.0"} {symbol}
             </span>
           </span>

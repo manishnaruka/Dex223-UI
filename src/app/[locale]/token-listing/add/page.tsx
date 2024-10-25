@@ -204,7 +204,7 @@ export default function ListTokenPage() {
   const handleChange = useCallback(
     async (
       e: ChangeEvent<HTMLInputElement>,
-      setToken: (token: Currency) => void,
+      setToken: (token: Currency | undefined) => void,
       setTokenAddress: (value: string) => void,
     ) => {
       const value = e.target.value;
@@ -251,6 +251,8 @@ export default function ListTokenPage() {
         );
 
         setToken(_token);
+      } else {
+        setToken(undefined);
       }
     },
     [chainId, publicClient, tokens],

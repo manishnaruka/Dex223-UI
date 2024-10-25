@@ -16,10 +16,10 @@ export default function NavigationItem({ href, title, active }: Props) {
   return (
     <Link
       className={clsx(
-        "px-3 py-5 duration-200 inline-flex text-secondary-text",
+        "px-3 py-5 duration-200 inline-flex",
         active
           ? "bg-navigation-active text-green shadow-green/60 text-shadow"
-          : "hocus:bg-navigation-hover hocus:text-green hocus:shadow-green/60 hocus:text-shadow",
+          : "hocus:bg-navigation-hover hocus:text-green hocus:shadow-green/60 hocus:text-shadow text-secondary-text",
         !["/swap", "/pools", "/token-listing", "/portfolio"].includes(href) &&
           "opacity-50 pointer-events-none",
       )}
