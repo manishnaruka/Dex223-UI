@@ -305,15 +305,19 @@ export default function ListTokenPage() {
     return;
   }, [tokenAAddress]);
 
+  const sameTokensSelected = useMemo(() => {
+    return Boolean(tokenAAddress && tokenAAddress === tokenBAddress);
+  }, [tokenAAddress, tokenBAddress]);
+
   const secondFieldError = useMemo(() => {
     if (tokenBAddress && !isAddress(tokenBAddress)) {
       return "Token address is invalid";
     }
 
-    if (tokenAAddress && tokenAAddress === tokenBAddress) {
+    if (sameTokensSelected) {
       return "Second token should be different";
     }
-  }, [tokenAAddress, tokenBAddress]);
+  }, [sameTokensSelected, tokenBAddress]);
 
   return (
     <>
@@ -451,7 +455,7 @@ export default function ListTokenPage() {
                     />
                   </div>
 
-                  {!isPoolExists && tokenA && tokenB && (
+                  {!isPoolExists && !sameTokensSelected && tokenA && tokenB && (
                     <Alert
                       text={
                         <span>
