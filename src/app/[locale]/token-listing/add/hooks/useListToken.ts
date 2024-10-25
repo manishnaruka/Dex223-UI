@@ -220,9 +220,9 @@ export default function useListToken() {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
         setListTokenStatus(ListTokenStatus.PENDING_APPROVE);
-        const result = await writeTokenApprove(
-          parseUnits(amountToApprove, paymentToken.token.decimals),
-        );
+        const result = await writeTokenApprove({
+          customAmount: parseUnits(amountToApprove, paymentToken.token.decimals),
+        });
 
         if (!result?.success) {
           setListTokenStatus(ListTokenStatus.INITIAL);

@@ -37,7 +37,6 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useAddLiquidityGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const { isAdvanced, setIsAdvanced } = useAddLiquidityGasModeStore();
 
   const gasPrice = useAddLiquidityGasPrice();

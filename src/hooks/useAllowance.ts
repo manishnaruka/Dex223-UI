@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { Abi, Address, formatUnits, getAbiItem } from "viem";
 import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
+import { AddLiquidityApproveStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
-import { formatFloat } from "@/functions/formatFloat";
-import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -17,14 +15,12 @@ import {
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
 
-import useDeepEffect from "./useDeepEffect";
-
 export enum AllowanceStatus {
-  INITIAL,
-  PENDING,
-  LOADING,
-  SUCCESS,
-  ERROR,
+  INITIAL = AddLiquidityApproveStatus.INITIAL,
+  PENDING = AddLiquidityApproveStatus.PENDING,
+  LOADING = AddLiquidityApproveStatus.LOADING,
+  SUCCESS = AddLiquidityApproveStatus.SUCCESS,
+  ERROR = AddLiquidityApproveStatus.ERROR,
 }
 
 const allowanceGasLimitMap: Record<DexChainId, { base: bigint; additional: bigint }> = {
@@ -33,6 +29,19 @@ const allowanceGasLimitMap: Record<DexChainId, { base: bigint; additional: bigin
 };
 
 const defaultApproveValue = BigInt(46000);
+
+type CustomGasSettings =
+  | {
+      maxPriorityFeePerGas: bigint | undefined;
+      maxFeePerGas: bigint | undefined;
+      gasPrice?: undefined;
+    }
+  | {
+      gasPrice: bigint | undefined;
+      maxPriorityFeePerGas?: undefined;
+      maxFeePerGas?: undefined;
+    }
+  | undefined;
 
 export function useStoreAllowance({
   token,
@@ -141,7 +150,13 @@ export function useStoreAllowance({
   );
 
   const writeTokenApprove = useCallback(
-    async (customAmount?: bigint) => {
+    async ({
+      customAmount,
+      customGasSettings,
+    }: {
+      customAmount?: bigint;
+      customGasSettings?: CustomGasSettings;
+    }) => {
       const amountToApprove = customAmount || amountToCheck;
 
       if (
@@ -178,6 +193,7 @@ export function useStoreAllowance({
       try {
         const { request } = await publicClient.simulateContract({
           ...params,
+          ...(customGasSettings || {}),
           gas: gasLimit,
         });
 
@@ -255,220 +271,5 @@ export function useStoreAllowance({
     currentAllowance: currentAllowanceData,
     estimatedGas: allowanceGasLimitMap[chainId]?.base || defaultApproveValue,
     updateAllowance: refetch,
-  };
-}
-
-//TODO: Rewrite all useAllowance usages to useStoreAllowance, 16.09.2024
-export default function useAllowance({
-  token,
-  contractAddress,
-  amountToCheck,
-}: {
-  token: Currency | undefined;
-  contractAddress: Address | undefined;
-  amountToCheck: bigint | null;
-}) {
-  const [status, setStatus] = useState(AllowanceStatus.INITIAL);
-  const chainId = useCurrentChainId();
-  const { address } = useAccount();
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
-
-  const { addRecentTransaction } = useRecentTransactionsStore();
-
-  const { refetch, data: currentAllowanceData } = useReadContract({
-    abi: ERC20_ABI,
-    address: token?.wrapped.address0 as Address,
-    functionName: "allowance",
-    args: [
-      //set ! to avoid ts errors, make sure it is not undefined with "enable" option
-      address!,
-      contractAddress!,
-    ],
-    query: {
-      //make sure hook don't run when there is no addresses
-      enabled: Boolean(token?.wrapped.address0) && Boolean(address) && Boolean(contractAddress),
-    },
-    // cacheTime: 0,
-    // watch: true,
-  });
-
-  const { data: blockNumber } = useScopedBlockNumber();
-
-  useEffect(() => {
-    // refetch();
-  }, [refetch, blockNumber]);
-
-  const isAllowed = useMemo(() => {
-    if (!token) {
-      return false;
-    }
-
-    // if (isNativeToken(token.address)) {
-    //   return true;
-    // }
-
-    if (currentAllowanceData && amountToCheck) {
-      return currentAllowanceData >= amountToCheck;
-    }
-
-    return false;
-  }, [amountToCheck, currentAllowanceData, token]);
-
-  const writeTokenApprove = useCallback(
-    async (customAmount?: bigint) => {
-      if (
-        !amountToCheck ||
-        !contractAddress ||
-        !token ||
-        !walletClient ||
-        !address ||
-        !chainId ||
-        !publicClient ||
-        !token.isToken
-      ) {
-        console.error("Error: writeTokenApprove ~ something undefined");
-        return;
-      }
-      setStatus(AllowanceStatus.PENDING);
-
-      // customAmount — is amount provided by user in approve amount input
-      const amount = customAmount || amountToCheck;
-      const params: {
-        address: Address;
-        account: Address;
-        abi: Abi;
-        functionName: "approve";
-        args: [Address, bigint];
-      } = {
-        address: token.address0 as Address,
-        account: address,
-        abi: ERC20_ABI,
-        functionName: "approve",
-        args: [contractAddress!, amount!],
-      };
-
-      try {
-        const estimatedGas = await publicClient.estimateContractGas(params);
-
-        const { request } = await publicClient.simulateContract({
-          ...params,
-          gas: estimatedGas + BigInt(30000),
-        });
-
-        let hash;
-
-        try {
-          hash = await walletClient.writeContract({ ...request, account: undefined });
-        } catch (e) {
-          setStatus(AllowanceStatus.INITIAL);
-          console.log(e);
-        }
-
-        if (hash) {
-          const transaction = await publicClient.getTransaction({
-            hash,
-          });
-
-          const nonce = transaction.nonce;
-
-          addRecentTransaction(
-            {
-              hash,
-              nonce,
-              chainId,
-              gas: {
-                model: GasFeeModel.EIP1559,
-                gas: BigInt(30000).toString(),
-                maxFeePerGas: undefined,
-                maxPriorityFeePerGas: undefined,
-              },
-              params: {
-                ...stringifyObject(params),
-                abi: [getAbiItem({ name: "approve", abi: ERC20_ABI })],
-              },
-              title: {
-                symbol: token.symbol!,
-                template: RecentTransactionTitleTemplate.APPROVE,
-                amount: formatUnits(amount, token.decimals),
-                logoURI: token?.logoURI || "/tokens/placeholder.svg",
-              },
-            },
-            address,
-          );
-
-          setStatus(AllowanceStatus.LOADING);
-          await publicClient.waitForTransactionReceipt({ hash });
-          setStatus(AllowanceStatus.SUCCESS);
-          return { success: true as const, hash };
-        }
-      } catch (e) {
-        console.log(e);
-        setStatus(AllowanceStatus.INITIAL);
-        addToast("Unexpected error, please contact support", "error");
-        return { success: false as const };
-      }
-    },
-    [
-      amountToCheck,
-      contractAddress,
-      token,
-      walletClient,
-      address,
-      chainId,
-      publicClient,
-      addRecentTransaction,
-    ],
-  );
-
-  const [estimatedGas, setEstimatedGas] = useState(null as null | bigint);
-  useDeepEffect(() => {
-    IIFE(async () => {
-      if (
-        !amountToCheck ||
-        !contractAddress ||
-        !token ||
-        !walletClient ||
-        !address ||
-        !chainId ||
-        !publicClient
-      ) {
-        return;
-      }
-
-      const params: {
-        address: Address;
-        account: Address;
-        abi: Abi;
-        functionName: "approve";
-        args: [Address, bigint];
-      } = {
-        address: token.wrapped.address0,
-        // TODO: check. Before "fix: fixed re-renders issue" — account: address || contractAddress,
-        account: address,
-        abi: ERC20_ABI,
-        functionName: "approve",
-        args: [contractAddress, amountToCheck],
-      };
-
-      try {
-        const estimatedGas = await publicClient.estimateContractGas(params);
-        setEstimatedGas(estimatedGas);
-        console.log(estimatedGas);
-      } catch (error) {
-        console.warn("🚀 ~ useAllowance ~ estimatedGas ~ error:", error, "params:", params);
-        setEstimatedGas(null);
-      }
-    });
-  }, [amountToCheck, contractAddress, token, walletClient, address, chainId, publicClient]);
-
-  return {
-    isAllowed,
-    status,
-    isLoading: status === AllowanceStatus.LOADING,
-    isPending: status === AllowanceStatus.PENDING,
-    writeTokenApprove,
-    currentAllowance: currentAllowanceData,
-    estimatedGas,
   };
 }

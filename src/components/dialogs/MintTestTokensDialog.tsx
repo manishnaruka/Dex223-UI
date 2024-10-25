@@ -94,7 +94,7 @@ export default function MintTestTokensDialog() {
     },
   });
 
-  const { data: latestBlock } = useBlockNumber({ watch: true });
+  const { data: latestBlock } = useBlockNumber({ watch: isOpen });
 
   useEffect(() => {
     refetch();

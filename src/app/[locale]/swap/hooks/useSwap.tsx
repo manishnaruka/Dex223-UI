@@ -366,7 +366,9 @@ export default function useSwap() {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
         setSwapStatus(SwapStatus.PENDING_APPROVE);
-        const result = await approveA(parseUnits(amountToApprove, tokenA?.decimals ?? 18));
+        const result = await approveA({
+          customAmount: parseUnits(amountToApprove, tokenA?.decimals ?? 18),
+        });
 
         if (!result?.success) {
           setSwapStatus(SwapStatus.INITIAL);

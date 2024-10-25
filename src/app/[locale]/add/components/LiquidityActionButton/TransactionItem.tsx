@@ -6,12 +6,15 @@ import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
+import IconButton from "@/components/buttons/IconButton";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
-import { AllowanceStatus } from "@/hooks/useAllowance";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Standard } from "@/sdk_hybrid/standard";
 
 import { ApproveTransaction } from "../../hooks/useLiquidityApprove";
+import { AddLiquidityApproveStatus } from "../../stores/useAddLiquidityStatusStore";
 
 export const TransactionItem = ({
   transaction,
@@ -36,6 +39,7 @@ export const TransactionItem = ({
   setCustomAmount: (amount: bigint) => void;
   disabled?: boolean;
 }) => {
+  const chainId = useCurrentChainId();
   const [localValue, setLocalValue] = useState(
     formatUnits(transaction?.amount || BigInt(0), transaction?.token.decimals || 18),
   );
@@ -56,7 +60,7 @@ export const TransactionItem = ({
   };
   if (!transaction) return null;
 
-  const { token, amount, estimatedGas, isAllowed, status } = transaction;
+  const { token, amount, estimatedGas, isAllowed, status, hash } = transaction;
 
   return (
     <div className="flex gap-2">
@@ -77,7 +81,9 @@ export const TransactionItem = ({
 
           <div className="flex items-center gap-2 justify-end">
             {localValueBigInt !== amount &&
-            ![AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(status) ? (
+            ![AddLiquidityApproveStatus.PENDING, AddLiquidityApproveStatus.LOADING].includes(
+              status,
+            ) ? (
               <div
                 className="flex gap-2 text-green cursor-pointer"
                 onClick={() => {
@@ -88,16 +94,25 @@ export const TransactionItem = ({
                 <Svg iconName="reset" />
               </div>
             ) : null}
-            {status === AllowanceStatus.PENDING && (
+            {hash && (
+              <a
+                target="_blank"
+                href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
+              >
+                <IconButton iconName="forward" />
+              </a>
+            )}
+
+            {status === AddLiquidityApproveStatus.PENDING && (
               <>
                 <Preloader type="linear" />
                 <span className="text-secondary-text text-14">Proceed in your wallet</span>
               </>
             )}
-            {status === AllowanceStatus.LOADING ? (
+            {status === AddLiquidityApproveStatus.LOADING ? (
               <Preloader size={20} />
             ) : (
-              (isAllowed || status === AllowanceStatus.SUCCESS) && (
+              (isAllowed || status === AddLiquidityApproveStatus.SUCCESS) && (
                 <Svg className="text-green" iconName="done" size={20} />
               )
             )}

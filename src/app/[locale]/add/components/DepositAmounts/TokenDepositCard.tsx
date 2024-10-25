@@ -1,22 +1,15 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { Address, formatEther, formatGwei, formatUnits, parseUnits } from "viem";
+import { formatUnits } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
-import Alert from "@/components/atoms/Alert";
-import Dialog from "@/components/atoms/Dialog";
-import DialogHeader from "@/components/atoms/DialogHeader";
-import Preloader from "@/components/atoms/Preloader";
-import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
-import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
-import { getChainSymbol } from "@/functions/getChainSymbol";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke from "@/hooks/useRevoke";

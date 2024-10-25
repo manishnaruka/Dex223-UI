@@ -192,7 +192,6 @@ export default function ListTokenPage() {
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useListTokensGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const { isAdvanced, setIsAdvanced } = useListTokensGasModeStore();
 
   const handleChange = useCallback(
