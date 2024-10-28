@@ -22,7 +22,7 @@ export default function TextButton({
         "rounded-2 flex items-center justify-center gap-2 px-6 duration-200",
         props.disabled
           ? "opacity-50 pointer-events-none text-tertiary-text"
-          : "text-green hover:text-green-hover",
+          : "text-green hocus:text-green-hover",
         className,
       )}
       {...props}

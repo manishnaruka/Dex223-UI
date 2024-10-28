@@ -12,7 +12,7 @@ export default function TokenListsSettings() {
   return (
     <div>
       <SelectButton
-        className="py-1 xl:py-2 text-14 xl:text-16 min-h-8 w-full md:w-auto flex items-center justify-center"
+        className="py-1 xl:py-2 text-14 xl:text-16 min-h-8 w-full md:w-auto flex items-center justify-center text-secondary-text"
         withArrow={false}
         size="regular"
         onClick={() => setIsOpen(!isOpen)}

@@ -9,11 +9,13 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { NumericFormat } from "react-number-format";
 import { formatGwei, parseGwei } from "viem";
 
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
 import TextField from "@/components/atoms/TextField";
@@ -114,6 +116,7 @@ function EIP1559Fields({
   return (
     <div className="grid gap-3 grid-cols-2">
       <TextField
+        isNumeric
         isError={maxFeePerGasError}
         isWarning={maxFeePerGasWarning}
         placeholder="Max fee"
@@ -149,6 +152,7 @@ function EIP1559Fields({
       />
 
       <TextField
+        isNumeric
         isError={maxPriorityFeePerGasError}
         isWarning={maxPriorityFeePerGasWarning}
         placeholder="Priority fee"
@@ -352,7 +356,6 @@ function NetworkFeeDialogContent({
 
       setIsOpen(false);
       addToast("Settings applied");
-      console.log(values);
     },
   });
 
@@ -488,7 +491,7 @@ function NetworkFeeDialogContent({
                       "w-4 h-4 duration-200 before:duration-200 border bg-secondary-bg rounded-full before:w-2.5 before:h-2.5 before:absolute before:top-1/2 before:rounded-full before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 relative",
                       values.gasPriceOption === _gasOption
                         ? "border-green before:bg-green"
-                        : "border-secondary-border group-hover:border-green",
+                        : "border-secondary-border group-hocus:border-green",
                     )}
                   />
                   {gasOptionIcon[_gasOption]}
@@ -498,6 +501,15 @@ function NetworkFeeDialogContent({
                   </span>
                   <span className="text-secondary-text">~0.00$</span>
                 </div>
+                {_gasOption !== GasOption.CUSTOM &&
+                  baseFee &&
+                  `${formatFloat(
+                    formatGwei(
+                      (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR,
+                    ),
+                  )} GWEI`}
+                {_gasOption === GasOption.CUSTOM &&
+                  `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
               </div>
 
               {_gasOption === GasOption.CUSTOM && (
@@ -609,6 +621,7 @@ function NetworkFeeDialogContent({
                         </TextButton>
                       </div>
                       <TextField
+                        isNumeric
                         placeholder="Gas price"
                         label="Gas price"
                         name="gasPrice"
@@ -687,6 +700,7 @@ function NetworkFeeDialogContent({
                         </TextButton>
                       </div>
                       <TextField
+                        isNumeric
                         placeholder="Gas price"
                         label="Gas price"
                         name="gasPrice"
@@ -722,6 +736,8 @@ function NetworkFeeDialogContent({
                       />
 
                       <TextField
+                        isNumeric
+                        decimalScale={0}
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"
@@ -804,7 +820,7 @@ function NetworkFeeDialogContent({
                               values.gasPriceModel === GasFeeModel.EIP1559
                                 ? "bg-green-bg border-green"
                                 : "bg-primary-bg border-transparent",
-                              "flex flex-col gap-1 justify-center items-center py-3 px-5 border hover:bg-green-bg rounded-3 duration-200",
+                              "flex flex-col gap-1 justify-center items-center py-3 px-5 border hocus:bg-green-bg rounded-3 duration-200",
                             )}
                             onClick={() => setFieldValue("gasPriceModel", GasFeeModel.EIP1559)}
                           >
@@ -821,7 +837,7 @@ function NetworkFeeDialogContent({
                               values.gasPriceModel === GasFeeModel.LEGACY
                                 ? "bg-green-bg border-green"
                                 : "bg-primary-bg border-transparent",
-                              "flex flex-col gap-1 justify-center items-center py-3 px-5 border hover:bg-green-bg rounded-3 duration-200",
+                              "flex flex-col gap-1 justify-center items-center py-3 px-5 border hocus:bg-green-bg rounded-3 duration-200",
                             )}
                             onClick={() => setFieldValue("gasPriceModel", GasFeeModel.LEGACY)}
                           >
@@ -860,6 +876,7 @@ function NetworkFeeDialogContent({
                         {values.gasPriceModel === GasFeeModel.LEGACY && (
                           <div className="mt-4">
                             <TextField
+                              isNumeric
                               placeholder="Gas price"
                               label="Gas price"
                               name="gasPrice"
@@ -897,6 +914,8 @@ function NetworkFeeDialogContent({
                         )}
                       </div>
                       <TextField
+                        isNumeric
+                        decimalScale={0}
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"

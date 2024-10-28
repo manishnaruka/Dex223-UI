@@ -46,17 +46,17 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
 
 const buttonVariantClassnameMap: Record<ButtonVariant, Record<ButtonColor, string>> = {
   [ButtonVariant.CONTAINED]: {
-    [ButtonColor.RED]: "bg-red text-primary-text hover:bg-red-hover",
-    [ButtonColor.GREEN]: "bg-green text-black hover:bg-green-hover",
+    [ButtonColor.RED]: "bg-red text-primary-text hocus:bg-red-hover",
+    [ButtonColor.GREEN]: "bg-green text-black hocus:bg-green-hover",
     [ButtonColor.LIGHT_GREEN]:
-      "bg-green-bg text-secondary-text border-transparent border hover:border-green hover:bg-green-bg-hover hover:text-primary-text",
+      "bg-green-bg text-secondary-text border-transparent border hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text",
   },
   [ButtonVariant.OUTLINED]: {
     [ButtonColor.RED]:
-      "border border-primary text-secondary-text hover:bg-red-bg hover:border-primary-text hover:text-primary-text",
-    [ButtonColor.GREEN]: "border border-green text-primary-text hover:bg-green-bg",
+      "border border-primary text-secondary-text hocus:bg-red-bg hocus:border-primary-text hocus:text-primary-text",
+    [ButtonColor.GREEN]: "border border-green text-primary-text hocus:bg-green-bg",
     [ButtonColor.LIGHT_GREEN]:
-      "bg-green-bg text-primary-text border-transparent border hover:border-green",
+      "bg-green-bg text-primary-text border-transparent border hocus:border-green",
   },
 };
 
@@ -78,14 +78,14 @@ const tabletButtonSizeClassnameMap: Record<ButtonSize, string> = {
 
 const mobileButtonSizeClassnameMap: Record<ButtonSize, string> = {
   [ButtonSize.EXTRA_SMALL]: "text-12 min-h-5 rounded-20 px-4",
-  [ButtonSize.SMALL]: "text-14 font-medium rounded-20 min-h-8 px-6",
+  [ButtonSize.SMALL]: "text-14 font-medium rounded-2 min-h-8 px-6",
   [ButtonSize.MEDIUM]: "text-16 font-medium rounded-2 min-h-10 px-6",
   [ButtonSize.LARGE]: "text-16 font-medium rounded-3 min-h-12 px-6",
   [ButtonSize.EXTRA_LARGE]: "text-18 font-medium rounded-3 min-h-[60px] px-6",
 };
 
 const disabledClassnameMap: Record<ButtonVariant, string> = {
-  [ButtonVariant.CONTAINED]: "disabled:bg-tertiary-bg disabled:text-secondary-text",
+  [ButtonVariant.CONTAINED]: "disabled:bg-quaternary-bg disabled:text-secondary-text",
   [ButtonVariant.OUTLINED]: "disabled:text-secondary-text disabled:border-secondary-border",
 };
 

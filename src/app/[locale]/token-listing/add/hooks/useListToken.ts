@@ -1,10 +1,11 @@
 import { isZeroAddress } from "@ethereumjs/util";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
-import { getAbiItem } from "viem";
+import { getAbiItem, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
+import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import {
@@ -117,9 +118,6 @@ export function useListTokenEstimatedGas() {
   useDeepEffect(() => {
     IIFE(async () => {
       if (!listTokenParams || !address || (!isAllowed && !isFree)) {
-        console.log(address);
-        console.log(isAllowed);
-        console.log(listTokenParams);
         setEstimatedGas(BigInt(195000));
         console.log("Can't estimate gas");
         return;
@@ -130,8 +128,6 @@ export function useListTokenEstimatedGas() {
           account: address,
           ...listTokenParams,
         } as any);
-
-        console.log(estimated);
 
         if (estimated) {
           setEstimatedGas(estimated + BigInt(10000));
@@ -163,11 +159,11 @@ export default function useListToken() {
     tier: FeeAmount.MEDIUM,
   });
 
+  const tokensToList = useTokensToList();
+
   const isFree = useMemo(() => {
     return !autoListing?.tokensToPay.length;
   }, [autoListing]);
-
-  console.log(autoListing, "autoListing");
 
   const { data: walletClient } = useWalletClient();
   const { paymentToken } = usePaymentTokenStore();
@@ -217,193 +213,206 @@ export default function useListToken() {
     amountToCheck: paymentToken ? paymentToken.price * BigInt(2) : null,
   });
 
-  const handleList = useCallback(async () => {
-    console.log(!paymentToken && !isFree);
-
-    if (!poolAddress || !walletClient || (!paymentToken && !isFree) || !publicClient) {
-      return;
-    }
-
-    if (!isAllowed && !isFree && paymentToken && !isZeroAddress(paymentToken.token.address)) {
-      openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-
-      setListTokenStatus(ListTokenStatus.PENDING_APPROVE);
-      const result = await writeTokenApprove();
-
-      if (!result?.success) {
-        setListTokenStatus(ListTokenStatus.INITIAL);
-        closeConfirmInWalletAlert();
+  const handleList = useCallback(
+    async (amountToApprove: string) => {
+      if (!poolAddress || !walletClient || (!paymentToken && !isFree) || !publicClient) {
         return;
-      } else {
-        setApproveHash(result.hash);
-        setListTokenStatus(ListTokenStatus.LOADING_APPROVE);
-        closeConfirmInWalletAlert();
-
-        const approveReceipt = await publicClient.waitForTransactionReceipt({ hash: result.hash });
-
-        if (approveReceipt.status === "reverted") {
-          setListTokenStatus(ListTokenStatus.APPROVE_ERROR);
-          return;
-        }
       }
-    }
 
-    if (!tokenA || !tokenB || !address || !listParams) {
-      return;
-    }
+      if (!isAllowed && !isFree && paymentToken && !isZeroAddress(paymentToken.token.address)) {
+        openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
-    setListTokenStatus(ListTokenStatus.PENDING);
-    openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-
-    let hash;
-
-    let gasPriceFormatted = {};
-
-    if (gasPriceOption !== GasOption.CUSTOM) {
-      const multiplier = baseFeeMultipliers[chainId][gasPriceOption];
-      switch (gasPriceSettings.model) {
-        case GasFeeModel.EIP1559:
-          if (priorityFee && baseFee) {
-            gasPriceFormatted = {
-              maxPriorityFeePerGas: (priorityFee * multiplier) / SCALING_FACTOR,
-              maxFeePerGas: (baseFee * multiplier) / SCALING_FACTOR,
-            };
-          }
-          break;
-
-        case GasFeeModel.LEGACY:
-          if (gasPrice) {
-            gasPriceFormatted = {
-              gasPrice: (gasPrice * multiplier) / SCALING_FACTOR,
-            };
-          }
-          break;
-      }
-    } else {
-      switch (gasPriceSettings.model) {
-        case GasFeeModel.EIP1559:
-          gasPriceFormatted = {
-            maxPriorityFeePerGas: gasPriceSettings.maxPriorityFeePerGas,
-            maxFeePerGas: gasPriceSettings.maxFeePerGas,
-          };
-          break;
-
-        case GasFeeModel.LEGACY:
-          gasPriceFormatted = { gasPrice: gasPriceSettings.gasPrice };
-          break;
-      }
-    }
-
-    console.log(listParams);
-
-    try {
-      const estimatedGas = await publicClient.estimateContractGas({
-        account: address,
-        ...listParams,
-      } as any);
-
-      // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
-      const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
-      console.log(gasToUse);
-
-      const { request } = await publicClient.simulateContract({
-        ...listParams,
-        account: address,
-        ...gasPriceFormatted,
-        gas: gasToUse,
-      } as any);
-
-      hash = await walletClient.writeContract({ ...request, account: undefined }); // TODO: remove any
-
-      closeConfirmInWalletAlert();
-
-      if (hash) {
-        setListTokenHash(hash);
-        const transaction = await publicClient.getTransaction({
-          hash,
-        });
-
-        const nonce = transaction.nonce;
-        setListTokenStatus(ListTokenStatus.LOADING);
-        addRecentTransaction(
-          {
-            hash,
-            nonce,
-            chainId,
-            gas: {
-              ...stringifyObject({ ...gasPriceFormatted, model: GasFeeModel.EIP1559 }),
-              // gas: gasLimit.toString(),
-            },
-            params: {
-              ...stringifyObject(listParams),
-              abi: [getAbiItem({ name: "exactInputSingle", abi: ROUTER_ABI })],
-            },
-            title: {
-              symbol: tokenA.symbol!,
-              template: RecentTransactionTitleTemplate.LIST_SINGLE,
-              logoURI: tokenA?.logoURI || "/tokens/placeholder.svg",
-              autoListing: autoListing?.name || "Unknown",
-            },
-          },
-          address,
+        setListTokenStatus(ListTokenStatus.PENDING_APPROVE);
+        const result = await writeTokenApprove(
+          parseUnits(amountToApprove, paymentToken.token.decimals),
         );
 
-        const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
-        updateAllowance();
-        if (receipt.status === "success") {
-          setListTokenStatus(ListTokenStatus.SUCCESS);
-        }
+        if (!result?.success) {
+          setListTokenStatus(ListTokenStatus.INITIAL);
+          closeConfirmInWalletAlert();
+          return;
+        } else {
+          setApproveHash(result.hash);
+          setListTokenStatus(ListTokenStatus.LOADING_APPROVE);
+          closeConfirmInWalletAlert();
 
-        if (receipt.status === "reverted") {
-          setListTokenStatus(ListTokenStatus.ERROR);
+          const approveReceipt = await publicClient.waitForTransactionReceipt({
+            hash: result.hash,
+          });
 
-          const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
-
-          if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
-            setErrorType(ListError.OUT_OF_GAS);
-          } else {
-            setErrorType(ListError.UNKNOWN);
+          if (approveReceipt.status === "reverted") {
+            setListTokenStatus(ListTokenStatus.APPROVE_ERROR);
+            return;
           }
         }
+      }
+
+      if (!tokenA || !tokenB || !address || !listParams) {
+        return;
+      }
+
+      setListTokenStatus(ListTokenStatus.PENDING);
+      openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
+
+      let hash;
+
+      let gasPriceFormatted = {};
+
+      if (gasPriceOption !== GasOption.CUSTOM) {
+        const multiplier = baseFeeMultipliers[chainId][gasPriceOption];
+        switch (gasPriceSettings.model) {
+          case GasFeeModel.EIP1559:
+            if (priorityFee && baseFee) {
+              gasPriceFormatted = {
+                maxPriorityFeePerGas: (priorityFee * multiplier) / SCALING_FACTOR,
+                maxFeePerGas: (baseFee * multiplier) / SCALING_FACTOR,
+              };
+            }
+            break;
+
+          case GasFeeModel.LEGACY:
+            if (gasPrice) {
+              gasPriceFormatted = {
+                gasPrice: (gasPrice * multiplier) / SCALING_FACTOR,
+              };
+            }
+            break;
+        }
       } else {
+        switch (gasPriceSettings.model) {
+          case GasFeeModel.EIP1559:
+            gasPriceFormatted = {
+              maxPriorityFeePerGas: gasPriceSettings.maxPriorityFeePerGas,
+              maxFeePerGas: gasPriceSettings.maxFeePerGas,
+            };
+            break;
+
+          case GasFeeModel.LEGACY:
+            gasPriceFormatted = { gasPrice: gasPriceSettings.gasPrice };
+            break;
+        }
+      }
+
+      try {
+        const estimatedGas = await publicClient.estimateContractGas({
+          account: address,
+          ...listParams,
+        } as any);
+
+        // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
+        const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
+
+        const { request } = await publicClient.simulateContract({
+          ...listParams,
+          account: address,
+          ...gasPriceFormatted,
+          gas: gasToUse,
+        } as any);
+
+        hash = await walletClient.writeContract({ ...request, account: undefined }); // TODO: remove any
+
+        closeConfirmInWalletAlert();
+
+        if (hash) {
+          setListTokenHash(hash);
+          const transaction = await publicClient.getTransaction({
+            hash,
+          });
+
+          const nonce = transaction.nonce;
+          setListTokenStatus(ListTokenStatus.LOADING);
+
+          if (tokensToList.length) {
+            addRecentTransaction(
+              {
+                hash,
+                nonce,
+                chainId,
+                gas: {
+                  ...stringifyObject({ ...gasPriceFormatted, model: GasFeeModel.EIP1559 }),
+                  gas: gasToUse.toString(),
+                },
+                params: {
+                  ...stringifyObject(listParams),
+                  abi: [getAbiItem({ name: "exactInputSingle", abi: ROUTER_ABI })],
+                },
+                title:
+                  tokensToList.length === 2
+                    ? {
+                        symbol0: tokenA.wrapped.symbol!,
+                        symbol1: tokenB.wrapped.symbol!,
+                        template: RecentTransactionTitleTemplate.LIST_DOUBLE,
+                        logoURI0: tokenA?.logoURI || "/tokens/placeholder.svg",
+                        logoURI1: tokenB?.logoURI || "/tokens/placeholder.svg",
+                        autoListing: autoListing?.name || "Unknown",
+                      }
+                    : {
+                        symbol: tokensToList[0]?.symbol || "Unknown",
+                        template: RecentTransactionTitleTemplate.LIST_SINGLE,
+                        logoURI: tokensToList[0]?.logoURI || "/tokens/placeholder.svg",
+                        autoListing: autoListing?.name || "Unknown",
+                      },
+              },
+              address,
+            );
+          }
+
+          const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
+          updateAllowance();
+          if (receipt.status === "success") {
+            setListTokenStatus(ListTokenStatus.SUCCESS);
+          }
+
+          if (receipt.status === "reverted") {
+            setListTokenStatus(ListTokenStatus.ERROR);
+
+            const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
+
+            if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
+              setErrorType(ListError.OUT_OF_GAS);
+            } else {
+              setErrorType(ListError.UNKNOWN);
+            }
+          }
+        } else {
+          setListTokenStatus(ListTokenStatus.INITIAL);
+        }
+      } catch (e) {
+        console.log(e);
         setListTokenStatus(ListTokenStatus.INITIAL);
       }
-    } catch (e) {
-      console.log(e);
-      setListTokenStatus(ListTokenStatus.INITIAL);
-    }
-  }, [
-    addRecentTransaction,
-    address,
-    autoListing?.name,
-    baseFee,
-    chainId,
-    closeConfirmInWalletAlert,
-    customGasLimit,
-    gasPrice,
-    gasPriceOption,
-    gasPriceSettings,
-    gasPriceSettings.model,
-    isAllowed,
-    isFree,
-    listParams,
-    openConfirmInWalletAlert,
-    paymentToken,
-    poolAddress,
-    priorityFee,
-    publicClient,
-    setApproveHash,
-    setErrorType,
-    setListTokenHash,
-    setListTokenStatus,
-    t,
-    tokenA,
-    tokenB,
-    updateAllowance,
-    walletClient,
-    writeTokenApprove,
-  ]);
+    },
+    [
+      addRecentTransaction,
+      address,
+      autoListing?.name,
+      baseFee,
+      chainId,
+      closeConfirmInWalletAlert,
+      customGasLimit,
+      gasPrice,
+      gasPriceOption,
+      gasPriceSettings,
+      isAllowed,
+      isFree,
+      listParams,
+      openConfirmInWalletAlert,
+      paymentToken,
+      poolAddress,
+      priorityFee,
+      publicClient,
+      setApproveHash,
+      setErrorType,
+      setListTokenHash,
+      setListTokenStatus,
+      t,
+      tokenA,
+      tokenB,
+      updateAllowance,
+      walletClient,
+      writeTokenApprove,
+    ],
+  );
 
   return { handleList };
 }

@@ -44,6 +44,7 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -175,7 +176,12 @@ export default function ListTokenPage() {
   const { tokenA, tokenB, setTokenA, setTokenB } = useListTokensStore();
   const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
 
-  const isPoolExists = useMemo(() => pool[0] !== PoolState.NOT_EXISTS, [pool]);
+  const isPoolExists = useMemo(
+    () => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID,
+    [pool],
+  );
+
+  console.log(pool);
 
   const [tokenAAddress, setTokenAAddress] = useState("");
   const [tokenBAddress, setTokenBAddress] = useState("");
@@ -198,7 +204,7 @@ export default function ListTokenPage() {
   const handleChange = useCallback(
     async (
       e: ChangeEvent<HTMLInputElement>,
-      setToken: (token: Currency) => void,
+      setToken: (token: Currency | undefined) => void,
       setTokenAddress: (value: string) => void,
     ) => {
       const value = e.target.value;
@@ -245,6 +251,8 @@ export default function ListTokenPage() {
         );
 
         setToken(_token);
+      } else {
+        setToken(undefined);
       }
     },
     [chainId, publicClient, tokens],
@@ -264,9 +272,6 @@ export default function ListTokenPage() {
   const { setIsOpen: setAutoListingSelectOpened } = useChooseAutoListingDialogStore();
 
   const tokensToList = useTokensToList();
-
-  console.log(gasPriceSettings, gasPriceOption);
-  console.log(customGasLimit, estimatedGas);
 
   const { baseFee, gasPrice, priorityFee } = useFees();
 
@@ -294,6 +299,27 @@ export default function ListTokenPage() {
       }
     }
   }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
+
+  const firstFieldError = useMemo(() => {
+    if (tokenAAddress && !isAddress(tokenAAddress)) {
+      return "Token address is invalid";
+    }
+    return;
+  }, [tokenAAddress]);
+
+  const sameTokensSelected = useMemo(() => {
+    return Boolean(tokenAAddress && tokenAAddress === tokenBAddress);
+  }, [tokenAAddress, tokenBAddress]);
+
+  const secondFieldError = useMemo(() => {
+    if (tokenBAddress && !isAddress(tokenBAddress)) {
+      return "Token address is invalid";
+    }
+
+    if (sameTokensSelected) {
+      return "Second token should be different";
+    }
+  }, [sameTokensSelected, tokenBAddress]);
 
   return (
     <>
@@ -345,7 +371,7 @@ export default function ListTokenPage() {
                 <div className="flex flex-col gap-4 pb-5">
                   <div>
                     <InputLabel label="Token contract address" />
-                    <div className="bg-secondary-bg relative flex items-center border border-transparent rounded-2 pr-[3px]">
+                    <div className="bg-secondary-bg relative flex items-center rounded-3 pr-[3px]">
                       <input
                         className="bg-transparent peer duration-200 focus:outline-0 h-12 pl-5 placeholder:text-tertiary-text text-16 w-full rounded-2 pr-2"
                         value={tokenAAddress}
@@ -356,30 +382,42 @@ export default function ListTokenPage() {
                         placeholder="Token contract address"
                       />
                       <button
-                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hover:bg-green-bg hover:border-green duration-200 hover:shadow hover:shadow-green/60"
+                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hocus:bg-green-bg hocus:border-green duration-200 hocus:shadow hocus:shadow-green/60"
                         onClick={() => {
                           setCurrentlyPicking("tokenA");
                           setPickTokenOpened(true);
                         }}
                       >
-                        <Image
-                          className="mr-1"
-                          width={24}
-                          height={24}
-                          src={tokenA?.logoURI || "/tokens/placeholder.svg"}
-                          alt=""
-                        />
-                        {tokenA?.symbol || "Select token"}
+                        {tokenA && (
+                          <Image
+                            className="mr-1"
+                            width={24}
+                            height={24}
+                            src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                            alt=""
+                          />
+                        )}
+                        {tokenA?.symbol || <span className="text-tertiary-text">Select token</span>}
                         <Svg iconName="small-expand-arrow" />
                       </button>
-                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow peer-hover:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
+                      <div
+                        className={clsx(
+                          "duration-200 rounded-2 pointer-events-none absolute w-full h-full border peer-hocus:shadow top-0 left-0",
+                          firstFieldError
+                            ? "border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
+                            : "border-transparent peer-hocus:border-green peer-hocus:shadow-green/60",
+                        )}
+                      />
                     </div>
-                    <HelperText helperText="Enter the contract address of the token you want to list" />
+                    <HelperText
+                      error={firstFieldError}
+                      helperText="Enter the contract address of the token you want to list"
+                    />
                   </div>
 
                   <div>
                     <InputLabel label="Paired token contract address" />
-                    <div className="bg-secondary-bg relative flex items-center border border-transparent rounded-2 pr-[3px]">
+                    <div className="bg-secondary-bg relative flex items-center rounded-3 pr-[3px]">
                       <input
                         className="bg-transparent peer duration-200 focus:outline-0 h-12 pl-5 placeholder:text-tertiary-text text-16 w-full rounded-2 pr-2"
                         value={tokenBAddress}
@@ -390,33 +428,45 @@ export default function ListTokenPage() {
                         placeholder="Token contract address"
                       />
                       <button
-                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hover:bg-green-bg hover:border-green duration-200 hover:shadow hover:shadow-green/60"
+                        className="flex-shrink-0 p-2 flex items-center border border-transparent gap-1 text-primary-text bg-primary-bg rounded-2 hocus:bg-green-bg hocus:border-green duration-200 hocus:shadow hocus:shadow-green/60"
                         onClick={() => {
                           setCurrentlyPicking("tokenB");
                           setPickTokenOpened(true);
                         }}
                       >
-                        <Image
-                          className="mr-1"
-                          width={24}
-                          height={24}
-                          src={tokenB?.logoURI || "/tokens/placeholder.svg"}
-                          alt=""
-                        />
-                        {tokenB?.symbol || "Select token"}
+                        {tokenB && (
+                          <Image
+                            className="mr-1"
+                            width={24}
+                            height={24}
+                            src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                            alt=""
+                          />
+                        )}
+                        {tokenB?.symbol || <span className="text-tertiary-text">Select token</span>}
                         <Svg iconName="small-expand-arrow" />
                       </button>
-                      <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow peer-hover:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
+                      <div
+                        className={clsx(
+                          "duration-200 rounded-2 pointer-events-none absolute w-full h-full border peer-hocus:shadow top-0 left-0",
+                          secondFieldError
+                            ? "border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
+                            : "border-transparent peer-hocus:border-green peer-hocus:shadow-green/60",
+                        )}
+                      />
                     </div>
-                    <HelperText helperText="Enter or select the paired token address" />
+                    <HelperText
+                      error={secondFieldError}
+                      helperText="Enter or select the paired token address"
+                    />
                   </div>
 
-                  {!isPoolExists && tokenA && tokenB && (
+                  {!isPoolExists && !sameTokensSelected && tokenA && tokenB && (
                     <Alert
                       text={
                         <span>
                           There is no existing pool, so you cannot list the primary token. Please{" "}
-                          <a target="_blank" href="/add" className="text-green hover:underline">
+                          <a target="_blank" href="/add" className="text-green hocus:underline">
                             create a pool
                           </a>{" "}
                           first.
@@ -439,7 +489,9 @@ export default function ListTokenPage() {
                       className="bg-secondary-bg justify-between pl-5"
                       onClick={() => setAutoListingSelectOpened(true)}
                     >
-                      {autoListing?.name || "Select token list"}
+                      {autoListing?.name || (
+                        <span className="text-tertiary-text">Select token list</span>
+                      )}
                     </SelectButton>
                     <HelperText
                       helperText={
@@ -449,7 +501,6 @@ export default function ListTokenPage() {
                           <span className="flex items-center gap-2">
                             Contract address:{" "}
                             <ExternalTextLink
-                              color="white"
                               text={truncateMiddle(autoListing.id)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,

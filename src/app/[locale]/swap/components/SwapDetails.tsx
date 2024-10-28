@@ -63,9 +63,10 @@ export default function SwapDetails({
         <div
           className={clsx(
             "h-12 flex justify-between duration-200 px-5 items-center text-secondary-text",
-            !isDetailsExpanded ? "hover:bg-green-bg rounded-3" : "rounded-t-3",
+            !isDetailsExpanded ? "hocus:bg-green-bg rounded-3" : "rounded-t-3",
           )}
           role="button"
+          tabIndex={0}
           onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
         >
           <button
@@ -73,7 +74,7 @@ export default function SwapDetails({
               e.stopPropagation();
               setIsPriceInverted(!isPriceInverted);
             }}
-            className="text-14 flex items-center hover:text-green gap-1 duration-200"
+            className="text-14 flex items-center hocus:text-green gap-1 duration-200"
           >
             <span>1 {isPriceInverted ? tokenB.symbol : tokenA.symbol}</span>
             <span>=</span>

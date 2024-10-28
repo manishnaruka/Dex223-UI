@@ -219,7 +219,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
         <div className="h-full bg-green" />
         <div
           className={clsx(
-            "absolute border-[2px]  top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full w-6 h-6 bg-primary-bg",
+            "absolute border-[2px]  top-1/2 -translate-y-1/2 rounded-full w-6 h-6 bg-primary-bg",
             rateRange === "low" && "border-red-light",
             rateRange === "medium" && "border-orange -translate-x-1/2 ",
             rateRange === "high" && "border-green",
@@ -228,7 +228,13 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
             internalTokenScore < 99 ? { left: `${(internalTokenScore + 100) / 2}%` } : { right: 0 }
           }
         >
-          <Image src={logoURI || "/tokens/placeholder.svg"} alt="" width={20} height={20} />
+          <Image
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            src={logoURI || "/tokens/placeholder.svg"}
+            alt=""
+            width={20}
+            height={20}
+          />
         </div>
       </div>
       <div className="grid grid-cols-3 items-center text-secondary-text mt-4 mb-5 text-12 ">
@@ -449,7 +455,7 @@ export function TrustMarker({ rate, logoURI, totalScore }: TrustMarkerProps) {
 
   return (
     <div
-      className="p-0.5 rounded-full bg-primary-bg relative z-10 group-hover:bg-tertiary-bg duration-200"
+      className="p-0.5 rounded-full bg-primary-bg relative z-10 group-hocus:bg-tertiary-bg duration-200"
       ref={refs.setReference}
       {...getReferenceProps()}
     >

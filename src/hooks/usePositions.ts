@@ -1,41 +1,22 @@
 import JSBI from "jsbi";
-import { useCallback, useMemo, useState } from "react";
-import { Address, getAbiItem } from "viem";
-import {
-  useAccount,
-  useBlockNumber,
-  usePublicClient,
-  useReadContract,
-  useReadContracts,
-  useSimulateContract,
-  useWalletClient,
-  useWriteContract,
-} from "wagmi";
+import { useMemo } from "react";
+import { Address } from "viem";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
 
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { useTokens } from "@/hooks/useTokenLists";
-import addToast from "@/other/toast";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Price } from "@/sdk_hybrid/entities/fractions/price";
-import { Pool } from "@/sdk_hybrid/entities/pool";
 import { Position } from "@/sdk_hybrid/entities/position";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
-import {
-  GasFeeModel,
-  RecentTransactionTitleTemplate,
-  stringifyObject,
-  useRecentTransactionsStore,
-} from "@/stores/useRecentTransactionsStore";
 
-import { AllowanceStatus } from "./useAllowance";
 import useCurrentChainId from "./useCurrentChainId";
 import { usePool } from "./usePools";
 
@@ -63,7 +44,7 @@ export function usePositionFromTokenId(tokenId: bigint) {
       loading,
       position: positions?.[0],
     };
-  }, [loading, positions]);
+  }, [loading, positions?.[0]]);
 }
 export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
   const chainId = useCurrentChainId();
@@ -313,185 +294,6 @@ export function usePositionFromPositionInfo(positionDetails: PositionInfo) {
       });
     }
   }, [pool, positionDetails]);
-}
-
-const MAX_UINT128 = BigInt(2) ** BigInt(128) - BigInt(1);
-
-export function usePositionFees({
-  poolAddress,
-  pool,
-  tokenId,
-}: {
-  pool?: Pool;
-  tokenId?: bigint;
-  poolAddress?: Address;
-}): {
-  fees: [CurrencyAmount<Currency>, CurrencyAmount<Currency>] | [undefined, undefined];
-  handleCollectFees: (params: { tokensOutCode: number }) => void;
-  status: AllowanceStatus;
-  claimFeesHash?: string;
-  resetCollectFees: () => void;
-} {
-  const [status, setStatus] = useState(AllowanceStatus.INITIAL);
-  const [claimFeesHash, setClaimFeesHash] = useState(undefined as undefined | string);
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
-
-  const { address } = useAccount();
-  const chainId = useCurrentChainId();
-  const { addRecentTransaction } = useRecentTransactionsStore();
-
-  const result = useReadContract({
-    address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
-    abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-    functionName: "ownerOf",
-    args: [tokenId!],
-    query: {
-      enabled: Boolean(tokenId),
-    },
-  });
-  const recipient = result.data! || address;
-  const latestBlockNumber = useBlockNumber();
-
-  // TODO: is this result cached? wrong numbers in UI, but in metamask — ok
-  const { data: collectResult } = useSimulateContract({
-    address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
-    abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-    functionName: "collect",
-    args: [
-      {
-        pool: poolAddress!,
-        tokenId: tokenId!,
-        recipient: recipient,
-        amount0Max: MAX_UINT128,
-        amount1Max: MAX_UINT128,
-        tokensOutCode: 0,
-      },
-    ],
-    query: {
-      enabled: Boolean(tokenId && result.data),
-    },
-  });
-
-  const { writeContract } = useWriteContract();
-
-  const handleCollectFees = useCallback(
-    async ({ tokensOutCode }: { tokensOutCode: number }) => {
-      setStatus(AllowanceStatus.INITIAL);
-      if (!publicClient || !walletClient || !chainId || !address || !pool || !collectResult) {
-        return;
-      }
-      setStatus(AllowanceStatus.PENDING);
-
-      const params = {
-        address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
-        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        functionName: "collect" as const,
-        args: [
-          {
-            pool: poolAddress!,
-            tokenId: tokenId!,
-            recipient: recipient,
-            amount0Max: MAX_UINT128,
-            amount1Max: MAX_UINT128,
-            tokensOutCode,
-          },
-        ] as const,
-      };
-
-      try {
-        const estimatedGas = await publicClient.estimateContractGas(params);
-
-        const { request } = await publicClient.simulateContract({
-          ...params,
-          gas: estimatedGas + BigInt(30000),
-        });
-        const hash = await walletClient.writeContract(request);
-
-        setClaimFeesHash(hash);
-        const transaction = await publicClient.getTransaction({
-          hash,
-        });
-
-        const nonce = transaction.nonce;
-
-        addRecentTransaction(
-          {
-            hash,
-            nonce,
-            chainId,
-            gas: {
-              model: GasFeeModel.EIP1559,
-              gas: (estimatedGas + BigInt(30000)).toString(),
-              maxFeePerGas: undefined,
-              maxPriorityFeePerGas: undefined,
-            },
-            params: {
-              ...stringifyObject(params),
-              abi: [getAbiItem({ name: "collect", abi: NONFUNGIBLE_POSITION_MANAGER_ABI })],
-            },
-            title: {
-              template: RecentTransactionTitleTemplate.COLLECT,
-              symbol0: pool.token0.symbol!,
-              symbol1: pool.token1.symbol!,
-              amount0: CurrencyAmount.fromRawAmount(
-                pool.token0,
-                collectResult.result[0].toString(),
-              ).toSignificant(2),
-              amount1: CurrencyAmount.fromRawAmount(
-                pool.token1,
-                collectResult.result[1].toString(),
-              ).toSignificant(2),
-              logoURI0: (pool?.token0 as Token).logoURI!,
-              logoURI1: (pool?.token1 as Token).logoURI!,
-            },
-          },
-          address,
-        );
-        if (hash) {
-          setStatus(AllowanceStatus.LOADING);
-          await publicClient.waitForTransactionReceipt({ hash });
-          setStatus(AllowanceStatus.SUCCESS);
-          return { success: true };
-        }
-      } catch (error) {
-        console.error(error);
-        setStatus(AllowanceStatus.ERROR);
-      }
-    },
-    [
-      addRecentTransaction,
-      address,
-      chainId,
-      collectResult,
-      pool,
-      publicClient,
-      tokenId,
-      walletClient,
-      poolAddress,
-      recipient,
-      setClaimFeesHash,
-    ],
-  );
-
-  const resetCollectFees = () => {
-    setStatus(AllowanceStatus.INITIAL);
-    setClaimFeesHash(undefined);
-  };
-
-  return {
-    fees:
-      pool && collectResult?.result
-        ? [
-            CurrencyAmount.fromRawAmount(pool.token0, collectResult.result[0].toString()),
-            CurrencyAmount.fromRawAmount(pool.token1, collectResult.result[1].toString()),
-          ]
-        : [undefined, undefined],
-    handleCollectFees,
-    status,
-    claimFeesHash,
-    resetCollectFees,
-  };
 }
 
 function getRatio(

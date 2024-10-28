@@ -32,10 +32,10 @@ export const SelectButton = forwardRef(
         ref={ref}
         {...props}
         className={clsxMerge(
-          "flex items-center gap-2 duration-[600ms] text-base text-primary-text hover:bg-green-bg bg-primary-bg",
+          "flex items-center gap-2 duration-[600ms] text-base text-primary-text hocus:bg-green-bg bg-primary-bg",
           variant === "rectangle" && "rounded-2",
           variant === "rounded" &&
-            "rounded-[80px] border border-transparent hover:bg-green-bg hover:shadow shadow-green/60 hover:border-green",
+            "rounded-[80px] border border-transparent hocus:bg-green-bg hocus:shadow shadow-green/60 hocus:border-green",
           isOpen && "bg-green-bg border-green",
           size === "large" && "p-2 lg:px-5 lg:py-2.5 lg:text-24 min-h-12",
           size === "regular" && "py-2 px-3",

@@ -5,6 +5,7 @@ const customTwMerge = extendTailwindMerge({
   extend: {
     theme: {
       spacing: ["sm", "md", "lg", "xl", "2xl"],
+      borderRadius: ["2", "3", "20"],
     },
     classGroups: {
       "font-size": [

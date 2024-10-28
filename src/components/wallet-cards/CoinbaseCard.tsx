@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useConnect } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
 import {
@@ -15,24 +15,26 @@ const { image, name } = wallets.coinbase;
 export default function CoinbaseCard() {
   const t = useTranslations("Wallet");
   const { connectors, connectAsync, isPending } = useConnect();
-
+  const { isConnecting } = useAccount();
   const { setName, chainToConnect } = useConnectWalletStore();
   const { setIsOpened } = useConnectWalletDialogStateStore();
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
 
+  console.log(connectors);
   return (
     <PickButton
+      disabled={isConnecting}
       onClick={() => {
         setName("coinbase");
-        const connectorToConnect = connectors.find((c) => c.id === rdnsMap.coinbase);
+        const connectorToConnect = connectors[1];
 
         if (!connectorToConnect) {
           return addToast(t("install_coinbase"), "error");
         }
 
         connectAsync({
-          connector: connectors[3],
+          connector: connectorToConnect,
           chainId: chainToConnect,
         })
           .then(() => {
@@ -43,6 +45,7 @@ export default function CoinbaseCard() {
             if (e.code && e.code === 4001) {
               addToast(t("user_rejected"), "error");
             } else {
+              console.log(e);
               addToast(t("something_went_wrong"), "error");
             }
           });

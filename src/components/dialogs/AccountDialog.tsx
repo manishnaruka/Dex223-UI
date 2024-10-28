@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
@@ -42,7 +42,10 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
 
     return [];
   }, [address, transactions]);
+  const { connector, isConnected } = useAccount();
 
+  console.log(connector);
+  console.log(isConnected);
   return (
     <>
       <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
@@ -73,8 +76,11 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
             </div>
           </div>
           <button
-            onClick={() => disconnect()}
-            className="flex items-center gap-2 hover:text-green duration-200"
+            onClick={() => {
+              setIsOpenedAccount(false);
+              disconnect({ connector });
+            }}
+            className="flex items-center gap-2 hocus:text-green duration-200"
           >
             {t("disconnect")}
             <Svg iconName="logout" />
@@ -122,7 +128,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                   </span>
                   <button
                     onClick={clearTransactions}
-                    className="border-primary-border flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hover:bg-white/20 duration-200 hover:border-primary-text"
+                    className="border-primary-border flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hocus:bg-white/20 duration-200 hocus:border-primary-text"
                   >
                     {tRecentTransactions("clear_all")}
                     <Svg iconName="delete" />
@@ -167,8 +173,8 @@ export default function AccountDialog() {
         isOpen={isOpenedAccount}
         onClick={() => setIsOpenedAccount(!isOpenedAccount)}
       >
-        <span className="flex gap-2 items-center">
-          <Svg iconName="wallet" />
+        <span className="flex gap-2 items-center text-secondary-text">
+          <Svg className="text-tertiary-text" iconName="wallet" />
           {truncateMiddle(address || "", { charsFromStart: 5, charsFromEnd: 3 })}
         </span>
       </SelectButton>
@@ -226,7 +232,7 @@ export default function AccountDialog() {
             size={ButtonSize.MEDIUM}
             tabletSize={ButtonSize.SMALL}
             mobileSize={ButtonSize.SMALL}
-            className="md:rounded-2 md:font-normal w-full md:w-auto"
+            className="rounded-2 md:rounded-2 md:font-normal w-full md:w-auto"
             onClick={() => setOpenedWallet(true)}
           >
             Connect wallet

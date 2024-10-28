@@ -5,6 +5,7 @@ import { useState } from "react";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
+import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import { db } from "@/db/db";
@@ -40,7 +41,7 @@ export default function ManageTokenItem({
         </div>
         <div className="flex items-center gap-3">
           {token.wrapped.lists?.includes(`custom-${chainId}`) && (
-            <div className="group-hover:opacity-100 opacity-0 duration-200">
+            <div className="group-hocus:opacity-100 opacity-0 duration-200">
               <IconButton
                 variant={IconButtonVariant.DELETE}
                 handleDelete={() => {
@@ -111,10 +112,21 @@ export default function ManageTokenItem({
             </div>
           )}
           {token.isToken && (
-            <span className="flex gap-0.5 items-center text-secondary-text text-14">
-              {token.wrapped.lists?.length || 1}
-              <Svg className="text-tertiary-text" iconName="list" />
-            </span>
+            <Tooltip
+              text={`Token belongs to ${token.lists?.length || 1} token lists`}
+              renderTrigger={(ref, refProps) => {
+                return (
+                  <span
+                    ref={ref.setReference}
+                    {...refProps}
+                    className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer"
+                  >
+                    {token.lists?.length || 1}
+                    <Svg className="text-tertiary-text" iconName="list" />
+                  </span>
+                );
+              }}
+            />
           )}
 
           {token.isToken && (

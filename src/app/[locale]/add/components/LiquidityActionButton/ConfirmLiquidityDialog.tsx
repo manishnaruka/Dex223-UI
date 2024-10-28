@@ -1,9 +1,8 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Address, formatEther, formatGwei } from "viem";
-import { useBlockNumber, useGasPrice } from "wagmi";
 
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import Alert from "@/components/atoms/Alert";
@@ -35,8 +34,13 @@ import {
   useLiquidityApprove,
 } from "../../hooks/useLiquidityApprove";
 import { usePriceRange } from "../../hooks/usePrice";
+import { useSortedTokens } from "../../hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../hooks/useV3DerivedMintInfo";
 import { Field, useTokensStandards } from "../../stores/useAddLiquidityAmountsStore";
+import {
+  useAddLiquidityGasLimitStore,
+  useAddLiquidityGasPrice,
+} from "../../stores/useAddLiquidityGasSettings";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
 import { LiquidityStatus, useLiquidityStatusStore } from "../../stores/useLiquidityStatusStore";
@@ -64,8 +68,8 @@ function isDefinedTransactionItem(item: {
 const ApproveDialog = () => {
   const t = useTranslations("Liquidity");
 
-  const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
-  const { status, setStatus } = useLiquidityStatusStore();
+  const { setIsOpen } = useConfirmLiquidityDialogStore();
+  const { setStatus } = useLiquidityStatusStore();
 
   const chainId = useCurrentChainId();
   const chainSymbol = getChainSymbol(chainId);
@@ -235,10 +239,15 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const chainId = useCurrentChainId();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
+  const { token0, token1 } = useSortedTokens({
+    tokenA,
+    tokenB,
+  });
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
   const [showFirst, setShowFirst] = useState(true);
+  const { liquidityHash } = useLiquidityStatusStore();
 
   const { parsedAmounts, position, noLiquidity } = useV3DerivedMintInfo({
     tokenA,
@@ -248,12 +257,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   });
 
   // Gas price
-  const { data: gasPrice, refetch: refetchGasPrice } = useGasPrice();
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-
-  useEffect(() => {
-    refetchGasPrice();
-  }, [blockNumber, refetchGasPrice]);
+  const gasPrice = useAddLiquidityGasPrice();
 
   const buttonText = increase
     ? "Add liquidity"
@@ -281,7 +285,9 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
     tokenId,
   });
 
+  const { customGasLimit } = useAddLiquidityGasLimitStore();
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
+  const gasToUse = customGasLimit ? customGasLimit : estimatedMintGas + BigInt(30000); // set custom gas here if user changed it
 
   if (!tokenA || !tokenB) {
     return null;
@@ -311,6 +317,14 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
             />
           </div>
           <div className="flex items-center gap-2 justify-end">
+            {liquidityHash && (
+              <a
+                target="_blank"
+                href={getExplorerLink(ExplorerLinkType.TRANSACTION, liquidityHash, chainId)}
+              >
+                <IconButton iconName="forward" />
+              </a>
+            )}
             {status === AllowanceStatus.PENDING && (
               <>
                 <Preloader type="linear" />
@@ -363,7 +377,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                   "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                   showFirst
                     ? "bg-green-bg border-green text-primary-text"
-                    : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
                 {tokenA?.symbol}
@@ -374,7 +388,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                   "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                   !showFirst
                     ? "bg-green-bg border-green text-primary-text"
-                    : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
                 {tokenB?.symbol}
@@ -384,8 +398,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           <div className="grid grid-cols-[1fr_20px_1fr] mb-3">
             <PositionPriceRangeCard
               showFirst={showFirst}
-              tokenA={tokenA}
-              tokenB={tokenB}
+              token0={token0}
+              token1={token1}
               price={minPriceString}
             />
             <div className="relative">
@@ -395,8 +409,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
             </div>
             <PositionPriceRangeCard
               showFirst={showFirst}
-              tokenA={tokenA}
-              tokenB={tokenB}
+              token0={token0}
+              token1={token1}
               price={maxPriceString}
               isMax
             />
@@ -407,8 +421,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
               <div className="text-18">{currentPriceString}</div>
               <div className="text-14 text-secondary-text">
                 {showFirst
-                  ? `${tokenB?.symbol} per ${tokenA?.symbol}`
-                  : `${tokenA?.symbol} per ${tokenB?.symbol}`}
+                  ? `${token0?.symbol} per ${token1?.symbol}`
+                  : `${token1?.symbol} per ${token0?.symbol}`}
               </div>
             </div>
           </div>
@@ -422,11 +436,11 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           </div>
           <div className="flex flex-col">
             <span className="text-14 text-secondary-text">Gas limit</span>
-            <span>{estimatedMintGas?.toString()}</span>
+            <span>{gasToUse?.toString()}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-14 text-secondary-text">Fee</span>
-            <span>{`${gasPrice && formatFloat(formatEther(gasPrice * estimatedMintGas))} ${getChainSymbol(chainId)}`}</span>
+            <span>{`${gasPrice && formatFloat(formatEther(gasPrice * gasToUse))} ${getChainSymbol(chainId)}`}</span>
           </div>
         </div>
 
@@ -519,7 +533,7 @@ function ApproveRow({
 }
 
 const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
-  const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
+  const { setIsOpen } = useConfirmLiquidityDialogStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();
@@ -630,7 +644,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .

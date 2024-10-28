@@ -48,7 +48,7 @@ export const usePoolsSearchParams = () => {
   }, [pathname, searchParams, tokenA, tokenB, tier]);
 
   useEffect(() => {
-    if (!isInitialized && tokens.length) {
+    if (!isInitialized && tokens.length > 1) {
       const queryTokenA = searchParams.get(PoolsQueryParams.tokenA);
       const queryTokenB = searchParams.get(PoolsQueryParams.tokenB);
       const queryTier = parseInt(searchParams.get(PoolsQueryParams.tier) || "");

@@ -30,7 +30,6 @@ export default function NetworkPicker() {
     useUnknownNetworkWarningStore();
 
   useEffect(() => {
-    console.log(currentNetwork);
     if (!currentNetwork) {
       openNoTokenListsEnabledWarning();
     } else {
@@ -46,7 +45,7 @@ export default function NetworkPicker() {
         placement="bottom-start"
         trigger={
           <SelectButton
-            className="pl-2 pr-1 py-1 xl:py-2 gap-0 md:gap-2 xl:px-3"
+            className="pl-2 pr-1 py-1 xl:py-2 gap-0 md:gap-2 xl:px-3 text-secondary-text"
             isOpen={isOpened}
             onClick={() => setIsOpened(!isOpened)}
           >
@@ -95,7 +94,7 @@ export default function NetworkPicker() {
           {/*<div className="pt-1">*/}
           {/*  <div*/}
           {/*    role="button"*/}
-          {/*    className="flex gap-2 items-center py-3 px-5 bg-primary-bg hover:bg-tertiary-bg duration-200"*/}
+          {/*    className="flex gap-2 items-center py-3 px-5 bg-primary-bg hocus:bg-tertiary-bg duration-200"*/}
           {/*  >*/}
           {/*    <Svg iconName="add" />*/}
           {/*    Add custom node*/}

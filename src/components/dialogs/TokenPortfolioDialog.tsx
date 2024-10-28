@@ -75,7 +75,6 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
             {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
           </span>
           <ExternalTextLink
-            color="white"
             text={`${token.address0.slice(0, 6)}...${token.address0.slice(-6)}`}
             href={getExplorerLink(ExplorerLinkType.ADDRESS, token.address0, token.chainId)}
             className="justify-between"
@@ -90,7 +89,6 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
             {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-223" />{" "}
           </span>
           <ExternalTextLink
-            color="white"
             text={`${token.address1.slice(0, 6)}...${token.address1.slice(-6)}`}
             href={getExplorerLink(ExplorerLinkType.ADDRESS, token.address1, token.chainId)}
           />

@@ -114,8 +114,6 @@ export default function AutoListingContractDetails({
     return <div>Whoops, this autolisting not found.</div>;
   }
 
-  console.log(listingContract);
-
   return (
     <>
       <Container>
@@ -144,7 +142,6 @@ export default function AutoListingContractDetails({
               value={
                 <span className="flex items-center">
                   <ExternalTextLink
-                    color="white"
                     text={truncateMiddle(params.address, { charsFromEnd: 3, charsFromStart: 3 })}
                     href="#"
                   />{" "}
@@ -317,7 +314,6 @@ export default function AutoListingContractDetails({
                             </div>
                             <div className="flex items-center">
                               <ExternalTextLink
-                                color="white"
                                 text={truncateMiddle(token.address0, {
                                   charsFromStart: 3,
                                   charsFromEnd: 3,
@@ -342,7 +338,6 @@ export default function AutoListingContractDetails({
                             </div>
                             <div className="flex items-center">
                               <ExternalTextLink
-                                color="white"
                                 text={truncateMiddle(token.address1, {
                                   charsFromStart: 3,
                                   charsFromEnd: 3,
@@ -394,7 +389,6 @@ export default function AutoListingContractDetails({
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
-                              color="white"
                               text={truncateMiddle(token.address0)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
@@ -406,7 +400,6 @@ export default function AutoListingContractDetails({
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
-                              color="white"
                               text={truncateMiddle(token.address1)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,

@@ -1,7 +1,7 @@
 import { fallback, http, webSocket } from "viem";
 import { bscTestnet, eos } from "viem/chains";
 import { createConfig, createStorage, parseCookie } from "wagmi";
-import { coinbaseWallet, metaMask, walletConnect } from "wagmi/connectors";
+import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connectors";
 
 import { sepolia } from "@/config/chains/sepolia";
 
@@ -13,11 +13,11 @@ const cookieStorage = {
   },
   setItem(key: string, value: string) {
     if (typeof window === "undefined") return;
-    document.cookie = `${key}=${value};Path=/;SameSite=Lax`;
+    document.cookie = `${key}=${value};path=/;samesite=Lax`;
   },
   removeItem(key: string) {
     if (typeof window === "undefined") return;
-    document.cookie = `${key}=;Path=/;max-age=-1`;
+    document.cookie = `${key}=;path=/;max-age=-1`;
   },
 };
 
@@ -34,17 +34,23 @@ export const config = createConfig({
     }),
     coinbaseWallet({
       appName: "DEX223",
+      appLogoUrl: "https://test-app.dex223.io/tokens/DEX.svg",
     }),
     metaMask({
       dappMetadata: {
         name: "dex223.io",
       },
+      useDeeplink: true,
+    }),
+    injected({
+      target: "trust",
     }),
   ],
   ssr: true,
   storage: createStorage({
     storage: cookieStorage,
   }),
+  multiInjectedProviderDiscovery: false, // to avoid connecting to io.metamask and other injected connectors
   transports: {
     [sepolia.id]: fallback([
       webSocket("wss://sepolia.infura.io/ws/v3/6689c099b8d542589b1842e30dbc2027"),

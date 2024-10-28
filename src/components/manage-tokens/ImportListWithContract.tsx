@@ -73,7 +73,6 @@ export default function ImportListWithContract({ setContent }: Props) {
 
     return "";
   }, [addressToImport, data?.autoListings, loading]);
-  console.log(data);
 
   return (
     <div className="flex flex-col flex-grow">

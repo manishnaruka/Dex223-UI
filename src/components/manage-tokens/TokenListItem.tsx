@@ -45,7 +45,7 @@ function ListPopoverOption(props: Props) {
     case ListActionOption.DOWNLOAD:
       return (
         <button
-          className={clsx(commonClassName, "text-primary-text hover:text-green-hover")}
+          className={clsx(commonClassName, "text-primary-text hocus:text-green-hover")}
           onClick={() => props.handleDownload()}
         >
           {t("download")}
@@ -55,7 +55,7 @@ function ListPopoverOption(props: Props) {
     case ListActionOption.REMOVE:
       return (
         <button
-          className={clsx(commonClassName, "text-red hover:text-red-hover")}
+          className={clsx(commonClassName, "text-red hocus:text-red-hover")}
           onClick={() => props.handleRemove()}
         >
           {t("remove")}
@@ -68,7 +68,7 @@ function ListPopoverOption(props: Props) {
           target="_blank"
           className={clsx(
             commonClassName,
-            "text-green hover:text-green-hover",
+            "text-green hocus:text-green-hover",
             props.href === "#" && "opacity-50 pointer-events-none",
           )}
           href={props.href}
@@ -96,147 +96,144 @@ export default function TokenListItem({
   console.log(tokenList);
 
   return (
-    <div>
-      <div className="flex justify-between py-1.5">
-        <div className="flex gap-3 items-center">
-          {tokenList?.id?.toString()?.startsWith("default") && (
-            <TokenListLogo type={TokenListLogoType.DEFAULT} chainId={tokenList.chainId} />
-          )}
-          {tokenList?.id?.toString()?.includes("autolisting") && (
-            <TokenListLogo type={TokenListLogoType.AUTOLISTING} chainId={tokenList.chainId} />
-          )}
-          {tokenList?.id?.toString()?.startsWith("custom") && (
-            <TokenListLogo type={TokenListLogoType.CUSTOM} chainId={tokenList.chainId} />
-          )}
-          {typeof tokenList.id === "number" && (
-            <TokenListLogo type={TokenListLogoType.OTHER} url={tokenList.list.logoURI} />
-          )}
+    <div className="flex justify-between py-1.5">
+      <div className="flex gap-3 items-center">
+        {tokenList?.id?.toString()?.startsWith("default") && (
+          <TokenListLogo type={TokenListLogoType.DEFAULT} chainId={tokenList.chainId} />
+        )}
+        {tokenList?.id?.toString()?.includes("autolisting") && (
+          <TokenListLogo type={TokenListLogoType.AUTOLISTING} chainId={tokenList.chainId} />
+        )}
+        {tokenList?.id?.toString()?.startsWith("custom") && (
+          <TokenListLogo type={TokenListLogoType.CUSTOM} chainId={tokenList.chainId} />
+        )}
+        {typeof tokenList.id === "number" && (
+          <TokenListLogo type={TokenListLogoType.OTHER} url={tokenList.list.logoURI} />
+        )}
 
-          <div className="flex flex-col">
-            <span>{tokenList.list.name}</span>
-            <div className="flex gap-1 items-cente text-secondary-text">
-              {tokenList.list.tokens.length} tokens
-              <Popover
-                placement="top"
-                isOpened={isPopoverOpened}
-                setIsOpened={() => setPopoverOpened(!isPopoverOpened)}
-                customOffset={12}
-                trigger={
-                  <button
-                    onClick={() => setPopoverOpened(true)}
-                    className="text-secondary-text hover:text-primary-text duration-200 relative"
-                  >
-                    <Svg size={20} iconName="settings" />
-                  </button>
-                }
-              >
-                <div className="flex flex-col gap-1 px-5 py-3 border-secondary-border border bg-primary-bg rounded-1 shadow-popover shadow-black/70">
-                  <ListPopoverOption
-                    variant={ListActionOption.VIEW}
-                    href={
-                      tokenList.autoListingContract
-                        ? getExplorerLink(
-                            ExplorerLinkType.ADDRESS,
-                            tokenList.autoListingContract,
-                            tokenList.chainId,
-                          )
-                        : "#"
-                    }
-                  />
-                  <ListPopoverOption
-                    variant={ListActionOption.DOWNLOAD}
-                    handleDownload={async () => {
-                      const blob = new Blob([JSON.stringify(tokenList.list, null, 2)], {
-                        type: "application/json",
-                      });
+        <div className="flex flex-col">
+          <span>{tokenList.list.name}</span>
+          <div className="flex gap-1 items-cente text-secondary-text">
+            {tokenList.list.tokens.length} tokens
+            <Popover
+              placement="top"
+              isOpened={isPopoverOpened}
+              setIsOpened={() => setPopoverOpened(!isPopoverOpened)}
+              customOffset={12}
+              trigger={
+                <button
+                  onClick={() => setPopoverOpened(true)}
+                  className="text-secondary-text hocus:text-primary-text duration-200 relative"
+                >
+                  <Svg size={20} iconName="settings" />
+                </button>
+              }
+            >
+              <div className="flex flex-col gap-1 px-5 py-3 border-secondary-border border bg-primary-bg rounded-1 shadow-popover shadow-black/70">
+                <ListPopoverOption
+                  variant={ListActionOption.VIEW}
+                  href={
+                    tokenList.autoListingContract
+                      ? getExplorerLink(
+                          ExplorerLinkType.ADDRESS,
+                          tokenList.autoListingContract,
+                          tokenList.chainId,
+                        )
+                      : "#"
+                  }
+                />
+                <ListPopoverOption
+                  variant={ListActionOption.DOWNLOAD}
+                  handleDownload={async () => {
+                    const blob = new Blob([JSON.stringify(tokenList.list, null, 2)], {
+                      type: "application/json",
+                    });
 
-                      download(blob, tokenList.list.name, "application/json");
-                    }}
-                  />
+                    download(blob, tokenList.list.name, "application/json");
+                  }}
+                />
 
-                  {tokenList.id !== `default-${chainId}` &&
-                    tokenList.id !== `free-autolisting-${chainId}` &&
-                    tokenList.id !== `core-autolisting-${chainId}` && (
-                      <>
-                        <ListPopoverOption
-                          variant={ListActionOption.REMOVE}
-                          handleRemove={() => {
-                            const otherEnabledLists = lists?.filter(
-                              (l) =>
-                                Boolean(l.enabled) &&
-                                Boolean(l.list.tokens.length) &&
-                                l.id !== tokenList.id,
-                            );
+                {tokenList.id !== `default-${chainId}` &&
+                  tokenList.id !== `free-autolisting-${chainId}` &&
+                  tokenList.id !== `core-autolisting-${chainId}` && (
+                    <>
+                      <ListPopoverOption
+                        variant={ListActionOption.REMOVE}
+                        handleRemove={() => {
+                          const otherEnabledLists = lists?.filter(
+                            (l) =>
+                              Boolean(l.enabled) &&
+                              Boolean(l.list.tokens.length) &&
+                              l.id !== tokenList.id,
+                          );
 
-                            const totalTokensInOtherEnabledLists = otherEnabledLists?.reduce(
-                              (accumulator, currentValue) =>
-                                accumulator + currentValue.list.tokens.length,
-                              0,
-                            );
+                          const totalTokensInOtherEnabledLists = otherEnabledLists?.reduce(
+                            (accumulator, currentValue) =>
+                              accumulator + currentValue.list.tokens.length,
+                            0,
+                          );
 
-                            if (
-                              tokenList.enabled &&
-                              (!totalTokensInOtherEnabledLists ||
-                                totalTokensInOtherEnabledLists < 2)
-                            ) {
-                              addToast("You can't delete this token list now", "warning");
-                              return;
-                            }
-                            setDeleteOpened(true);
-                          }}
-                        />
-                        <DrawerDialog isOpen={deleteOpened} setIsOpen={setDeleteOpened}>
-                          <div className="w-full md:w-[600px]">
-                            <DialogHeader
-                              onClose={() => setDeleteOpened(false)}
-                              title={t("removing_list")}
+                          if (
+                            tokenList.enabled &&
+                            (!totalTokensInOtherEnabledLists || totalTokensInOtherEnabledLists < 2)
+                          ) {
+                            addToast("You can't delete this token list now", "warning");
+                            return;
+                          }
+                          setDeleteOpened(true);
+                        }}
+                      />
+                      <DrawerDialog isOpen={deleteOpened} setIsOpen={setDeleteOpened}>
+                        <div className="w-full md:w-[600px]">
+                          <DialogHeader
+                            onClose={() => setDeleteOpened(false)}
+                            title={t("removing_list")}
+                          />
+                          <div className="px-4 pb-4 md:px-10 md:pb-10">
+                            <Image
+                              className="mx-auto mt-5 mb-2"
+                              src={tokenList.list.logoURI || ""}
+                              alt=""
+                              width={60}
+                              height={60}
                             />
-                            <div className="px-4 pb-4 md:px-10 md:pb-10">
-                              <Image
-                                className="mx-auto mt-5 mb-2"
-                                src={tokenList.list.logoURI || ""}
-                                alt=""
-                                width={60}
-                                height={60}
-                              />
-                              <p className="mb-5 text-center">
-                                {t.rich("confirm_removing_list_text", {
-                                  list: tokenList.list.name,
-                                  bold: (chunks) => (
-                                    <b className="whitespace-nowrap">&quot;{chunks}&quot;</b>
-                                  ),
-                                })}
-                              </p>
-                              <div className="grid grid-cols-2 gap-2">
-                                <Button
-                                  colorScheme={ButtonColor.LIGHT_GREEN}
-                                  onClick={() => setDeleteOpened(false)}
-                                >
-                                  {t("cancel")}
-                                </Button>
-                                <Button
-                                  colorScheme={ButtonColor.RED}
-                                  onClick={() => {
-                                    db.tokenLists.delete(tokenList.id);
-                                    setDeleteOpened(false);
-                                  }}
-                                >
-                                  {t("confirm_removing")}
-                                </Button>
-                              </div>
+                            <p className="mb-5 text-center">
+                              {t.rich("confirm_removing_list_text", {
+                                list: tokenList.list.name,
+                                bold: (chunks) => (
+                                  <b className="whitespace-nowrap">&quot;{chunks}&quot;</b>
+                                ),
+                              })}
+                            </p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                colorScheme={ButtonColor.LIGHT_GREEN}
+                                onClick={() => setDeleteOpened(false)}
+                              >
+                                {t("cancel")}
+                              </Button>
+                              <Button
+                                colorScheme={ButtonColor.RED}
+                                onClick={() => {
+                                  db.tokenLists.delete(tokenList.id);
+                                  setDeleteOpened(false);
+                                }}
+                              >
+                                {t("confirm_removing")}
+                              </Button>
                             </div>
                           </div>
-                        </DrawerDialog>
-                      </>
-                    )}
-                </div>
-              </Popover>
-            </div>
+                        </div>
+                      </DrawerDialog>
+                    </>
+                  )}
+              </div>
+            </Popover>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Switch checked={tokenList.enabled} handleChange={() => toggle(tokenList.id)} />
-        </div>
+      </div>
+      <div className="flex items-center">
+        <Switch checked={tokenList.enabled} handleChange={() => toggle(tokenList.id)} />
       </div>
     </div>
   );

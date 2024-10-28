@@ -2,7 +2,8 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
@@ -24,10 +25,9 @@ import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { AllowanceStatus } from "@/hooks/useAllowance";
+import { useCollectFeesEstimatedGas, usePositionFees } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import {
-  usePositionFees,
   usePositionFromPositionInfo,
   usePositionFromTokenId,
   usePositionPrices,
@@ -38,6 +38,10 @@ import { useRouter } from "@/navigation";
 import { Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
 
+import { CollectFeesGasSettings } from "./components/CollectFeesGasSettings";
+import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
+import { useCollectFeesStore } from "./stores/useCollectFeesStore";
+
 export default function PoolPage({
   params,
 }: {
@@ -46,23 +50,12 @@ export default function PoolPage({
   };
 }) {
   useRecentTransactionTracking();
+  useCollectFeesEstimatedGas();
+
   const chainId = useCurrentChainId();
   const [showRecentTransactions, setShowRecentTransactions] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [tokenAStandard, setTokenAStandard] = useState(Standard.ERC20);
-  const [tokenBStandard, setTokenBStandard] = useState(Standard.ERC20);
 
-  const tokensOutCode = useMemo(() => {
-    // 0 >> both ERC-20
-    // 1 >> 0 ERC-20, 1 ERC-223
-    // 2 >> 0 ERC-223, 1 ERC-20
-    // 3 >> both ERC-223
-    if (tokenAStandard === Standard.ERC20 && tokenBStandard === Standard.ERC20) return 0;
-    if (tokenAStandard === Standard.ERC20 && tokenBStandard === Standard.ERC223) return 1;
-    if (tokenAStandard === Standard.ERC223 && tokenBStandard === Standard.ERC20) return 2;
-    if (tokenAStandard === Standard.ERC223 && tokenBStandard === Standard.ERC223) return 3;
-    return 0;
-  }, [tokenAStandard, tokenBStandard]);
   const router = useRouter();
 
   //TODO: make centralize function instead of boolean useState value to control invert
@@ -71,23 +64,35 @@ export default function PoolPage({
   const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
   const position = usePositionFromPositionInfo(positionInfo);
 
-  const [tokenA, tokenB, fee] = useMemo(() => {
-    return position?.pool.token0 && position?.pool.token1 && position?.pool.fee
-      ? [position.pool.token0, position.pool.token1, position.pool.fee]
-      : [undefined, undefined];
-  }, [position?.pool.fee, position?.pool.token0, position?.pool.token1]);
+  const token0 = position?.pool.token0;
+  const token1 = position?.pool.token1;
+  const fee = position?.pool.fee;
 
   const { poolAddress, poolAddressLoading } = useComputePoolAddressDex({
-    tokenA,
-    tokenB,
+    tokenA: token0,
+    tokenB: token1,
     tier: fee,
   });
 
-  const { fees, handleCollectFees, status, resetCollectFees, claimFeesHash } = usePositionFees({
-    pool: position?.pool,
-    poolAddress,
-    tokenId: positionInfo?.tokenId,
-  });
+  const {
+    token0Standard,
+    token1Standard,
+    reset,
+    setToken0Standard,
+    setToken1Standard,
+    setPool,
+    setPoolAddress,
+    setTokenId,
+  } = useCollectFeesStore();
+  const { status, hash } = useCollectFeesStatusStore();
+
+  useEffect(() => {
+    setPool(position?.pool);
+    setPoolAddress(poolAddress);
+    setTokenId(positionInfo?.tokenId);
+  }, [position?.pool, poolAddress, positionInfo?.tokenId, setPool, setPoolAddress, setTokenId]);
+
+  const { fees, handleCollectFees } = usePositionFees();
 
   const { inRange, removed } = usePositionRangeStatus({ position });
   const { minPriceString, maxPriceString, currentPriceString, ratio } = usePositionPrices({
@@ -96,11 +101,21 @@ export default function PoolPage({
   });
 
   const handleClose = () => {
-    resetCollectFees();
+    reset();
     setIsOpen(false);
   };
 
-  if (!tokenA || !tokenB) return <div>Error: Token A or B undefined</div>;
+  if (loading || poolAddressLoading) {
+    return (
+      <div className="flex justify-center items-center h-full min-h-[550px]">
+        <Preloader type="awaiting" size={48} />
+      </div>
+    );
+  }
+  if (!token0 || !token1) return <div>Error: Token A or B undefined</div>;
+
+  const token0FeeFormatted = formatFloat(formatUnits(fees[0] || BigInt(0), token0?.decimals || 18));
+  const token1FeeFormatted = formatFloat(formatUnits(fees[1] || BigInt(0), token1?.decimals || 18));
 
   return (
     <Container>
@@ -123,7 +138,7 @@ export default function PoolPage({
 
         <div className="w-full flex justify-between mb-4 lg:mb-5">
           <div className="flex items-center gap-2">
-            <TokensPair tokenA={position?.pool.token0} tokenB={position?.pool.token1} />
+            <TokensPair tokenA={token0} tokenB={token1} />
             {position && (
               <Badge
                 text={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
@@ -187,16 +202,16 @@ export default function PoolPage({
             <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-1 lg:bg-quaternary-bg">
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
-                  token={tokenA}
-                  standards={["ERC-20", "ERC-223"]}
+                  token={token0}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={position?.amount0.toSignificant() || "Loading..."}
                   percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
               </div>
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
-                  token={tokenB}
-                  standards={["ERC-20", "ERC-223"]}
+                  token={token1}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={position?.amount1.toSignificant() || "Loading..."}
                   percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -215,6 +230,7 @@ export default function PoolPage({
                 onClick={() => setIsOpen(true)}
                 size={ButtonSize.MEDIUM}
                 mobileSize={ButtonSize.SMALL}
+                disabled={!fees[0]}
               >
                 Collect fees
               </Button>
@@ -223,16 +239,16 @@ export default function PoolPage({
             <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-1 lg:bg-quaternary-bg">
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
-                  token={tokenA}
-                  standards={["ERC-20", "ERC-223"]}
-                  amount={fees[0]?.toSignificant() || "Loading..."}
+                  token={token0}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  amount={token0FeeFormatted}
                 />
               </div>
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
-                  token={tokenB}
-                  standards={["ERC-20", "ERC-223"]}
-                  amount={fees[1]?.toSignificant() || "Loading..."}
+                  token={token1}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  amount={token1FeeFormatted}
                 />
               </div>
             </div>
@@ -261,10 +277,10 @@ export default function PoolPage({
                   "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
                   showFirst
                     ? "bg-green-bg border-green text-primary-text"
-                    : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
-                {tokenA?.symbol}
+                {token0?.symbol}
               </button>
               <button
                 onClick={() => setShowFirst(false)}
@@ -272,18 +288,18 @@ export default function PoolPage({
                   "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
                   !showFirst
                     ? "bg-green-bg border-green text-primary-text"
-                    : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
-                {tokenB?.symbol}
+                {token1?.symbol}
               </button>
             </div>
           </div>
           <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_20px_1fr] mb-2 lg:mb-5">
             <PositionPriceRangeCard
               showFirst={showFirst}
-              tokenA={tokenA}
-              tokenB={tokenB}
+              token0={token0}
+              token1={token1}
               price={minPriceString}
             />
             <div className="relative">
@@ -293,8 +309,8 @@ export default function PoolPage({
             </div>
             <PositionPriceRangeCard
               showFirst={showFirst}
-              tokenA={tokenA}
-              tokenB={tokenB}
+              token0={token0}
+              token1={token1}
               price={maxPriceString}
               isMax
             />
@@ -305,15 +321,15 @@ export default function PoolPage({
               <div className="text-16 lg:text-18">{currentPriceString}</div>
               <div className="text-12 lg:text-14 text-secondary-text">
                 {showFirst
-                  ? `${tokenA?.symbol} per ${tokenB?.symbol}`
-                  : `${tokenB?.symbol} per ${tokenA?.symbol}`}
+                  ? `${token0?.symbol} per ${token1?.symbol}`
+                  : `${token1?.symbol} per ${token0?.symbol}`}
               </div>
             </div>
           </div>
         </div>
       </div>
       <div className="lg:w-[800px] mx-auto lg:mb-[40px] gap-5 flex flex-col">
-        <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
+        <SelectedTokensInfo tokenA={token0} tokenB={token1} />
         <RecentTransactions
           showRecentTransactions={showRecentTransactions}
           handleClose={() => setShowRecentTransactions(false)}
@@ -340,144 +356,176 @@ export default function PoolPage({
                     className="absolute left-0 top-0 w-[24px] h-[24px] lg:w-[34px] lg:h-[34px]"
                     width={32}
                     height={32}
-                    src={tokenA.logoURI as any}
+                    src={token0?.logoURI as any}
                     alt=""
                   />
                   <div className="w-[24px] h-[24px] lg:w-[34px] lg:h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
-                    <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
+                    <Image width={32} height={32} src={token1?.logoURI as any} alt="" />
                   </div>
                 </div>
-                <span className="text-16 lg:text-18 font-bold">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
+                <span className="text-16 lg:text-18 font-bold">{`${token0?.symbol} and ${token1?.symbol}`}</span>
               </div>
               <div className="flex items-center gap-2 justify-end">
-                {claimFeesHash && (
+                {hash && (
                   <a
                     target="_blank"
-                    href={getExplorerLink(ExplorerLinkType.TRANSACTION, claimFeesHash, chainId)}
+                    href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
                   >
                     <IconButton iconName="forward" />
                   </a>
                 )}
 
-                {status === AllowanceStatus.PENDING && (
+                {status === CollectFeesStatus.PENDING && (
                   <>
                     <Preloader type="linear" />
                     <span className="text-secondary-text text-14">Proceed in your wallet</span>
                   </>
                 )}
-                {status === AllowanceStatus.LOADING && <Preloader size={20} />}
-                {status === AllowanceStatus.SUCCESS && (
+                {status === CollectFeesStatus.LOADING && <Preloader size={20} />}
+                {status === CollectFeesStatus.SUCCESS && (
                   <Svg className="text-green" iconName="done" size={20} />
                 )}
-                {status === AllowanceStatus.ERROR && (
+                {status === CollectFeesStatus.ERROR && (
                   <Svg className="text-red-light" iconName="warning" size={24} />
                 )}
               </div>
             </div>
             {/* Standard A */}
             <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
-              <div className="flex gap-2 items-center mb-3">
-                <Image width={24} height={24} src={tokenA.logoURI as any} alt="" />
-                <span className="font-bold">{`Standard for collecting ${tokenA.symbol}`}</span>
-              </div>
-              <div className="flex flex-col gap-2">
-                <RadioButton
-                  isActive={tokenAStandard === Standard.ERC20}
-                  onClick={() => setTokenAStandard(Standard.ERC20)}
-                  disabled={tokenAStandard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <span className="text-14 lg:text-16">Standard</span>
-                      <Badge color="green" text="ERC-20" />
+              <div
+                className={clsx("flex gap-2 items-center", token0?.isNative && "justify-between")}
+              >
+                {token0?.isNative ? (
+                  <>
+                    <div className="flex gap-2 items-center">
+                      <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
+                      <span className="font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
+                      <Badge color="green" text="Native" />
                     </div>
                     <span className="text-14 lg:text-16">
-                      {`${formatFloat(fees[0]?.toSignificant() || "")} ${tokenA.symbol}`}
+                      {`${token0FeeFormatted} ${token0.symbol}`}
                     </span>
-                  </div>
-                </RadioButton>
-                <RadioButton
-                  isActive={tokenAStandard === Standard.ERC223}
-                  onClick={() => setTokenAStandard(Standard.ERC223)}
-                  disabled={
-                    tokenAStandard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
-                  }
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <span className="text-14 lg:text-16">Standard</span>
-                      <Badge color="green" text="ERC-223" />
-                    </div>
-                    <span className="text-14 lg:text-16">
-                      {`${formatFloat(fees[0]?.toSignificant() || "")} ${tokenA.symbol}`}
-                    </span>
-                  </div>
-                </RadioButton>
+                  </>
+                ) : (
+                  <>
+                    <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
+                    <span className="font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
+                  </>
+                )}
               </div>
+              {token0?.isNative ? null : (
+                <div className="flex flex-col gap-2 mt-3">
+                  <RadioButton
+                    isActive={token0Standard === Standard.ERC20}
+                    onClick={() => setToken0Standard(Standard.ERC20)}
+                    disabled={
+                      token0Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
+                    }
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="text-14 lg:text-16">Standard</span>
+                        <Badge color="green" text="ERC-20" />
+                      </div>
+                      <span className="text-14 lg:text-16">{token0FeeFormatted}</span>
+                    </div>
+                  </RadioButton>
+                  <RadioButton
+                    isActive={token0Standard === Standard.ERC223}
+                    onClick={() => setToken0Standard(Standard.ERC223)}
+                    disabled={
+                      token0Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
+                    }
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="text-14 lg:text-16">Standard</span>
+                        <Badge color="green" text="ERC-223" />
+                      </div>
+                      <span className="text-14 lg:text-16">{token0FeeFormatted}</span>
+                    </div>
+                  </RadioButton>
+                </div>
+              )}
             </div>
             {/* Standard B */}
             <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
-              <div className="flex gap-2 items-center mb-3">
-                <Image width={24} height={24} src={tokenB.logoURI as any} alt="" />
-                <span className="font-bold">{`Standard for collecting ${tokenB.symbol}`}</span>
-              </div>
-              <div className="flex flex-col gap-2">
-                <RadioButton
-                  isActive={tokenBStandard === Standard.ERC20}
-                  onClick={() => setTokenBStandard(Standard.ERC20)}
-                  disabled={tokenBStandard !== Standard.ERC20 && status !== AllowanceStatus.INITIAL}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <span className="text-14 lg:text-16">Standard</span>
-                      <Badge color="green" text="ERC-20" />
+              <div
+                className={clsx("flex gap-2 items-center", token1?.isNative && "justify-between")}
+              >
+                {token1?.isNative ? (
+                  <>
+                    <div className="flex gap-2 items-center">
+                      <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
+                      <span className="font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
+                      <Badge color="green" text="Native" />
                     </div>
-                    <span className="text-14 lg:text-16">
-                      {`${formatFloat(fees[1]?.toSignificant() || "")} ${tokenB.symbol}`}
-                    </span>
-                  </div>
-                </RadioButton>
-                <RadioButton
-                  isActive={tokenBStandard === Standard.ERC223}
-                  onClick={() => setTokenBStandard(Standard.ERC223)}
-                  disabled={
-                    tokenBStandard !== Standard.ERC223 && status !== AllowanceStatus.INITIAL
-                  }
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <span className="text-14 lg:text-16">Standard</span>
-                      <Badge color="green" text="ERC-223" />
-                    </div>
-                    <span className="text-14 lg:text-16">
-                      {`${formatFloat(fees[1]?.toSignificant() || "")} ${tokenB.symbol}`}
-                    </span>
-                  </div>
-                </RadioButton>
+                    <span className="text-14 lg:text-16">{token1FeeFormatted}</span>
+                  </>
+                ) : (
+                  <>
+                    <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
+                    <span className="font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
+                  </>
+                )}
               </div>
+              {token1?.isNative ? null : (
+                <div className="flex flex-col gap-2 mt-3">
+                  <RadioButton
+                    isActive={token1Standard === Standard.ERC20}
+                    onClick={() => setToken1Standard(Standard.ERC20)}
+                    disabled={
+                      token1Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
+                    }
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="text-14 lg:text-16">Standard</span>
+                        <Badge color="green" text="ERC-20" />
+                      </div>
+                      <span className="text-14 lg:text-16">
+                        {`${token1FeeFormatted} ${token1?.symbol}`}
+                      </span>
+                    </div>
+                  </RadioButton>
+                  <RadioButton
+                    isActive={token1Standard === Standard.ERC223}
+                    onClick={() => setToken1Standard(Standard.ERC223)}
+                    disabled={
+                      token1Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
+                    }
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="text-14 lg:text-16">Standard</span>
+                        <Badge color="green" text="ERC-223" />
+                      </div>
+                      <span className="text-14 lg:text-16">
+                        {`${token1FeeFormatted} ${token1?.symbol}`}
+                      </span>
+                    </div>
+                  </RadioButton>
+                </div>
+              )}
             </div>
             <div className="text-secondary-text my-4 text-14 lg:text-16">
               Collecting fees will withdraw currently available fees for you
             </div>
+            <CollectFeesGasSettings />
 
-            {[AllowanceStatus.INITIAL].includes(status) ? (
-              <Button
-                onClick={() => {
-                  handleCollectFees({ tokensOutCode });
-                }}
-                fullWidth
-              >
+            {[CollectFeesStatus.INITIAL].includes(status) ? (
+              <Button onClick={() => handleCollectFees()} fullWidth>
                 Collect fees
               </Button>
             ) : null}
-            {[AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
+            {[CollectFeesStatus.LOADING, CollectFeesStatus.PENDING].includes(status) ? (
               <Button fullWidth disabled>
                 <span className="flex items-center gap-2">
                   <Preloader size={20} color="black" />
                 </span>
               </Button>
             ) : null}
-            {[AllowanceStatus.ERROR].includes(status) ? (
+            {[CollectFeesStatus.ERROR].includes(status) ? (
               <div className="flex flex-col gap-5">
                 <Alert
                   withIcon={false}
@@ -487,24 +535,19 @@ export default function PoolPage({
                       Transaction failed due to lack of gas or an internal contract error. Try using
                       higher slippage or gas to ensure your transaction is completed. If you still
                       have issues, click{" "}
-                      <a href="#" className="text-green hover:underline">
+                      <a href="#" className="text-green hocus:underline">
                         common errors
                       </a>
                       .
                     </span>
                   }
                 />
-                <Button
-                  onClick={() => {
-                    handleCollectFees({ tokensOutCode });
-                  }}
-                  fullWidth
-                >
+                <Button onClick={() => handleCollectFees()} fullWidth>
                   Try again
                 </Button>
               </div>
             ) : null}
-            {[AllowanceStatus.SUCCESS].includes(status) ? (
+            {[CollectFeesStatus.SUCCESS].includes(status) ? (
               <Button onClick={handleClose} fullWidth>
                 Close
               </Button>

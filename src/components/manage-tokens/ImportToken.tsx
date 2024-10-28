@@ -264,7 +264,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                           {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
                         </span>
                         <ExternalTextLink
-                          color="green"
                           text={truncateMiddle(erc20AddressToImport)}
                           href={getExplorerLink(
                             ExplorerLinkType.ADDRESS,
@@ -285,7 +284,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                         {erc223AddressToImport && isErc223Exist && (
                           <>
                             <ExternalTextLink
-                              color="green"
                               text={truncateMiddle(erc223AddressToImport)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,

@@ -31,6 +31,7 @@ import { DepositAmounts } from "../../add/components/DepositAmounts/DepositAmoun
 import ConfirmLiquidityDialog from "../../add/components/LiquidityActionButton/ConfirmLiquidityDialog";
 import { LiquidityActionButton } from "../../add/components/LiquidityActionButton/LiquidityActionButton";
 import { usePriceRange } from "../../add/hooks/usePrice";
+import { useSortedTokens } from "../../add/hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../add/hooks/useV3DerivedMintInfo";
 
 export default function IncreaseLiquidityPage({
@@ -53,11 +54,16 @@ export default function IncreaseLiquidityPage({
   const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
   const existedPosition = usePositionFromPositionInfo(positionInfo);
 
+  // TODO: tokens already sorted, rename tokenA\B -> token0\1
   const [tokenA, tokenB, fee] = useMemo(() => {
     return existedPosition?.pool.token0 && existedPosition?.pool.token1 && existedPosition?.pool.fee
       ? [existedPosition.pool.token0, existedPosition.pool.token1, existedPosition.pool.fee]
       : [undefined, undefined];
   }, [existedPosition?.pool.fee, existedPosition?.pool.token0, existedPosition?.pool.token1]);
+  const { token0, token1 } = useSortedTokens({
+    tokenA,
+    tokenB,
+  });
 
   const { inRange, removed } = usePositionRangeStatus({ position: existedPosition });
   const { minPriceString, maxPriceString, currentPriceString, ratio } = usePositionPrices({
@@ -83,20 +89,7 @@ export default function IncreaseLiquidityPage({
   }, [initialized, existedPosition, setBothTokens, setTicks, setTier, tokenA, tokenB]);
 
   // PRICE RANGE HOOK START
-  const {
-    formattedPrice,
-    invertPrice,
-    price,
-    pricesAtTicks,
-    ticksAtLimit,
-    isFullRange,
-    isSorted,
-    leftPrice,
-    rightPrice,
-    token0,
-    token1,
-    tickSpaceLimits,
-  } = usePriceRange();
+  const { price } = usePriceRange();
   // PRICE RANGE HOOK END
 
   // Deposit Amounts START
@@ -204,7 +197,7 @@ export default function IncreaseLiquidityPage({
                       "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                       showFirst
                         ? "bg-green-bg border-green text-primary-text"
-                        : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                        : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
                     {tokenA?.symbol}
@@ -215,7 +208,7 @@ export default function IncreaseLiquidityPage({
                       "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                       !showFirst
                         ? "bg-green-bg border-green text-primary-text"
-                        : "hover:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                        : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
                     {tokenB?.symbol}
@@ -226,8 +219,8 @@ export default function IncreaseLiquidityPage({
               <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_12px_1fr] mb-2 lg:mb-3">
                 <PositionPriceRangeCard
                   showFirst={showFirst}
-                  tokenA={tokenA}
-                  tokenB={tokenB}
+                  token0={token0}
+                  token1={token1}
                   price={minPriceString}
                 />
                 <div className="relative">
@@ -237,8 +230,8 @@ export default function IncreaseLiquidityPage({
                 </div>
                 <PositionPriceRangeCard
                   showFirst={showFirst}
-                  tokenA={tokenA}
-                  tokenB={tokenB}
+                  token0={token0}
+                  token1={token1}
                   price={maxPriceString}
                   isMax
                 />
@@ -249,8 +242,8 @@ export default function IncreaseLiquidityPage({
                 <div className="text-16 lg:text-18">{currentPriceString}</div>
                 <div className="text-12 lg:text-14 text-tertiary-text">
                   {showFirst
-                    ? `${tokenA?.symbol} per ${tokenB?.symbol}`
-                    : `${tokenB?.symbol} per ${tokenA?.symbol}`}
+                    ? `${token0?.symbol} per ${token1?.symbol}`
+                    : `${token1?.symbol} per ${token0?.symbol}`}
                 </div>
               </div>
             </div>

@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { PropsWithChildren, ReactNode, useEffect, useMemo } from "react";
-import { Address, formatGwei } from "viem";
+import React, { PropsWithChildren, ReactNode, useEffect, useMemo, useState } from "react";
+import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
@@ -20,22 +20,24 @@ import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import Input from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { networks } from "@/config/networks";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -183,7 +185,13 @@ function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
 
-function SwapActionButton() {
+function SwapActionButton({
+  amountToApprove,
+  isEditApproveActive,
+}: {
+  amountToApprove: string;
+  isEditApproveActive: boolean;
+}) {
   const t = useTranslations("Swap");
   const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
   const { typedValue } = useSwapAmountsStore();
@@ -191,8 +199,6 @@ function SwapActionButton() {
   const { status: swapStatus } = useSwapStatusStore();
 
   const { handleSwap } = useSwap();
-
-  console.log(tokenA);
 
   const {
     isPendingApprove,
@@ -258,7 +264,7 @@ function SwapActionButton() {
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .
@@ -331,7 +337,7 @@ function SwapActionButton() {
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .
@@ -358,7 +364,7 @@ function SwapActionButton() {
   }
 
   return (
-    <Button onClick={handleSwap} fullWidth>
+    <Button disabled={isEditApproveActive} onClick={() => handleSwap(amountToApprove)} fullWidth>
       {t("confirm_swap")}
     </Button>
   );
@@ -470,7 +476,14 @@ export default function ConfirmSwapDialog() {
     isSettledSwap,
   ]);
 
+  const [amountToApprove, setAmountToApprove] = useState(typedValue);
   // const { gasOption, gasPrice, gasLimit } = useSwapGasSettingsStore();
+
+  useEffect(() => {
+    if (typedValue) {
+      setAmountToApprove(typedValue);
+    }
+  }, [typedValue]);
 
   const { gasPriceSettings } = useSwapGasPriceStore();
   const { data: baseFee } = useGasPrice();
@@ -500,6 +513,14 @@ export default function ConfirmSwapDialog() {
       resetAmounts();
     }
   }, [isOpen, isSettledSwap, resetAmounts, resetTokens]);
+
+  const [isEditApproveActive, setEditApproveActive] = useState(false);
+
+  const { isAllowed: isAllowedA } = useStoreAllowance({
+    token: tokenA,
+    contractAddress: ROUTER_ADDRESS[chainId],
+    amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
+  });
 
   return (
     <DrawerDialog
@@ -646,10 +667,72 @@ export default function ConfirmSwapDialog() {
                 }
                 tooltipText={t("gas_limit_tooltip")}
               />
+
+              {tokenA?.isToken && tokenAStandard === Standard.ERC20 && !isAllowedA && (
+                <div
+                  className={clsx(
+                    "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-2 gap-5",
+                    +amountToApprove < +typedValue && "pb-[26px]",
+                  )}
+                >
+                  <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
+                    <Tooltip text={"Tooltip_text"} />
+                    <span>Approve amount</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-grow justify-end">
+                    {!isEditApproveActive ? (
+                      <span>
+                        {amountToApprove} {tokenA.symbol}
+                      </span>
+                    ) : (
+                      <div className="flex-grow">
+                        <div className="relative w-full flex-grow">
+                          <Input
+                            isError={+amountToApprove < +typedValue}
+                            className="h-8 pl-3"
+                            value={amountToApprove}
+                            onChange={(e) => setAmountToApprove(e.target.value)}
+                            type="text"
+                          />
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
+                            {tokenA.symbol}
+                          </span>
+                        </div>
+                        {+amountToApprove < +typedValue && (
+                          <span className="text-red-light absolute text-12 translate-y-0.5">
+                            Must be higher or equal {typedValue}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {!isEditApproveActive ? (
+                      <Button
+                        size={ButtonSize.EXTRA_SMALL}
+                        colorScheme={ButtonColor.LIGHT_GREEN}
+                        onClick={() => setEditApproveActive(true)}
+                      >
+                        Edit
+                      </Button>
+                    ) : (
+                      <Button
+                        disabled={+amountToApprove < +typedValue}
+                        size={ButtonSize.EXTRA_SMALL}
+                        colorScheme={ButtonColor.LIGHT_GREEN}
+                        onClick={() => setEditApproveActive(false)}
+                      >
+                        Save
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}
-          <SwapActionButton />
+          <SwapActionButton
+            isEditApproveActive={isEditApproveActive}
+            amountToApprove={amountToApprove}
+          />
         </div>
       </div>
     </DrawerDialog>
