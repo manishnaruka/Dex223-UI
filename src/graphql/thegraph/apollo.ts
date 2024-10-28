@@ -26,7 +26,8 @@ const CHAIN_SUBGRAPH_URL: Record<DexChainId, string> = {
   [DexChainId.SEPOLIA]: "https://api.studio.thegraph.com/query/56540/dex223-v1-sepolia/1.0.82",
   // [DexChainId.CALLISTO]: "",
   [DexChainId.BSC_TESTNET]: "",
-  [DexChainId.EOS]: "",
+  [DexChainId.EOS]:
+    "https://gateway.testnet.thegraph.com/api/deployments/id/Qmc7USxnNW5EHkzNGA61YbddgiZy68zdWZXDgfL9JQ4sZQ",
 };
 
 const httpLink = new HttpLink({ uri: CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA] });

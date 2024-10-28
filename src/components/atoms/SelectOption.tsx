@@ -14,7 +14,7 @@ export default function SelectOption({
     <button
       onClick={onClick}
       className={clsx(
-        "flex gap-2 items-center py-3 px-5 bg-primary-bg hocus:bg-green-bg duration-200",
+        "flex gap-2 items-center py-3 px-5 bg-primary-bg hocus:bg-green-bg duration-200 w-full",
         isActive && "text-green pointer-events-none",
         disabled && "opacity-50 pointer-events-none",
       )}
