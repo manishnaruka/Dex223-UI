@@ -13,6 +13,7 @@ import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterAutoListings, filterTokenLists } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 
@@ -33,11 +34,7 @@ export default function ChooseAutoListingDialog() {
     if (!searchValue) {
       return autoListings;
     } else {
-      return autoListings.filter(
-        (l) =>
-          l.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
-          l.id.toLowerCase().startsWith(searchValue.toLowerCase()),
-      );
+      return filterAutoListings(searchValue, autoListings);
     }
   }, [autoListings, searchValue]);
 

@@ -220,54 +220,60 @@ export default function RecentTransaction({
       key={transaction.hash}
       className="flex justify-between w-full bg-tertiary-bg rounded-3 p-5 items-center @container flex-wrap"
     >
-      <div className="flex gap-2 items-center">
-        <RecentTransactionLogo title={transaction.title} />
-        <div className="grid">
-          <RecentTransactionTitle title={transaction.title} />
-          <RecentTransactionSubTitle title={transaction.title} />
+      <div className="w-full grid grid-cols-[1fr_76px]">
+        <div className="flex gap-2 items-center">
+          <RecentTransactionLogo title={transaction.title} />
+          <div className="grid">
+            <RecentTransactionTitle title={transaction.title} />
+            <RecentTransactionSubTitle title={transaction.title} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 @[620px]:flex">
+            {transaction.status === RecentTransactionStatus.PENDING &&
+              showSpeedUp &&
+              isLowestNonce && (
+                <>
+                  <RecentTransactionActionButton disabled color="secondary">
+                    {t("cancel")}
+                  </RecentTransactionActionButton>
+                  <RecentTransactionActionButton
+                    disabled
+                    onClick={() => handleSpeedUp(transaction)}
+                  >
+                    {t("speed_up")}
+                  </RecentTransactionActionButton>
+                </>
+              )}
+            {transaction.status === RecentTransactionStatus.PENDING &&
+              showSpeedUp &&
+              !isLowestNonce && (
+                <>
+                  <RecentTransactionActionButton disabled color="secondary">
+                    {t("queue")}
+                  </RecentTransactionActionButton>
+                </>
+              )}
+          </div>
+
+          <a
+            className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
+            target="_blank"
+            href={getExplorerLink(
+              ExplorerLinkType.TRANSACTION,
+              transaction.hash,
+              transaction.chainId,
+            )}
+          >
+            <Svg iconName="forward" />
+          </a>
+          <span className="flex-shrink-0">
+            <RecentTransactionStatusIcon status={transaction.status} />
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="hidden items-center gap-3 @[620px]:flex">
-          {transaction.status === RecentTransactionStatus.PENDING &&
-            showSpeedUp &&
-            isLowestNonce && (
-              <>
-                <RecentTransactionActionButton disabled color="secondary">
-                  {t("cancel")}
-                </RecentTransactionActionButton>
-                <RecentTransactionActionButton disabled onClick={() => handleSpeedUp(transaction)}>
-                  {t("speed_up")}
-                </RecentTransactionActionButton>
-              </>
-            )}
-          {transaction.status === RecentTransactionStatus.PENDING &&
-            showSpeedUp &&
-            !isLowestNonce && (
-              <>
-                <RecentTransactionActionButton disabled color="secondary">
-                  {t("queue")}
-                </RecentTransactionActionButton>
-              </>
-            )}
-        </div>
-
-        <a
-          className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
-          target="_blank"
-          href={getExplorerLink(
-            ExplorerLinkType.TRANSACTION,
-            transaction.hash,
-            transaction.chainId,
-          )}
-        >
-          <Svg iconName="forward" />
-        </a>
-        <span className="flex-shrink-0">
-          <RecentTransactionStatusIcon status={transaction.status} />
-        </span>
-      </div>
       {transaction.status === RecentTransactionStatus.PENDING && showSpeedUp && isLowestNonce && (
         <div className="@[620px]:hidden w-full grid grid-cols-2 gap-3 mt-3">
           <RecentTransactionActionButton disabled color="secondary">

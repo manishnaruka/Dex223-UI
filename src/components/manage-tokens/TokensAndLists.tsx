@@ -14,6 +14,7 @@ import ManageTokenItem from "@/components/manage-tokens/ManageTokenItem";
 import TokenListItem from "@/components/manage-tokens/TokenListItem";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { db } from "@/db/db";
+import { filterTokenLists, filterTokens } from "@/functions/searchTokens";
 import { useTokenLists, useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { Token } from "@/sdk_hybrid/entities/token";
@@ -57,25 +58,12 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
   const [tokensSearchValue, setTokensSearchValue] = useState("");
 
   const [filteredTokens, isTokenFilterActive] = useMemo(() => {
-    return tokensSearchValue
-      ? [
-          tokens.filter(
-            (t) => t.name && t.name.toLowerCase().startsWith(tokensSearchValue.toLowerCase()),
-          ),
-          true,
-        ]
-      : [tokens, false];
+    return tokensSearchValue ? [filterTokens(tokensSearchValue, tokens), true] : [tokens, false];
   }, [tokens, tokensSearchValue]);
 
   const [filteredLists, isListFilterActive] = useMemo(() => {
     return listSearchValue
-      ? [
-          lists?.filter(
-            ({ list }) =>
-              list.name && list.name.toLowerCase().startsWith(listSearchValue.toLowerCase()),
-          ),
-          true,
-        ]
+      ? [lists && filterTokenLists(listSearchValue, lists), true]
       : [lists, false];
   }, [lists, listSearchValue]);
 

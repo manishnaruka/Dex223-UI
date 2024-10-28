@@ -3,6 +3,7 @@
 import { isZeroAddress } from "@ethereumjs/util";
 import clsx from "clsx";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatEther, formatGwei, formatUnits, isAddress } from "viem";
@@ -160,11 +161,14 @@ export default function ListTokenPage() {
   useAutoListingSearchParams();
   const t = useTranslations("Swap");
 
+  const params = useSearchParams();
   const router = useRouter();
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
+
+  console.log(params);
 
   useRecentTransactionTracking();
   useListTokenEstimatedGas();
@@ -181,7 +185,14 @@ export default function ListTokenPage() {
     [pool],
   );
 
-  console.log(pool);
+  const destination = useMemo(() => {
+    const dest = params.get("dest");
+    if (dest && decodeURIComponent(dest).startsWith("/token-listing/contracts")) {
+      return decodeURIComponent(dest);
+    } else {
+      return `/token-listing/contracts`;
+    }
+  }, [params]);
 
   const [tokenAAddress, setTokenAAddress] = useState("");
   const [tokenBAddress, setTokenBAddress] = useState("");
@@ -348,7 +359,7 @@ export default function ListTokenPage() {
               <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
                 <div className="flex justify-between items-center mb-2.5">
                   <IconButton
-                    onClick={() => router.back()}
+                    onClick={() => router.replace(destination)}
                     iconName="back"
                     buttonSize={IconButtonSize.LARGE}
                   />

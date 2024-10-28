@@ -35,6 +35,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
+import addToast from "@/other/toast";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
 import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
@@ -456,17 +457,25 @@ export default function useSwap() {
 
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
 
-        const { request } = await publicClient.simulateContract({
-          ...swapParams,
-          account: address,
-          ...gasPriceFormatted,
-          gas: gasToUse,
-        } as any);
-
-        hash = await walletClient.writeContract({
-          ...request,
-          account: undefined,
-        });
+        try {
+          const { request } = await publicClient.simulateContract({
+            ...swapParams,
+            account: address,
+            ...gasPriceFormatted,
+            gas: gasToUse,
+          } as any);
+          hash = await walletClient.writeContract({
+            ...request,
+            account: undefined,
+          });
+        } catch (e) {
+          hash = await walletClient.writeContract({
+            ...swapParams,
+            ...gasPriceFormatted,
+            gas: gasToUse,
+            account: undefined,
+          } as any);
+        }
 
         closeConfirmInWalletAlert();
 
@@ -526,6 +535,8 @@ export default function useSwap() {
         }
       } catch (e) {
         console.log(e);
+        addToast("Error while executing contract", "error");
+        closeConfirmInWalletAlert();
         setSwapStatus(SwapStatus.INITIAL);
       }
     },

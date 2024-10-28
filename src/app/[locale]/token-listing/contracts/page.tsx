@@ -16,6 +16,7 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterAutoListings } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { Link } from "@/navigation";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -33,11 +34,7 @@ export default function TokenListingPage() {
     if (!searchValue) {
       return autoListings;
     } else {
-      return autoListings.filter(
-        (l: any) =>
-          l.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
-          l.id.toLowerCase().startsWith(searchValue.toLowerCase()),
-      );
+      return filterAutoListings(searchValue, autoListings);
     }
   }, [autoListings, searchValue]);
 
@@ -50,10 +47,10 @@ export default function TokenListingPage() {
       <Container>
         <div className="my-3 md:my-10 px-4">
           <Link href="/token-listing">
-            <button className="flex items-center gap-2">
+            <span className="flex items-center gap-2">
               <Svg iconName="back" />
               Back to token listing
-            </button>
+            </span>
           </Link>
         </div>
         <div className="pb-10">
@@ -149,7 +146,7 @@ export default function TokenListingPage() {
                     <div className="flex-grow">
                       <Link
                         onClick={(e) => e.stopPropagation()}
-                        href={`/token-listing/add/?autoListingContract=${autoListing.id}`}
+                        href={`/token-listing/add/?autoListingContract=${autoListing.id}&dest=${encodeURIComponent("/token-listing/contracts/")}`}
                       >
                         <Button
                           fullWidth
@@ -243,7 +240,7 @@ export default function TokenListingPage() {
                     <div className="h-[56px] z-10 relative flex items-center pr-2.5 mr-2.5 rounded-r-3 group-hocus:bg-tertiary-bg duration-200">
                       <Link
                         onClick={(e) => e.stopPropagation()}
-                        href={`/token-listing/add/?autoListingContract=${autoListing.id}`}
+                        href={`/token-listing/add/?autoListingContract=${autoListing.id}&dest=${encodeURIComponent("/token-listing/contracts/")}`}
                       >
                         <Button
                           className="hocus:bg-green hocus:text-black"

@@ -964,11 +964,13 @@ function NetworkFeeDialogContent({
         </Button>
         <Button
           disabled={Boolean(
-            ((maxFeePerGasError || maxPriorityFeePerGasError) &&
+            (!isAdvanced &&
+              (maxFeePerGasError || maxPriorityFeePerGasError) &&
               values.gasPriceOption === GasOption.CUSTOM &&
               values.gasPriceModel === GasFeeModel.EIP1559) ||
               gasLimitError ||
-              (values.gasPriceOption === GasOption.CUSTOM &&
+              (!isAdvanced &&
+                values.gasPriceOption === GasOption.CUSTOM &&
                 values.gasPriceModel === GasFeeModel.LEGACY &&
                 legacyGasPriceError),
           )}

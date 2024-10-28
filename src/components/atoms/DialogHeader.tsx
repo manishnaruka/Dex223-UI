@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { ReactNode } from "react";
+import { useSwipeable } from "react-swipeable";
 
 import Svg from "@/components/atoms/Svg";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
@@ -12,8 +13,15 @@ interface Props {
   settings?: ReactNode;
 }
 export default function DialogHeader({ onBack, onClose, title, paragraph, settings }: Props) {
+  const handlers = useSwipeable({
+    onSwipedDown: (eventData) => {
+      onClose();
+    },
+    delta: { down: 200 },
+  });
+
   return (
-    <div className={onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10"}>
+    <div {...handlers} className={onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10"}>
       <div className={clsx("h-[60px] flex items-center")}>
         <div
           className={clsx(
