@@ -96,7 +96,7 @@ export default function TokenListItem({
   console.log(tokenList);
 
   return (
-    <div className="flex justify-between py-1.5">
+    <div className="flex justify-between py-1.5 rounded-3 bg-tertiary-bg px-4 md:px-5">
       <div className="flex gap-3 items-center">
         {tokenList?.id?.toString()?.startsWith("default") && (
           <TokenListLogo type={TokenListLogoType.DEFAULT} chainId={tokenList.chainId} />
@@ -112,8 +112,8 @@ export default function TokenListItem({
         )}
 
         <div className="flex flex-col">
-          <span>{tokenList.list.name}</span>
-          <div className="flex gap-1 items-cente text-secondary-text">
+          <span className="text-14 md:text-16">{tokenList.list.name}</span>
+          <div className="flex gap-1 items-center text-secondary-text text-12 md:text-16">
             {tokenList.list.tokens.length} tokens
             <Popover
               placement="top"

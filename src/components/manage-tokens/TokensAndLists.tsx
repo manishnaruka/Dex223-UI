@@ -111,7 +111,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
 
             {Boolean(filteredLists?.length) && (
-              <div className="flex flex-col mt-3">
+              <div className="flex flex-col mt-3 gap-3">
                 {filteredLists
                   ?.filter((l) => Boolean(l.list.tokens.length))
                   ?.map((tokenList) => {

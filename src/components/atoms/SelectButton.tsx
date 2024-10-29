@@ -32,7 +32,7 @@ export const SelectButton = forwardRef(
         ref={ref}
         {...props}
         className={clsxMerge(
-          "group flex items-center gap-2 duration-[600ms] text-base text-primary-text hocus:bg-green-bg bg-primary-bg hocus:text-primary-text",
+          "group flex items-center gap-2 duration-200 text-base text-primary-text hocus:bg-green-bg bg-primary-bg hocus:text-primary-text",
           variant === "rectangle" && "rounded-2",
           variant === "rounded" &&
             "rounded-[80px] border border-transparent hocus:bg-green-bg hocus:shadow shadow-green/60 hocus:border-green",
