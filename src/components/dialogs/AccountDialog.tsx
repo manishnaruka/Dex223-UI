@@ -169,12 +169,15 @@ export default function AccountDialog() {
   const trigger = useMemo(
     () => (
       <SelectButton
-        className="py-1 xl:py-2 text-14 xl:text-16 w-full md:w-auto flex items-center justify-center"
+        className="py-1 xl:py-2 text-14 xl:text-16 w-full md:w-auto flex items-center justify-center group"
         isOpen={isOpenedAccount}
         onClick={() => setIsOpenedAccount(!isOpenedAccount)}
       >
-        <span className="flex gap-2 items-center text-secondary-text">
-          <Svg className="text-tertiary-text" iconName="wallet" />
+        <span className="duration-200 flex gap-2 items-center text-secondary-text group-hover:text-primary-text">
+          <Svg
+            className="duration-200 text-tertiary-text group-hover:text-primary-text"
+            iconName="wallet"
+          />
           {truncateMiddle(address || "", { charsFromStart: 5, charsFromEnd: 3 })}
         </span>
       </SelectButton>

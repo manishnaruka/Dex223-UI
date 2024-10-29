@@ -32,7 +32,7 @@ export const SelectButton = forwardRef(
         ref={ref}
         {...props}
         className={clsxMerge(
-          "flex items-center gap-2 duration-[600ms] text-base text-primary-text hocus:bg-green-bg bg-primary-bg",
+          "group flex items-center gap-2 duration-[600ms] text-base text-primary-text hocus:bg-green-bg bg-primary-bg hocus:text-primary-text",
           variant === "rectangle" && "rounded-2",
           variant === "rounded" &&
             "rounded-[80px] border border-transparent hocus:bg-green-bg hocus:shadow shadow-green/60 hocus:border-green",
@@ -49,7 +49,7 @@ export const SelectButton = forwardRef(
         {withArrow && (
           <Svg
             className={clsx(
-              "text-secondary-text",
+              "text-secondary-text group-hover:text-primary-text",
               isOpen ? "-rotate-180" : "",
               "duration-200",
               "flex-shrink-0",
