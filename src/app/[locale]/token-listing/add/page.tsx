@@ -4,7 +4,7 @@ import { isZeroAddress } from "@ethereumjs/util";
 import clsx from "clsx";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatEther, formatGwei, formatUnits, isAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
@@ -332,6 +332,8 @@ export default function ListTokenPage() {
     }
   }, [sameTokensSelected, tokenBAddress]);
 
+  const locale = useLocale();
+
   return (
     <>
       <Container>
@@ -477,7 +479,11 @@ export default function ListTokenPage() {
                       text={
                         <span>
                           There is no existing pool, so you cannot list the primary token. Please{" "}
-                          <a target="_blank" href="/add" className="text-green hocus:underline">
+                          <a
+                            target="_blank"
+                            href={`/${locale}/add?tokenA=${tokenA.wrapped.address0}&tokenB=${tokenB.wrapped.address0}`}
+                            className="text-green hocus:underline"
+                          >
                             create a pool
                           </a>{" "}
                           first.

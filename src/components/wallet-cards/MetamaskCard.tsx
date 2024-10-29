@@ -10,6 +10,7 @@ import {
 import { wallets } from "@/config/wallets";
 import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 import usePreloaderTimeout from "@/hooks/usePreloader";
+import { usePathname } from "@/navigation";
 import addToast from "@/other/toast";
 
 const { image, name } = wallets.metamask;
@@ -23,9 +24,13 @@ export default function MetamaskCard() {
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
 
+  const pathname = usePathname();
+
+  console.log(pathname);
+
   if (isMobile && !isMetamaskMobile) {
     return (
-      <a href="https://metamask.app.link/dapp/test-app.dex223.io">
+      <a href={`https://metamask.app.link/dapp/${window.location.host || "test-app.dex223.io"}`}>
         <PickButton disabled={isConnecting} image={image} label={name} loading={loading} />
       </a>
     );

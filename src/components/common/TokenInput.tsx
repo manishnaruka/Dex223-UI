@@ -150,11 +150,11 @@ function StandardOption({
       {gas && (
         <div
           className={clsx(
-            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center text-tertiary-text",
+            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center text-tertiary-text w-fit",
             standard === Standard.ERC20 &&
               "bg-gradient-to-r from-primary-bg to-secondary-bg rounded-bl-2",
             standard === Standard.ERC223 &&
-              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end",
+              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end ml-auto",
           )}
         >
           {gas}

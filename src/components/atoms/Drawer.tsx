@@ -90,7 +90,7 @@ export default function Drawer({
                 className={clsx(
                   "drawer-container bg-primary-bg",
                   placement === "left" && "h-full",
-                  placement === "bottom" && "w-full max-h-[80vh]",
+                  placement === "bottom" && "w-full max-h-[100vh]",
                 )}
                 ref={refs.setFloating}
                 aria-labelledby={headingId}

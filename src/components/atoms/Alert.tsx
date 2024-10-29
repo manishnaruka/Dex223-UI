@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 
 import Svg from "@/components/atoms/Svg";
+import { clsxMerge } from "@/functions/clsxMerge";
 
 export type AlertType = "success" | "info" | "error" | "warning" | "info-border";
 
@@ -22,13 +23,13 @@ const iconsMap: Record<AlertType, ReactNode> = {
 export default function Alert({ text, type = "success", withIcon = true }: Props) {
   return (
     <div
-      className={clsx(
+      className={clsxMerge(
         `
         relative
         flex
         outline
-        outline-1
         rounded-2
+        outline-1
         gap-2
         px-5
         py-2
@@ -36,12 +37,12 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         group
         text-14
         `,
-        type === "success" && "outline-green bg-green-bg",
+        type === "success" && "outline-green bg-green-bg ",
         type === "error" && "outline-red-light bg-red-bg",
-        type === "warning" && "outline-orange bg-orange-bg",
+        type === "warning" && "outline-orange bg-orange-bg ",
         type === "info" && "outline-blue bg-blue-bg",
         type === "info-border" &&
-          "border-l-4 border-l-blue outline-0 bg-primary-bg text-secondary-text",
+          "border-l-4 border-l-blue outline-0 bg-primary-bg text-secondary-text pl-4",
       )}
     >
       {withIcon && (
