@@ -509,10 +509,10 @@ export default function ConfirmSwapDialog() {
   }, [baseFee, gasPriceSettings]);
 
   useEffect(() => {
-    if (isSettledSwap && !isOpen) {
+    if (isSuccessSwap && !isOpen) {
       resetAmounts();
     }
-  }, [isOpen, isSettledSwap, resetAmounts, resetTokens]);
+  }, [isOpen, isSuccessSwap, resetAmounts, resetTokens]);
 
   const [isEditApproveActive, setEditApproveActive] = useState(false);
 
@@ -527,17 +527,11 @@ export default function ConfirmSwapDialog() {
       isOpen={isOpen}
       setIsOpen={(isOpen) => {
         setIsOpen(isOpen);
-        if (isSettledSwap) {
-          resetAmounts();
-        }
       }}
     >
       <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
         <DialogHeader
           onClose={() => {
-            if (isSettledSwap) {
-              resetAmounts();
-            }
             setIsOpen(false);
           }}
           title={t("review_swap")}

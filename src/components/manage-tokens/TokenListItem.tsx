@@ -2,7 +2,8 @@ import clsx from "clsx";
 import download from "downloadjs";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { scroller } from "react-scroll";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -11,11 +12,12 @@ import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
 import TokenListLogo, { TokenListLogoType } from "@/components/atoms/TokenListLogo";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
-import { db, TokenList } from "@/db/db";
+import { db, TokenList, TokenListId } from "@/db/db";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
+import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 enum ListActionOption {
   VIEW,
@@ -90,13 +92,44 @@ export default function TokenListItem({
   const t = useTranslations("ManageTokens");
   const [isPopoverOpened, setPopoverOpened] = useState(false);
   const [deleteOpened, setDeleteOpened] = useState(false);
-
+  const { scrollTo, setScrollTo } = useManageTokensDialogStore();
   const chainId = useCurrentChainId();
+  const [effect, setEffect] = useState(false);
 
-  console.log(tokenList);
+  useEffect(() => {
+    if (!!tokenList.id && scrollTo === tokenList.id) {
+      setScrollTo(null);
+
+      let scrollDuration;
+
+      scroller.scrollTo(tokenList.id.toString(), {
+        duration: (scrollDistanceInPx: number) => {
+          console.log(scrollDistanceInPx);
+          scrollDuration = scrollDistanceInPx * 2;
+          return scrollDuration;
+        },
+        delay: 100,
+        smooth: true,
+        containerId: "manage-lists-container",
+        offset: 0, // Scrolls to element + 50 pixels down the page
+        // ... other options
+      });
+
+      setTimeout(() => {
+        setEffect(true);
+      }, scrollDuration);
+    }
+  }, [scrollTo, setScrollTo, tokenList.id]);
 
   return (
-    <div className="flex justify-between py-1.5 rounded-3 bg-tertiary-bg px-4 md:px-5">
+    <div
+      onAnimationEnd={() => setEffect(false)}
+      className={clsx(
+        "flex justify-between py-1.5 rounded-3 bg-tertiary-bg px-4 md:px-5",
+        effect ? "animate-list" : "",
+      )}
+      id={tokenList?.id?.toString()}
+    >
       <div className="flex gap-3 items-center">
         {tokenList?.id?.toString()?.startsWith("default") && (
           <TokenListLogo type={TokenListLogoType.DEFAULT} chainId={tokenList.chainId} />

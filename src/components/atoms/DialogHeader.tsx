@@ -7,12 +7,20 @@ import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/butt
 
 interface Props {
   onClose: () => void;
-  title: string;
+  title: ReactNode;
   paragraph?: string;
   onBack?: () => void;
   settings?: ReactNode;
+  titlePosition?: "left" | "center";
 }
-export default function DialogHeader({ onBack, onClose, title, paragraph, settings }: Props) {
+export default function DialogHeader({
+  onBack,
+  onClose,
+  title,
+  paragraph,
+  settings,
+  titlePosition = "left",
+}: Props) {
   const handlers = useSwipeable({
     onSwipedDown: (eventData) => {
       onClose();
@@ -26,16 +34,19 @@ export default function DialogHeader({ onBack, onClose, title, paragraph, settin
         <div
           className={clsx(
             "grid flex-grow",
-            onBack ? "grid-cols-3" : "grid-cols-[1fr_auto] md:grid-cols-2",
+            onBack || titlePosition === "center"
+              ? "grid-cols-3"
+              : "grid-cols-[1fr_auto] md:grid-cols-2",
           )}
         >
           {onBack && (
             <IconButton onClick={onBack} iconName="back" buttonSize={IconButtonSize.LARGE} />
           )}
+          {!onBack && titlePosition === "center" && <span />}
           <h2
             className={clsx(
               "text-18 md:text-20 font-bold flex items-center text-nowrap text-primary-text",
-              onBack && "justify-center",
+              (onBack || titlePosition === "center") && "justify-center",
             )}
           >
             {title}

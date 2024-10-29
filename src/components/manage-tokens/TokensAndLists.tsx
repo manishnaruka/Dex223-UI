@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AutoSizer, List } from "react-virtualized";
 
 import Checkbox from "@/components/atoms/Checkbox";
@@ -47,7 +47,7 @@ function ButtonTooltip({ text }: { text: string }) {
 }
 export default function TokensAndLists({ setContent, handleClose, setTokenForPortfolio }: Props) {
   const t = useTranslations("ManageTokens");
-  const { activeTab, setActiveTab } = useManageTokensDialogStore();
+  const { activeTab, setActiveTab, scrollTo } = useManageTokensDialogStore();
 
   const lists = useTokenLists();
   const [onlyCustom, setOnlyCustom] = useState(false);
@@ -111,7 +111,10 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
 
             {Boolean(filteredLists?.length) && (
-              <div className="flex flex-col mt-3 gap-3">
+              <div
+                className="flex flex-col mt-3 gap-3 h-[392px] overflow-scroll"
+                id="manage-lists-container"
+              >
                 {filteredLists
                   ?.filter((l) => Boolean(l.list.tokens.length))
                   ?.map((tokenList) => {

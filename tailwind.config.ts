@@ -74,6 +74,10 @@ const config: Config = {
           "50%": { transform: "rotate(-90deg)" },
           "100%": { transform: "rotate(0deg)" },
         },
+        list: {
+          "0%": { backgroundColor: "theme('colors.green-bg')" },
+          "100%": { backgroundColor: "theme('colors.tertiary-bg')" },
+        },
         flicker1: {
           "0%": { opacity: "0.3" },
           "25%": { opacity: "1" },
@@ -93,6 +97,7 @@ const config: Config = {
       animation: {
         orbit: "orbit ease-in-out 1.5s infinite",
         swap: "swap ease-in-out 0.5s",
+        list: "list ease-in-out 2s",
         flicker1: "flicker1 ease-in 1.5s infinite",
         flicker2: "flicker2 ease-in 1.5s infinite",
         flicker3: "flicker3 ease-in 1.5s infinite",

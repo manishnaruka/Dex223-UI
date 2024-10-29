@@ -457,6 +457,7 @@ export default function useSwap() {
 
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
 
+        let _request;
         try {
           const { request } = await publicClient.simulateContract({
             ...swapParams,
@@ -464,18 +465,20 @@ export default function useSwap() {
             ...gasPriceFormatted,
             gas: gasToUse,
           } as any);
-          hash = await walletClient.writeContract({
-            ...request,
-            account: undefined,
-          });
+          _request = request;
         } catch (e) {
-          hash = await walletClient.writeContract({
+          _request = {
             ...swapParams,
             ...gasPriceFormatted,
             gas: gasToUse,
             account: undefined,
-          } as any);
+          } as any;
         }
+
+        hash = await walletClient.writeContract({
+          ..._request,
+          account: undefined,
+        });
 
         closeConfirmInWalletAlert();
 
