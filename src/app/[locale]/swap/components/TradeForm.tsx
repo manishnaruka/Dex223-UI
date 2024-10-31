@@ -491,7 +491,7 @@ export default function TradeForm() {
           className={clsx(
             "rounded-3 py-3.5 flex flex-col md:flex-row justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center",
           )}
-          // role="button"
+          role="button"
         >
           {computedGasSpending ? (
             <>

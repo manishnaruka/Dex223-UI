@@ -19,8 +19,8 @@ export enum SpeedUpOption {
 
 const speedUpOptionTitle: Record<SpeedUpOption, string> = {
   [SpeedUpOption.AUTO_INCREASE]: "+10% increase",
-  [SpeedUpOption.CHEAP]: "Cheap",
-  [SpeedUpOption.FAST]: "Fast",
+  [SpeedUpOption.CHEAP]: "Cheaper",
+  [SpeedUpOption.FAST]: "Faster",
   [SpeedUpOption.CUSTOM]: "Custom",
 };
 

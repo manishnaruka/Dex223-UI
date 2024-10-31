@@ -10,6 +10,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: "520px",
+      },
       boxShadow: {
         DEFAULT: "0px 0px 8px 0px var(--tw-shadow-color)",
         notification: "0px -8px 24px 0px var(--tw-shadow-color)",

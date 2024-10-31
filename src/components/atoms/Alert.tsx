@@ -36,13 +36,13 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         overflow-hidden
         group
         text-14
+        text-secondary-text
         `,
         type === "success" && "outline-green bg-green-bg ",
         type === "error" && "outline-red-light bg-red-bg",
         type === "warning" && "outline-orange bg-orange-bg ",
         type === "info" && "outline-blue bg-blue-bg",
-        type === "info-border" &&
-          "border-l-4 border-l-blue outline-0 bg-primary-bg text-secondary-text pl-4",
+        type === "info-border" && "border-l-4 border-l-blue outline-0 bg-primary-bg pl-4",
       )}
     >
       {withIcon && (

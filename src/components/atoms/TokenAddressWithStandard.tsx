@@ -16,14 +16,14 @@ export default function TokenAddressWithStandard({
 }) {
   return (
     <div className="flex text-10">
-      <div className="border rounded-l-2 border-primary-bg bg-quaternary-bg px-2 flex items-center text-secondary-text">
+      <div className="border rounded-l-2 border-secondary-border bg-quaternary-bg px-2 flex items-center text-secondary-text">
         {standard}
       </div>
       <a
         href={getExplorerLink(ExplorerLinkType.ADDRESS, tokenAddress, chainId)}
         target="_blank"
-        className="bg-secondary-bg pl-2 pr-1 flex gap-1 py-px text-secondary-text hocus:text-primary-text
-         hocus:bg-green-bg duration-200 border border-primary-bg rounded-r-2 items-center border-l-0"
+        className="bg-quaternary-bg pl-2 pr-1 flex gap-1 py-px text-secondary-text hocus:text-primary-text
+         hocus:bg-green-bg duration-200 border border-secondary-border rounded-r-2 items-center border-l-0"
       >
         {tokenAddress && `${tokenAddress.slice(0, 6)}...${tokenAddress.slice(-6)}`}
         <Svg size={16} iconName="forward" />

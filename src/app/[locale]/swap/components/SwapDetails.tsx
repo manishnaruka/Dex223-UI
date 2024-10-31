@@ -62,7 +62,7 @@ export default function SwapDetails({
       >
         <div
           className={clsx(
-            "h-12 flex justify-between duration-200 px-5 items-center text-secondary-text",
+            "min-h-10 flex justify-between duration-200 px-5 text-secondary-text py-2 gap-2",
             !isDetailsExpanded ? "hocus:bg-green-bg rounded-3" : "rounded-t-3",
           )}
           role="button"
@@ -74,21 +74,25 @@ export default function SwapDetails({
               e.stopPropagation();
               setIsPriceInverted(!isPriceInverted);
             }}
-            className="text-14 flex items-center hocus:text-green gap-1 duration-200"
+            className="text-14 hocus:text-green duration-200 text-left py-0.5"
           >
-            <span>1 {isPriceInverted ? tokenB.symbol : tokenA.symbol}</span>
-            <span>=</span>
+            <span>1 {isPriceInverted ? tokenB.symbol : tokenA.symbol}</span> <span>= </span>
             <span>
               {isPriceInverted
                 ? trade.executionPrice.invert().toSignificant()
                 : trade.executionPrice.toSignificant()}{" "}
-              {isPriceInverted ? tokenA.symbol : tokenB.symbol} ($0.00)
+              {isPriceInverted ? tokenA.symbol : tokenB.symbol}
+            </span>{" "}
+            <span className="whitespace-nowrap">
+              ($0.00){" "}
+              <span className="text-14 inline-flex items-center justify-center align-middle relative bottom-[1px]">
+                <Svg iconName="swap" size={16} />
+              </span>
             </span>
-            <Svg iconName="swap" size={16} />
           </button>
 
-          <div className="flex items-center gap-3">
-            <div className=" text-14 flex items-center">{t("swap_details")}</div>
+          <div className="flex gap-3">
+            <div className="max-sm:hidden text-14 flex items-center">{t("swap_details")}</div>
             <span>
               <Svg
                 className={clsx("duration-200", isDetailsExpanded && "-rotate-180")}

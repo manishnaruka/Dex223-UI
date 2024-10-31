@@ -53,17 +53,24 @@ function MobileStandardOption({
             className={clsx(
               "flex flex-col",
               standard === active ? "text-secondary-text" : "text-tertiary-text",
-              standard === Standard.ERC223 && "items-end",
+              standard === Standard.ERC223 ? "items-end" : "items-start",
             )}
           >
             {t("balance")}{" "}
             <span
               className={clsx(
-                "whitespace-nowrap",
+                "w-full table table-fixed",
                 standard === active ? "text-primary-text" : "text-tertiary-text",
               )}
             >
-              {balance || "0.0"} {symbol}
+              <span
+                className={clsx(
+                  "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
+                  standard === Standard.ERC223 ? "text-right" : "text-left",
+                )}
+              >
+                {balance || "0.0"} {symbol}
+              </span>
             </span>
           </span>
         )}
@@ -131,18 +138,18 @@ function StandardOption({
         ) : (
           <span
             className={clsx(
-              "block",
+              "w-[calc(100%-55px)] table table-fixed",
               standard === active ? "text-secondary-text" : "text-tertiary-text",
             )}
           >
-            {t("balance")}{" "}
             <span
               className={clsx(
-                "whitespace-nowrap",
+                "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
                 standard === active ? "text-primary-text" : "text-tertiary-text",
+                standard === Standard.ERC223 ? "text-right" : "text-left",
               )}
             >
-              {balance || "0.0"} {symbol}
+              {t("balance")} {balance || "0.0"} {symbol}
             </span>
           </span>
         )}
@@ -239,7 +246,7 @@ export default function TokenInput({
           size="large"
         >
           {token ? (
-            <span className="flex gap-2 items-center pr-2">
+            <span className="flex gap-2 items-center">
               <Image
                 className="flex-shrink-0"
                 src={token?.logoURI || ""}

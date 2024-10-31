@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { Address, formatEther, formatGwei, formatUnits, isAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 
@@ -45,7 +46,6 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
-import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -334,6 +334,8 @@ export default function ListTokenPage() {
 
   const locale = useLocale();
 
+  const isMobile = useMediaQuery({ query: "(max-width: 519px)" });
+
   return (
     <>
       <Container>
@@ -615,8 +617,8 @@ export default function ListTokenPage() {
                   )}
                 </div>
 
-                <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3">
-                  <div className="flex items-center gap-8">
+                <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3 flex-col xs:flex-row">
+                  <div className="text-12 xs:text-14 flex items-center gap-8 justify-between xs:justify-start max-xs:w-full">
                     <p className="flex flex-col text-tertiary-text">
                       <span>Gas price:</span>
                       <span> {formatFloat(formatGwei(formattedGasPrice || BigInt(0)))} GWEI</span>
@@ -643,16 +645,18 @@ export default function ListTokenPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-[auto_1fr] xs:flex xs:items-center gap-2 w-full xs:w-auto mt-2 xs:mt-0">
                     {gasPriceOption === GasOption.CUSTOM && (
-                      <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
+                      <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border max-xs:h-8">
                         {t(gasOptionTitle[gasPriceOption])}
                       </span>
                     )}
                     <Button
                       colorScheme={ButtonColor.LIGHT_GREEN}
-                      size={ButtonSize.EXTRA_SMALL}
+                      size={isMobile ? ButtonSize.SMALL : ButtonSize.EXTRA_SMALL}
                       onClick={() => setIsOpenedFee(true)}
+                      fullWidth={isMobile}
+                      className="rounded-5"
                     >
                       Edit
                     </Button>

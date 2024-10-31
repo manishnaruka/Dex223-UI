@@ -55,8 +55,8 @@ interface Props {
 }
 
 const gasOptionTitle: Record<GasOption, string> = {
-  [GasOption.CHEAP]: "Cheap",
-  [GasOption.FAST]: "Fast",
+  [GasOption.CHEAP]: "Cheaper",
+  [GasOption.FAST]: "Faster",
   [GasOption.CUSTOM]: "Custom",
 };
 

@@ -134,14 +134,14 @@ function ListTokenRow({
         <div
           className={clsxMerge(
             "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green",
+            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
             isReverted && "bg-red-bg",
           )}
         >
           <Svg
             className={clsxMerge(
               "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-secondary-bg",
+              isDisabled ? "text-tertiary-text" : "text-green",
               isReverted && "text-red-light",
             )}
             iconName="swap"
