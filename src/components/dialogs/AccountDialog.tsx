@@ -80,7 +80,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
               setIsOpenedAccount(false);
               disconnect({ connector });
             }}
-            className="flex items-center gap-2 hover:text-green duration-200"
+            className="flex items-center gap-2 hocus:text-green duration-200"
           >
             {t("disconnect")}
             <Svg iconName="logout" />
@@ -128,7 +128,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                   </span>
                   <button
                     onClick={clearTransactions}
-                    className="border-primary-border flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hover:bg-white/20 duration-200 hover:border-primary-text"
+                    className="border-primary-border flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hocus:bg-white/20 duration-200 hocus:border-primary-text"
                   >
                     {tRecentTransactions("clear_all")}
                     <Svg iconName="delete" />
@@ -169,12 +169,15 @@ export default function AccountDialog() {
   const trigger = useMemo(
     () => (
       <SelectButton
-        className="py-1 xl:py-2 text-14 xl:text-16 w-full md:w-auto flex items-center justify-center"
+        className="py-1 xl:py-2 text-14 xl:text-16 w-full md:w-auto flex items-center justify-center group"
         isOpen={isOpenedAccount}
         onClick={() => setIsOpenedAccount(!isOpenedAccount)}
       >
-        <span className="flex gap-2 items-center">
-          <Svg iconName="wallet" />
+        <span className="duration-200 flex gap-2 items-center text-secondary-text group-hover:text-primary-text">
+          <Svg
+            className="duration-200 text-tertiary-text group-hover:text-primary-text"
+            iconName="wallet"
+          />
           {truncateMiddle(address || "", { charsFromStart: 5, charsFromEnd: 3 })}
         </span>
       </SelectButton>

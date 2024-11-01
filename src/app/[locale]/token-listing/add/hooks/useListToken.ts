@@ -5,6 +5,7 @@ import { getAbiItem, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
+import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import {
@@ -76,10 +77,14 @@ function useListParams() {
       }
 
       if (isZeroAddress(paymentToken.token.address)) {
-        return { ...common, args: [...common.args, paymentToken.token], value: paymentToken.price };
+        return {
+          ...common,
+          args: [...common.args, paymentToken.token.address],
+          value: paymentToken.price,
+        };
       }
 
-      return { ...common, args: [...common.args, paymentToken.token] };
+      return { ...common, args: [...common.args, paymentToken.token.address] };
     }
   }, [autoListingContract, isFree, paymentToken, poolAddress]);
 }
@@ -122,6 +127,8 @@ export function useListTokenEstimatedGas() {
         return;
       }
 
+      console.log(listTokenParams);
+
       try {
         const estimated = await publicClient?.estimateContractGas({
           account: address,
@@ -157,6 +164,8 @@ export default function useListToken() {
     tokenB,
     tier: FeeAmount.MEDIUM,
   });
+
+  const tokensToList = useTokensToList();
 
   const isFree = useMemo(() => {
     return !autoListing?.tokensToPay.length;
@@ -207,7 +216,8 @@ export default function useListToken() {
           )
         : undefined,
     contractAddress: autoListingContract,
-    amountToCheck: paymentToken ? paymentToken.price * BigInt(2) : null,
+    amountToCheck:
+      paymentToken && tokensToList.length ? paymentToken.price * BigInt(tokensToList.length) : null,
   });
 
   const handleList = useCallback(
@@ -318,28 +328,41 @@ export default function useListToken() {
 
           const nonce = transaction.nonce;
           setListTokenStatus(ListTokenStatus.LOADING);
-          addRecentTransaction(
-            {
-              hash,
-              nonce,
-              chainId,
-              gas: {
-                ...stringifyObject({ ...gasPriceFormatted, model: GasFeeModel.EIP1559 }),
-                // gas: gasLimit.toString(),
+
+          if (tokensToList.length) {
+            addRecentTransaction(
+              {
+                hash,
+                nonce,
+                chainId,
+                gas: {
+                  ...stringifyObject({ ...gasPriceFormatted, model: GasFeeModel.EIP1559 }),
+                  gas: gasToUse.toString(),
+                },
+                params: {
+                  ...stringifyObject(listParams),
+                  abi: [getAbiItem({ name: "exactInputSingle", abi: ROUTER_ABI })],
+                },
+                title:
+                  tokensToList.length === 2
+                    ? {
+                        symbol0: tokenA.wrapped.symbol!,
+                        symbol1: tokenB.wrapped.symbol!,
+                        template: RecentTransactionTitleTemplate.LIST_DOUBLE,
+                        logoURI0: tokenA?.logoURI || "/tokens/placeholder.svg",
+                        logoURI1: tokenB?.logoURI || "/tokens/placeholder.svg",
+                        autoListing: autoListing?.name || "Unknown",
+                      }
+                    : {
+                        symbol: tokensToList[0]?.symbol || "Unknown",
+                        template: RecentTransactionTitleTemplate.LIST_SINGLE,
+                        logoURI: tokensToList[0]?.logoURI || "/tokens/placeholder.svg",
+                        autoListing: autoListing?.name || "Unknown",
+                      },
               },
-              params: {
-                ...stringifyObject(listParams),
-                abi: [getAbiItem({ name: "exactInputSingle", abi: ROUTER_ABI })],
-              },
-              title: {
-                symbol: tokenA.symbol!,
-                template: RecentTransactionTitleTemplate.LIST_SINGLE,
-                logoURI: tokenA?.logoURI || "/tokens/placeholder.svg",
-                autoListing: autoListing?.name || "Unknown",
-              },
-            },
-            address,
-          );
+              address,
+            );
+          }
 
           const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
           updateAllowance();
@@ -392,6 +415,7 @@ export default function useListToken() {
       t,
       tokenA,
       tokenB,
+      tokensToList,
       updateAllowance,
       walletClient,
       writeTokenApprove,

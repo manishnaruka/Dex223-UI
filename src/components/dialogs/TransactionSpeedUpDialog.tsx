@@ -19,8 +19,8 @@ export enum SpeedUpOption {
 
 const speedUpOptionTitle: Record<SpeedUpOption, string> = {
   [SpeedUpOption.AUTO_INCREASE]: "+10% increase",
-  [SpeedUpOption.CHEAP]: "Cheap",
-  [SpeedUpOption.FAST]: "Fast",
+  [SpeedUpOption.CHEAP]: "Cheaper",
+  [SpeedUpOption.FAST]: "Faster",
   [SpeedUpOption.CUSTOM]: "Custom",
 };
 
@@ -89,7 +89,7 @@ export default function TransactionSpeedUpDialog() {
                           "w-4 h-4 duration-200 before:duration-200 border bg-secondary-bg rounded-full before:w-2.5 before:h-2.5 before:absolute before:top-1/2 before:rounded-full before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 relative",
                           speedUpOption === _speedUpOption
                             ? "border-green before:bg-green"
-                            : "border-secondary-border group-hover:border-green",
+                            : "border-secondary-border group-hocus:border-green",
                         )}
                       />
                       {speedUpOptionTitle[_speedUpOption]}

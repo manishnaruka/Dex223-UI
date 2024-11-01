@@ -1,33 +1,52 @@
 import clsx from "clsx";
 import { ReactNode } from "react";
+import { useSwipeable } from "react-swipeable";
 
 import Svg from "@/components/atoms/Svg";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 
 interface Props {
   onClose: () => void;
-  title: string;
+  title: ReactNode;
   paragraph?: string;
   onBack?: () => void;
   settings?: ReactNode;
+  titlePosition?: "left" | "center";
 }
-export default function DialogHeader({ onBack, onClose, title, paragraph, settings }: Props) {
+export default function DialogHeader({
+  onBack,
+  onClose,
+  title,
+  paragraph,
+  settings,
+  titlePosition = "left",
+}: Props) {
+  const handlers = useSwipeable({
+    onSwipedDown: (eventData) => {
+      onClose();
+    },
+    delta: { down: 200 },
+  });
+
   return (
-    <div className={onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10"}>
+    <div {...handlers} className={onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10"}>
       <div className={clsx("h-[60px] flex items-center")}>
         <div
           className={clsx(
             "grid flex-grow",
-            onBack ? "grid-cols-3" : "grid-cols-[1fr_auto] md:grid-cols-2",
+            onBack || titlePosition === "center"
+              ? "grid-cols-3"
+              : "grid-cols-[1fr_auto] md:grid-cols-2",
           )}
         >
           {onBack && (
             <IconButton onClick={onBack} iconName="back" buttonSize={IconButtonSize.LARGE} />
           )}
+          {!onBack && titlePosition === "center" && <span />}
           <h2
             className={clsx(
               "text-18 md:text-20 font-bold flex items-center text-nowrap text-primary-text",
-              onBack && "justify-center",
+              (onBack || titlePosition === "center") && "justify-center",
             )}
           >
             {title}

@@ -35,16 +35,15 @@ function MobileStandardOption({
 
   return (
     <div className="flex flex-col">
-      <div
-        role="button"
+      <button
         onClick={() => setIsActive(standard)}
         className={clsxMerge(
-          "*:z-10 pt-10 flex flex-col gap-1 px-3 pb-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hover:cursor-pointer text-12 group",
-          isActive ? "before:opacity-100" : "before:opacity-0 hover:before:opacity-100",
+          "*:z-10 pt-10 flex flex-col gap-1 px-3 pb-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
+          isActive ? "before:opacity-100" : "before:opacity-0 hocus:before:opacity-100",
           standard === Standard.ERC223 &&
             "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
           standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
-          !token && "before:opacity-0 hover:before:opacity-0 before:cursor-default cursor-default",
+          !token && "before:opacity-0 hocus:before:opacity-0 before:cursor-default cursor-default",
         )}
       >
         {!token ? (
@@ -53,17 +52,29 @@ function MobileStandardOption({
           <span
             className={clsx(
               "flex flex-col",
-              standard === active ? "text-primary-text" : "text-tertiary-text",
-              standard === Standard.ERC223 && "items-end",
+              standard === active ? "text-secondary-text" : "text-tertiary-text",
+              standard === Standard.ERC223 ? "items-end" : "items-start",
             )}
           >
             {t("balance")}{" "}
-            <span className="whitespace-nowrap">
-              {balance || "0.0"} {symbol}
+            <span
+              className={clsx(
+                "w-full table table-fixed",
+                standard === active ? "text-primary-text" : "text-tertiary-text",
+              )}
+            >
+              <span
+                className={clsx(
+                  "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
+                  standard === Standard.ERC223 ? "text-right" : "text-left",
+                )}
+              >
+                {balance || "0.0"} {symbol}
+              </span>
             </span>
           </span>
         )}
-      </div>
+      </button>
     </div>
   );
 }
@@ -92,28 +103,31 @@ function StandardOption({
 
   return (
     <div className="flex flex-col">
-      <div
-        role="button"
+      <button
         onClick={() => setIsActive(standard)}
         className={clsxMerge(
-          "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hover:cursor-pointer text-12 group",
-          isActive ? "before:opacity-100" : "before:opacity-0 hover:before:opacity-100",
+          "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
+          isActive ? "before:opacity-100" : "before:opacity-0 hocus:before:opacity-100",
           standard === Standard.ERC223 &&
             "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
           standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
           !token &&
-            "before:opacity-0 hover:before:opacity-0 before:cursor-default cursor-default pointer-events-none",
+            "before:opacity-0 hocus:before:opacity-0 before:cursor-default cursor-default pointer-events-none",
           gas && standard === Standard.ERC20 && "rounded-b-0 before:rounded-b-0",
           gas && standard === Standard.ERC223 && "rounded-b-0 before:rounded-t-0",
         )}
       >
         <div className="flex items-center gap-1 cursor-default">
           <span
-            className={clsxMerge("text-12 text-secondary-text", !token && "text-tertiary-text")}
+            className={clsxMerge(
+              "text-12 text-secondary-text",
+              (!token || standard !== active) && "text-tertiary-text",
+            )}
           >
             {t("standard")}
           </span>
           <Badge size="small" color="green" text={standard} />
+
           <Tooltip
             iconSize={16}
             text={standard === Standard.ERC20 ? t("erc20_tooltip") : t("erc223_tooltip")}
@@ -124,26 +138,30 @@ function StandardOption({
         ) : (
           <span
             className={clsx(
-              "block",
-              standard === active ? "text-primary-text" : "text-tertiary-text",
+              "w-[calc(100%-55px)] table table-fixed",
+              standard === active ? "text-secondary-text" : "text-tertiary-text",
             )}
           >
-            {t("balance")}{" "}
-            <span className="whitespace-nowrap">
-              {balance || "0.0"} {symbol}
+            <span
+              className={clsx(
+                "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
+                standard === active ? "text-primary-text" : "text-tertiary-text",
+                standard === Standard.ERC223 ? "text-right" : "text-left",
+              )}
+            >
+              {t("balance")} {balance || "0.0"} {symbol}
             </span>
           </span>
         )}
-      </div>
+      </button>
       {gas && (
         <div
           className={clsx(
-            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center",
+            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center text-tertiary-text w-fit",
             standard === Standard.ERC20 &&
               "bg-gradient-to-r from-primary-bg to-secondary-bg rounded-bl-2",
             standard === Standard.ERC223 &&
-              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end",
-            gas === "—" ? "text-tertiary-text" : "text-secondary-text",
+              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end ml-auto",
           )}
         >
           {gas}
@@ -219,7 +237,7 @@ export default function TokenInput({
             allowNegative={false}
           />
           <span className="text-12 block -mt-1 text-secondary-text">$0.00</span>
-          <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hover:shadow peer-hover:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
+          <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
         <SelectButton
           className="flex-shrink-0"
@@ -228,7 +246,7 @@ export default function TokenInput({
           size="large"
         >
           {token ? (
-            <span className="flex gap-2 items-center pr-2">
+            <span className="flex gap-2 items-center">
               <Image
                 className="flex-shrink-0"
                 src={token?.logoURI || ""}
@@ -269,7 +287,7 @@ export default function TokenInput({
                       "h-6 rounded-3 duration-200 px-2 min-w-[58px] w-full text-10 text-secondary-text",
                       standard === st
                         ? "bg-green text-black shadow shadow-green/60"
-                        : "hover:bg-green-bg hover:text-primary-text",
+                        : "hocus:bg-green-bg hocus:text-primary-text",
                       !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
                       !token && "text-tertiary-text pointer-events-none",
                     )}
@@ -314,7 +332,7 @@ export default function TokenInput({
                       "h-6 rounded-3 duration-200 px-2 min-w-[58px] text-secondary-text",
                       standard === st
                         ? "bg-green text-black shadow shadow-green/60"
-                        : "hover:bg-green-bg hover:text-primary-text",
+                        : "hocus:bg-green-bg hocus:text-primary-text",
                       !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
                       !token && "text-tertiary-text pointer-events-none",
                     )}
@@ -341,12 +359,12 @@ export default function TokenInput({
         <div className="flex flex-col">
           <div
             className={clsxMerge(
-              "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hover:cursor-pointer text-12 group",
+              "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
               standard === Standard.ERC223 &&
                 "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
               standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
               !token &&
-                "before:opacity-0 hover:before:opacity-0 before:cursor-default cursor-default",
+                "before:opacity-0 hocus:before:opacity-0 before:cursor-default cursor-default",
             )}
           >
             <div className="flex items-center gap-1 cursor-default">

@@ -13,6 +13,7 @@ import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterAutoListings, filterTokenLists } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 
@@ -33,11 +34,7 @@ export default function ChooseAutoListingDialog() {
     if (!searchValue) {
       return autoListings;
     } else {
-      return autoListings.filter(
-        (l) =>
-          l.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
-          l.id.toLowerCase().startsWith(searchValue.toLowerCase()),
-      );
+      return filterAutoListings(searchValue, autoListings);
     }
   }, [autoListings, searchValue]);
 
@@ -67,7 +64,7 @@ export default function ChooseAutoListingDialog() {
                   setAutoListingSelectOpened(false);
                 }}
                 key={a.id}
-                className="w-full flex items-center justify-between hover:bg-tertiary-bg duration-200 px-4 md:px-10 py-2"
+                className="w-full flex items-center justify-between hocus:bg-tertiary-bg duration-200 px-4 md:px-10 py-2"
               >
                 <div className="flex flex-col items-start">
                   <span className="font-medium w-[70px] overflow-ellipsis overflow-hidden md:w-[244px] whitespace-nowrap text-left">
@@ -86,7 +83,6 @@ export default function ChooseAutoListingDialog() {
                   )}
                   <ExternalTextLink
                     onClick={(e) => e.stopPropagation()}
-                    color="white"
                     text={truncateMiddle(a.id, { charsFromEnd: 3, charsFromStart: 3 })}
                     href={getExplorerLink(ExplorerLinkType.ADDRESS, a.id, chainId)}
                   />

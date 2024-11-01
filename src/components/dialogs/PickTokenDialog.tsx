@@ -16,6 +16,7 @@ import IconButton from "@/components/buttons/IconButton";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
+import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
@@ -36,7 +37,7 @@ function FoundInOtherListMarker() {
       renderTrigger={(ref, refProps) => {
         return (
           <div
-            className="rounded-full p-0.5 bg-primary-bg group-hover:bg-tertiary-bg duration-200"
+            className="rounded-full p-0.5 bg-primary-bg group-hocus:bg-tertiary-bg duration-200"
             ref={ref.setReference}
             {...refProps}
           >
@@ -83,41 +84,74 @@ function TokenRow({
   }, [currency]);
 
   return (
-    <div
+    <button
       role="button"
       onClick={() => handlePick(currency)}
-      className="px-10 hover:bg-tertiary-bg duration-200 group pb-2"
+      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:px-10 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
     >
-      <div className="grid grid-cols-[40px_1fr] gap-2">
-        <div className="flex items-center pt-3">
+      <div className="grid grid-cols-[40px_1fr] gap-2 w-full">
+        <div className="flex items-center md:pt-3">
           <Image width={40} height={40} src={currency?.logoURI || ""} alt="" />
         </div>
-        <div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span>{currency.name}</span>
-              <div className="flex relative items-center">
-                {scoreObj && (
-                  <>
-                    {scoreObj[0] < 20 && (
-                      <>
-                        {currency.isToken && currency.rate && (
-                          <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
-                        )}
-                      </>
-                    )}
-                    {scoreObj[1] && (
-                      <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
-                        <FoundInOtherListMarker />
-                      </div>
-                    )}
-                  </>
-                )}
+        <div className="w-full">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center md:gap-2 flex-wrap">
+              <div className="flex items-center w-[120px] md:gap-2 md:w-[256px]">
+                <span className="whitespace-nowrap overflow-ellipsis overflow-hidden">
+                  {currency.name}
+                </span>
+                <div className="flex relative items-center">
+                  {scoreObj && (
+                    <>
+                      {scoreObj[0] < 20 && (
+                        <>
+                          {currency.isToken && currency.rate && (
+                            <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
+                          )}
+                        </>
+                      )}
+                      {scoreObj[1] && (
+                        <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
+                          <FoundInOtherListMarker />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
+
+              {isTokenPinned ? (
+                <span className="block w-full text-primary-text text-12 md:hidden">$0.00</span>
+              ) : (
+                <span className="w-full ">
+                  <span className="w-[100px] whitespace-nowrap overflow-hidden overflow-ellipsis block text-secondary-text text-12 md:hidden">
+                    {currency.symbol}
+                  </span>
+                </span>
+              )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-primary-text text-12">$0.00</span>
+            <div className="flex items-center gap-1">
+              <span className="text-primary-text text-12 hidden md:inline">$0.00</span>
+              {currency.isToken ? (
+                <Tooltip
+                  text={`Token belongs to ${currency.lists?.length || 1} token lists`}
+                  renderTrigger={(ref, refProps) => {
+                    return (
+                      <span
+                        ref={ref.setReference}
+                        {...refProps}
+                        className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer w-10"
+                      >
+                        {currency.lists?.length || 1}
+                        <Svg className="text-tertiary-text" iconName="list" />
+                      </span>
+                    );
+                  }}
+                />
+              ) : (
+                <span className="block w-10" />
+              )}
               {currency.isToken ? (
                 <IconButton
                   iconName="details"
@@ -141,7 +175,7 @@ function TokenRow({
             </div>
           </div>
 
-          <div className="auto-cols-fr grid grid-flow-col gap-2">
+          <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid">
             {!isTokenPinned && (
               <span className="text-secondary-text text-12">{currency.symbol}</span>
             )}
@@ -172,7 +206,33 @@ function TokenRow({
           </div>
         </div>
       </div>
-    </div>
+      <div className="auto-cols-fr grid grid-flow-col gap-2 md:hidden mt-1">
+        {erc20Balance && currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc20Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+        {erc20Balance && !currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc20Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+        {erc223Balance && !currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc223Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+      </div>
+    </button>
   );
 }
 
@@ -202,22 +262,15 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
   const [tokensSearchValue, setTokensSearchValue] = useState("");
 
   const [filteredTokens, isTokenFilterActive] = useMemo(() => {
-    return tokensSearchValue
-      ? [
-          tokens.filter(
-            (t) => t.name && t.name.toLowerCase().startsWith(tokensSearchValue.toLowerCase()),
-          ),
-          true,
-        ]
-      : [tokens, false];
+    return tokensSearchValue ? [filterTokens(tokensSearchValue, tokens), true] : [tokens, false];
   }, [tokens, tokensSearchValue]);
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
   useEffect(() => {
-    if (!isMobile) {
+    if (!isMobile || !pinnedTokens.length) {
       setEditActivated(false);
     }
-  }, [isMobile]);
+  }, [isMobile, pinnedTokens.length]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
@@ -253,7 +306,14 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                   >
                     {pinnedTokens.map((pinnedToken) => {
                       return (
-                        <div key={pinnedToken.wrapped.address0} className="group relative">
+                        <div
+                          key={
+                            pinnedToken.isToken
+                              ? pinnedToken.address0
+                              : `native-${pinnedToken.wrapped.address0}`
+                          }
+                          className="group relative"
+                        >
                           <button
                             onClick={() => {
                               if (isMobile && isEditActivated) {
@@ -265,7 +325,12 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                                 handlePick(pinnedToken);
                               }
                             }}
-                            className="items-center justify-center px-4 duration-200 h-10 rounded-1 bg-tertiary-bg hover:bg-green-bg flex gap-2"
+                            className={clsx(
+                              isEditActivated
+                                ? "bg-transparent border-secondary-border hocus:bg-transparent"
+                                : "bg-tertiary-bg border-transparent hocus:bg-green-bg",
+                              "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                            )}
                           >
                             <Image
                               width={24}
@@ -284,7 +349,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                               );
                             }}
                             className={clsxMerge(
-                              "group-hover:opacity-100 opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text hover:text-primary-text -right-1 -top-1",
+                              "group-hocus:opacity-100 hocus:opacity-100 opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text hocus:text-primary-text -right-1 -top-1",
                               isEditActivated && "opacity-100",
                             )}
                           >
@@ -293,25 +358,30 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                         </div>
                       );
                     })}
-                    {
+                    {!!pinnedTokens.length && (
                       <span className="md:hidden">
-                        <IconButton
+                        <button
+                          className={clsx(
+                            "w-10 h-10 rounded-2 flex items-center justify-center",
+                            isEditActivated ? "bg-green-bg-hover" : "bg-tertiary-bg",
+                          )}
                           onClick={() => {
                             setEditActivated(!isEditActivated);
                           }}
-                          iconName="edit"
-                        />
+                        >
+                          <Svg iconName="edit" size={20} />
+                        </button>
                       </span>
-                    }
+                    )}
                   </div>
                 </div>
                 {Boolean(filteredTokens.length) && (
-                  <div className="h-[420px] overflow-auto">
+                  <div className="h-[420px] overflow-auto flex flex-col gap-2 md:gap-0 px-4 md:px-0 pb-2">
                     {filteredTokens.map((token) => (
                       <TokenRow
                         setTokenForPortfolio={setTokenForPortfolio}
                         handlePick={handlePick}
-                        key={token.wrapped.address0}
+                        key={token.isToken ? token.address0 : `native-${token.wrapped.address0}`}
                         currency={token}
                       />
                     ))}
@@ -328,7 +398,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     setIsOpen(false);
                     setManageOpened(true);
                   }}
-                  className="w-full text-green hover:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hover:bg-green-bg hover:shadow hover:shadow-green/60 duration-200"
+                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg hocus:shadow hocus:shadow-green/60 duration-200"
                 >
                   Manage tokens
                   <Svg iconName="edit" />

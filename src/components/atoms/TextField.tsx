@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { InputHTMLAttributes, ReactNode } from "react";
+import { NumericFormat } from "react-number-format";
 
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Tooltip from "@/components/atoms/Tooltip";
-import { clsxMerge } from "@/functions/clsxMerge";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -20,6 +20,18 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
         warning?: never;
       }
     | { warning?: string | boolean; error?: never }
+  ) &
+  (
+    | {
+        isNumeric?: never;
+      }
+    | {
+        isNumeric?: true;
+        defaultValue?: string | number | null | undefined;
+        value?: string | number | null | undefined;
+        type?: "tel" | "text" | "password";
+        decimalScale?: number;
+      }
   );
 
 export function InputLabel({ label, tooltipText, ...props }: Omit<Props, "helperText">) {
@@ -72,11 +84,21 @@ export default function TextField({
       <InputLabel label={label} tooltipText={tooltipText} />
       {variant === "default" ? (
         <div className="relative">
-          <Input
-            isError={Boolean(error) || isError}
-            isWarning={Boolean(warning) || isWarning}
-            {...props}
-          />
+          {props.isNumeric ? (
+            <NumericFormat
+              isError={Boolean(error) || isError}
+              isWarning={Boolean(warning) || isWarning}
+              customInput={Input}
+              {...props}
+              decimalScale={props.decimalScale}
+            />
+          ) : (
+            <Input
+              isError={Boolean(error) || isError}
+              isWarning={Boolean(warning) || isWarning}
+              {...props}
+            />
+          )}
           {internalText && (
             <span className="absolute right-5 text-tertiary-text top-1/2 -translate-y-1/2">
               {internalText}

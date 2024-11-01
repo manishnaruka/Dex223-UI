@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -20,6 +21,7 @@ import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
+import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 function TokenListInfo({ listId }: { listId: TokenListId }) {
   const t = useTranslations("ManageTokens");
@@ -28,7 +30,9 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
   const tokenList = useMemo(() => {
     return tokenLists?.find((tl) => tl.id === listId);
   }, [listId, tokenLists]);
-
+  const { isOpen, setIsOpen, setActiveTab, activeTab, content, setScrollTo, setContent } =
+    useManageTokensDialogStore();
+  const { handleClose } = useTokenPortfolioDialogStore();
   return (
     <div className="flex justify-between w-full">
       <div className="flex gap-3 items-center">
@@ -52,8 +56,17 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
           </div>
         </div>
       </div>
-      <button className="text-green opacity-50 pointer-events-none flex items-center gap-2">
-        View list
+      <button
+        onClick={() => {
+          setIsOpen(true);
+          setActiveTab(0);
+          setContent("default");
+          setScrollTo(tokenList?.id || null);
+          handleClose();
+        }}
+        className="text-green flex items-center gap-2"
+      >
+        Manage list
         <Svg iconName="next" />
       </button>
     </div>
@@ -62,7 +75,7 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
 
 export function TokenPortfolioDialogContent({ token }: { token: Token }) {
   const t = useTranslations("ManageTokens");
-  const tToast = useTranslations("Toast");
+
   return (
     <div className="w-full md:w-[600px]">
       <div className="px-4 pb-5 md:px-10 border-b border-primary-border flex flex-col gap-2">
@@ -75,7 +88,6 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
             {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
           </span>
           <ExternalTextLink
-            color="white"
             text={`${token.address0.slice(0, 6)}...${token.address0.slice(-6)}`}
             href={getExplorerLink(ExplorerLinkType.ADDRESS, token.address0, token.chainId)}
             className="justify-between"
@@ -90,7 +102,6 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
             {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-223" />{" "}
           </span>
           <ExternalTextLink
-            color="white"
             text={`${token.address1.slice(0, 6)}...${token.address1.slice(-6)}`}
             href={getExplorerLink(ExplorerLinkType.ADDRESS, token.address1, token.chainId)}
           />
@@ -127,7 +138,21 @@ export default function TokenPortfolioDialog() {
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
-      <DialogHeader onClose={handleClose} title={token?.name || "Unknown"} />
+      <DialogHeader
+        titlePosition="center"
+        onClose={handleClose}
+        title={
+          <span className="flex items-center gap-2">
+            <Image
+              width={32}
+              height={32}
+              src={token?.logoURI || "/tokens/placeholder.svg"}
+              alt=""
+            />
+            {token?.name || "Unknown"}
+          </span>
+        }
+      />
       {token && <TokenPortfolioDialogContent token={token} />}
     </DrawerDialog>
   );

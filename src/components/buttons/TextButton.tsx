@@ -6,6 +6,7 @@ import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+  color?: "green" | "secondary";
   endIcon?: IconName;
 }
 
@@ -19,10 +20,9 @@ export default function TextButton({
   return (
     <button
       className={clsxMerge(
-        "rounded-2 flex items-center justify-center gap-2 px-6 duration-200",
-        props.disabled
-          ? "opacity-50 pointer-events-none text-tertiary-text"
-          : "text-green hover:text-green-hover",
+        "disabled:opacity-50 disabled:pointer-events-none disabled:text-tertiary-text rounded-2 flex items-center justify-center gap-2 px-6 duration-200",
+        color === "green" && "text-green hocus:text-green-hover",
+        color === "secondary" && "text-secondary-text hocus:text-green-hover",
         className,
       )}
       {...props}

@@ -9,11 +9,13 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { NumericFormat } from "react-number-format";
 import { formatGwei, parseGwei } from "viem";
 
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
 import TextField from "@/components/atoms/TextField";
@@ -53,8 +55,8 @@ interface Props {
 }
 
 const gasOptionTitle: Record<GasOption, string> = {
-  [GasOption.CHEAP]: "Cheap",
-  [GasOption.FAST]: "Fast",
+  [GasOption.CHEAP]: "Cheaper",
+  [GasOption.FAST]: "Faster",
   [GasOption.CUSTOM]: "Custom",
 };
 
@@ -114,6 +116,7 @@ function EIP1559Fields({
   return (
     <div className="grid gap-3 grid-cols-2">
       <TextField
+        isNumeric
         isError={maxFeePerGasError}
         isWarning={maxFeePerGasWarning}
         placeholder="Max fee"
@@ -149,6 +152,7 @@ function EIP1559Fields({
       />
 
       <TextField
+        isNumeric
         isError={maxPriorityFeePerGasError}
         isWarning={maxPriorityFeePerGasWarning}
         placeholder="Priority fee"
@@ -478,7 +482,7 @@ function NetworkFeeDialogContent({
                   "flex justify-between px-5 items-center min-h-12 duration-200",
                   GasOption.CUSTOM === _gasOption && "border-primary-bg rounded-t-3",
                   GasOption.CUSTOM !== _gasOption && "border-primary-bg rounded-3",
-                  values.gasPriceOption === _gasOption && "bg-green-bg",
+                  values.gasPriceOption !== _gasOption && "group-hocus:bg-green-bg",
                 )}
               >
                 <div className="flex items-center gap-2">
@@ -487,16 +491,62 @@ function NetworkFeeDialogContent({
                       "w-4 h-4 duration-200 before:duration-200 border bg-secondary-bg rounded-full before:w-2.5 before:h-2.5 before:absolute before:top-1/2 before:rounded-full before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 relative",
                       values.gasPriceOption === _gasOption
                         ? "border-green before:bg-green"
-                        : "border-secondary-border group-hover:border-green",
+                        : "border-secondary-border group-hocus:border-green",
                     )}
                   />
-                  {gasOptionIcon[_gasOption]}
-                  {gasOptionTitle[_gasOption]}
-                  <span className="text-secondary-text">
+                  <span
+                    className={clsx(
+                      values.gasPriceOption === _gasOption
+                        ? "text-green"
+                        : "text-tertiary-text group-hocus:text-primary-text",
+                      "duration-200",
+                    )}
+                  >
+                    {gasOptionIcon[_gasOption]}
+                  </span>
+                  <span
+                    className={clsx(
+                      values.gasPriceOption === _gasOption
+                        ? "text-primary-text"
+                        : "text-secondary-text group-hocus:text-primary-text",
+                      "duration-200 font-bold",
+                    )}
+                  >
+                    {gasOptionTitle[_gasOption]}
+                  </span>
+
+                  <span className="text-tertiary-text">
                     <Tooltip iconSize={20} text="Tooltip text" />
                   </span>
-                  <span className="text-secondary-text">~0.00$</span>
+                  <span
+                    className={clsx(
+                      values.gasPriceOption === _gasOption
+                        ? "text-secondary-text"
+                        : "text-tertiary-text group-hocus:text-secondary-text",
+                      "duration-200",
+                    )}
+                  >
+                    ~0.00$
+                  </span>
                 </div>
+                <span
+                  className={clsx(
+                    values.gasPriceOption === _gasOption
+                      ? "text-primary-text"
+                      : "text-tertiary-text group-hocus:text-primary-text",
+                    "duration-200",
+                  )}
+                >
+                  {_gasOption !== GasOption.CUSTOM &&
+                    baseFee &&
+                    `${formatFloat(
+                      formatGwei(
+                        (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR,
+                      ),
+                    )} GWEI`}
+                  {_gasOption === GasOption.CUSTOM &&
+                    `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
+                </span>
               </div>
 
               {_gasOption === GasOption.CUSTOM && (
@@ -509,7 +559,9 @@ function NetworkFeeDialogContent({
                     <div className={clsx("px-5 pb-4")}>
                       <div className="flex justify-between items-center pb-3 pt-3">
                         <span>
-                          <span className="hidden md:inline">Custom gas settings</span>
+                          <span className="hidden text-tertiary-text md:inline">
+                            Custom gas settings
+                          </span>
                         </span>
                         <TextButton
                           onClick={() => {
@@ -570,7 +622,9 @@ function NetworkFeeDialogContent({
                     <div className={clsx("px-5 pb-4")}>
                       <div className="flex justify-between items-center pb-3 pt-3">
                         <span>
-                          <span className="hidden md:inline">Custom gas settings</span>
+                          <span className="hidden text-tertiary-text md:inline">
+                            Custom gas settings
+                          </span>
                         </span>
                         <TextButton
                           onClick={() => {
@@ -608,6 +662,7 @@ function NetworkFeeDialogContent({
                         </TextButton>
                       </div>
                       <TextField
+                        isNumeric
                         placeholder="Gas price"
                         label="Gas price"
                         name="gasPrice"
@@ -648,7 +703,9 @@ function NetworkFeeDialogContent({
                     <div className={clsx("px-5 pb-4 flex flex-col gap-4")}>
                       <div className="flex justify-between items-center pb-3 pt-3">
                         <span>
-                          <span className="hidden md:inline">Custom gas settings</span>
+                          <span className="hidden text-tertiary-text md:inline">
+                            Custom gas settings
+                          </span>
                         </span>
                         <TextButton
                           onClick={() => {
@@ -686,6 +743,7 @@ function NetworkFeeDialogContent({
                         </TextButton>
                       </div>
                       <TextField
+                        isNumeric
                         placeholder="Gas price"
                         label="Gas price"
                         name="gasPrice"
@@ -721,6 +779,8 @@ function NetworkFeeDialogContent({
                       />
 
                       <TextField
+                        isNumeric
+                        decimalScale={0}
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"
@@ -758,7 +818,9 @@ function NetworkFeeDialogContent({
                     <div className="px-5 pb-4">
                       <div className="flex justify-between items-center pb-3 pt-3">
                         <span>
-                          <span className="hidden md:inline">Custom gas settings</span>
+                          <span className="hidden text-tertiary-text md:inline">
+                            Custom gas settings
+                          </span>
                         </span>
                         <TextButton
                           onClick={() => {
@@ -803,14 +865,27 @@ function NetworkFeeDialogContent({
                               values.gasPriceModel === GasFeeModel.EIP1559
                                 ? "bg-green-bg border-green"
                                 : "bg-primary-bg border-transparent",
-                              "flex flex-col gap-1 justify-center items-center py-3 px-5 border hover:bg-green-bg rounded-3 duration-200",
+                              "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border group hocus:bg-green-bg rounded-3 duration-200",
                             )}
                             onClick={() => setFieldValue("gasPriceModel", GasFeeModel.EIP1559)}
                           >
-                            <span className="flex items-center gap-1">
+                            <span
+                              className={clsx(
+                                "flex items-center gap-1",
+                                values.gasPriceModel !== GasFeeModel.EIP1559 &&
+                                  "text-secondary-text",
+                              )}
+                            >
                               EIP-1559 <Tooltip text="WOOTLAMN" />
                             </span>
-                            <span className="text-secondary-text text-12">
+                            <span
+                              className={clsx(
+                                "text-12 duration-200",
+                                values.gasPriceModel === GasFeeModel.EIP1559
+                                  ? "text-secondary-text "
+                                  : "text-tertiary-text group-hover/button:text-secondary-text",
+                              )}
+                            >
                               Network Fee = gasLimit × (Base Fee + PriorityFee)
                             </span>
                           </button>
@@ -819,15 +894,28 @@ function NetworkFeeDialogContent({
                             className={clsx(
                               values.gasPriceModel === GasFeeModel.LEGACY
                                 ? "bg-green-bg border-green"
-                                : "bg-primary-bg border-transparent",
-                              "flex flex-col gap-1 justify-center items-center py-3 px-5 border hover:bg-green-bg rounded-3 duration-200",
+                                : "bg-primary-bg border-transparent text-secondary-text",
+                              "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border hocus:bg-green-bg rounded-3 duration-200",
                             )}
                             onClick={() => setFieldValue("gasPriceModel", GasFeeModel.LEGACY)}
                           >
-                            <span className="flex items-center gap-1">
+                            <span
+                              className={clsx(
+                                "flex items-center gap-1",
+                                values.gasPriceModel !== GasFeeModel.LEGACY &&
+                                  "text-secondary-text",
+                              )}
+                            >
                               Legacy <Tooltip text="WOOTLAMN" />
                             </span>
-                            <span className="text-secondary-text text-12">
+                            <span
+                              className={clsx(
+                                "text-12 duration-200",
+                                values.gasPriceModel === GasFeeModel.LEGACY
+                                  ? "text-secondary-text "
+                                  : "text-tertiary-text group-hover/button:text-secondary-text",
+                              )}
+                            >
                               Network Fee = gasLimit × gasPrice
                             </span>
                           </button>
@@ -854,11 +942,18 @@ function NetworkFeeDialogContent({
                               errors={gasPriceErrors}
                               warnings={gasPriceWarnings}
                             />
+                            <div className="mt-5">
+                              <Alert
+                                text="Сhanging Priority Fee only in order to make transaction cheaper or speed it up at a cost of paying higher fee."
+                                type="info-border"
+                              />
+                            </div>
                           </>
                         )}
                         {values.gasPriceModel === GasFeeModel.LEGACY && (
                           <div className="mt-4">
                             <TextField
+                              isNumeric
                               placeholder="Gas price"
                               label="Gas price"
                               name="gasPrice"
@@ -896,6 +991,8 @@ function NetworkFeeDialogContent({
                         )}
                       </div>
                       <TextField
+                        isNumeric
+                        decimalScale={0}
                         placeholder="Gas limit"
                         label="Gas limit"
                         name="gasLimit"
@@ -944,11 +1041,13 @@ function NetworkFeeDialogContent({
         </Button>
         <Button
           disabled={Boolean(
-            ((maxFeePerGasError || maxPriorityFeePerGasError) &&
+            (!isAdvanced &&
+              (maxFeePerGasError || maxPriorityFeePerGasError) &&
               values.gasPriceOption === GasOption.CUSTOM &&
               values.gasPriceModel === GasFeeModel.EIP1559) ||
               gasLimitError ||
-              (values.gasPriceOption === GasOption.CUSTOM &&
+              (!isAdvanced &&
+                values.gasPriceOption === GasOption.CUSTOM &&
                 values.gasPriceModel === GasFeeModel.LEGACY &&
                 legacyGasPriceError),
           )}

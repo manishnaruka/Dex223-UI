@@ -8,7 +8,7 @@ export default function useTokensToList() {
   const { tokenA, tokenB } = useListTokensStore();
 
   return useMemo(() => {
-    if (!autoListing) {
+    if (!autoListing || !tokenA || !tokenB) {
       return [];
     }
 

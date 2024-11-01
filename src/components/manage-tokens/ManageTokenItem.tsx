@@ -41,7 +41,7 @@ export default function ManageTokenItem({
         </div>
         <div className="flex items-center gap-3">
           {token.wrapped.lists?.includes(`custom-${chainId}`) && (
-            <div className="group-hover:opacity-100 opacity-0 duration-200">
+            <div className="group-hocus:opacity-100 opacity-0 duration-200">
               <IconButton
                 variant={IconButtonVariant.DELETE}
                 handleDelete={() => {

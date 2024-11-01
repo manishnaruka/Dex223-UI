@@ -39,6 +39,7 @@ export const config = createConfig({
       dappMetadata: {
         name: "dex223.io",
       },
+      useDeeplink: true,
     }),
     injected({
       target: "trust",

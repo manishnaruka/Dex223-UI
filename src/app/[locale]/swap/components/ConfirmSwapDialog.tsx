@@ -133,14 +133,14 @@ function SwapRow({
         <div
           className={clsxMerge(
             "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green",
+            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
             isReverted && "bg-red-bg",
           )}
         >
           <Svg
             className={clsxMerge(
               "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-secondary-bg",
+              isDisabled ? "text-tertiary-text" : "text-green",
               isReverted && "text-red-light",
             )}
             iconName="swap"
@@ -264,7 +264,7 @@ function SwapActionButton({
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .
@@ -337,7 +337,7 @@ function SwapActionButton({
                   Transaction failed due to lack of gas or an internal contract error. Try using
                   higher slippage or gas to ensure your transaction is completed. If you still have
                   issues, click{" "}
-                  <a href="#" className="text-green hover:underline">
+                  <a href="#" className="text-green hocus:underline">
                     common errors
                   </a>
                   .
@@ -479,8 +479,6 @@ export default function ConfirmSwapDialog() {
   const [amountToApprove, setAmountToApprove] = useState(typedValue);
   // const { gasOption, gasPrice, gasLimit } = useSwapGasSettingsStore();
 
-  console.log(typedValue);
-  console.log(amountToApprove);
   useEffect(() => {
     if (typedValue) {
       setAmountToApprove(typedValue);
@@ -511,10 +509,10 @@ export default function ConfirmSwapDialog() {
   }, [baseFee, gasPriceSettings]);
 
   useEffect(() => {
-    if (isSettledSwap && !isOpen) {
+    if (isSuccessSwap && !isOpen) {
       resetAmounts();
     }
-  }, [isOpen, isSettledSwap, resetAmounts, resetTokens]);
+  }, [isOpen, isSuccessSwap, resetAmounts, resetTokens]);
 
   const [isEditApproveActive, setEditApproveActive] = useState(false);
 
@@ -529,17 +527,11 @@ export default function ConfirmSwapDialog() {
       isOpen={isOpen}
       setIsOpen={(isOpen) => {
         setIsOpen(isOpen);
-        if (isSettledSwap) {
-          resetAmounts();
-        }
       }}
     >
       <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
         <DialogHeader
           onClose={() => {
-            if (isSettledSwap) {
-              resetAmounts();
-            }
             setIsOpen(false);
           }}
           title={t("review_swap")}

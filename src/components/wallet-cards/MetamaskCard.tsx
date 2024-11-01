@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { isMobile } from "react-device-detect";
 import { useAccount, useConnect, useReconnect } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
@@ -7,24 +8,37 @@ import {
   useConnectWalletStore,
 } from "@/components/dialogs/stores/useConnectWalletStore";
 import { wallets } from "@/config/wallets";
+import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 import usePreloaderTimeout from "@/hooks/usePreloader";
+import { usePathname } from "@/navigation";
 import addToast from "@/other/toast";
 
 const { image, name } = wallets.metamask;
 export default function MetamaskCard() {
   const t = useTranslations("Wallet");
   const { connectors, connectAsync, isPending } = useConnect();
-  const { connector, isConnected } = useAccount();
+  const { connector, isConnected, isConnecting } = useAccount();
   const { setName, chainToConnect } = useConnectWalletStore();
   const { setIsOpened } = useConnectWalletDialogStateStore();
+  const isMetamaskMobile = useDetectMetaMaskMobile();
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
-  const { reconnect } = useReconnect();
-  console.log(connectors);
-  console.log(connector);
-  console.log(isConnected);
+
+  const pathname = usePathname();
+
+  console.log(pathname);
+
+  if (isMobile && !isMetamaskMobile) {
+    return (
+      <a href={`https://metamask.app.link/dapp/${window.location.host || "test-app.dex223.io"}`}>
+        <PickButton disabled={isConnecting} image={image} label={name} loading={loading} />
+      </a>
+    );
+  }
+
   return (
     <PickButton
+      disabled={isConnecting}
       onClick={() => {
         setName("metamask");
         console.log(connectors[2]);

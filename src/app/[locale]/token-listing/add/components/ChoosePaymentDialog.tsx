@@ -62,7 +62,7 @@ export default function ChoosePaymentDialog() {
                   setPaymentDialogSelectOpened(false);
                 }}
                 key={a.token.address}
-                className="px-4 md:px-10 md:w-full py-2.5 flex justify-between md:grid md:grid-cols-[1fr_1fr_40px] gap-2 items-center hover:bg-tertiary-bg duration-200"
+                className="px-4 md:px-10 md:w-full py-2.5 flex justify-between md:grid md:grid-cols-[1fr_1fr_40px] gap-2 items-center hocus:bg-tertiary-bg duration-200"
               >
                 <div className="flex items-center gap-2">
                   <Image src="/tokens/placeholder.svg" width={40} height={40} alt="" />

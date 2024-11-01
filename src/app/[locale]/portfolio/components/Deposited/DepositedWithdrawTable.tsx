@@ -8,6 +8,7 @@ import { Address, formatUnits } from "viem";
 import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
+import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
@@ -85,7 +86,7 @@ const WithdrawTableItem = ({
           <span>{`${deposite.token.name}`}</span>
         </div>
         <div
-          className="px-2 py-1 text-16 text-secondary-text bg-quaternary-bg rounded-2 flex justify-center items-center hover:bg-green-bg cursor-pointer duration-200"
+          className="px-2 py-1 text-16 text-secondary-text bg-quaternary-bg rounded-2 flex justify-center items-center hocus:bg-green-bg cursor-pointer duration-200"
           onClick={() => {
             onDetailsClick();
           }}
@@ -98,14 +99,13 @@ const WithdrawTableItem = ({
         {`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}
       </div>
       <div className={clsx("h-[56px] flex items-center")}>
-        <a
-          className="flex gap-2 cursor-pointer hover:text-green-hover"
-          target="_blank"
+        <ExternalTextLink
+          text={truncateMiddle(deposite.contractAddress || "", {
+            charsFromStart: 5,
+            charsFromEnd: 3,
+          })}
           href={getExplorerLink(ExplorerLinkType.ADDRESS, deposite.contractAddress, chainId)}
-        >
-          {truncateMiddle(deposite.contractAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
-          <Svg iconName="forward" />
-        </a>
+        />
       </div>
       <div className={clsx("h-[56px] flex rounded-r-3 flex-col justify-center")}>
         {address === walletAddress ? (
@@ -119,14 +119,10 @@ const WithdrawTableItem = ({
         ) : (
           <>
             <span className="text-14 text-secondary-text">Token owner</span>
-            <a
-              className="flex gap-2 cursor-pointer hover:text-green-hover"
-              target="_blank"
+            <ExternalTextLink
+              text={truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
               href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddress, chainId)}
-            >
-              {truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
-              <Svg iconName="forward" />
-            </a>
+            />
           </>
         )}
       </div>
@@ -201,7 +197,7 @@ const WithdrawMobileTableItem = ({
             </div>
           </div>
           <div
-            className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center hover:bg-green-bg cursor-pointer duration-200"
+            className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center hocus:bg-green-bg cursor-pointer duration-200"
             onClick={() => {
               onDetailsClick();
             }}
@@ -216,7 +212,7 @@ const WithdrawMobileTableItem = ({
         <div className="flex justify-between items-center rounded-2 bg-quaternary-bg px-4 py-[10px]">
           <span className="text-14 text-secondary-text">Contract address</span>
           <a
-            className="flex gap-2 text-14 cursor-pointer items-center hover:text-green-hover"
+            className="flex gap-2 text-14 cursor-pointer items-center hocus:text-green-hover"
             target="_blank"
             href={getExplorerLink(ExplorerLinkType.ADDRESS, deposite.contractAddress, chainId)}
           >
@@ -236,14 +232,11 @@ const WithdrawMobileTableItem = ({
           ) : (
             <div className="flex justify-between items-center bg-tertiary-bg px-4 py-[10px] rounded-2">
               <span className="text-14 text-secondary-text">Token owner</span>
-              <a
-                className="flex items-center gap-2 cursor-pointer text-14 hover:text-green-hover"
-                target="_blank"
+              <ExternalTextLink
+                className="text-14"
+                text={truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
                 href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddress, chainId)}
-              >
-                {truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
-                <Svg iconName="forward" />
-              </a>
+              />
             </div>
           )}
         </div>

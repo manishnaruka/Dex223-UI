@@ -6,7 +6,6 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Pool } from "@/sdk_hybrid/entities/pool";
-import { Token } from "@/sdk_hybrid/entities/token";
 import {
   getPoolAddressKey,
   useComputePoolAddressesDex,
@@ -49,7 +48,7 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
         }
         const tokenA = currencyA;
         const tokenB = currencyB;
-        if (tokenA.equals(tokenB)) return undefined;
+        if (tokenA.wrapped.equals(tokenB.wrapped)) return undefined;
         return {
           token0: tokenA.wrapped.sortsBefore(tokenB.wrapped) ? tokenA : tokenB,
           token1: tokenA.wrapped.sortsBefore(tokenB.wrapped) ? tokenB : tokenA,
@@ -161,13 +160,12 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
       if (!poolToken) return undefined;
       const { tier, token0, token1 } = poolToken;
       if (!token0 || !token1 || !tier || !chainId) return undefined;
-      const key = getPoolAddressKey({
+      return getPoolAddressKey({
         addressTokenA: token0.wrapped.address0,
         addressTokenB: token1.wrapped.address0,
         chainId,
         tier,
       });
-      return key;
     });
   }, [poolsParams, chainId]);
 

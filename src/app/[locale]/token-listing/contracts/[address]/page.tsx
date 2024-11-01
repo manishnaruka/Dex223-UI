@@ -21,6 +21,7 @@ import { clsxMerge } from "@/functions/clsxMerge";
 import { copyToClipboard } from "@/functions/copyToClipboard";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
@@ -101,13 +102,7 @@ export default function AutoListingContractDetails({
   }, [listingContract, tokenLists]);
 
   const filteredTokens = useMemo(() => {
-    return tokens.filter(
-      (t: Token) =>
-        (t.symbol && t.symbol.toLowerCase().startsWith(searchValue.toLowerCase())) ||
-        (t.name && t.name.toLowerCase().startsWith(searchValue.toLowerCase())) ||
-        t.address0.toLowerCase().startsWith(searchValue.toLowerCase()) ||
-        t.address1.toLowerCase().startsWith(searchValue.toLowerCase()),
-    );
+    return filterTokens(searchValue, tokens);
   }, [searchValue, tokens]);
 
   if (!listingContract) {
@@ -117,12 +112,20 @@ export default function AutoListingContractDetails({
   return (
     <>
       <Container>
-        <div className="py-10 px-4">
+        <div className="my-2 md:my-10 px-4">
+          <Link href="/token-listing/contracts">
+            <span className="flex items-center gap-2">
+              <Svg iconName="back" />
+              Back to token listing
+            </span>
+          </Link>
+        </div>
+        <div className="my-2 md:my-10 px-4">
           <div className="flex justify-between mb-5">
             <h1 className="text-24 xl:text-40">Listing contract details</h1>
             <Link
               className="hidden xl:block"
-              href={`/token-listing/add/?autoListingContract=${params.address}`}
+              href={`/token-listing/add/?autoListingContract=${params.address}&dest=${encodeURIComponent(`/token-listing/contracts/${params.address}`)}`}
             >
               <Button>List token(s)</Button>
             </Link>
@@ -142,7 +145,6 @@ export default function AutoListingContractDetails({
               value={
                 <span className="flex items-center">
                   <ExternalTextLink
-                    color="white"
                     text={truncateMiddle(params.address, { charsFromEnd: 3, charsFromStart: 3 })}
                     href="#"
                   />{" "}
@@ -315,7 +317,6 @@ export default function AutoListingContractDetails({
                             </div>
                             <div className="flex items-center">
                               <ExternalTextLink
-                                color="white"
                                 text={truncateMiddle(token.address0, {
                                   charsFromStart: 3,
                                   charsFromEnd: 3,
@@ -340,7 +341,6 @@ export default function AutoListingContractDetails({
                             </div>
                             <div className="flex items-center">
                               <ExternalTextLink
-                                color="white"
                                 text={truncateMiddle(token.address1, {
                                   charsFromStart: 3,
                                   charsFromEnd: 3,
@@ -392,7 +392,6 @@ export default function AutoListingContractDetails({
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
-                              color="white"
                               text={truncateMiddle(token.address0)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
@@ -404,7 +403,6 @@ export default function AutoListingContractDetails({
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
-                              color="white"
                               text={truncateMiddle(token.address1)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,

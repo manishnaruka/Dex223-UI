@@ -16,6 +16,7 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterAutoListings } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { Link } from "@/navigation";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -33,11 +34,7 @@ export default function TokenListingPage() {
     if (!searchValue) {
       return autoListings;
     } else {
-      return autoListings.filter(
-        (l: any) =>
-          l.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
-          l.id.toLowerCase().startsWith(searchValue.toLowerCase()),
-      );
+      return filterAutoListings(searchValue, autoListings);
     }
   }, [autoListings, searchValue]);
 
@@ -50,10 +47,10 @@ export default function TokenListingPage() {
       <Container>
         <div className="my-3 md:my-10 px-4">
           <Link href="/token-listing">
-            <button className="flex items-center gap-2">
+            <span className="flex items-center gap-2">
               <Svg iconName="back" />
               Back to token listing
-            </button>
+            </span>
           </Link>
         </div>
         <div className="pb-10">
@@ -78,7 +75,7 @@ export default function TokenListingPage() {
                   <Link
                     key={autoListing.id}
                     href={`/token-listing/contracts/${autoListing.id}`}
-                    className="hover:bg-tertiary-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3"
+                    className="hocus:bg-tertiary-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3"
                   >
                     <div className="text-18 font-medium">{autoListing.name}</div>
                     <div className="mb-3">{autoListing.totalTokens} tokens</div>
@@ -138,7 +135,6 @@ export default function TokenListingPage() {
                       <span className="text-secondary-text">Contract link</span>
                       <ExternalTextLink
                         onClick={(e) => e.stopPropagation()}
-                        color="white"
                         text={truncateMiddle(autoListing.id)}
                         href={getExplorerLink(
                           ExplorerLinkType.ADDRESS,
@@ -150,11 +146,11 @@ export default function TokenListingPage() {
                     <div className="flex-grow">
                       <Link
                         onClick={(e) => e.stopPropagation()}
-                        href={`/token-listing/add/?autoListingContract=${autoListing.id}`}
+                        href={`/token-listing/add/?autoListingContract=${autoListing.id}&dest=${encodeURIComponent("/token-listing/contracts/")}`}
                       >
                         <Button
                           fullWidth
-                          className="hover:bg-green hover:text-black"
+                          className="hocus:bg-green hocus:text-black"
                           colorScheme={ButtonColor.LIGHT_GREEN}
                           size={ButtonSize.MEDIUM}
                         >
@@ -181,16 +177,16 @@ export default function TokenListingPage() {
                   <Link
                     key={autoListing.id}
                     href={`/token-listing/contracts/${autoListing.id}`}
-                    className="contents hover:bg-tertiary-bg duration-200 group"
+                    className="contents hocus:bg-tertiary-bg duration-200 group"
                   >
-                    <div className="h-[56px] z-10 relative flex items-center group-hover:bg-tertiary-bg gap-2 pl-2.5 ml-2.5 rounded-l-3 duration-200 pr-2">
+                    <div className="h-[56px] z-10 relative flex items-center group-hocus:bg-tertiary-bg gap-2 pl-2.5 ml-2.5 rounded-l-3 duration-200 pr-2">
                       {autoListing.name}
                     </div>
 
-                    <div className=" h-[56px] z-10 relative flex items-center group-hover:bg-tertiary-bg duration-200 pr-2">
+                    <div className=" h-[56px] z-10 relative flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
                       {autoListing.totalTokens} tokens
                     </div>
-                    <div className=" h-[56px] z-10 relative flex items-center gap-2 group-hover:bg-tertiary-bg duration-200 pr-2">
+                    <div className=" h-[56px] z-10 relative flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2">
                       {autoListing.tokensToPay.length
                         ? autoListing.tokensToPay.map((paymentMethod) => (
                             <span
@@ -229,7 +225,7 @@ export default function TokenListingPage() {
                           ))
                         : "Free"}
                     </div>
-                    <div className=" h-[56px] z-10 relative flex items-center group-hover:bg-tertiary-bg duration-200 pr-2">
+                    <div className=" h-[56px] z-10 relative flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
                       <ExternalTextLink
                         onClick={(e) => e.stopPropagation()}
                         color="green"
@@ -241,13 +237,13 @@ export default function TokenListingPage() {
                         )}
                       />
                     </div>
-                    <div className="h-[56px] z-10 relative flex items-center pr-2.5 mr-2.5 rounded-r-3 group-hover:bg-tertiary-bg duration-200">
+                    <div className="h-[56px] z-10 relative flex items-center pr-2.5 mr-2.5 rounded-r-3 group-hocus:bg-tertiary-bg duration-200">
                       <Link
                         onClick={(e) => e.stopPropagation()}
-                        href={`/token-listing/add/?autoListingContract=${autoListing.id}`}
+                        href={`/token-listing/add/?autoListingContract=${autoListing.id}&dest=${encodeURIComponent("/token-listing/contracts/")}`}
                       >
                         <Button
-                          className="hover:bg-green hover:text-black"
+                          className="hocus:bg-green hocus:text-black"
                           colorScheme={ButtonColor.LIGHT_GREEN}
                           size={ButtonSize.MEDIUM}
                         >

@@ -14,6 +14,7 @@ import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Popover from "@/components/atoms/Popover";
 import SelectButton from "@/components/atoms/SelectButton";
@@ -233,13 +234,13 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
           <>
             <div className="flex justify-between text-green text-18 font-medium px-5">
               <span
-                className="py-2 cursor-pointer hover:text-green-hover"
+                className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => setAllWalletActive()}
               >
                 Select all
               </span>
               <span
-                className="py-2 cursor-pointer hover:text-green-hover"
+                className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => {
                   setContent("manage");
                 }}
@@ -447,14 +448,10 @@ export function Portfolio() {
                     key={ad}
                     className="flex items-center gap-1 p-r pl-3 bg-tertiary-bg rounded-2"
                   >
-                    <a
-                      className="flex gap-2 cursor-pointer hover:text-green-hover"
-                      target="_blank"
+                    <ExternalTextLink
+                      text={truncateMiddle(ad || "", { charsFromStart: 5, charsFromEnd: 3 })}
                       href={getExplorerLink(ExplorerLinkType.ADDRESS, ad, chainId)}
-                    >
-                      {truncateMiddle(ad || "", { charsFromStart: 5, charsFromEnd: 3 })}
-                      <Svg iconName="forward" />
-                    </a>
+                    />
                     <IconButton
                       buttonSize={IconButtonSize.SMALL}
                       iconName="copy"

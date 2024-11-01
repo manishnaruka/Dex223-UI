@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AutoSizer, List } from "react-virtualized";
 
 import Checkbox from "@/components/atoms/Checkbox";
@@ -14,6 +14,7 @@ import ManageTokenItem from "@/components/manage-tokens/ManageTokenItem";
 import TokenListItem from "@/components/manage-tokens/TokenListItem";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { db } from "@/db/db";
+import { filterTokenLists, filterTokens } from "@/functions/searchTokens";
 import { useTokenLists, useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { Token } from "@/sdk_hybrid/entities/token";
@@ -34,7 +35,7 @@ function ButtonTooltip({ text }: { text: string }) {
           <div
             ref={ref.setReference}
             {...refProps}
-            className="bg-green-bg text-secondary-text border-transparent border hover:border-green hover:bg-green-bg-hover hover:text-primary-text w-12 h-full rounded-r-2 border-r-2 border-primary-bg flex items-center justify-center duration-200 cursor-pointer"
+            className="bg-green-bg text-secondary-text border-transparent border hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text w-12 h-full rounded-r-2 border-r-2 border-primary-bg flex items-center justify-center duration-200 cursor-pointer"
           >
             <Svg iconName="info" />
           </div>
@@ -46,7 +47,7 @@ function ButtonTooltip({ text }: { text: string }) {
 }
 export default function TokensAndLists({ setContent, handleClose, setTokenForPortfolio }: Props) {
   const t = useTranslations("ManageTokens");
-  const { activeTab, setActiveTab } = useManageTokensDialogStore();
+  const { activeTab, setActiveTab, scrollTo } = useManageTokensDialogStore();
 
   const lists = useTokenLists();
   const [onlyCustom, setOnlyCustom] = useState(false);
@@ -57,25 +58,12 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
   const [tokensSearchValue, setTokensSearchValue] = useState("");
 
   const [filteredTokens, isTokenFilterActive] = useMemo(() => {
-    return tokensSearchValue
-      ? [
-          tokens.filter(
-            (t) => t.name && t.name.toLowerCase().startsWith(tokensSearchValue.toLowerCase()),
-          ),
-          true,
-        ]
-      : [tokens, false];
+    return tokensSearchValue ? [filterTokens(tokensSearchValue, tokens), true] : [tokens, false];
   }, [tokens, tokensSearchValue]);
 
   const [filteredLists, isListFilterActive] = useMemo(() => {
     return listSearchValue
-      ? [
-          lists?.filter(
-            ({ list }) =>
-              list.name && list.name.toLowerCase().startsWith(listSearchValue.toLowerCase()),
-          ),
-          true,
-        ]
+      ? [lists && filterTokenLists(listSearchValue, lists), true]
       : [lists, false];
   }, [lists, listSearchValue]);
 
@@ -123,7 +111,10 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
 
             {Boolean(filteredLists?.length) && (
-              <div className="flex flex-col mt-3">
+              <div
+                className="flex flex-col mt-3 gap-3 h-[392px] overflow-scroll"
+                id="manage-lists-container"
+              >
                 {filteredLists
                   ?.filter((l) => Boolean(l.list.tokens.length))
                   ?.map((tokenList) => {

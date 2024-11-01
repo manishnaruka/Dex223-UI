@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useConnect } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
 import {
@@ -13,6 +13,7 @@ import addToast from "@/other/toast";
 const { image, name } = wallets.wc;
 export default function WalletConnectCard() {
   const t = useTranslations("Wallet");
+  const { isConnecting } = useAccount();
   const { connectors, connectAsync, isPending } = useConnect();
 
   const { walletName, setName, chainToConnect } = useConnectWalletStore();
@@ -22,6 +23,7 @@ export default function WalletConnectCard() {
 
   return (
     <PickButton
+      disabled={isConnecting}
       onClick={() => {
         setName("wc");
         connectAsync({

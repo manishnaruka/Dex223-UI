@@ -9,7 +9,7 @@ import {
   getAbiItem,
   parseUnits,
 } from "viem";
-import { useAccount, useBalance, usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useTrade } from "@/app/[locale]/swap/libs/trading";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -29,13 +29,13 @@ import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
-import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
+import addToast from "@/other/toast";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
 import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
@@ -96,11 +96,6 @@ export function useSwapParams() {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
 
-  const balance = useBalance({
-    token: tokenB?.wrapped.address0,
-    address: ROUTER_ADDRESS[chainId],
-  });
-
   const minimumAmountOut = useMemo(() => {
     if (!trade) {
       return BigInt(0);
@@ -112,7 +107,6 @@ export function useSwapParams() {
         .quotient.toString(),
     );
   }, [dependentAmount, slippage, trade]);
-  console.log(balance.data);
 
   const swapParams = useMemo(() => {
     if (
@@ -465,14 +459,28 @@ export default function useSwap() {
 
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
 
-        const { request } = await publicClient.simulateContract({
-          ...swapParams,
-          account: address,
-          ...gasPriceFormatted,
-          gas: gasToUse,
-        } as any);
+        let _request;
+        try {
+          const { request } = await publicClient.simulateContract({
+            ...swapParams,
+            account: address,
+            ...gasPriceFormatted,
+            gas: gasToUse,
+          } as any);
+          _request = request;
+        } catch (e) {
+          _request = {
+            ...swapParams,
+            ...gasPriceFormatted,
+            gas: gasToUse,
+            account: undefined,
+          } as any;
+        }
 
-        hash = await walletClient.writeContract({ ...request, account: undefined });
+        hash = await walletClient.writeContract({
+          ..._request,
+          account: undefined,
+        });
 
         closeConfirmInWalletAlert();
 
@@ -532,6 +540,8 @@ export default function useSwap() {
         }
       } catch (e) {
         console.log(e);
+        addToast("Error while executing contract", "error");
+        closeConfirmInWalletAlert();
         setSwapStatus(SwapStatus.INITIAL);
       }
     },
@@ -571,6 +581,5 @@ export default function useSwap() {
     handleSwap,
     isAllowedA: isAllowedA,
     handleApprove: () => null,
-    // estimatedGas: gasLimit,
   };
 }

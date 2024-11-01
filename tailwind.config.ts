@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 /** @type {import('tailwindcss').Config} */
 const config: Config = {
@@ -9,6 +10,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: "520px",
+      },
       boxShadow: {
         DEFAULT: "0px 0px 8px 0px var(--tw-shadow-color)",
         notification: "0px -8px 24px 0px var(--tw-shadow-color)",
@@ -73,6 +77,10 @@ const config: Config = {
           "50%": { transform: "rotate(-90deg)" },
           "100%": { transform: "rotate(0deg)" },
         },
+        list: {
+          "0%": { backgroundColor: "theme('colors.green-bg')" },
+          "100%": { backgroundColor: "theme('colors.tertiary-bg')" },
+        },
         flicker1: {
           "0%": { opacity: "0.3" },
           "25%": { opacity: "1" },
@@ -92,6 +100,7 @@ const config: Config = {
       animation: {
         orbit: "orbit ease-in-out 1.5s infinite",
         swap: "swap ease-in-out 0.5s",
+        list: "list ease-in-out 2s",
         flicker1: "flicker1 ease-in 1.5s infinite",
         flicker2: "flicker2 ease-in 1.5s infinite",
         flicker3: "flicker3 ease-in 1.5s infinite",
@@ -213,6 +222,20 @@ const config: Config = {
     require("@tailwindcss/container-queries"),
     require("@savvywombat/tailwindcss-grid-areas"),
     require("tailwind-scrollbar")({ preferredStrategy: "pseudoelements", nocompatible: true }),
+    plugin(function ({ addVariant, e }) {
+      addVariant("hocus", ["&:hover", "&:focus-visible"]);
+      addVariant("group-hocus", [".group:hover &", ".group:focus-visible &"]);
+      addVariant("peer-hocus", [".peer:hover ~ &", ".peer:focus-visible ~ &"]);
+    }),
+    function ({ addUtilities }: any) {
+      const newUtilities = {
+        ".text-shadow": {
+          textShadow: "0px 0px 8px var(--tw-shadow-color)",
+        },
+      };
+
+      addUtilities(newUtilities, ["responsive", "hover"]);
+    },
   ],
 };
 export default config;
