@@ -19,7 +19,7 @@ import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettings
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonSize } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";
 import TokenInput from "@/components/common/TokenInput";
@@ -41,6 +41,7 @@ import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Standard } from "@/sdk_hybrid/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
+
 function OpenConfirmDialogButton({
   isSufficientBalance,
   isTradeReady,
@@ -508,11 +509,9 @@ export default function TradeForm() {
 
               <div className="flex items-center gap-2 justify-between md:justify-end">
                 <span className="flex gap-2 items-center">
-                  {gasPriceOption === GasOption.CUSTOM && (
-                    <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text bg-quaternary-bg">
-                      {t(gasOptionTitle[gasPriceOption])}
-                    </span>
-                  )}
+                  <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text bg-quaternary-bg">
+                    {t(gasOptionTitle[gasPriceOption])}
+                  </span>
                   <div>
                     <span className="text-secondary-text mr-1 text-14">
                       {computedGasSpending} GWEI
@@ -521,16 +520,18 @@ export default function TradeForm() {
                   </div>
                 </span>
 
-                <button
+                <Button
+                  size={ButtonSize.EXTRA_SMALL}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
                   // disabled
-                  className="border border-green flex px-4 rounded-5 hocus:bg-green-bg duration-200"
+                  // className="border border-green flex px-4 rounded-5 hocus:bg-green-bg duration-200"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsOpenedFee(true);
                   }}
                 >
                   {t("edit")}
-                </button>
+                </Button>
               </div>
             </>
           ) : (

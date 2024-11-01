@@ -646,11 +646,9 @@ export default function ListTokenPage() {
                   </div>
 
                   <div className="grid grid-cols-[auto_1fr] xs:flex xs:items-center gap-2 w-full xs:w-auto mt-2 xs:mt-0">
-                    {gasPriceOption === GasOption.CUSTOM && (
-                      <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border max-xs:h-8">
-                        {t(gasOptionTitle[gasPriceOption])}
-                      </span>
-                    )}
+                    <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border max-xs:h-8">
+                      {t(gasOptionTitle[gasPriceOption])}
+                    </span>
                     <Button
                       colorScheme={ButtonColor.LIGHT_GREEN}
                       size={isMobile ? ButtonSize.SMALL : ButtonSize.EXTRA_SMALL}

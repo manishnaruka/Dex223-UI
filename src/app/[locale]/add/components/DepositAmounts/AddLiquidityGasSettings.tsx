@@ -89,11 +89,9 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {gasPriceOption === GasOption.CUSTOM && (
-          <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
-            {tSwap(gasOptionTitle[gasPriceOption])}
-          </span>
-        )}
+        <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
+          {tSwap(gasOptionTitle[gasPriceOption])}
+        </span>
         <Button
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.EXTRA_SMALL}

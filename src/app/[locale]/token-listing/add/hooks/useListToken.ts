@@ -77,10 +77,14 @@ function useListParams() {
       }
 
       if (isZeroAddress(paymentToken.token.address)) {
-        return { ...common, args: [...common.args, paymentToken.token], value: paymentToken.price };
+        return {
+          ...common,
+          args: [...common.args, paymentToken.token.address],
+          value: paymentToken.price,
+        };
       }
 
-      return { ...common, args: [...common.args, paymentToken.token] };
+      return { ...common, args: [...common.args, paymentToken.token.address] };
     }
   }, [autoListingContract, isFree, paymentToken, poolAddress]);
 }
@@ -122,6 +126,8 @@ export function useListTokenEstimatedGas() {
         console.log("Can't estimate gas");
         return;
       }
+
+      console.log(listTokenParams);
 
       try {
         const estimated = await publicClient?.estimateContractGas({
@@ -210,7 +216,8 @@ export default function useListToken() {
           )
         : undefined,
     contractAddress: autoListingContract,
-    amountToCheck: paymentToken ? paymentToken.price * BigInt(2) : null,
+    amountToCheck:
+      paymentToken && tokensToList.length ? paymentToken.price * BigInt(tokensToList.length) : null,
   });
 
   const handleList = useCallback(
@@ -408,6 +415,7 @@ export default function useListToken() {
       t,
       tokenA,
       tokenB,
+      tokensToList,
       updateAllowance,
       walletClient,
       writeTokenApprove,
