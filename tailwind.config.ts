@@ -61,6 +61,8 @@ const config: Config = {
         "gradient-card-purple-dark-border":
           "linear-gradient(251.06deg, #7E71AD 11.76%, #3D354D 59.71%)",
 
+        "gradient-card-account": "linear-gradient(90deg, #1F2020 0%, #3C4B4A 100%);",
+
         "table-gradient": "linear-gradient(to bottom, #272727 60px, #1D1E1E 60px, #1D1E1E 100%)",
       },
       keyframes: {

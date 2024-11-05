@@ -235,13 +235,10 @@ export default function RecentTransaction({
               showSpeedUp &&
               isLowestNonce && (
                 <>
-                  <RecentTransactionActionButton disabled color="secondary">
+                  <RecentTransactionActionButton color="secondary">
                     {t("cancel")}
                   </RecentTransactionActionButton>
-                  <RecentTransactionActionButton
-                    disabled
-                    onClick={() => handleSpeedUp(transaction)}
-                  >
+                  <RecentTransactionActionButton onClick={() => handleSpeedUp(transaction)}>
                     {t("speed_up")}
                   </RecentTransactionActionButton>
                 </>
@@ -276,10 +273,10 @@ export default function RecentTransaction({
 
       {transaction.status === RecentTransactionStatus.PENDING && showSpeedUp && isLowestNonce && (
         <div className="@[620px]:hidden w-full grid grid-cols-2 gap-3 mt-3">
-          <RecentTransactionActionButton disabled color="secondary">
+          <RecentTransactionActionButton color="secondary">
             {t("cancel")}
           </RecentTransactionActionButton>
-          <RecentTransactionActionButton disabled onClick={() => handleSpeedUp(transaction)}>
+          <RecentTransactionActionButton onClick={() => handleSpeedUp(transaction)}>
             {t("speed_up")}
           </RecentTransactionActionButton>
         </div>

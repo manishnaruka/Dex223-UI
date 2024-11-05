@@ -523,8 +523,6 @@ export default function TradeForm() {
                 <Button
                   size={ButtonSize.EXTRA_SMALL}
                   colorScheme={ButtonColor.LIGHT_GREEN}
-                  // disabled
-                  // className="border border-green flex px-4 rounded-5 hocus:bg-green-bg duration-200"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsOpenedFee(true);

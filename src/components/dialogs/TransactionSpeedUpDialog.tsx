@@ -9,6 +9,11 @@ import Tooltip from "@/components/atoms/Tooltip";
 import Button from "@/components/buttons/Button";
 import RecentTransaction from "@/components/common/RecentTransaction";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
+import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useFees } from "@/hooks/useFees";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
+import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 export enum SpeedUpOption {
   AUTO_INCREASE,
@@ -37,24 +42,74 @@ const speedUpOptions = [
   SpeedUpOption.FAST,
   SpeedUpOption.CUSTOM,
 ];
+
+type ConvertableSpeedUpOption = Exclude<
+  SpeedUpOption,
+  SpeedUpOption.AUTO_INCREASE | SpeedUpOption.CUSTOM
+>;
+type GasOptionWithoutCustom = Exclude<GasOption, GasOption.CUSTOM>;
+
+const gasPriceOptionMap: Record<ConvertableSpeedUpOption, GasOptionWithoutCustom> = {
+  [SpeedUpOption.CHEAP]: GasOption.CHEAP,
+  [SpeedUpOption.FAST]: GasOption.FAST,
+};
 export default function TransactionSpeedUpDialog() {
   const { transaction, isOpen, handleClose } = useTransactionSpeedUpDialogStore();
-
+  const chainId = useCurrentChainId();
   const [speedUpOption, setSpeedUpOption] = useState<SpeedUpOption>(SpeedUpOption.AUTO_INCREASE);
 
   const { data: walletClient } = useWalletClient();
+
+  const { priorityFee, baseFee, gasPrice } = useFees();
 
   const handleSpeedUp = useCallback(() => {
     if (!transaction?.params || !walletClient) {
       return;
     }
 
-    walletClient.writeContract({
+    let gasPriceFormatted = {};
+
+    if (speedUpOption !== SpeedUpOption.CUSTOM && speedUpOption !== SpeedUpOption.AUTO_INCREASE) {
+      const _option = gasPriceOptionMap[speedUpOption];
+
+      const multiplier = baseFeeMultipliers[chainId][_option];
+      switch (transaction.gas.model) {
+        case GasFeeModel.EIP1559:
+          if (priorityFee && baseFee) {
+            gasPriceFormatted = {
+              maxPriorityFeePerGas: (priorityFee * multiplier) / SCALING_FACTOR,
+              maxFeePerGas: (baseFee * multiplier) / SCALING_FACTOR,
+            };
+          }
+          break;
+
+        case GasFeeModel.LEGACY:
+          if (gasPrice) {
+            gasPriceFormatted = {
+              gasPrice: (gasPrice * multiplier) / SCALING_FACTOR,
+            };
+          }
+          break;
+      }
+    } else {
+      //handle custom and +10% increase
+    }
+
+    console.log(transaction);
+    console.log(gasPriceFormatted);
+
+    console.log({
       nonce: transaction.nonce,
-      gas: BigInt(transaction.gas.gas) + BigInt(30000),
+      ...gasPriceFormatted,
       ...transaction.params,
     });
-  }, [transaction, walletClient]);
+
+    walletClient.writeContract({
+      nonce: transaction.nonce,
+      ...gasPriceFormatted,
+      ...transaction.params,
+    });
+  }, [baseFee, chainId, gasPrice, priorityFee, speedUpOption, transaction, walletClient]);
 
   if (!transaction) {
     return null;

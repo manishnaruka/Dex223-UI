@@ -7,6 +7,7 @@ import { useAccount, useConnect, useDisconnect } from "wagmi";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Popover from "@/components/atoms/Popover";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
@@ -42,10 +43,8 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
 
     return [];
   }, [address, transactions]);
-  const { connector, isConnected } = useAccount();
+  const { connector } = useAccount();
 
-  console.log(connector);
-  console.log(isConnected);
   return (
     <>
       <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
@@ -53,11 +52,15 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
             <Image src={wallets.metamask.image} alt="" width={48} height={48} />
-            <div>
-              {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : t("not_connected")}
-            </div>
+            <div></div>
 
             <div className="flex gap-1">
+              {address && (
+                <ExternalTextLink
+                  text={`${address.slice(0, 6)}...${address.slice(-4)}`}
+                  href={getExplorerLink(ExplorerLinkType.ADDRESS, address, chainId)}
+                />
+              )}
               <IconButton
                 iconName="copy"
                 onClick={async () => {
@@ -65,14 +68,6 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                   addToast(tToast("successfully_copied"));
                 }}
               />
-              {address && (
-                <a
-                  target="_blank"
-                  href={getExplorerLink(ExplorerLinkType.ADDRESS, address, chainId)}
-                >
-                  <IconButton iconName="forward" />
-                </a>
-              )}
             </div>
           </div>
           <button
@@ -80,17 +75,17 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
               setIsOpenedAccount(false);
               disconnect({ connector });
             }}
-            className="flex items-center gap-2 hocus:text-green duration-200"
+            className="text-secondary-text flex items-center gap-2 hocus:text-green duration-200"
           >
             {t("disconnect")}
             <Svg iconName="logout" />
           </button>
         </div>
-        <div className="relative bg-gradient-to-r from-[#3C4C4A] to-[#70C59E] rounded-2">
+        <div className="relative bg-gradient-card-account rounded-2">
           <div className="absolute right-0 top-0 bottom-0 bg-account-card-pattern mix-blend-screen bg-no-repeat bg-right w-full h-full" />
-          <div className="relative mb-5 px-5 pt-4 pb-3 grid gap-3 z-10">
+          <div className="relative mb-5 px-5 py-6 grid gap-3 z-10">
             <div>
-              <div className="text-12 text-secondary-text">{t("total_balance")}</div>
+              <div className="text-16 text-secondary-text">{t("total_balance")}</div>
               <div className="text-32 text-primary-text font-medium">$0.00</div>
             </div>
           </div>
@@ -215,7 +210,7 @@ export default function AccountDialog() {
               <Popover
                 isOpened={isOpenedAccount}
                 setIsOpened={setIsOpenedAccount}
-                placement={"bottom-start"}
+                placement={"bottom-end"}
                 trigger={trigger}
               >
                 <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popover shadow-black/70">

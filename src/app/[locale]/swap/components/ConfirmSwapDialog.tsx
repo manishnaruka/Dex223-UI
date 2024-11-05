@@ -14,7 +14,11 @@ import {
   useSwapGasPriceStore,
 } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
-import { SwapError, useSwapStatusStore } from "@/app/[locale]/swap/stores/useSwapStatusStore";
+import {
+  SwapError,
+  SwapStatus,
+  useSwapStatusStore,
+} from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -456,6 +460,9 @@ export default function ConfirmSwapDialog() {
     isSettledSwap,
     isRevertedApprove,
   } = useSwapStatus();
+
+  const { status: swapStatus, setStatus: setSwapStatus } = useSwapStatusStore();
+
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
 
   const isProcessing = useMemo(() => {
@@ -512,7 +519,15 @@ export default function ConfirmSwapDialog() {
     if (isSuccessSwap && !isOpen) {
       resetAmounts();
     }
-  }, [isOpen, isSuccessSwap, resetAmounts, resetTokens]);
+  }, [isSuccessSwap, resetAmounts, isOpen]);
+
+  useEffect(() => {
+    if ((isSuccessSwap || isRevertedSwap || isRevertedApprove) && !isOpen) {
+      setTimeout(() => {
+        setSwapStatus(SwapStatus.INITIAL);
+      }, 400);
+    }
+  }, [isOpen, isRevertedApprove, isRevertedSwap, isSuccessSwap, setSwapStatus, swapStatus]);
 
   const [isEditApproveActive, setEditApproveActive] = useState(false);
 

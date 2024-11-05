@@ -160,7 +160,7 @@ export function useSwapParams() {
       if (tokenB.isNative) {
         const encodedSwapParams = encodeFunctionData({
           abi: ROUTER_ABI,
-          functionName: "exactInput",
+          functionName: "exactInput" as "exactInput",
           args: [
             {
               path: encodePath(tokenA.address0, tokenB.wrapped.address0, FeeAmount.MEDIUM),
@@ -174,14 +174,14 @@ export function useSwapParams() {
         });
         const encodedUnwrapParams = encodeFunctionData({
           abi: ROUTER_ABI,
-          functionName: "unwrapWETH9",
+          functionName: "unwrapWETH9" as const,
           args: [minimumAmountOut, address],
         });
 
         return {
           address: ROUTER_ADDRESS[chainId],
           abi: ROUTER_ABI,
-          functionName: "multicall",
+          functionName: "multicall" as "multicall",
           args: [[encodedSwapParams, encodedUnwrapParams]],
         };
       } else {
@@ -193,7 +193,7 @@ export function useSwapParams() {
       return {
         address: getTokenAddressForStandard(tokenA, tokenAStandard),
         abi: ERC223_ABI,
-        functionName: "transfer",
+        functionName: "transfer" as "transfer",
         args: [
           poolAddress.poolAddress,
           parseUnits(typedValue, tokenA.decimals), // amountSpecified
@@ -313,7 +313,6 @@ export default function useSwap() {
     setApproveHash,
     setErrorType,
   } = useSwapStatusStore();
-  const { isOpen: confirmDialogOpened } = useConfirmSwapDialogStore();
 
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
 
@@ -336,19 +335,6 @@ export default function useSwap() {
   }, [slippage, trade]);
 
   const { swapParams } = useSwapParams();
-
-  useEffect(() => {
-    if (
-      (swapStatus === SwapStatus.SUCCESS ||
-        swapStatus === SwapStatus.ERROR ||
-        swapStatus === SwapStatus.APPROVE_ERROR) &&
-      !confirmDialogOpened
-    ) {
-      setTimeout(() => {
-        setSwapStatus(SwapStatus.INITIAL);
-      }, 400);
-    }
-  }, [confirmDialogOpened, setSwapStatus, swapStatus]);
 
   const handleSwap = useCallback(
     async (amountToApprove: string) => {
@@ -497,11 +483,17 @@ export default function useSwap() {
               chainId,
               gas: {
                 ...stringifyObject({ ...gasPriceFormatted, model: gasPriceSettings.model }),
-                // gas: gasLimit.toString(),
+                gas: gasToUse.toString(),
               },
               params: {
                 ...stringifyObject(swapParams),
-                abi: [getAbiItem({ name: "exactInputSingle", abi: ROUTER_ABI })],
+                abi: [
+                  getAbiItem({
+                    name: swapParams.functionName,
+                    abi: swapParams.abi,
+                    args: swapParams.args,
+                  }),
+                ],
               },
               title: {
                 symbol0: tokenA.symbol!,

@@ -23,7 +23,7 @@ export default function ExternalTextLink({
       target="_blank"
       href={href}
       className={clsxMerge(
-        "flex gap-1 items-center duration-200",
+        "flex items-center duration-200",
         color === "green" ? "text-green hocus:text-green-hover" : "text-white hocus:text-green",
         className,
       )}

@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { isMobile } from "react-device-detect";
-import { useAccount, useConnect, useReconnect } from "wagmi";
+import { useAccount, useConnect, useReconnect, useSwitchChain } from "wagmi";
 
 import PickButton from "@/components/buttons/PickButton";
 import {
@@ -17,10 +17,12 @@ const { image, name } = wallets.metamask;
 export default function MetamaskCard() {
   const t = useTranslations("Wallet");
   const { connectors, connectAsync, isPending } = useConnect();
-  const { connector, isConnected, isConnecting } = useAccount();
+  const { isConnecting } = useAccount();
   const { setName, chainToConnect } = useConnectWalletStore();
   const { setIsOpened } = useConnectWalletDialogStateStore();
   const isMetamaskMobile = useDetectMetaMaskMobile();
+
+  const { switchChainAsync } = useSwitchChain();
 
   const loading = usePreloaderTimeout({ isLoading: isPending });
 
@@ -39,7 +41,7 @@ export default function MetamaskCard() {
   return (
     <PickButton
       disabled={isConnecting}
-      onClick={() => {
+      onClick={async () => {
         setName("metamask");
         console.log(connectors[2]);
         const connectorToConnect = connectors[2];
@@ -49,22 +51,21 @@ export default function MetamaskCard() {
           return addToast(t("install_metamask"), "error");
         }
 
-        connectAsync({
-          connector: connectorToConnect,
-          chainId: chainToConnect,
-        })
-          .then(() => {
-            setIsOpened(false);
-            addToast(t("successfully_connected"));
-          })
-          .catch((e) => {
-            console.log(e);
-            if (e.code && e.code === 4001) {
-              addToast(t("user_rejected"), "error");
-            } else {
-              addToast(t("something_went_wrong"), "error");
-            }
+        try {
+          await connectAsync({
+            connector: connectorToConnect,
           });
+          await switchChainAsync({ chainId: chainToConnect });
+          setIsOpened(false);
+          addToast(t("successfully_connected"));
+        } catch (e: any) {
+          // console.log(e);
+          if (e.code && e.code === 4001) {
+            addToast(t("user_rejected"), "error");
+          } else {
+            addToast(t("something_went_wrong"), "error");
+          }
+        }
       }}
       image={image}
       label={name}

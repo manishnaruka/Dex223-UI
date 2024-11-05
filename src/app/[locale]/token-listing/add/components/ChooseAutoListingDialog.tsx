@@ -1,3 +1,4 @@
+import { useLocale } from "next-intl";
 import React, { useMemo, useState } from "react";
 
 import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
@@ -20,6 +21,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 export default function ChooseAutoListingDialog() {
   const { isOpen: isAutoListingSelectOpened, setIsOpen: setAutoListingSelectOpened } =
     useChooseAutoListingDialogStore();
+  const locale = useLocale();
   const chainId = useCurrentChainId();
   const [searchValue, setSearchValue] = useState("");
   const autoListings = useAutoListingContracts();
@@ -86,7 +88,11 @@ export default function ChooseAutoListingDialog() {
                     text={truncateMiddle(a.id, { charsFromEnd: 3, charsFromStart: 3 })}
                     href={getExplorerLink(ExplorerLinkType.ADDRESS, a.id, chainId)}
                   />
-                  <a target="_blank" onClick={(e) => e.stopPropagation()} href="#">
+                  <a
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                    href={`/${locale}/token-listing/contracts/${a.id}`}
+                  >
                     <IconButton iconName="listing-details" />
                   </a>
                 </div>
