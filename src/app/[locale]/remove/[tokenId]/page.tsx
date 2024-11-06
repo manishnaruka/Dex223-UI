@@ -9,6 +9,7 @@ import { useAccount } from "wagmi";
 import useRemoveLiquidity, {
   useRemoveLiquidityEstimatedGas,
 } from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -17,7 +18,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button from "@/components/buttons/Button";
-import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconButtonVariant, IconSize } from "@/components/buttons/IconButton";
 import InputButton from "@/components/buttons/InputButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
@@ -93,7 +94,10 @@ export default function DecreaseLiquidityPage({
   }, [position?.pool.fee, position?.pool.token0, position?.pool.token1]);
 
   const { inRange, removed } = usePositionRangeStatus({ position });
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useSwapRecentTransactionsStore();
 
   const {
     reset,

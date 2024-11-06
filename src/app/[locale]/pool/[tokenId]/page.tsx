@@ -7,6 +7,7 @@ import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -17,7 +18,7 @@ import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
@@ -53,7 +54,10 @@ export default function PoolPage({
   useCollectFeesEstimatedGas();
 
   const chainId = useCurrentChainId();
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useSwapRecentTransactionsStore();
+
   const [isOpen, setIsOpen] = useState(false);
 
   const router = useRouter();
