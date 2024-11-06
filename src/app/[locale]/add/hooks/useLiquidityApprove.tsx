@@ -1,11 +1,12 @@
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Address } from "viem";
 import { usePublicClient } from "wagmi";
 
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useStoreDeposit } from "@/hooks/useDeposit";
+import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -39,6 +40,8 @@ export enum ApproveTransactionType {
 }
 
 export const useLiquidityApprove = () => {
+  const isMetamaskMobile = useDetectMetaMaskMobile();
+
   const { gasSettings, gasModel, customGasLimit } = useAddLiquidityGasSettings();
   const {
     approve0Status,
@@ -209,7 +212,13 @@ export const useLiquidityApprove = () => {
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
 
   const handleApprove0 = useCallback(
-    async ({ customAmountA }: { customAmountA?: bigint }) => {
+    async ({
+      customAmountA,
+      customAmountB,
+    }: {
+      customAmountA?: bigint;
+      customAmountB?: bigint;
+    }) => {
       const amountA = customAmountA || amountToCheckA;
 
       if (!publicClient) {
@@ -244,6 +253,10 @@ export const useLiquidityApprove = () => {
           } else {
             setApprove0Status(AddLiquidityApproveStatus.SUCCESS);
           }
+
+          if (customAmountB) {
+            await handleApprove1({ customAmountB });
+          }
         }
       } else if (
         tokenA?.isToken &&
@@ -273,6 +286,10 @@ export const useLiquidityApprove = () => {
             setDeposite0Status(AddLiquidityApproveStatus.ERROR);
           } else {
             setDeposite0Status(AddLiquidityApproveStatus.SUCCESS);
+          }
+
+          if (customAmountB) {
+            await handleApprove1({ customAmountB });
           }
         }
       }
@@ -397,7 +414,11 @@ export const useLiquidityApprove = () => {
       customAmountA?: bigint;
       customAmountB?: bigint;
     }) => {
-      await Promise.all([handleApprove0({ customAmountA }), handleApprove1({ customAmountB })]);
+      if (isMetamaskMobile) {
+        await handleApprove0({ customAmountA, customAmountB });
+      } else {
+        await Promise.all([handleApprove0({ customAmountA }), handleApprove1({ customAmountB })]);
+      }
     },
     [handleApprove0, handleApprove1],
   );
