@@ -81,19 +81,22 @@ export const TransactionItem = ({
 
           <div className="flex items-center gap-2 justify-end">
             {localValueBigInt !== amount &&
-            ![AddLiquidityApproveStatus.PENDING, AddLiquidityApproveStatus.LOADING].includes(
-              status,
-            ) ? (
-              <div
-                className="flex gap-2 text-green cursor-pointer"
-                onClick={() => {
-                  updateValue(formatUnits(amount, token.decimals));
-                }}
-              >
-                <span>Set Default</span>
-                <Svg iconName="reset" />
-              </div>
-            ) : null}
+              ![
+                AddLiquidityApproveStatus.PENDING,
+                AddLiquidityApproveStatus.LOADING,
+                AddLiquidityApproveStatus.SUCCESS,
+              ].includes(status) && (
+                <div
+                  className="flex gap-2 text-green cursor-pointer"
+                  onClick={() => {
+                    updateValue(formatUnits(amount, token.decimals));
+                  }}
+                >
+                  <span>Set Default</span>
+                  <Svg iconName="reset" />
+                </div>
+              )}
+
             {hash && (
               <a
                 target="_blank"
