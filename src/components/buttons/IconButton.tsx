@@ -107,12 +107,16 @@ function CopyIconButton(_props: CopyIconButtonProps) {
   const { text, buttonSize, className, ...props } = _props;
 
   const handleCopy = useCallback(async () => {
-    await copyToClipboard(text);
-    setIsCopied(true);
-    addToast(t("successfully_copied"));
-    setTimeout(() => {
-      setIsCopied(false);
-    }, 800);
+    try {
+      await copyToClipboard(text);
+      setIsCopied(true);
+      addToast(t("successfully_copied"));
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 800);
+    } catch (e) {
+      addToast("Clipboard API not supported", "error");
+    }
   }, [t, text]);
 
   return (
