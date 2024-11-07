@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
@@ -27,29 +27,48 @@ export const InputRange = ({
   onChange,
 }: {
   value: number;
-  onChange: (value: 0 | 100) => void;
+  // onChange: (value: 0 | 100) => void;
+  onChange: (value: number) => void;
 }) => {
+  const [locValue, setValue] = useState(value);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(`handleChange: ${event.target.value}`);
+    setValue(parseInt(event.target.value));
+    // onChange(locValue);
+  };
+
+  const handleMouseUp = () => {
+    let newValue = locValue >= 50 ? 100 : 0;
+    console.log(`handleMouseUp: ${newValue}`);
+    setValue(newValue);
+    onChange(newValue);
+  };
+
   return (
     <div className="relative h-6">
       <input
-        value={value}
+        value={locValue}
         max={100}
-        step={100}
+        step={5}
         min={0}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(+e.target.value as 0 | 100)}
+        onChange={handleChange}
+        onMouseUp={handleMouseUp}
+        onTouchEnd={handleMouseUp}
         className={clsx(
           "w-full accent-green absolute top-2 left-0 right-0 duration-200 !bg-purple",
-          value < 50 && "variant-purple",
+          locValue < 50 && "variant-purple",
         )}
         type="range"
       />
       <div
         className="pointer-events-none absolute bg-green h-2 rounded-1 left-0 top-2"
-        style={{ width: value === 1 ? 0 : `calc(${value}% - 2px)` }}
+        style={{ width: value === 1 ? 0 : `calc(${locValue}% - 2px)` }}
       />
     </div>
   );
 };
+
 function InputTotalAmount({
   currency,
   value,
@@ -291,8 +310,10 @@ export default function TokenDepositCard({
   onChange: (value: string) => void;
   isDisabled: boolean;
   isOutOfRange: boolean;
-  tokenStandardRatio: 0 | 100;
-  setTokenStandardRatio: (ratio: 0 | 100) => void;
+  // tokenStandardRatio: 0 | 100;
+  tokenStandardRatio: number;
+  // setTokenStandardRatio: (ratio: 0 | 100) => void;
+  setTokenStandardRatio: (ratio: number) => void;
   gasPrice?: bigint;
 }) {
   const t = useTranslations("Liquidity");

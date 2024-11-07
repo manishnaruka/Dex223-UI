@@ -14,10 +14,14 @@ interface LiquidityAmountsStore {
   typedValue: string;
   dependentField: Field;
   setTypedValue: (data: { typedValue: string; field: Field }) => void;
-  tokenAStandardRatio: 0 | 100;
-  tokenBStandardRatio: 0 | 100;
-  setTokenAStandardRatio: (ratio: 0 | 100) => void;
-  setTokenBStandardRatio: (ratio: 0 | 100) => void;
+  // tokenAStandardRatio: 0 | 100;
+  // tokenBStandardRatio: 0 | 100;
+  tokenAStandardRatio: number;
+  tokenBStandardRatio: number;
+  // setTokenAStandardRatio: (ratio: 0 | 100) => void;
+  // setTokenBStandardRatio: (ratio: 0 | 100) => void;
+  setTokenAStandardRatio: (ratio: number) => void;
+  setTokenBStandardRatio: (ratio: number) => void;
 }
 
 export const useLiquidityAmountsStore = create<LiquidityAmountsStore>((set, get) => ({
