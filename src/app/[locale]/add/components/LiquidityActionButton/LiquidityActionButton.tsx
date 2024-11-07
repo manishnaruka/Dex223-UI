@@ -35,7 +35,8 @@ export const LiquidityActionButton = ({
   const tWallet = useTranslations("Wallet");
   const { setIsOpen } = useConfirmLiquidityDialogStore();
 
-  const { setStatus, setApprove0Status, setApprove0Hash, setApprove1Status, setApprove1Hash } = useAddLiquidityStatusStore();
+  const { setStatus, setApprove0Status, setApprove0Hash, setApprove1Status, setApprove1Hash } =
+    useAddLiquidityStatusStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();

@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { ButtonHTMLAttributes, useCallback, useState, useEffect } from "react";
+import { ButtonHTMLAttributes, useCallback, useEffect, useState } from "react";
 import { MouseEvent } from "react";
 
 import { SortingType } from "@/app/[locale]/borrow-market/components/BorrowMarketTable";
@@ -70,7 +70,6 @@ export enum IconButtonVariant {
   COPY,
   SORTING,
   ADD,
-  NOHOVER 
 }
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> &

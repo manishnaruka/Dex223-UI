@@ -289,9 +289,7 @@ export const useLiquidityApprove = () => {
         }
       }
 
-      console.log('end of approve0');
       if (customAmountB || amountToCheckB) {
-        console.log('calling approve1 in end');
         await handleApprove1({ customAmountB });
       }
     },
@@ -322,7 +320,11 @@ export const useLiquidityApprove = () => {
         return;
       }
 
-      if (![AddLiquidityApproveStatus.SUCCESS, AddLiquidityApproveStatus.LOADING].includes(approve1Status)) {
+      if (
+        ![AddLiquidityApproveStatus.SUCCESS, AddLiquidityApproveStatus.LOADING].includes(
+          approve1Status,
+        )
+      ) {
         if (
           tokenB?.isToken &&
           tokenBStandard === Standard.ERC20 &&
