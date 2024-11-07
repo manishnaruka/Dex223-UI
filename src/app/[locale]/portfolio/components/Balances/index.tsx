@@ -13,7 +13,6 @@ import Tooltip from "@/components/atoms/Tooltip";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";
