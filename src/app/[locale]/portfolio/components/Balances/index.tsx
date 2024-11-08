@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -42,10 +42,15 @@ export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  const isTokenInfoOpened = Boolean(tokenForPortfolio);
+  // const isTokenInfoOpened = Boolean(tokenForPortfolio);
+  const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
   const handleClosTokenInfo = () => {
     setTokenForPortfolio(null);
   };
+
+  useEffect(() => {
+    setTokenInfoOpened(Boolean(tokenForPortfolio));
+  }, [tokenForPortfolio]);
 
   const loading = false;
 
