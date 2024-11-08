@@ -117,6 +117,11 @@ interface RecentTransactions {
   ) => void;
   updateTransactionStatus: (id: string, status: RecentTransactionStatus, account: string) => void;
   updateTransactionHash: (id: string, newHash: `0x${string}`, account: string) => void;
+  updateTransactionGasSettings: (
+    id: string,
+    newGasSettings: RecentTransactionGasLimit,
+    account: string,
+  ) => void;
   clearTransactions: () => void;
 }
 
@@ -181,6 +186,31 @@ export const useRecentTransactionsStore = create<RecentTransactions>()(
           if (!transaction) return {};
 
           transaction.hash = newHash;
+          return { transactions: updatedTransactions };
+        }),
+
+      updateTransactionGasSettings: (id, newGasSettings, account) =>
+        set((state) => {
+          const updatedTransactions = { ...state.transactions };
+          const accountTransactions = updatedTransactions[account];
+          const transaction = accountTransactions.find((t) => t.id === id);
+
+          if (!transaction) return {};
+
+          if (transaction.gas.model === GasFeeModel.EIP1559) {
+            transaction.gas = {
+              ...newGasSettings,
+              gas: transaction.gas.gas,
+            };
+          }
+
+          if (transaction.gas.model === GasFeeModel.LEGACY) {
+            transaction.gas = {
+              ...newGasSettings,
+              gas: transaction.gas.gas,
+            };
+          }
+
           return { transactions: updatedTransactions };
         }),
       clearTransactions: () =>

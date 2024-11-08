@@ -491,7 +491,7 @@ export default function useSwap() {
                   getAbiItem({
                     name: swapParams.functionName,
                     abi: swapParams.abi,
-                    args: swapParams.args,
+                    args: swapParams.args as any,
                   }),
                 ],
               },

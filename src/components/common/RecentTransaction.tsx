@@ -7,6 +7,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
+import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import {
@@ -207,10 +208,12 @@ export default function RecentTransaction({
   transaction,
   showSpeedUp = true,
   isLowestNonce = false,
+  view = "default",
 }: {
   transaction: IRecentTransaction;
   isLowestNonce?: boolean;
   showSpeedUp?: boolean;
+  view: "default" | "transparent";
 }) {
   const t = useTranslations("RecentTransactions");
   const { handleSpeedUp } = useTransactionSpeedUpDialogStore();
@@ -218,7 +221,10 @@ export default function RecentTransaction({
   return (
     <div
       key={transaction.hash}
-      className="flex justify-between w-full bg-tertiary-bg rounded-3 p-5 items-center @container flex-wrap"
+      className={clsxMerge(
+        "flex justify-between w-full bg-tertiary-bg rounded-3 p-5 items-center @container flex-wrap",
+        view === "transparent" && "bg-transparent rounded-0 p-0",
+      )}
     >
       <div className="w-full grid grid-cols-[1fr_76px]">
         <div className="flex gap-2 items-center">

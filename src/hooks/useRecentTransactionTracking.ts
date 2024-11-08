@@ -1,17 +1,25 @@
+import { getTransaction } from "@wagmi/core";
+import { white } from "next/dist/lib/picocolors";
 import { useCallback, useEffect, useMemo } from "react";
-import { Address } from "viem";
+import { Address, TransactionNotFoundError, WaitForTransactionReceiptTimeoutError } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 
 import { addNotification } from "@/other/notification";
 import {
   IRecentTransactionTitle,
   RecentTransactionStatus,
+  stringifyObject,
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
 
 const trackingTransactions: Address[] = [];
 export function useRecentTransactionTracking() {
-  const { transactions, updateTransactionStatus } = useRecentTransactionsStore();
+  const {
+    transactions,
+    updateTransactionStatus,
+    updateTransactionGasSettings,
+    updateTransactionHash,
+  } = useRecentTransactionsStore();
   const { address } = useAccount();
   const publicClient = usePublicClient();
 
@@ -19,32 +27,59 @@ export function useRecentTransactionTracking() {
     return (address && transactions[address]) || [];
   }, [address, transactions]);
 
-  const waitForTransaction = useCallback(
+  const waitAndUpdate = useCallback(
     async (hash: `0x${string}`, id: string, title: IRecentTransactionTitle) => {
       if (!publicClient || !address) {
         return;
       }
 
       try {
-        const transaction = await publicClient.waitForTransactionReceipt({
-          hash,
-          onReplaced: (replacement) => {
-            console.log(replacement);
-          },
-        });
-        if (transaction.status === "success") {
-          updateTransactionStatus(id, RecentTransactionStatus.SUCCESS, address);
-          addNotification(title, RecentTransactionStatus.SUCCESS);
-        } else if (transaction.status === "reverted") {
-          updateTransactionStatus(id, RecentTransactionStatus.ERROR, address);
-          addNotification(title, RecentTransactionStatus.ERROR);
-        }
+        await publicClient.getTransaction({ hash });
       } catch (e) {
+        if (e instanceof TransactionNotFoundError) {
+          updateTransactionStatus(id, RecentTransactionStatus.ERROR, address);
+        }
+      }
+
+      const transaction = await publicClient.waitForTransactionReceipt({
+        timeout: 1000 * 60 * 60,
+        hash,
+        onReplaced: (replacement) => {
+          if (replacement.reason === "repriced") {
+            updateTransactionHash(id, replacement.transaction.hash, address);
+          }
+          if (replacement.reason === "cancelled") {
+          } //TODO: make something with closure, this callback fired mutliple times even if function failed with error
+          console.log(replacement);
+        },
+      });
+      if (transaction.status === "success") {
+        updateTransactionStatus(id, RecentTransactionStatus.SUCCESS, address);
+        addNotification(title, RecentTransactionStatus.SUCCESS);
+      } else if (transaction.status === "reverted") {
         updateTransactionStatus(id, RecentTransactionStatus.ERROR, address);
         addNotification(title, RecentTransactionStatus.ERROR);
       }
     },
-    [address, publicClient, updateTransactionStatus],
+    [address, publicClient, updateTransactionHash, updateTransactionStatus],
+  );
+
+  const waitForTransaction = useCallback(
+    async (hash: `0x${string}`, id: string, title: IRecentTransactionTitle) => {
+      while (true) {
+        try {
+          console.log("trying again");
+          await waitAndUpdate(hash, id, title);
+          return;
+        } catch (e) {
+          console.log(e);
+          if (!(e instanceof WaitForTransactionReceiptTimeoutError)) {
+            return;
+          }
+        }
+      }
+    },
+    [waitAndUpdate],
   );
 
   useEffect(() => {
