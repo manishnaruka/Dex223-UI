@@ -5,9 +5,7 @@ import { useAccount, useBlockNumber, usePublicClient, useWalletClient } from "wa
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
-import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
-import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
@@ -28,7 +26,10 @@ import {
 import { useTransactionSettingsStore } from "@/stores/useTransactionSettingsStore";
 
 import { useAddLiquidityGasSettings } from "../stores/useAddLiquidityGasSettings";
-import { LiquidityStatus, useLiquidityStatusStore } from "../stores/useLiquidityStatusStore";
+import {
+  AddLiquidityStatus,
+  useAddLiquidityStatusStore,
+} from "../stores/useAddLiquidityStatusStore";
 import { useSortedTokens } from "./useSortedTokens";
 
 const TEST_ALLOWED_SLIPPAGE = new Percent(2, 100);
@@ -299,8 +300,7 @@ export const useAddLiquidity = ({
   createPool?: boolean;
   tokenId?: string;
 }) => {
-  const { setLiquidityHash, setStatus: setLiquidityStatus } = useLiquidityStatusStore();
-  const [status, setStatus] = useState(AllowanceStatus.INITIAL);
+  const { setLiquidityHash, setStatus: setLiquidityStatus } = useAddLiquidityStatusStore();
   const { address: accountAddress } = useAccount();
   const chainId = useCurrentChainId();
 
@@ -318,106 +318,111 @@ export const useAddLiquidity = ({
 
   const { gasSettings, gasModel, customGasLimit } = useAddLiquidityGasSettings();
 
-  const handleAddLiquidity = useCallback(async () => {
-    if (
-      !position ||
-      !publicClient ||
-      !walletClient ||
-      !accountAddress ||
-      !chainId ||
-      !addLiquidityParams
-    ) {
-      console.log("handleAddLiquidity: SOMESING UNDEFINED");
-      return;
-    }
-    setStatus(AllowanceStatus.PENDING);
-    setLiquidityStatus(LiquidityStatus.MINT_PENDING);
-    try {
-      const estimatedGas = await publicClient.estimateContractGas(addLiquidityParams);
-
-      const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
-      const { request } = await publicClient.simulateContract({
-        ...addLiquidityParams,
-        ...gasSettings,
-        gas: gasToUse,
-      });
-      const hash = await walletClient.writeContract({ ...request, account: undefined });
-
-      setLiquidityHash(hash);
-
-      const transaction = await publicClient.getTransaction({
-        hash,
-      });
-
-      const nonce = transaction.nonce;
-
-      addRecentTransaction(
-        {
-          hash,
-          nonce,
-          chainId,
-          gas: {
-            ...stringifyObject({ ...gasSettings, model: gasModel }),
-            gas: gasToUse.toString(),
-          },
-          params: {
-            ...stringifyObject(addLiquidityParams),
-            abi: [
-              getAbiItem({
-                name: addLiquidityParams.functionName,
-                abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-              }),
-            ],
-          },
-          title: {
-            template: RecentTransactionTitleTemplate.ADD,
-            symbol0: position.pool.token0.symbol!,
-            symbol1: position.pool.token1.symbol!,
-            amount0: formatUnits(
-              BigInt(JSBI.toNumber(position.mintAmounts.amount0)),
-              position.pool.token0.decimals,
-            ),
-            amount1: formatUnits(
-              BigInt(JSBI.toNumber(position.mintAmounts.amount1)),
-              position.pool.token1.decimals,
-            ),
-            logoURI0: position.pool.token0?.logoURI || "/tokens/placeholder.svg",
-            logoURI1: position.pool.token1?.logoURI || "/tokens/placeholder.svg",
-          },
-        },
-        accountAddress,
-      );
-      if (hash) {
-        setLiquidityStatus(LiquidityStatus.MINT_LOADING);
-        setStatus(AllowanceStatus.LOADING);
-        await publicClient.waitForTransactionReceipt({ hash });
-        setLiquidityStatus(LiquidityStatus.SUCCESS);
-        setStatus(AllowanceStatus.SUCCESS);
+  const handleAddLiquidity = useCallback(
+    async ({ updateAllowance }: { updateAllowance: () => Promise<void> }) => {
+      if (
+        !position ||
+        !publicClient ||
+        !walletClient ||
+        !accountAddress ||
+        !chainId ||
+        !addLiquidityParams
+      ) {
+        console.log("handleAddLiquidity: SOMESING UNDEFINED");
+        return;
       }
-    } catch (error) {
-      console.error("useAddLiquidity ~ error:", error);
-      addToast("Unexpected error, please contact support", "error");
-      setLiquidityStatus(LiquidityStatus.MINT);
-      setStatus(AllowanceStatus.INITIAL);
-    }
-  }, [
-    accountAddress,
-    publicClient,
-    walletClient,
-    chainId,
-    addRecentTransaction,
-    addLiquidityParams,
-    position,
-    setLiquidityHash,
-    setLiquidityStatus,
-    gasSettings,
-    customGasLimit,
-    gasModel,
-  ]);
+      setLiquidityStatus(AddLiquidityStatus.MINT_PENDING);
+      try {
+        const estimatedGas = await publicClient.estimateContractGas(addLiquidityParams);
+
+        const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
+
+        const { request } = await publicClient.simulateContract({
+          ...addLiquidityParams,
+          ...gasSettings,
+          gas: gasToUse,
+        });
+        const hash = await walletClient.writeContract({ ...request, account: undefined });
+
+        setLiquidityHash(hash);
+
+        const transaction = await publicClient.getTransaction({
+          hash,
+        });
+
+        const nonce = transaction.nonce;
+
+        addRecentTransaction(
+          {
+            hash,
+            nonce,
+            chainId,
+            gas: {
+              ...stringifyObject({ ...gasSettings, model: gasModel }),
+              gas: gasToUse.toString(),
+            },
+            params: {
+              ...stringifyObject(addLiquidityParams),
+              abi: [
+                getAbiItem({
+                  name: addLiquidityParams.functionName,
+                  abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
+                }),
+              ],
+            },
+            title: {
+              template: RecentTransactionTitleTemplate.ADD,
+              symbol0: position.pool.token0.symbol!,
+              symbol1: position.pool.token1.symbol!,
+              amount0: formatUnits(
+                BigInt(JSBI.toNumber(position.mintAmounts.amount0)),
+                position.pool.token0.decimals,
+              ),
+              amount1: formatUnits(
+                BigInt(JSBI.toNumber(position.mintAmounts.amount1)),
+                position.pool.token1.decimals,
+              ),
+              logoURI0: position.pool.token0?.logoURI || "/tokens/placeholder.svg",
+              logoURI1: position.pool.token1?.logoURI || "/tokens/placeholder.svg",
+            },
+          },
+          accountAddress,
+        );
+        if (hash) {
+          setLiquidityStatus(AddLiquidityStatus.MINT_LOADING);
+          const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
+          updateAllowance();
+          if (receipt.status === "success") {
+            setLiquidityStatus(AddLiquidityStatus.SUCCESS);
+          }
+
+          if (receipt.status === "reverted") {
+            setLiquidityStatus(AddLiquidityStatus.MINT_ERROR);
+          }
+        }
+      } catch (error) {
+        console.error("useAddLiquidity ~ error:", error);
+        addToast("Unexpected error, please contact support", "error");
+        setLiquidityStatus(AddLiquidityStatus.MINT);
+      }
+    },
+    [
+      accountAddress,
+      publicClient,
+      walletClient,
+      chainId,
+      addRecentTransaction,
+      addLiquidityParams,
+      position,
+      setLiquidityHash,
+      setLiquidityStatus,
+      gasSettings,
+      customGasLimit,
+      gasModel,
+    ],
+  );
 
   return {
     handleAddLiquidity,
-    status,
   };
 };

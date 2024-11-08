@@ -9,6 +9,7 @@ import { useAccount } from "wagmi";
 import useRemoveLiquidity, {
   useRemoveLiquidityEstimatedGas,
 } from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -93,7 +94,10 @@ export default function DecreaseLiquidityPage({
   }, [position?.pool.fee, position?.pool.token0, position?.pool.token1]);
 
   const { inRange, removed } = usePositionRangeStatus({ position });
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useSwapRecentTransactionsStore();
 
   const {
     reset,

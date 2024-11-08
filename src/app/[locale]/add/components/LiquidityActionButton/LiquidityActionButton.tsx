@@ -15,9 +15,12 @@ import {
   useLiquidityAmountsStore,
   useTokensStandards,
 } from "../../stores/useAddLiquidityAmountsStore";
+import {
+  AddLiquidityStatus,
+  useAddLiquidityStatusStore,
+} from "../../stores/useAddLiquidityStatusStore";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
-import { LiquidityStatus, useLiquidityStatusStore } from "../../stores/useLiquidityStatusStore";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { APPROVE_BUTTON_TEXT } from "./ConfirmLiquidityDialog";
 
@@ -32,7 +35,8 @@ export const LiquidityActionButton = ({
   const tWallet = useTranslations("Wallet");
   const { setIsOpen } = useConfirmLiquidityDialogStore();
 
-  const { setStatus } = useLiquidityStatusStore();
+  const { setStatus, setApprove0Status, setApprove0Hash, setApprove1Status, setApprove1Hash } =
+    useAddLiquidityStatusStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();
@@ -155,7 +159,11 @@ export const LiquidityActionButton = ({
         variant={ButtonVariant.CONTAINED}
         fullWidth
         onClick={() => {
-          setStatus(LiquidityStatus.INITIAL);
+          setStatus(AddLiquidityStatus.INITIAL);
+          setApprove0Status(0);
+          setApprove0Hash(undefined);
+          setApprove1Status(0);
+          setApprove1Hash(undefined);
           setIsOpen(true);
         }}
       >
@@ -169,7 +177,7 @@ export const LiquidityActionButton = ({
       variant={ButtonVariant.CONTAINED}
       fullWidth
       onClick={() => {
-        setStatus(LiquidityStatus.MINT);
+        setStatus(AddLiquidityStatus.MINT);
         setIsOpen(true);
       }}
     >

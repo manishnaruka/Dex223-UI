@@ -27,8 +27,10 @@ export const BalancesDesktopTable = ({
       <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
       <div className="text-secondary-text pr-5 h-[60px] flex items-center justify-end">Details</div>
       {tableData.map((o: any, index: number) => {
+        const key = o?.token?.address0 ? o.token.address0 : `item-${index}`;
+
         return (
-          <React.Fragment key={o.token.address0}>
+          <React.Fragment key={key}>
             <div
               className={clsx(
                 "h-[56px] flex items-center gap-2 pl-5 rounded-l-3",
@@ -84,8 +86,10 @@ export const BalancesMobileTable = ({
   return (
     <div className="flex lg:hidden flex-col gap-4">
       {tableData.map((o: any, index: number) => {
+        const key = o?.token?.address0 ? o.token.address0 : `item-${index}`;
+
         return (
-          <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2" key={o.token.address0}>
+          <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2" key={key}>
             <div className="flex justify-start items-start gap-1">
               <div className="flex gap-2">
                 <Image src={o.logoURI || "/tokens/placeholder.svg"} width={32} height={32} alt="" />

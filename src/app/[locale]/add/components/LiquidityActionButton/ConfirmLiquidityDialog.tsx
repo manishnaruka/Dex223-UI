@@ -19,7 +19,6 @@ import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
 import { getChainSymbol } from "@/functions/getChainSymbol";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { usePositionPrices, usePositionRangeStatus } from "@/hooks/usePositions";
 import { Link } from "@/navigation";
@@ -41,9 +40,13 @@ import {
   useAddLiquidityGasLimitStore,
   useAddLiquidityGasPrice,
 } from "../../stores/useAddLiquidityGasSettings";
+import {
+  AddLiquidityApproveStatus,
+  AddLiquidityStatus,
+  useAddLiquidityStatusStore,
+} from "../../stores/useAddLiquidityStatusStore";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
-import { LiquidityStatus, useLiquidityStatusStore } from "../../stores/useLiquidityStatusStore";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { TransactionItem } from "./TransactionItem";
 
@@ -69,35 +72,32 @@ const ApproveDialog = () => {
   const t = useTranslations("Liquidity");
 
   const { setIsOpen } = useConfirmLiquidityDialogStore();
-  const { setStatus } = useLiquidityStatusStore();
+  const { setStatus } = useAddLiquidityStatusStore();
 
   const chainId = useCurrentChainId();
   const chainSymbol = getChainSymbol(chainId);
-  const {
-    handleApprove,
-    approveTransactionsType,
-    gasPrice,
-    approveTransactions,
-    approveTotalGasLimit,
-  } = useLiquidityApprove();
+  const gasPrice = useAddLiquidityGasPrice();
+
+  const { handleApprove, approveTransactionsType, approveTransactions, approveTotalGasLimit } =
+    useLiquidityApprove();
 
   const isLoadingA20 = approveTransactions.approveA
-    ? [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(
+    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
         approveTransactions.approveA?.status,
       )
     : false;
   const isLoadingB20 = approveTransactions.approveB
-    ? [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(
+    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
         approveTransactions.approveB?.status,
       )
     : false;
   const isLoadingA223 = approveTransactions.depositA
-    ? [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(
+    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
         approveTransactions.depositA?.status,
       )
     : false;
   const isLoadingB223 = approveTransactions.depositB
-    ? [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(
+    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
         approveTransactions.depositB?.status,
       )
     : false;
@@ -107,22 +107,22 @@ const ApproveDialog = () => {
   type TokenType = "tokenA" | "tokenB";
   const transactionItems = [
     {
-      transaction: approveTransactions.approveA,
+      transaction: approveTransactions.approveA!,
       standard: Standard.ERC20,
       token: "tokenA" as TokenType,
     },
     {
-      transaction: approveTransactions.depositA,
+      transaction: approveTransactions.depositA!,
       standard: Standard.ERC223,
       token: "tokenA" as TokenType,
     },
     {
-      transaction: approveTransactions.approveB,
+      transaction: approveTransactions.approveB!,
       standard: Standard.ERC20,
       token: "tokenB" as TokenType,
     },
     {
-      transaction: approveTransactions.depositB,
+      transaction: approveTransactions.depositB!,
       standard: Standard.ERC223,
       token: "tokenB" as TokenType,
     },
@@ -159,38 +159,33 @@ const ApproveDialog = () => {
         title={`${t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)} ${t("approve_transaction_modal_title")}`}
       />
       <div className="w-full md:w-[570px] px-4 md:px-10 md:pb-10 pb-4 mx-auto">
-        {transactionItems.map(
-          (
-            { transaction, standard, token }: { transaction: any; standard: any; token: TokenType },
-            index,
-          ) => (
-            <TransactionItem
-              key={`${transaction.token.symbol}_${standard}`}
-              transaction={transaction}
-              standard={standard}
-              gasPrice={gasPrice}
-              chainSymbol={chainSymbol}
-              index={index}
-              itemsCount={transactionItems.length}
-              isError={fieldsErrors[token]}
-              disabled={isLoading || isAllowed}
-              setFieldError={(isError: boolean) => setFieldError(token, isError)}
-              setCustomAmount={(amount: bigint) => {
-                if (token === "tokenA") {
-                  setCustomAmounts({
-                    ...customAmounts,
-                    customAmountA: amount,
-                  });
-                } else if (token === "tokenB") {
-                  setCustomAmounts({
-                    ...customAmounts,
-                    customAmountB: amount,
-                  });
-                }
-              }}
-            />
-          ),
-        )}
+        {transactionItems.map(({ transaction, standard, token }, index) => (
+          <TransactionItem
+            key={`${transaction.token.symbol}_${standard}`}
+            transaction={transaction}
+            standard={standard}
+            gasPrice={gasPrice}
+            chainSymbol={chainSymbol}
+            index={index}
+            itemsCount={transactionItems.length}
+            isError={fieldsErrors[token]}
+            disabled={isLoading || isAllowed}
+            setFieldError={(isError: boolean) => setFieldError(token, isError)}
+            setCustomAmount={(amount: bigint) => {
+              if (token === "tokenA") {
+                setCustomAmounts({
+                  ...customAmounts,
+                  customAmountA: amount,
+                });
+              } else if (token === "tokenB") {
+                setCustomAmounts({
+                  ...customAmounts,
+                  customAmountB: amount,
+                });
+              }
+            }}
+          />
+        ))}
         {approveTotalGasLimit > 0 ? (
           <div className="flex gap-1 justify-center items-center border-t pt-4 border-secondary-border mb-4">
             <span className="text-secondary-text">{t("total_fee")}</span>
@@ -211,7 +206,7 @@ const ApproveDialog = () => {
         ) : isAllowed ? (
           <Button
             onClick={() => {
-              setStatus(LiquidityStatus.MINT);
+              setStatus(AddLiquidityStatus.MINT);
             }}
             fullWidth
           >
@@ -247,7 +242,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   const { price } = usePriceRange();
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
   const [showFirst, setShowFirst] = useState(true);
-  const { liquidityHash } = useLiquidityStatusStore();
+  const { liquidityHash, status } = useAddLiquidityStatusStore();
+  const { updateAllowance } = useLiquidityApprove();
 
   const { parsedAmounts, position, noLiquidity } = useV3DerivedMintInfo({
     tokenA,
@@ -271,7 +267,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
     showFirst,
   });
 
-  const { handleAddLiquidity, status } = useAddLiquidity({
+  const { handleAddLiquidity } = useAddLiquidity({
     position,
     increase,
     createPool: noLiquidity ? true : false,
@@ -325,14 +321,14 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                 <IconButton iconName="forward" />
               </a>
             )}
-            {status === AllowanceStatus.PENDING && (
+            {status === AddLiquidityStatus.MINT_PENDING && (
               <>
                 <Preloader type="linear" />
                 <span className="text-secondary-text text-14">Proceed in your wallet</span>
               </>
             )}
-            {status === AllowanceStatus.LOADING && <Preloader size={20} />}
-            {status === AllowanceStatus.SUCCESS && (
+            {status === AddLiquidityStatus.MINT_LOADING && <Preloader size={20} />}
+            {status === AddLiquidityStatus.SUCCESS && (
               <Svg className="text-green" iconName="done" size={20} />
             )}
           </div>
@@ -444,7 +440,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           </div>
         </div>
 
-        {[AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
+        {[AddLiquidityStatus.MINT_LOADING, AddLiquidityStatus.MINT_PENDING].includes(status) ? (
           <Button fullWidth disabled>
             <span className="flex items-center gap-2">
               <Preloader size={20} color="green" />
@@ -453,7 +449,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
         ) : (
           <Button
             onClick={() => {
-              handleAddLiquidity();
+              handleAddLiquidity({ updateAllowance });
             }}
             fullWidth
           >
@@ -465,79 +461,12 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   );
 };
 
-function ApproveRow({
-  logoURI = "",
-  isPending = false,
-  isLoading = false,
-  isSuccess = false,
-  isReverted = false,
-  hash,
-}: {
-  logoURI: string | undefined;
-  isLoading?: boolean;
-  isPending?: boolean;
-  isSuccess?: boolean;
-  isReverted?: boolean;
-  hash?: Address | undefined;
-}) {
-  const t = useTranslations("Swap");
-
-  return (
-    <div
-      className={clsx(
-        "grid grid-cols-[32px_1fr_1fr] gap-2 h-10 before:absolute relative before:left-[15px] before:-bottom-4 before:w-0.5 before:h-3 before:rounded-1",
-        isSuccess ? "before:bg-green" : "before:bg-green-bg",
-      )}
-    >
-      <div className="flex items-center">
-        <Image
-          className={clsx(isSuccess && "", "rounded-full")}
-          src={logoURI}
-          alt=""
-          width={32}
-          height={32}
-        />
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span className={isSuccess ? "text-secondary-text text-14" : "text-14"}>
-          {isSuccess && t("approved")}
-          {isPending && "Confirm in your wallet"}
-          {isLoading && "Approving"}
-          {!isSuccess && !isPending && !isReverted && !isLoading && "Approve"}
-          {isReverted && "Approve failed"}
-        </span>
-        {!isSuccess && <span className="text-green text-12">{t("why_do_i_have_to_approve")}</span>}
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a
-            target="_blank"
-            href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, DexChainId.SEPOLIA)}
-          >
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {isPending && (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        )}
-        {isLoading && <Preloader size={20} />}
-        {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
-      </div>
-    </div>
-  );
-}
-
 const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();
-  const { liquidityHash } = useLiquidityStatusStore();
+  const { liquidityHash } = useAddLiquidityStatusStore();
   const { parsedAmounts } = useV3DerivedMintInfo({
     tokenA,
     tokenB,
@@ -675,7 +604,7 @@ export default function ConfirmLiquidityDialog({
 }) {
   const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
 
-  const { status } = useLiquidityStatusStore();
+  const { status } = useAddLiquidityStatusStore();
   return (
     <DrawerDialog
       isOpen={isOpen}
@@ -685,21 +614,21 @@ export default function ConfirmLiquidityDialog({
     >
       <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
         {[
-          LiquidityStatus.INITIAL,
-          LiquidityStatus.APPROVE_PENDING,
-          LiquidityStatus.APPROVE_LOADING,
+          AddLiquidityStatus.INITIAL,
+          AddLiquidityStatus.APPROVE_LOADING,
+          AddLiquidityStatus.APPROVE_ERROR,
         ].includes(status) ? (
           <ApproveDialog />
         ) : null}
         {[
-          LiquidityStatus.MINT,
-          LiquidityStatus.MINT_PENDING,
-          LiquidityStatus.MINT_LOADING,
+          AddLiquidityStatus.MINT,
+          AddLiquidityStatus.MINT_PENDING,
+          AddLiquidityStatus.MINT_LOADING,
         ].includes(status) ? (
           <MintDialog increase={increase} tokenId={tokenId} />
         ) : null}
-        {[LiquidityStatus.SUCCESS].includes(status) ? <SuccessfulDialog /> : null}
-        {[LiquidityStatus.MINT_ERROR].includes(status) ? <SuccessfulDialog isError /> : null}
+        {[AddLiquidityStatus.SUCCESS].includes(status) ? <SuccessfulDialog /> : null}
+        {[AddLiquidityStatus.MINT_ERROR].includes(status) ? <SuccessfulDialog isError /> : null}
       </div>
     </DrawerDialog>
   );

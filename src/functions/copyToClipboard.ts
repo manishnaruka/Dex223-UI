@@ -1,3 +1,7 @@
 export async function copyToClipboard(text: string) {
-  await navigator.clipboard.writeText(text);
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (error) {
+    throw new Error("Clipboard API not supported");
+  }
 }

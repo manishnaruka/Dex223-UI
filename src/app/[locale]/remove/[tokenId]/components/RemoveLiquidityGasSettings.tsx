@@ -34,7 +34,6 @@ export const RemoveLiquidityGasSettings = () => {
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useRemoveLiquidityGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const gasToUse = customGasLimit || estimatedGas;
   const { isAdvanced, setIsAdvanced } = useRemoveLiquidityGasModeStore();
 

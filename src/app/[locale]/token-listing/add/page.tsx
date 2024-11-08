@@ -38,7 +38,7 @@ import Svg from "@/components/atoms/Svg";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
@@ -209,7 +209,6 @@ export default function ListTokenPage() {
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useListTokensGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const { isAdvanced, setIsAdvanced } = useListTokensGasModeStore();
 
   const handleChange = useCallback(
@@ -347,16 +346,14 @@ export default function ListTokenPage() {
               : "xl:grid-cols-[600px] xl:max-w-[600px] grid-areas-[right]",
           )}
         >
-          {showRecentTransactions && (
-            <div className="grid-in-[left] flex justify-center">
-              <div className="w-full sm:max-w-[600px] xl:max-w-full">
-                <RecentTransactions
-                  showRecentTransactions={showRecentTransactions}
-                  handleClose={() => setShowRecentTransactions(false)}
-                />
-              </div>
+          <div className="grid-in-[left] flex justify-center">
+            <div className="w-full sm:max-w-[600px] xl:max-w-full">
+              <RecentTransactions
+                showRecentTransactions={showRecentTransactions}
+                handleClose={() => setShowRecentTransactions(false)}
+              />
             </div>
-          )}
+          </div>
 
           <div className="flex justify-center grid-in-[right]">
             <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">

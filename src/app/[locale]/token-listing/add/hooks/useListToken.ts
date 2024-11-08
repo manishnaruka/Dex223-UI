@@ -21,7 +21,7 @@ import {
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import { AUTO_LISTING_ABI } from "@/config/abis/autolisting";
 import { ROUTER_ABI } from "@/config/abis/router";
-import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import { getGasSettings } from "@/functions/gasSettings";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -31,7 +31,6 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
-import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   GasFeeModel,
@@ -220,6 +219,17 @@ export default function useListToken() {
       paymentToken && tokensToList.length ? paymentToken.price * BigInt(tokensToList.length) : null,
   });
 
+  const gasSettings = useMemo(() => {
+    return getGasSettings({
+      baseFee,
+      chainId,
+      gasPrice,
+      priorityFee,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, priorityFee, gasPriceOption, gasPriceSettings]);
+
   const handleList = useCallback(
     async (amountToApprove: string) => {
       if (!poolAddress || !walletClient || (!paymentToken && !isFree) || !publicClient) {
@@ -230,9 +240,10 @@ export default function useListToken() {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
         setListTokenStatus(ListTokenStatus.PENDING_APPROVE);
-        const result = await writeTokenApprove(
-          parseUnits(amountToApprove, paymentToken.token.decimals),
-        );
+        const result = await writeTokenApprove({
+          customAmount: parseUnits(amountToApprove, paymentToken.token.decimals),
+          customGasSettings: gasSettings,
+        });
 
         if (!result?.success) {
           setListTokenStatus(ListTokenStatus.INITIAL);
@@ -263,43 +274,6 @@ export default function useListToken() {
 
       let hash;
 
-      let gasPriceFormatted = {};
-
-      if (gasPriceOption !== GasOption.CUSTOM) {
-        const multiplier = baseFeeMultipliers[chainId][gasPriceOption];
-        switch (gasPriceSettings.model) {
-          case GasFeeModel.EIP1559:
-            if (priorityFee && baseFee) {
-              gasPriceFormatted = {
-                maxPriorityFeePerGas: (priorityFee * multiplier) / SCALING_FACTOR,
-                maxFeePerGas: (baseFee * multiplier) / SCALING_FACTOR,
-              };
-            }
-            break;
-
-          case GasFeeModel.LEGACY:
-            if (gasPrice) {
-              gasPriceFormatted = {
-                gasPrice: (gasPrice * multiplier) / SCALING_FACTOR,
-              };
-            }
-            break;
-        }
-      } else {
-        switch (gasPriceSettings.model) {
-          case GasFeeModel.EIP1559:
-            gasPriceFormatted = {
-              maxPriorityFeePerGas: gasPriceSettings.maxPriorityFeePerGas,
-              maxFeePerGas: gasPriceSettings.maxFeePerGas,
-            };
-            break;
-
-          case GasFeeModel.LEGACY:
-            gasPriceFormatted = { gasPrice: gasPriceSettings.gasPrice };
-            break;
-        }
-      }
-
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
@@ -312,7 +286,7 @@ export default function useListToken() {
         const { request } = await publicClient.simulateContract({
           ...listParams,
           account: address,
-          ...gasPriceFormatted,
+          ...gasSettings,
           gas: gasToUse,
         } as any);
 
@@ -336,7 +310,7 @@ export default function useListToken() {
                 nonce,
                 chainId,
                 gas: {
-                  ...stringifyObject({ ...gasPriceFormatted, model: GasFeeModel.EIP1559 }),
+                  ...stringifyObject({ ...gasSettings, model: GasFeeModel.EIP1559 }),
                   gas: gasToUse.toString(),
                 },
                 params: {
@@ -393,20 +367,15 @@ export default function useListToken() {
       addRecentTransaction,
       address,
       autoListing?.name,
-      baseFee,
       chainId,
       closeConfirmInWalletAlert,
       customGasLimit,
-      gasPrice,
-      gasPriceOption,
-      gasPriceSettings,
       isAllowed,
       isFree,
       listParams,
       openConfirmInWalletAlert,
       paymentToken,
       poolAddress,
-      priorityFee,
       publicClient,
       setApproveHash,
       setErrorType,
@@ -419,6 +388,7 @@ export default function useListToken() {
       updateAllowance,
       walletClient,
       writeTokenApprove,
+      gasSettings,
     ],
   );
 

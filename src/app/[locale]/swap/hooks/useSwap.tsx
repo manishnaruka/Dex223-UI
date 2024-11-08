@@ -28,7 +28,7 @@ import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStor
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
-import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import { getGasSettings } from "@/functions/gasSettings";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -336,6 +336,17 @@ export default function useSwap() {
 
   const { swapParams } = useSwapParams();
 
+  const gasSettings = useMemo(() => {
+    return getGasSettings({
+      baseFee,
+      chainId,
+      gasPrice,
+      priorityFee,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, priorityFee, gasPriceOption, gasPriceSettings]);
+
   const handleSwap = useCallback(
     async (amountToApprove: string) => {
       if (!publicClient || !tokenA) {
@@ -346,7 +357,10 @@ export default function useSwap() {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
         setSwapStatus(SwapStatus.PENDING_APPROVE);
-        const result = await approveA(parseUnits(amountToApprove, tokenA?.decimals ?? 18));
+        const result = await approveA({
+          customAmount: parseUnits(amountToApprove, tokenA?.decimals ?? 18),
+          customGasSettings: gasSettings,
+        });
 
         if (!result?.success) {
           setSwapStatus(SwapStatus.INITIAL);
@@ -398,43 +412,6 @@ export default function useSwap() {
 
       let hash;
 
-      let gasPriceFormatted = {};
-
-      if (gasPriceOption !== GasOption.CUSTOM) {
-        const multiplier = baseFeeMultipliers[chainId][gasPriceOption];
-        switch (gasPriceSettings.model) {
-          case GasFeeModel.EIP1559:
-            if (priorityFee && baseFee) {
-              gasPriceFormatted = {
-                maxPriorityFeePerGas: (priorityFee * multiplier) / SCALING_FACTOR,
-                maxFeePerGas: (baseFee * multiplier) / SCALING_FACTOR,
-              };
-            }
-            break;
-
-          case GasFeeModel.LEGACY:
-            if (gasPrice) {
-              gasPriceFormatted = {
-                gasPrice: (gasPrice * multiplier) / SCALING_FACTOR,
-              };
-            }
-            break;
-        }
-      } else {
-        switch (gasPriceSettings.model) {
-          case GasFeeModel.EIP1559:
-            gasPriceFormatted = {
-              maxPriorityFeePerGas: gasPriceSettings.maxPriorityFeePerGas,
-              maxFeePerGas: gasPriceSettings.maxFeePerGas,
-            };
-            break;
-
-          case GasFeeModel.LEGACY:
-            gasPriceFormatted = { gasPrice: gasPriceSettings.gasPrice };
-            break;
-        }
-      }
-
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
@@ -448,14 +425,14 @@ export default function useSwap() {
           const { request } = await publicClient.simulateContract({
             ...swapParams,
             account: address,
-            ...gasPriceFormatted,
+            ...gasSettings,
             gas: gasToUse,
           } as any);
           _request = request;
         } catch (e) {
           _request = {
             ...swapParams,
-            ...gasPriceFormatted,
+            ...gasSettings,
             gas: gasToUse,
             account: undefined,
           } as any;
@@ -482,7 +459,7 @@ export default function useSwap() {
               nonce,
               chainId,
               gas: {
-                ...stringifyObject({ ...gasPriceFormatted, model: gasPriceSettings.model }),
+                ...stringifyObject({ ...gasSettings, model: gasPriceSettings.model }),
                 gas: gasToUse.toString(),
               },
               params: {
@@ -539,17 +516,13 @@ export default function useSwap() {
       addRecentTransaction,
       address,
       approveA,
-      baseFee,
       chainId,
       closeConfirmInWalletAlert,
       customGasLimit,
-      gasPrice,
-      gasPriceOption,
       gasPriceSettings,
       isAllowedA,
       openConfirmInWalletAlert,
       output,
-      priorityFee,
       publicClient,
       setApproveHash,
       setErrorType,
@@ -564,6 +537,7 @@ export default function useSwap() {
       typedValue,
       updateAllowance,
       walletClient,
+      gasSettings,
     ],
   );
 

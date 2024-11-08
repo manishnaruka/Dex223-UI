@@ -33,7 +33,6 @@ export const CollectFeesGasSettings = () => {
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useCollectFeesGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const gasToUse = customGasLimit || estimatedGas;
   const { isAdvanced, setIsAdvanced } = useCollectFeesGasModeStore();
 

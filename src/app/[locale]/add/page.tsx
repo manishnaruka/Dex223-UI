@@ -7,6 +7,7 @@ import React, { useCallback, useState } from "react";
 import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import SelectButton from "@/components/atoms/SelectButton";
 import IconButton, {
@@ -22,7 +23,6 @@ import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/navigation";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "./components/LiquidityActionButton/ConfirmLiquidityDialog";
@@ -36,7 +36,10 @@ export default function AddPoolPage() {
   usePoolsSearchParams();
   useRecentTransactionTracking();
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useSwapRecentTransactionsStore();
+
   const t = useTranslations("Liquidity");
 
   const router = useRouter();
@@ -123,12 +126,10 @@ export default function AddPoolPage() {
           <h2 className="text-18 md:text-20 font-bold">{t("add_liquidity_title")}</h2>
           <div className="w-[48px] md:w-[104px] flex items-center gap-2 justify-end">
             <IconButton
-              variant={IconButtonVariant.DEFAULT}
               buttonSize={IconButtonSize.LARGE}
               iconName="recent-transactions"
               active={showRecentTransactions}
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-              className="text-tertiary-text"
             />
           </div>
         </div>

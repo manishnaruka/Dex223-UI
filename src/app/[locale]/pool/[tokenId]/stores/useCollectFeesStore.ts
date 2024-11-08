@@ -19,6 +19,16 @@ interface CollectFeesStore {
   reset: () => void;
 }
 
+interface RefreshStore {
+  refreshKey: number;
+  forceRefresh: () => void;
+}
+
+export const useRefreshStore = create<RefreshStore>((set) => ({
+  refreshKey: 0,
+  forceRefresh: () => set((state) => ({ refreshKey: state.refreshKey + 1 })),
+}));
+
 export const useCollectFeesStore = create<CollectFeesStore>((set, get) => ({
   token0Standard: Standard.ERC20,
   token1Standard: Standard.ERC20,

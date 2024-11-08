@@ -11,9 +11,11 @@ import NetworkPicker from "@/components/common/NetworkPicker";
 import TokenListsSettings from "@/components/common/TokenListsSettings";
 import AccountDialog from "@/components/dialogs/AccountDialog";
 import { useMintTestTokensDialogStore } from "@/components/dialogs/stores/useMintTestTokensDialogStore";
-import { Link, usePathname } from "@/navigation";
+import { useMixpanelConnectWalletEvents } from "@/functions/mixpanel";
+import { Link } from "@/navigation";
 
 export default function Header() {
+  useMixpanelConnectWalletEvents();
   const { handleOpen } = useMintTestTokensDialogStore();
   return (
     <div>
