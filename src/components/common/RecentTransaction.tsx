@@ -213,7 +213,7 @@ export default function RecentTransaction({
   transaction: IRecentTransaction;
   isLowestNonce?: boolean;
   showSpeedUp?: boolean;
-  view: "default" | "transparent";
+  view?: "default" | "transparent";
 }) {
   const t = useTranslations("RecentTransactions");
   const { handleSpeedUp } = useTransactionSpeedUpDialogStore();
