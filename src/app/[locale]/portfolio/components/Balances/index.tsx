@@ -33,16 +33,13 @@ const filterTable = ({
   if (token.wrapped.address0 === searchValue) return true;
   if (token.wrapped.address1 === searchValue) return true;
   if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-  if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-
-  return false;
+  return !!token.symbol?.toLowerCase().includes(searchValue.toLowerCase());
 };
 
 export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  // const isTokenInfoOpened = Boolean(tokenForPortfolio);
   const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
   const handleClosTokenInfo = () => {
     setTokenForPortfolio(null);
