@@ -9,6 +9,7 @@ import { useLiquidityPriceRangeStore } from "@/app/[locale]/add/stores/useLiquid
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
@@ -42,7 +43,10 @@ export default function IncreaseLiquidityPage({
   };
 }) {
   useRecentTransactionTracking();
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useSwapRecentTransactionsStore();
 
   const { setIsOpen } = useTransactionSettingsDialogStore();
   const { setTicks } = useLiquidityPriceRangeStore();
@@ -129,7 +133,7 @@ export default function IncreaseLiquidityPage({
               buttonSize={IconButtonSize.LARGE}
               iconName="recent-transactions"
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-              className={showRecentTransactions ? "text-green" : "text-tertiary-text"}
+              active={showRecentTransactions}
             />
             <IconButton
               buttonSize={IconButtonSize.LARGE}

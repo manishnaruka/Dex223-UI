@@ -7,6 +7,7 @@ import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -16,7 +17,7 @@ import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
@@ -40,7 +41,7 @@ import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress"
 
 import { CollectFeesGasSettings } from "./components/CollectFeesGasSettings";
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
-import { useCollectFeesStore } from "./stores/useCollectFeesStore";
+import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
 
 export default function PoolPage({
   params,
@@ -53,7 +54,12 @@ export default function PoolPage({
   useCollectFeesEstimatedGas();
 
   const chainId = useCurrentChainId();
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useSwapRecentTransactionsStore();
+
+  const { forceRefresh } = useRefreshStore();
+
   const [isOpen, setIsOpen] = useState(false);
 
   const router = useRouter();
@@ -62,7 +68,7 @@ export default function PoolPage({
   const [showFirst, setShowFirst] = useState(true);
 
   const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
-  const position = usePositionFromPositionInfo(positionInfo);
+  let position = usePositionFromPositionInfo(positionInfo);
 
   const token0 = position?.pool.token0;
   const token1 = position?.pool.token1;
@@ -84,7 +90,7 @@ export default function PoolPage({
     setPoolAddress,
     setTokenId,
   } = useCollectFeesStore();
-  const { status, hash } = useCollectFeesStatusStore();
+  const { status, hash, setStatus } = useCollectFeesStatusStore();
 
   useEffect(() => {
     setPool(position?.pool);
@@ -103,6 +109,8 @@ export default function PoolPage({
   const handleClose = () => {
     reset();
     setIsOpen(false);
+    forceRefresh();
+    setStatus(CollectFeesStatus.INITIAL);
   };
 
   if (loading || poolAddressLoading) {
@@ -230,7 +238,7 @@ export default function PoolPage({
                 onClick={() => setIsOpen(true)}
                 size={ButtonSize.MEDIUM}
                 mobileSize={ButtonSize.SMALL}
-                disabled={!fees[0]}
+                disabled={!fees[0] && !fees[1]}
               >
                 Collect fees
               </Button>
@@ -427,7 +435,7 @@ export default function PoolPage({
                         <span className="text-14 lg:text-16">Standard</span>
                         <Badge color="green" text="ERC-20" />
                       </div>
-                      <span className="text-14 lg:text-16">{token0FeeFormatted}</span>
+                      <span className="text-14 lg:text-16">{`${token0FeeFormatted} ${token0?.symbol}`}</span>
                     </div>
                   </RadioButton>
                   <RadioButton
@@ -442,7 +450,7 @@ export default function PoolPage({
                         <span className="text-14 lg:text-16">Standard</span>
                         <Badge color="green" text="ERC-223" />
                       </div>
-                      <span className="text-14 lg:text-16">{token0FeeFormatted}</span>
+                      <span className="text-14 lg:text-16">{`${token0FeeFormatted} ${token0?.symbol}`}</span>
                     </div>
                   </RadioButton>
                 </div>

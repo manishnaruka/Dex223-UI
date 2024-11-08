@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Address } from "viem";
 
 import Preloader from "@/components/atoms/Preloader";
@@ -87,7 +87,7 @@ const PoolsTableDesktop = ({
 
       {tableData.map((o: any, index: number) => {
         return (
-          <>
+          <React.Fragment key={o.id}>
             <div
               onClick={() => openPoolHandler(o.id)}
               className="h-[56px] cursor-pointer flex items-center justify-center"
@@ -132,7 +132,7 @@ const PoolsTableDesktop = ({
             >
               ${formatFloat(0)}
             </div>
-          </>
+          </React.Fragment>
         );
       })}
     </div>
@@ -140,16 +140,18 @@ const PoolsTableDesktop = ({
 };
 
 const PoolsTableItemMobile = ({
+  key,
   pool,
   openPoolHandler,
   index,
 }: {
+  key: any;
   pool: any;
   openPoolHandler: (id: Address) => any;
   index: number;
 }) => {
   return (
-    <>
+    <React.Fragment key={key}>
       <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-3">
         <div className="flex justify-between gap-2">
           <div className="flex items-center gap-2 text-14">
@@ -204,15 +206,13 @@ const PoolsTableItemMobile = ({
           View pool
         </Button>
       </div>
-    </>
+    </React.Fragment>
   );
 };
 
 const PoolsTableMobile = ({
   tableData,
   currentPage,
-  sorting,
-  handleSort,
   openPoolHandler,
 }: {
   tableData: any[];
@@ -263,7 +263,7 @@ export default function PoolsTable({
   const [currentPage, setCurrentPage] = useState(1);
 
   const chainId = useCurrentChainId();
-  const { data, loading, ...restData } = usePoolsData({
+  const { data, loading } = usePoolsData({
     chainId,
     orderDirection: GQLSorting[sorting],
     filter,

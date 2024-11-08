@@ -20,7 +20,7 @@ import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStor
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";
 import TokenInput from "@/components/common/TokenInput";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";

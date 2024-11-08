@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { ButtonHTMLAttributes, useCallback, useState } from "react";
+import { ButtonHTMLAttributes, useCallback, useEffect, useState } from "react";
 import { MouseEvent } from "react";
 
 import { SortingType } from "@/app/[locale]/borrow-market/components/BorrowMarketTable";
@@ -106,12 +106,16 @@ function CopyIconButton(_props: CopyIconButtonProps) {
   const { text, buttonSize, className, ...props } = _props;
 
   const handleCopy = useCallback(async () => {
-    await copyToClipboard(text);
-    setIsCopied(true);
-    addToast(t("successfully_copied"));
-    setTimeout(() => {
-      setIsCopied(false);
-    }, 800);
+    try {
+      await copyToClipboard(text);
+      setIsCopied(true);
+      addToast(t("successfully_copied"));
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 800);
+    } catch (e) {
+      addToast("Clipboard API not supported", "error");
+    }
   }, [t, text]);
 
   return (
@@ -129,6 +133,14 @@ function CopyIconButton(_props: CopyIconButtonProps) {
   );
 }
 export default function IconButton(_props: Props) {
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
+      setIsTouchDevice(true);
+    }
+  }, []);
+
   switch (_props.variant) {
     case IconButtonVariant.DEFAULT:
     case undefined: {
@@ -137,8 +149,9 @@ export default function IconButton(_props: Props) {
         <IconButtonFrame
           iconName={_props.iconName}
           className={clsxMerge(
-            "text-tertiary-text  hocus:text-green-hover-icon relative before:opacity-0 before:duration-200 hocus:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[9px] duration-200",
+            "text-tertiary-text relative before:opacity-0 before:duration-200 hocus:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:blur-[9px] duration-200",
             active && "text-green",
+            !isTouchDevice && "hocus:text-green-hover-icon before:bg-green-hover-icon",
             className,
           )}
           {...props}

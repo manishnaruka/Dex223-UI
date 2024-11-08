@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
@@ -27,6 +27,24 @@ export default function RecentTransactions({
 
   const { transactions } = useRecentTransactionsStore();
   const { address } = useAccount();
+
+  const componentRef = useRef<HTMLDivElement>(null);
+  const prevShowRecentTransactions = useRef(showRecentTransactions);
+
+  useEffect(() => {
+    // Check if switching from non-visible to visible
+    if (!prevShowRecentTransactions.current && showRecentTransactions && componentRef.current) {
+      const rect = componentRef.current.getBoundingClientRect();
+      const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+      if (!isVisible) {
+        componentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    // Update the previous value for the next render
+    prevShowRecentTransactions.current = showRecentTransactions;
+  }, [showRecentTransactions]);
 
   const lowestPendingNonce = useMemo(() => {
     if (address) {
@@ -65,7 +83,7 @@ export default function RecentTransactions({
   return (
     <>
       {showRecentTransactions && (
-        <div>
+        <div ref={componentRef}>
           <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
             <div className="flex justify-between items-center mb-2.5">
               <h3 className="font-bold text-20">{t("transactions")}</h3>

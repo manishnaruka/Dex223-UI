@@ -34,8 +34,8 @@ interface AddLiquidityStatusStore {
   setStatus: (status: AddLiquidityStatus) => void;
   setApprove0Status: (status: AddLiquidityApproveStatus) => void;
   setApprove1Status: (status: AddLiquidityApproveStatus) => void;
-  setApprove0Hash: (hash: Address) => void;
-  setApprove1Hash: (hash: Address) => void;
+  setApprove0Hash: (hash: Address | undefined) => void;
+  setApprove1Hash: (hash: Address | undefined) => void;
   setDeposite0Status: (status: AddLiquidityApproveStatus) => void;
   setDeposite1Status: (status: AddLiquidityApproveStatus) => void;
   setDeposite0Hash: (hash: Address) => void;
