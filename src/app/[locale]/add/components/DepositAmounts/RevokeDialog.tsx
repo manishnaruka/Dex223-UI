@@ -5,8 +5,8 @@ import { NumericFormat } from "react-number-format";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 
 import Alert from "@/components/atoms/Alert";
-import Dialog from "@/components/atoms/Dialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
+import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
@@ -66,7 +66,7 @@ export const RevokeDialog = ({
   return (
     <div className="flex flex-col gap-2">
       {token && (
-        <Dialog isOpen={isOpen} setIsOpen={setIsOpen}>
+        <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
           <DialogHeader
             onClose={() => setIsOpen(false)}
             title={standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
@@ -172,7 +172,7 @@ export const RevokeDialog = ({
               </Button>
             ) : null}
           </div>
-        </Dialog>
+        </DrawerDialog>
       )}
     </div>
   );
