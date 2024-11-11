@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-// import { useMemo } from "react";
 
+// import { useMemo } from "react";
 import Container from "@/components/atoms/Container";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
