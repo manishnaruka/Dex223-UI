@@ -42,7 +42,6 @@ import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress"
 import { CollectFeesGasSettings } from "./components/CollectFeesGasSettings";
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
-import { clsxMerge } from "@/functions/clsxMerge";
 
 export default function PoolPage({
   params,
