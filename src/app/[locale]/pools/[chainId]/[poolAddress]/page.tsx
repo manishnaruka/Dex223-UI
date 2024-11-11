@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+// import { useMemo } from "react";
 
 import Container from "@/components/atoms/Container";
 import Preloader from "@/components/atoms/Preloader";
@@ -15,7 +16,6 @@ import { renderShortAddress } from "@/functions/renderAddress";
 import { Link, useRouter } from "@/navigation";
 
 import { usePoolData } from "../../hooks";
-import { useMemo } from "react";
 
 const formatNumber = (num: number | string): string => {
   // Convert string to number
@@ -63,11 +63,9 @@ export default function ExplorePoolPage({
 
   const { pool } = data;
 
-  // const valuePercent =
-  //   (Number(pool.token0.totalValueLocked) * 100) /
-  //   (Number(pool.token0.totalValueLocked) + Number(pool.token1.totalValueLocked));
-
-  const valuePercent = 0.5;
+  const valuePercent =
+    (Number(pool.token0.totalValueLocked) * 100) /
+    (Number(pool.token0.totalValueLocked) + Number(pool.token1.totalValueLocked));
 
   return (
     <Container>

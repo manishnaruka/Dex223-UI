@@ -67,7 +67,9 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
           {disabledGasSettings ? (
             <span className="text-secondary-text">—</span>
           ) : (
-            <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
+            <span className="text-secondary-text text-16">
+              {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
+            </span>
           )}
         </div>
         <div className="flex flex-col">
