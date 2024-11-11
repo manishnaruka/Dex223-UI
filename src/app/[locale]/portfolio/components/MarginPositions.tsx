@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
@@ -22,7 +22,7 @@ export const MarginPositions = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]  relative overflow-hidden">
           <div className="flex flex-col">
             <div className="flex items-center gap-1">
               <span className="text-14 lg:text-16">Margin positions balance</span>
@@ -31,10 +31,17 @@ export const MarginPositions = () => {
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
+          <img
+            src="/portfolio-bars.svg"
+            alt="Side Icon"
+            width={"180"}
+            height={"120"}
+            className="absolute top-0 right-0 z-10"
+          />
           <Button
             colorScheme={ButtonColor.LIGHT_GREEN}
             mobileSize={ButtonSize.MEDIUM}
-            className="px-4 lg:px-6"
+            className="px-4 lg:px-6 z-20 border border-green"
           >
             Withdraw
           </Button>
