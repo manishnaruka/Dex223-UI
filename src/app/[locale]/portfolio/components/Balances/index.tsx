@@ -16,7 +16,6 @@ import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";
-import Image from "next/image";
 
 // import Icon from "/logo-short.svg";
 
