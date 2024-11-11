@@ -15,6 +15,7 @@ import { renderShortAddress } from "@/functions/renderAddress";
 import { Link, useRouter } from "@/navigation";
 
 import { usePoolData } from "../../hooks";
+import { useMemo } from "react";
 
 const formatNumber = (num: number | string): string => {
   // Convert string to number
@@ -61,6 +62,12 @@ export default function ExplorePoolPage({
     );
 
   const { pool } = data;
+
+  // const valuePercent =
+  //   (Number(pool.token0.totalValueLocked) * 100) /
+  //   (Number(pool.token0.totalValueLocked) + Number(pool.token1.totalValueLocked));
+
+  const valuePercent = 0.5;
 
   return (
     <Container>
@@ -137,7 +144,7 @@ export default function ExplorePoolPage({
               <div
                 className="bg-purple h-2"
                 style={{
-                  width: `${(Number(pool.token0.totalValueLocked) * 100) / (Number(pool.token0.totalValueLocked) + Number(pool.token1.totalValueLocked))}%`,
+                  width: valuePercent < 1 ? `1%` : valuePercent > 99 ? `99%` : `${valuePercent}%`,
                 }}
               />
             </div>
