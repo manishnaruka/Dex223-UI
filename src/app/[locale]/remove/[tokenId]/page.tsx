@@ -39,6 +39,12 @@ import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 import PositionLiquidityCard from "../../pool/[tokenId]/components/PositionLiquidityCard";
 import { RemoveLiquidityGasSettings } from "./components/RemoveLiquidityGasSettings";
 import {
+  useRemoveLiquidityGasLimitStore,
+  useRemoveLiquidityGasModeStore,
+  useRemoveLiquidityGasPrice,
+  useRemoveLiquidityGasPriceStore,
+} from "./stores/useRemoveLiquidityGasSettings";
+import {
   RemoveLiquidityStatus,
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
@@ -98,6 +104,15 @@ export default function DecreaseLiquidityPage({
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
+
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useRemoveLiquidityGasPriceStore();
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useRemoveLiquidityGasLimitStore();
+
+  const { isAdvanced, setIsAdvanced } = useRemoveLiquidityGasModeStore();
+
+  const gasPrice: bigint | undefined = useRemoveLiquidityGasPrice();
 
   const {
     reset,
@@ -173,7 +188,7 @@ export default function DecreaseLiquidityPage({
           </div>
 
           <div className="mb-4 lg:mb-5">
-            <text className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</text>
+            <span className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</span>
             <div className="flex justify-between items-center mb-4">
               <span className="text-24 lg:text-32">{percentage}%</span>
               <div className="flex gap-3">
@@ -237,7 +252,19 @@ export default function DecreaseLiquidityPage({
               />
             </div>
           </div>
-          <RemoveLiquidityGasSettings />
+          <RemoveLiquidityGasSettings
+            gasPriceOption={gasPriceOption}
+            gasPriceSettings={gasPriceSettings}
+            setGasPriceOption={setGasPriceOption}
+            setGasPriceSettings={setGasPriceSettings}
+            estimatedGas={estimatedGas}
+            customGasLimit={customGasLimit}
+            setEstimatedGas={setEstimatedGas}
+            setCustomGasLimit={setCustomGasLimit}
+            isAdvanced={isAdvanced}
+            setIsAdvanced={setIsAdvanced}
+            gasPrice={gasPrice}
+          />
           {!isConnected ? (
             <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
               {tWallet("connect_wallet")}

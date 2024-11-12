@@ -12,8 +12,8 @@ import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useRevoke from "@/hooks/useRevoke";
-import useWithdraw from "@/hooks/useWithdraw";
+import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
+import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -33,14 +33,14 @@ export const InputRange = ({
   const [locValue, setValue] = useState(value);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(`handleChange: ${event.target.value}`);
+    // console.log(`handleChange: ${event.target.value}`);
     setValue(parseInt(event.target.value));
     // onChange(locValue);
   };
 
   const handleMouseUp = () => {
     let newValue = locValue >= 50 ? 100 : 0;
-    console.log(`handleMouseUp: ${newValue}`);
+    // console.log(`handleMouseUp: ${newValue}`);
     setValue(newValue);
     onChange(newValue);
   };
@@ -176,8 +176,8 @@ function InputStandardAmount({
   status,
   currentAllowance,
   revokeHandler,
-  estimatedGas,
-  gasPrice,
+  // estimatedGas,
+  // gasPrice,
 }: {
   standard: Standard;
   value?: number | string;
@@ -185,8 +185,8 @@ function InputStandardAmount({
   currentAllowance: bigint; // currentAllowance or currentDeposit
   status: AllowanceStatus;
   revokeHandler: (customAmount?: bigint) => void; // onWithdraw or onWithdraw
-  gasPrice?: bigint;
-  estimatedGas: bigint | null;
+  // gasPrice?: bigint;
+  // estimatedGas: bigint | null;
 }) {
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
@@ -200,6 +200,17 @@ function InputStandardAmount({
   useEffect(() => {
     refetchBalance();
   }, [blockNumber, refetchBalance]);
+
+  const chainId = useCurrentChainId();
+  useRevokeEstimatedGas({
+    token: currency,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
+
+  useWithdrawEstimatedGas({
+    token: currency,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
 
   const [isOpenedRevokeDialog, setIsOpenedRevokeDialog] = useState(false);
 
@@ -285,8 +296,8 @@ function InputStandardAmount({
           status={status}
           currentAllowance={currentAllowance}
           revokeHandler={revokeHandler}
-          estimatedGas={estimatedGas}
-          gasPrice={gasPrice}
+          // estimatedGas={estimatedGas}
+          // gasPrice={gasPrice}
         />
       )}
     </div>
@@ -328,7 +339,7 @@ export default function TokenDepositCard({
     revokeHandler,
     currentAllowance: currentAllowance,
     revokeStatus,
-    revokeEstimatedGas,
+    // revokeEstimatedGas,
   } = useRevoke({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
@@ -337,7 +348,7 @@ export default function TokenDepositCard({
   const {
     withdrawHandler,
     currentDeposit: currentDeposit,
-    estimatedGas: depositEstimatedGas,
+    // estimatedGas: depositEstimatedGas,
     withdrawStatus,
   } = useWithdraw({
     token: currency,
@@ -385,8 +396,8 @@ export default function TokenDepositCard({
                 currency={currency}
                 revokeHandler={revokeHandler}
                 status={revokeStatus}
-                estimatedGas={revokeEstimatedGas}
-                gasPrice={gasPrice}
+                // estimatedGas={revokeEstimatedGas}
+                // gasPrice={gasPrice}
               />
               <InputStandardAmount
                 standard={Standard.ERC223}
@@ -394,9 +405,9 @@ export default function TokenDepositCard({
                 currency={currency}
                 currentAllowance={currentDeposit || BigInt(0)}
                 revokeHandler={withdrawHandler}
-                estimatedGas={depositEstimatedGas}
+                // estimatedGas={depositEstimatedGas}
                 status={withdrawStatus}
-                gasPrice={gasPrice}
+                // gasPrice={gasPrice}
               />
             </div>
           </>

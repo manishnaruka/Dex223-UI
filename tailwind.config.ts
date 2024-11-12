@@ -10,6 +10,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      width: {
+        "2/3-custom": "72%",
+        "1/3-custom": "28%",
+      },
       screens: {
         xs: "520px",
       },

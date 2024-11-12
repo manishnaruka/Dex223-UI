@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 // import { useAddLiquidityGasPrice } from "../../stores/useAddLiquidityGasSettings";
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
@@ -19,8 +19,20 @@ import { clsxMerge } from "@/functions/clsxMerge";
 // import { getChainSymbol } from "@/functions/getChainSymbol";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useRevokeEstimatedGas } from "@/hooks/useRevoke";
+import { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
+import { DexChainId } from "@/sdk_hybrid/chains";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
+
+import {
+  useRevokeGasLimitStore,
+  useRevokeGasModeStore,
+  useRevokeGasPrice,
+  useRevokeGasPriceStore,
+  useWithdrawGasLimitStore,
+} from "../../stores/useRevokeGasSettings";
 
 export const RevokeDialog = ({
   isOpen,
@@ -30,8 +42,8 @@ export const RevokeDialog = ({
   status,
   currentAllowance,
   revokeHandler,
-  estimatedGas,
-  gasPrice,
+  // estimatedGas,
+  // gasPrice,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -40,11 +52,10 @@ export const RevokeDialog = ({
   currentAllowance: bigint; // currentAllowance or currentDeposit
   status: AllowanceStatus;
   revokeHandler: (customAmount?: bigint) => void; // onWithdraw or onWithdraw
-  gasPrice?: bigint;
-  estimatedGas: bigint | null;
+  // gasPrice?: bigint;
+  // estimatedGas: bigint | null;
 }) => {
   const t = useTranslations("Liquidity");
-  const chainId = useCurrentChainId();
 
   const [localValue, setLocalValue] = useState(undefined as undefined | string);
   const localValueBigInt = useMemo(() => {
@@ -58,6 +69,32 @@ export const RevokeDialog = ({
     const valueBigInt = token ? parseUnits(value, token.decimals) : undefined;
     setIsError(!(!valueBigInt || valueBigInt <= currentAllowance));
   };
+
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useRevokeGasPriceStore();
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useRevokeGasLimitStore();
+
+  const {
+    estimatedGas: wEstimatedGas,
+    customGasLimit: wCustomGasLimit,
+    setEstimatedGas: wSetEstimatedGas,
+    setCustomGasLimit: wSetCustomGasLimit,
+  } = useWithdrawGasLimitStore();
+
+  const { isAdvanced, setIsAdvanced } = useRevokeGasModeStore();
+
+  const gasPrice: bigint | undefined = useRevokeGasPrice();
+
+  const chainId = useCurrentChainId();
+  useRevokeEstimatedGas({
+    token: token,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
+  useWithdrawEstimatedGas({
+    token: token,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
 
   const inputDisabled = [
     AllowanceStatus.LOADING,
@@ -141,7 +178,21 @@ export const RevokeDialog = ({
             )}
 
             <div style={{ margin: "12px 0" }}>
-              <RemoveLiquidityGasSettings />
+              <RemoveLiquidityGasSettings
+                gasPriceOption={gasPriceOption}
+                gasPriceSettings={gasPriceSettings}
+                setGasPriceOption={setGasPriceOption}
+                setGasPriceSettings={setGasPriceSettings}
+                estimatedGas={standard === Standard.ERC20 ? estimatedGas : wEstimatedGas}
+                customGasLimit={standard === Standard.ERC20 ? customGasLimit : wCustomGasLimit}
+                setEstimatedGas={standard === Standard.ERC20 ? setEstimatedGas : wSetEstimatedGas}
+                setCustomGasLimit={
+                  standard === Standard.ERC20 ? setCustomGasLimit : wSetCustomGasLimit
+                }
+                isAdvanced={isAdvanced}
+                setIsAdvanced={setIsAdvanced}
+                gasPrice={gasPrice}
+              />
             </div>
 
             <div style={{ margin: "24px 0" }}>

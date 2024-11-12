@@ -79,12 +79,15 @@ export default function TextField({
   isWarning = false,
   ...props
 }: Props) {
+  const { isNumeric, ...inputAttributes } = props;
+  delete props.isNumeric;
+
   return (
     <div>
       <InputLabel label={label} tooltipText={tooltipText} />
       {variant === "default" ? (
         <div className="relative">
-          {props.isNumeric ? (
+          {isNumeric ? (
             <NumericFormat
               isError={Boolean(error) || isError}
               isWarning={Boolean(warning) || isWarning}
@@ -96,7 +99,7 @@ export default function TextField({
             <Input
               isError={Boolean(error) || isError}
               isWarning={Boolean(warning) || isWarning}
-              {...props}
+              {...inputAttributes}
             />
           )}
           {internalText && (
