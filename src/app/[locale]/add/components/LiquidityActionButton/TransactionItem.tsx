@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
@@ -15,7 +16,6 @@ import { Standard } from "@/sdk_hybrid/standard";
 
 import { ApproveTransaction } from "../../hooks/useLiquidityApprove";
 import { AddLiquidityApproveStatus } from "../../stores/useAddLiquidityStatusStore";
-import { useTranslations } from "next-intl";
 
 export const TransactionItem = ({
   transaction,
@@ -148,7 +148,7 @@ export const TransactionItem = ({
         {isError ? (
           <span className="text-12 mt-2 text-red">{`Must be at least ${formatUnits(amount, token.decimals)} ${token.symbol}`}</span>
         ) : null}
-        
+
         <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-4 mt-6">
           <div className="flex gap-1">
             <span className="text-16 text-secondary-text">{tSwap("network_fee")}:</span>

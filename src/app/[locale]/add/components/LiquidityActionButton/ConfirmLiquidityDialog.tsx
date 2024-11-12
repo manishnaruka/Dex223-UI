@@ -197,8 +197,7 @@ const ApproveDialog = () => {
             }}
           />
         ))}
-
-        <div className="w-full h-[2px] bg-tertiary-bg mb-5" />  {/* Line above */}
+        <div className="w-full h-[2px] bg-tertiary-bg mb-5" /> {/* Line above */}
         {approveTotalGasLimit > 0 ? (
           <div className="flex items-center gap-2 px-5 py-2 bg-tertiary-bg rounded-3 mb-5 flex-nowrap">
             <div className="flex flex-grow gap-8 md:justify-start w-full">
@@ -225,7 +224,6 @@ const ApproveDialog = () => {
             </div>
           </div>
         ) : null}
-
         {isFormInvalid ? (
           <Button fullWidth disabled>
             <span className="flex items-center gap-2">Enter correct values</span>
