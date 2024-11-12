@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
-import { Address, formatEther, formatGwei } from "viem";
+import { formatEther, formatGwei } from "viem";
 
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import Alert from "@/components/atoms/Alert";
@@ -262,6 +262,8 @@ const ApproveDialog = () => {
 };
 
 const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId?: string }) => {
+  const tSwap = useTranslations("Swap");
+  const t = useTranslations("Liquidity");
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const chainId = useCurrentChainId();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
@@ -275,6 +277,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   const [showFirst, setShowFirst] = useState(true);
   const { liquidityHash, status } = useAddLiquidityStatusStore();
   const { updateAllowance } = useLiquidityApprove();
+  const { gasPriceOption } = useAddLiquidityGasPriceStore();
 
   const { parsedAmounts, position, noLiquidity } = useV3DerivedMintInfo({
     tokenA,
@@ -301,14 +304,14 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   const { handleAddLiquidity } = useAddLiquidity({
     position,
     increase,
-    createPool: noLiquidity ? true : false,
+    createPool: noLiquidity,
     tokenId,
   });
 
   useAddLiquidityEstimatedGas({
     position,
     increase,
-    createPool: noLiquidity ? true : false,
+    createPool: noLiquidity,
     tokenId,
   });
 
@@ -323,151 +326,168 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   return (
     <>
       <DialogHeader onClose={() => setIsOpen(false)} title="Add liquidity" />
-      <div className="px-4 md:px-10 pb-4 md:pb-10 h-[80dvh] md:h-auto overflow-y-auto">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center relative w-12 h-[34px]">
-              <Image
-                className="absolute left-0 top-0"
-                width={32}
-                height={32}
-                src={tokenA.logoURI as any}
-                alt=""
+      <div className="px-4 md:px-10 pb-4 md:pb-10 h-[80dvh] md:h-auto flex flex-col">
+        <div className="flex-grow overflow-y-auto">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center relative w-12 h-[34px]">
+                <Image
+                  className="absolute left-0 top-0"
+                  width={32}
+                  height={32}
+                  src={tokenA.logoURI as any}
+                  alt=""
+                />
+                <div className="w-[34px] h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
+                  <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
+                </div>
+              </div>
+              <span className="text-18 font-bold">{`${tokenA.symbol} / ${tokenB.symbol}`}</span>
+              <RangeBadge
+                status={inRange ? PositionRangeStatus.IN_RANGE : PositionRangeStatus.OUT_OF_RANGE}
               />
-              <div className="w-[34px] h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
-                <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              {liquidityHash && (
+                <a
+                  target="_blank"
+                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, liquidityHash, chainId)}
+                >
+                  <IconButton iconName="forward" />
+                </a>
+              )}
+              {status === AddLiquidityStatus.MINT_PENDING && (
+                <>
+                  <Preloader type="linear" />
+                  <span className="text-secondary-text text-14">Proceed in your wallet</span>
+                </>
+              )}
+              {status === AddLiquidityStatus.MINT_LOADING && <Preloader size={20} />}
+              {status === AddLiquidityStatus.SUCCESS && (
+                <Svg className="text-green" iconName="done" size={20} />
+              )}
+            </div>
+          </div>
+          {/* Amounts */}
+          <div className="flex flex-col rounded-3 bg-tertiary-bg p-5 mt-4">
+            <div className="flex gap-3">
+              <div className="flex flex-col items-center w-full rounded-3 bg-quaternary-bg px-5 py-3">
+                <div className="flex items-center gap-2">
+                  <Image width={24} height={24} src={tokenA.logoURI as any} alt="" />
+                  <span>{tokenA.symbol}</span>
+                  <Badge color="green" text={tokenAStandard} />
+                </div>
+                <span className="text-16 font-medium">
+                  {formatFloat(parsedAmounts[Field.CURRENCY_A]?.toSignificant() || "")}
+                </span>
+              </div>
+              <div className="flex flex-col items-center w-full rounded-3 bg-quaternary-bg px-5 py-3">
+                <div className="flex items-center gap-2">
+                  <Image width={24} height={24} src={tokenB.logoURI as any} alt="" />
+                  <span>{tokenB.symbol}</span>
+                  <Badge color="green" text={tokenBStandard} />
+                </div>
+                <span className="text-16 font-medium">
+                  {formatFloat(parsedAmounts[Field.CURRENCY_B]?.toSignificant() || "")}
+                </span>
               </div>
             </div>
-            <span className="text-18 font-bold">{`${tokenA.symbol} / ${tokenB.symbol}`}</span>
-            <RangeBadge
-              status={inRange ? PositionRangeStatus.IN_RANGE : PositionRangeStatus.OUT_OF_RANGE}
-            />
-          </div>
-          <div className="flex items-center gap-2 justify-end">
-            {liquidityHash && (
-              <a
-                target="_blank"
-                href={getExplorerLink(ExplorerLinkType.TRANSACTION, liquidityHash, chainId)}
-              >
-                <IconButton iconName="forward" />
-              </a>
-            )}
-            {status === AddLiquidityStatus.MINT_PENDING && (
-              <>
-                <Preloader type="linear" />
-                <span className="text-secondary-text text-14">Proceed in your wallet</span>
-              </>
-            )}
-            {status === AddLiquidityStatus.MINT_LOADING && <Preloader size={20} />}
-            {status === AddLiquidityStatus.SUCCESS && (
-              <Svg className="text-green" iconName="done" size={20} />
-            )}
-          </div>
-        </div>
-        {/* Amounts */}
-        <div className="flex flex-col rounded-3 bg-tertiary-bg p-5 mt-4">
-          <div className="flex gap-3">
-            <div className="flex flex-col items-center w-full rounded-3 bg-quaternary-bg px-5 py-3">
-              <div className="flex items-center gap-2">
-                <Image width={24} height={24} src={tokenA.logoURI as any} alt="" />
-                <span>{tokenA.symbol}</span>
-                <Badge color="green" text={tokenAStandard} />
-              </div>
-              <span className="text-16 font-medium">
-                {formatFloat(parsedAmounts[Field.CURRENCY_A]?.toSignificant() || "")}
-              </span>
-            </div>
-            <div className="flex flex-col items-center w-full rounded-3 bg-quaternary-bg px-5 py-3">
-              <div className="flex items-center gap-2">
-                <Image width={24} height={24} src={tokenB.logoURI as any} alt="" />
-                <span>{tokenB.symbol}</span>
-                <Badge color="green" text={tokenBStandard} />
-              </div>
-              <span className="text-16 font-medium">
-                {formatFloat(parsedAmounts[Field.CURRENCY_B]?.toSignificant() || "")}
-              </span>
+            <div className="flex justify-between items-center mt-4">
+              <span className="font-bold">Fee Tier</span>
+              <span>{`${FEE_AMOUNT_DETAIL[tier].label}%`}</span>
             </div>
           </div>
-          <div className="flex justify-between items-center mt-4">
-            <span className="font-bold">Fee Tier</span>
-            <span>{`${FEE_AMOUNT_DETAIL[tier].label}%`}</span>
-          </div>
-        </div>
-        {/* Price range */}
-        <div>
-          <div className="flex justify-between items-center mb-3 mt-5">
-            <span className="font-bold text-secondary-text">Selected range</span>
-            <div className="flex gap-0.5 bg-secondary-bg rounded-2 p-0.5">
-              <button
-                onClick={() => setShowFirst(true)}
-                className={clsx(
-                  "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
-                  showFirst
-                    ? "bg-green-bg border-green text-primary-text"
-                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
-                )}
-              >
-                {tokenA?.symbol}
-              </button>
-              <button
-                onClick={() => setShowFirst(false)}
-                className={clsx(
-                  "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
-                  !showFirst
-                    ? "bg-green-bg border-green text-primary-text"
-                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
-                )}
-              >
-                {tokenB?.symbol}
-              </button>
-            </div>
-          </div>
-          <div className="grid grid-cols-[1fr_20px_1fr] mb-3">
-            <PositionPriceRangeCard
-              showFirst={showFirst}
-              token0={token0}
-              token1={token1}
-              price={minPriceString}
-            />
-            <div className="relative">
-              <div className="bg-primary-bg w-12 h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                <Svg iconName="double-arrow" />
+          {/* Price range */}
+          <div>
+            <div className="flex justify-between items-center mb-3 mt-5">
+              <span className="font-bold text-secondary-text">Selected range</span>
+              <div className="flex gap-0.5 bg-secondary-bg rounded-2 p-0.5">
+                <button
+                  onClick={() => setShowFirst(true)}
+                  className={clsx(
+                    "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
+                    showFirst
+                      ? "bg-green-bg border-green text-primary-text"
+                      : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                  )}
+                >
+                  {tokenA?.symbol}
+                </button>
+                <button
+                  onClick={() => setShowFirst(false)}
+                  className={clsx(
+                    "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
+                    !showFirst
+                      ? "bg-green-bg border-green text-primary-text"
+                      : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                  )}
+                >
+                  {tokenB?.symbol}
+                </button>
               </div>
             </div>
-            <PositionPriceRangeCard
-              showFirst={showFirst}
-              token0={token0}
-              token1={token1}
-              price={maxPriceString}
-              isMax
-            />
-          </div>
-          <div className="rounded-3 overflow-hidden">
-            <div className="bg-tertiary-bg flex items-center justify-center flex-col py-3">
-              <div className="text-14 text-secondary-text">Current price</div>
-              <div className="text-18">{currentPriceString}</div>
-              <div className="text-14 text-secondary-text">
-                {showFirst
-                  ? `${token0?.symbol} per ${token1?.symbol}`
-                  : `${token1?.symbol} per ${token0?.symbol}`}
+            <div className="grid grid-cols-[1fr_20px_1fr] mb-3">
+              <PositionPriceRangeCard
+                showFirst={showFirst}
+                token0={token0}
+                token1={token1}
+                price={minPriceString}
+              />
+              <div className="relative">
+                <div className="bg-primary-bg w-12 h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <Svg iconName="double-arrow" />
+                </div>
+              </div>
+              <PositionPriceRangeCard
+                showFirst={showFirst}
+                token0={token0}
+                token1={token1}
+                price={maxPriceString}
+                isMax
+              />
+            </div>
+            <div className="rounded-3 overflow-hidden">
+              <div className="bg-tertiary-bg flex items-center justify-center flex-col py-3">
+                <div className="text-14 text-secondary-text">Current price</div>
+                <div className="text-18">{currentPriceString}</div>
+                <div className="text-14 text-secondary-text">
+                  {showFirst
+                    ? `${token0?.symbol} per ${token1?.symbol}`
+                    : `${token1?.symbol} per ${token0?.symbol}`}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/*<div className="overflow-hidden md:h-auto flex-shrink-0">*/}
         {/* GAS */}
-        <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-5 mt-5">
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Gas price</span>
-            <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
+        <div className="flex flex-col md:flex-row items-center gap-2 px-5 py-2 bg-tertiary-bg rounded-3 mb-5 mt-5">
+          {/* First row container with custom 66.67% width */}
+          <div className="flex w-full md:w-5/6 gap-8 justify-between md:justify-start">
+            <div className="flex flex-col">
+              <div className="text-secondary-text flex items-center gap-1 text-14">
+                {t("gas_price")}
+              </div>
+              <span className="text-secondary-text text-16">
+                {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <div className="text-secondary-text text-14">{t("gas_limit")}</div>
+              <span className="text-secondary-text text-16">{gasToUse.toString()}</span>
+            </div>
+            <div className="flex flex-col">
+              <div className="text-secondary-text text-14">{tSwap("network_fee")}</div>
+              <span>{`${gasPrice ? formatFloat(formatEther(gasPrice * gasToUse)) : ""} ${getChainSymbol(chainId)}`}</span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Gas limit</span>
-            <span>{gasToUse?.toString()}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Fee</span>
-            <span>{`${gasPrice && formatFloat(formatEther(gasPrice * gasToUse))} ${getChainSymbol(chainId)}`}</span>
+
+          {/* Second row container with custom 33.33% width */}
+          <div className="flex w-full md:w-1/6 items-center gap-2 mt-2 md:mt-0">
+            <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
+              {tSwap(gasOptionTitle[gasPriceOption])}
+            </span>
           </div>
         </div>
 
