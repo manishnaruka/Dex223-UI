@@ -13,6 +13,8 @@ const config: Config = {
       width: {
         "2/3-custom": "72%",
         "1/3-custom": "28%",
+        "7/8": "88%",
+        "1/8": "12%",
       },
       screens: {
         xs: "520px",
