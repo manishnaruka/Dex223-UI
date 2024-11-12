@@ -132,7 +132,7 @@ function TokenRow({
             </div>
 
             <div className="flex items-center gap-1">
-              <span className="text-primary-text text-12 hidden md:inline">$0.00</span>
+              <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
               {currency.isToken ? (
                 <Tooltip
                   text={`Token belongs to ${currency.lists?.length || 1} token lists`}

@@ -71,7 +71,7 @@ export default function Badge(props: Props) {
       return (
         <div
           className={clsx(
-            "border border-secondary-text text-secondary-text px-2 lg:px-3 rounded-5 h-5 lg:h-6 flex items-center justify-center text-12 lg:text-16",
+            "border border-secondary-border text-tertiary-text px-2 lg:px-3 rounded-5 h-5 lg:h-6 flex items-center justify-center text-12 lg:text-16",
             className,
           )}
         >

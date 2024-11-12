@@ -3,9 +3,11 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
+import { AddLiquidityStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
+import IconButton from "@/components/buttons/IconButton";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
@@ -19,23 +21,30 @@ import {
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   color?: "primary" | "secondary";
+  isRepriced?: boolean;
 }
 
 function RecentTransactionActionButton({
   color = "primary",
   children,
+  isRepriced,
   ...props
 }: PropsWithChildren<ButtonProps>) {
   return (
     <button
       {...props}
       className={clsx(
-        "h-8 rounded-5 border px-6 disabled:border-secondary-border disabled:text-tertiary-text duration-300 ease-in-out disabled:pointer-events-none",
+        "h-8 rounded-5 relative px-6 border disabled:border-secondary-border disabled:text-tertiary-text duration-300 ease-in-out disabled:pointer-events-none",
         color === "primary"
-          ? "border-green text-primary-text hocus:bg-green-bg hocus:border-green-hover"
-          : "border-primary-border text-secondary-text hocus:border-primary-text hocus:text-primary-text hocus:bg-red-bg",
+          ? "border-transparent text-secondary-text hocus:text-primary-text bg-green-bg hocus:border-green-hover"
+          : "border-primary-border text-secondary-text hocus:border-red-light hocus:text-primary-text hocus:bg-red-bg",
       )}
     >
+      {isRepriced && (
+        <span className="absolute -top-2 right-2 text-green">
+          <Svg size={16} iconName="speed-up" />
+        </span>
+      )}
       {children}
     </button>
   );
@@ -209,11 +218,13 @@ export default function RecentTransaction({
   showSpeedUp = true,
   isLowestNonce = false,
   view = "default",
+  isWaitingForProceeding = false,
 }: {
   transaction: IRecentTransaction;
   isLowestNonce?: boolean;
   showSpeedUp?: boolean;
   view?: "default" | "transparent";
+  isWaitingForProceeding?: boolean;
 }) {
   const t = useTranslations("RecentTransactions");
   const { handleSpeedUp } = useTransactionSpeedUpDialogStore();
@@ -226,7 +237,12 @@ export default function RecentTransaction({
         view === "transparent" && "bg-transparent rounded-0 p-0",
       )}
     >
-      <div className="w-full grid grid-cols-[1fr_76px]">
+      <div
+        className={clsxMerge(
+          "w-full grid grid-cols-[1fr_76px]",
+          isWaitingForProceeding && "flex flex-col sm:grid sm:grid-cols-[1fr_auto]",
+        )}
+      >
         <div className="flex gap-2 items-center">
           <RecentTransactionLogo title={transaction.title} />
           <div className="grid">
@@ -244,7 +260,10 @@ export default function RecentTransaction({
                   <RecentTransactionActionButton color="secondary">
                     {t("cancel")}
                   </RecentTransactionActionButton>
-                  <RecentTransactionActionButton onClick={() => handleSpeedUp(transaction)}>
+                  <RecentTransactionActionButton
+                    isRepriced={transaction.replacement === "repriced"}
+                    onClick={() => handleSpeedUp(transaction)}
+                  >
                     {t("speed_up")}
                   </RecentTransactionActionButton>
                 </>
@@ -260,20 +279,29 @@ export default function RecentTransaction({
               )}
           </div>
 
-          <a
-            className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
-            target="_blank"
-            href={getExplorerLink(
-              ExplorerLinkType.TRANSACTION,
-              transaction.hash,
-              transaction.chainId,
-            )}
-          >
-            <Svg iconName="forward" />
-          </a>
-          <span className="flex-shrink-0">
-            <RecentTransactionStatusIcon status={transaction.status} />
-          </span>
+          {!isWaitingForProceeding ? (
+            <>
+              <a
+                className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
+                target="_blank"
+                href={getExplorerLink(
+                  ExplorerLinkType.TRANSACTION,
+                  transaction.hash,
+                  transaction.chainId,
+                )}
+              >
+                <Svg iconName="forward" />
+              </a>
+              <span className="flex-shrink-0">
+                <RecentTransactionStatusIcon status={transaction.status} />
+              </span>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 justify-end">
+              <Preloader type="linear" />
+              <span className="text-secondary-text text-14">Proceed in your wallet</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -282,7 +310,10 @@ export default function RecentTransaction({
           <RecentTransactionActionButton color="secondary">
             {t("cancel")}
           </RecentTransactionActionButton>
-          <RecentTransactionActionButton onClick={() => handleSpeedUp(transaction)}>
+          <RecentTransactionActionButton
+            onClick={() => handleSpeedUp(transaction)}
+            isRepriced={transaction.replacement === "repriced"}
+          >
             {t("speed_up")}
           </RecentTransactionActionButton>
         </div>

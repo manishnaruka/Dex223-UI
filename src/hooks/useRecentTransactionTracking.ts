@@ -46,9 +46,10 @@ export function useRecentTransactionTracking() {
         hash,
         onReplaced: (replacement) => {
           if (replacement.reason === "repriced") {
-            updateTransactionHash(id, replacement.transaction.hash, address);
+            updateTransactionHash(id, replacement.transaction.hash, address, { isRepriced: true });
           }
           if (replacement.reason === "cancelled") {
+            updateTransactionHash(id, replacement.transaction.hash, address, { isCancelled: true });
           } //TODO: make something with closure, this callback fired mutliple times even if function failed with error
           console.log(replacement);
         },

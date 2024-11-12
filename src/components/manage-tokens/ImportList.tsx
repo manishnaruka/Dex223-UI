@@ -30,16 +30,25 @@ export default function ImportList({ setContent, handleClose }: Props) {
         <h3 className="text-16 font-bold mb-1">{t("importing_type")}</h3>
         <div className="grid grid-cols-3 gap-2 md:gap-3 mb-5">
           <RadioButton
+            bgColor="bg-tertiary-bg"
             isActive={importType === "contract"}
             onClick={() => setImportType("contract")}
             className="pr-[9px]"
           >
             {t("contract")}
           </RadioButton>
-          <RadioButton isActive={importType === "url"} onClick={() => setImportType("url")}>
+          <RadioButton
+            bgColor="bg-tertiary-bg"
+            isActive={importType === "url"}
+            onClick={() => setImportType("url")}
+          >
             {t("URL")}
           </RadioButton>
-          <RadioButton isActive={importType === "json"} onClick={() => setImportType("json")}>
+          <RadioButton
+            bgColor="bg-tertiary-bg"
+            isActive={importType === "json"}
+            onClick={() => setImportType("json")}
+          >
             {t("JSON")}
           </RadioButton>
         </div>

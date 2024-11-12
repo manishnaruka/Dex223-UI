@@ -1,7 +1,14 @@
 import clsx from "clsx";
 import { useFormik } from "formik";
-import React, { ChangeEvent, FocusEvent, ReactNode, useCallback, useMemo, useState } from "react";
-import { formatGwei, parseGwei } from "viem";
+import { useTranslations } from "next-intl";
+import React, { ChangeEvent, FocusEvent, ReactNode, useMemo, useState } from "react";
+import {
+  ContractFunctionExecutionError,
+  formatGwei,
+  parseGwei,
+  TransactionExecutionError,
+  UserRejectedRequestError,
+} from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
 import Alert from "@/components/atoms/Alert";
@@ -10,16 +17,19 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import RecentTransaction from "@/components/common/RecentTransaction";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
 import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
+import addToast from "@/other/toast";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
+import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   GasFeeModel,
+  RecentTransactionStatus,
   stringifyObject,
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
@@ -179,21 +189,25 @@ const gasPriceOptionMap: Record<ConvertableSpeedUpOption, GasOptionWithoutCustom
   [SpeedUpOption.CHEAP]: GasOption.CHEAP,
   [SpeedUpOption.FAST]: GasOption.FAST,
 };
+
+function pickLargerBigInt(a: bigint, b: bigint) {
+  return a > b ? a : b;
+}
+
 export default function TransactionSpeedUpDialog() {
   const { transaction, isOpen, handleClose } = useTransactionSpeedUpDialogStore();
   const chainId = useCurrentChainId();
   const [speedUpOption, setSpeedUpOption] = useState<SpeedUpOption>(SpeedUpOption.AUTO_INCREASE);
-  const {
-    transactions,
-    updateTransactionStatus,
-    updateTransactionGasSettings,
-    updateTransactionHash,
-  } = useRecentTransactionsStore();
-  console.log(transaction);
+  const { updateTransactionGasSettings, updateTransactionHash } = useRecentTransactionsStore();
+
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
 
+  const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
   const { priorityFee, baseFee, gasPrice } = useFees();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations("Swap");
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -214,132 +228,142 @@ export default function TransactionSpeedUpDialog() {
           : "",
       speedUpOption,
     },
-    onSubmit: (values, formikHelpers) => {},
-  });
+    onSubmit: async (values, formikHelpers) => {
+      if (!transaction?.params || !walletClient || !address) {
+        return;
+      }
 
-  const { handleChange, handleBlur, touched, values, setFieldValue, handleSubmit, handleReset } =
-    formik;
+      let gasPriceFormatted = {};
 
-  const handleSpeedUp = useCallback(async () => {
-    if (!transaction?.params || !walletClient || !address) {
-      return;
-    }
-
-    let gasPriceFormatted = {};
-
-    console.log(speedUpOption);
-    console.log(values);
-
-    if (
-      values.speedUpOption !== SpeedUpOption.CUSTOM &&
-      values.speedUpOption !== SpeedUpOption.AUTO_INCREASE
-    ) {
-      const _option = gasPriceOptionMap[values.speedUpOption];
-
-      const multiplier = baseFeeMultipliers[chainId][_option];
       switch (transaction.gas.model) {
-        case GasFeeModel.EIP1559:
-          if (priorityFee && baseFee) {
-            gasPriceFormatted = {
-              maxPriorityFeePerGas: (priorityFee * multiplier) / SCALING_FACTOR,
-              maxFeePerGas: (baseFee * multiplier) / SCALING_FACTOR,
-            };
-          }
-          break;
-
         case GasFeeModel.LEGACY:
-          if (gasPrice) {
-            gasPriceFormatted = {
-              gasPrice: (gasPrice * multiplier) / SCALING_FACTOR,
-            };
+          if (!transaction.gas.gasPrice) {
+            return;
+          }
+
+          const minimumAllowedGasPrice =
+            (BigInt(transaction.gas.gasPrice) * BigInt(110)) / SCALING_FACTOR;
+
+          switch (values.speedUpOption) {
+            case SpeedUpOption.AUTO_INCREASE:
+              gasPriceFormatted = {
+                gasPrice: minimumAllowedGasPrice,
+              };
+              break;
+            case SpeedUpOption.CHEAP:
+            case SpeedUpOption.FAST:
+              if (!gasPrice) {
+                return;
+              }
+              const _option = gasPriceOptionMap[values.speedUpOption];
+              const multiplier = baseFeeMultipliers[chainId][_option];
+
+              const increasedGasPrice = (gasPrice * multiplier) / SCALING_FACTOR;
+
+              gasPriceFormatted = {
+                gasPrice: pickLargerBigInt(minimumAllowedGasPrice, increasedGasPrice),
+              };
+              break;
+
+            case SpeedUpOption.CUSTOM:
+              if (!values.gasPrice) {
+                return;
+              }
+
+              gasPriceFormatted = {
+                gasPrice: parseGwei(values.gasPrice),
+              };
+
+              break;
           }
           break;
-      }
-    } else {
-      if (values.speedUpOption === SpeedUpOption.AUTO_INCREASE) {
-        switch (transaction.gas.model) {
-          case GasFeeModel.EIP1559:
-            if (transaction.gas.maxPriorityFeePerGas && transaction.gas.maxFeePerGas) {
-              gasPriceFormatted = {
-                maxPriorityFeePerGas:
-                  (BigInt(transaction.gas.maxPriorityFeePerGas) * BigInt(110)) / SCALING_FACTOR,
-                maxFeePerGas: (BigInt(transaction.gas.maxFeePerGas) * BigInt(110)) / SCALING_FACTOR,
-              };
-            }
-            break;
+        case GasFeeModel.EIP1559:
+          if (!transaction.gas.maxFeePerGas || !transaction.gas.maxPriorityFeePerGas) {
+            return;
+          }
 
-          case GasFeeModel.LEGACY:
-            if (transaction.gas.gasPrice) {
-              gasPriceFormatted = {
-                gasPrice: (BigInt(transaction.gas.gasPrice) * BigInt(110)) / SCALING_FACTOR,
-              };
-            }
-            break;
-        }
-      }
+          const minimumAllowedMaxFeePerGas =
+            (BigInt(transaction.gas.maxFeePerGas) * BigInt(110)) / SCALING_FACTOR;
+          const minimumAllowedMaxPriorityFeePerGas =
+            (BigInt(transaction.gas.maxPriorityFeePerGas) * BigInt(110)) / SCALING_FACTOR;
 
-      if (values.speedUpOption === SpeedUpOption.CUSTOM) {
-        switch (transaction.gas.model) {
-          case GasFeeModel.EIP1559:
-            if (values.maxPriorityFeePerGas && values.maxFeePerGas) {
+          switch (values.speedUpOption) {
+            case SpeedUpOption.AUTO_INCREASE:
+              gasPriceFormatted = {
+                maxFeePerGas: minimumAllowedMaxFeePerGas,
+                maxPriorityFeePerGas: minimumAllowedMaxPriorityFeePerGas,
+              };
+              break;
+            case SpeedUpOption.CHEAP:
+            case SpeedUpOption.FAST:
+              if (!priorityFee || !baseFee) {
+                return;
+              }
+              const _option = gasPriceOptionMap[values.speedUpOption];
+              const multiplier = baseFeeMultipliers[chainId][_option];
+
+              const increasedMaxPriorityFeePerGas = (priorityFee * multiplier) / SCALING_FACTOR;
+              const increasedMaxFeePerGas = (baseFee * multiplier) / SCALING_FACTOR;
+
+              gasPriceFormatted = {
+                maxFeePerGas: pickLargerBigInt(minimumAllowedMaxFeePerGas, increasedMaxFeePerGas),
+                maxPriorityFeePerGas: pickLargerBigInt(
+                  minimumAllowedMaxPriorityFeePerGas,
+                  increasedMaxPriorityFeePerGas,
+                ),
+              };
+              break;
+
+            case SpeedUpOption.CUSTOM:
+              if (!values.maxFeePerGas || !values.maxPriorityFeePerGas) {
+                return;
+              }
+
               gasPriceFormatted = {
                 maxPriorityFeePerGas: parseGwei(values.maxPriorityFeePerGas),
                 maxFeePerGas: parseGwei(values.maxFeePerGas),
               };
-            }
-            break;
 
-          case GasFeeModel.LEGACY:
-            if (transaction.gas.gasPrice) {
-              gasPriceFormatted = {
-                gasPrice: parseGwei(values.gasPrice),
-              };
-            }
-            break;
-        }
+              break;
+          }
+          break;
       }
-    }
 
-    console.log(transaction);
-    console.log(gasPriceFormatted);
+      try {
+        openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
+        setIsLoading(true);
+        const hash = await walletClient.writeContract({
+          nonce: transaction.nonce,
+          ...gasPriceFormatted,
+          ...transaction.params,
+        });
+        addToast("Transaction sped up successfully");
+        updateTransactionHash(transaction.id, hash, address, "repriced");
+        updateTransactionGasSettings(
+          transaction.id,
+          { model: transaction.gas.model, ...stringifyObject(gasPriceFormatted) },
+          address,
+        );
+      } catch (e) {
+        if (e instanceof ContractFunctionExecutionError) {
+          if (e.cause instanceof TransactionExecutionError) {
+            if (e.cause.cause instanceof UserRejectedRequestError) {
+              return;
+            }
+          }
+        }
 
-    console.log({
-      nonce: transaction.nonce,
-      ...gasPriceFormatted,
-      ...transaction.params,
-    });
+        addToast("Error while speeding up the transaction ", "error");
+        handleClose();
+      } finally {
+        setIsLoading(false);
+        closeConfirmInWalletAlert();
+      }
+    },
+  });
 
-    try {
-      const hash = await walletClient.writeContract({
-        nonce: transaction.nonce,
-        ...gasPriceFormatted,
-        ...transaction.params,
-      });
-      updateTransactionHash(transaction.id, hash, address);
-      updateTransactionGasSettings(
-        transaction.id,
-        { model: transaction.gas.model, ...stringifyObject(gasPriceFormatted) },
-        address,
-      );
-    } catch (e) {
-      console.log(e);
-    }
-  }, [
-    values,
-    address,
-    baseFee,
-    chainId,
-    gasPrice,
-    priorityFee,
-    speedUpOption,
-    transaction,
-    updateTransactionGasSettings,
-    updateTransactionHash,
-    values.gasPrice,
-    values.maxFeePerGas,
-    values.maxPriorityFeePerGas,
-    walletClient,
-  ]);
+  const { handleChange, handleBlur, touched, values, setFieldValue, handleSubmit, handleReset } =
+    formik;
 
   const maxFeePerGasError = useMemo(() => {
     return transaction?.gas.model === GasFeeModel.EIP1559 &&
@@ -351,10 +375,12 @@ export default function TransactionSpeedUpDialog() {
   }, [transaction, values.maxFeePerGas]);
 
   const legacyGasPriceError = useMemo(() => {
-    return gasPrice && parseGwei(values.gasPrice) < gasPrice
-      ? "Gas price is too low for current network condition"
+    return transaction?.gas.model === GasFeeModel.LEGACY &&
+      transaction.gas.gasPrice &&
+      parseGwei(values.gasPrice) < (BigInt(transaction.gas.gasPrice) * BigInt(110)) / SCALING_FACTOR
+      ? "You have to set at least +10% value to apply transaction speed up."
       : undefined;
-  }, [gasPrice, values.gasPrice]);
+  }, [transaction, values.gasPrice]);
 
   const legacyGasPriceWarning = useMemo(() => {
     return gasPrice && parseGwei(values.gasPrice) > gasPrice * BigInt(3)
@@ -456,8 +482,15 @@ export default function TransactionSpeedUpDialog() {
       <div className="w-full md:w-[600px]">
         <DialogHeader onClose={handleClose} title="Speed up" />
         <div className="px-4 pb-4 md:px-10 md:pb-10">
-          <RecentTransaction view={"transparent"} transaction={transaction} showSpeedUp={false} />
-          <form onSubmit={handleSpeedUp}>
+          <RecentTransaction
+            isWaitingForProceeding={
+              isLoading && transaction.status === RecentTransactionStatus.PENDING
+            }
+            view={"transparent"}
+            transaction={transaction}
+            showSpeedUp={false}
+          />
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2 mt-5">
               {speedUpOptions.map((_speedUpOption) => {
                 return (
@@ -467,6 +500,8 @@ export default function TransactionSpeedUpDialog() {
                     className={clsx(
                       "w-full rounded-3 bg-tertiary-bg group cursor-pointer",
                       values.speedUpOption === _speedUpOption && "cursor-auto",
+                      (isLoading || transaction.status !== RecentTransactionStatus.PENDING) &&
+                        "pointer-events-none",
                     )}
                   >
                     <div
@@ -476,6 +511,8 @@ export default function TransactionSpeedUpDialog() {
                           "border-primary-bg rounded-t-3 border-b",
                         SpeedUpOption.CUSTOM !== _speedUpOption && "border-primary-bg rounded-3 ",
                         values.speedUpOption !== _speedUpOption && "group-hocus:bg-green-bg",
+                        (isLoading || transaction.status !== RecentTransactionStatus.PENDING) &&
+                          "opacity-50",
                       )}
                     >
                       <div className="flex items-center gap-2">
@@ -611,14 +648,23 @@ export default function TransactionSpeedUpDialog() {
                 );
               })}
             </div>
+            <div className="grid grid-cols-2 gap-2 mt-5">
+              <Button
+                type="button"
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                onClick={() => handleClose()}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                fullWidth
+                disabled={isLoading || transaction.status !== RecentTransactionStatus.PENDING}
+              >
+                Speed up
+              </Button>
+            </div>
           </form>
-          <div>{transaction?.nonce}</div>
-          <div className="grid grid-cols-2 gap-2">
-            <Button onClick={() => handleClose()}>Cancel</Button>
-            <Button onClick={handleSpeedUp} fullWidth>
-              Speed up
-            </Button>
-          </div>
         </div>
       </div>
     </DrawerDialog>
