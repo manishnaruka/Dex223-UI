@@ -5,6 +5,10 @@ import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 
 import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
+import {
+  Field,
+  useLiquidityAmountsStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
@@ -36,7 +40,6 @@ export default function AddPoolPage() {
   usePoolsSearchParams();
   useRecentTransactionTracking();
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
-  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
 
@@ -48,6 +51,8 @@ export default function AddPoolPage() {
   const { tier } = useLiquidityTierStore();
   const { setIsOpen } = useTransactionSettingsDialogStore();
   const { ticks, clearPriceRange } = useLiquidityPriceRangeStore();
+  const { setTypedValue } = useLiquidityAmountsStore();
+  const { setStartPriceTypedValue } = useLiquidityPriceRangeStore();
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
@@ -69,9 +74,20 @@ export default function AddPoolPage() {
       }
 
       clearPriceRange();
+      setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
+      setStartPriceTypedValue("");
       setIsOpenedTokenPick(false);
     },
-    [currentlyPicking, setTokenA, setTokenB, tokenA, tokenB, clearPriceRange],
+    [
+      currentlyPicking,
+      clearPriceRange,
+      setTypedValue,
+      setStartPriceTypedValue,
+      tokenB,
+      setTokenA,
+      setTokenB,
+      tokenA,
+    ],
   );
 
   // PRICE RANGE HOOK START

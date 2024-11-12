@@ -67,13 +67,20 @@ export const Deposited = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
             <div className="flex items-center gap-1">
               <span className="text-14 lg:text-16">Deposited to contract</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
+            <img
+              src="/deposited-bar.svg"
+              alt="Side Icon"
+              width={"62"}
+              height={"171"}
+              className="absolute top-[20px] right-[40px] object-cover"
+            />
           </div>
         </div>
       </div>

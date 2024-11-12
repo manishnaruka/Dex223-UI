@@ -123,9 +123,9 @@ export const TransactionItem = ({
         </div>
         <div
           className={clsxMerge(
-            "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border border-transparent",
+            "flex justify-between px-5 py-3 rounded-3 mt-2 border border-transparent",
             isError ? "border-red" : "",
-            disabled ? "border-secondary-border" : "",
+            disabled ? "border-secondary-border bg-primary-bg" : "bg-secondary-bg",
           )}
         >
           <NumericFormat

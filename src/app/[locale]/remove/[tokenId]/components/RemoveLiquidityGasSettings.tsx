@@ -45,13 +45,14 @@ export const RemoveLiquidityGasSettings = () => {
         <div className="flex flex-col">
           <div className="text-secondary-text flex items-center gap-1 text-14">
             {t("gas_price")}
-            <Tooltip iconSize={20} text={t("gas_price_tooltip")} />
           </div>
-          <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
+          <span className="text-secondary-text text-16">
+            {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
+          </span>
         </div>
         <div className="flex flex-col">
           <div className="text-secondary-text text-14">{t("gas_limit")}</div>
-          <span>{gasToUse.toString()}</span>
+          <span className="text-secondary-text text-16">{gasToUse.toString()}</span>
         </div>
         <div className="flex flex-col">
           <div className="text-secondary-text text-14">{t("network_fee")}</div>

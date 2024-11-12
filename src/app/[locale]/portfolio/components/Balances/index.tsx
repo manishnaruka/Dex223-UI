@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -16,6 +16,8 @@ import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";
+
+// import Icon from "/logo-short.svg";
 
 const filterTable = ({
   searchValue,
@@ -33,19 +35,21 @@ const filterTable = ({
   if (token.wrapped.address0 === searchValue) return true;
   if (token.wrapped.address1 === searchValue) return true;
   if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-  if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-
-  return false;
+  return !!token.symbol?.toLowerCase().includes(searchValue.toLowerCase());
 };
 
 export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  const isTokenInfoOpened = Boolean(tokenForPortfolio);
+  const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
   const handleClosTokenInfo = () => {
     setTokenForPortfolio(null);
   };
+
+  useEffect(() => {
+    setTokenInfoOpened(Boolean(tokenForPortfolio));
+  }, [tokenForPortfolio]);
 
   const loading = false;
 
@@ -65,21 +69,37 @@ export const Balances = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-6 w-full">
-          <div className="flex items-center gap-1">
+        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-6 w-full relative overflow-hidden">
+          <div className="flex items-center gap-1 mb-auto">
             <span className="text-14 lg:text-16">Wallet balance</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
 
           <span className="text-24 lg:text-32 font-medium">$ —</span>
+
+          <img
+            src="/logo-short.svg"
+            alt="Side Icon"
+            width={"180"}
+            height={"120"}
+            className="absolute top-[-32px] right-0 object-cover opacity-10"
+          />
         </div>
+
         {/*TODO: Extract card to separate component. 01.10.2024*/}
-        <div className="flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-6 w-full">
+        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-6 w-full overflow-hidden">
           <div className="flex items-center gap-1">
             <span className="text-14 lg:text-16">Margin positions balance</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-24 lg:text-32 font-medium">$ —</span>
+          <img
+            src="/portfolio-bars.svg"
+            alt="Side Icon"
+            width={"180"}
+            height={"120"}
+            className="absolute top-0 right-0 object-cover"
+          />
         </div>
       </div>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">

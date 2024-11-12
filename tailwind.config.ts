@@ -46,8 +46,8 @@ const config: Config = {
           "linear-gradient(270deg, #1D1E1E 13.5%, #283633 97.85%, #7DA491 100%)",
 
         //cards
-        "gradient-card-blue-light-fill": "linear-gradient(90deg, #22282C 0%, #545C61 100%)",
-        "gradient-card-green-light-fill": "linear-gradient(90deg, #27322C 0%, #5B6864 100%)",
+        "gradient-card-blue-light-fill": "linear-gradient(90deg, #1E2022 0%, #445259 100%)",
+        "gradient-card-green-light-fill": "linear-gradient(90deg, #1F2020 0%, #3C4B4A 100%)",
 
         "gradient-card-blue-dark-fill": "linear-gradient(78.4deg, #21272C 4.02%, #5C6369 111.77%)",
         "gradient-card-green-dark-fill": "linear-gradient(78.4deg, #212C26 4.02%, #667471 111.77%)",

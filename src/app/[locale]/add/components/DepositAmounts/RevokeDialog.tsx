@@ -4,17 +4,19 @@ import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 
+// import { useAddLiquidityGasPrice } from "../../stores/useAddLiquidityGasSettings";
+import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import Alert from "@/components/atoms/Alert";
-import Dialog from "@/components/atoms/Dialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
+import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
+// import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import { clsxMerge } from "@/functions/clsxMerge";
-import { formatFloat } from "@/functions/formatFloat";
-import { getChainSymbol } from "@/functions/getChainSymbol";
+// import { formatFloat } from "@/functions/formatFloat";
+// import { getChainSymbol } from "@/functions/getChainSymbol";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Token } from "@/sdk_hybrid/entities/token";
@@ -54,7 +56,7 @@ export const RevokeDialog = ({
   const updateValue = (value: string) => {
     setLocalValue(value);
     const valueBigInt = token ? parseUnits(value, token.decimals) : undefined;
-    setIsError(!valueBigInt || valueBigInt <= currentAllowance ? false : true);
+    setIsError(!(!valueBigInt || valueBigInt <= currentAllowance));
   };
 
   const inputDisabled = [
@@ -66,12 +68,12 @@ export const RevokeDialog = ({
   return (
     <div className="flex flex-col gap-2">
       {token && (
-        <Dialog isOpen={isOpen} setIsOpen={setIsOpen}>
+        <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
           <DialogHeader
             onClose={() => setIsOpen(false)}
             title={standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
           />
-          <div className="w-full md:w-[570px] px-4 pb-4 md:px-10 md:pb-10">
+          <div className="w-full md:w-[570px] px-4 pb-4 md:px-10 md:pb-10 gap-1">
             <div className="flex justify-between items-center">
               <div className="flex gap-2 py-2 items-center">
                 {standard === Standard.ERC20 ? (
@@ -138,41 +140,33 @@ export const RevokeDialog = ({
               </>
             )}
 
-            <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-5 mt-2">
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("gas_price")}</span>
-                <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("gas_limit")}</span>
-                <span>{estimatedGas?.toString()}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-14 text-secondary-text">{t("fee")}</span>
-                <span>{`${gasPrice && estimatedGas ? formatFloat(formatEther(gasPrice * estimatedGas)) : ""} ${getChainSymbol(chainId)}`}</span>
-              </div>
+            <div style={{ margin: "12px 0" }}>
+              <RemoveLiquidityGasSettings />
             </div>
-            {isError ? (
-              <Button fullWidth disabled>
-                <span className="flex items-center gap-2">Enter correct values</span>
-              </Button>
-            ) : [AllowanceStatus.INITIAL].includes(status) ? (
-              <Button onClick={() => revokeHandler(localValueBigInt)} fullWidth>
-                {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
-              </Button>
-            ) : [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
-              <Button fullWidth disabled>
-                <span className="flex items-center gap-2">
-                  <Preloader size={20} color="black" />
-                </span>
-              </Button>
-            ) : [AllowanceStatus.SUCCESS].includes(status) ? (
-              <Button onClick={() => setIsOpen(false)} fullWidth>
-                {t("close")}
-              </Button>
-            ) : null}
+
+            <div style={{ margin: "24px 0" }}>
+              {isError ? (
+                <Button fullWidth disabled>
+                  <span className="flex items-center gap-2">Enter correct values</span>
+                </Button>
+              ) : [AllowanceStatus.INITIAL].includes(status) ? (
+                <Button onClick={() => revokeHandler(localValueBigInt)} fullWidth>
+                  {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
+                </Button>
+              ) : [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
+                <Button fullWidth disabled>
+                  <span className="flex items-center gap-2">
+                    <Preloader size={20} color="black" />
+                  </span>
+                </Button>
+              ) : [AllowanceStatus.SUCCESS].includes(status) ? (
+                <Button onClick={() => setIsOpen(false)} fullWidth>
+                  {t("close")}
+                </Button>
+              ) : null}
+            </div>
           </div>
-        </Dialog>
+        </DrawerDialog>
       )}
     </div>
   );
