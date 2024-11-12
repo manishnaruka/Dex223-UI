@@ -2,6 +2,10 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { ButtonHTMLAttributes, useCallback, useMemo, useState } from "react";
 
+import {
+  Field,
+  useLiquidityAmountsStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import Collapse from "@/components/atoms/Collapse";
@@ -86,6 +90,7 @@ export default function FeeAmountSettings() {
   const { tier, setTier } = useLiquidityTierStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { clearPriceRange } = useLiquidityPriceRangeStore();
+  const { setTypedValue } = useLiquidityAmountsStore();
   const isDisabled = !tokenA || !tokenB;
 
   const { isLoading, isError, largestUsageFeeTier, distributions } = useFeeTierDistribution({
@@ -172,6 +177,7 @@ export default function FeeAmountSettings() {
               onClick={() => {
                 setTier(_feeAmount);
                 clearPriceRange();
+                setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
               }}
             />
           ))}

@@ -43,13 +43,20 @@ export const LiquidityPositions = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%]">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
             <div className="flex items-center gap-1">
               <span className="text-14 lg:text-16">Provided liquidity balance</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
+            <img
+              src="/liq-pos-bar.svg"
+              alt="Side Icon"
+              width={"122"}
+              height={"152"}
+              className="absolute top-[4px] right-[30px] object-cover"
+            />
           </div>
         </div>
       </div>

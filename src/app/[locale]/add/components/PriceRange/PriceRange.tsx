@@ -86,19 +86,31 @@ export const PriceRange = ({
   const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
 
   const handleSetFullRange = useCallback(() => {
-    const currentPrice = price
-      ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))
-      : undefined;
-
     if (!isFullRange) {
       setFullRange();
     } else {
+      const currentPrice = price
+        ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))
+        : undefined;
       resetPriceRangeValue({
         price: currentPrice,
         feeAmount: tier,
       });
     }
   }, [setFullRange, isFullRange, resetPriceRangeValue, price, invertPrice, tier]);
+
+  useEffect(() => {
+    if (!isFullRange) {
+      const currentPrice = price
+        ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))
+        : undefined;
+
+      resetPriceRangeValue({
+        price: currentPrice,
+        feeAmount: tier,
+      });
+    }
+  }, [price, invertPrice, isFullRange, resetPriceRangeValue, tier]);
 
   const { getDecrementLower, getIncrementLower, getDecrementUpper, getIncrementUpper } =
     useRangeHopCallbacks(
@@ -180,7 +192,7 @@ export const PriceRange = ({
               tokenA: tokenB,
               tokenB: tokenA,
             });
-            clearPriceRange();
+            if (startPriceTypedValue) clearPriceRange();
           }
         }}
         button1Text={isSorted ? tokenB?.symbol : tokenA?.symbol}
@@ -190,7 +202,7 @@ export const PriceRange = ({
               tokenA: tokenB,
               tokenB: tokenA,
             });
-            clearPriceRange();
+            if (startPriceTypedValue) clearPriceRange();
           }
         }}
         handleSetFullRange={handleSetFullRange}
@@ -247,7 +259,9 @@ export const PriceRange = ({
               placeholder="0"
               type="text"
               value={startPriceTypedValue}
-              onChange={(e) => setStartPriceTypedValue(e.target.value)}
+              onChange={(e) => {
+                setStartPriceTypedValue(e.target.value);
+              }}
             />
             <div className="flex justify-between text-14 text-secondary-text mt-2">
               <span>{`Starting ${tokenA?.symbol} price:`}</span>

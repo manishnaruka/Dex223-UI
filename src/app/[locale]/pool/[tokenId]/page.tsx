@@ -362,8 +362,8 @@ export default function PoolPage({
                 <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
                   <Image
                     className="absolute left-0 top-0 w-[24px] h-[24px] lg:w-[34px] lg:h-[34px]"
-                    width={32}
-                    height={32}
+                    width={24}
+                    height={24}
                     src={token0?.logoURI as any}
                     alt=""
                   />
@@ -407,7 +407,7 @@ export default function PoolPage({
                   <>
                     <div className="flex gap-2 items-center">
                       <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
-                      <span className="font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
+                      <span className="text-16 font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
                       <Badge color="green" text="Native" />
                     </div>
                     <span className="text-14 lg:text-16">
@@ -417,12 +417,12 @@ export default function PoolPage({
                 ) : (
                   <>
                     <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
-                    <span className="font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
+                    <span className="text-16 font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
                   </>
                 )}
               </div>
               {token0?.isNative ? null : (
-                <div className="flex flex-col gap-2 mt-3">
+                <div className="flex flex-col gap-2 md:gap-3 mt-3">
                   <RadioButton
                     isActive={token0Standard === Standard.ERC20}
                     onClick={() => setToken0Standard(Standard.ERC20)}
@@ -465,7 +465,7 @@ export default function PoolPage({
                   <>
                     <div className="flex gap-2 items-center">
                       <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
-                      <span className="font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
+                      <span className="text-16 font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
                       <Badge color="green" text="Native" />
                     </div>
                     <span className="text-14 lg:text-16">{token1FeeFormatted}</span>
@@ -473,7 +473,7 @@ export default function PoolPage({
                 ) : (
                   <>
                     <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
-                    <span className="font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
+                    <span className="text-16 font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
                   </>
                 )}
               </div>
