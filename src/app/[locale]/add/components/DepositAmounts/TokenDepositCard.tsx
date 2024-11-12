@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
@@ -27,20 +27,16 @@ export const InputRange = ({
   onChange,
 }: {
   value: number;
-  // onChange: (value: 0 | 100) => void;
   onChange: (value: number) => void;
 }) => {
   const [locValue, setValue] = useState(value);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // console.log(`handleChange: ${event.target.value}`);
     setValue(parseInt(event.target.value));
-    // onChange(locValue);
   };
 
   const handleMouseUp = () => {
     let newValue = locValue >= 50 ? 100 : 0;
-    // console.log(`handleMouseUp: ${newValue}`);
     setValue(newValue);
     onChange(newValue);
   };
@@ -339,7 +335,6 @@ export default function TokenDepositCard({
     revokeHandler,
     currentAllowance: currentAllowance,
     revokeStatus,
-    // revokeEstimatedGas,
   } = useRevoke({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
@@ -348,7 +343,6 @@ export default function TokenDepositCard({
   const {
     withdrawHandler,
     currentDeposit: currentDeposit,
-    // estimatedGas: depositEstimatedGas,
     withdrawStatus,
   } = useWithdraw({
     token: currency,

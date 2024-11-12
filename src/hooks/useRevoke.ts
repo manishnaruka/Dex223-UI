@@ -1,7 +1,7 @@
 // @ts-ignore
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Abi, Address, formatUnits, getAbiItem, parseUnits } from "viem";
+import { Abi, Address, formatUnits, getAbiItem } from "viem";
 import {
   useAccount,
   useBlockNumber,
@@ -83,8 +83,6 @@ export function useRevokeEstimatedGas({
       try {
         const estimated = await publicClient?.estimateContractGas(params as any);
 
-        // console.log(`useDeepEffect gas: ${estimated}`);
-
         if (estimated) {
           setEstimatedGas(estimated + BigInt(10000));
         } else {
@@ -155,21 +153,9 @@ export default function useRevoke({
 
     setStatus(AllowanceStatus.PENDING);
 
-    // const estimatedGas = await publicClient.estimateContractGas(params);
-    // const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-    //
-    // const { request } = await publicClient.simulateContract({
-    //   ...params,
-    //   ...gasSettings,
-    //   gas: gasToUse,
-    // });
-
     try {
       const estimatedGas = await publicClient.estimateContractGas(params);
       const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(10000); // set custom gas here if user changed it
-
-      // console.dir(gasToUse);
-      // console.dir(gasSettings);
 
       const { request } = await publicClient.simulateContract({
         ...params,
@@ -177,12 +163,7 @@ export default function useRevoke({
         gas: gasToUse,
       });
 
-      // const { request } = await publicClient.simulateContract({
-      //   ...params,
-      //   gas: estimatedGas + BigInt(30000),
-      // });
       const hash = await walletClient.writeContract(request);
-
       const transaction = await publicClient.getTransaction({
         hash,
       });
@@ -236,28 +217,9 @@ export default function useRevoke({
     gasModel,
   ]);
 
-  // const [estimatedGas, setEstimatedGas] = useState(null as null | bigint);
-  //
-  // useEffect(() => {
-  //   IIFE(async () => {
-  //     if (!contractAddress || !token || !walletClient || !address || !chainId || !publicClient) {
-  //       return;
-  //     }
-  //
-  //     try {
-  //       const estimatedGas = await publicClient.estimateContractGas(params);
-  //       setEstimatedGas(estimatedGas);
-  //     } catch (error) {
-  //       console.warn("🚀 ~ useRevoke ~ estimatedGas ~ error:", error, "params:", params);
-  //       setEstimatedGas(null);
-  //     }
-  //   });
-  // }, [contractAddress, token, walletClient, address, chainId, publicClient]);
-
   return {
     revokeStatus: status,
     revokeHandler: writeTokenRevoke,
-    // revokeEstimatedGas: estimatedGas,
     currentAllowance: currentAllowanceData,
   };
 }

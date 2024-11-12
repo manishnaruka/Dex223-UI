@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Abi, Address, formatUnits, getAbiItem } from "viem";
+import { Address, formatUnits, getAbiItem } from "viem";
 import {
   useAccount,
   useBlockNumber,
@@ -8,8 +8,10 @@ import {
   useWalletClient,
 } from "wagmi";
 
-import { useWithdrawGasSettings, useWithdrawGasLimitStore } from "@/app/[locale]/add/stores/useRevokeGasSettings";
-// import { ERC20_ABI } from "@/config/abis/erc20";
+import {
+  useWithdrawGasLimitStore,
+  useWithdrawGasSettings,
+} from "@/app/[locale]/add/stores/useRevokeGasSettings";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 // import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
@@ -52,9 +54,6 @@ const useWithdrawParams = ({
       ],
     };
 
-    console.log(`Params`);
-    console.dir(params);
-
     return { params };
   }, [token, address, contractAddress, amountToWithdraw]);
 };
@@ -83,15 +82,12 @@ export function useWithdrawEstimatedGas({
       try {
         const estimated = await publicClient?.estimateContractGas(params as any);
 
-        // console.log(`useDeepEffect gas: ${estimated}`);
-
         if (estimated) {
           setEstimatedGas(estimated + BigInt(10000));
         } else {
           setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
         }
       } catch (e) {
-        console.log('error in useWithdrawEstimatedGas');
         console.error(e);
         setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
       }
@@ -156,35 +152,15 @@ export default function useWithdraw({
       if (!token || !params) return;
       const amount = customAmount || amountToWithdraw;
       try {
-        // const params = {
-        //   account: address as Address,
-        //   abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        //   functionName: "withdraw" as "withdraw",
-        //   address: contractAddress,
-        //   args: [token.address1 as Address, address as Address, amount] as [
-        //     Address,
-        //     Address,
-        //     bigint,
-        //   ],
-        // };
-
-        // const estimatedGas = await publicClient.estimateContractGas(params);
         const estimatedGas = await publicClient.estimateContractGas(params);
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(10000); // set custom gas here if user changed it
 
-        console.dir(gasToUse);
-        console.dir(gasSettings);
-        
         const { request } = await publicClient.simulateContract({
           ...params,
           ...gasSettings,
           gas: gasToUse,
         });
-        
-        // const { request } = await publicClient.simulateContract({
-        //   ...params,
-        //   gas: estimatedGas + BigInt(30000),
-        // });
+
         const hash = await walletClient.writeContract(request);
 
         const transaction = await publicClient.getTransaction({
@@ -243,47 +219,9 @@ export default function useWithdraw({
     ],
   );
 
-  // const [estimatedGas, setEstimatedGas] = useState(null as null | bigint);
-  // useEffect(() => {
-  //   IIFE(async () => {
-  //     if (
-  //       !amountToWithdraw ||
-  //       !contractAddress ||
-  //       !token ||
-  //       !walletClient ||
-  //       !address ||
-  //       !chainId ||
-  //       !publicClient
-  //     ) {
-  //       return;
-  //     }
-  //
-  //     const params = {
-  //       account: address as Address,
-  //       abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-  //       functionName: "withdraw" as "withdraw",
-  //       address: contractAddress,
-  //       args: [token.wrapped.address1 as Address, address as Address, amountToWithdraw] as [
-  //         Address,
-  //         Address,
-  //         bigint,
-  //       ],
-  //     };
-  //
-  //     try {
-  //       const estimatedGas = await publicClient.estimateContractGas(params);
-  //       setEstimatedGas(estimatedGas);
-  //     } catch (error) {
-  //       console.warn("🚀 ~ useWithdraw ~ estimatedGas ~ error:", error, "params:", params);
-  //       setEstimatedGas(null);
-  //     }
-  //   });
-  // }, [amountToWithdraw, contractAddress, token, walletClient, address, chainId, publicClient]);
-
   return {
     withdrawStatus: status,
     withdrawHandler: writeTokenWithdraw,
-    // estimatedGas,
     currentDeposit: currentDeposit.data as bigint,
   };
 }
