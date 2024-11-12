@@ -7,6 +7,13 @@ import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
+import {
+  useCollectFeesGasLimitStore,
+  useCollectFeesGasModeStore,
+  useCollectFeesGasPrice,
+  useCollectFeesGasPriceStore,
+} from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesGasSettings";
+import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
@@ -39,7 +46,6 @@ import { useRouter } from "@/navigation";
 import { Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
 
-import { CollectFeesGasSettings } from "./components/CollectFeesGasSettings";
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
 
@@ -79,6 +85,14 @@ export default function PoolPage({
     tokenB: token1,
     tier: fee,
   });
+
+  const { isAdvanced, setIsAdvanced } = useCollectFeesGasModeStore();
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useCollectFeesGasPriceStore();
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useCollectFeesGasLimitStore();
+
+  const gasPrice: bigint | undefined = useCollectFeesGasPrice();
 
   const {
     token0Standard,
@@ -517,9 +531,22 @@ export default function PoolPage({
               )}
             </div>
             <div className="text-secondary-text my-4 text-14 lg:text-16">
-              Collecting fees will withdraw currently available fees for you
+              Collectinq fees will withdraw currently available fees for you
             </div>
-            <CollectFeesGasSettings />
+
+            <RemoveLiquidityGasSettings
+              gasPriceOption={gasPriceOption}
+              gasPriceSettings={gasPriceSettings}
+              setGasPriceOption={setGasPriceOption}
+              setGasPriceSettings={setGasPriceSettings}
+              estimatedGas={estimatedGas}
+              customGasLimit={customGasLimit}
+              setEstimatedGas={setEstimatedGas}
+              setCustomGasLimit={setCustomGasLimit}
+              isAdvanced={isAdvanced}
+              setIsAdvanced={setIsAdvanced}
+              gasPrice={gasPrice}
+            />
 
             {[CollectFeesStatus.INITIAL].includes(status) ? (
               <Button onClick={() => handleCollectFees()} fullWidth>
