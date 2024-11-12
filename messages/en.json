@@ -257,6 +257,7 @@
     "gas_price": "Gas price",
     "gas_price_tooltip": "gas_price_tooltip",
     "total_fee": "Total fee",
+    "total_network_fee": "Total network fee",
     "transactions": "Transactions",
     "details": "Details",
     "fee_details_title": "Fee details",

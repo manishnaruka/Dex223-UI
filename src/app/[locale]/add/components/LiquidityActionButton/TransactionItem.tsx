@@ -15,6 +15,7 @@ import { Standard } from "@/sdk_hybrid/standard";
 
 import { ApproveTransaction } from "../../hooks/useLiquidityApprove";
 import { AddLiquidityApproveStatus } from "../../stores/useAddLiquidityStatusStore";
+import { useTranslations } from "next-intl";
 
 export const TransactionItem = ({
   transaction,
@@ -39,6 +40,7 @@ export const TransactionItem = ({
   setCustomAmount: (amount: bigint) => void;
   disabled?: boolean;
 }) => {
+  const tSwap = useTranslations("Swap");
   const chainId = useCurrentChainId();
   const [localValue, setLocalValue] = useState(
     formatUnits(transaction?.amount || BigInt(0), transaction?.token.decimals || 18),
@@ -146,17 +148,10 @@ export const TransactionItem = ({
         {isError ? (
           <span className="text-12 mt-2 text-red">{`Must be at least ${formatUnits(amount, token.decimals)} ${token.symbol}`}</span>
         ) : null}
-        <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-5 mt-2">
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Gas price</span>
-            <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Gas limit</span>
-            <span>{estimatedGas?.toString()}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Fee</span>
+        
+        <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-4 mt-6">
+          <div className="flex gap-1">
+            <span className="text-16 text-secondary-text">{tSwap("network_fee")}:</span>
             <span>{`${gasPrice && estimatedGas ? formatFloat(formatEther(gasPrice * estimatedGas)) : ""} ${chainSymbol}`}</span>
           </div>
         </div>

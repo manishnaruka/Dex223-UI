@@ -13,7 +13,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
@@ -24,6 +24,7 @@ import { usePositionPrices, usePositionRangeStatus } from "@/hooks/usePositions"
 import { Link } from "@/navigation";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Standard } from "@/sdk_hybrid/standard";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 
 import { useAddLiquidity, useAddLiquidityEstimatedGas } from "../../hooks/useAddLiquidity";
@@ -39,6 +40,7 @@ import { Field, useTokensStandards } from "../../stores/useAddLiquidityAmountsSt
 import {
   useAddLiquidityGasLimitStore,
   useAddLiquidityGasPrice,
+  useAddLiquidityGasPriceStore,
 } from "../../stores/useAddLiquidityGasSettings";
 import {
   AddLiquidityApproveStatus,
@@ -49,6 +51,12 @@ import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensSt
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { TransactionItem } from "./TransactionItem";
+
+const gasOptionTitle: Record<GasOption, any> = {
+  [GasOption.CHEAP]: "cheap",
+  [GasOption.FAST]: "fast",
+  [GasOption.CUSTOM]: "custom",
+};
 
 export const APPROVE_BUTTON_TEXT = {
   [ApproveTransactionType.ERC20_AND_ERC223]: "button_approve_and_deposit",
@@ -70,6 +78,7 @@ function isDefinedTransactionItem(item: {
 
 const ApproveDialog = () => {
   const t = useTranslations("Liquidity");
+  const tSwap = useTranslations("Swap");
 
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const { setStatus } = useAddLiquidityStatusStore();
@@ -77,6 +86,8 @@ const ApproveDialog = () => {
   const chainId = useCurrentChainId();
   const chainSymbol = getChainSymbol(chainId);
   const gasPrice = useAddLiquidityGasPrice();
+
+  const { gasPriceOption } = useAddLiquidityGasPriceStore();
 
   const { handleApprove, approveTransactionsType, approveTransactions, approveTotalGasLimit } =
     useLiquidityApprove();
@@ -186,10 +197,32 @@ const ApproveDialog = () => {
             }}
           />
         ))}
+
+        <div className="w-full h-[2px] bg-tertiary-bg mb-5" />  {/* Line above */}
         {approveTotalGasLimit > 0 ? (
-          <div className="flex gap-1 justify-center items-center border-t pt-4 border-secondary-border mb-4">
-            <span className="text-secondary-text">{t("total_fee")}</span>
-            <span className="font-bold">{`${gasPrice && approveTotalGasLimit ? formatFloat(formatEther(gasPrice * approveTotalGasLimit)) : ""} ${chainSymbol}`}</span>
+          <div className="flex items-center gap-2 px-5 py-2 bg-tertiary-bg rounded-3 mb-5 flex-nowrap">
+            <div className="flex flex-grow gap-8 md:justify-start w-full">
+              <div className="flex flex-col min-w-0">
+                <div className="text-secondary-text flex items-center gap-1 text-14">
+                  {t("gas_price")}
+                </div>
+                <span className="text-secondary-text text-16 truncate">
+                  {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
+                </span>
+              </div>
+              <div className="flex flex-col min-w-0">
+                <div className="text-secondary-text text-14">{t("total_network_fee")}</div>
+                <span className="truncate">
+                  {`${gasPrice && approveTotalGasLimit ? formatFloat(formatEther(gasPrice * approveTotalGasLimit)) : ""} ${chainSymbol}`}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 w-auto">
+              <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
+                {tSwap(gasOptionTitle[gasPriceOption])}
+              </span>
+            </div>
           </div>
         ) : null}
 
