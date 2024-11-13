@@ -36,6 +36,23 @@ type PositionInfo = {
   tokenId: bigint | undefined;
 };
 
+function formatNumber(num: string, maxPrecision = 15) {
+  const [integerPart] = num.toString().split(".");
+
+  if (integerPart.length >= maxPrecision) {
+    // If the integer part alone exceeds or matches the precision, return it as-is
+    return parseFloat(num)
+      .toPrecision(maxPrecision)
+      .replace(/\.?0+$/, "");
+  } else {
+    // Limit the total length to maxPrecision
+    const precisionNeeded = maxPrecision - integerPart.length;
+    return parseFloat(num)
+      .toPrecision(precisionNeeded)
+      .replace(/\.?0+$/, "");
+  }
+}
+
 function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: PositionInfo }) {
   const position = usePositionFromPositionInfo(positionInfo);
 
@@ -58,7 +75,7 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
   return (
     <div
       role="button"
-      className="px-4 lg:px-5 py-4 rounded-3 bg-secondary-bg hocus:bg-green-bg duration-200 cursor-pointer"
+      className="px-4 lg:px-5 py-4 rounded-3 bg-tertiary-bg hocus:bg-green-bg duration-200 cursor-pointer"
       onClick={onClick}
     >
       <div className="justify-between flex items-center mb-2 gap-2">
@@ -81,23 +98,23 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
         />
       </div>
       <div className="hidden md:flex gap-2 items-center">
-        <span className="text-secondary-text">Min:</span> {minTokenAPerTokenB} {tokenA?.symbol} per{" "}
-        {tokenB?.symbol}
+        <span className="text-secondary-text">Min:</span> {formatNumber(minTokenAPerTokenB)}{" "}
+        {tokenA?.symbol} per {tokenB?.symbol}
         <Svg iconName="double-arrow" className="text-secondary-text" />
-        <span className="text-secondary-text">Max:</span> {maxTokenAPerTokenB} {tokenA?.symbol} per{" "}
-        {tokenB?.symbol}
+        <span className="text-secondary-text">Max:</span> {formatNumber(maxTokenAPerTokenB)}{" "}
+        {tokenA?.symbol} per {tokenB?.symbol}
       </div>
       <div className="flex md:hidden gap-2 items-center">
         <Svg iconName="double-arrow" className="rotate-90 text-secondary-text" size={40} />
         <div className="flex flex-col text-14 gap-1">
           <div>
             {" "}
-            <span className="text-secondary-text">Min:</span> {minTokenAPerTokenB} {tokenA?.symbol}{" "}
-            per {tokenB?.symbol}
+            <span className="text-secondary-text">Min:</span> {formatNumber(minTokenAPerTokenB)}{" "}
+            {tokenA?.symbol} per {tokenB?.symbol}
           </div>
           <div>
-            <span className="text-secondary-text">Max:</span> {maxTokenAPerTokenB} {tokenA?.symbol}{" "}
-            per {tokenB?.symbol}
+            <span className="text-secondary-text">Max:</span> {formatNumber(maxTokenAPerTokenB)}{" "}
+            {tokenA?.symbol} per {tokenB?.symbol}
           </div>
         </div>
       </div>
@@ -135,8 +152,8 @@ const Positions = () => {
               {positions?.length ? (
                 <div className="rounded-5 w-full overflow-hidden bg-primary-bg md:px-10 px-5">
                   <div className="flex justify-between py-3">
-                    <span className="text-secondary-text">Your positions</span>
-                    <span className="text-green">Hide closed positions</span>
+                    <span className="text-tertiary-text">Your positions</span>
+                    <span className="text-secondary-text">Hide closed positions</span>
                   </div>
                   <div className="flex flex-col gap-3 pb-10">
                     {positions?.length ? (

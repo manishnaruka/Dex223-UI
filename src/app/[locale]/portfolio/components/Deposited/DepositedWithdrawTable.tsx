@@ -36,7 +36,7 @@ const DepositedTokenWithdrawDialog = ({
   const {
     withdrawHandler,
     currentDeposit: currentDeposit,
-    estimatedGas: depositEstimatedGas,
+    // estimatedGas: depositEstimatedGas,
     withdrawStatus,
   } = useWithdraw({
     token,
@@ -59,8 +59,8 @@ const DepositedTokenWithdrawDialog = ({
       status={withdrawStatus}
       currentAllowance={currentDeposit}
       revokeHandler={withdrawHandler}
-      estimatedGas={depositEstimatedGas}
-      gasPrice={gasPrice}
+      // estimatedGas={depositEstimatedGas}
+      // gasPrice={gasPrice}
     />
   );
 };
