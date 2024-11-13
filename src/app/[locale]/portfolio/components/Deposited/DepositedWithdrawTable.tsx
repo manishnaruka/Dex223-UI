@@ -43,7 +43,7 @@ const DepositedTokenWithdrawDialog = ({
     contractAddress: contractAddress,
   });
 
-  const { data: gasPrice, refetch: refetchGasPrice } = useGasPrice();
+  const { refetch: refetchGasPrice } = useGasPrice(); // data: gasPrice,
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
   useEffect(() => {
