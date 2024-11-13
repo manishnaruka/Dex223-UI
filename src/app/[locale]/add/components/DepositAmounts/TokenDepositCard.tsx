@@ -8,7 +8,7 @@ import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -274,7 +274,7 @@ function InputStandardAmount({
             )}
             {!!currentAllowance ? (
               <span
-                className="text-12 px-2 pt-[1px] pb-[2px] border border-green rounded-3 h-min cursor-pointer hocus:text-green duration-200"
+                className="text-12 px-2 pt-[2px] pb-[2px] pl-4 pr-4 bg-green-bg text-secondary-text rounded-3 h-min cursor-pointer hocus:text-green duration-200"
                 onClick={() => setIsOpenedRevokeDialog(true)}
               >
                 {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
