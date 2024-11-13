@@ -47,8 +47,16 @@ export const Balances = () => {
     setTokenForPortfolio(null);
   };
 
+  const [prevTokenForPortfolio, setPrevTokenForPortfolio] = useState<Currency | null>(null);
+
   useEffect(() => {
-    setTokenInfoOpened(Boolean(tokenForPortfolio));
+    if (tokenForPortfolio !== prevTokenForPortfolio) {
+      setTokenInfoOpened(Boolean(tokenForPortfolio));
+    }
+  }, [tokenForPortfolio, prevTokenForPortfolio]);
+
+  useEffect(() => {
+    setPrevTokenForPortfolio(tokenForPortfolio);
   }, [tokenForPortfolio]);
 
   const loading = false;
