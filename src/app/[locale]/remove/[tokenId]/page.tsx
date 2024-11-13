@@ -246,7 +246,7 @@ export default function DecreaseLiquidityPage({
             <div className="flex justify-between flex-col gap-3">
               <PositionLiquidityCard
                 token={tokenA}
-                standards={["ERC-20", "ERC-223"]}  // TODO check if token has standards
+                standards={["ERC-20", "ERC-223"]} // TODO check if token has standards
                 amount={
                   position?.amount0
                     .multiply(new Percent(percentage))
@@ -280,7 +280,11 @@ export default function DecreaseLiquidityPage({
             gasPrice={gasPrice}
           />
           {!isConnected ? (
-            <Button className="h-[48px] md:h-[60px]" onClick={() => setWalletConnectOpened(true)} fullWidth>
+            <Button
+              className="h-[48px] md:h-[60px]"
+              onClick={() => setWalletConnectOpened(true)}
+              fullWidth
+            >
               {tWallet("connect_wallet")}
             </Button>
           ) : (
