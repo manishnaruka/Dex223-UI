@@ -187,53 +187,66 @@ export default function DecreaseLiquidityPage({
             />
           </div>
 
-          <div className="mb-4 lg:mb-5">
-            <span className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</span>
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-24 lg:text-32">{percentage}%</span>
-              <div className="flex gap-3">
-                <InputButton
-                  text={"25%"}
-                  isActive={percentage === 25}
-                  onClick={() => setPercentage(25)}
+          <div className="lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1">
+            <div className="lg:mb-5 mt-4 mb-5 ml-5 mr-5">
+              <span className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</span>
+              <div className="flex justify-between items-center mb-4">
+                <div className="text-24 lg:text-24 font-medium">
+                  <span>{percentage}</span>
+                  <span className="text-secondary-text ml-10">%</span>
+                </div>
+                <div className="flex gap-3">
+                  <InputButton
+                    text={"25%"}
+                    isActive={percentage === 25}
+                    onClick={() => setPercentage(25)}
+                  />
+                  <InputButton
+                    text={"50%"}
+                    isActive={percentage === 50}
+                    onClick={() => setPercentage(50)}
+                  />
+                  <InputButton
+                    text={"75%"}
+                    isActive={percentage === 75}
+                    onClick={() => setPercentage(75)}
+                  />
+                  <InputButton
+                    text={"MAX"}
+                    isActive={percentage === 100}
+                    onClick={() => setPercentage(100)}
+                  />
+                </div>
+              </div>
+
+              <div className="relative h-6">
+                <input
+                  value={percentage}
+                  max={100}
+                  min={1}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPercentage(+e.target.value)}
+                  className="w-full accent-green absolute left-0 right-0 top-2  duration-200"
+                  type="range"
                 />
-                <InputButton
-                  text={"50%"}
-                  isActive={percentage === 50}
-                  onClick={() => setPercentage(50)}
-                />
-                <InputButton
-                  text={"75%"}
-                  isActive={percentage === 75}
-                  onClick={() => setPercentage(75)}
-                />
-                <InputButton
-                  text={"MAX"}
-                  isActive={percentage === 100}
-                  onClick={() => setPercentage(100)}
-                />
+                <div
+                  className="pointer-events-none bg-tertiary-bg top-2 absolute h-2 w-full rounded-l-0 rounded-r-1 right-0"
+                  style={{
+                    width: `calc(${100 - percentage}% - ${20 - (20 / 100) * percentage}px)`,
+                  }}
+                ></div>
+                <div
+                  className="pointer-events-none bg-green absolute h-2 rounded-1 left-0 top-2 "
+                  style={{ width: percentage === 1 ? 0 : `calc(${percentage}% - 2px)` }}
+                ></div>
               </div>
             </div>
-
-            <div className="relative h-6">
-              <input
-                value={percentage}
-                max={100}
-                min={1}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setPercentage(+e.target.value)}
-                className="w-full accent-green absolute top-2 left-0 right-0 duration-200"
-                type="range"
-              />
-              <div
-                className="pointer-events-none absolute bg-green h-2 rounded-1 left-0 top-2"
-                style={{ width: percentage === 1 ? 0 : `calc(${percentage}% - 2px)` }}
-              ></div>
-            </div>
           </div>
+
           <div className="rounded-3 bg-tertiary-bg mb-4 lg:mb-5 p-5">
-            <div className="flex justify-between lg:flex-col gap-3">
+            <div className="flex justify-between flex-col gap-3">
               <PositionLiquidityCard
                 token={tokenA}
+                standards={["ERC-20", "ERC-223"]}  // TODO check if token has standards
                 amount={
                   position?.amount0
                     .multiply(new Percent(percentage))
@@ -243,6 +256,7 @@ export default function DecreaseLiquidityPage({
               />
               <PositionLiquidityCard
                 token={tokenB}
+                standards={["ERC-20", "ERC-223"]}
                 amount={
                   position?.amount1
                     .multiply(new Percent(percentage))
@@ -266,14 +280,14 @@ export default function DecreaseLiquidityPage({
             gasPrice={gasPrice}
           />
           {!isConnected ? (
-            <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+            <Button className="h-[48px] md:h-[60px]" onClick={() => setWalletConnectOpened(true)} fullWidth>
               {tWallet("connect_wallet")}
             </Button>
           ) : (
             position &&
             tokenA &&
             tokenB && (
-              <Button onClick={() => setIsOpen(true)} fullWidth>
+              <Button className="h-[48px] md:h-[60px]" onClick={() => setIsOpen(true)} fullWidth>
                 Remove
               </Button>
             )

@@ -15,7 +15,7 @@ export default function PositionLiquidityCard({
   standards?: string[];
 }) {
   return (
-    <div className="flex flex-col lg:flex-row gap-1 lg:gap-0 justify-between items-center">
+    <div className="flex lg:flex-row gap-1 lg:gap-0 justify-between items-center">
       <div className="flex items-center gap-2">
         <Image
           src={token?.logoURI || "/tokens/placeholder.svg"}
@@ -29,7 +29,7 @@ export default function PositionLiquidityCard({
         })}
       </div>
       <div className="flex items-center gap-1">
-        <span>{amount}</span>
+        <span className="text-16 font-medium">{amount}</span>
         {percentage && <span>({percentage}%)</span>}
       </div>
     </div>
