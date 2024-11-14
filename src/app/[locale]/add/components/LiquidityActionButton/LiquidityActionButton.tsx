@@ -1,10 +1,14 @@
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { Address } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
 import Button, { ButtonVariant } from "@/components/buttons/Button";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useRevoke from "@/hooks/useRevoke";
+import useWithdraw from "@/hooks/useWithdraw";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
+import { DexChainId } from "@/sdk_hybrid/chains";
 import { Standard } from "@/sdk_hybrid/standard";
 
 import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
@@ -35,8 +39,17 @@ export const LiquidityActionButton = ({
   const tWallet = useTranslations("Wallet");
   const { setIsOpen } = useConfirmLiquidityDialogStore();
 
-  const { setStatus, setApprove0Status, setApprove0Hash, setApprove1Status, setApprove1Hash } =
-    useAddLiquidityStatusStore();
+  const {
+    setStatus,
+    setApprove0Status,
+    setApprove0Hash,
+    setDeposite0Hash,
+    setDeposite1Hash,
+    setApprove1Status,
+    setApprove1Hash,
+    setDeposite0Status,
+    setDeposite1Status,
+  } = useAddLiquidityStatusStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { price } = usePriceRange();
@@ -56,6 +69,27 @@ export const LiquidityActionButton = ({
   });
 
   const { data: blockNumber } = useBlockNumber({ watch: true });
+  const chainId = useCurrentChainId();
+
+  const { currentAllowance: currentAllowanceA } = useRevoke({
+    token: tokenA,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
+
+  const { currentDeposit: currentDepositA } = useWithdraw({
+    token: tokenA,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
+
+  const { currentAllowance: currentAllowanceB } = useRevoke({
+    token: tokenB,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
+
+  const { currentDeposit: currentDepositB } = useWithdraw({
+    token: tokenB,
+    contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+  });
 
   const { data: tokenA0Balance, refetch: refetchBalanceA0 } = useBalance({
     address: tokenA ? address : undefined,
@@ -104,19 +138,19 @@ export const LiquidityActionButton = ({
   const isSufficientBalanceA =
     tokenAStandard === Standard.ERC20
       ? tokenA0Balance
-        ? tokenA0Balance?.value >= amountToCheckA
+        ? tokenA0Balance?.value + BigInt(currentAllowanceA || 0) >= amountToCheckA
         : false
       : tokenA1Balance
-        ? tokenA1Balance?.value >= amountToCheckA
+        ? tokenA1Balance?.value + BigInt(currentDepositA || 0) >= amountToCheckA
         : false;
 
   const isSufficientBalanceB =
     tokenBStandard === Standard.ERC20
       ? tokenB0Balance
-        ? tokenB0Balance?.value >= amountToCheckB
+        ? tokenB0Balance?.value + BigInt(currentAllowanceB || 0) >= amountToCheckB
         : false
       : tokenB1Balance
-        ? tokenB1Balance?.value >= amountToCheckB
+        ? tokenB1Balance?.value + BigInt(currentDepositB || 0) >= amountToCheckB
         : false;
 
   const isSufficientBalance = isSufficientBalanceA && isSufficientBalanceB;
@@ -163,7 +197,11 @@ export const LiquidityActionButton = ({
           setApprove0Status(0);
           setApprove0Hash(undefined);
           setApprove1Status(0);
+          setDeposite0Status(0);
+          setDeposite1Status(0);
           setApprove1Hash(undefined);
+          setDeposite0Hash(undefined);
+          setDeposite1Hash(undefined);
           setIsOpen(true);
         }}
       >

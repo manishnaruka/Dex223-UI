@@ -57,7 +57,7 @@ export const TransactionItem = ({
     setCustomAmount(valueBigInt);
 
     if (transaction.amount) {
-      setFieldError(valueBigInt < transaction.amount ? true : false);
+      setFieldError(valueBigInt < transaction.amount);
     }
   };
   if (!transaction) return null;
