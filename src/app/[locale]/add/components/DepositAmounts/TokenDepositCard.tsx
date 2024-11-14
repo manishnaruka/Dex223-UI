@@ -109,55 +109,62 @@ function InputTotalAmount({
     }
   };
 
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
-    <div>
-      <div className="bg-secondary-bg p-4 lg:p-5 pb-3 lg:pb-4 rounded-3">
-        <div className="mb-1 flex justify-between items-center">
-          <NumericFormat
-            decimalScale={currency?.decimals}
-            inputMode="decimal"
-            placeholder="0.0"
-            className={clsx("bg-transparent outline-0 border-0 text-20 w-full peer")}
-            type="text"
-            value={value}
-            onValueChange={(values) => {
-              onChange(values.value);
-            }}
-            allowNegative={false}
-            disabled={isDisabled}
-          />
-          <div className="bg-secondary-bg rounded-5 py-1 pl-1 pr-3 flex items-center gap-2 min-w-[88px]">
-            {currency ? (
-              <>
-                <Image
-                  src={currency?.logoURI || "/tokens/placeholder.svg"}
-                  alt=""
-                  width={24}
-                  height={24}
-                />
-                <span>{currency.symbol}</span>
-              </>
-            ) : (
-              <span>Select token</span>
-            )}
-          </div>
+    <div
+      className={clsx(
+        "bg-secondary-bg p-4 lg:p-5 pb-3 lg:pb-4 rounded-3 border hocus:shadow hocus:shadow-green/60",
+        isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
+      )}
+    >
+      <div className="mb-1 flex justify-between items-center">
+        <NumericFormat
+          decimalScale={currency?.decimals}
+          inputMode="decimal"
+          placeholder="0.0"
+          className={clsx("bg-transparent outline-0 border-0 text-20 w-full peer")}
+          type="text"
+          value={value}
+          onValueChange={(values) => {
+            onChange(values.value);
+          }}
+          allowNegative={false}
+          disabled={isDisabled}
+          onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
+          onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
+        />
+        <div className="bg-secondary-bg rounded-5 py-1 pl-1 pr-3 flex items-center gap-2 min-w-[88px]">
+          {currency ? (
+            <>
+              <Image
+                src={currency?.logoURI || "/tokens/placeholder.svg"}
+                alt=""
+                width={24}
+                height={24}
+              />
+              <span>{currency.symbol}</span>
+            </>
+          ) : (
+            <span>Select token</span>
+          )}
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-secondary-text text-12 lg:text-14">—</span>
-          <div className="flex gap-1">
-            <span className="text-12 md:text-14">
-              {currency &&
-                `Balance: ${formatFloat(formatUnits(totalBalance, currency.decimals))} ${currency.symbol}`}
-            </span>
-            <Button
-              variant={ButtonVariant.CONTAINED}
-              size={ButtonSize.EXTRA_SMALL}
-              className="bg-tertiary-bg text-green px-2 hocus:bg-secondary-bg"
-              onClick={maxHandler}
-            >
-              Max
-            </Button>
-          </div>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="text-secondary-text text-12 lg:text-14">—</span>
+        <div className="flex gap-1">
+          <span className="text-12 md:text-14">
+            {currency &&
+              `Balance: ${formatFloat(formatUnits(totalBalance, currency.decimals))} ${currency.symbol}`}
+          </span>
+          <Button
+            variant={ButtonVariant.CONTAINED}
+            size={ButtonSize.EXTRA_SMALL}
+            className="bg-tertiary-bg text-green px-2 hocus:bg-secondary-bg"
+            onClick={maxHandler}
+          >
+            Max
+          </Button>
         </div>
       </div>
     </div>

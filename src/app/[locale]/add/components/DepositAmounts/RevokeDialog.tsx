@@ -102,6 +102,8 @@ export const RevokeDialog = ({
     AllowanceStatus.SUCCESS,
   ].includes(status);
 
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <div className="flex flex-col gap-2">
       {token && (
@@ -143,9 +145,10 @@ export const RevokeDialog = ({
               <>
                 <div
                   className={clsxMerge(
-                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border border-transparent",
+                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border hocus:shadow hocus:shadow-green/60",
                     isError ? "border-red" : "",
                     inputDisabled ? "border-secondary-border" : "",
+                    isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
                   )}
                 >
                   <NumericFormat
@@ -165,6 +168,8 @@ export const RevokeDialog = ({
                     onValueChange={(values) => {
                       updateValue(values.value);
                     }}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
                     allowNegative={false}
                   />
                   <span className="text-secondary-text min-w-max">

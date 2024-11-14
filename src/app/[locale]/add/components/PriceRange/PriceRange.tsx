@@ -260,7 +260,7 @@ export const PriceRange = ({
           <div className="flex flex-col gap-1">
             <span className="font-bold text-16">Starting price</span>
             <input
-              className="outline-0 text-16 w-full rounded-3 bg-primary-bg px-5 py-3"
+              className="outline-0 text-16 w-full rounded-3 bg-secondary-bg px-5 py-3 border border-transparent hocus:shadow hocus:shadow-green/60 focus:border-green focus:shadow focus:shadow-green/60"
               placeholder="0"
               type="text"
               value={startPriceTypedValue}

@@ -1,4 +1,5 @@
 import { escapeRegExp } from "@/functions/escapeRegExp";
+import { useState } from "react";
 
 const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`); // match escaped "." characters via in a non-capturing group
 
@@ -7,6 +8,8 @@ export type NumericalInputProps = {
   onUserInput: (typedValue: string) => void;
   prependSymbol?: string;
   maxDecimals?: number;
+  onFocus?: () => void;
+  onBlur?: () => void;
 };
 
 export const NumericalInput = ({
@@ -14,6 +17,8 @@ export const NumericalInput = ({
   onUserInput,
   prependSymbol,
   maxDecimals,
+  onFocus,
+  onBlur,
 }: NumericalInputProps) => {
   const enforcer = (nextUserInput: string) => {
     if (nextUserInput === "" || inputRegex.test(escapeRegExp(nextUserInput))) {
@@ -44,6 +49,8 @@ export const NumericalInput = ({
       value={
         prependSymbol && value ? prependSymbol + valueFormattedWithLocale : valueFormattedWithLocale
       }
+      onFocus={onFocus}
+      onBlur={onBlur}
       onChange={(event) => {
         if (prependSymbol) {
           const value = event.target.value;
