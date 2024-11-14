@@ -18,6 +18,7 @@ import LiquidityChartRangeInput from "./LiquidityChartRangeInput";
 import { Bound } from "./LiquidityChartRangeInput/types";
 import { PriceRangeHeader } from "./PriceRangeHeader";
 import PriceRangeInput from "./PriceRangeInput";
+import { Field, useLiquidityAmountsStore } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 
 export const PriceRange = ({
   noLiquidity,
@@ -82,7 +83,8 @@ export const PriceRange = ({
     currencyB: tokenB,
     tier,
   });
-
+  const { setTypedValue } = useLiquidityAmountsStore();
+  
   const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
 
   const handleSetFullRange = useCallback(() => {
@@ -261,6 +263,9 @@ export const PriceRange = ({
               value={startPriceTypedValue}
               onChange={(e) => {
                 setStartPriceTypedValue(e.target.value);
+                if (!Number(e.target.value)) {
+                  setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
+                }
               }}
             />
             <div className="flex justify-between text-14 text-secondary-text mt-2">
