@@ -13,7 +13,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import Button from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
@@ -294,9 +294,9 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
     : noLiquidity
       ? "Create Pool & Mint liquidity"
       : "Mint liquidity";
-  const { inRange, removed } = usePositionRangeStatus({ position });
+  const { inRange } = usePositionRangeStatus({ position });
 
-  const { minPriceString, maxPriceString, currentPriceString, ratio } = usePositionPrices({
+  const { minPriceString, maxPriceString, currentPriceString } = usePositionPrices({
     position,
     showFirst,
   });
