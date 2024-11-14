@@ -568,7 +568,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
         </div>
         {isError ? null : (
           <Link href="/pools/positions">
-            <div className="flex gap-2 text-green justify-center">
+            <div className="flex gap-2 text-green justify-center" onClick={() => setIsOpen(false)}>
               View my liquidity positions
               <Svg iconName="forward" />
             </div>
