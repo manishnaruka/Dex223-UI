@@ -110,6 +110,7 @@ export const Balances = () => {
           />
         </div>
       </div>
+
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">

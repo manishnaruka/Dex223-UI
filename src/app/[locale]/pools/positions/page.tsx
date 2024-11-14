@@ -13,6 +13,7 @@ import Button, { ButtonSize } from "@/components/buttons/Button";
 import TabButton from "@/components/buttons/TabButton";
 import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
+import { formatNumber } from "@/functions/formatFloat";
 import usePositions, {
   usePositionFromPositionInfo,
   usePositionRangeStatus,
@@ -35,23 +36,6 @@ type PositionInfo = {
   tokensOwed1: bigint;
   tokenId: bigint | undefined;
 };
-
-function formatNumber(num: string, maxPrecision = 15) {
-  const [integerPart] = num.toString().split(".");
-
-  if (integerPart.length >= maxPrecision) {
-    // If the integer part alone exceeds or matches the precision, return it as-is
-    return parseFloat(num)
-      .toPrecision(maxPrecision)
-      .replace(/\.?0+$/, "");
-  } else {
-    // Limit the total length to maxPrecision
-    const precisionNeeded = maxPrecision - integerPart.length;
-    return parseFloat(num)
-      .toPrecision(precisionNeeded)
-      .replace(/\.?0+$/, "");
-  }
-}
 
 function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: PositionInfo }) {
   const position = usePositionFromPositionInfo(positionInfo);

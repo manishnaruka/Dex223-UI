@@ -333,7 +333,7 @@
     "lending_search_placeholder": "Search by ID",
     "liquidity_title": "Liquidity positions",
     "liquidity_search_placeholder": "Search by ID",
-    "deposited_title": "Deposited to contract",
+    "deposited_title": "Approved and Deposited tokens",
     "enter_in_correct_format": "Enter token address in correct format"
 
   }

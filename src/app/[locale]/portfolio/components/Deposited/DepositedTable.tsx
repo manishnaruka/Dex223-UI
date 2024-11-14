@@ -8,11 +8,11 @@ import { Address, formatUnits } from "viem";
 import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
+import { TableData } from "@/app/[locale]/portfolio/components/Deposited/DepositedWithdrawTable";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
-import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
-import { formatFloat } from "@/functions/formatFloat";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -36,14 +36,14 @@ const DepositedTokenWithdrawDialog = ({
   const {
     withdrawHandler,
     currentDeposit: currentDeposit,
-    estimatedGas: depositEstimatedGas,
+    // estimatedGas: depositEstimatedGas,
     withdrawStatus,
   } = useWithdraw({
     token,
     contractAddress: contractAddress,
   });
 
-  const { data: gasPrice, refetch: refetchGasPrice } = useGasPrice();
+  const { refetch: refetchGasPrice } = useGasPrice(); // data: gasPrice,
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
   useEffect(() => {
@@ -59,22 +59,24 @@ const DepositedTokenWithdrawDialog = ({
       status={withdrawStatus}
       currentAllowance={currentDeposit}
       revokeHandler={withdrawHandler}
-      estimatedGas={depositEstimatedGas}
-      gasPrice={gasPrice}
+      // estimatedGas={depositEstimatedGas}
+      // gasPrice={gasPrice}
     />
   );
 };
 
 const DepositedTokenTableItem = ({
   deposite,
-  walletAddress,
+  walletAddresses,
   onDetailsClick,
   setIsWithdrawDetailsOpened,
+  isOdd
 }: {
   deposite: WalletDeposite;
-  walletAddress: Address;
+  walletAddresses: Address[];
   onDetailsClick: () => void;
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
+  isOdd: boolean;
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
@@ -82,7 +84,7 @@ const DepositedTokenTableItem = ({
 
   return (
     <>
-      <div className={clsx("h-[56px] flex justify-start items-center gap-2 pl-5 rounded-l-3")}>
+      <div className={clsx("h-[56px] flex justify-start items-center gap-2 pl-5 rounded-l-3", isOdd ? "bg-tertiary-bg" : "")}>
         <div className="flex gap-2">
           <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
           <span>{`${deposite.token.name}`}</span>
@@ -97,12 +99,15 @@ const DepositedTokenTableItem = ({
         </div>
       </div>
 
-      <div className={clsx("h-[56px] flex items-center")}>
-        {`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}
+      <div className={clsx("h-[56px] flex items-center", isOdd ? "bg-tertiary-bg" : "")}>
+        {`${formatNumber(formatUnits(deposite.approved, deposite.token.decimals), 8)} ${deposite.token.symbol}`}
       </div>
-      <div className={clsx("h-[56px] flex items-center")}>$ —</div>
-      <div className={clsx("h-[56px] flex pr-5 rounded-r-3 flex-col justify-center")}>
-        {address === walletAddress ? (
+      <div className={clsx("h-[56px] flex items-center", isOdd ? "bg-tertiary-bg" : "")}>
+        {`${formatNumber(formatUnits(deposite.deposited, deposite.token.decimals), 8)} ${deposite.token.symbol}`}
+      </div>
+      <div className={clsx("h-[56px] flex items-center", isOdd ? "bg-tertiary-bg" : "")}>$ —</div>
+      <div className={clsx("h-[56px] flex pr-5 rounded-r-3 flex-col justify-center", isOdd ? "bg-tertiary-bg" : "")}>
+        {address === walletAddresses[0] ? ( // TODO upgrade to use more addresses
           <Button
             variant={ButtonVariant.CONTAINED}
             size={ButtonSize.MEDIUM}
@@ -117,8 +122,11 @@ const DepositedTokenTableItem = ({
           <>
             <span className="text-14 text-secondary-text">Token owner</span>
             <ExternalTextLink
-              text={truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
-              href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddress, chainId)}
+              text={truncateMiddle(walletAddresses[0] || "", {
+                charsFromStart: 5,
+                charsFromEnd: 3,
+              })}
+              href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddresses[0], chainId)}
             />
           </>
         )}
@@ -140,24 +148,31 @@ export const DesktopTable = ({
   setTokenForPortfolio,
   setIsWithdrawDetailsOpened,
 }: {
-  tableData: (WalletDeposite & { walletAddress: Address })[];
+  tableData: TableData;
   setTokenForPortfolio: any;
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
+  let line = -1;
+  
   return (
-    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(60px,1.33fr),_minmax(60px,1.33fr),_minmax(50px,1.33fr),_minmax(60px,1.33fr)] pb-2 relative">
       <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
       <div className="text-secondary-text h-[60px] flex items-center gap-2">
-        Amount <Badge color="green" text="ERC-223" />
+        Approved <Badge color="green" text="ERC-20" />
       </div>
-      <div className="text-secondary-text h-[60px] flex items-center">Amount, $</div>
+      <div className="text-secondary-text h-[60px] flex items-center gap-2">
+        Deposited <Badge color="green" text="ERC-223" />
+      </div>
+      <div className="text-secondary-text h-[60px] flex items-center">Total Amount, $</div>
       <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action / Owner</div>
       {tableData.map((deposite, index) => {
+        line++;
         return (
           <DepositedTokenTableItem
-            key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
+            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
             deposite={deposite}
-            walletAddress={deposite.walletAddress}
+            isOdd={line % 2 === 1}
+            walletAddresses={deposite.walletAddresses}
             onDetailsClick={() => {
               setTokenForPortfolio(deposite.token);
             }}
@@ -184,6 +199,7 @@ const DepositedTokenMobileTableItem = ({
   const { address } = useAccount();
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
+  // @ts-ignore
   return (
     <>
       <div
@@ -208,15 +224,37 @@ const DepositedTokenMobileTableItem = ({
           </div>
         </div>
         <div className="flex gap-1 items-center">
-          <Badge color="green" text="ERC-223" />
-          <span className="text-12 text-secondary-text">{`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}</span>
+          <div className="flex gap-2 w-1/2">
+            <Badge color="green" text="ERC-20" />
+            <span className="text-12 text-secondary-text">
+              {`${formatNumber(formatUnits(deposite.approved, deposite.token.decimals), 6)} ${truncateMiddle(
+                deposite.token.symbol || "",
+                {
+                  charsFromStart: 3,
+                  charsFromEnd: 3,
+                },
+              )}`}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Badge color="green" text="ERC-223" />
+            <span className="text-12 text-secondary-text">
+              {`${formatNumber(formatUnits(deposite.deposited, deposite.token.decimals), 6)} ${truncateMiddle(
+                deposite.token.symbol || "",
+                {
+                  charsFromStart: 3,
+                  charsFromEnd: 3,
+                },
+              )}`}
+            </span>
+          </div>
         </div>
         <div className="flex flex-col justify-center mt-1">
           {address === walletAddress ? (
             <Button
               variant={ButtonVariant.CONTAINED}
+              colorScheme={ButtonColor.LIGHT_GREEN}
               size={ButtonSize.MEDIUM}
-              // onClick={() => setIsWithdrawOpen(true)}
               onClick={() => setIsWithdrawDetailsOpened(true)}
             >
               Details
@@ -250,7 +288,7 @@ export const MobileTable = ({
   setTokenForPortfolio,
   setIsWithdrawDetailsOpened,
 }: {
-  tableData: (WalletDeposite & { walletAddress: Address })[];
+  tableData: TableData;
   setTokenForPortfolio: any;
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
@@ -259,9 +297,9 @@ export const MobileTable = ({
       {tableData.map((deposite, index: number) => {
         return (
           <DepositedTokenMobileTableItem
-            key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
+            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
             deposite={deposite}
-            walletAddress={deposite.walletAddress}
+            walletAddress={deposite.walletAddresses[0]}
             onDetailsClick={() => {
               setTokenForPortfolio(deposite.token);
             }}

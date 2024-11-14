@@ -513,7 +513,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.deposited}
             onClick={() => setActiveTab(ActiveTab.deposited)}
           >
-            <span className="text-nowrap px-4">Deposited to contract</span>
+            <span className="text-nowrap px-4">Approved and Deposited</span>
           </TabButton>
         </div>
         {activeTab === ActiveTab.balances ? (
