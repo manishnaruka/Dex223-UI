@@ -347,7 +347,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                 status={inRange ? PositionRangeStatus.IN_RANGE : PositionRangeStatus.OUT_OF_RANGE}
               />
             </div>
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2 justify-end mr-1">
               {liquidityHash && (
                 <a
                   target="_blank"
