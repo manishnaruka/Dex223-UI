@@ -403,7 +403,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     setIsOpen(false);
                     setManageOpened(true);
                   }}
-                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg hocus:shadow hocus:shadow-green/60 duration-200"
+                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
                 >
                   Manage tokens
                   <Svg iconName="edit" />

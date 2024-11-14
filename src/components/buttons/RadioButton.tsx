@@ -21,6 +21,7 @@ export default function RadioButton({
       className={clsxMerge(
         "duration-200 text-14 md:text-16 h-10 flex px-3 md:px-4 lg:px-5 items-center rounded-2 group hocus:bg-green-bg gap-2 hocus:text-primary-text disabled:pointer-events-none disabled:opacity-50",
         isActive ? "text-primary-text" : "text-secondary-text",
+        bgColor,
         className,
       )}
       {...props}

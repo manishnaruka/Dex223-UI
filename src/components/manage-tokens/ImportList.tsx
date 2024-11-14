@@ -26,7 +26,7 @@ export default function ImportList({ setContent, handleClose }: Props) {
         title={t("import_list")}
       />
 
-      <div className="px-4 pb-4 md:px-10 md:pb-10 w-full md:w-[550px] h-[580px] flex flex-col">
+      <div className="px-4 pb-4 md:px-10 md:pb-10 w-full md:w-[600px] h-[580px] flex flex-col">
         <h3 className="text-16 font-bold mb-1">{t("importing_type")}</h3>
         <div className="grid grid-cols-3 gap-2 md:gap-3 mb-5">
           <RadioButton
