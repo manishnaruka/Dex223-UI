@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { formatUnits } from "viem";
@@ -85,7 +86,7 @@ export const Balances = () => {
 
           <span className="text-24 lg:text-32 font-medium">$ —</span>
 
-          <img
+          <Image
             src="/logo-short.svg"
             alt="Side Icon"
             width={"180"}
@@ -101,7 +102,7 @@ export const Balances = () => {
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-24 lg:text-32 font-medium">$ —</span>
-          <img
+          <Image
             src="/portfolio-bars.svg"
             alt="Side Icon"
             width={"180"}

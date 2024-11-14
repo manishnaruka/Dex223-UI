@@ -2,7 +2,6 @@
 "use client";
 
 import clsx from "clsx";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
@@ -154,7 +153,6 @@ const PopoverTitles: { [key in ManageWalletsPopoverContent]: string } = {
 };
 
 const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => void }) => {
-  const t = useTranslations("Portfolio");
   const tWallet = useTranslations("Wallet");
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
@@ -292,7 +290,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
               />
             </div>
             <div className="flex flex-col gap-3 px-5 max-h-[380px] overflow-auto">
-              {wallets.map(({ address, isActive, isConnectedWallet }) => (
+              {wallets.map(({ address, isConnectedWallet }) => (
                 <div
                   key={address}
                   className="flex items-center pl-5 pr-1 justify-between py-[10px] bg-tertiary-bg rounded-3 "
@@ -405,13 +403,12 @@ export function Portfolio() {
   usePortfolioSearchParams();
 
   const chainId = useCurrentChainId();
-  const router = useRouter();
   const t = useTranslations("Portfolio");
   const tToast = useTranslations("Toast");
 
   const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
 
-  const { activeAddresses, searchValue, setSearchValue, errorSearch } = useActiveAddresses();
+  const { activeAddresses } = useActiveAddresses();
 
   return (
     <Container>

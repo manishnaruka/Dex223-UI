@@ -31,7 +31,7 @@ const getWalletDeposites = async (
   const result = await multicall(config, {
     contracts: calls,
   });
-  
+
   const approveCalls = contractAddresses.reduce((acc, contractAddress) => {
     const contractCalls = tokens.map(({ address0 }) => ({
       address: address0 as Address,
@@ -79,8 +79,6 @@ const getWalletDeposites = async (
       }
     }
   }
-  
-  console.dir(deposites);
 
   const walletDeposites: WalletDeposites = {
     address: walletAddress,
@@ -113,7 +111,7 @@ export const useActiveWalletsDeposites = () => {
             contractAddresses,
           );
         }),
-      )
+      );
       setAllDeposites(result);
       setIsLoading(false);
     })();

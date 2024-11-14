@@ -9,7 +9,6 @@ import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";

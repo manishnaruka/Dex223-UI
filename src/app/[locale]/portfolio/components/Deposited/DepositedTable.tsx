@@ -70,7 +70,7 @@ const DepositedTokenTableItem = ({
   walletAddresses,
   onDetailsClick,
   setIsWithdrawDetailsOpened,
-  isOdd
+  isOdd,
 }: {
   deposite: WalletDeposite;
   walletAddresses: Address[];
@@ -84,7 +84,12 @@ const DepositedTokenTableItem = ({
 
   return (
     <>
-      <div className={clsx("h-[56px] flex justify-start items-center gap-2 pl-5 rounded-l-3", isOdd ? "bg-tertiary-bg" : "")}>
+      <div
+        className={clsx(
+          "h-[56px] flex justify-start items-center gap-2 pl-5 rounded-l-3",
+          isOdd ? "bg-tertiary-bg" : "",
+        )}
+      >
         <div className="flex gap-2">
           <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
           <span>{`${deposite.token.name}`}</span>
@@ -106,12 +111,16 @@ const DepositedTokenTableItem = ({
         {`${formatNumber(formatUnits(deposite.deposited, deposite.token.decimals), 8)} ${deposite.token.symbol}`}
       </div>
       <div className={clsx("h-[56px] flex items-center", isOdd ? "bg-tertiary-bg" : "")}>$ —</div>
-      <div className={clsx("h-[56px] flex pr-5 rounded-r-3 flex-col justify-center", isOdd ? "bg-tertiary-bg" : "")}>
+      <div
+        className={clsx(
+          "h-[56px] flex pr-5 rounded-r-3 flex-col justify-center",
+          isOdd ? "bg-tertiary-bg" : "",
+        )}
+      >
         {address === walletAddresses[0] ? ( // TODO upgrade to use more addresses
           <Button
             variant={ButtonVariant.CONTAINED}
             size={ButtonSize.MEDIUM}
-            // onClick={() => setIsWithdrawOpen(true)}
             onClick={() => {
               setIsWithdrawDetailsOpened(true);
             }}
@@ -153,7 +162,7 @@ export const DesktopTable = ({
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
   let line = -1;
-  
+
   return (
     <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(60px,1.33fr),_minmax(60px,1.33fr),_minmax(50px,1.33fr),_minmax(60px,1.33fr)] pb-2 relative">
       <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
