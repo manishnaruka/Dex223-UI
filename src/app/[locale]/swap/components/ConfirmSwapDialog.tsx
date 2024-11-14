@@ -2,6 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, ReactNode, useEffect, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
 import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
@@ -696,11 +697,15 @@ export default function ConfirmSwapDialog() {
                     ) : (
                       <div className="flex-grow">
                         <div className="relative w-full flex-grow">
-                          <Input
+                          <NumericFormat
                             isError={+amountToApprove < +typedValue}
                             className="h-8 pl-3"
                             value={amountToApprove}
-                            onChange={(e) => setAmountToApprove(e.target.value)}
+                            onValueChange={(values) => {
+                              setAmountToApprove(values.value);
+                            }}
+                            customInput={Input}
+                            allowNegative={false}
                             type="text"
                           />
                           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">

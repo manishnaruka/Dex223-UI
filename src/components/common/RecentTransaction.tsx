@@ -12,6 +12,7 @@ import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/us
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { DexChainId } from "@/sdk_hybrid/chains";
 import {
   IRecentTransaction,
   IRecentTransactionTitle,
@@ -262,33 +263,6 @@ export default function RecentTransaction({
         </div>
 
         <div className="flex @[420px]:items-center gap-3">
-          {/*<div className="hidden items-center gap-3 @[420px]:flex">*/}
-          {/*  {transaction.status === RecentTransactionStatus.PENDING &&*/}
-          {/*    showSpeedUp &&*/}
-          {/*    isLowestNonce && (*/}
-          {/*      <>*/}
-          {/*        <RecentTransactionActionButton color="secondary">*/}
-          {/*          {t("cancel")}*/}
-          {/*        </RecentTransactionActionButton>*/}
-          {/*        <RecentTransactionActionButton*/}
-          {/*          isRepriced={transaction.replacement === "repriced"}*/}
-          {/*          onClick={() => handleSpeedUp(transaction)}*/}
-          {/*        >*/}
-          {/*          {t("speed_up")}*/}
-          {/*        </RecentTransactionActionButton>*/}
-          {/*      </>*/}
-          {/*    )}*/}
-          {/*  {transaction.status === RecentTransactionStatus.PENDING &&*/}
-          {/*    showSpeedUp &&*/}
-          {/*    !isLowestNonce && (*/}
-          {/*      <>*/}
-          {/*        <RecentTransactionActionButton disabled color="secondary">*/}
-          {/*          {t("queue")}*/}
-          {/*        </RecentTransactionActionButton>*/}
-          {/*      </>*/}
-          {/*    )}*/}
-          {/*</div>*/}
-
           {!isWaitingForProceeding ? (
             <>
               {transaction.replacement === "cancelled" && (
@@ -298,7 +272,6 @@ export default function RecentTransaction({
                 </span>
               )}
               <a
-                className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200 relative -top-2 @[420px]:top-0"
                 target="_blank"
                 href={getExplorerLink(
                   ExplorerLinkType.TRANSACTION,
@@ -306,7 +279,7 @@ export default function RecentTransaction({
                   transaction.chainId,
                 )}
               >
-                <Svg iconName="forward" />
+                <IconButton iconName="forward" />
               </a>
               <span className="flex-shrink-0">
                 <RecentTransactionStatusIcon
@@ -351,10 +324,7 @@ export default function RecentTransaction({
             </div>
           ) : (
             <div className="mt-3 w-full">
-              <RecentTransactionActionButton
-                onClick={() => handleSpeedUp(transaction)}
-                // isRepriced={transaction.replacement === "repriced"}
-              >
+              <RecentTransactionActionButton onClick={() => handleSpeedUp(transaction)}>
                 Speed up cancellation
               </RecentTransactionActionButton>
             </div>

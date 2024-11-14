@@ -15,17 +15,19 @@ export default function ManageTokensDialog() {
   const { isOpen, setIsOpen, content, setContent } = useManageTokensDialogStore();
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
+  const { setActiveTab } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setTimeout(() => {
       setContent("default");
+      setActiveTab(0);
       setTokenForPortfolio(null);
     }, 400);
-  }, [setIsOpen, setContent]);
+  }, [setIsOpen, setContent, setActiveTab]);
 
   return (
-    <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
+    <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
       <div className="z-[1000]">
         {content === "default" && (
           <TokensAndLists

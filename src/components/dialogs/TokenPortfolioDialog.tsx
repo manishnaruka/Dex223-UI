@@ -64,7 +64,7 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
           setScrollTo(tokenList?.id || null);
           handleClose();
         }}
-        className="text-green flex items-center gap-2"
+        className="text-secondary-text hocus:text-green-hover duration-200 flex items-center gap-2"
       >
         Manage list
         <Svg iconName="next" />
@@ -78,7 +78,7 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
 
   return (
     <div className="w-full md:w-[600px]">
-      <div className="px-4 pb-5 md:px-10 border-b border-primary-border flex flex-col gap-2">
+      <div className="px-4 pb-5 md:px-10 flex flex-col gap-2">
         <div className="flex justify-between">
           <span className="text-secondary-text">{t("symbol")}</span>
           <span>{token.symbol}</span>
@@ -117,6 +117,7 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
           <span>{token.decimals}</span>
         </div>
       </div>
+      <div className="mx-4 md:mx-10 bg-secondary-border h-px" />
       <p className="text-secondary-text px-4 md:px-10 py-3">
         {t("found_in", { amount: token.lists?.length })}
       </p>

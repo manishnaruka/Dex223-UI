@@ -206,6 +206,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                 />
               </div>
             </div>
+            <div className="bg-secondary-border h-px mb-3" />
 
             <div className="flex flex-col overflow-auto flex-grow">
               <div style={{ flex: "1 1 auto" }} className="pb-[1px]">
