@@ -34,7 +34,7 @@ function RecentTransactionActionButton({
     <button
       {...props}
       className={clsx(
-        "h-8 rounded-5 relative px-6 border disabled:border-secondary-border disabled:text-tertiary-text duration-300 ease-in-out disabled:pointer-events-none",
+        "h-8 rounded-5 relative px-6 border disabled:border-secondary-border disabled:text-tertiary-text duration-300 ease-in-out disabled:pointer-events-none w-full",
         color === "primary"
           ? "border-transparent text-secondary-text hocus:text-primary-text bg-green-bg hocus:border-green-hover"
           : "border-primary-border text-secondary-text hocus:border-red-light hocus:text-primary-text hocus:bg-red-bg",
@@ -61,7 +61,7 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           <span className="text-16 font-medium block mr-1">
             {t("approve_title", { symbol: title.symbol })}
           </span>
-          <Badge color="green" text="ERC-20" />
+          {/*<Badge color="green" text="ERC-20" />*/}
         </div>
       );
     case RecentTransactionTitleTemplate.LIST_SINGLE:
@@ -85,7 +85,7 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           <span className="text-16 font-medium block mr-1">
             {t("deposit_title", { symbol: title.symbol })}
           </span>
-          <Badge color="green" text="ERC-223" />
+          {/*<Badge color="green" text="ERC-223" />*/}
         </div>
       );
     case RecentTransactionTitleTemplate.WITHDRAW:
@@ -95,7 +95,7 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           <span className="text-16 font-medium block mr-1">
             {t("withdraw_title", { symbol: title.symbol })}
           </span>
-          <Badge color="green" text="ERC-223" />
+          {/*<Badge color="green" text="ERC-223" />*/}
         </div>
       );
     case RecentTransactionTitleTemplate.SWAP:
@@ -202,14 +202,23 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
   }
 }
 
-export function RecentTransactionStatusIcon({ status }: { status: RecentTransactionStatus }) {
+export function RecentTransactionStatusIcon({
+  status,
+  replacement,
+}: {
+  status: RecentTransactionStatus;
+  replacement?: "cancelled" | "repriced";
+}) {
   switch (status) {
     case RecentTransactionStatus.PENDING:
       return <Preloader />;
     case RecentTransactionStatus.SUCCESS:
+      if (replacement === "cancelled") {
+        return <Svg className="text-red-light" iconName="warning" />;
+      }
       return <Svg className="text-green" iconName="done" />;
     case RecentTransactionStatus.ERROR:
-      return <Svg className="text-red" iconName="error" />;
+      return <Svg className="text-red-light" iconName="warning" />;
   }
 }
 
@@ -227,8 +236,9 @@ export default function RecentTransaction({
   isWaitingForProceeding?: boolean;
 }) {
   const t = useTranslations("RecentTransactions");
-  const { handleSpeedUp } = useTransactionSpeedUpDialogStore();
+  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
 
+  console.log(transaction);
   return (
     <div
       key={transaction.hash}
@@ -239,7 +249,7 @@ export default function RecentTransaction({
     >
       <div
         className={clsxMerge(
-          "w-full grid grid-cols-[1fr_76px]",
+          "w-full grid grid-cols-[1fr_auto]",
           isWaitingForProceeding && "flex flex-col sm:grid sm:grid-cols-[1fr_auto]",
         )}
       >
@@ -251,38 +261,44 @@ export default function RecentTransaction({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-3 @[620px]:flex">
-            {transaction.status === RecentTransactionStatus.PENDING &&
-              showSpeedUp &&
-              isLowestNonce && (
-                <>
-                  <RecentTransactionActionButton color="secondary">
-                    {t("cancel")}
-                  </RecentTransactionActionButton>
-                  <RecentTransactionActionButton
-                    isRepriced={transaction.replacement === "repriced"}
-                    onClick={() => handleSpeedUp(transaction)}
-                  >
-                    {t("speed_up")}
-                  </RecentTransactionActionButton>
-                </>
-              )}
-            {transaction.status === RecentTransactionStatus.PENDING &&
-              showSpeedUp &&
-              !isLowestNonce && (
-                <>
-                  <RecentTransactionActionButton disabled color="secondary">
-                    {t("queue")}
-                  </RecentTransactionActionButton>
-                </>
-              )}
-          </div>
+        <div className="flex @[420px]:items-center gap-3">
+          {/*<div className="hidden items-center gap-3 @[420px]:flex">*/}
+          {/*  {transaction.status === RecentTransactionStatus.PENDING &&*/}
+          {/*    showSpeedUp &&*/}
+          {/*    isLowestNonce && (*/}
+          {/*      <>*/}
+          {/*        <RecentTransactionActionButton color="secondary">*/}
+          {/*          {t("cancel")}*/}
+          {/*        </RecentTransactionActionButton>*/}
+          {/*        <RecentTransactionActionButton*/}
+          {/*          isRepriced={transaction.replacement === "repriced"}*/}
+          {/*          onClick={() => handleSpeedUp(transaction)}*/}
+          {/*        >*/}
+          {/*          {t("speed_up")}*/}
+          {/*        </RecentTransactionActionButton>*/}
+          {/*      </>*/}
+          {/*    )}*/}
+          {/*  {transaction.status === RecentTransactionStatus.PENDING &&*/}
+          {/*    showSpeedUp &&*/}
+          {/*    !isLowestNonce && (*/}
+          {/*      <>*/}
+          {/*        <RecentTransactionActionButton disabled color="secondary">*/}
+          {/*          {t("queue")}*/}
+          {/*        </RecentTransactionActionButton>*/}
+          {/*      </>*/}
+          {/*    )}*/}
+          {/*</div>*/}
 
           {!isWaitingForProceeding ? (
             <>
+              {transaction.replacement === "cancelled" && (
+                <span className="@[420px]:flex hidden items-center gap-1 text-red-light">
+                  Cancelled
+                  <Svg iconName="cancel" />
+                </span>
+              )}
               <a
-                className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200"
+                className="text-tertiary-text w-10 h-10 flex items-center justify-center hocus:text-green duration-200 relative -top-2 @[420px]:top-0"
                 target="_blank"
                 href={getExplorerLink(
                   ExplorerLinkType.TRANSACTION,
@@ -293,7 +309,10 @@ export default function RecentTransaction({
                 <Svg iconName="forward" />
               </a>
               <span className="flex-shrink-0">
-                <RecentTransactionStatusIcon status={transaction.status} />
+                <RecentTransactionStatusIcon
+                  replacement={transaction.replacement}
+                  status={transaction.status}
+                />
               </span>
             </>
           ) : (
@@ -305,21 +324,45 @@ export default function RecentTransaction({
         </div>
       </div>
 
+      {transaction.replacement === "cancelled" && (
+        <span className="@[420px]:hidden flex items-center gap-1 text-red-light text-12 mt-1">
+          Cancelled
+          <Svg iconName="cancel" size={16} />
+        </span>
+      )}
+
       {transaction.status === RecentTransactionStatus.PENDING && showSpeedUp && isLowestNonce && (
-        <div className="@[620px]:hidden w-full grid grid-cols-2 gap-3 mt-3">
-          <RecentTransactionActionButton color="secondary">
-            {t("cancel")}
-          </RecentTransactionActionButton>
-          <RecentTransactionActionButton
-            onClick={() => handleSpeedUp(transaction)}
-            isRepriced={transaction.replacement === "repriced"}
-          >
-            {t("speed_up")}
-          </RecentTransactionActionButton>
-        </div>
+        <>
+          {transaction.replacement !== "cancelled" ? (
+            <div className="w-full grid grid-cols-2 gap-3 mt-3">
+              <RecentTransactionActionButton
+                onClick={() => handleCancel(transaction)}
+                color="secondary"
+              >
+                {t("cancel")}
+              </RecentTransactionActionButton>
+
+              <RecentTransactionActionButton
+                onClick={() => handleSpeedUp(transaction)}
+                isRepriced={transaction.replacement === "repriced"}
+              >
+                {t("speed_up")}
+              </RecentTransactionActionButton>
+            </div>
+          ) : (
+            <div className="mt-3 w-full">
+              <RecentTransactionActionButton
+                onClick={() => handleSpeedUp(transaction)}
+                // isRepriced={transaction.replacement === "repriced"}
+              >
+                Speed up cancellation
+              </RecentTransactionActionButton>
+            </div>
+          )}
+        </>
       )}
       {transaction.status === RecentTransactionStatus.PENDING && showSpeedUp && !isLowestNonce && (
-        <div className="@[620px]:hidden w-full mt-3 grid grid-cols-1">
+        <div className="w-full mt-3 grid grid-cols-1">
           <RecentTransactionActionButton disabled color="secondary">
             {t("queue")}
           </RecentTransactionActionButton>

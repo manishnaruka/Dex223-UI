@@ -195,7 +195,7 @@ function pickLargerBigInt(a: bigint, b: bigint) {
 }
 
 export default function TransactionSpeedUpDialog() {
-  const { transaction, isOpen, handleClose } = useTransactionSpeedUpDialogStore();
+  const { transaction, isOpen, handleClose, replacement } = useTransactionSpeedUpDialogStore();
   const chainId = useCurrentChainId();
   const [speedUpOption, setSpeedUpOption] = useState<SpeedUpOption>(SpeedUpOption.AUTO_INCREASE);
   const { updateTransactionGasSettings, updateTransactionHash } = useRecentTransactionsStore();
@@ -332,18 +332,36 @@ export default function TransactionSpeedUpDialog() {
       try {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
         setIsLoading(true);
-        const hash = await walletClient.writeContract({
-          nonce: transaction.nonce,
-          ...gasPriceFormatted,
-          ...transaction.params,
-        });
-        addToast("Transaction sped up successfully");
-        updateTransactionHash(transaction.id, hash, address, "repriced");
+
+        if (replacement === "reprice" && transaction.replacement !== "cancelled") {
+          const hash = await walletClient.writeContract({
+            nonce: transaction.nonce,
+            ...gasPriceFormatted,
+            ...transaction.params,
+          });
+          addToast("Transaction sped up successfully");
+          updateTransactionHash(transaction.id, hash, address, "repriced");
+        }
+
+        if (replacement === "cancel" || transaction.replacement === "cancelled") {
+          const hash = await walletClient.sendTransaction({
+            nonce: transaction.nonce,
+            ...gasPriceFormatted,
+            value: BigInt(0),
+            to: address,
+            account: address,
+          });
+          addToast("Transaction cancellation submitted");
+          updateTransactionHash(transaction.id, hash, address, "cancelled");
+        }
+
         updateTransactionGasSettings(
           transaction.id,
           { model: transaction.gas.model, ...stringifyObject(gasPriceFormatted) },
           address,
         );
+
+        handleClose();
       } catch (e) {
         if (e instanceof ContractFunctionExecutionError) {
           if (e.cause instanceof TransactionExecutionError) {
@@ -357,6 +375,7 @@ export default function TransactionSpeedUpDialog() {
         handleClose();
       } finally {
         setIsLoading(false);
+
         closeConfirmInWalletAlert();
       }
     },
@@ -473,6 +492,18 @@ export default function TransactionSpeedUpDialog() {
     return "0";
   }, [transaction?.gas]);
 
+  const title = useMemo(() => {
+    if (transaction?.replacement === "cancelled" && replacement === "reprice") {
+      return "Speed up cancellation";
+    }
+
+    if (replacement === "cancel") {
+      return "Transaction cancellation";
+    }
+
+    return "Speed up";
+  }, [transaction, replacement]);
+
   if (!transaction) {
     return null;
   }
@@ -480,7 +511,7 @@ export default function TransactionSpeedUpDialog() {
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
       <div className="w-full md:w-[600px]">
-        <DialogHeader onClose={handleClose} title="Speed up" />
+        <DialogHeader onClose={handleClose} title={title} />
         <div className="px-4 pb-4 md:px-10 md:pb-10">
           <RecentTransaction
             isWaitingForProceeding={
@@ -648,22 +679,35 @@ export default function TransactionSpeedUpDialog() {
                 );
               })}
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-5">
-              <Button
-                type="button"
-                colorScheme={ButtonColor.LIGHT_GREEN}
-                onClick={() => handleClose()}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                fullWidth
-                disabled={isLoading || transaction.status !== RecentTransactionStatus.PENDING}
-              >
-                Speed up
-              </Button>
-            </div>
+            {replacement === "reprice" && (
+              <div className="grid grid-cols-2 gap-2 mt-5">
+                <Button
+                  type="button"
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  onClick={() => handleClose()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  fullWidth
+                  disabled={isLoading || transaction.status !== RecentTransactionStatus.PENDING}
+                >
+                  Apply
+                </Button>
+              </div>
+            )}
+            {replacement === "cancel" && (
+              <div className="mt-5">
+                <Button
+                  type="submit"
+                  fullWidth
+                  disabled={isLoading || transaction.status !== RecentTransactionStatus.PENDING}
+                >
+                  Confirm cancellation
+                </Button>
+              </div>
+            )}
           </form>
         </div>
       </div>
