@@ -1,5 +1,4 @@
 import { escapeRegExp } from "@/functions/escapeRegExp";
-import { useState } from "react";
 
 const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`); // match escaped "." characters via in a non-capturing group
 

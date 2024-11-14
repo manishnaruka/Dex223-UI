@@ -41,7 +41,7 @@ export default function PriceRangeInput({
   const [useLocalValue, setUseLocalValue] = useState(false);
 
   // animation if parent value updates local value
-  const [pulsing, setPulsing] = useState<boolean>(false);
+  // const [pulsing, setPulsing] = useState<boolean>(false);
 
   // const handleOnFocus = () => {
   //   setUseLocalValue(true);
@@ -69,9 +69,9 @@ export default function PriceRangeInput({
     if (localValue !== value && !useLocalValue) {
       setTimeout(() => {
         setLocalValue(value); // reset local value to match parent
-        setPulsing(true); // trigger animation
+        // setPulsing(true); // trigger animation
         setTimeout(function () {
-          setPulsing(false);
+          // setPulsing(false);
         }, 1800);
       }, 0);
     }

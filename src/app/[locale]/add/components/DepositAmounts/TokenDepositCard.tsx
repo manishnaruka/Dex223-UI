@@ -8,7 +8,7 @@ import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -316,7 +316,7 @@ export default function TokenDepositCard({
   isOutOfRange,
   tokenStandardRatio,
   setTokenStandardRatio,
-  gasPrice,
+  // gasPrice,
 }: {
   currency?: Currency;
   value: CurrencyAmount<Currency> | undefined;
@@ -328,7 +328,7 @@ export default function TokenDepositCard({
   tokenStandardRatio: number;
   // setTokenStandardRatio: (ratio: 0 | 100) => void;
   setTokenStandardRatio: (ratio: number) => void;
-  gasPrice?: bigint;
+  // gasPrice?: bigint;
 }) {
   const t = useTranslations("Liquidity");
 
