@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import React, { useMemo } from "react";
 import { useAccount } from "wagmi";
 

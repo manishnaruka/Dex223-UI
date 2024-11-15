@@ -10,7 +10,6 @@ export const PoolsDataDocument = gql`
     $skip: Int!
     $first: Int!
     $orderDirection: OrderDirection
-    $token0: String
     $where: Pool_filter
   ) {
     pools(

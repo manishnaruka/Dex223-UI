@@ -5300,6 +5300,7 @@ enum TickHourData_orderBy {
 type Token {
   id: ID!
   symbol: String!
+  addressERC223: String!
   name: String!
   decimals: BigInt!
   totalSupply: BigInt!
