@@ -6,17 +6,17 @@ import Image from "next/image";
 import Container from "@/components/atoms/Container";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { renderShortAddress } from "@/functions/renderAddress";
+import { useTokens } from "@/hooks/useTokenLists";
 import { Link, useRouter } from "@/navigation";
 
 import { usePoolData } from "../../hooks";
-import { useTokens } from "@/hooks/useTokenLists";
 
 const formatNumber = (num: number | string): string => {
   // Convert string to number
@@ -50,7 +50,7 @@ export default function ExplorePoolPage({
 
   const tokens = useTokens();
 
-  const { data, loading, ...restData } = usePoolData({
+  const { data, loading } = usePoolData({
     chainId,
     poolAddress,
   } as any);

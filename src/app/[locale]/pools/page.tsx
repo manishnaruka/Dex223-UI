@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
+import React, { useCallback, useState } from "react";
 
 import Container from "@/components/atoms/Container";
+import { SearchInput } from "@/components/atoms/Input";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import TabButton from "@/components/buttons/TabButton";
@@ -15,8 +17,11 @@ import PoolsTable from "./PoolsTable";
 
 export default function PoolsPage() {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
+  const t = useTranslations("Liquidity");
 
   const router = useRouter();
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
   const [tokenA, setTokenA] = useState<Currency>();
@@ -69,7 +74,7 @@ export default function PoolsPage() {
               Liquidity positions
             </TabButton>
           </div>
-          <div className="flex w-full lg:w-auto gap-2 items-center">
+          <div className="flex w-full lg:w-auto gap-2 items-center ml-auto">
             <SelectButton
               fullWidth
               onClick={() => {
@@ -156,11 +161,22 @@ export default function PoolsPage() {
               )}
             </SelectButton>
           </div>
+          <div className="md:w-[300px] w-full">
+            <SearchInput
+              placeholder={t("pools_search_placeholder")}
+              className="bg-primary-bg"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+              }}
+            />
+          </div>
         </div>
         <PoolsTable
           filter={{
             token0Address: tokenA?.wrapped.address0,
             token1Address: tokenB?.wrapped.address0,
+            searchString: searchQuery,
           }}
         />
       </div>

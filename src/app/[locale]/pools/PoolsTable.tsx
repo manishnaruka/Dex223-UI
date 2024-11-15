@@ -18,6 +18,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 
 export enum SortingType {
   NONE,
@@ -242,6 +243,7 @@ export default function PoolsTable({
   filter?: {
     token0Address?: Address;
     token1Address?: Address;
+    searchString?: string;
   };
 }) {
   const [sorting, setSorting] = useState<SortingType>(SortingType.NONE);
@@ -268,7 +270,10 @@ export default function PoolsTable({
     orderDirection: GQLSorting[sorting],
     filter,
   });
-  const pools = useMemo(() => data?.pools || [], [data?.pools]);
+
+  console.dir(data);
+
+  const pools: any[] = useMemo(() => data?.pools || [], [data?.pools]);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
@@ -290,20 +295,33 @@ export default function PoolsTable({
           </div>
         ) : (
           <>
-            <PoolsTableDesktop
-              tableData={currentTableData}
-              sorting={sorting}
-              currentPage={currentPage}
-              handleSort={handleSort}
-              openPoolHandler={openPoolHandler}
-            />
-            <PoolsTableMobile
-              tableData={currentTableData}
-              sorting={sorting}
-              currentPage={currentPage}
-              handleSort={handleSort}
-              openPoolHandler={openPoolHandler}
-            />
+            {pools.length > 0 ? (
+              <>
+                <PoolsTableDesktop
+                  tableData={currentTableData}
+                  sorting={sorting}
+                  currentPage={currentPage}
+                  handleSort={handleSort}
+                  openPoolHandler={openPoolHandler}
+                />
+                <PoolsTableMobile
+                  tableData={currentTableData}
+                  sorting={sorting}
+                  currentPage={currentPage}
+                  handleSort={handleSort}
+                  openPoolHandler={openPoolHandler}
+                />
+              </>
+            ) : (
+              <div className="w-full overflow-hidden">
+                <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 relative">
+                  <div className="absolute inset-0 overflow-hidden rounded-5">
+                    <EmptyStateIcon iconName="poolList" className="absolute right-0" />
+                  </div>
+                  <p className="text-16 text-secondary-text relative z-10">Pools not found</p>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

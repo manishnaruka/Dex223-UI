@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import Image from "next/image";
+import React, { useMemo } from "react";
 import { useAccount } from "wagmi";
 
 import Container from "@/components/atoms/Container";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -126,11 +127,13 @@ const Positions = () => {
       ) : (
         <>
           {!isConnected ? (
-            <div className="w-full">
-              <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5">
-                <EmptyStateIcon iconName="wallet" />
-                <p className="text-16 text-secondary-text">
-                  Connect to a wallet to see your liquidity
+            <div className="w-full overflow-hidden">
+              <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 relative">
+                <div className="absolute inset-0 overflow-hidden rounded-5">
+                  <EmptyStateIcon iconName="wallet" className="absolute right-0" />
+                </div>
+                <p className="text-16 text-secondary-text relative z-10">
+                  Connect to a wallet to see your liquidity positions
                 </p>
               </div>
             </div>
@@ -161,10 +164,12 @@ const Positions = () => {
                   </div>
                 </div>
               ) : (
-                <div className="w-full">
-                  <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5">
-                    <EmptyStateIcon iconName="pool" />
-                    <p className="text-16 text-secondary-text">
+                <div className="w-full overflow-hidden">
+                  <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 relative">
+                    <div className="absolute inset-0 overflow-hidden rounded-5">
+                      <EmptyStateIcon iconName="pool" className="absolute right-0" />
+                    </div>
+                    <p className="text-16 text-secondary-text relative z-10">
                       Your active liquidity positions will appear here
                     </p>
                   </div>
