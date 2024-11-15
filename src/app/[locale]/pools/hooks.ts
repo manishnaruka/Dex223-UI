@@ -110,10 +110,10 @@ export function usePoolsData({
       where: filter?.searchString
         ? {
             or: [
-              { token0_: { name_contains: filter.searchString } },
-              { token1_: { name_contains: filter.searchString } },
-              { token0_: { symbol_contains: filter.searchString } },
-              { token1_: { symbol_contains: filter.searchString } },
+              { token0_: { name_contains_nocase: filter.searchString } },
+              { token1_: { name_contains_nocase: filter.searchString } },
+              { token0_: { symbol_contains_nocase: filter.searchString } },
+              { token1_: { symbol_contains_nocase: filter.searchString } },
               { id: filter.searchString.toLowerCase() },
             ],
           }
