@@ -438,7 +438,6 @@ export default function PoolPage({
               {token0?.isNative ? null : (
                 <div className="flex flex-col gap-2 md:gap-3 mt-3">
                   <RadioButton
-                    className="bg-quaternary-bg"
                     isActive={token0Standard === Standard.ERC20}
                     onClick={() => setToken0Standard(Standard.ERC20)}
                     disabled={
@@ -454,7 +453,6 @@ export default function PoolPage({
                     </div>
                   </RadioButton>
                   <RadioButton
-                    className="bg-quaternary-bg"
                     isActive={token0Standard === Standard.ERC223}
                     onClick={() => setToken0Standard(Standard.ERC223)}
                     disabled={
@@ -496,7 +494,6 @@ export default function PoolPage({
               {token1?.isNative ? null : (
                 <div className="flex flex-col gap-2 mt-3">
                   <RadioButton
-                    className="bg-quaternary-bg"
                     isActive={token1Standard === Standard.ERC20}
                     onClick={() => setToken1Standard(Standard.ERC20)}
                     disabled={
@@ -514,7 +511,6 @@ export default function PoolPage({
                     </div>
                   </RadioButton>
                   <RadioButton
-                    className="bg-quaternary-bg"
                     isActive={token1Standard === Standard.ERC223}
                     onClick={() => setToken1Standard(Standard.ERC223)}
                     disabled={

@@ -16,6 +16,7 @@ import { renderShortAddress } from "@/functions/renderAddress";
 import { Link, useRouter } from "@/navigation";
 
 import { usePoolData } from "../../hooks";
+import { useTokens } from "@/hooks/useTokenLists";
 
 const formatNumber = (num: number | string): string => {
   // Convert string to number
@@ -47,6 +48,8 @@ export default function ExplorePoolPage({
   const { chainId, poolAddress } = params;
   const router = useRouter();
 
+  const tokens = useTokens();
+
   const { data, loading, ...restData } = usePoolData({
     chainId,
     poolAddress,
@@ -62,6 +65,8 @@ export default function ExplorePoolPage({
     );
 
   const { pool } = data;
+  const tokenA = tokens.find((t) => t.wrapped.address0.toLowerCase() === pool.token0.id);
+  const tokenB = tokens.find((t) => t.wrapped.address0.toLowerCase() === pool.token1.id);
 
   const valuePercent =
     (Number(pool.token0.totalValueLocked) * 100) /
@@ -186,10 +191,7 @@ export default function ExplorePoolPage({
         </div>
       </div>
       <div className="lg:w-[800px] lg:mx-auto lg:mb-[40px] gap-5 flex flex-col">
-        <SelectedTokensInfo
-          tokenA={{ ...pool.token0, address0: pool.token0.id, address1: pool.token0.addressERC223 }}
-          tokenB={{ ...pool.token1, address0: pool.token1.id, address1: pool.token1.addressERC223 }}
-        />
+        <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
       </div>
     </Container>
   );

@@ -15,6 +15,8 @@ interface Props {
   tokenB: Currency | undefined;
 }
 export default function SelectedTokensInfo({ tokenA, tokenB }: Props) {
+  console.dir(tokenA);
+
   if (!tokenA && !tokenB) {
     return null;
   }
@@ -29,7 +31,7 @@ export default function SelectedTokensInfo({ tokenA, tokenB }: Props) {
 
 function AddressPair({ token }: { token: Token }) {
   return (
-    <div className="flex gap-2 flex-col min-[450px]:flex-row">
+    <div className="flex gap-2 flex-col md:flex-row">
       <TokenAddressWithStandard
         tokenAddress={token.address0}
         standard={Standard.ERC20}
@@ -48,7 +50,7 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
 
   return (
     <div className="bg-tertiary-bg rounded-3 py-2.5 px-5 flex flex-wrap justify-between items-center @container relative z-20">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mr-auto md:mr-3">
         <Image
           src={token.logoURI || "/tokens/placeholder.svg"}
           alt="Ethereum"
@@ -56,20 +58,23 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
           height={32}
         />
         <div className="flex flex-col">
-          <div className="flex gap-2 items-center">
-            {token.name}
-            {token.isToken && (
-              <div className="hidden @[620px]:block">
-                <AddressPair token={token} />
-              </div>
-            )}
-          </div>
+          <div className="flex gap-2 items-center">{token.name}</div>
           <div className="text-secondary-text text-12">{token.symbol}</div>
         </div>
       </div>
       {token.isToken && (
+        <div className="hidden @[620px]:block mr-3 md:mr-auto">
+          <AddressPair token={token} />
+        </div>
+      )}
+      {token.isToken && (
         <div className="flex gap-2 items-center">
-          {token.rate && <TrustBadge rate={token?.rate} />}
+          {/*{token.rate && <TrustBadge rate={token?.rate} />}*/}
+          {token.rate && (
+            <div className="hidden @[620px]:block items-right">
+              <TrustBadge rate={token?.rate} />
+            </div>
+          )}
 
           <Tooltip
             text={`Token belongs to ${token.lists?.length || 1} token lists`}
@@ -104,8 +109,15 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
         </div>
       )}
       {token.isToken && (
-        <div className="@[620px]:hidden w-full mt-3">
-          <AddressPair token={token} />
+        <div className="@[620px]:hidden w-full">
+          {token.rate && (
+            <div className="@[620px]:hidden flex">
+              <TrustBadge rate={token?.rate} />
+            </div>
+          )}
+          <div className="@[620px]:hidden w-full mt-3">
+            <AddressPair token={token} />
+          </div>
         </div>
       )}
     </div>

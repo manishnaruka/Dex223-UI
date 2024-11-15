@@ -166,7 +166,7 @@ export const LiquidityActionButton = ({
   if (!tokenA || !tokenB) {
     return (
       <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
-        {t("select_tokens")}
+        {t("select_pair")}
       </Button>
     );
   }
