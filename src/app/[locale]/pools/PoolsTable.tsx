@@ -3,6 +3,7 @@ import Image from "next/image";
 import React, { useCallback, useMemo, useState } from "react";
 import { Address } from "viem";
 
+import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
@@ -18,7 +19,6 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 
 export enum SortingType {
   NONE,
