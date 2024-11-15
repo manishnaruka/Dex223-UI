@@ -104,9 +104,9 @@ export type IRecentTransaction = {
   gas: { gas: string } & RecentTransactionGasLimit;
   params: IncreaseLiquidityParams | SwapParams | RemoveLiquidityParams | ApproveTokenParams;
   title: IRecentTransactionTitle;
+  replacement?: "repriced" | "cancelled";
 };
 
-const localStorageKey = "d223_recent_transactions_v1";
 interface RecentTransactions {
   transactions: {
     [key: string]: IRecentTransaction[];
@@ -116,7 +116,17 @@ interface RecentTransactions {
     accountAddress: Address,
   ) => void;
   updateTransactionStatus: (id: string, status: RecentTransactionStatus, account: string) => void;
-  updateTransactionHash: (id: string, newHash: `0x${string}`, account: string) => void;
+  updateTransactionHash: (
+    id: string,
+    newHash: `0x${string}`,
+    account: string,
+    replacement: "repriced" | "cancelled",
+  ) => void;
+  updateTransactionGasSettings: (
+    id: string,
+    newGasSettings: RecentTransactionGasLimit,
+    account: string,
+  ) => void;
   clearTransactions: () => void;
 }
 
@@ -172,7 +182,7 @@ export const useRecentTransactionsStore = create<RecentTransactions>()(
 
           return { transactions: updatedTransactions };
         }),
-      updateTransactionHash: (id, newHash, account) =>
+      updateTransactionHash: (id, newHash, account, replacement) =>
         set((state) => {
           const updatedTransactions = { ...state.transactions };
           const accountTransactions = updatedTransactions[account];
@@ -181,6 +191,33 @@ export const useRecentTransactionsStore = create<RecentTransactions>()(
           if (!transaction) return {};
 
           transaction.hash = newHash;
+          transaction.replacement = replacement;
+
+          return { transactions: updatedTransactions };
+        }),
+
+      updateTransactionGasSettings: (id, newGasSettings, account) =>
+        set((state) => {
+          const updatedTransactions = { ...state.transactions };
+          const accountTransactions = updatedTransactions[account];
+          const transaction = accountTransactions.find((t) => t.id === id);
+
+          if (!transaction) return {};
+
+          if (transaction.gas.model === GasFeeModel.EIP1559) {
+            transaction.gas = {
+              ...newGasSettings,
+              gas: transaction.gas.gas,
+            };
+          }
+
+          if (transaction.gas.model === GasFeeModel.LEGACY) {
+            transaction.gas = {
+              ...newGasSettings,
+              gas: transaction.gas.gas,
+            };
+          }
+
           return { transactions: updatedTransactions };
         }),
       clearTransactions: () =>

@@ -59,14 +59,17 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
   return (
     <div
       role="button"
-      className="px-4 lg:px-5 py-4 rounded-3 bg-tertiary-bg hocus:bg-green-bg duration-200 cursor-pointer"
+      className="px-4 lg:px-5 py-4 rounded-3 bg-tertiary-bg hocus:bg-quaternary-bg duration-200 cursor-pointer"
       onClick={onClick}
     >
       <div className="justify-between flex items-center mb-2 gap-2">
         <div className="flex items-center gap-2">
           <TokensPair tokenA={tokenA} tokenB={tokenB} />
           {fee ? (
-            <Badge variant={BadgeVariant.DEFAULT} text={`${FEE_AMOUNT_DETAIL[fee].label}%`} />
+            <Badge
+              variant={BadgeVariant.PERCENTAGE}
+              percentage={`${FEE_AMOUNT_DETAIL[fee].label}%`}
+            />
           ) : (
             <Badge variant={BadgeVariant.DEFAULT} text="loading..." />
           )}

@@ -38,12 +38,12 @@ export function InputLabel({ label, tooltipText, ...props }: Omit<Props, "helper
   return (
     <p
       className={clsx(
-        "text-16 font-bold mb-1 flex items-center gap-1 text-secondary-text",
+        "text-14 font-bold mb-1 flex items-center gap-1 text-secondary-text",
         props.disabled && "opacity-50",
       )}
     >
       {label}
-      {tooltipText && <Tooltip iconSize={24} text={tooltipText} />}
+      {tooltipText && <Tooltip iconSize={20} text={tooltipText} />}
     </p>
   );
 }

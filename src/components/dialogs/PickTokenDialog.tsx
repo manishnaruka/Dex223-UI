@@ -95,7 +95,7 @@ function TokenRow({
         </div>
         <div className="w-full">
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center md:gap-2 flex-wrap">
+            <div className="flex items-center md:gap-x-2 flex-wrap">
               <div className="flex items-center w-[120px] md:gap-2 md:w-[256px]">
                 <span className="whitespace-nowrap overflow-ellipsis overflow-hidden">
                   {currency.name}
@@ -132,7 +132,7 @@ function TokenRow({
             </div>
 
             <div className="flex items-center gap-1">
-              <span className="text-primary-text text-12 hidden md:inline">$0.00</span>
+              <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
               {currency.isToken ? (
                 <Tooltip
                   text={`Token belongs to ${currency.lists?.length || 1} token lists`}
@@ -171,11 +171,12 @@ function TokenRow({
                     toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
                   }
                 }}
+                active={isTokenPinned}
               />
             </div>
           </div>
 
-          <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid">
+          <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid min-h-4">
             {!isTokenPinned && (
               <span className="text-secondary-text text-12">{currency.symbol}</span>
             )}
@@ -327,9 +328,11 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                             }}
                             className={clsx(
                               isEditActivated
-                                ? "bg-transparent border-secondary-border hocus:bg-transparent"
-                                : "bg-tertiary-bg border-transparent hocus:bg-green-bg",
+                                ? "bg-transparent border-secondary-border"
+                                : "bg-tertiary-bg border-transparent",
                               "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                              !isMobile && isEditActivated && "hocus:bg-transparent",
+                              !isMobile && !isEditActivated && "hocus:bg-green-bg",
                             )}
                           >
                             <Image
@@ -349,8 +352,10 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                               );
                             }}
                             className={clsxMerge(
-                              "group-hocus:opacity-100 hocus:opacity-100 opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text hocus:text-primary-text -right-1 -top-1",
+                              "opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text  -right-1 -top-1",
                               isEditActivated && "opacity-100",
+                              !isMobile &&
+                                "group-hocus:opacity-100 hocus:opacity-100 hocus:text-primary-text",
                             )}
                           >
                             <Svg size={16} iconName="close" />
@@ -398,7 +403,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     setIsOpen(false);
                     setManageOpened(true);
                   }}
-                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg hocus:shadow hocus:shadow-green/60 duration-200"
+                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
                 >
                   Manage tokens
                   <Svg iconName="edit" />

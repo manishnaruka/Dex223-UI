@@ -41,7 +41,7 @@ function SettingsButton({ text, isActive = false, className, ...props }: Setting
     <button
       {...props}
       className={clsxMerge(
-        "duration-200 px-6 w-full border flex items-center justify-center rounded-2 text-12 lg:text-16 h-10",
+        "duration-200 px-6 w-full border flex items-center justify-center rounded-2 text-12 lg:text-16 h-10 md:h-12",
         isActive
           ? "bg-green-bg shadow shadow-green/60 border-green text-primary-text"
           : "bg-tertiary-bg border-transparent hocus:bg-green-bg text-secondary-text",
@@ -75,7 +75,7 @@ function SettingsInput({ isActive, isError, ...props }: SettingsInputProps) {
       allowNegative={false}
       {...props}
       className={clsx(
-        " focus:outline-0  rounded-2 duration-200  py-2.5 px-1.5 md:px-3 text-center placeholder:text-center placeholder:text-secondary-text w-full border text-12 lg:text-16",
+        " focus:outline-0  rounded-2 duration-200 py-1.5 md:py-2.5 px-1.5 md:px-3 text-center placeholder:text-center placeholder:text-secondary-text w-full border text-12 lg:text-16",
         isActive &&
           !isError &&
           "bg-green-bg shadow shadow-green/60 border-green text-primary-text hocus:bg-green-bg ",

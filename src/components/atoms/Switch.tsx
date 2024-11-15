@@ -30,9 +30,14 @@ export default function Switch({ checked, handleChange, small = false, disabled 
                       left-0
                       duration-200
                       peer-checked:border-green
+                      peer-checked:bg-green-bg
+                      peer-checked:hocus:shadow
+                      peer-checked:hocus:shadow-green/60
                       border-primary-border
                       border
                       rounded-5
+                      peer-hocus:before:bg-green
+                      peer-hocus:border-green
                       peer-checked:before:bg-green
                       peer-checked:before:translate-x-6
                       before:content-['']

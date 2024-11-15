@@ -34,7 +34,11 @@ export default function Popover({
   const { refs, floatingStyles, context } = useFloating({
     open: isOpened,
     onOpenChange: setIsOpened,
-    middleware: [offset(customOffset || 24), flip({ fallbackAxisSideDirection: "end" }), shift()],
+    middleware: [
+      offset(customOffset || 24),
+      flip({ fallbackAxisSideDirection: "end", mainAxis: false }),
+      shift(),
+    ],
     placement,
     whileElementsMounted: autoUpdate,
   });

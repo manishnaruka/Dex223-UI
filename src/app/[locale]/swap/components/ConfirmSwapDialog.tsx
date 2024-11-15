@@ -2,6 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, ReactNode, useEffect, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
 import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
@@ -14,7 +15,11 @@ import {
   useSwapGasPriceStore,
 } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
-import { SwapError, useSwapStatusStore } from "@/app/[locale]/swap/stores/useSwapStatusStore";
+import {
+  SwapError,
+  SwapStatus,
+  useSwapStatusStore,
+} from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -456,6 +461,9 @@ export default function ConfirmSwapDialog() {
     isSettledSwap,
     isRevertedApprove,
   } = useSwapStatus();
+
+  const { status: swapStatus, setStatus: setSwapStatus } = useSwapStatusStore();
+
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
 
   const isProcessing = useMemo(() => {
@@ -512,7 +520,15 @@ export default function ConfirmSwapDialog() {
     if (isSuccessSwap && !isOpen) {
       resetAmounts();
     }
-  }, [isOpen, isSuccessSwap, resetAmounts, resetTokens]);
+  }, [isSuccessSwap, resetAmounts, isOpen]);
+
+  useEffect(() => {
+    if ((isSuccessSwap || isRevertedSwap || isRevertedApprove) && !isOpen) {
+      setTimeout(() => {
+        setSwapStatus(SwapStatus.INITIAL);
+      }, 400);
+    }
+  }, [isOpen, isRevertedApprove, isRevertedSwap, isSuccessSwap, setSwapStatus, swapStatus]);
 
   const [isEditApproveActive, setEditApproveActive] = useState(false);
 
@@ -681,11 +697,15 @@ export default function ConfirmSwapDialog() {
                     ) : (
                       <div className="flex-grow">
                         <div className="relative w-full flex-grow">
-                          <Input
+                          <NumericFormat
                             isError={+amountToApprove < +typedValue}
                             className="h-8 pl-3"
                             value={amountToApprove}
-                            onChange={(e) => setAmountToApprove(e.target.value)}
+                            onValueChange={(values) => {
+                              setAmountToApprove(values.value);
+                            }}
+                            customInput={Input}
+                            allowNegative={false}
                             type="text"
                           />
                           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">

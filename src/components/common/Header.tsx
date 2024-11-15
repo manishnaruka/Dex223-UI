@@ -30,19 +30,19 @@ export default function Header() {
             </div>
             <div className="flex items-center gap-2 md:gap-3">
               <LocaleSwitcher />
-              <div className="fixed w-[calc(50%-24px)] bottom-2 left-4 md:static md:w-auto md:bottom-unset z-[88] md:z-[21]">
+              <div className="fixed w-[calc(50%-20px)] bottom-4 left-4 md:static md:w-auto md:bottom-unset z-[88] md:z-[21]">
                 <TokenListsSettings />
               </div>
               <NetworkPicker />
 
-              <div className="fixed w-[calc(50%-24px)] bottom-2 right-4 md:static md:w-auto md:bottom-unset z-[88] md:z-[21]">
+              <div className="fixed w-[calc(50%-20px)] bottom-4 right-4 md:static md:w-auto md:bottom-unset z-[88] md:z-[21]">
                 <AccountDialog />
               </div>
 
               <MobileMenu />
             </div>
 
-            <div className="md:hidden grid grid-cols-2 fixed bottom-0 left-0 bg-secondary-bg z-[87] gap-2 w-full h-12 before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute before:top-0 before:left-0" />
+            <div className="md:hidden grid grid-cols-2 fixed bottom-0 left-0 bg-secondary-bg z-[87] gap-2 w-full h-[64px] before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute before:top-0 before:left-0" />
           </div>
         </Container>
       </header>
