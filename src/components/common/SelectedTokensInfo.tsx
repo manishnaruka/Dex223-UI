@@ -15,8 +15,6 @@ interface Props {
   tokenB: Currency | undefined;
 }
 export default function SelectedTokensInfo({ tokenA, tokenB }: Props) {
-  console.dir(tokenA);
-
   if (!tokenA && !tokenB) {
     return null;
   }

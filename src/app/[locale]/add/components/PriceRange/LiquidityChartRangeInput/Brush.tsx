@@ -113,6 +113,10 @@ export const Brush = ({
 
   const previousBrushExtent = usePrevious(brushExtent);
 
+  const beforebrushstarted = useCallback((event: D3BrushEvent<unknown>) => {
+    // do nothing
+  }, []);
+
   const brushed = useCallback(
     (event: D3BrushEvent<unknown>) => {
       const { type, selection, mode } = event;
@@ -167,7 +171,20 @@ export const Brush = ({
       .attr("stroke", "none")
       .attr("fill-opacity", "0.1")
       .attr("fill", `url(#${id}-gradient-selection)`);
-  }, [brushExtent, brushed, id, innerHeight, innerWidth, interactive, previousBrushExtent, xScale]);
+
+    // NOTE: not the best, but it works without errors - to prevent resetting interval (selection)
+    select(".overlay").datum({ type: "none" }).on("mousedown touchstart", beforebrushstarted);
+  }, [
+    beforebrushstarted,
+    brushExtent,
+    brushed,
+    id,
+    innerHeight,
+    innerWidth,
+    interactive,
+    previousBrushExtent,
+    xScale,
+  ]);
 
   // respond to xScale changes only
   useEffect(() => {
