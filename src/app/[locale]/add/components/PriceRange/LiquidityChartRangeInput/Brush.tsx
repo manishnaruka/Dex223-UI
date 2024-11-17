@@ -225,9 +225,13 @@ export const Brush = ({
       <>
         <defs>
           <linearGradient id={`${id}-gradient-selection`} x1="0%" y1="100%" x2="100%" y2="100%">
-            <stop stopColor={westHandleColor} />
-            <stop stopColor={eastHandleColor} offset="1" />
+            <stop stopColor="rgba(125, 164, 145, 1)" /> {/* Light green with some transparency */}
+            <stop stopColor="rgba(125, 164, 145, 1)" offset="1" />{" "}
+            {/* Darker green with some transparency */}
           </linearGradient>
+          {/*<stop stopColor={westHandleColor} />*/}
+          {/*<stop stopColor={eastHandleColor} offset="1" />*/}
+          {/*</linearGradient>*/}
 
           {/* clips at exactly the svg area */}
           <clipPath id={`${id}-brush-clip`}>

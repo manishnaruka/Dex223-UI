@@ -33,6 +33,9 @@ export function Chart({
     [width, height, margins],
   );
 
+  console.dir(series);
+  console.dir(current);
+
   const { xScale, yScale } = useMemo(() => {
     const scales = {
       xScale: scaleLinear()
@@ -88,6 +91,7 @@ export function Chart({
         width="100%"
         height="100%"
         viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="xMidYMid meet"
         style={{ overflow: "visible" }}
       >
         <defs>
@@ -107,28 +111,65 @@ export function Chart({
               />
             </mask>
           )}
+
+          <linearGradient id={`${id}-gradient-red`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(255,0,0,0.7)" />
+            <stop offset="100%" stopColor="rgba(255,0,0,0.3)" />
+          </linearGradient>
+
+          <linearGradient id={`${id}-gradient-green`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(0,255,0,0.7)" />
+            <stop offset="100%" stopColor="rgba(0,255,0,0.3)" />
+          </linearGradient>
         </defs>
 
         <g transform={`translate(${margins.left},${margins.top})`}>
           <g clipPath={`url(#${id}-chart-clip)`}>
+            {/* Left side of the Line (red) */}
             <Area
-              series={series}
+              series={series.filter((d) => xAccessor(d) <= current)}
               xScale={xScale}
               yScale={yScale}
               xValue={xAccessor}
               yValue={yAccessor}
+              color={"stroke-red fill-red opacity-50"}
+              // fill="red"
+            />
+
+            {/* Right side of the Line (green) */}
+            <Area
+              series={series.filter((d) => xAccessor(d) > current)}
+              xScale={xScale}
+              yScale={yScale}
+              xValue={xAccessor}
+              yValue={yAccessor}
+              // fill="green"
             />
 
             {brushDomain && (
               // duplicate area chart with mask for selected area
               <g mask={`url(#${id}-chart-area-mask)`}>
+                {/* Left side of the Line (red) */}
                 <Area
-                  series={series}
+                  series={series.filter((d) => xAccessor(d) <= current)}
                   xScale={xScale}
                   yScale={yScale}
                   xValue={xAccessor}
                   yValue={yAccessor}
-                  fill={styles.area.selection}
+                  color={"stroke-red fill-red opacity-50"}
+                  // fill={styles.area.selection}
+                  fill={`url(#${id}-gradient-red)`}
+                />
+
+                {/* Right side of the Line (green) */}
+                <Area
+                  series={series.filter((d) => xAccessor(d) > current)}
+                  xScale={xScale}
+                  yScale={yScale}
+                  xValue={xAccessor}
+                  yValue={yAccessor}
+                  // fill={styles.area.selection}
+                  fill={`url(#${id}-gradient-green)`}
                 />
               </g>
             )}

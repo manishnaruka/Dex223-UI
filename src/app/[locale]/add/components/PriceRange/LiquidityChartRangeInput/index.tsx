@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { ReactNode, useCallback, useEffect, useMemo } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -12,7 +12,17 @@ import { formatDelta, useDensityChartData } from "./hooks";
 import { Bound } from "./types";
 
 const ChartWrapper = ({ children, ...props }: any) => (
-  <div className="relative w-full max-h-[200px] justify-center items-center" {...props}>
+  <div
+    className="relative w-full lg:h-auto md:h-[300px] h-[200px] justify-center items-center"
+    style={{
+      // maxWidth: "510px",
+      width: "100%",
+      height: "auto",
+    }}
+    {...props}
+    // className="relative w-full lg:h-auto h-[220px] justify-center items-center"
+    // {...props}
+  >
     {children}
   </div>
 );
@@ -147,9 +157,33 @@ export default function LiquidityChartRangeInput({
     }
   }, [brushDomain, onBrushDomainChangeEnded, price, zoomLevels.initialMin, zoomLevels.initialMax]);
 
+  // State to manage chart dimensions
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>(() => {
+    const isMobile = window.innerWidth <= 768;
+    return isMobile ? { width: 252, height: 170 } : { width: 510, height: 352 };
+  });
+
+  // Update dimensions on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      setDimensions(isMobile ? { width: 252, height: 170 } : { width: 510, height: 352 });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     // <AutoColumn gap="md" style={{ minHeight: "200px" }}>
-    <div style={{ minHeight: "200px" }}>
+    <div
+      style={{
+        minHeight: "200px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       {isUninitialized ? (
         <InfoBox
           message={<span>{t("price_chart_data_will_appear_here")}</span>}
@@ -176,7 +210,7 @@ export default function LiquidityChartRangeInput({
           <Chart
             data={{ series: formattedData!, current: price }}
             // data={{ series: [], current: price }}
-            dimensions={{ width: 560, height: 240 }}
+            dimensions={dimensions}
             margins={{ top: 10, right: 2, bottom: 20, left: 0 }}
             styles={{
               area: {
@@ -186,8 +220,8 @@ export default function LiquidityChartRangeInput({
                 handle: {
                   // west: saturate(0.1, tokenAColor) ?? theme.critical,
                   // east: saturate(0.1, tokenBColor) ?? theme.accent1,
-                  west: "#9576ec",
-                  east: "#9576ec",
+                  west: "#8089BD",
+                  east: "#8089BD",
                 },
               },
             }}
