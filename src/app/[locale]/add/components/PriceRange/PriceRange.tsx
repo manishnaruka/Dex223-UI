@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import {
   Field,
@@ -22,6 +22,12 @@ import LiquidityChartRangeInput from "./LiquidityChartRangeInput";
 import { Bound } from "./LiquidityChartRangeInput/types";
 import { PriceRangeHeader } from "./PriceRangeHeader";
 import PriceRangeInput from "./PriceRangeInput";
+
+import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
+import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
+import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
+
+import { FeeAmount } from "@/sdk_hybrid/constants";
 
 export const PriceRange = ({
   noLiquidity,
@@ -67,6 +73,8 @@ export const PriceRange = ({
 }) => {
   const t = useTranslations("Liquidity");
   const { tokenA, tokenB, setBothTokens } = useAddLiquidityTokensStore();
+  const { setZoomIn, setZoomOut, setZoomInitial } = useZoomStateStore();
+  const { setRefreshTicksTrigger } = useRefreshTicksDataStore();
   const {
     ticks,
     leftRangeTypedValue,
@@ -80,7 +88,7 @@ export const PriceRange = ({
     resetPriceRangeValue,
     setTicks,
   } = useLiquidityPriceRangeStore();
-  const { tier } = useLiquidityTierStore();
+  const { tier, setTier } = useLiquidityTierStore();
   const [, pool] = usePool({
     currencyA: tokenA,
     currencyB: tokenB,
@@ -279,10 +287,42 @@ export const PriceRange = ({
         </>
       ) : (
         <>
-          <CurrentPrice
-            price={formattedPrice}
-            description={tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}
-          />
+          <div className="flex w-full flex-row">
+            <CurrentPrice
+              price={formattedPrice}
+              description={tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}
+            />
+            <div className="ml-auto flex-col mt-auto">
+              <div
+                onClick={() => {
+                  const locTier = tier;
+                  setRefreshTicksTrigger(true);
+                  setZoomInitial(true);
+                }}
+                className="flex mb-2 text-12 cursor-pointer text-secondary-text hocus:text-green justify-end items-center w-100"
+              >
+                {t("refresh")}
+                <Svg
+                  iconName="convert"
+                  // className="text-tertiary-text group-hocus:text-green mr-1 flex-shrink-0"
+                />
+              </div>
+              <div className="ml-auto flex gap-2 justify-end items-center w-100 ">
+                <IconButton
+                  variant={IconButtonVariant.CONTROL}
+                  buttonSize={24}
+                  iconName="zoom-in"
+                  onClick={() => setZoomIn(true)}
+                />
+                <IconButton
+                  variant={IconButtonVariant.CONTROL}
+                  buttonSize={24}
+                  iconName="zoom-out"
+                  onClick={() => setZoomOut(true)}
+                />
+              </div>
+            </div>
+          </div>
           <LiquidityChartRangeInput
             currencyA={tokenA ?? undefined}
             currencyB={tokenB ?? undefined}

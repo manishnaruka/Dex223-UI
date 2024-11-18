@@ -59,6 +59,10 @@ export function Chart({
     zoom,
   ]);
 
+  // useEffect(() => {
+  //   console.log("Updated series data:", series);
+  // }, [series]);
+
   useEffect(() => {
     // reset zoom as necessary
     setZoom(null);
@@ -93,7 +97,7 @@ export function Chart({
             "reset",
           );
         }}
-        showResetButton={Boolean(ticksAtLimit[Bound.LOWER] || ticksAtLimit[Bound.UPPER])}
+        // showResetButton={Boolean(ticksAtLimit[Bound.LOWER] || ticksAtLimit[Bound.UPPER])}
         zoomLevels={zoomLevels}
       />
       <svg

@@ -10,6 +10,7 @@ import { ZOOM_LEVELS } from "../../../hooks/types";
 import { Chart } from "./Chart";
 import { formatDelta, useDensityChartData } from "./hooks";
 import { Bound } from "./types";
+import { useMediaQuery } from "react-responsive";
 
 const ChartWrapper = ({ children, ...props }: any) => (
   <div
@@ -156,22 +157,13 @@ export default function LiquidityChartRangeInput({
     }
   }, [brushDomain, onBrushDomainChangeEnded, price, zoomLevels.initialMin, zoomLevels.initialMax]);
 
+  // const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
   // State to manage chart dimensions
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>(() => {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window ? window.innerWidth <= 768 : false;
     return isMobile ? { width: 252, height: 170 } : { width: 510, height: 312 };
   });
 
-  // Update dimensions on window resize
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     const isMobile = window.innerWidth <= 768;
-  //     setDimensions(isMobile ? { width: 252, height: 170 } : { width: 510, height: 312 });
-  //   };
-  //
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth <= 768;
