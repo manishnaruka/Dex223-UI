@@ -10,7 +10,6 @@ import { ZOOM_LEVELS } from "../../../hooks/types";
 import { Chart } from "./Chart";
 import { formatDelta, useDensityChartData } from "./hooks";
 import { Bound } from "./types";
-import { useMediaQuery } from "react-responsive";
 
 const ChartWrapper = ({ children, ...props }: any) => (
   <div

@@ -6,7 +6,10 @@ import {
   Field,
   useLiquidityAmountsStore,
 } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
+import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
+import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
 import Svg from "@/components/atoms/Svg";
+import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import { tryParseTick } from "@/functions/tryParseTick";
 import { usePool } from "@/hooks/usePools";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -22,12 +25,6 @@ import LiquidityChartRangeInput from "./LiquidityChartRangeInput";
 import { Bound } from "./LiquidityChartRangeInput/types";
 import { PriceRangeHeader } from "./PriceRangeHeader";
 import PriceRangeInput from "./PriceRangeInput";
-
-import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
-import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
-import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
-
-import { FeeAmount } from "@/sdk_hybrid/constants";
 
 export const PriceRange = ({
   noLiquidity,
@@ -88,7 +85,7 @@ export const PriceRange = ({
     resetPriceRangeValue,
     setTicks,
   } = useLiquidityPriceRangeStore();
-  const { tier, setTier } = useLiquidityTierStore();
+  const { tier } = useLiquidityTierStore();
   const [, pool] = usePool({
     currencyA: tokenA,
     currencyB: tokenB,
@@ -295,7 +292,6 @@ export const PriceRange = ({
             <div className="ml-auto flex-col mt-auto">
               <div
                 onClick={() => {
-                  const locTier = tier;
                   setRefreshTicksTrigger(true);
                   setZoomInitial(true);
                 }}

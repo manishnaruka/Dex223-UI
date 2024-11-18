@@ -5,7 +5,7 @@ import { Area } from "./Area";
 import { AxisBottom } from "./AxisBottom";
 import { Brush } from "./Brush";
 import { Line } from "./Line";
-import { Bound, ChartEntry, LiquidityChartRangeInputProps } from "./types";
+import { ChartEntry, LiquidityChartRangeInputProps } from "./types";
 import Zoom, { ZoomOverlay } from "./Zoom";
 
 const xAccessor = (d: ChartEntry) => d.price0;

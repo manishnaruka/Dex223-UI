@@ -99,7 +99,7 @@ function useTicksFromSubgraph(
   refreshTicksTrigger: boolean,
 ) {
   const apolloClient = chainToApolloClient[chainId];
-  const { poolAddress, poolAddressLoading } = useComputePoolAddressDex({
+  const { poolAddress } = useComputePoolAddressDex({
     tokenA: currencyA,
     tokenB: currencyB,
     tier: feeAmount,

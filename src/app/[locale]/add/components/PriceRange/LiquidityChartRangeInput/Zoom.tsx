@@ -1,4 +1,4 @@
-import { ScaleLinear, select, zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from "d3";
+import { ScaleLinear, select, zoom, ZoomBehavior, ZoomTransform } from "d3";
 import { useTranslations } from "next-intl";
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 
@@ -38,7 +38,6 @@ export default function Zoom({
   resetBrush: () => void;
   zoomLevels: ZoomLevels;
 }) {
-  const t = useTranslations("Liquidity");
   const zoomBehavior = useRef<ZoomBehavior<Element, unknown>>();
 
   const {
