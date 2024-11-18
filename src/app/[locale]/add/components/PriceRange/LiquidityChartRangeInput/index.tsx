@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -66,8 +66,7 @@ export default function LiquidityChartRangeInput({
   interactive: boolean;
 }) {
   const t = useTranslations("Liquidity");
-  // const tokenAColor = useColor(currencyA);
-  // const tokenBColor = useColor(currencyB);
+  const chartWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const isSorted = currencyA && currencyB && currencyA?.wrapped.sortsBefore(currencyB?.wrapped);
 
@@ -160,17 +159,28 @@ export default function LiquidityChartRangeInput({
   // State to manage chart dimensions
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>(() => {
     const isMobile = window.innerWidth <= 768;
-    return isMobile ? { width: 252, height: 170 } : { width: 510, height: 352 };
+    return isMobile ? { width: 252, height: 170 } : { width: 510, height: 312 };
   });
 
   // Update dimensions on window resize
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     const isMobile = window.innerWidth <= 768;
+  //     setDimensions(isMobile ? { width: 252, height: 170 } : { width: 510, height: 312 });
+  //   };
+  //
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth <= 768;
-      setDimensions(isMobile ? { width: 252, height: 170 } : { width: 510, height: 352 });
+      const height = chartWrapperRef.current?.clientHeight || (isMobile ? 170 : 312);
+      setDimensions({ width: isMobile ? 252 : 510, height });
     };
 
     window.addEventListener("resize", handleResize);
+    handleResize(); // Set initial dimensions
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 

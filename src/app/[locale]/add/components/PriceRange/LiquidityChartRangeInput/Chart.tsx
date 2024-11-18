@@ -64,6 +64,18 @@ export function Chart({
     setZoom(null);
   }, [zoomLevels]);
 
+  const { leftChart, rightChart } = useMemo(() => {
+    const left = series.filter((d) => xAccessor(d) < current);
+    const right = series.filter((d) => xAccessor(d) >= current);
+
+    const appendix = {
+      activeLiquidity: right[0].activeLiquidity,
+      price0: current,
+    };
+
+    return { leftChart: [...left, appendix], rightChart: [appendix, ...right] };
+  }, [current, series]);
+
   return (
     <>
       <Zoom
@@ -124,7 +136,7 @@ export function Chart({
           <g clipPath={`url(#${id}-chart-clip)`}>
             {/* Left side of the Line (red) */}
             <Area
-              series={series.filter((d) => xAccessor(d) <= current)}
+              series={leftChart}
               xScale={xScale}
               yScale={yScale}
               xValue={xAccessor}
@@ -135,7 +147,7 @@ export function Chart({
 
             {/* Right side of the Line (green) */}
             <Area
-              series={series.filter((d) => xAccessor(d) > current)}
+              series={rightChart}
               xScale={xScale}
               yScale={yScale}
               xValue={xAccessor}
@@ -148,7 +160,7 @@ export function Chart({
               <g mask={`url(#${id}-chart-area-mask)`}>
                 {/* Left side of the Line (red) */}
                 <Area
-                  series={series.filter((d) => xAccessor(d) <= current)}
+                  series={leftChart}
                   xScale={xScale}
                   yScale={yScale}
                   xValue={xAccessor}
@@ -160,7 +172,7 @@ export function Chart({
 
                 {/* Right side of the Line (green) */}
                 <Area
-                  series={series.filter((d) => xAccessor(d) > current)}
+                  series={rightChart}
                   xScale={xScale}
                   yScale={yScale}
                   xValue={xAccessor}
