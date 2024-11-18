@@ -33,9 +33,6 @@ export function Chart({
     [width, height, margins],
   );
 
-  console.dir(series);
-  console.dir(current);
-
   const { xScale, yScale } = useMemo(() => {
     const scales = {
       xScale: scaleLinear()
