@@ -82,32 +82,35 @@ export default function Tooltip({ text, iconSize = 24, renderTrigger, customOffs
         renderTrigger(refs, getReferenceProps())
       ) : (
         <span
-          className="cursor-pointer text-tertiary-text"
+          className="cursor-pointer text-tertiary-text pointer-events-auto"
           ref={refs.setReference}
           {...getReferenceProps()}
+          onClick={(e) => e.stopPropagation()}
         >
           <Svg size={iconSize} iconName="info" />
         </span>
       )}
-      <FloatingPortal>
-        {isMounted && (
-          <div
-            className="py-2 px-5 bg-quaternary-bg border border-secondary-border rounded-2 max-w-[400px] relative z-[100] text-14 text-secondary-text"
-            ref={refs.setFloating}
-            style={{ ...floatingStyles, ...transitionStyles }}
-            {...getFloatingProps()}
-          >
-            {text}
-            <FloatingArrow
-              ref={arrowRef}
-              context={context}
-              strokeWidth={1}
-              stroke={"#383C3A"}
-              fill={"#2E2F2F"}
-            />
-          </div>
-        )}
-      </FloatingPortal>
+      {isOpen && (
+        <FloatingPortal>
+          {isMounted && (
+            <div
+              className="py-2 px-5 bg-quaternary-bg border border-secondary-border rounded-2 max-w-[400px] relative z-[100] text-14 text-secondary-text"
+              ref={refs.setFloating}
+              style={{ ...floatingStyles, ...transitionStyles }}
+              {...getFloatingProps()}
+            >
+              {text}
+              <FloatingArrow
+                ref={arrowRef}
+                context={context}
+                strokeWidth={1}
+                stroke={"#383C3A"}
+                fill={"#2E2F2F"}
+              />
+            </div>
+          )}
+        </FloatingPortal>
+      )}
     </>
   );
 }

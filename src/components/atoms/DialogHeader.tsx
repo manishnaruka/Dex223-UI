@@ -35,7 +35,7 @@ export default function DialogHeader({
           className={clsx(
             "grid flex-grow",
             onBack || titlePosition === "center"
-              ? "grid-cols-3"
+              ? "grid-cols-[1fr_3fr_1fr]"
               : "grid-cols-[1fr_auto] md:grid-cols-2",
           )}
         >

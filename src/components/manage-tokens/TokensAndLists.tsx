@@ -1,11 +1,14 @@
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AutoSizer, List } from "react-virtualized";
+import SimpleBar from "simplebar-react";
 
 import Checkbox from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
+import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
@@ -33,6 +36,7 @@ function ButtonTooltip({ text }: { text: string }) {
       renderTrigger={(ref, refProps) => {
         return (
           <div
+            onClick={(e) => e.stopPropagation()}
             ref={ref.setReference}
             {...refProps}
             className="bg-green-bg text-secondary-text border-transparent border hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text w-12 h-full rounded-r-2 border-r-2 border-primary-bg flex items-center justify-center duration-200 cursor-pointer"
@@ -67,9 +71,24 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
       : [lists, false];
   }, [lists, listSearchValue]);
 
+  const parentRef = React.useRef(null);
+
+  const virtualizer = useVirtualizer({
+    count: filteredTokens.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 60,
+  });
+  const items = virtualizer.getVirtualItems();
+
+  const [paddingTop, paddingBottom] =
+    items.length > 0
+      ? [items[0].start, Math.max(0, virtualizer.getTotalSize() - items[items.length - 1].end)]
+      : [0, 0];
+
   return (
     <>
       <DialogHeader onClose={handleClose} title={t("manage_tokens")} />
+
       <div className="w-full md:w-[600px] h-[580px] flex flex-col px-4 md:px-10">
         <div className="grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3  mb-3">
           {[t("lists"), t("tokens")].map((title, index) => {
@@ -111,50 +130,50 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
 
             {Boolean(filteredLists?.length) && (
-              <div
-                className="flex flex-col mt-3 gap-3 h-[392px] overflow-scroll"
-                id="manage-lists-container"
-              >
-                {filteredLists
-                  ?.filter((l) => Boolean(l.list.tokens.length))
-                  ?.map((tokenList) => {
-                    return (
-                      <TokenListItem
-                        toggle={async () => {
-                          const otherEnabledLists = lists?.filter(
-                            (l) =>
-                              Boolean(l.enabled) &&
-                              Boolean(l.list.tokens.length) &&
-                              l.id !== tokenList.id,
-                          );
-
-                          const totalTokensInOtherEnabledLists = otherEnabledLists?.reduce(
-                            (accumulator, currentValue) =>
-                              accumulator + currentValue.list.tokens.length,
-                            0,
-                          );
-
-                          if (
-                            tokenList.enabled &&
-                            (!totalTokensInOtherEnabledLists || totalTokensInOtherEnabledLists < 2)
-                          ) {
-                            addToast(
-                              "You can't disable this token list. Please, enable any other one and try again",
-                              "warning",
+              <ScrollbarContainer className="mt-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={392}>
+                <div className="flex flex-col gap-3" id="manage-lists-container">
+                  {filteredLists
+                    ?.filter((l) => Boolean(l.list.tokens.length))
+                    ?.map((tokenList) => {
+                      return (
+                        <TokenListItem
+                          toggle={async () => {
+                            const otherEnabledLists = lists?.filter(
+                              (l) =>
+                                Boolean(l.enabled) &&
+                                Boolean(l.list.tokens.length) &&
+                                l.id !== tokenList.id,
                             );
-                            return;
-                          }
 
-                          (db.tokenLists as any).update(tokenList.id, {
-                            enabled: !tokenList.enabled,
-                          });
-                        }}
-                        tokenList={tokenList}
-                        key={tokenList.id}
-                      />
-                    );
-                  })}
-              </div>
+                            const totalTokensInOtherEnabledLists = otherEnabledLists?.reduce(
+                              (accumulator, currentValue) =>
+                                accumulator + currentValue.list.tokens.length,
+                              0,
+                            );
+
+                            if (
+                              tokenList.enabled &&
+                              (!totalTokensInOtherEnabledLists ||
+                                totalTokensInOtherEnabledLists < 2)
+                            ) {
+                              addToast(
+                                "You can't disable this token list. Please, enable any other one and try again",
+                                "warning",
+                              );
+                              return;
+                            }
+
+                            (db.tokenLists as any).update(tokenList.id, {
+                              enabled: !tokenList.enabled,
+                            });
+                          }}
+                          tokenList={tokenList}
+                          key={tokenList.id}
+                        />
+                      );
+                    })}
+                </div>
+              </ScrollbarContainer>
             )}
             {Boolean(filteredLists && !filteredLists.length && isListFilterActive) && (
               <div className="flex items-center justify-center gap-2 flex-col h-full">
@@ -180,7 +199,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                 endIcon="import-token"
                 colorScheme={ButtonColor.LIGHT_GREEN}
                 onClick={() => setContent("import-token")}
-                className="rounded-r-0 xl:rounded-r-0 flex-grow"
+                className="rounded-r-0 xl:rounded-r-0 md:rounded-r-0 flex-grow"
               >
                 {t("import_token")}
               </Button>
@@ -206,36 +225,41 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                 />
               </div>
             </div>
-            <div className="bg-secondary-border h-px mb-3" />
+            <div className="bg-secondary-border h-px" />
 
-            <div className="flex flex-col overflow-auto flex-grow">
-              <div style={{ flex: "1 1 auto" }} className="pb-[1px]">
+            <div className="flex flex-col flex-grow">
+              <div style={{ flex: "1 1 auto" }} className="pb-[1px] -mr-3 md:-mr-8">
                 {Boolean(filteredTokens.length) && (
-                  <AutoSizer>
-                    {({ width, height }) => {
-                      if (filteredTokens.length) {
-                        return (
-                          <List
-                            width={width}
-                            height={height}
-                            rowCount={filteredTokens.length}
-                            rowHeight={60}
-                            rowRenderer={({ key, index, isScrolling, isVisible, style }) => {
-                              return (
-                                <div key={key} style={style}>
-                                  <ManageTokenItem
-                                    setTokenForPortfolio={setTokenForPortfolio}
-                                    token={filteredTokens[index]}
-                                  />
-                                </div>
-                              );
-                            }}
-                          />
-                        );
-                      }
+                  <SimpleBar
+                    scrollableNodeProps={{
+                      ref: parentRef,
                     }}
-                  </AutoSizer>
+                    className="pr-3 md:pr-8 pt-3"
+                    style={{ height: 350 }}
+                    autoHide={false}
+                  >
+                    <div
+                      style={{
+                        paddingTop,
+                        paddingBottom,
+                      }}
+                    >
+                      {items.map((item) => (
+                        <div
+                          key={item.key}
+                          data-index={item.index}
+                          ref={virtualizer.measureElement}
+                        >
+                          <ManageTokenItem
+                            setTokenForPortfolio={setTokenForPortfolio}
+                            token={filteredTokens[item.index]}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </SimpleBar>
                 )}
+
                 {Boolean(!filteredTokens.length && onlyCustom && !isTokenFilterActive) && (
                   <div className="flex items-center justify-center gap-2 flex-col h-full">
                     <EmptyStateIcon iconName="custom" />

@@ -1,8 +1,10 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { scroller } from "react-scroll";
 import { useAccount } from "wagmi";
 
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import Pagination from "@/components/common/Pagination";
 import RecentTransaction from "@/components/common/RecentTransaction";
@@ -18,6 +20,17 @@ interface Props {
   handleClose: () => void;
   pageSize?: number;
 }
+
+const isInView = (element: HTMLDivElement, visibleHeight = 200) => {
+  if (!element) return false;
+
+  const rect = element.getBoundingClientRect();
+  const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+  // Check if at least 200px of the element from its top is visible
+  return rect.top >= 0 && rect.top <= windowHeight - visibleHeight;
+};
+
 export default function RecentTransactions({
   showRecentTransactions,
   handleClose,
@@ -30,21 +43,40 @@ export default function RecentTransactions({
 
   const componentRef = useRef<HTMLDivElement>(null);
   const prevShowRecentTransactions = useRef(showRecentTransactions);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Check if switching from non-visible to visible
-    if (!prevShowRecentTransactions.current && showRecentTransactions && componentRef.current) {
-      const rect = componentRef.current.getBoundingClientRect();
-      const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+    if (useSwapRecentTransactionsStore.persist.hasHydrated() && !isInitialized) {
+      console.log("Fire if hydrated");
+      prevShowRecentTransactions.current = useSwapRecentTransactionsStore.getState().isOpened;
+      setIsInitialized(true);
+    }
+  }, [isInitialized, showRecentTransactions]);
 
-      if (!isVisible) {
-        componentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  useEffect(() => {
+    if (!isInitialized) {
+      return;
+    }
+
+    if (!prevShowRecentTransactions.current && showRecentTransactions && componentRef.current) {
+      let scrollDuration;
+
+      console.log(componentRef.current);
+      if (!isInView(componentRef.current)) {
+        scroller.scrollTo("recent-transactions-container", {
+          duration: (scrollDistanceInPx: number) => {
+            console.log(scrollDistanceInPx);
+            scrollDuration = scrollDistanceInPx / 2;
+            return scrollDuration;
+          },
+          smooth: true,
+          offset: -20,
+        });
       }
     }
 
-    // Update the previous value for the next render
     prevShowRecentTransactions.current = showRecentTransactions;
-  }, [showRecentTransactions]);
+  }, [showRecentTransactions, isInitialized]);
 
   const lowestPendingNonce = useMemo(() => {
     if (address) {
@@ -83,7 +115,7 @@ export default function RecentTransactions({
   return (
     <>
       {showRecentTransactions && (
-        <div ref={componentRef}>
+        <div id="recent-transactions-container" ref={componentRef}>
           <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
             <div className="flex justify-between items-center mb-2.5">
               <h3 className="font-bold text-20">{t("transactions")}</h3>

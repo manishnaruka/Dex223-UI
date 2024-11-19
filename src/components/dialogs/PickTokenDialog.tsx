@@ -3,11 +3,13 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import { Address } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
+import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -37,6 +39,7 @@ function FoundInOtherListMarker() {
       renderTrigger={(ref, refProps) => {
         return (
           <div
+            onClick={(e) => e.stopPropagation()}
             className="rounded-full p-0.5 bg-primary-bg group-hocus:bg-tertiary-bg duration-200"
             ref={ref.setReference}
             {...refProps}
@@ -139,6 +142,7 @@ function TokenRow({
                   renderTrigger={(ref, refProps) => {
                     return (
                       <span
+                        onClick={(e) => e.stopPropagation()}
                         ref={ref.setReference}
                         {...refProps}
                         className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer w-10"
@@ -244,9 +248,11 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
   const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();
 
   const pinnedTokens = useMemo(() => {
-    return tokens.filter((t) =>
-      pinnedTokensAddresses[chainId].includes(t.isNative ? "native" : t.address0),
+    const lookupMap: Map<"native" | Address, Currency> = new Map(
+      tokens.map((token) => [token.isNative ? "native" : token.address0, token]),
     );
+
+    return pinnedTokensAddresses[chainId].map((id) => lookupMap.get(id));
   }, [chainId, pinnedTokensAddresses, tokens]);
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
@@ -292,8 +298,8 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
 
           {Boolean(tokens.length) && (
             <>
-              <div className="w-full md:w-[600px]">
-                <div className="px-4 md:px-10 pb-3">
+              <div className="w-full md:w-[600px] max-h-[640px] h-[calc(100vh-60px)] flex flex-col">
+                <div className={clsx("px-4 md:px-10", !pinnedTokens.length && "pb-3")}>
                   <SearchInput
                     value={tokensSearchValue}
                     onChange={(e) => setTokensSearchValue(e.target.value)}
@@ -301,11 +307,15 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                   />
                   <div
                     className={clsx(
-                      "flex flex-wrap gap-3 mt-3",
-                      !!pinnedTokens.length && "border-b border-secondary-border pb-3",
+                      "flex flex-wrap gap-3",
+                      !!pinnedTokens.length && "border-b border-secondary-border pb-3 mt-3",
                     )}
                   >
                     {pinnedTokens.map((pinnedToken) => {
+                      if (!pinnedToken) {
+                        return;
+                      }
+
                       return (
                         <div
                           key={
@@ -380,18 +390,30 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     )}
                   </div>
                 </div>
-                {Boolean(filteredTokens.length) && (
-                  <div className="h-[420px] overflow-auto flex flex-col gap-2 md:gap-0 px-4 md:px-0 pb-2">
-                    {filteredTokens.map((token) => (
-                      <TokenRow
-                        setTokenForPortfolio={setTokenForPortfolio}
-                        handlePick={handlePick}
-                        key={token.isToken ? token.address0 : `native-${token.wrapped.address0}`}
-                        currency={token}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className="flex-grow flex min-h-0">
+                  {Boolean(filteredTokens.length) && (
+                    <ScrollbarContainer height="full">
+                      <div
+                        className={clsx(
+                          "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-[11px] pb-2",
+                          !!pinnedTokens.length && "pt-3",
+                        )}
+                      >
+                        {filteredTokens.map((token) => (
+                          <TokenRow
+                            setTokenForPortfolio={setTokenForPortfolio}
+                            handlePick={handlePick}
+                            key={
+                              token.isToken ? token.address0 : `native-${token.wrapped.address0}`
+                            }
+                            currency={token}
+                          />
+                        ))}
+                      </div>
+                    </ScrollbarContainer>
+                  )}
+                </div>
+
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
                   <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[420px] w-full md:w-[570px]">
                     <EmptyStateIcon iconName="search" />
@@ -403,7 +425,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     setIsOpen(false);
                     setManageOpened(true);
                   }}
-                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
+                  className="flex-shrink-0 w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
                 >
                   Manage tokens
                   <Svg iconName="edit" />

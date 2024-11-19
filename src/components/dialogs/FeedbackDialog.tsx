@@ -142,7 +142,7 @@ export default function FeedbackDialog() {
                 github: (chunks) => (
                   <a
                     href="https://github.com/EthereumCommonwealth/Dex223-UI/issues"
-                    className="text-green hocus:underline"
+                    className="text-green underline hocus:text-green-hover duration-200"
                   >
                     {chunks}
                   </a>

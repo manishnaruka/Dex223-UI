@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import React, { ChangeEvent, FocusEvent, ReactNode, useMemo, useState } from "react";
 import {
   ContractFunctionExecutionError,
+  formatEther,
   formatGwei,
   parseGwei,
   TransactionExecutionError,
@@ -24,6 +25,7 @@ import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMu
 import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import addToast from "@/other/toast";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
@@ -92,7 +94,8 @@ function EIP1559Fields({
               }}
               className="text-green"
             >
-              Min. required
+              <span className="md:hidden">Required</span>
+              <span className="hidden md:inline">Min. required</span>
             </button>{" "}
             {currentMaxFeePerGas ? formatFloat(formatGwei(currentMaxFeePerGas)) : "0"} Gwei
           </div>
@@ -126,7 +129,8 @@ function EIP1559Fields({
               }}
               className="text-green"
             >
-              Min. required
+              <span className="md:hidden">Required</span>
+              <span className="hidden md:inline">Min. required</span>
             </button>{" "}
             {currentMaxPriorityFeePerGas
               ? formatFloat(formatGwei(currentMaxPriorityFeePerGas))
@@ -476,21 +480,37 @@ export default function TransactionSpeedUpDialog() {
     return _warnings;
   }, [legacyGasPriceWarning]);
 
-  const autoIncreaseGwei = useMemo(() => {
+  const [autoIncreaseGwei, autoIncreaseETH] = useMemo(() => {
     if (transaction?.gas.model === GasFeeModel.EIP1559 && transaction.gas.maxFeePerGas) {
-      return formatFloat(
-        formatGwei((BigInt(transaction.gas.maxFeePerGas) * BigInt(110)) / SCALING_FACTOR),
-      );
+      return [
+        formatFloat(
+          formatGwei((BigInt(transaction.gas.maxFeePerGas) * BigInt(110)) / SCALING_FACTOR),
+        ),
+        formatFloat(
+          formatEther(
+            (BigInt(transaction.gas.maxFeePerGas) * BigInt(110) * BigInt(transaction.gas.gas)) /
+              SCALING_FACTOR,
+          ),
+        ),
+      ];
     }
 
     if (transaction?.gas.model === GasFeeModel.LEGACY && transaction.gas.gasPrice) {
-      return formatFloat(
-        formatGwei((BigInt(transaction.gas.gasPrice) * BigInt(110)) / SCALING_FACTOR),
-      );
+      return [
+        formatFloat(formatGwei((BigInt(transaction.gas.gasPrice) * BigInt(110)) / SCALING_FACTOR)),
+        formatFloat(
+          formatEther(
+            (BigInt(transaction.gas.gasPrice) * BigInt(110) * BigInt(transaction.gas.gas)) /
+              SCALING_FACTOR,
+          ),
+        ),
+      ];
     }
 
-    return "0";
+    return ["0", "0"];
   }, [transaction?.gas]);
+
+  const nativeCurrency = useNativeCurrency();
 
   const title = useMemo(() => {
     if (transaction?.replacement === "cancelled" && replacement === "reprice") {
@@ -529,7 +549,7 @@ export default function TransactionSpeedUpDialog() {
                     onClick={() => setFieldValue("speedUpOption", _speedUpOption)}
                     key={_speedUpOption}
                     className={clsx(
-                      "w-full rounded-3 bg-tertiary-bg group cursor-pointer",
+                      "w-full rounded-3 bg-tertiary-bg group cursor-pointer ",
                       values.speedUpOption === _speedUpOption && "cursor-auto",
                       (isLoading || transaction.status !== RecentTransactionStatus.PENDING) &&
                         "pointer-events-none",
@@ -537,7 +557,7 @@ export default function TransactionSpeedUpDialog() {
                   >
                     <div
                       className={clsx(
-                        "flex justify-between px-5 items-center min-h-12 duration-200",
+                        "flex justify-between px-5 items-center min-h-12 md:min-h-[64px] duration-200",
                         SpeedUpOption.CUSTOM === _speedUpOption &&
                           "border-primary-bg rounded-t-3 border-b",
                         SpeedUpOption.CUSTOM !== _speedUpOption && "border-primary-bg rounded-3 ",
@@ -555,36 +575,90 @@ export default function TransactionSpeedUpDialog() {
                               : "border-secondary-border group-hocus:border-green",
                           )}
                         />
-                        {speedUpOptionTitle[_speedUpOption]}
-                        {speedUpOptionIcon[_speedUpOption]}
-                        <span className="text-secondary-text">
-                          <Tooltip iconSize={20} text="Tooltip text" />
+
+                        <span
+                          className={clsx(
+                            values.speedUpOption === _speedUpOption
+                              ? "text-green"
+                              : "text-tertiary-text group-hocus:text-primary-text",
+                            "duration-200",
+                          )}
+                        >
+                          {speedUpOptionIcon[_speedUpOption]}
                         </span>
-                        <span className="text-secondary-text">~0.00$</span>
+                        <div className="flex flex-col md:flex-row md:items-center md:gap-2">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={clsx(
+                                values.speedUpOption === _speedUpOption
+                                  ? "text-primary-text"
+                                  : "text-secondary-text group-hocus:text-primary-text",
+                                "duration-200 font-bold text-14 md:text-16",
+                              )}
+                            >
+                              {speedUpOptionTitle[_speedUpOption]}
+                            </span>
+
+                            <span className="text-tertiary-text">
+                              <Tooltip iconSize={20} text="Tooltip text" />
+                            </span>
+                          </div>
+                          <span
+                            className={clsx(
+                              values.speedUpOption === _speedUpOption
+                                ? "text-secondary-text"
+                                : "text-tertiary-text group-hocus:text-secondary-text",
+                              "duration-200 text-12 md:text-16",
+                            )}
+                          >
+                            ~0.00$
+                          </span>
+                        </div>
                       </div>
-                      <span
-                        className={clsx(
-                          values.speedUpOption === _speedUpOption
-                            ? "text-primary-text"
-                            : "text-tertiary-text group-hocus:text-primary-text",
-                          "duration-200",
-                        )}
-                      >
-                        {_speedUpOption !== SpeedUpOption.CUSTOM &&
-                          _speedUpOption !== SpeedUpOption.AUTO_INCREASE &&
-                          baseFee &&
-                          `${formatFloat(
-                            formatGwei(
-                              (baseFee *
-                                baseFeeMultipliers[chainId][gasPriceOptionMap[_speedUpOption]]) /
-                                SCALING_FACTOR,
-                            ),
-                          )} GWEI`}
-                        {_speedUpOption === SpeedUpOption.CUSTOM &&
-                          `${transaction.gas.model === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
-                        {_speedUpOption === SpeedUpOption.AUTO_INCREASE &&
-                          `${autoIncreaseGwei} GWEI`}
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span
+                          className={clsx(
+                            values.speedUpOption === _speedUpOption
+                              ? "text-primary-text"
+                              : "text-secondary-text group-hocus:text-primary-text",
+                            "duration-200 text-12 md:text-16",
+                          )}
+                        >
+                          {_speedUpOption !== SpeedUpOption.CUSTOM &&
+                            _speedUpOption !== SpeedUpOption.AUTO_INCREASE &&
+                            baseFee &&
+                            `${formatFloat(
+                              formatEther(
+                                (baseFee *
+                                  baseFeeMultipliers[chainId][gasPriceOptionMap[_speedUpOption]] *
+                                  BigInt(transaction.gas.gas)) /
+                                  SCALING_FACTOR,
+                              ),
+                            )} ${nativeCurrency.symbol}`}
+                          {_speedUpOption === SpeedUpOption.CUSTOM &&
+                            `${transaction.gas.model === GasFeeModel.LEGACY ? formatFloat(formatEther(parseGwei(values.gasPrice) * BigInt(transaction.gas.gas))) : formatFloat(formatEther(parseGwei(values.maxFeePerGas) * BigInt(transaction.gas.gas)))} ${nativeCurrency.symbol}`}
+                          {_speedUpOption === SpeedUpOption.AUTO_INCREASE &&
+                            `${autoIncreaseETH} ${nativeCurrency.symbol}`}
+                        </span>
+                        <span
+                          className={clsx("duration-200 text-12 md:text-14 text-tertiary-text")}
+                        >
+                          {_speedUpOption !== SpeedUpOption.CUSTOM &&
+                            _speedUpOption !== SpeedUpOption.AUTO_INCREASE &&
+                            baseFee &&
+                            `${formatFloat(
+                              formatGwei(
+                                (baseFee *
+                                  baseFeeMultipliers[chainId][gasPriceOptionMap[_speedUpOption]]) /
+                                  SCALING_FACTOR,
+                              ),
+                            )} GWEI`}
+                          {_speedUpOption === SpeedUpOption.CUSTOM &&
+                            `${transaction.gas.model === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
+                          {_speedUpOption === SpeedUpOption.AUTO_INCREASE &&
+                            `${autoIncreaseGwei} GWEI`}
+                        </span>
+                      </div>
                     </div>
 
                     {_speedUpOption === SpeedUpOption.CUSTOM && (
@@ -656,7 +730,8 @@ export default function TransactionSpeedUpDialog() {
                                     }}
                                     className="text-green"
                                   >
-                                    Min. required:
+                                    <span className="md:hidden">Required</span>
+                                    <span className="hidden md:inline">Min. required</span>
                                   </button>{" "}
                                   {gasPrice
                                     ? formatFloat(

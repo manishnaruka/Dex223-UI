@@ -102,6 +102,7 @@ export default function TokenListItem({
 
       let scrollDuration;
 
+      console.log("Scrolling...");
       scroller.scrollTo(tokenList.id.toString(), {
         duration: (scrollDistanceInPx: number) => {
           console.log(scrollDistanceInPx);

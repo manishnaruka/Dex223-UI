@@ -7,15 +7,14 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
-import { NumericFormat } from "react-number-format";
-import { formatGwei, parseGwei } from "viem";
+import { formatEther, formatGwei, parseGwei } from "viem";
 
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
 import TextField from "@/components/atoms/TextField";
@@ -31,6 +30,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
@@ -294,6 +294,8 @@ function NetworkFeeDialogContent({
     }
   }, [gasPrice, priorityFee, baseFee, gasPriceSettings]);
 
+  const nativeCurrency = useNativeCurrency();
+
   const formik = useFormik({
     enableReinitialize: !isInitialized,
     initialValues: {
@@ -465,8 +467,8 @@ function NetworkFeeDialogContent({
   }, [gasLimitError]);
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="flex flex-col gap-2 px-4 md:px-10">
+    <form className="h-[calc(100%-60px)]" onSubmit={handleSubmit}>
+      <div className="h-[calc(100%-80px)] overflow-auto flex flex-col gap-2 px-4 md:px-10">
         {gasOptions.map((_gasOption) => {
           return (
             <div
@@ -479,7 +481,7 @@ function NetworkFeeDialogContent({
             >
               <div
                 className={clsx(
-                  "flex justify-between px-5 items-center min-h-12 duration-200",
+                  "flex justify-between px-5 items-center min-h-12 md:min-h-[60px] duration-200",
                   GasOption.CUSTOM === _gasOption && "border-primary-bg rounded-t-3",
                   GasOption.CUSTOM !== _gasOption && "border-primary-bg rounded-3",
                   values.gasPriceOption !== _gasOption && "group-hocus:bg-green-bg",
@@ -494,6 +496,7 @@ function NetworkFeeDialogContent({
                         : "border-secondary-border group-hocus:border-green",
                     )}
                   />
+
                   <span
                     className={clsx(
                       values.gasPriceOption === _gasOption
@@ -504,49 +507,74 @@ function NetworkFeeDialogContent({
                   >
                     {gasOptionIcon[_gasOption]}
                   </span>
+                  <div className="flex flex-col md:flex-row md:items-center md:gap-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={clsx(
+                          values.gasPriceOption === _gasOption
+                            ? "text-primary-text"
+                            : "text-secondary-text group-hocus:text-primary-text",
+                          "duration-200 font-bold text-14 md:text-16",
+                        )}
+                      >
+                        {gasOptionTitle[_gasOption]}
+                      </span>
+
+                      <span className="text-tertiary-text">
+                        <Tooltip iconSize={20} text="Tooltip text" />
+                      </span>
+                    </div>
+                    <span
+                      className={clsx(
+                        values.gasPriceOption === _gasOption
+                          ? "text-secondary-text"
+                          : "text-tertiary-text group-hocus:text-secondary-text",
+                        "duration-200 text-12 md:text-16",
+                      )}
+                    >
+                      ~0.00$
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-0.5">
                   <span
                     className={clsx(
                       values.gasPriceOption === _gasOption
                         ? "text-primary-text"
                         : "text-secondary-text group-hocus:text-primary-text",
-                      "duration-200 font-bold",
+                      "duration-200  text-12 md:text-16",
                     )}
                   >
-                    {gasOptionTitle[_gasOption]}
-                  </span>
-
-                  <span className="text-tertiary-text">
-                    <Tooltip iconSize={20} text="Tooltip text" />
+                    {_gasOption !== GasOption.CUSTOM &&
+                      baseFee &&
+                      `${formatFloat(
+                        formatEther(
+                          (baseFee * baseFeeMultipliers[chainId][_gasOption] * estimatedGas) /
+                            SCALING_FACTOR,
+                        ),
+                      )} ${nativeCurrency.symbol}`}
+                    {_gasOption === GasOption.CUSTOM &&
+                      `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(formatEther(parseGwei(values.gasPrice) * estimatedGas)) : formatFloat(formatEther(parseGwei(values.maxFeePerGas) * estimatedGas))} ${nativeCurrency.symbol}`}
                   </span>
                   <span
                     className={clsx(
                       values.gasPriceOption === _gasOption
-                        ? "text-secondary-text"
-                        : "text-tertiary-text group-hocus:text-secondary-text",
-                      "duration-200",
+                        ? "text-tertiary-text"
+                        : "text-tertiary-text",
+                      "duration-200  text-12 md:text-14",
                     )}
                   >
-                    ~0.00$
+                    {_gasOption !== GasOption.CUSTOM &&
+                      baseFee &&
+                      `${formatFloat(
+                        formatGwei(
+                          (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR,
+                        ),
+                      )} GWEI`}
+                    {_gasOption === GasOption.CUSTOM &&
+                      `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
                   </span>
                 </div>
-                <span
-                  className={clsx(
-                    values.gasPriceOption === _gasOption
-                      ? "text-primary-text"
-                      : "text-tertiary-text group-hocus:text-primary-text",
-                    "duration-200",
-                  )}
-                >
-                  {_gasOption !== GasOption.CUSTOM &&
-                    baseFee &&
-                    `${formatFloat(
-                      formatGwei(
-                        (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR,
-                      ),
-                    )} GWEI`}
-                  {_gasOption === GasOption.CUSTOM &&
-                    `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
-                </span>
               </div>
 
               {_gasOption === GasOption.CUSTOM && (
@@ -1030,7 +1058,7 @@ function NetworkFeeDialogContent({
         })}
       </div>
 
-      <div className="px-4 pb-4 md:px-10 md:pb-10 pt-5 grid grid-cols-2 gap-3">
+      <div className="px-4 pb-4 md:px-10 md:pb-10 pt-4 grid grid-cols-2 gap-3">
         <Button
           type="button"
           fullWidth
@@ -1067,9 +1095,40 @@ export default function NetworkFeeConfigDialog({
   setIsAdvanced,
   ...props
 }: Props) {
+  const [containerHeight, setContainerHeight] = useState("auto"); // Default to auto height
+  const ref = useRef<HTMLDivElement>(null);
+  // Function to check and adjust the container height based on the content
+
+  // Run adjustHeight on window resize or on initial load
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const adjustHeight = () => {
+      const contentHeight = ref.current?.scrollHeight; // Get the height of the content
+      if (!contentHeight) {
+        return;
+      }
+
+      const viewportHeight = window.innerHeight;
+
+      // Set container height to 100vh only if content exceeds the viewport height
+      if (contentHeight > viewportHeight) {
+        setContainerHeight("100vh");
+      } else {
+        setContainerHeight("auto");
+      }
+    };
+
+    adjustHeight();
+  }, [isAdvanced]);
+
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
-      <div className="w-full md:w-[800px] duration-200">
+      <div
+        ref={ref}
+        className="w-full md:w-[800px] duration-200 overflow-hidden"
+        style={{ height: containerHeight }}
+      >
         <DialogHeader
           onClose={() => setIsOpen(false)}
           title="Gas settings"

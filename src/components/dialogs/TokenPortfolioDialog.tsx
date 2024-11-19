@@ -34,8 +34,8 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
     useManageTokensDialogStore();
   const { handleClose } = useTokenPortfolioDialogStore();
   return (
-    <div className="flex justify-between w-full">
-      <div className="flex gap-3 items-center">
+    <div className="flex justify-between w-full flex-col md:flex-row">
+      <div className="flex gap-2 md:gap-3 items-center">
         {tokenList?.id?.toString()?.startsWith("default") && (
           <TokenListLogo type={TokenListLogoType.DEFAULT} chainId={tokenList.chainId} />
         )}
@@ -50,8 +50,12 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
         )}
 
         <div className="flex flex-col">
-          <span>{tokenList?.list.name}</span>
-          <div className="flex gap-1 items-cente text-secondary-text">
+          <div className="table table-fixed w-full">
+            <span className="text-14 md:text-16 table-cell whitespace-nowrap overflow-ellipsis overflow-hidden">
+              {tokenList?.list.name}
+            </span>
+          </div>
+          <div className="flex gap-1 items-cente text-secondary-text text-12 md:text-16">
             {t("tokens_amount", { amount: tokenList?.list.tokens.length })}
           </div>
         </div>
@@ -64,10 +68,19 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
           setScrollTo(tokenList?.id || null);
           handleClose();
         }}
-        className="text-secondary-text hocus:text-green-hover duration-200 flex items-center gap-2"
+        className="pl-12 text-12 md:text-16 md:pl-0 text-secondary-text hocus:text-green-hover duration-200 flex items-center gap-2"
       >
         Manage list
-        <Svg iconName="next" />
+        {
+          <span className="md:hidden">
+            <Svg size={20} iconName="next" />
+          </span>
+        }
+        {
+          <span className="hidden md:inline">
+            <Svg size={24} iconName="next" />
+          </span>
+        }
       </button>
     </div>
   );

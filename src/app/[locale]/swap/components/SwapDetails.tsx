@@ -11,7 +11,10 @@ import Collapse from "@/components/atoms/Collapse";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import { formatFloat } from "@/functions/formatFloat";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Currency } from "@/sdk_hybrid/entities/currency";
+import { NativeCoin } from "@/sdk_hybrid/entities/ether";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 
@@ -38,12 +41,17 @@ export default function SwapDetails({
   trade,
   tokenA,
   tokenB,
+  gasPrice,
+  networkFee,
 }: {
   trade: TokenTrade;
   tokenA: Currency;
   tokenB: Currency;
+  gasPrice: string | undefined;
+  networkFee: string | undefined;
 }) {
   const t = useTranslations("Swap");
+  const nativeCurrency = useNativeCurrency();
   const { isDetailsExpanded, setIsDetailsExpanded, setIsPriceInverted, isPriceInverted } =
     useSwapDetailsStateStore();
   const { typedValue } = useSwapAmountsStore();
@@ -54,7 +62,6 @@ export default function SwapDetails({
 
   const { slippage, deadline: _deadline } = useSwapSettingsStore();
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
-
   return (
     <>
       <div
@@ -104,6 +111,16 @@ export default function SwapDetails({
       </div>
       <Collapse open={isDetailsExpanded}>
         <div className="flex flex-col gap-2 pb-4 px-5 bg-tertiary-bg rounded-b-3 text-14">
+          <SwapDetailsRow
+            title={"Gas price"}
+            value={`${gasPrice} GWEI`}
+            tooltipText={"Gas price tooltip"}
+          />
+          <SwapDetailsRow
+            title={"Network fee"}
+            value={`${networkFee} ${nativeCurrency.symbol}`}
+            tooltipText={"Network fee tooltip"}
+          />
           <SwapDetailsRow
             title={t("minimum_received")}
             value={

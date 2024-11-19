@@ -8,7 +8,8 @@
     "portfolio": "Portfolio",
     "token_listing": "Token listing",
     "more": "More",
-    "token": "Token listing",
+    "token": "Token",
+    "token_listing": "Token listing",
     "token_statistics": "Statistics",
     "token_lists": "Token lists",
     "social_media": "Social media",
@@ -299,7 +300,7 @@
   },
   "Feedback": {
     "feedback": "Feedback",
-    "feel_free_to_share": "Feel free to share your thoughts either by leaving a comment here or by opening an issue on <github>Github</github>",
+    "feel_free_to_share": "Feel free to share your thoughts either by leaving a comment here or by opening an <github>issue on Github</github>",
     "describe_your_issue": "Describe your issue",
     "email_wallet_address_or_nickname": "Email, wallet address or nickname",
     "feedback_category": "Feedback category",

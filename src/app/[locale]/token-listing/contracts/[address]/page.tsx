@@ -278,6 +278,7 @@ export default function AutoListingContractDetails({
                               renderTrigger={(ref, refProps) => {
                                 return (
                                   <span
+                                    onClick={(e) => e.stopPropagation()}
                                     ref={ref.setReference}
                                     {...refProps}
                                     className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer"

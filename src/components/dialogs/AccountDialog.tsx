@@ -9,6 +9,7 @@ import Drawer from "@/components/atoms/Drawer";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Popover from "@/components/atoms/Popover";
+import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonSize } from "@/components/buttons/Button";
@@ -114,7 +115,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
         )}
 
         {activeTab == 1 && (
-          <div className="h-[408px] overflow-auto">
+          <div>
             {_transactions.length ? (
               <>
                 <div className="flex justify-between items-center mb-3">
@@ -129,11 +130,13 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     <Svg iconName="delete" />
                   </button>
                 </div>
-                <div className="flex flex-col gap-1 pb-3">
-                  {_transactions.map((transaction) => {
-                    return <RecentTransaction transaction={transaction} key={transaction.hash} />;
-                  })}
-                </div>
+                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={358}>
+                  <div className="flex flex-col gap-2 md:gap-3">
+                    {_transactions.map((transaction) => {
+                      return <RecentTransaction transaction={transaction} key={transaction.hash} />;
+                    })}
+                  </div>
+                </ScrollbarContainer>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-2">

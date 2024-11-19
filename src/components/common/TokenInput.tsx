@@ -257,7 +257,7 @@ export default function TokenInput({
               <span>{token.symbol}</span>
             </span>
           ) : (
-            <span className="whitespace-nowrap text-tertiary-text">{t("select_token")}</span>
+            <span className="whitespace-nowrap text-tertiary-text pl-2">{t("select_token")}</span>
           )}
         </SelectButton>
       </div>

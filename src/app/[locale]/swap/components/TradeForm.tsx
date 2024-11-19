@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { formatGwei, formatUnits, parseUnits } from "viem";
+import { useMediaQuery } from "react-responsive";
+import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
@@ -32,6 +33,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
@@ -339,11 +341,46 @@ export default function TradeForm() {
     return undefined;
   }, [baseFee, gasPriceOption, gasPriceSettings, priorityFee]);
 
+  const computedGasSpendingETH = useMemo(() => {
+    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
+      return formatFloat(formatEther(gasPriceSettings.gasPrice * estimatedGas));
+    }
+
+    if (
+      gasPriceSettings.model === GasFeeModel.EIP1559 &&
+      gasPriceSettings.maxFeePerGas &&
+      gasPriceSettings.maxPriorityFeePerGas &&
+      baseFee &&
+      gasPriceOption === GasOption.CUSTOM
+    ) {
+      const lowerFeePerGas =
+        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
+
+      return formatFloat(
+        formatEther((lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas) * estimatedGas),
+      );
+    }
+
+    if (
+      gasPriceSettings.model === GasFeeModel.EIP1559 &&
+      baseFee &&
+      priorityFee &&
+      gasPriceOption !== GasOption.CUSTOM
+    ) {
+      return formatFloat(formatEther((baseFee + priorityFee) * estimatedGas));
+    }
+
+    return undefined;
+  }, [baseFee, estimatedGas, gasPriceOption, gasPriceSettings, priorityFee]);
+
+  const _isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+  const nativeCurrency = useNativeCurrency();
+
   return (
     <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
       <div className="flex justify-between items-center mb-2.5">
         <h3 className="font-bold text-20">{t("swap")}</h3>
-        <div className="flex items-center">
+        <div className="flex items-center relative left-3">
           <IconButton
             buttonSize={IconButtonSize.LARGE}
             active={showRecentTransactions}
@@ -490,36 +527,41 @@ export default function TradeForm() {
       {tokenA && tokenB && typedValue ? (
         <div
           className={clsx(
-            "rounded-3 py-3.5 flex flex-col md:flex-row justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center",
+            "rounded-3 py-3.5 flex justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center",
           )}
           role="button"
         >
           {computedGasSpending ? (
             <>
-              <div className="flex items-center gap-1">
-                <Tooltip
-                  text={t("network_fee_tooltip", {
-                    networkName: networks.find((n) => n.chainId === chainId)?.name,
-                  })}
-                />
-                <div className="text-secondary-text text-14 flex items-center">
-                  {t("network_fee")}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  <Tooltip
+                    iconSize={_isMobile ? 16 : 24}
+                    text={t("network_fee_tooltip", {
+                      networkName: networks.find((n) => n.chainId === chainId)?.name,
+                    })}
+                  />
+                  <div className="text-secondary-text text-12 md:text-14 flex items-center ">
+                    {t("network_fee")}
+                  </div>
+                  <span className="mr-1 text-12 md:hidden">~$0.00</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-secondary-text text-12 md:text-14 ">
+                    {computedGasSpendingETH} {nativeCurrency.symbol}
+                  </span>
+                  <span className="block h-4 w-px bg-primary-border" />
+                  <span className="text-tertiary-text mr-1 text-12 md:text-14 ">
+                    {computedGasSpending} GWEI
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 justify-between md:justify-end">
-                <span className="flex gap-2 items-center">
-                  <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text bg-quaternary-bg">
-                    {t(gasOptionTitle[gasPriceOption])}
-                  </span>
-                  <div>
-                    <span className="text-secondary-text mr-1 text-14">
-                      {computedGasSpending} GWEI
-                    </span>{" "}
-                    <span className="mr-1 text-14">~$0.00</span>
-                  </div>
+                <span className="mr-1 text-14 hidden md:inline">~$0.00</span>
+                <span className="flex items-center justify-center px-2 text-12 md:text-14 h-5 rounded-20 font-500 text-tertiary-text border border-secondary-border">
+                  {t(gasOptionTitle[gasPriceOption])}
                 </span>
-
                 <Button
                   size={ButtonSize.EXTRA_SMALL}
                   colorScheme={ButtonColor.LIGHT_GREEN}
@@ -579,7 +621,15 @@ export default function TradeForm() {
         isTradeLoading={isLoadingTrade}
       />
 
-      {trade && tokenA && tokenB && <SwapDetails trade={trade} tokenA={tokenA} tokenB={tokenB} />}
+      {trade && tokenA && tokenB && (
+        <SwapDetails
+          trade={trade}
+          tokenA={tokenA}
+          tokenB={tokenB}
+          networkFee={computedGasSpendingETH}
+          gasPrice={computedGasSpending}
+        />
+      )}
 
       <NetworkFeeConfigDialog
         isAdvanced={isAdvanced}

@@ -5,7 +5,7 @@ import { ReactNode, useState } from "react";
 import Popover from "@/components/atoms/Popover";
 import Svg from "@/components/atoms/Svg";
 import IconButton from "@/components/buttons/IconButton";
-import { Link } from "@/navigation";
+import { Link, usePathname } from "@/navigation";
 
 interface Props {
   href: string;
@@ -36,10 +36,11 @@ export function NavigationItemWithSubmenu({
   active,
 }: {
   title: string;
-  submenu: (handleClose: () => void, t: any) => ReactNode;
+  submenu: (handleClose: () => void, t: any, pathname?: string) => ReactNode;
   active: boolean;
 }) {
   const t = useTranslations("Navigation");
+  const pathname = usePathname();
 
   const [isSubmenuOpened, setSubmenuOpened] = useState(false);
 
@@ -72,7 +73,7 @@ export function NavigationItemWithSubmenu({
         </button>
       }
     >
-      {submenu(() => setSubmenuOpened(false), t)}
+      {submenu(() => setSubmenuOpened(false), t, pathname)}
     </Popover>
   );
 }

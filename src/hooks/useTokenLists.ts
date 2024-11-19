@@ -9,7 +9,6 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { NativeCoin } from "@/sdk_hybrid/entities/ether";
 import { Token } from "@/sdk_hybrid/entities/token";
-import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 
 export async function fetchTokenList(url: string) {
   const data = await fetch(url);

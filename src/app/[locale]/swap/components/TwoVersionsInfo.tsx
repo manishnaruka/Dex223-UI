@@ -29,7 +29,7 @@ export default function TwoVersionsInfo() {
               <a
                 target="_blank"
                 href="https://gorbatiukcom.github.io/token-converter/"
-                className="text-green hocus:underline"
+                className="text-green underline hocus:text-green-hover duration-200"
               >
                 {chunks}
               </a>
