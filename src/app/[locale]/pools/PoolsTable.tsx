@@ -19,6 +19,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
+import Svg from "@/components/atoms/Svg";
 
 export enum SortingType {
   NONE,
@@ -48,7 +49,7 @@ function HeaderItem({
       role={handleSort && "button"}
       onClick={handleSort}
       className={clsx(
-        "h-[60px] flex items-center text-tertiary-text relative -left-3 mb-2",
+        "h-[60px] flex items-center justify-end text-tertiary-text relative -left-3 mb-2",
         isFirst && "pl-2",
       )}
     >
@@ -80,27 +81,37 @@ const PoolsTableDesktop = ({
   handleSort: () => any;
   openPoolHandler: (id: Address) => any;
 }) => {
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
   return (
-    <div className="hidden lg:grid pr-5 pl-2 rounded-3 overflow-hidden gap-x-2 bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2">
+    <div className="hidden lg:grid pr-3 pl-2 rounded-3 overflow-hidden bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(30px,1fr),_minmax(30px,1fr),_minmax(30px,1fr)] pb-2">
       <div className=" h-[60px] flex items-center justify-center  text-tertiary-text ">#</div>
       <div className=" h-[60px] flex items-center  text-tertiary-text ">Pool</div>
       <HeaderItem label="Transactions" sorting={sorting} handleSort={handleSort} />
-      <div className=" h-[60px] flex items-center  text-tertiary-text ">TVL</div>
-      <div className=" h-[60px] flex items-center  text-tertiary-text ">1 day volume</div>
-      <div className=" h-[60px] flex items-center text-tertiary-text ">7 day volume</div>
+      <div className=" h-[60px] flex items-center justify-end  text-tertiary-text ">TVL</div>
+      <div className=" h-[60px] flex items-center justify-end text-tertiary-text ">
+        1 day volume
+      </div>
+      <div className=" h-[60px] flex items-center justify-end text-tertiary-text pr-2">
+        7 day volume
+      </div>
 
       {tableData.map((o: any, index: number) => {
         return (
           <React.Fragment key={o.id}>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center justify-center"
+              className={`h-[56px] cursor-pointer flex items-center rounded-l-4 justify-center text-secondary-text ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
               {(currentPage - 1) * PAGE_SIZE + index + 1}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center gap-2"
+              className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
               <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
               <Image
@@ -108,31 +119,41 @@ const PoolsTableDesktop = ({
                 width={24}
                 height={24}
                 alt=""
-                className="-ml-5 bg-primary-bg rounded-full"
+                className="-ml-3 bg-primary-bg rounded-full"
               />
-              <span>{`${o.token0.symbol}/${o.token1.symbol}`}</span>
+              {/*TODO add tier badge*/}
+              <span className="ml-3 mr-3">{`${o.token0.symbol}/${o.token1.symbol}`}</span>
+              {hoveredRow === index && <Svg iconName="next" className="text-green" />}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
+              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              {o.txCount}
+              {o.txCount} {/*TODO: format big numbers as 5K  or 6M */}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
+              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
               ${formatFloat(o.totalValueLockedUSD)}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
+              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
               ${formatFloat(o.poolDayData?.[0]?.volumeUSD || 0)}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
+              className={`h-[56px] cursor-pointer flex justify-end items-center pr-4 rounded-r-4 text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
               ${formatFloat(0)}
             </div>

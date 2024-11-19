@@ -84,7 +84,7 @@ export default function Pagination({
       {/*  Right Navigation arrow */}
       <li
         className={clsx(
-          "text-primary-text w-10 lg:w-12 h-10 lg:h-12 rounded-full hocus:bg-green-bg text-16 cursor-pointer duration-200 flex items-center justify-center",
+          "text-tertiary-text w-10 lg:w-12 h-10 lg:h-12 rounded-full hocus:bg-green-bg text-16 cursor-pointer duration-200 flex items-center justify-center",
           currentPage === lastPage && "opacity-50 pointer-events-none",
         )}
         onClick={onNext}

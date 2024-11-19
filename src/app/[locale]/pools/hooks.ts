@@ -100,8 +100,6 @@ export function usePoolsData({
 }) {
   const apolloClient = chainToApolloClient[chainId];
 
-  console.dir(filter);
-
   return useQuery<any, any>(PoolsDataDocument, {
     variables: {
       skip,
