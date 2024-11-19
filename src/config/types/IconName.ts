@@ -131,6 +131,8 @@ export const svgIconsNames = [
   "warning-outline",
   "speed-up",
   "cancel",
+  "sort-up",
+  "sort-down",
 ] as const;
 
 export const socialIconNames = [""] as const;

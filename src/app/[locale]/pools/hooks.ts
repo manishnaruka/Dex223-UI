@@ -14,7 +14,7 @@ export const PoolsDataDocument = gql`
   ) {
     pools(
       where: $where
-      orderBy: txCount
+      orderBy: totalValueLockedUSD
       orderDirection: $orderDirection
       first: $first
       skip: $skip

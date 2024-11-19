@@ -118,7 +118,7 @@ const Positions = () => {
   const [hideClosed, setHideClosed] = useState(false);
 
   const hasClosedPositions: boolean = useMemo(() => {
-    for (let position of positions) {
+    for (let position of positions || []) {
       if (position.liquidity === BigInt("0")) {
         return true;
       }

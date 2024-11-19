@@ -45,3 +45,16 @@ export function formatNumber(num: string, maxPrecision = 15) {
       .replace(/\.?0+$/, "");
   }
 }
+
+export function formatNumberKilos(num: number): string {
+  if (num < 1000) {
+    return formatFloat(num); // Numbers less than 1000 remain as is.
+  }
+
+  const suffixes = ["K", "M", "B", "T"]; // Thousand, Million, Billion, Trillion
+  let power = Math.floor(Math.log10(num) / 3); // Determine the power of 1000
+  power = Math.min(power, suffixes.length); // Ensure it doesn't exceed defined suffixes
+  const scaled = num / Math.pow(1000, power);
+
+  return scaled.toFixed(2).replace(/\.0$/, "") + suffixes[power - 1];
+}
