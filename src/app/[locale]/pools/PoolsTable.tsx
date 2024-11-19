@@ -47,7 +47,10 @@ function HeaderItem({
     <div
       role={handleSort && "button"}
       onClick={handleSort}
-      className={clsx("h-[60px] flex items-center relative -left-3 mb-2", isFirst && "pl-2")}
+      className={clsx(
+        "h-[60px] flex items-center text-tertiary-text relative -left-3 mb-2",
+        isFirst && "pl-2",
+      )}
     >
       {handleSort && (
         <IconButton
@@ -78,13 +81,13 @@ const PoolsTableDesktop = ({
   openPoolHandler: (id: Address) => any;
 }) => {
   return (
-    <div className="hidden lg:grid pr-5 pl-2 rounded-2 overflow-hidden gap-x-2 bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2">
-      <div className=" h-[60px] flex items-center justify-center">#</div>
-      <div className=" h-[60px] flex items-center">Pool</div>
+    <div className="hidden lg:grid pr-5 pl-2 rounded-3 overflow-hidden gap-x-2 bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2">
+      <div className=" h-[60px] flex items-center justify-center  text-tertiary-text ">#</div>
+      <div className=" h-[60px] flex items-center  text-tertiary-text ">Pool</div>
       <HeaderItem label="Transactions" sorting={sorting} handleSort={handleSort} />
-      <div className=" h-[60px] flex items-center">TVL</div>
-      <div className=" h-[60px] flex items-center">1 day volume</div>
-      <div className=" h-[60px] flex items-center">7 day volume</div>
+      <div className=" h-[60px] flex items-center  text-tertiary-text ">TVL</div>
+      <div className=" h-[60px] flex items-center  text-tertiary-text ">1 day volume</div>
+      <div className=" h-[60px] flex items-center text-tertiary-text ">7 day volume</div>
 
       {tableData.map((o: any, index: number) => {
         return (
@@ -111,25 +114,25 @@ const PoolsTableDesktop = ({
             </div>
             <div
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
             >
               {o.txCount}
             </div>
             <div
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
             >
               ${formatFloat(o.totalValueLockedUSD)}
             </div>
             <div
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
             >
               ${formatFloat(o.poolDayData?.[0]?.volumeUSD || 0)}
             </div>
             <div
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className="h-[56px] cursor-pointer flex items-center text-secondary-text "
             >
               ${formatFloat(0)}
             </div>
@@ -270,8 +273,6 @@ export default function PoolsTable({
     orderDirection: GQLSorting[sorting],
     filter,
   });
-
-  console.dir(data);
 
   const pools: any[] = useMemo(() => data?.pools || [], [data?.pools]);
 
