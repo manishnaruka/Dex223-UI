@@ -5,6 +5,7 @@ import { Address } from "viem";
 
 import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
+import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, {
@@ -19,7 +20,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
-import Svg from "@/components/atoms/Svg";
+import truncateMiddle from "@/functions/truncateMiddle";
 
 export enum SortingType {
   NONE,
@@ -121,8 +122,17 @@ const PoolsTableDesktop = ({
                 alt=""
                 className="-ml-3 bg-primary-bg rounded-full"
               />
-              {/*TODO add tier badge*/}
-              <span className="ml-3 mr-3">{`${o.token0.symbol}/${o.token1.symbol}`}</span>
+              <span className="ml-3 mr-2">{`${truncateMiddle(o.token0.symbol, {
+                charsFromStart: 4,
+                charsFromEnd: 3,
+              })}/${truncateMiddle(o.token1.symbol, {
+                charsFromStart: 4,
+                charsFromEnd: 3,
+              })}`}</span>
+              <Badge
+                variant={BadgeVariant.PERCENTAGE}
+                percentage={`${(FEE_AMOUNT_DETAIL as any)[o.feeTier as any].label}%`}
+              />
               {hoveredRow === index && <Svg iconName="next" className="text-green" />}
             </div>
             <div
