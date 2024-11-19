@@ -16,10 +16,10 @@ import IconButton, {
 import Pagination from "@/components/common/Pagination";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat, formatNumber } from "@/functions/formatFloat";
+import { formatNumberKilos } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
-import { formatNumberKilos } from "@/functions/formatFloat";
 
 import { usePoolsData } from "./hooks";
 
@@ -300,12 +300,12 @@ export default function PoolsTable({
   const handleSort = useCallback(() => {
     switch (sorting) {
       case SortingType.NONE:
-        setSorting(SortingType.ASCENDING);
-        return;
-      case SortingType.ASCENDING:
         setSorting(SortingType.DESCENDING);
         return;
       case SortingType.DESCENDING:
+        setSorting(SortingType.ASCENDING);
+        return;
+      case SortingType.ASCENDING:
         setSorting(SortingType.NONE);
         return;
     }
