@@ -184,6 +184,7 @@ export default function PoolsPage() {
         handlePick={handlePick}
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
+        simpleForm={true}
       />
     </Container>
   );

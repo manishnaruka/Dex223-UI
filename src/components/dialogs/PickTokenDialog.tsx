@@ -28,6 +28,7 @@ interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handlePick: (token: Currency) => void;
+  simpleForm?: boolean;
 }
 
 function FoundInOtherListMarker() {
@@ -55,10 +56,12 @@ function TokenRow({
   currency,
   handlePick,
   setTokenForPortfolio,
+  simpleForm = false,
 }: {
   currency: Currency;
   handlePick: (currency: Currency) => void;
   setTokenForPortfolio: (currency: Currency) => void;
+  simpleForm?: boolean;
 }) {
   const { toggleToken, isTokenPinned, pinnedTokens } = usePinnedTokensStore((s) => ({
     toggleToken: s.toggleToken,
@@ -101,7 +104,7 @@ function TokenRow({
                   {currency.name}
                 </span>
                 <div className="flex relative items-center">
-                  {scoreObj && (
+                  {scoreObj && !simpleForm && (
                     <>
                       {scoreObj[0] < 20 && (
                         <>
@@ -120,7 +123,7 @@ function TokenRow({
                 </div>
               </div>
 
-              {isTokenPinned ? (
+              {isTokenPinned && !simpleForm ? (
                 <span className="block w-full text-primary-text text-12 md:hidden">$0.00</span>
               ) : (
                 <span className="w-full ">
@@ -132,8 +135,10 @@ function TokenRow({
             </div>
 
             <div className="flex items-center gap-1">
-              <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
-              {currency.isToken ? (
+              {!simpleForm && (
+                <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
+              )}
+              {currency.isToken && !simpleForm ? (
                 <Tooltip
                   text={`Token belongs to ${currency.lists?.length || 1} token lists`}
                   renderTrigger={(ref, refProps) => {
@@ -163,16 +168,21 @@ function TokenRow({
               ) : (
                 <span className="block w-10" />
               )}
-              <IconButton
-                iconName={isTokenPinned ? "pin-fill" : "pin"}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (pinnedTokens[currency.chainId].length < 8 || isTokenPinned) {
-                    toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
-                  }
-                }}
-                active={isTokenPinned}
-              />
+              {!simpleForm && (
+                <IconButton
+                  iconName={isTokenPinned ? "pin-fill" : "pin"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (pinnedTokens[currency.chainId].length < 8 || isTokenPinned) {
+                      toggleToken(
+                        currency.isNative ? "native" : currency.address0,
+                        currency.chainId,
+                      );
+                    }
+                  }}
+                  active={isTokenPinned}
+                />
+              )}
             </div>
           </div>
 
@@ -237,7 +247,12 @@ function TokenRow({
   );
 }
 
-export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props) {
+export default function PickTokenDialog({
+  isOpen,
+  setIsOpen,
+  handlePick,
+  simpleForm = false,
+}: Props) {
   const tokens = useTokens();
   const t = useTranslations("ManageTokens");
   const chainId = useCurrentChainId();
@@ -388,6 +403,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                         handlePick={handlePick}
                         key={token.isToken ? token.address0 : `native-${token.wrapped.address0}`}
                         currency={token}
+                        simpleForm={simpleForm}
                       />
                     ))}
                   </div>
@@ -398,16 +414,18 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     <span className="text-secondary-text">{t("token_not_found")}</span>
                   </div>
                 )}
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setManageOpened(true);
-                  }}
-                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
-                >
-                  Manage tokens
-                  <Svg iconName="edit" />
-                </button>
+                {!simpleForm && (
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setManageOpened(true);
+                    }}
+                    className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
+                  >
+                    Manage tokens
+                    <Svg iconName="edit" />
+                  </button>
+                )}
               </div>
             </>
           )}
