@@ -131,7 +131,7 @@ const Positions = () => {
       return positions.filter((position) => position.liquidity !== BigInt("0"));
     }
     return positions;
-  }, [positions]);
+  }, [hideClosed, positions]);
 
   return (
     <div className="w-full">
@@ -162,7 +162,7 @@ const Positions = () => {
                     <span className="text-tertiary-text">Your positions</span>
                     {hasClosedPositions && (
                       <span
-                        className="text-green hocus:text-green-hover cursor-pointer"
+                        className="text-secondary-text hocus:text-green-hover cursor-pointer"
                         onClick={() => setHideClosed(!hideClosed)}
                       >
                         {!hideClosed ? "Hide closed positions" : "Show closed positions"}
