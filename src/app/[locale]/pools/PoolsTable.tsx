@@ -7,7 +7,7 @@ import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
@@ -16,11 +16,11 @@ import IconButton, {
 import Pagination from "@/components/common/Pagination";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
+import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
-import truncateMiddle from "@/functions/truncateMiddle";
 
 export enum SortingType {
   NONE,
@@ -200,14 +200,14 @@ const PoolsTableItemMobile = ({
             />
             <span>{`${pool.token0.symbol}/${pool.token1.symbol}`}</span>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center justify-start mr-auto">
             <Badge
-              size="small"
-              variant={BadgeVariant.DEFAULT}
-              text={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
+              // size="small"
+              variant={BadgeVariant.PERCENTAGE}
+              percentage={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
             />
-            <span className="text-secondary-text font-normal">{`# ${index}`}</span>
           </div>
+          <span className="text-secondary-text font-normal">{`# ${index}`}</span>
         </div>
         <div className="flex justify-between gap-2">
           <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
@@ -235,6 +235,7 @@ const PoolsTableItemMobile = ({
         </div>
         <Button
           variant={ButtonVariant.CONTAINED}
+          colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.MEDIUM}
           onClick={() => openPoolHandler(pool.id)}
         >

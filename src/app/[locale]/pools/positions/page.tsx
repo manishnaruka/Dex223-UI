@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import Container from "@/components/atoms/Container";
@@ -115,6 +115,24 @@ const Positions = () => {
 
   const { loading, positions } = usePositions();
 
+  const [hideClosed, setHideClosed] = useState(false);
+
+  const hasClosedPositions: boolean = useMemo(() => {
+    for (let position of positions) {
+      if (position.liquidity === BigInt("0")) {
+        return true;
+      }
+    }
+    return false;
+  }, [positions]);
+
+  const filteredPositions: PositionInfo[] = useMemo(() => {
+    if (hideClosed) {
+      return positions.filter((position) => position.liquidity !== BigInt("0"));
+    }
+    return positions;
+  }, [positions]);
+
   return (
     <div className="w-full">
       {loading ? (
@@ -142,11 +160,18 @@ const Positions = () => {
                 <div className="rounded-5 w-full overflow-hidden bg-primary-bg md:px-10 px-5">
                   <div className="flex justify-between py-3">
                     <span className="text-tertiary-text">Your positions</span>
-                    <span className="text-secondary-text">Hide closed positions</span>
+                    {hasClosedPositions && (
+                      <span
+                        className="text-green hocus:text-green-hover cursor-pointer"
+                        onClick={() => setHideClosed(!hideClosed)}
+                      >
+                        {!hideClosed ? "Hide closed positions" : "Show closed positions"}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col gap-3 pb-10">
-                    {positions?.length ? (
-                      positions.map((position) => {
+                    {filteredPositions?.length ? (
+                      filteredPositions.map((position) => {
                         return (
                           <PoolPosition
                             positionInfo={position}
