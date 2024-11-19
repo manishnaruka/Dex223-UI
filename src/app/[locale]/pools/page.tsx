@@ -61,12 +61,12 @@ export default function PoolsPage() {
     <Container>
       <div className="p-4 lg:p-10 flex flex-col items-center">
         <div className="flex flex-col lg:flex-row w-full justify-between items-center mb-6 gap-2">
-          <div className="w-full lg:w-[384px] grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3">
-            <TabButton inactiveBackground="bg-primary-bg" size={48} active>
+          <div className="w-full lg:w-[384px] grid grid-cols-2 bg-primary-bg p-1 gap-1 rounded-3">
+            <TabButton inactiveBackground="bg-secondary-bg" size={48} active>
               Pools
             </TabButton>
             <TabButton
-              inactiveBackground="bg-primary-bg"
+              inactiveBackground="bg-secondary-bg"
               size={48}
               active={false}
               onClick={() => router.push("/pools/positions")}
@@ -114,7 +114,7 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">Token</span>
+                <span className="text-tertiary-text">{t("select_token")}</span>
               )}
             </SelectButton>
             <span>—</span>
@@ -157,7 +157,7 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">Token</span>
+                <span className="text-tertiary-text">{t("select_token")}</span>
               )}
             </SelectButton>
           </div>
