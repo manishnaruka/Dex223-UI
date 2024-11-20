@@ -13,7 +13,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
@@ -93,26 +93,32 @@ const ApproveDialog = () => {
     useLiquidityApprove();
 
   const isLoadingA20 = approveTransactions.approveA
-    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
-        approveTransactions.approveA?.status,
-      )
+    ? [AddLiquidityApproveStatus.LOADING].includes(approveTransactions.approveA?.status)
     : false;
   const isLoadingB20 = approveTransactions.approveB
-    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
-        approveTransactions.approveB?.status,
-      )
+    ? [AddLiquidityApproveStatus.LOADING].includes(approveTransactions.approveB?.status)
     : false;
   const isLoadingA223 = approveTransactions.depositA
-    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
-        approveTransactions.depositA?.status,
-      )
+    ? [AddLiquidityApproveStatus.LOADING].includes(approveTransactions.depositA?.status)
     : false;
   const isLoadingB223 = approveTransactions.depositB
-    ? [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
-        approveTransactions.depositB?.status,
-      )
+    ? [AddLiquidityApproveStatus.LOADING].includes(approveTransactions.depositB?.status)
+    : false;
+
+  const isPendingA20 = approveTransactions.approveA
+    ? [AddLiquidityApproveStatus.PENDING].includes(approveTransactions.approveA?.status)
+    : false;
+  const isPendingB20 = approveTransactions.approveB
+    ? [AddLiquidityApproveStatus.PENDING].includes(approveTransactions.approveB?.status)
+    : false;
+  const isPendingA223 = approveTransactions.depositA
+    ? [AddLiquidityApproveStatus.PENDING].includes(approveTransactions.depositA?.status)
+    : false;
+  const isPendingB223 = approveTransactions.depositB
+    ? [AddLiquidityApproveStatus.PENDING].includes(approveTransactions.depositB?.status)
     : false;
   const isLoading = isLoadingA20 || isLoadingB20 || isLoadingA223 || isLoadingB223;
+  const isPending = isPendingA20 || isPendingB20 || isPendingA223 || isPendingB223;
 
   // TODO change name of "token" field
   type TokenType = "tokenA" | "tokenB";
@@ -228,10 +234,17 @@ const ApproveDialog = () => {
           <Button fullWidth disabled>
             <span className="flex items-center gap-2">Enter correct values</span>
           </Button>
-        ) : isLoading ? (
+        ) : isPending ? (
           <Button fullWidth disabled>
             <span className="flex items-center gap-2">
-              <Preloader size={20} color="green" />
+              <Preloader size={20} color="green" type="linear" />
+            </span>
+          </Button>
+        ) : isLoading ? (
+          <Button fullWidth isLoading>
+            Approve
+            <span className="flex items-center gap-2">
+              <Preloader size={20} color="black" type="circular" />
             </span>
           </Button>
         ) : isAllowed ? (
@@ -491,10 +504,17 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           </div>
         </div>
 
-        {[AddLiquidityStatus.MINT_LOADING, AddLiquidityStatus.MINT_PENDING].includes(status) ? (
+        {AddLiquidityStatus.MINT_LOADING === status ? (
+          <Button fullWidth isLoading={true}>
+            <span className="flex items-center gap-2">
+              {buttonText}
+              <Preloader size={20} color="black" type="circular" />
+            </span>
+          </Button>
+        ) : AddLiquidityStatus.MINT_PENDING === status ? (
           <Button fullWidth disabled>
             <span className="flex items-center gap-2">
-              <Preloader size={20} color="green" />
+              <Preloader size={20} color="green" type="linear" />
             </span>
           </Button>
         ) : (

@@ -209,8 +209,15 @@ export const RevokeDialog = ({
                 <Button onClick={() => revokeHandler(localValueBigInt)} fullWidth>
                   {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
                 </Button>
-              ) : [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(status) ? (
+              ) : AllowanceStatus.PENDING === status ? (
                 <Button fullWidth disabled>
+                  <span className="flex items-center gap-2">
+                    <Preloader size={20} color="green" type="linear" />
+                  </span>
+                </Button>
+              ) : AllowanceStatus.LOADING === status ? (
+                <Button fullWidth isLoading={true}>
+                  {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
                   <span className="flex items-center gap-2">
                     <Preloader size={20} color="black" />
                   </span>

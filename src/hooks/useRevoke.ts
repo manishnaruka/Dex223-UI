@@ -217,6 +217,10 @@ export default function useRevoke({
     gasModel,
   ]);
 
+  if ((currentAllowanceData || 0) > 0 && status === AllowanceStatus.SUCCESS) {
+    setStatus(AllowanceStatus.INITIAL);
+  }
+
   return {
     revokeStatus: status,
     revokeHandler: writeTokenRevoke,

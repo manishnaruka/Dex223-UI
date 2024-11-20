@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
 import Button, { ButtonVariant } from "@/components/buttons/Button";
@@ -135,25 +135,55 @@ export const LiquidityActionButton = ({
     ? BigInt(parsedAmounts[Field.CURRENCY_B].quotient.toString())
     : BigInt(0);
 
-  const isSufficientBalanceA =
-    tokenAStandard === Standard.ERC20
+  const isSufficientBalanceA = useMemo(() => {
+    return tokenAStandard === Standard.ERC20
       ? tokenA0Balance
         ? tokenA0Balance?.value + BigInt(currentAllowanceA || 0) >= amountToCheckA
         : false
       : tokenA1Balance
         ? tokenA1Balance?.value + BigInt(currentDepositA || 0) >= amountToCheckA
         : false;
+  }, [
+    amountToCheckA,
+    currentAllowanceA,
+    currentDepositA,
+    tokenA0Balance,
+    tokenA1Balance,
+    tokenAStandard,
+  ]);
 
-  const isSufficientBalanceB =
-    tokenBStandard === Standard.ERC20
+  const isSufficientAllowanceA = useMemo(() => {
+    return tokenAStandard === Standard.ERC20
+      ? BigInt(currentAllowanceA || 0) >= amountToCheckA
+      : BigInt(currentDepositA || 0) >= amountToCheckA;
+  }, [amountToCheckA, currentAllowanceA, currentDepositA, tokenAStandard]);
+
+  const isSufficientAllowanceB = useMemo(() => {
+    return tokenBStandard === Standard.ERC20
+      ? BigInt(currentAllowanceB || 0) >= amountToCheckB
+      : BigInt(currentDepositB || 0) >= amountToCheckB;
+  }, [amountToCheckB, currentAllowanceB, currentDepositB, tokenBStandard]);
+
+  const isSufficientBalanceB = useMemo(() => {
+    return tokenBStandard === Standard.ERC20
       ? tokenB0Balance
         ? tokenB0Balance?.value + BigInt(currentAllowanceB || 0) >= amountToCheckB
         : false
       : tokenB1Balance
         ? tokenB1Balance?.value + BigInt(currentDepositB || 0) >= amountToCheckB
         : false;
+  }, [
+    amountToCheckB,
+    currentAllowanceB,
+    currentDepositB,
+    tokenB0Balance,
+    tokenB1Balance,
+    tokenBStandard,
+  ]);
 
-  const isSufficientBalance = isSufficientBalanceA && isSufficientBalanceB;
+  const isSufficientBalance = useMemo(() => {
+    return isSufficientBalanceA && isSufficientBalanceB;
+  }, [isSufficientBalanceA, isSufficientBalanceB]);
 
   if (!isConnected) {
     return (
@@ -187,7 +217,7 @@ export const LiquidityActionButton = ({
     );
   }
 
-  if (approveTransactionsCount) {
+  if (approveTransactionsCount || !isSufficientAllowanceA || !isSufficientAllowanceB) {
     return (
       <Button
         variant={ButtonVariant.CONTAINED}

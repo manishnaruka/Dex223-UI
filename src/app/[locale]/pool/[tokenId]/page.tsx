@@ -49,6 +49,7 @@ import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress"
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
+import { useTranslations } from "next-intl";
 
 export default function PoolPage({
   params,
@@ -106,6 +107,7 @@ export default function PoolPage({
     setTokenId,
   } = useCollectFeesStore();
   const { status, hash, setStatus } = useCollectFeesStatusStore();
+  const t = useTranslations("Liquidity");
 
   useEffect(() => {
     setPool(position?.pool);
@@ -557,13 +559,21 @@ export default function PoolPage({
 
             {[CollectFeesStatus.INITIAL].includes(status) ? (
               <Button onClick={() => handleCollectFees()} fullWidth>
-                Collect fees
+                {t("collect_fees_title")}
               </Button>
             ) : null}
-            {[CollectFeesStatus.LOADING, CollectFeesStatus.PENDING].includes(status) ? (
-              <Button fullWidth disabled>
+            {CollectFeesStatus.LOADING === status ? (
+              <Button fullWidth isLoading={true}>
+                {t("collect_fees_title")}
                 <span className="flex items-center gap-2">
                   <Preloader size={20} color="black" />
+                </span>
+              </Button>
+            ) : null}
+            {CollectFeesStatus.PENDING === status ? (
+              <Button fullWidth disabled>
+                <span className="flex items-center gap-2">
+                  <Preloader size={20} color="green" type="linear" />
                 </span>
               </Button>
             ) : null}

@@ -125,6 +125,7 @@ export default function DecreaseLiquidityPage({
     position: storedPosition,
   } = useRemoveLiquidityStore();
   const { status, hash } = useRemoveLiquidityStatusStore();
+  const t = useTranslations("Liquidity");
 
   const { handleRemoveLiquidity } = useRemoveLiquidity();
 
@@ -316,7 +317,7 @@ export default function DecreaseLiquidityPage({
           }
         }}
       >
-        <DialogHeader onClose={handleClose} title="Confirm removing liquidity" />
+        <DialogHeader onClose={handleClose} title={t("confirm_removing_liquidity")} />
         <div className="px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 md:h-auto overflow-y-auto">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -389,13 +390,23 @@ export default function DecreaseLiquidityPage({
               }}
               fullWidth
             >
-              Confirm removing liquidity
+              {t("confirm_removing_liquidity")}
             </Button>
           ) : null}
-          {[RemoveLiquidityStatus.LOADING, RemoveLiquidityStatus.PENDING].includes(status) ? (
-            <Button fullWidth disabled>
+
+          {RemoveLiquidityStatus.LOADING === status ? (
+            <Button fullWidth isLoading={true}>
+              {t("confirm_removing_liquidity")}
               <span className="flex items-center gap-2">
                 <Preloader size={20} color="black" />
+              </span>
+            </Button>
+          ) : null}
+
+          {RemoveLiquidityStatus.PENDING === status ? (
+            <Button fullWidth disabled>
+              <span className="flex items-center gap-2">
+                <Preloader size={20} color="green" type="linear" />
               </span>
             </Button>
           ) : null}
