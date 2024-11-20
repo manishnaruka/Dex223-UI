@@ -9,6 +9,7 @@ import {
   Field,
   useLiquidityAmountsStore,
 } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
+import { useAddLiquidityRecentTransactionsStore } from "@/app/[locale]/add/stores/useAddLiquidityRecentTransactionsStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
@@ -41,7 +42,7 @@ export default function AddPoolPage() {
   useRecentTransactionTracking();
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
-    useSwapRecentTransactionsStore();
+    useAddLiquidityRecentTransactionsStore();
 
   const t = useTranslations("Liquidity");
 
@@ -256,6 +257,7 @@ export default function AddPoolPage() {
             showRecentTransactions={showRecentTransactions}
             handleClose={() => setShowRecentTransactions(false)}
             pageSize={5}
+            store={useAddLiquidityRecentTransactionsStore}
           />
         </div>
       </div>

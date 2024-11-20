@@ -9,6 +9,7 @@ import { useAccount } from "wagmi";
 import useRemoveLiquidity, {
   useRemoveLiquidityEstimatedGas,
 } from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
+import { useRemoveRecentTransactionsStore } from "@/app/[locale]/remove/[tokenId]/stores/useRemoveLiquidityRecentTransactionsStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
@@ -97,7 +98,7 @@ export default function DecreaseLiquidityPage({
   // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
-    useSwapRecentTransactionsStore();
+    useRemoveRecentTransactionsStore();
 
   const {
     reset,
@@ -259,6 +260,7 @@ export default function DecreaseLiquidityPage({
           showRecentTransactions={showRecentTransactions}
           handleClose={() => setShowRecentTransactions(false)}
           pageSize={5}
+          store={useRemoveRecentTransactionsStore}
         />
       </div>
       <DrawerDialog

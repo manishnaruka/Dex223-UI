@@ -3,21 +3,22 @@ import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { scroller } from "react-scroll";
 import { useAccount } from "wagmi";
+import { StoreApi, UseBoundStore } from "zustand";
 
-import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import Pagination from "@/components/common/Pagination";
 import RecentTransaction from "@/components/common/RecentTransaction";
+import { RecentTransactionsStore } from "@/stores/factories/createRecentTransactionsStore";
 import {
   RecentTransactionStatus,
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
 
 const PAGE_SIZE = 10;
-
 interface Props {
   showRecentTransactions: boolean;
   handleClose: () => void;
+  store: UseBoundStore<StoreApi<RecentTransactionsStore>>;
   pageSize?: number;
 }
 
@@ -35,6 +36,7 @@ export default function RecentTransactions({
   showRecentTransactions,
   handleClose,
   pageSize = PAGE_SIZE,
+  store,
 }: Props) {
   const t = useTranslations("RecentTransactions");
 
@@ -46,12 +48,11 @@ export default function RecentTransactions({
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (useSwapRecentTransactionsStore.persist.hasHydrated() && !isInitialized) {
-      console.log("Fire if hydrated");
-      prevShowRecentTransactions.current = useSwapRecentTransactionsStore.getState().isOpened;
+    if (!isInitialized) {
+      prevShowRecentTransactions.current = store.getState().isOpened;
       setIsInitialized(true);
     }
-  }, [isInitialized, showRecentTransactions]);
+  }, [isInitialized, showRecentTransactions, store]);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -61,11 +62,9 @@ export default function RecentTransactions({
     if (!prevShowRecentTransactions.current && showRecentTransactions && componentRef.current) {
       let scrollDuration;
 
-      console.log(componentRef.current);
       if (!isInView(componentRef.current)) {
         scroller.scrollTo("recent-transactions-container", {
           duration: (scrollDistanceInPx: number) => {
-            console.log(scrollDistanceInPx);
             scrollDuration = scrollDistanceInPx / 2;
             return scrollDuration;
           },

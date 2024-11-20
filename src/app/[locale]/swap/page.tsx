@@ -52,6 +52,7 @@ export default function SwapPage() {
               <RecentTransactions
                 showRecentTransactions={showRecentTransactions}
                 handleClose={() => setShowRecentTransactions(false)}
+                store={useSwapRecentTransactionsStore}
               />
             </div>
           </div>

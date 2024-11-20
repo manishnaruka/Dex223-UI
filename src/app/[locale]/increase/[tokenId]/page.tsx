@@ -7,6 +7,7 @@ import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRa
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "@/app/[locale]/add/stores/useLiquidityPriceRangeStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
+import { useIncreaseRecentTransactionsStore } from "@/app/[locale]/increase/[tokenId]/stores/useIncreaseRecentTransactionsStore";
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
@@ -46,7 +47,7 @@ export default function IncreaseLiquidityPage({
   // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
-    useSwapRecentTransactionsStore();
+    useIncreaseRecentTransactionsStore();
 
   const { setIsOpen } = useTransactionSettingsDialogStore();
   const { setTicks } = useLiquidityPriceRangeStore();
@@ -260,6 +261,7 @@ export default function IncreaseLiquidityPage({
             showRecentTransactions={showRecentTransactions}
             handleClose={() => setShowRecentTransactions(false)}
             pageSize={5}
+            store={useIncreaseRecentTransactionsStore}
           />
         </div>
       </div>

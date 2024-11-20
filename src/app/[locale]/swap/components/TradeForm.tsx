@@ -527,13 +527,13 @@ export default function TradeForm() {
       {tokenA && tokenB && typedValue ? (
         <div
           className={clsx(
-            "rounded-3 py-3.5 flex justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center",
+            "rounded-3 py-3.5 flex justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center flex-wrap",
           )}
           role="button"
         >
           {computedGasSpending ? (
             <>
-              <div className="flex flex-col">
+              <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-1">
                   <Tooltip
                     iconSize={_isMobile ? 16 : 24}
@@ -546,7 +546,7 @@ export default function TradeForm() {
                   </div>
                   <span className="mr-1 text-12 md:hidden">~$0.00</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 max-sm:hidden">
                   <span className="text-secondary-text text-12 md:text-14 ">
                     {computedGasSpendingETH} {nativeCurrency.symbol}
                   </span>
@@ -558,7 +558,7 @@ export default function TradeForm() {
               </div>
 
               <div className="flex items-center gap-2 justify-between md:justify-end">
-                <span className="mr-1 text-14 hidden md:inline">~$0.00</span>
+                <span className="mr-1 text-14 max-md:hidden">~$0.00</span>
                 <span className="flex items-center justify-center px-2 text-12 md:text-14 h-5 rounded-20 font-500 text-tertiary-text border border-secondary-border">
                   {t(gasOptionTitle[gasPriceOption])}
                 </span>
@@ -572,6 +572,16 @@ export default function TradeForm() {
                 >
                   {t("edit")}
                 </Button>
+              </div>
+
+              <div className="flex items-center gap-2 sm:hidden w-full mt-0.5">
+                <span className="text-secondary-text text-12 md:text-14 ">
+                  {computedGasSpendingETH} {nativeCurrency.symbol}
+                </span>
+                <span className="block h-4 w-px bg-primary-border" />
+                <span className="text-tertiary-text mr-1 text-12 md:text-14 ">
+                  {computedGasSpending} GWEI
+                </span>
               </div>
             </>
           ) : (

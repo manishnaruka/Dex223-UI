@@ -7,6 +7,7 @@ import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
+import { usePoolRecentTransactionsStore } from "@/app/[locale]/pool/[tokenId]/stores/usePoolRecentTransactionsStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
@@ -54,9 +55,8 @@ export default function PoolPage({
   useCollectFeesEstimatedGas();
 
   const chainId = useCurrentChainId();
-  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
-    useSwapRecentTransactionsStore();
+    usePoolRecentTransactionsStore();
 
   const { forceRefresh } = useRefreshStore();
 
@@ -342,6 +342,7 @@ export default function PoolPage({
           showRecentTransactions={showRecentTransactions}
           handleClose={() => setShowRecentTransactions(false)}
           pageSize={5}
+          store={usePoolRecentTransactionsStore}
         />
       </div>
       <div>

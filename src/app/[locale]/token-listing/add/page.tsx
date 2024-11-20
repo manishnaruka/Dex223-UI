@@ -29,6 +29,7 @@ import {
 } from "@/app/[locale]/token-listing/add/stores/useListTokensGasSettings";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
+import { useTokenListingRecentTransactionsStore } from "@/app/[locale]/token-listing/add/stores/useTokenListingRecentTransactionsStore";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
@@ -166,7 +167,7 @@ export default function ListTokenPage() {
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
-    useSwapRecentTransactionsStore();
+    useTokenListingRecentTransactionsStore();
 
   console.log(params);
 
@@ -351,6 +352,7 @@ export default function ListTokenPage() {
               <RecentTransactions
                 showRecentTransactions={showRecentTransactions}
                 handleClose={() => setShowRecentTransactions(false)}
+                store={useTokenListingRecentTransactionsStore}
               />
             </div>
           </div>
