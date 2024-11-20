@@ -31,7 +31,7 @@ export default function TokensPair({
           />
         </span>
       </div>
-      <span className="md:font-bold md:text-16 text-18 font-bold block">
+      <span className="md:font-medium md:text-16 text-18 font-medium block">
         {tokenA?.symbol} / {tokenB?.symbol}
       </span>
     </div>
