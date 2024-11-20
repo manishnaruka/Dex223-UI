@@ -48,6 +48,7 @@ import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress"
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
+import truncateMiddle from "@/functions/truncateMiddle";
 
 export default function PoolPage({
   params,
@@ -158,24 +159,28 @@ export default function PoolPage({
           />
         </div>
 
-        <div className="w-full flex justify-between mb-4 lg:mb-5">
-          <div className="flex items-center gap-2">
-            <TokensPair tokenA={token0} tokenB={token1} />
-            {position && (
-              <Badge
-                text={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
-                variant={BadgeVariant.DEFAULT}
+        <div className="w-full flex flex-col mb-4 lg:mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <TokensPair tokenA={token0} tokenB={token1} />
+            </div>
+            <div className="flex flex-wrap justify-end items-center gap-2">
+              {position && (
+                <Badge
+                  percentage={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
+                  variant={BadgeVariant.PERCENTAGE}
+                />
+              )}
+              <RangeBadge
+                status={
+                  removed
+                    ? PositionRangeStatus.CLOSED
+                    : inRange
+                      ? PositionRangeStatus.IN_RANGE
+                      : PositionRangeStatus.OUT_OF_RANGE
+                }
               />
-            )}
-            <RangeBadge
-              status={
-                removed
-                  ? PositionRangeStatus.CLOSED
-                  : inRange
-                    ? PositionRangeStatus.IN_RANGE
-                    : PositionRangeStatus.OUT_OF_RANGE
-              }
-            />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
@@ -221,11 +226,12 @@ export default function PoolPage({
           <div>
             <h3 className="text-12 lg:text-14">Liquidity</h3>
             <p className="text-16 lg:text-20 font-bold mb-3">$0.00</p>
-            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-1 lg:bg-quaternary-bg">
+            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20"]}
+                  // {/*}, "ERC-223" */}
                   amount={position?.amount0.toSignificant() || "Loading..."}
                   percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -233,7 +239,8 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20"]}
+                  // {/*}, "ERC-223" */}
                   amount={position?.amount1.toSignificant() || "Loading..."}
                   percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -258,18 +265,18 @@ export default function PoolPage({
               </Button>
             </div>
 
-            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-1 lg:bg-quaternary-bg">
+            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20"]}
                   amount={token0FeeFormatted}
                 />
               </div>
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20"]}
                   amount={token1FeeFormatted}
                 />
               </div>
@@ -302,7 +309,7 @@ export default function PoolPage({
                     : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
-                {token0?.symbol}
+                {truncateMiddle(token0?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
               </button>
               <button
                 onClick={() => setShowFirst(false)}
@@ -313,7 +320,7 @@ export default function PoolPage({
                     : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
-                {token1?.symbol}
+                {truncateMiddle(token1?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
               </button>
             </div>
           </div>

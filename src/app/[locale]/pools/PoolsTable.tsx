@@ -210,7 +210,7 @@ const PoolsTableItemMobile = ({
               percentage={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
             />
           </div>
-          <span className="text-secondary-text font-normal">{`# ${index}`}</span>
+          <span className="text-secondary-text whitespace-nowrap font-normal">{`# ${index}`}</span>
         </div>
         <div className="flex justify-between gap-2">
           <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
