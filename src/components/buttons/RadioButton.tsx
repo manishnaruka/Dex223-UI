@@ -30,8 +30,8 @@ export default function RadioButton({
     >
       <span
         className={clsx(
-          "flex-shrink-0 duration-200 w-4 h-4 rounded-full border relative ",
-          bgColor,
+          "flex-shrink-0 duration-200 w-4 h-4 rounded-full border relative bg-secondary-bg",
+          // bgColor,
           isActive ? "border-green" : "border-secondary-border group-hocus:border-green",
         )}
       >
