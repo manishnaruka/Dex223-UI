@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
@@ -50,6 +50,8 @@ import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress"
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
 import { useTranslations } from "next-intl";
+import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 
 export default function PoolPage({
   params,
@@ -166,7 +168,7 @@ export default function PoolPage({
             <div>
               <TokensPair tokenA={token0} tokenB={token1} />
             </div>
-            <div className="flex flex-wrap justify-end items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 mr-auto">
               {position && (
                 <Badge
                   percentage={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
@@ -188,21 +190,29 @@ export default function PoolPage({
         <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-secondary-text text-12 lg:text-16">NFT ID:</span>
-            <span className="text-12 lg:text-16">{params.tokenId}</span>
+            <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
+            <ExternalTextLink
+              text={params.tokenId}
+              href={getExplorerLink(
+                ExplorerLinkType.TOKEN,
+                `${NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]}?a=${params.tokenId}`,
+                chainId,
+              )}
+            />
+            {/*<span className="text-12 text-secondary-text lg:text-16">{params.tokenId}</span>*/}
             <button>
               <Svg iconName="arrow-up" />
             </button>
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-secondary-text text-12 lg:text-16">Min tick:</span>
-            <span className="text-12 lg:text-16">{position?.tickLower}</span>
+            <span className="text-tertiary-text text-12 lg:text-16">Min tick:</span>
+            <span className="text-12 text-secondary-text lg:text-16">{position?.tickLower}</span>
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-secondary-text text-12 lg:text-16">Max tick:</span>
-            <span className="text-12 lg:text-16">{position?.tickUpper}</span>
+            <span className="text-tertiary-text text-12 lg:text-16">Max tick:</span>
+            <span className="text-12 text-secondary-text lg:text-16">{position?.tickUpper}</span>
           </div>
         </div>
         <div className="flex flex-col lg:grid lg:grid-cols-2 items-center gap-2 lg:gap-3 mb-4 lg:mb-5">

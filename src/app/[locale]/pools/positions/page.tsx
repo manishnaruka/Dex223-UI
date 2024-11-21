@@ -64,7 +64,7 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
     >
       <div className="justify-between flex items-center mb-2 gap-2">
         <div className="flex items-center gap-2">
-          <TokensPair tokenA={tokenA} tokenB={tokenB} />
+          <TokensPair tokenA={tokenA} tokenB={tokenB} isBold={false} />
           {fee ? (
             <Badge
               variant={BadgeVariant.PERCENTAGE}
