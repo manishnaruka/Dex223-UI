@@ -271,6 +271,7 @@ export default function RecentTransaction({
                 </span>
               )}
               <a
+                className="relative -top-2 @[420px]:static @[420px]:top-0"
                 target="_blank"
                 href={getExplorerLink(
                   ExplorerLinkType.TRANSACTION,

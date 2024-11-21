@@ -34,7 +34,7 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
     useManageTokensDialogStore();
   const { handleClose } = useTokenPortfolioDialogStore();
   return (
-    <div className="flex justify-between w-full flex-col md:flex-row">
+    <div className="flex justify-between w-full flex-col xs:flex-row bg-tertiary-bg rounded-3 xs:bg-transparent pb-1.5 pt-2 pl-4 xs:p-0">
       <div className="flex gap-2 md:gap-3 items-center">
         {tokenList?.id?.toString()?.startsWith("default") && (
           <TokenListLogo type={TokenListLogoType.DEFAULT} chainId={tokenList.chainId} />
@@ -68,7 +68,7 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
           setScrollTo(tokenList?.id || null);
           handleClose();
         }}
-        className="pl-12 text-12 md:text-16 md:pl-0 text-secondary-text hocus:text-green-hover duration-200 flex items-center gap-2"
+        className="pl-12 text-12 md:text-16 md:pl-0 text-secondary-text hocus:text-green-hover duration-200 flex items-center gap-2 flex-shrink-0"
       >
         Manage list
         {

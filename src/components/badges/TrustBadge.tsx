@@ -248,7 +248,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
             const rateValueMap = rateMap[key as RateKey] as RateValueMap<typeof key>;
             const { text, score } = rateValueMap[value as OtherListCheck];
             return (
-              <div key={key} className="flex justify-between items-center gap-2">
+              <div key={key} className="flex justify-between items-start gap-2">
                 <p className="flex items-start gap-2">
                   <Svg
                     className={clsx(
@@ -271,7 +271,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
             const { text, score } = rateValueMap[value as TrustRateCheck];
 
             return (
-              <div key={key} className="flex justify-between items-center gap-2">
+              <div key={key} className="flex justify-between items-start gap-2">
                 <div className="flex items-start gap-2">
                   <Svg
                     size={20}

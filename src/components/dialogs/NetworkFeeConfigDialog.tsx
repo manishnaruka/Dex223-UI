@@ -1,26 +1,20 @@
 import clsx from "clsx";
 import { useFormik } from "formik";
-import React, {
-  ChangeEvent,
-  FocusEvent,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, formatGwei, parseGwei } from "viem";
 
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Svg from "@/components/atoms/Svg";
 import Switch from "@/components/atoms/Switch";
-import TextField from "@/components/atoms/TextField";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
-import TextButton from "@/components/buttons/TextButton";
+import ConfigureAutomatically from "@/components/gas-settings/ConfigureAutomatically";
+import EIP1559Fields from "@/components/gas-settings/EIP1559Fields";
+import GasLimitField from "@/components/gas-settings/GasLimitField";
+import GasOptionRadioButton from "@/components/gas-settings/GasOptionRadioButton";
+import useNetworkFeeGasValidation from "@/components/gas-settings/hooks/useNetworkFeeGasValidation";
+import LegacyField from "@/components/gas-settings/LegacyField";
 import {
   baseFeeMultipliers,
   isEip1559Supported,
@@ -60,10 +54,10 @@ const gasOptionTitle: Record<GasOption, string> = {
   [GasOption.CUSTOM]: "Custom",
 };
 
-const gasOptionIcon: Record<GasOption, ReactNode> = {
-  [GasOption.CHEAP]: <Svg iconName="cheap-gas" />,
-  [GasOption.FAST]: <Svg iconName="fast-gas" />,
-  [GasOption.CUSTOM]: <Svg iconName="custom-gas" />,
+const gasOptionIcon: Record<GasOption, "cheap-gas" | "fast-gas" | "custom-gas"> = {
+  [GasOption.CHEAP]: "cheap-gas",
+  [GasOption.FAST]: "fast-gas",
+  [GasOption.CUSTOM]: "custom-gas",
 };
 
 const gasOptions = [GasOption.CHEAP, GasOption.FAST, GasOption.CUSTOM];
@@ -86,128 +80,11 @@ function getInitialCustomValue(
   return "";
 }
 
-function EIP1559Fields({
-  maxFeePerGas,
-  maxPriorityFeePerGas,
-  handleChange,
-  handleBlur,
-  currentMaxFeePerGas,
-  setMaxFeePerGasValue,
-  setMaxPriorityFeePerGasValue,
-  currentMaxPriorityFeePerGas,
-  maxPriorityFeePerGasError,
-  maxPriorityFeePerGasWarning,
-  maxFeePerGasError,
-  maxFeePerGasWarning,
-}: {
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
-  setMaxFeePerGasValue: (value: string) => void;
-  setMaxPriorityFeePerGasValue: (value: string) => void;
-  handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleBlur: (e: FocusEvent<HTMLInputElement>) => void;
-  currentMaxFeePerGas: bigint | undefined;
-  currentMaxPriorityFeePerGas: bigint | undefined;
-  maxPriorityFeePerGasError: boolean;
-  maxPriorityFeePerGasWarning: boolean;
-  maxFeePerGasError: boolean;
-  maxFeePerGasWarning: boolean;
-}) {
-  return (
-    <div className="grid gap-3 grid-cols-2">
-      <TextField
-        isNumeric
-        isError={maxFeePerGasError}
-        isWarning={maxFeePerGasWarning}
-        placeholder="Max fee"
-        label="Max fee"
-        name="maxFeePerGas"
-        id="maxFeePerGas"
-        tooltipText="Max fee tooltip"
-        value={maxFeePerGas}
-        onChange={(e) => {
-          handleChange(e);
-        }}
-        onBlur={(e) => {
-          handleBlur(e);
-        }}
-        helperText={
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                if (currentMaxFeePerGas) {
-                  setMaxFeePerGasValue(formatGwei(currentMaxFeePerGas));
-                }
-
-                // setUnsavedMaxFeePerGas( || BigInt(0));
-              }}
-              className="text-green"
-            >
-              Current
-            </button>{" "}
-            {currentMaxFeePerGas ? formatFloat(formatGwei(currentMaxFeePerGas)) : "0"} Gwei
-          </div>
-        }
-      />
-
-      <TextField
-        isNumeric
-        isError={maxPriorityFeePerGasError}
-        isWarning={maxPriorityFeePerGasWarning}
-        placeholder="Priority fee"
-        label="Priority fee"
-        name="maxPriorityFeePerGas"
-        id="maxPriorityFeePerGas"
-        tooltipText="Max priority tooltip"
-        value={maxPriorityFeePerGas}
-        onChange={(e) => {
-          handleChange(e);
-        }}
-        onBlur={(e) => {
-          handleBlur(e);
-        }}
-        helperText={
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                if (currentMaxPriorityFeePerGas) {
-                  setMaxPriorityFeePerGasValue(formatGwei(currentMaxPriorityFeePerGas));
-                }
-              }}
-              className="text-green"
-            >
-              Current
-            </button>{" "}
-            {currentMaxPriorityFeePerGas
-              ? formatFloat(formatGwei(currentMaxPriorityFeePerGas))
-              : "0"}{" "}
-            Gwei
-          </div>
-        }
-      />
-    </div>
-  );
-}
-
-function ErrorsAndWarnings({ errors, warnings }: { errors?: string[]; warnings?: string[] }) {
-  return (
-    <>
-      {(!!errors?.length || !!warnings?.length) && (
-        <div className="flex flex-col gap-5 mt-4">
-          {errors?.map((err) => <Alert key={err} text={err} type="error" />)}
-          {warnings?.map((war) => <Alert key={war} text={war} type="warning" />)}
-        </div>
-      )}
-    </>
-  );
-}
-
 type HandleApplyArgs =
   | { option: GasOption.CHEAP }
   | { option: GasOption.FAST }
   | { option: GasOption.CUSTOM; gasSettings: GasSettings; gasLimit: bigint };
+
 function NetworkFeeDialogContent({
   isAdvanced,
   setIsOpen,
@@ -216,7 +93,6 @@ function NetworkFeeDialogContent({
   setGasPriceSettings,
   setGasPriceOption,
   estimatedGas,
-  setEstimatedGas,
   customGasLimit,
   setCustomGasLimit,
 }: Omit<Props, "isOpen" | "setIsAdvanced">) {
@@ -364,696 +240,273 @@ function NetworkFeeDialogContent({
   const { handleChange, handleBlur, touched, values, setFieldValue, handleSubmit, handleReset } =
     formik;
 
-  const maxFeePerGasError = useMemo(() => {
-    return baseFee && parseGwei(values.maxFeePerGas) < baseFee
-      ? "Max fee per gas is too low for current network condition"
-      : undefined;
-  }, [baseFee, values.maxFeePerGas]);
+  const {
+    maxFeePerGasError,
+    maxFeePerGasWarning,
+    maxPriorityFeePerGasError,
+    maxPriorityFeePerGasWarning,
+    legacyGasPriceError,
+    legacyGasPriceWarning,
+    gasLimitError,
+  } = useNetworkFeeGasValidation({
+    maxFeePerGas: values.maxFeePerGas,
+    maxPriorityFeePerGas: values.maxPriorityFeePerGas,
+    gasPrice: values.gasPrice,
+    gasLimit: values.gasLimit,
+    estimatedGas,
+  });
 
-  const legacyGasPriceError = useMemo(() => {
-    return gasPrice && parseGwei(values.gasPrice) < gasPrice
-      ? "Gas price is too low for current network condition"
-      : undefined;
-  }, [gasPrice, values.gasPrice]);
+  const getGasPriceGwei = useCallback(
+    (_gasOption: GasOption) => {
+      if (_gasOption === GasOption.CUSTOM && baseFee) {
+        if (values.gasPriceModel === GasFeeModel.LEGACY) {
+          return parseGwei(values.gasPrice);
+        }
 
-  const legacyGasPriceWarning = useMemo(() => {
-    return gasPrice && parseGwei(values.gasPrice) > gasPrice * BigInt(3)
-      ? "Gas price is unnecessarily high for current network condition"
-      : undefined;
-  }, [gasPrice, values.gasPrice]);
-
-  const maxFeePerGasWarning = useMemo(() => {
-    return baseFee && parseGwei(values.maxFeePerGas) > baseFee * BigInt(3)
-      ? "Max fee per gas is unnecessarily high for current network condition"
-      : undefined;
-  }, [baseFee, values.maxFeePerGas]);
-
-  const maxPriorityFeePerGasError = useMemo(() => {
-    return parseGwei(values.maxPriorityFeePerGas) === BigInt(0)
-      ? "Max priority fee per gas is too low for current network condition"
-      : undefined;
-  }, [values.maxPriorityFeePerGas]);
-
-  const maxPriorityFeePerGasWarning = useMemo(() => {
-    return priorityFee && parseGwei(values.maxPriorityFeePerGas) > priorityFee * BigInt(3)
-      ? "Max priority fee per gas is unnecessarily high for current network condition"
-      : undefined;
-  }, [priorityFee, values.maxPriorityFeePerGas]);
-
-  const gasLimitError = useMemo(() => {
-    return BigInt(values.gasLimit) < estimatedGas
-      ? "Gas limit is lower then recommended"
-      : undefined;
-  }, [values.gasLimit, estimatedGas]);
-
-  const gasPriceErrors = useMemo(() => {
-    const _errors: string[] = [];
-
-    [maxPriorityFeePerGasError, maxFeePerGasError].forEach((v) => {
-      if (v) {
-        _errors.push(v);
+        if (values.gasPriceModel === GasFeeModel.EIP1559) {
+          return parseGwei(values.maxFeePerGas);
+        }
       }
-    });
 
-    return _errors;
-  }, [maxFeePerGasError, maxPriorityFeePerGasError]);
-
-  const legacyGasPriceErrors = useMemo(() => {
-    const _errors: string[] = [];
-
-    [legacyGasPriceError].forEach((v) => {
-      if (v) {
-        _errors.push(v);
+      if (_gasOption !== GasOption.CUSTOM && baseFee) {
+        return (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR;
       }
-    });
 
-    return _errors;
-  }, [legacyGasPriceError]);
-
-  const gasPriceWarnings = useMemo(() => {
-    const _warnings: string[] = [];
-
-    [maxPriorityFeePerGasWarning, maxFeePerGasWarning].forEach((v) => {
-      if (v) {
-        _warnings.push(v);
-      }
-    });
-
-    return _warnings;
-  }, [maxFeePerGasWarning, maxPriorityFeePerGasWarning]);
-
-  const legacyGasPriceWarnings = useMemo(() => {
-    const _warnings: string[] = [];
-
-    [legacyGasPriceWarning].forEach((v) => {
-      if (v) {
-        _warnings.push(v);
-      }
-    });
-
-    return _warnings;
-  }, [legacyGasPriceWarning]);
-
-  const gasLimitErrors = useMemo(() => {
-    const _errors: string[] = [];
-
-    [gasLimitError].forEach((v) => {
-      if (v) {
-        _errors.push(v);
-      }
-    });
-
-    return _errors;
-  }, [gasLimitError]);
+      return BigInt(0);
+    },
+    [baseFee, chainId, values.gasPrice, values.gasPriceModel, values.maxFeePerGas],
+  );
 
   return (
     <form className="h-[calc(100%-60px)]" onSubmit={handleSubmit}>
       <div className="h-[calc(100%-80px)] overflow-auto flex flex-col gap-2 px-4 md:px-10">
         {gasOptions.map((_gasOption) => {
           return (
-            <div
-              onClick={() => setFieldValue("gasPriceOption", _gasOption)}
+            <GasOptionRadioButton
               key={_gasOption}
-              className={clsx(
-                "w-full rounded-3 bg-tertiary-bg group cursor-pointer",
-                values.gasPriceOption === _gasOption && "cursor-auto",
-              )}
-            >
-              <div
-                className={clsx(
-                  "flex justify-between px-5 items-center min-h-12 md:min-h-[60px] duration-200",
-                  GasOption.CUSTOM === _gasOption && "border-primary-bg rounded-t-3",
-                  GasOption.CUSTOM !== _gasOption && "border-primary-bg rounded-3",
-                  values.gasPriceOption !== _gasOption && "group-hocus:bg-green-bg",
-                )}
-              >
-                <div className="flex items-center gap-2">
+              gasPriceGWEI={`${formatFloat(formatGwei(getGasPriceGwei(_gasOption)))} GWEI`}
+              gasPriceCurrency={`${formatFloat(formatEther(getGasPriceGwei(_gasOption) * estimatedGas))} ${nativeCurrency.symbol}`}
+              gasPriceUSD={"~$0.00"}
+              tooltipText={"Tooltip text"}
+              title={gasOptionTitle[_gasOption]}
+              iconName={gasOptionIcon[_gasOption]}
+              customContent={
+                _gasOption === GasOption.CUSTOM ? (
                   <div
                     className={clsx(
-                      "w-4 h-4 duration-200 before:duration-200 border bg-secondary-bg rounded-full before:w-2.5 before:h-2.5 before:absolute before:top-1/2 before:rounded-full before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 relative",
-                      values.gasPriceOption === _gasOption
-                        ? "border-green before:bg-green"
-                        : "border-secondary-border group-hocus:border-green",
-                    )}
-                  />
-
-                  <span
-                    className={clsx(
-                      values.gasPriceOption === _gasOption
-                        ? "text-green"
-                        : "text-tertiary-text group-hocus:text-primary-text",
-                      "duration-200",
+                      values.gasPriceOption !== GasOption.CUSTOM &&
+                        "opacity-30 pointer-events-none",
                     )}
                   >
-                    {gasOptionIcon[_gasOption]}
-                  </span>
-                  <div className="flex flex-col md:flex-row md:items-center md:gap-2">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={clsx(
-                          values.gasPriceOption === _gasOption
-                            ? "text-primary-text"
-                            : "text-secondary-text group-hocus:text-primary-text",
-                          "duration-200 font-bold text-14 md:text-16",
-                        )}
-                      >
-                        {gasOptionTitle[_gasOption]}
-                      </span>
-
-                      <span className="text-tertiary-text">
-                        <Tooltip iconSize={20} text="Tooltip text" />
-                      </span>
-                    </div>
-                    <span
-                      className={clsx(
-                        values.gasPriceOption === _gasOption
-                          ? "text-secondary-text"
-                          : "text-tertiary-text group-hocus:text-secondary-text",
-                        "duration-200 text-12 md:text-16",
-                      )}
-                    >
-                      ~0.00$
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-0.5">
-                  <span
-                    className={clsx(
-                      values.gasPriceOption === _gasOption
-                        ? "text-primary-text"
-                        : "text-secondary-text group-hocus:text-primary-text",
-                      "duration-200  text-12 md:text-16",
+                    {!isAdvanced && isEip1559Supported(chainId) && (
+                      <div className={clsx("px-5 pb-4")}>
+                        <ConfigureAutomatically
+                          gasPriceModel={values.gasPriceModel}
+                          setFieldValue={setFieldValue}
+                        />
+                        <EIP1559Fields
+                          maxPriorityFeePerGas={values.maxPriorityFeePerGas}
+                          maxFeePerGas={values.maxFeePerGas}
+                          setMaxFeePerGasValue={(value) => setFieldValue("maxFeePerGas", value)}
+                          setMaxPriorityFeePerGasValue={(value) =>
+                            setFieldValue("maxPriorityFeePerGas", value)
+                          }
+                          currentMaxFeePerGas={baseFee}
+                          currentMaxPriorityFeePerGas={priorityFee}
+                          handleChange={handleChange}
+                          handleBlur={handleBlur}
+                          maxFeePerGasError={maxFeePerGasError}
+                          maxFeePerGasWarning={maxFeePerGasWarning}
+                          maxPriorityFeePerGasError={maxPriorityFeePerGasError}
+                          maxPriorityFeePerGasWarning={maxPriorityFeePerGasWarning}
+                        />
+                      </div>
                     )}
-                  >
-                    {_gasOption !== GasOption.CUSTOM &&
-                      baseFee &&
-                      `${formatFloat(
-                        formatEther(
-                          (baseFee * baseFeeMultipliers[chainId][_gasOption] * estimatedGas) /
-                            SCALING_FACTOR,
-                        ),
-                      )} ${nativeCurrency.symbol}`}
-                    {_gasOption === GasOption.CUSTOM &&
-                      `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(formatEther(parseGwei(values.gasPrice) * estimatedGas)) : formatFloat(formatEther(parseGwei(values.maxFeePerGas) * estimatedGas))} ${nativeCurrency.symbol}`}
-                  </span>
-                  <span
-                    className={clsx(
-                      values.gasPriceOption === _gasOption
-                        ? "text-tertiary-text"
-                        : "text-tertiary-text",
-                      "duration-200  text-12 md:text-14",
+
+                    {!isAdvanced && !isEip1559Supported(chainId) && (
+                      <div className={clsx("px-5 pb-4")}>
+                        <ConfigureAutomatically
+                          gasPriceModel={values.gasPriceModel}
+                          setFieldValue={setFieldValue}
+                        />
+                        <LegacyField
+                          value={values.gasPrice}
+                          onChange={(e) => {
+                            handleChange(e);
+                          }}
+                          onBlur={(e) => {
+                            handleBlur(e);
+                          }}
+                          gasPrice={gasPrice}
+                          setFieldValue={(value) => setFieldValue("gasPrice", value)}
+                          legacyGasPriceError={legacyGasPriceError}
+                          legacyGasPriceWarning={legacyGasPriceWarning}
+                        />
+                      </div>
                     )}
-                  >
-                    {_gasOption !== GasOption.CUSTOM &&
-                      baseFee &&
-                      `${formatFloat(
-                        formatGwei(
-                          (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR,
-                        ),
-                      )} GWEI`}
-                    {_gasOption === GasOption.CUSTOM &&
-                      `${values.gasPriceModel === GasFeeModel.LEGACY ? formatFloat(values.gasPrice) : formatFloat(values.maxFeePerGas)} GWEI`}
-                  </span>
-                </div>
-              </div>
 
-              {_gasOption === GasOption.CUSTOM && (
-                <div
-                  className={clsx(
-                    values.gasPriceOption !== GasOption.CUSTOM && "opacity-30 pointer-events-none",
-                  )}
-                >
-                  {!isAdvanced && isEip1559Supported(chainId) && (
-                    <div className={clsx("px-5 pb-4")}>
-                      <div className="flex justify-between items-center pb-3 pt-3">
-                        <span>
-                          <span className="hidden text-tertiary-text md:inline">
-                            Custom gas settings
-                          </span>
-                        </span>
-                        <TextButton
-                          onClick={() => {
-                            const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
-
-                            if (values.gasPriceModel === GasFeeModel.EIP1559) {
-                              if (baseFee) {
-                                setFieldValue(
-                                  "maxFeePerGas",
-                                  formatGwei((baseFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                              if (priorityFee) {
-                                setFieldValue(
-                                  "maxPriorityFeePerGas",
-                                  formatGwei((priorityFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
-
-                            if (values.gasPriceModel === GasFeeModel.LEGACY) {
-                              if (gasPrice) {
-                                setFieldValue(
-                                  "gasPrice",
-                                  formatGwei((gasPrice * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
+                    {isAdvanced && !isEip1559Supported(chainId) && (
+                      <div className={clsx("px-5 pb-4 flex flex-col gap-4")}>
+                        <ConfigureAutomatically
+                          gasPriceModel={values.gasPriceModel}
+                          setFieldValue={setFieldValue}
+                        />
+                        <LegacyField
+                          value={values.gasPrice}
+                          onChange={(e) => {
+                            handleChange(e);
                           }}
-                          type="reset"
-                          endIcon="reset"
-                          className="pr-0"
-                        >
-                          Configure automatically
-                        </TextButton>
-                      </div>
-                      <EIP1559Fields
-                        maxPriorityFeePerGas={values.maxPriorityFeePerGas}
-                        maxFeePerGas={values.maxFeePerGas}
-                        setMaxFeePerGasValue={(value) => setFieldValue("maxFeePerGas", value)}
-                        setMaxPriorityFeePerGasValue={(value) =>
-                          setFieldValue("maxPriorityFeePerGas", value)
-                        }
-                        currentMaxFeePerGas={baseFee}
-                        currentMaxPriorityFeePerGas={priorityFee}
-                        handleChange={handleChange}
-                        handleBlur={handleBlur}
-                        maxFeePerGasError={!!maxFeePerGasError}
-                        maxPriorityFeePerGasError={!!maxPriorityFeePerGasError}
-                        maxFeePerGasWarning={!!maxFeePerGasWarning}
-                        maxPriorityFeePerGasWarning={!!maxPriorityFeePerGasWarning}
-                      />
-                      <ErrorsAndWarnings errors={gasPriceErrors} warnings={gasPriceWarnings} />
-                    </div>
-                  )}
-
-                  {!isAdvanced && !isEip1559Supported(chainId) && (
-                    <div className={clsx("px-5 pb-4")}>
-                      <div className="flex justify-between items-center pb-3 pt-3">
-                        <span>
-                          <span className="hidden text-tertiary-text md:inline">
-                            Custom gas settings
-                          </span>
-                        </span>
-                        <TextButton
-                          onClick={() => {
-                            const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
-
-                            if (values.gasPriceModel === GasFeeModel.EIP1559) {
-                              if (baseFee) {
-                                setFieldValue(
-                                  "maxFeePerGas",
-                                  formatGwei((baseFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                              if (priorityFee) {
-                                setFieldValue(
-                                  "maxPriorityFeePerGas",
-                                  formatGwei((priorityFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
-
-                            if (values.gasPriceModel === GasFeeModel.LEGACY) {
-                              if (gasPrice) {
-                                setFieldValue(
-                                  "gasPrice",
-                                  formatGwei((gasPrice * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
+                          onBlur={(e) => {
+                            handleBlur(e);
                           }}
-                          type="reset"
-                          endIcon="reset"
-                          className="pr-0"
-                        >
-                          Configure automatically
-                        </TextButton>
+                          gasPrice={gasPrice}
+                          setFieldValue={(value) => setFieldValue("gasPrice", value)}
+                          legacyGasPriceError={legacyGasPriceError}
+                          legacyGasPriceWarning={legacyGasPriceWarning}
+                        />
+
+                        <GasLimitField
+                          onChange={(e) => setFieldValue("gasLimit", e.target.value)}
+                          onBlur={(e) => handleBlur(e)}
+                          setFieldValue={(value) => setFieldValue("gasLimit", value)}
+                          value={values.gasLimit}
+                          estimatedGas={estimatedGas}
+                          gasLimitError={gasLimitError}
+                        />
                       </div>
-                      <TextField
-                        isNumeric
-                        placeholder="Gas price"
-                        label="Gas price"
-                        name="gasPrice"
-                        id="gasPrice"
-                        tooltipText="Gas price tooltip"
-                        value={values.gasPrice}
-                        onChange={(e) => {
-                          handleChange(e);
-                        }}
-                        onBlur={(e) => {
-                          handleBlur(e);
-                        }}
-                        helperText={
-                          <div className="flex items-center gap-1">
+                    )}
+
+                    {isAdvanced && isEip1559Supported(chainId) && (
+                      <div className="px-5 pb-4">
+                        <ConfigureAutomatically
+                          gasPriceModel={values.gasPriceModel}
+                          setFieldValue={setFieldValue}
+                        />
+                        <div className="pb-5">
+                          <div className="grid grid-cols-2 gap-1 p-1 rounded-3 bg-secondary-bg mb-4">
                             <button
                               type="button"
-                              onClick={() => {
-                                if (gasPrice) {
-                                  setFieldValue("gasPrice", formatGwei(gasPrice));
-                                }
-                              }}
-                              className="text-green"
-                            >
-                              Current
-                            </button>{" "}
-                            {gasPrice ? formatFloat(formatGwei(gasPrice)) : "0"} Gwei
-                          </div>
-                        }
-                      />
-                      <ErrorsAndWarnings
-                        errors={legacyGasPriceErrors}
-                        warnings={legacyGasPriceWarnings}
-                      />
-                    </div>
-                  )}
-
-                  {isAdvanced && !isEip1559Supported(chainId) && (
-                    <div className={clsx("px-5 pb-4 flex flex-col gap-4")}>
-                      <div className="flex justify-between items-center pb-3 pt-3">
-                        <span>
-                          <span className="hidden text-tertiary-text md:inline">
-                            Custom gas settings
-                          </span>
-                        </span>
-                        <TextButton
-                          onClick={() => {
-                            const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
-
-                            if (values.gasPriceModel === GasFeeModel.EIP1559) {
-                              if (baseFee) {
-                                setFieldValue(
-                                  "maxFeePerGas",
-                                  formatGwei((baseFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                              if (priorityFee) {
-                                setFieldValue(
-                                  "maxPriorityFeePerGas",
-                                  formatGwei((priorityFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
-
-                            if (values.gasPriceModel === GasFeeModel.LEGACY) {
-                              if (gasPrice) {
-                                setFieldValue(
-                                  "gasPrice",
-                                  formatGwei((gasPrice * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
-                          }}
-                          type="reset"
-                          endIcon="reset"
-                          className="pr-0"
-                        >
-                          Configure automatically
-                        </TextButton>
-                      </div>
-                      <TextField
-                        isNumeric
-                        placeholder="Gas price"
-                        label="Gas price"
-                        name="gasPrice"
-                        id="gasPrice"
-                        tooltipText="Gas price tooltip"
-                        value={values.gasPrice}
-                        onChange={(e) => {
-                          handleChange(e);
-                        }}
-                        onBlur={(e) => {
-                          handleBlur(e);
-                        }}
-                        helperText={
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (gasPrice) {
-                                  setFieldValue("gasPrice", formatGwei(gasPrice));
-                                }
-                              }}
-                              className="text-green"
-                            >
-                              Current
-                            </button>{" "}
-                            {gasPrice ? formatFloat(formatGwei(gasPrice)) : "0"} Gwei
-                          </div>
-                        }
-                      />
-                      <ErrorsAndWarnings
-                        errors={legacyGasPriceErrors}
-                        warnings={legacyGasPriceWarnings}
-                      />
-
-                      <TextField
-                        isNumeric
-                        decimalScale={0}
-                        placeholder="Gas limit"
-                        label="Gas limit"
-                        name="gasLimit"
-                        id="gasLimit"
-                        tooltipText="gasLimit is a measure of actions that a contract can perform in your transaction. Setting gasLimit to a low value may result in your transaction not being able to perform the necessary actions (i.e. purchase tokens) and fail. We don't recommend changing this unless you absolutely know what you're doing."
-                        value={values.gasLimit}
-                        onChange={(e) => setFieldValue("gasLimit", e.target.value)}
-                        onBlur={(e) => {
-                          handleBlur(e);
-                        }}
-                        isError={!!gasLimitError}
-                        helperText={
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                setFieldValue(
-                                  "gasLimit",
-                                  estimatedGas ? estimatedGas.toString() : "100000",
-                                );
-                              }}
-                              className="text-green"
-                            >
-                              Estimated
-                            </button>{" "}
-                            {estimatedGas ? estimatedGas?.toString() : 100000} Gwei
-                          </div>
-                        }
-                      />
-                      <ErrorsAndWarnings errors={gasLimitErrors} />
-                    </div>
-                  )}
-
-                  {isAdvanced && isEip1559Supported(chainId) && (
-                    <div className="px-5 pb-4">
-                      <div className="flex justify-between items-center pb-3 pt-3">
-                        <span>
-                          <span className="hidden text-tertiary-text md:inline">
-                            Custom gas settings
-                          </span>
-                        </span>
-                        <TextButton
-                          onClick={() => {
-                            const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
-
-                            if (values.gasPriceModel === GasFeeModel.EIP1559) {
-                              if (baseFee) {
-                                setFieldValue(
-                                  "maxFeePerGas",
-                                  formatGwei((baseFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                              if (priorityFee) {
-                                setFieldValue(
-                                  "maxPriorityFeePerGas",
-                                  formatGwei((priorityFee * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
-
-                            if (values.gasPriceModel === GasFeeModel.LEGACY) {
-                              if (gasPrice) {
-                                setFieldValue(
-                                  "gasPrice",
-                                  formatGwei((gasPrice * multiplier) / SCALING_FACTOR),
-                                );
-                              }
-                            }
-                          }}
-                          type="reset"
-                          endIcon="reset"
-                          className="pr-0"
-                        >
-                          Configure automatically
-                        </TextButton>
-                      </div>
-                      <div className="pb-5">
-                        <div className="grid grid-cols-2 gap-1 p-1 rounded-3 bg-secondary-bg mb-4">
-                          <button
-                            type="button"
-                            className={clsx(
-                              values.gasPriceModel === GasFeeModel.EIP1559
-                                ? "bg-green-bg border-green"
-                                : "bg-primary-bg border-transparent",
-                              "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border group hocus:bg-green-bg rounded-3 duration-200",
-                            )}
-                            onClick={() => setFieldValue("gasPriceModel", GasFeeModel.EIP1559)}
-                          >
-                            <span
                               className={clsx(
-                                "flex items-center gap-1",
-                                values.gasPriceModel !== GasFeeModel.EIP1559 &&
-                                  "text-secondary-text",
-                              )}
-                            >
-                              EIP-1559 <Tooltip text="WOOTLAMN" />
-                            </span>
-                            <span
-                              className={clsx(
-                                "text-12 duration-200",
                                 values.gasPriceModel === GasFeeModel.EIP1559
-                                  ? "text-secondary-text "
-                                  : "text-tertiary-text group-hover/button:text-secondary-text",
+                                  ? "bg-green-bg border-green"
+                                  : "bg-primary-bg border-transparent",
+                                "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border group hocus:bg-green-bg rounded-3 duration-200",
                               )}
+                              onClick={() => setFieldValue("gasPriceModel", GasFeeModel.EIP1559)}
                             >
-                              Network Fee = gasLimit × (Base Fee + PriorityFee)
-                            </span>
-                          </button>
-                          <button
-                            type="button"
-                            className={clsx(
-                              values.gasPriceModel === GasFeeModel.LEGACY
-                                ? "bg-green-bg border-green"
-                                : "bg-primary-bg border-transparent text-secondary-text",
-                              "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border hocus:bg-green-bg rounded-3 duration-200",
-                            )}
-                            onClick={() => setFieldValue("gasPriceModel", GasFeeModel.LEGACY)}
-                          >
-                            <span
+                              <span
+                                className={clsx(
+                                  "flex items-center gap-1",
+                                  values.gasPriceModel !== GasFeeModel.EIP1559 &&
+                                    "text-secondary-text",
+                                )}
+                              >
+                                EIP-1559 <Tooltip text="WOOTLAMN" />
+                              </span>
+                              <span
+                                className={clsx(
+                                  "text-12 duration-200",
+                                  values.gasPriceModel === GasFeeModel.EIP1559
+                                    ? "text-secondary-text "
+                                    : "text-tertiary-text group-hover/button:text-secondary-text",
+                                )}
+                              >
+                                Network Fee = gasLimit × (Base Fee + PriorityFee)
+                              </span>
+                            </button>
+                            <button
+                              type="button"
                               className={clsx(
-                                "flex items-center gap-1",
-                                values.gasPriceModel !== GasFeeModel.LEGACY &&
-                                  "text-secondary-text",
-                              )}
-                            >
-                              Legacy <Tooltip text="WOOTLAMN" />
-                            </span>
-                            <span
-                              className={clsx(
-                                "text-12 duration-200",
                                 values.gasPriceModel === GasFeeModel.LEGACY
-                                  ? "text-secondary-text "
-                                  : "text-tertiary-text group-hover/button:text-secondary-text",
+                                  ? "bg-green-bg border-green"
+                                  : "bg-primary-bg border-transparent text-secondary-text",
+                                "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border hocus:bg-green-bg rounded-3 duration-200",
                               )}
+                              onClick={() => setFieldValue("gasPriceModel", GasFeeModel.LEGACY)}
                             >
-                              Network Fee = gasLimit × gasPrice
-                            </span>
-                          </button>
-                        </div>
-                        {values.gasPriceModel === GasFeeModel.EIP1559 && (
-                          <>
-                            <EIP1559Fields
-                              maxPriorityFeePerGas={values.maxPriorityFeePerGas}
-                              maxFeePerGas={values.maxFeePerGas}
-                              setMaxFeePerGasValue={(value) => setFieldValue("maxFeePerGas", value)}
-                              setMaxPriorityFeePerGasValue={(value) =>
-                                setFieldValue("maxPriorityFeePerGas", value)
-                              }
-                              currentMaxFeePerGas={baseFee}
-                              currentMaxPriorityFeePerGas={priorityFee}
-                              handleChange={handleChange}
-                              handleBlur={handleBlur}
-                              maxFeePerGasError={!!maxFeePerGasError}
-                              maxPriorityFeePerGasError={!!maxPriorityFeePerGasError}
-                              maxFeePerGasWarning={!!maxFeePerGasWarning}
-                              maxPriorityFeePerGasWarning={!!maxPriorityFeePerGasWarning}
-                            />
-                            <ErrorsAndWarnings
-                              errors={gasPriceErrors}
-                              warnings={gasPriceWarnings}
-                            />
-                            <div className="mt-5">
-                              <Alert
-                                text="Сhanging Priority Fee only in order to make transaction cheaper or speed it up at a cost of paying higher fee."
-                                type="info-border"
+                              <span
+                                className={clsx(
+                                  "flex items-center gap-1",
+                                  values.gasPriceModel !== GasFeeModel.LEGACY &&
+                                    "text-secondary-text",
+                                )}
+                              >
+                                Legacy <Tooltip text="WOOTLAMN" />
+                              </span>
+                              <span
+                                className={clsx(
+                                  "text-12 duration-200",
+                                  values.gasPriceModel === GasFeeModel.LEGACY
+                                    ? "text-secondary-text "
+                                    : "text-tertiary-text group-hover/button:text-secondary-text",
+                                )}
+                              >
+                                Network Fee = gasLimit × gasPrice
+                              </span>
+                            </button>
+                          </div>
+                          {values.gasPriceModel === GasFeeModel.EIP1559 && (
+                            <>
+                              <EIP1559Fields
+                                maxPriorityFeePerGas={values.maxPriorityFeePerGas}
+                                maxFeePerGas={values.maxFeePerGas}
+                                setMaxFeePerGasValue={(value) =>
+                                  setFieldValue("maxFeePerGas", value)
+                                }
+                                setMaxPriorityFeePerGasValue={(value) =>
+                                  setFieldValue("maxPriorityFeePerGas", value)
+                                }
+                                currentMaxFeePerGas={baseFee}
+                                currentMaxPriorityFeePerGas={priorityFee}
+                                handleChange={handleChange}
+                                handleBlur={handleBlur}
+                                maxFeePerGasError={maxFeePerGasError}
+                                maxFeePerGasWarning={maxFeePerGasWarning}
+                                maxPriorityFeePerGasError={maxPriorityFeePerGasError}
+                                maxPriorityFeePerGasWarning={maxPriorityFeePerGasWarning}
+                              />
+                              <div className="mt-5">
+                                <Alert
+                                  text="Сhanging Priority Fee only in order to make transaction cheaper or speed it up at a cost of paying higher fee."
+                                  type="info-border"
+                                />
+                              </div>
+                            </>
+                          )}
+                          {values.gasPriceModel === GasFeeModel.LEGACY && (
+                            <div className="mt-4">
+                              <LegacyField
+                                value={values.gasPrice}
+                                onChange={(e) => {
+                                  handleChange(e);
+                                }}
+                                onBlur={(e) => {
+                                  handleBlur(e);
+                                }}
+                                gasPrice={gasPrice}
+                                setFieldValue={(value) => setFieldValue("gasPrice", value)}
+                                legacyGasPriceError={legacyGasPriceError}
+                                legacyGasPriceWarning={legacyGasPriceWarning}
                               />
                             </div>
-                          </>
-                        )}
-                        {values.gasPriceModel === GasFeeModel.LEGACY && (
-                          <div className="mt-4">
-                            <TextField
-                              isNumeric
-                              placeholder="Gas price"
-                              label="Gas price"
-                              name="gasPrice"
-                              id="gasPrice"
-                              tooltipText="Gas price tooltip"
-                              value={values.gasPrice}
-                              onChange={(e) => {
-                                handleChange(e);
-                              }}
-                              onBlur={(e) => {
-                                handleBlur(e);
-                              }}
-                              helperText={
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (gasPrice) {
-                                        setFieldValue("gasPrice", formatGwei(gasPrice));
-                                      }
-                                    }}
-                                    className="text-green"
-                                  >
-                                    Current
-                                  </button>{" "}
-                                  {gasPrice ? formatFloat(formatGwei(gasPrice)) : "0"} Gwei
-                                </div>
-                              }
-                            />
-                            <ErrorsAndWarnings
-                              errors={legacyGasPriceErrors}
-                              warnings={legacyGasPriceWarnings}
-                            />
-                          </div>
-                        )}
+                          )}
+                        </div>
+                        <GasLimitField
+                          onChange={(e) => setFieldValue("gasLimit", e.target.value)}
+                          onBlur={(e) => handleBlur(e)}
+                          setFieldValue={(value) => setFieldValue("gasLimit", value)}
+                          value={values.gasLimit}
+                          estimatedGas={estimatedGas}
+                          gasLimitError={gasLimitError}
+                        />
                       </div>
-                      <TextField
-                        isNumeric
-                        decimalScale={0}
-                        placeholder="Gas limit"
-                        label="Gas limit"
-                        name="gasLimit"
-                        id="gasLimit"
-                        isError={!!gasLimitError}
-                        tooltipText="gasLimit is a measure of actions that a contract can perform in your transaction. Setting gasLimit to a low value may result in your transaction not being able to perform the necessary actions (i.e. purchase tokens) and fail. We don't recommend changing this unless you absolutely know what you're doing."
-                        value={values.gasLimit}
-                        onChange={(e) => setFieldValue("gasLimit", e.target.value)}
-                        onBlur={(e) => handleBlur(e)}
-                        helperText={
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                setFieldValue(
-                                  "gasLimit",
-                                  estimatedGas ? estimatedGas.toString() : "100000",
-                                );
-                              }}
-                              className="text-green"
-                            >
-                              Estimated
-                            </button>{" "}
-                            {estimatedGas ? estimatedGas?.toString() : 100000} Gwei
-                          </div>
-                        }
-                      />
-                      <ErrorsAndWarnings errors={gasLimitErrors} />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                    )}
+                  </div>
+                ) : undefined
+              }
+              isActive={values.gasPriceOption === _gasOption}
+              onClick={() => setFieldValue("gasPriceOption", _gasOption)}
+            />
           );
         })}
       </div>
@@ -1144,3 +597,4 @@ export default function NetworkFeeConfigDialog({
     </DrawerDialog>
   );
 }
+//1170 => 1133 => 797 => 826 => 861 => 714 => 681 => 607

@@ -298,7 +298,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
 
           {Boolean(tokens.length) && (
             <>
-              <div className="w-full md:w-[600px] max-h-[640px] h-[calc(100vh-60px)] flex flex-col">
+              <div className="w-full md:w-[600px] max-h-[580px] h-[calc(100vh-60px)] flex flex-col">
                 <div className={clsx("px-4 md:px-10", !pinnedTokens.length && "pb-3")}>
                   <SearchInput
                     value={tokensSearchValue}
