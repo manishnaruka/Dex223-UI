@@ -28,8 +28,8 @@ export default function PositionPriceRangeCard({
   const val = formatNumber(price || "0", 10);
 
   return (
-    <div className="rounded-3 overflow-hidden">
-      <div className="py-2 lg:py-3 px-2 lg:px-5 flex items-center justify-center flex-col bg-tertiary-bg">
+    <div className="rounded-3 overflow-hidden flex-grow">
+      <div className="py-2 lg:py-3 px-2 lg:px-5 flex items-center flex-col justify-center bg-tertiary-bg">
         <div className="text-12 lg:text-14 text-secondary-text">{isMax ? "Max" : "Min"} price</div>
         <div className="text-16 lg:text-18">{val}</div>
         <div className="text-12 lg:text-14 text-tertiary-text">
@@ -38,7 +38,7 @@ export default function PositionPriceRangeCard({
             : `${token1?.symbol} per ${token0?.symbol}`}
         </div>
       </div>
-      <div className="text-12 lg:text-14 bg-quaternary-bg py-2 lg:py-3 px-2 lg:px-5 border-t-2 border-tertiary-bg text-tertiary-text text-center">
+      <div className="lg:min-h-[45%] min-h-[45%] flex-grow overflow-hidden text-12 lg:text-14 bg-quaternary-bg py-2 lg:py-3 px-2 lg:px-5 border-t-2 border-tertiary-bg text-tertiary-text text-center">
         Your position will be 100% {symbol} at this price
       </div>
     </div>
