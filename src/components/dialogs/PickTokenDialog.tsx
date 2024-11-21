@@ -395,7 +395,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     <ScrollbarContainer height="full">
                       <div
                         className={clsx(
-                          "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-[11px] pb-2",
+                          "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2",
                           !!pinnedTokens.length && "pt-3",
                         )}
                       >
@@ -425,7 +425,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                     setIsOpen(false);
                     setManageOpened(true);
                   }}
-                  className="flex-shrink-0 w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
+                  className="flex-shrink-0 w-full text-green hocus:text-green-hover rounded-b-0 md:rounded-b-5 border-t border-secondary-border md:border-t-0 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
                 >
                   Manage tokens
                   <Svg iconName="edit" />
