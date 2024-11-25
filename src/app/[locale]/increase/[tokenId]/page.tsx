@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
@@ -34,6 +35,7 @@ import { LiquidityActionButton } from "../../add/components/LiquidityActionButto
 import { usePriceRange } from "../../add/hooks/usePrice";
 import { useSortedTokens } from "../../add/hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../add/hooks/useV3DerivedMintInfo";
+import truncateMiddle from "@/functions/truncateMiddle";
 
 export default function IncreaseLiquidityPage({
   params,
@@ -43,6 +45,7 @@ export default function IncreaseLiquidityPage({
   };
 }) {
   useRecentTransactionTracking();
+  const t = useTranslations("Liquidity");
   // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
@@ -91,6 +94,9 @@ export default function IncreaseLiquidityPage({
       setInitialized(true);
     }
   }, [initialized, existedPosition, setBothTokens, setTicks, setTier, tokenA, tokenB]);
+
+  const tokenAshort = truncateMiddle(tokenA?.symbol || "", { charsFromStart: 20, charsFromEnd: 0 });
+  const tokenBshort = truncateMiddle(tokenB?.symbol || "", { charsFromStart: 20, charsFromEnd: 0 });
 
   // PRICE RANGE HOOK START
   const { price } = usePriceRange();
@@ -193,7 +199,7 @@ export default function IncreaseLiquidityPage({
               </div>
 
               <div className="flex justify-between items-center mb-3">
-                <span className="font-bold text-secondary-text">Selected range</span>
+                <span className="font-bold text-secondary-text">{t("selected_range")}</span>
                 <div className="flex p-0.5 gap-0.5 rounded-2 bg-secondary-bg">
                   <button
                     onClick={() => setShowFirst(true)}
@@ -204,7 +210,7 @@ export default function IncreaseLiquidityPage({
                         : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
-                    {tokenA?.symbol}
+                    {tokenAshort}
                   </button>
                   <button
                     onClick={() => setShowFirst(false)}
@@ -215,13 +221,14 @@ export default function IncreaseLiquidityPage({
                         : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
-                    {tokenB?.symbol}
+                    {tokenBshort}
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_12px_1fr] mb-2 lg:mb-3">
                 <PositionPriceRangeCard
+                  className="bg-quaternary-bg"
                   showFirst={showFirst}
                   token0={token0}
                   token1={token1}
@@ -233,6 +240,7 @@ export default function IncreaseLiquidityPage({
                   </div>
                 </div>
                 <PositionPriceRangeCard
+                  className="bg-quaternary-bg"
                   showFirst={showFirst}
                   token0={token0}
                   token1={token1}

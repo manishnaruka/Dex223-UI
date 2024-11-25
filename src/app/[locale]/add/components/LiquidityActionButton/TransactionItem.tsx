@@ -76,13 +76,20 @@ export const TransactionItem = ({
       </div>
       <div className="w-full">
         <div className="flex justify-between items-center">
-          <div className="flex gap-2 py-2 items-center">
-            <span>{`${standard === Standard.ERC20 ? "Approve" : "Deposit"} for ${token.symbol}`}</span>
-            <Badge color="green" text={standard} />
+          <div className="flex gap-2 py-2 items-start flex-wrap">
+            <span className="flex-wrap items-baseline gap-1">
+              {`${standard === Standard.ERC20 ? "Approve" : "Deposit"} for ${token.symbol}`}
+              <Badge
+                color="green"
+                text={standard}
+                className="inline-block ml-2 relative -top-0.5"
+              />
+            </span>
           </div>
 
           <div className="flex items-center gap-2 justify-end">
             {localValueBigInt !== amount &&
+              !disabled &&
               ![
                 AddLiquidityApproveStatus.PENDING,
                 AddLiquidityApproveStatus.LOADING,
@@ -111,7 +118,9 @@ export const TransactionItem = ({
             {status === AddLiquidityApproveStatus.PENDING && (
               <>
                 <Preloader type="linear" />
-                <span className="text-secondary-text text-14">Proceed in your wallet</span>
+                <span className="text-secondary-text text-14 text-nowrap">
+                  Proceed in your wallet
+                </span>
               </>
             )}
             {status === AddLiquidityApproveStatus.LOADING ? (

@@ -3,7 +3,7 @@
 import JSBI from "jsbi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import useRemoveLiquidity, {
@@ -18,7 +18,11 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button from "@/components/buttons/Button";
-import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import InputButton from "@/components/buttons/InputButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
@@ -49,11 +53,13 @@ import {
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
 import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
+import clsx from "clsx";
+import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
     <div className="flex justify-between items-center">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 text-secondary-text">
         <span>{`Pooled ${token?.symbol}:`}</span>
       </div>
       <div className="flex items-center gap-2">
@@ -154,159 +160,185 @@ export default function DecreaseLiquidityPage({
 
   return (
     <Container>
-      <div className="lg:w-[600px] bg-primary-bg mx-auto mt-[40px] mb-4 lg:mb-5 px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
-        <div className="grid grid-cols-3 py-1.5 -mx-3">
-          <IconButton
-            onClick={() => router.push(`/pool/${params.tokenId}`)}
-            buttonSize={IconButtonSize.LARGE}
-            iconName="back"
-            iconSize={IconSize.LARGE}
-          />
-          <h2 className="text-18 lg:text-20 font-bold flex justify-center items-center text-nowrap">
-            Remove liquidity
-          </h2>
-          <div className="flex items-center gap-2 justify-end">
-            <IconButton
-              onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-              buttonSize={IconButtonSize.LARGE}
-              iconName="recent-transactions"
-              active={showRecentTransactions}
+      <div
+        className={clsx(
+          "grid py-4 lg:py-[40px] grid-cols-1 mx-auto",
+          showRecentTransactions
+            ? "xl:grid-cols-[580px_600px] xl:max-w-[1200px] gap-4 xl:grid-areas-[left_right] grid-areas-[right,left]"
+            : "xl:grid-cols-[600px] xl:max-w-[600px] grid-areas-[right]",
+        )}
+      >
+        <div className="grid-in-[left] flex justify-center">
+          <div className="w-full sm:max-w-[600px] xl:max-w-full mx-auto mt-[40px]">
+            <RecentTransactions
+              filterFunction={[RecentTransactionTitleTemplate.REMOVE]}
+              showRecentTransactions={showRecentTransactions}
+              handleClose={() => setShowRecentTransactions(false)}
             />
           </div>
         </div>
-        <div className="rounded-b-2 bg-primary-bg">
-          <div className="flex items-center justify-between mb-4 lg:mb-5">
-            <TokensPair tokenA={tokenA} tokenB={tokenB} />
-            <RangeBadge
-              status={
-                removed
-                  ? PositionRangeStatus.CLOSED
-                  : inRange
-                    ? PositionRangeStatus.IN_RANGE
-                    : PositionRangeStatus.OUT_OF_RANGE
-              }
-            />
-          </div>
 
-          <div className="lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1">
-            <div className="lg:mb-5 mt-4 mb-5 ml-5 mr-5">
-              <span className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</span>
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-24 lg:text-24 font-medium">
-                  <span>{percentage}</span>
-                  <span className="text-secondary-text ml-10">%</span>
-                </div>
-                <div className="flex gap-3">
-                  <InputButton
-                    text={"25%"}
-                    isActive={percentage === 25}
-                    onClick={() => setPercentage(25)}
-                  />
-                  <InputButton
-                    text={"50%"}
-                    isActive={percentage === 50}
-                    onClick={() => setPercentage(50)}
-                  />
-                  <InputButton
-                    text={"75%"}
-                    isActive={percentage === 75}
-                    onClick={() => setPercentage(75)}
-                  />
-                  <InputButton
-                    text={"MAX"}
-                    isActive={percentage === 100}
-                    onClick={() => setPercentage(100)}
-                  />
-                </div>
-              </div>
-
-              <div className="relative h-6">
-                <input
-                  value={percentage}
-                  max={100}
-                  min={1}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPercentage(+e.target.value)}
-                  className="w-full accent-green absolute left-0 right-0 top-2  duration-200"
-                  type="range"
+        <div>
+          <div className="lg:w-[600px] bg-primary-bg mx-auto mt-[40px] mb-4 lg:mb-5 px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
+            <div className="grid grid-cols-3 py-1.5 -mx-3">
+              <IconButton
+                onClick={() => router.push(`/pool/${params.tokenId}`)}
+                buttonSize={IconButtonSize.LARGE}
+                className="hocus:text-white before:bg-transparent"
+                iconName="back"
+                iconSize={IconSize.LARGE}
+              />
+              <h2 className="text-18 lg:text-20 font-bold flex justify-center items-center text-nowrap">
+                {t("remove_liquidity_title")}
+              </h2>
+              <div className="flex items-center gap-2 justify-end">
+                <IconButton
+                  onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+                  buttonSize={IconButtonSize.LARGE}
+                  iconName="recent-transactions"
+                  active={showRecentTransactions}
                 />
-                <div
-                  className="pointer-events-none bg-tertiary-bg top-2 absolute h-2 w-full rounded-l-0 rounded-r-1 right-0"
-                  style={{
-                    width: `calc(${100 - percentage}% - ${20 - (20 / 100) * percentage}px)`,
-                  }}
-                ></div>
-                <div
-                  className="pointer-events-none bg-green absolute h-2 rounded-1 left-0 top-2 "
-                  style={{ width: percentage === 1 ? 0 : `calc(${percentage}% - 2px)` }}
-                ></div>
               </div>
             </div>
-          </div>
+            <div className="rounded-b-2 bg-primary-bg">
+              <div className="flex items-center justify-between mb-4 lg:mb-5">
+                <TokensPair tokenA={tokenA} tokenB={tokenB} />
+                <RangeBadge
+                  status={
+                    removed
+                      ? PositionRangeStatus.CLOSED
+                      : inRange
+                        ? PositionRangeStatus.IN_RANGE
+                        : PositionRangeStatus.OUT_OF_RANGE
+                  }
+                />
+              </div>
 
-          <div className="rounded-3 bg-tertiary-bg mb-4 lg:mb-5 p-5">
-            <div className="flex justify-between flex-col gap-3">
-              <PositionLiquidityCard
-                token={tokenA}
-                standards={["ERC-20", "ERC-223"]} // TODO check if token has standards
-                amount={
-                  position?.amount0
-                    .multiply(new Percent(percentage))
-                    .divide(JSBI.BigInt(100))
-                    .toSignificant() || "Loading..."
-                }
+              <div className="lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1">
+                <div className="lg:mb-5 mt-4 mb-5 ml-5 mr-5">
+                  <span className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</span>
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-24 lg:text-24 font-medium">
+                      <span>{percentage}</span>
+                      <span className="text-secondary-text ml-10">%</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <InputButton
+                        text={"25%"}
+                        isActive={percentage === 25}
+                        onClick={() => setPercentage(25)}
+                      />
+                      <InputButton
+                        text={"50%"}
+                        isActive={percentage === 50}
+                        onClick={() => setPercentage(50)}
+                      />
+                      <InputButton
+                        text={"75%"}
+                        isActive={percentage === 75}
+                        onClick={() => setPercentage(75)}
+                      />
+                      <InputButton
+                        text={"Max"}
+                        isActive={percentage === 100}
+                        onClick={() => setPercentage(100)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative h-6">
+                    <input
+                      value={percentage}
+                      max={100}
+                      min={1}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setPercentage(+e.target.value)
+                      }
+                      className="w-full accent-green absolute left-0 right-0 top-2  duration-200"
+                      type="range"
+                    />
+                    <div
+                      className="pointer-events-none bg-tertiary-bg top-2 absolute h-2 w-full rounded-l-0 rounded-r-1 right-0"
+                      style={{
+                        width: `calc(${100 - percentage}% - ${20 - (20 / 100) * percentage}px)`,
+                      }}
+                    ></div>
+                    <div
+                      className="pointer-events-none bg-green absolute h-2 rounded-1 left-0 top-2 "
+                      style={{ width: percentage === 1 ? 0 : `calc(${percentage}% - 2px)` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3 bg-tertiary-bg mb-4 lg:mb-5 p-5">
+                <div className="flex justify-between flex-col gap-3">
+                  <PositionLiquidityCard
+                    token={tokenA}
+                    standards={["ERC-20", "ERC-223"]} // TODO check if token has standards
+                    amount={
+                      position?.amount0
+                        .multiply(new Percent(percentage))
+                        .divide(JSBI.BigInt(100))
+                        .toSignificant() || "Loading..."
+                    }
+                  />
+                  <PositionLiquidityCard
+                    token={tokenB}
+                    standards={["ERC-20", "ERC-223"]}
+                    amount={
+                      position?.amount1
+                        .multiply(new Percent(percentage))
+                        .divide(JSBI.BigInt(100))
+                        .toSignificant() || "Loading..."
+                    }
+                  />
+                </div>
+              </div>
+              <RemoveLiquidityGasSettings
+                gasPriceOption={gasPriceOption}
+                gasPriceSettings={gasPriceSettings}
+                setGasPriceOption={setGasPriceOption}
+                setGasPriceSettings={setGasPriceSettings}
+                estimatedGas={estimatedGas}
+                customGasLimit={customGasLimit}
+                setEstimatedGas={setEstimatedGas}
+                setCustomGasLimit={setCustomGasLimit}
+                isAdvanced={isAdvanced}
+                setIsAdvanced={setIsAdvanced}
+                gasPrice={gasPrice}
               />
-              <PositionLiquidityCard
-                token={tokenB}
-                standards={["ERC-20", "ERC-223"]}
-                amount={
-                  position?.amount1
-                    .multiply(new Percent(percentage))
-                    .divide(JSBI.BigInt(100))
-                    .toSignificant() || "Loading..."
-                }
-              />
+              {!isConnected ? (
+                <Button
+                  className="h-[48px] md:h-[60px]"
+                  onClick={() => setWalletConnectOpened(true)}
+                  fullWidth
+                >
+                  {tWallet("connect_wallet")}
+                </Button>
+              ) : (
+                position &&
+                tokenA &&
+                tokenB && (
+                  <Button
+                    className="h-[48px] md:h-[60px]"
+                    onClick={() => setIsOpen(true)}
+                    fullWidth
+                  >
+                    Remove
+                  </Button>
+                )
+              )}
             </div>
           </div>
-          <RemoveLiquidityGasSettings
-            gasPriceOption={gasPriceOption}
-            gasPriceSettings={gasPriceSettings}
-            setGasPriceOption={setGasPriceOption}
-            setGasPriceSettings={setGasPriceSettings}
-            estimatedGas={estimatedGas}
-            customGasLimit={customGasLimit}
-            setEstimatedGas={setEstimatedGas}
-            setCustomGasLimit={setCustomGasLimit}
-            isAdvanced={isAdvanced}
-            setIsAdvanced={setIsAdvanced}
-            gasPrice={gasPrice}
-          />
-          {!isConnected ? (
-            <Button
-              className="h-[48px] md:h-[60px]"
-              onClick={() => setWalletConnectOpened(true)}
-              fullWidth
-            >
-              {tWallet("connect_wallet")}
-            </Button>
-          ) : (
-            position &&
-            tokenA &&
-            tokenB && (
-              <Button className="h-[48px] md:h-[60px]" onClick={() => setIsOpen(true)} fullWidth>
-                Remove
-              </Button>
-            )
-          )}
+          <div>
+            <div className="flex flex-col lg:w-[600px] mx-auto lg:mb-[40px] gap-5">
+              <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
+            </div>
+          </div>
         </div>
       </div>
-      <div className="flex flex-col lg:w-[600px] mx-auto lg:mb-[40px] gap-5">
-        <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
-        <RecentTransactions
-          showRecentTransactions={showRecentTransactions}
-          handleClose={() => setShowRecentTransactions(false)}
-          pageSize={5}
-        />
-      </div>
+
       <DrawerDialog
         isOpen={isOpen}
         setIsOpen={(isOpen) => {
@@ -348,7 +380,9 @@ export default function DecreaseLiquidityPage({
               {status === RemoveLiquidityStatus.PENDING && (
                 <>
                   <Preloader type="linear" />
-                  <span className="text-secondary-text text-14">Proceed in your wallet</span>
+                  <span className="mr-3 text-secondary-text text-14 whitespace-nowrap">
+                    {t("status_pending")}
+                  </span>
                 </>
               )}
               {status === RemoveLiquidityStatus.LOADING && <Preloader size={24} />}
@@ -418,11 +452,9 @@ export default function DecreaseLiquidityPage({
                 type="error"
                 text={
                   <span>
-                    Transaction failed due to lack of gas or an internal contract error. Try using
-                    higher slippage or gas to ensure your transaction is completed. If you still
-                    have issues, click{" "}
+                    {t("failed_transaction_error_message")}{" "}
                     <a href="#" className="text-green hocus:underline">
-                      common errors
+                      {t("common_errors")}
                     </a>
                     .
                   </span>
@@ -434,7 +466,7 @@ export default function DecreaseLiquidityPage({
                 }}
                 fullWidth
               >
-                Try again
+                {t("try_again")}
               </Button>
             </div>
           ) : null}
@@ -445,10 +477,9 @@ export default function DecreaseLiquidityPage({
                 type="info"
                 text={
                   <span>
-                    Tokens have been transferred to your position. You can claim them using the
-                    following link:{" "}
+                    {t("removed_liquidity_message")}:{" "}
                     <Link href={`/pool/${params.tokenId}`}>
-                      <span className="text-green hocus:underline">claim tokens</span>
+                      <span className="text-green underline">{t("claim_tokens")}</span>
                     </Link>
                   </span>
                 }

@@ -186,7 +186,7 @@ const ApproveDialog = () => {
             index={index}
             itemsCount={transactionItems.length}
             isError={fieldsErrors[token]}
-            disabled={isLoading || isAllowed}
+            disabled={isLoading || isPending || isAllowed}
             setFieldError={(isError: boolean) => setFieldError(token, isError)}
             setCustomAmount={(amount: bigint) => {
               if (token === "tokenA") {
@@ -544,6 +544,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
     tier,
     price,
   });
+  const t = useTranslations("Liquidity");
 
   return (
     <>
@@ -641,11 +642,9 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
               type="error"
               text={
                 <span>
-                  Transaction failed due to lack of gas or an internal contract error. Try using
-                  higher slippage or gas to ensure your transaction is completed. If you still have
-                  issues, click{" "}
+                  {t("failed_transaction_error_message")}{" "}
                   <a href="#" className="text-green hocus:underline">
-                    common errors
+                    {t("common_errors")}
                   </a>
                   .
                 </span>

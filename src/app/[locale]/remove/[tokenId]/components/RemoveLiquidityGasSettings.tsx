@@ -52,19 +52,17 @@ export const RemoveLiquidityGasSettings = ({
       {/* First row container with custom 66.67% width */}
       <div className="flex w-full md:w-2/3-custom gap-8 justify-between md:justify-start">
         <div className="flex flex-col">
-          <div className="text-secondary-text flex items-center gap-1 text-14">
-            {t("gas_price")}
-          </div>
-          <span className="text-secondary-text text-16">
+          <div className="text-tertiary-text flex items-center gap-1 text-14">{t("gas_price")}</div>
+          <span className="text-tertiary-text text-16">
             {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
           </span>
         </div>
         <div className="flex flex-col">
-          <div className="text-secondary-text text-14">{t("gas_limit")}</div>
-          <span className="text-secondary-text text-16">{gasToUse.toString()}</span>
+          <div className="text-tertiary-text text-14">{t("gas_limit")}</div>
+          <span className="text-tertiary-text text-16">{gasToUse.toString()}</span>
         </div>
         <div className="flex flex-col">
-          <div className="text-secondary-text text-14">{t("network_fee")}</div>
+          <div className="text-tertiary-text text-14">{t("network_fee")}</div>
           <span>{`${gasPrice ? formatFloat(formatEther(gasPrice * gasToUse)) : ""} ${getChainSymbol(chainId)}`}</span>
         </div>
       </div>

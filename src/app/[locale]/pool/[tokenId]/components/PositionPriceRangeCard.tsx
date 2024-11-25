@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { useMemo } from "react";
 
 import { formatNumber } from "@/functions/formatFloat";
@@ -9,12 +10,14 @@ export default function PositionPriceRangeCard({
   token1,
   showFirst,
   isMax = false,
+  className,
 }: {
   price?: string;
   token0: Currency | undefined;
   token1: Currency | undefined;
   showFirst: boolean;
   isMax?: boolean;
+  className?: string;
 }) {
   // TODO check if correct
   const symbol = useMemo(() => {
@@ -29,7 +32,12 @@ export default function PositionPriceRangeCard({
 
   return (
     <div className="rounded-3 overflow-hidden flex-grow">
-      <div className="py-2 lg:py-3 px-2 lg:px-5 flex items-center flex-col justify-center bg-tertiary-bg">
+      <div
+        className={clsx(
+          "py-2 lg:py-3 px-2 lg:px-5 flex items-center flex-col justify-center ",
+          className ? className : "bg-tertiary-bg",
+        )}
+      >
         <div className="text-12 lg:text-14 text-secondary-text">{isMax ? "Max" : "Min"} price</div>
         <div className="text-16 lg:text-18">{val}</div>
         <div className="text-12 lg:text-14 text-tertiary-text">

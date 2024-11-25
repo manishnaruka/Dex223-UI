@@ -265,13 +265,13 @@ const PoolsTableMobile = ({
   return (
     <>
       <div
-        className="flex mb-4 gap-2 text-secondary-text flex-row cursor-pointer"
+        className="flex mb-4 gap-2 text-secondary-text flex-row cursor-pointer md:hidden"
         onClick={handleSort}
       >
         <span>TVL</span>
         <Svg iconName={sorting === SortingType.ASCENDING ? "sort-up" : "sort-down"} />
       </div>
-      <div className="flex lg:hidden flex-col gap-4">
+      <div className="flex md:hidden flex-col gap-4">
         {tableData.map((pool: any, index: number) => {
           return (
             <PoolsTableItemMobile

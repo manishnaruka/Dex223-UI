@@ -49,6 +49,7 @@ import { useRouter } from "@/navigation";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
+import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
@@ -110,6 +111,7 @@ export default function PoolPage({
   } = useCollectFeesStore();
   const { status, hash, setStatus } = useCollectFeesStatusStore();
   const t = useTranslations("Liquidity");
+  const tr = useTranslations("RecentTransactions");
 
   useEffect(() => {
     setPool(position?.pool);
@@ -148,13 +150,12 @@ export default function PoolPage({
     <Container>
       <div className="w-full md:w-[800px] md:mx-auto md:mt-[40px] mb-5 bg-primary-bg px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
         <div className="flex justify-between items-center py-1.5 -mx-3">
-          <button
+          <IconButton
+            buttonSize={IconButtonSize.LARGE}
+            iconName="back"
             onClick={() => router.push("/pools/positions")}
-            className="flex items-center w-12 h-12 justify-center"
-          >
-            <Svg iconName="back" />
-          </button>
-          <h2 className="text-18 lg:text-20 font-bold">Liquidity position</h2>
+          />
+          <h2 className="text-18 lg:text-20 font-bold">{t("liquidity_position")}</h2>
           <IconButton
             buttonSize={IconButtonSize.LARGE}
             iconName="recent-transactions"
@@ -206,12 +207,12 @@ export default function PoolPage({
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-tertiary-text text-12 lg:text-16">Min tick:</span>
+            <span className="text-tertiary-text text-12 lg:text-16">{t("min_tick")}:</span>
             <span className="text-12 text-secondary-text lg:text-16">{position?.tickLower}</span>
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-tertiary-text text-12 lg:text-16">Max tick:</span>
+            <span className="text-tertiary-text text-12 lg:text-16">{t("max_tick")}:</span>
             <span className="text-12 text-secondary-text lg:text-16">{position?.tickUpper}</span>
           </div>
         </div>
@@ -222,7 +223,7 @@ export default function PoolPage({
             colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >
-            Increase liquidity
+            {t("increase_liquidity")}
           </Button>
           <Button
             size={ButtonSize.MEDIUM}
@@ -230,13 +231,13 @@ export default function PoolPage({
             colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >
-            Remove liquidity
+            {tr("remove_liquidity_title")}
           </Button>
         </div>
 
         <div className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
           <div>
-            <h3 className="text-12 lg:text-14">Liquidity</h3>
+            <h3 className="text-12 lg:text-14 text-secondary-text">{t("liquidity")}</h3>
             <p className="text-16 lg:text-20 font-bold mb-3">$0.00</p>
             <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
@@ -264,7 +265,7 @@ export default function PoolPage({
           <div>
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-12 lg:text-14">Unclaimed fees</h3>
+                <h3 className="text-12 lg:text-14 text-secondary-text">{t("unclaimed_fees")}</h3>
                 <p className="text-16 lg:text-20 font-bold mb-3 text-green">$0.00</p>
               </div>
               <Button
@@ -273,7 +274,7 @@ export default function PoolPage({
                 mobileSize={ButtonSize.SMALL}
                 disabled={!fees[0] && !fees[1]}
               >
-                Collect fees
+                {t("collect_fees_title")}
               </Button>
             </div>
 
@@ -358,9 +359,9 @@ export default function PoolPage({
           </div>
           <div className="rounded-3 overflow-hidden">
             <div className="bg-tertiary-bg flex items-center justify-center flex-col py-2 lg:py-3">
-              <div className="text-12 lg:text-14 text-secondary-text">Current price</div>
+              <div className="text-12 lg:text-14 text-secondary-text">{t("current_price")}</div>
               <div className="text-16 lg:text-18">{currentPriceString}</div>
-              <div className="text-12 lg:text-14 text-secondary-text">
+              <div className="text-12 lg:text-14 text-tertiary-text">
                 {showFirst
                   ? `${token0?.symbol} per ${token1?.symbol}`
                   : `${token1?.symbol} per ${token0?.symbol}`}
@@ -372,6 +373,10 @@ export default function PoolPage({
       <div className="lg:w-[800px] mx-auto lg:mb-[40px] gap-5 flex flex-col">
         <SelectedTokensInfo tokenA={token0} tokenB={token1} />
         <RecentTransactions
+          filterFunction={[
+            RecentTransactionTitleTemplate.REMOVE,
+            RecentTransactionTitleTemplate.ADD,
+          ]}
           showRecentTransactions={showRecentTransactions}
           handleClose={() => setShowRecentTransactions(false)}
           pageSize={5}
@@ -594,11 +599,9 @@ export default function PoolPage({
                   type="error"
                   text={
                     <span>
-                      Transaction failed due to lack of gas or an internal contract error. Try using
-                      higher slippage or gas to ensure your transaction is completed. If you still
-                      have issues, click{" "}
+                      {t("failed_transaction_error_message")}{" "}
                       <a href="#" className="text-green hocus:underline">
-                        common errors
+                        {t("common_errors")}
                       </a>
                       .
                     </span>
