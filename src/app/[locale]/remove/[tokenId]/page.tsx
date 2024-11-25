@@ -18,7 +18,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
 import InputButton from "@/components/buttons/InputButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
@@ -312,19 +312,42 @@ export default function DecreaseLiquidityPage({
                 >
                   {tWallet("connect_wallet")}
                 </Button>
-              ) : (
-                position &&
-                tokenA &&
-                tokenB && (
+              ) : position && tokenA && tokenB ? (
+                [RemoveLiquidityStatus.LOADING, RemoveLiquidityStatus.PENDING].includes(status) ? (
+                  <>
+                    <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
+                      <Preloader size={20} color="green" type="circular" />
+                      <span className="mr-auto items-center text-14 text-primary-text">
+                        {t("remove_liquidity_progress")}
+                      </span>
+                      <Button
+                        className="ml-auto mr-3"
+                        variant={ButtonVariant.CONTAINED}
+                        size={ButtonSize.EXTRA_SMALL}
+                        onClick={() => {
+                          setIsOpen(true);
+                        }}
+                      >
+                        {t("details")}
+                      </Button>
+                    </div>
+                    <Button className="h-[48px] md:h-[60px]" isLoading={true} fullWidth>
+                      {t("remove_title")}
+                      <span className="flex items-center gap-2">
+                        <Preloader size={20} color="black" type="circular" />
+                      </span>
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     className="h-[48px] md:h-[60px]"
                     onClick={() => setIsOpen(true)}
                     fullWidth
                   >
-                    Remove
+                    {t("remove_title")}
                   </Button>
                 )
-              )}
+              ) : null}
             </div>
           </div>
           <div>

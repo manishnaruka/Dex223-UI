@@ -232,6 +232,8 @@
     "slippage_tooltip": "The actual swap price may be different than the one specified at the moment of sending the transaction. Slippage determines how much of the price change can be tolerated. 5% slippage means that if the price in the pool will change more than 5% from the expected, your transaction will automatically fail (you will pay for GAS but no swap will occur)."
   },
   "Liquidity": {
+    "remove_title": "Remove",
+    "remove_liquidity_progress": "Removing liquidity in progress",
     "approve_liquidity_progress": "Approval and depositing in progress",
     "increase_liquidity_progress": "Increasing liquidity in progress",
     "mint_liquidity_progress": "Create Pool & Mint liquidity in progress",
