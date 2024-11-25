@@ -22,7 +22,6 @@ import IconButton, {
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
-import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/navigation";
@@ -49,7 +48,6 @@ export default function AddPoolPage() {
 
   const { tokenA, tokenB, setTokenA, setTokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
-  const { setIsOpen } = useTransactionSettingsDialogStore();
   const { ticks, clearPriceRange } = useLiquidityPriceRangeStore();
   const { setTypedValue } = useLiquidityAmountsStore();
   const { setStartPriceTypedValue } = useLiquidityPriceRangeStore();

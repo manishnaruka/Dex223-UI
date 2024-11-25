@@ -146,19 +146,26 @@ function InputTotalAmount({
           onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
           onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
         />
-        <div className="bg-secondary-bg rounded-5 py-1 pl-1 pr-3 flex items-center gap-2 min-w-[88px]">
+        <div className="justify-end bg-secondary-bg rounded-5 py-1 pl-1 flex items-center gap-2 min-w-[88px]">
           {currency ? (
-            <>
+            <div
+              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : ""}`}
+            >
               <Image
                 src={currency?.logoURI || "/tokens/placeholder.svg"}
                 alt=""
                 width={24}
                 height={24}
               />
-              <span>{currencySymbolShortX2}</span>
-            </>
+              <span className="text-nowrap pr-8">{currencySymbolShortX2}</span>
+            </div>
           ) : (
-            <span>{t("select_token")}</span>
+            <div
+              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : ""}`}
+            >
+              <Image src={"/tokens/placeholder.svg"} alt="" width={24} height={24} />
+              <span className="text-nowrap pr-8">{t("select_token")}</span>
+            </div>
           )}
         </div>
       </div>
@@ -166,20 +173,23 @@ function InputTotalAmount({
         <span className="text-secondary-text text-12 lg:text-14">—</span>
         <div className="flex gap-1">
           <span className="text-12 text-tertiary-text md:text-tertiary-text md:text-14">
-            {currency &&
-              t("balance", {
-                balance: formatFloat(formatUnits(totalBalance, currency.decimals)),
-                symbol: currencySymbolShort,
-              })}
+            {currency
+              ? t("balance", {
+                  balance: formatFloat(formatUnits(totalBalance, currency.decimals)),
+                  symbol: currencySymbolShort,
+                })
+              : "—"}
           </span>
-          <Button
-            variant={ButtonVariant.CONTAINED}
-            size={ButtonSize.EXTRA_SMALL}
-            className="bg-tertiary-bg text-green md:px-2 lg:px-2 xl:px-2 px-2 hocus:bg-green-bg"
-            onClick={maxHandler}
-          >
-            {t("max_title")}
-          </Button>
+          {currency && (
+            <Button
+              variant={ButtonVariant.CONTAINED}
+              size={ButtonSize.EXTRA_SMALL}
+              className="bg-tertiary-bg text-green md:px-2 lg:px-2 xl:px-2 px-2 hocus:bg-green-bg"
+              onClick={maxHandler}
+            >
+              {t("max_title")}
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -261,13 +271,14 @@ function InputStandardAmount({
         </div>
         <div className="flex justify-end items-center text-10 lg:text-12 text-tertiary-text">
           <span>
-            {currency &&
-              t("balance", {
-                balance: formatFloat(
-                  formatUnits(tokenBalance?.value || BigInt(0), currency.decimals),
-                ),
-                symbol: currencySymbolShort,
-              })}
+            {currency
+              ? t("balance", {
+                  balance: formatFloat(
+                    formatUnits(tokenBalance?.value || BigInt(0), currency.decimals),
+                  ),
+                  symbol: currencySymbolShort,
+                })
+              : "—"}
           </span>
         </div>
       </div>
@@ -388,19 +399,17 @@ export default function TokenDepositCard({
       </div>
     );
   }
-  if (!currency) return;
+  // if (!currency) return;
+
   return (
-    <div className="rounded-3 bg-tertiary-bg px-4 py-3 lg:p-5">
-      <div className="flex items-center gap-2 mb-3">
-        {currency && (
-          <Image
-            width={24}
-            height={24}
-            src={currency?.logoURI || "/tokens/placeholder.svg"}
-            alt=""
-          />
-        )}
-        <h3 className="text-16 font-bold text-secondary-text">
+    <div
+      className={`rounded-3 bg-tertiary-bg px-4 py-3 lg:p-5 ${
+        isDisabled ? "pointer-events-none " : ""
+      }`}
+    >
+      <div className={`flex items-center gap-2 mb-3`}>
+        <Image width={24} height={24} src={currency?.logoURI || "/tokens/placeholder.svg"} alt="" />
+        <h3 className={`text-16 font-bold text-secondary-text text-nowrap`}>
           {currency
             ? t("token_deposit_amounts", { symbol: currencySymbolShort })
             : t("select_token")}
@@ -413,13 +422,13 @@ export default function TokenDepositCard({
           onChange={onChange}
           isDisabled={isDisabled}
         />
-        {currency.isNative ? null : (
+        {currency?.isNative && currency ? null : (
           <>
             <InputRange value={tokenStandardRatio} onChange={setTokenStandardRatio} />
             <div className="flex flex-col md:flex-row justify-between gap-4 w-full">
               <InputStandardAmount
                 standard={Standard.ERC20}
-                value={formatUnits(ERC20Value, currency.decimals)}
+                value={formatUnits(ERC20Value, currency?.decimals || 18)}
                 currentAllowance={currentAllowance || BigInt(0)}
                 currency={currency}
                 revokeHandler={revokeHandler}
@@ -429,7 +438,7 @@ export default function TokenDepositCard({
               />
               <InputStandardAmount
                 standard={Standard.ERC223}
-                value={formatUnits(ERC223Value, currency.decimals)}
+                value={formatUnits(ERC223Value, currency?.decimals || 18)}
                 currency={currency}
                 currentAllowance={currentDeposit || BigInt(0)}
                 revokeHandler={withdrawHandler}

@@ -29,7 +29,6 @@ const gasOptionTitle: Record<GasOption, any> = {
 export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: boolean }) => {
   //
   const chainId = useCurrentChainId();
-  const tSwap = useTranslations("Swap");
   const [isOpenedFee, setIsOpenedFee] = useState(false);
 
   const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
@@ -98,6 +97,7 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
           className="w-full md:w-auto h-8 md:h-auto"
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.EXTRA_SMALL}
+          disabled={isFormDisabled}
           onClick={() => setIsOpenedFee(true)}
         >
           Edit

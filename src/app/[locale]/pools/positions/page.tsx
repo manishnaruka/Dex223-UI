@@ -20,6 +20,9 @@ import usePositions, {
 } from "@/hooks/usePositions";
 import { useRouter } from "@/navigation";
 import { FeeAmount } from "@/sdk_hybrid/constants";
+import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
+import { NativeCoin } from "@/sdk_hybrid/entities/ether";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 type PositionInfo = {
   nonce: bigint;
@@ -209,6 +212,8 @@ const Positions = () => {
 
 export default function PoolsPage() {
   const router = useRouter();
+  const { tokenA, tokenB, setTokenA, setTokenB } = useAddLiquidityTokensStore();
+  const chainId = useCurrentChainId();
 
   return (
     <Container>
@@ -230,7 +235,14 @@ export default function PoolsPage() {
           <Button
             size={ButtonSize.LARGE}
             mobileSize={ButtonSize.MEDIUM}
-            onClick={() => router.push("/add")}
+            onClick={() => {
+              if (!tokenA && !tokenB) {
+                const native = NativeCoin.onChain(chainId);
+                setTokenA(native);
+              }
+              // const { tokenA, tokenB, setTokenA, setTokenB } = useAddLiquidityTokensStore();
+              router.push("/add");
+            }}
             fullWidth
             className="lg:w-auto"
           >
