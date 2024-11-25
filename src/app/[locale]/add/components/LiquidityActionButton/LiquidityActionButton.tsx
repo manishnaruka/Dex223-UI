@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
-import Button, { ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke from "@/hooks/useRevoke";
@@ -20,6 +20,7 @@ import {
   useTokensStandards,
 } from "../../stores/useAddLiquidityAmountsStore";
 import {
+  AddLiquidityApproveStatus,
   AddLiquidityStatus,
   useAddLiquidityStatusStore,
 } from "../../stores/useAddLiquidityStatusStore";
@@ -27,6 +28,7 @@ import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensSt
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { APPROVE_BUTTON_TEXT } from "./ConfirmLiquidityDialog";
+import Preloader from "@/components/atoms/Preloader";
 
 export const LiquidityActionButton = ({
   increase = false,
@@ -49,6 +51,11 @@ export const LiquidityActionButton = ({
     setApprove1Hash,
     setDeposite0Status,
     setDeposite1Status,
+    status,
+    approve0Status,
+    approve1Status,
+    deposite0Status,
+    deposite1Status,
   } = useAddLiquidityStatusStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
@@ -218,6 +225,47 @@ export const LiquidityActionButton = ({
   }
 
   if (approveTransactionsCount || !isSufficientAllowanceA || !isSufficientAllowanceB) {
+    if (
+      [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
+        approve0Status,
+      ) ||
+      [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
+        approve1Status,
+      ) ||
+      [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
+        deposite0Status,
+      ) ||
+      [AddLiquidityApproveStatus.LOADING, AddLiquidityApproveStatus.PENDING].includes(
+        deposite1Status,
+      )
+    ) {
+      return (
+        <>
+          <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
+            <Preloader size={20} color="green" type="circular" />
+            <span className="mr-auto items-center text-14 text-primary-text">
+              {t("approve_liquidity_progress")}
+            </span>
+            <Button
+              className="ml-auto mr-3"
+              variant={ButtonVariant.CONTAINED}
+              size={ButtonSize.EXTRA_SMALL}
+              onClick={() => {
+                setIsOpen(true);
+              }}
+            >
+              {t("details")}
+            </Button>
+          </div>
+          <Button variant={ButtonVariant.CONTAINED} fullWidth isLoading={true}>
+            {t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)}
+            <span className="flex items-center gap-2">
+              <Preloader size={20} color="black" type="circular" />
+            </span>
+          </Button>
+        </>
+      );
+    }
     return (
       <Button
         variant={ButtonVariant.CONTAINED}
@@ -240,6 +288,39 @@ export const LiquidityActionButton = ({
     );
   }
 
+  if ([AddLiquidityStatus.MINT_LOADING, AddLiquidityStatus.MINT_PENDING].includes(status)) {
+    return (
+      <>
+        <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
+          <Preloader size={20} color="green" type="circular" />
+          <span className="mr-auto items-center text-14 text-primary-text">
+            {increase ? t("increase_liquidity_progress") : t("mint_liquidity_progress")}
+          </span>
+          <Button
+            className="ml-auto mr-3"
+            variant={ButtonVariant.CONTAINED}
+            size={ButtonSize.EXTRA_SMALL}
+            onClick={() => {
+              setIsOpen(true);
+            }}
+          >
+            {t("details")}
+          </Button>
+        </div>
+        <Button variant={ButtonVariant.CONTAINED} fullWidth isLoading={true}>
+          {increase
+            ? t("add_liquidity_title")
+            : noLiquidity
+              ? t("create_pool_mint")
+              : t("mint_liquidity")}
+          <span className="flex items-center gap-2">
+            <Preloader size={20} color="black" type="circular" />
+          </span>
+        </Button>
+      </>
+    );
+  }
+
   return (
     <Button
       variant={ButtonVariant.CONTAINED}
@@ -249,7 +330,11 @@ export const LiquidityActionButton = ({
         setIsOpen(true);
       }}
     >
-      {increase ? "Add liquidity" : noLiquidity ? "Create Pool & Mint liquidity" : "Mint liquidity"}
+      {increase
+        ? t("add_liquidity_title")
+        : noLiquidity
+          ? t("create_pool_mint")
+          : t("mint_liquidity")}
     </Button>
   );
 };

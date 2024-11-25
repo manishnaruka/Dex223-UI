@@ -516,7 +516,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
         ) : (
           <Button
             onClick={() => {
-              handleAddLiquidity({ updateAllowance });
+              handleAddLiquidity({ updateAllowance }).then();
             }}
             fullWidth
           >
