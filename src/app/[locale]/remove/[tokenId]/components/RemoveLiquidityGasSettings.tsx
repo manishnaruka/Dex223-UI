@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { formatFloat } from "@/functions/formatFloat";

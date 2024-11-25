@@ -7,7 +7,6 @@ import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import Pagination from "@/components/common/Pagination";
 import RecentTransaction from "@/components/common/RecentTransaction";
 import {
-  IRecentTransactionTitle,
   RecentTransactionStatus,
   RecentTransactionTitleTemplate,
   useRecentTransactionsStore,

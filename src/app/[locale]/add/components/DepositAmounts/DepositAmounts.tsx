@@ -9,9 +9,7 @@ import {
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 
-// import { useAddLiquidityGasPrice } from "../../stores/useAddLiquidityGasSettings";
 import { AddLiquidityGasSettings } from "./AddLiquidityGasSettings";
-import truncateMiddle from "@/functions/truncateMiddle";
 
 export const DepositAmounts = ({
   parsedAmounts,

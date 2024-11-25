@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
+import { formatEther, formatUnits, parseUnits } from "viem";
 
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
@@ -77,7 +77,7 @@ export const TransactionItem = ({
       <div className="w-full">
         <div className="flex justify-between items-center">
           <div className="flex gap-2 py-2 items-start flex-wrap">
-            <span className="flex-wrap items-baseline gap-1">
+            <span className="flex-wrap items-baseline gap-1 text-secondary-text">
               {`${standard === Standard.ERC20 ? "Approve" : "Deposit"} for ${token.symbol}`}
               <Badge
                 color="green"

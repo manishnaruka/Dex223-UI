@@ -15,7 +15,7 @@ import IconButton, {
 } from "@/components/buttons/IconButton";
 import Pagination from "@/components/common/Pagination";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
-import { formatFloat, formatNumber } from "@/functions/formatFloat";
+import { formatFloat } from "@/functions/formatFloat";
 import { formatNumberKilos } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";

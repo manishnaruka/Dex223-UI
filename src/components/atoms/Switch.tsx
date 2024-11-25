@@ -6,9 +6,16 @@ interface Props {
   handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
   small?: boolean;
   disabled?: boolean;
+  bgColor?: string;
 }
 
-export default function Switch({ checked, handleChange, small = false, disabled = false }: Props) {
+export default function Switch({
+  checked,
+  handleChange,
+  small = false,
+  disabled = false,
+  bgColor,
+}: Props) {
   return (
     <label className={clsx("relative inline-block w-12 h-6")}>
       <input
@@ -19,7 +26,8 @@ export default function Switch({ checked, handleChange, small = false, disabled 
         type="checkbox"
       />
       <span
-        className={clsx(`
+        className={clsx(
+          `
                       absolute
                       cursor-pointer
                       w-full
@@ -49,7 +57,9 @@ export default function Switch({ checked, handleChange, small = false, disabled 
                       before:bg-primary-border
                       before:rounded-full
                       before:duration-200
-                  `)}
+                  `,
+          bgColor,
+        )}
       />
     </label>
   );

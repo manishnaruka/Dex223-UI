@@ -10,6 +10,7 @@ import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
+import truncateMiddle from "@/functions/truncateMiddle";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
@@ -21,7 +22,6 @@ import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 
 import { RevokeDialog } from "./RevokeDialog";
-import truncateMiddle from "@/functions/truncateMiddle";
 
 export const InputRange = ({
   value,
@@ -59,8 +59,8 @@ export const InputRange = ({
         type="range"
       />
       <div
-        className="pointer-events-none absolute bg-green h-2 rounded-1 left-0 top-2"
-        style={{ width: value === 1 ? 0 : `calc(${locValue}% - 2px)` }}
+        className="pointer-events-none absolute bg-green h-2 rounded-l-1 left-0 top-2"
+        style={{ width: value === 1 ? 0 : `calc(${locValue}% - ${(locValue / 100) * 20}px)` }}
       />
     </div>
   );

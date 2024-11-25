@@ -13,7 +13,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonColor } from "@/components/buttons/Button";
+import Button from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
@@ -167,10 +167,6 @@ const ApproveDialog = () => {
     <>
       <DialogHeader
         onClose={() => {
-          // if (isSettledSwap) {
-          //   resetAmounts();
-          //   resetTokens();
-          // }
           setIsOpen(false);
         }}
         title={`${t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)} ${t("approve_transaction_modal_title")}`}

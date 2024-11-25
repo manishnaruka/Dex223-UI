@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import JSBI from "jsbi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -18,11 +19,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button from "@/components/buttons/Button";
-import IconButton, {
-  IconButtonSize,
-  IconButtonVariant,
-  IconSize,
-} from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
 import InputButton from "@/components/buttons/InputButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
@@ -39,6 +36,7 @@ import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracki
 import { Link, useRouter } from "@/navigation";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
+import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
 
 import PositionLiquidityCard from "../../pool/[tokenId]/components/PositionLiquidityCard";
 import { RemoveLiquidityGasSettings } from "./components/RemoveLiquidityGasSettings";
@@ -53,8 +51,6 @@ import {
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
 import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
-import clsx from "clsx";
-import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
@@ -91,15 +87,15 @@ export default function DecreaseLiquidityPage({
   }, [params.tokenId]);
 
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const tWallet = useTranslations("Wallet");
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
 
-  const { position: positionInfo, loading } = usePositionFromTokenId(tokenId);
+  const { position: positionInfo } = usePositionFromTokenId(tokenId);
   const position = usePositionFromPositionInfo(positionInfo);
   const chainId = useCurrentChainId();
   // const [value, setValue] = useState(25);
-  const [tokenA, tokenB, fee] = useMemo(() => {
+  const [tokenA, tokenB] = useMemo(() => {
     return position?.pool.token0 && position?.pool.token1 && position?.pool.fee
       ? [position.pool.token0, position.pool.token1, position.pool.fee]
       : [undefined, undefined];
@@ -420,7 +416,7 @@ export default function DecreaseLiquidityPage({
           {[RemoveLiquidityStatus.INITIAL].includes(status) ? (
             <Button
               onClick={() => {
-                handleRemoveLiquidity();
+                handleRemoveLiquidity().then();
               }}
               fullWidth
             >
@@ -462,7 +458,7 @@ export default function DecreaseLiquidityPage({
               />
               <Button
                 onClick={() => {
-                  handleRemoveLiquidity();
+                  handleRemoveLiquidity().then();
                 }}
                 fullWidth
               >

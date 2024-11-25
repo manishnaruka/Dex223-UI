@@ -20,6 +20,7 @@ import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
+import truncateMiddle from "@/functions/truncateMiddle";
 import {
   usePositionFromPositionInfo,
   usePositionFromTokenId,
@@ -35,7 +36,6 @@ import { LiquidityActionButton } from "../../add/components/LiquidityActionButto
 import { usePriceRange } from "../../add/hooks/usePrice";
 import { useSortedTokens } from "../../add/hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../add/hooks/useV3DerivedMintInfo";
-import truncateMiddle from "@/functions/truncateMiddle";
 
 export default function IncreaseLiquidityPage({
   params,
@@ -58,11 +58,11 @@ export default function IncreaseLiquidityPage({
 
   const [showFirst, setShowFirst] = useState(true);
 
-  const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
+  const { position: positionInfo } = usePositionFromTokenId(BigInt(params.tokenId));
   const existedPosition = usePositionFromPositionInfo(positionInfo);
 
   // TODO: tokens already sorted, rename tokenA\B -> token0\1
-  const [tokenA, tokenB, fee] = useMemo(() => {
+  const [tokenA, tokenB] = useMemo(() => {
     return existedPosition?.pool.token0 && existedPosition?.pool.token1 && existedPosition?.pool.fee
       ? [existedPosition.pool.token0, existedPosition.pool.token1, existedPosition.pool.fee]
       : [undefined, undefined];
@@ -103,15 +103,7 @@ export default function IncreaseLiquidityPage({
   // PRICE RANGE HOOK END
 
   // Deposit Amounts START
-  const {
-    parsedAmounts,
-    position,
-    currencies,
-    noLiquidity,
-    outOfRange,
-    depositADisabled,
-    depositBDisabled,
-  } = useV3DerivedMintInfo({
+  const { parsedAmounts, currencies, depositADisabled, depositBDisabled } = useV3DerivedMintInfo({
     tokenA,
     tokenB,
     tier,
