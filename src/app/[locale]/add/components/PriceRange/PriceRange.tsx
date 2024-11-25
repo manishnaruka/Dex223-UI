@@ -247,8 +247,7 @@ export const PriceRange = ({
       />
       {outOfRange ? (
         <span className="text-14 border border-orange rounded-3 px-4 py-2 bg-orange-bg">
-          Your position will not earn fees or be used in trades until the market price moves into
-          your range.
+          {t("not_earn_fee_message")}
         </span>
       ) : null}
 
@@ -256,14 +255,10 @@ export const PriceRange = ({
         <>
           <div className="flex px-5 py-3 bg-blue-bg border-blue border rounded-3 gap-2">
             <Svg iconName="info" className="min-w-[24px] text-blue" />
-            <span className="text-16">
-              This pool must be initialized before you can add liquidity. To initialize, select a
-              starting price for the pool. Then, enter your liquidity price range and deposit
-              amount. Gas fees will be higher than usual due to the initialization transaction.
-            </span>
+            <span className="text-14 text-secondary-text">{t("init_pool_message")}</span>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-bold text-16">Starting price</span>
+            <span className="font-bold text-16">{t("starting_price")}</span>
             <input
               className="outline-0 text-16 w-full rounded-3 bg-secondary-bg px-5 py-3 border border-transparent hocus:shadow hocus:shadow-green/60 focus:border-green focus:shadow focus:shadow-green/60"
               placeholder="0"
@@ -276,7 +271,7 @@ export const PriceRange = ({
                 }
               }}
             />
-            <div className="flex justify-between text-14 text-secondary-text mt-2">
+            <div className="flex justify-between text-14 text-tertiary-text">
               <span>{`Starting ${tokenA?.symbol} price:`}</span>
               <span>{`${formattedPrice} ${tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}`}</span>
             </div>

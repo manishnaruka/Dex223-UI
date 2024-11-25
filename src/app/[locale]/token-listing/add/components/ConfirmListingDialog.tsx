@@ -477,8 +477,6 @@ export default function ConfirmListingDialog() {
     }
   }, [paymentToken, tokensToList]);
 
-  console.log(amountToApprove);
-
   const { autoListingContract } = useAutoListingContractStore();
 
   useEffect(() => {

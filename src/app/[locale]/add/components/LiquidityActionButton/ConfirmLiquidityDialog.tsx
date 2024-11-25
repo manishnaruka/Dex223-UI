@@ -639,7 +639,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
               text={
                 <span>
                   {t("failed_transaction_error_message")}{" "}
-                  <a href="#" className="text-green hocus:underline">
+                  <a href="#" className="text-green underline">
                     {t("common_errors")}
                   </a>
                   .

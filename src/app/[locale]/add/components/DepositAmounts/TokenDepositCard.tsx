@@ -71,11 +71,13 @@ function InputTotalAmount({
   value,
   onChange,
   isDisabled,
+  tokenStandardRatio = 0,
 }: {
   currency?: Currency;
   value: string;
   onChange: (value: string) => void;
   isDisabled?: boolean;
+  tokenStandardRatio: number;
 }) {
   const { address } = useAccount();
 
@@ -104,9 +106,14 @@ function InputTotalAmount({
     ? token0Balance?.value || BigInt(0)
     : (token0Balance?.value || BigInt(0)) + (token1Balance?.value || BigInt(0));
 
+  const maxBalance = currency?.isNative
+    ? token0Balance?.value || BigInt(0)
+    : (token0Balance?.value || BigInt(0)) * BigInt(100 - tokenStandardRatio) +
+      (token1Balance?.value || BigInt(0)) * BigInt(tokenStandardRatio / 100);
+
   const maxHandler = () => {
     if (currency) {
-      onChange(formatFloat(formatUnits(totalBalance, currency.decimals)));
+      onChange(formatFloat(formatUnits(maxBalance, currency.decimals)));
     }
   };
 
@@ -421,6 +428,7 @@ export default function TokenDepositCard({
           value={formattedValue}
           onChange={onChange}
           isDisabled={isDisabled}
+          tokenStandardRatio={tokenStandardRatio}
         />
         {currency?.isNative && currency ? null : (
           <>
