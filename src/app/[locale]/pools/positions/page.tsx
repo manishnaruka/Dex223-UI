@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
+import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import Container from "@/components/atoms/Container";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
@@ -14,15 +15,14 @@ import TabButton from "@/components/buttons/TabButton";
 import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatNumber } from "@/functions/formatFloat";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import usePositions, {
   usePositionFromPositionInfo,
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
 import { useRouter } from "@/navigation";
 import { FeeAmount } from "@/sdk_hybrid/constants";
-import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { NativeCoin } from "@/sdk_hybrid/entities/ether";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 type PositionInfo = {
   nonce: bigint;
@@ -212,7 +212,7 @@ const Positions = () => {
 
 export default function PoolsPage() {
   const router = useRouter();
-  const { tokenA, tokenB, setTokenA, setTokenB } = useAddLiquidityTokensStore();
+  const { tokenA, tokenB, setTokenA } = useAddLiquidityTokensStore();
   const chainId = useCurrentChainId();
 
   return (
@@ -240,7 +240,6 @@ export default function PoolsPage() {
                 const native = NativeCoin.onChain(chainId);
                 setTokenA(native);
               }
-              // const { tokenA, tokenB, setTokenA, setTokenB } = useAddLiquidityTokensStore();
               router.push("/add");
             }}
             fullWidth

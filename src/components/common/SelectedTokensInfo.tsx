@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 
 import Svg from "@/components/atoms/Svg";
 import TokenAddressWithStandard from "@/components/atoms/TokenAddressWithStandard";
@@ -46,8 +45,6 @@ function AddressPair({ token }: { token: Token }) {
 }
 export function SelectedTokenInfoItem({ token }: { token: Currency }) {
   const { handleOpen } = useTokenPortfolioDialogStore();
-
-  const t = useTranslations("Liquidity");
 
   return (
     <div className="bg-tertiary-bg rounded-3 py-2.5 px-5 flex flex-wrap justify-between items-center @container relative z-20">
