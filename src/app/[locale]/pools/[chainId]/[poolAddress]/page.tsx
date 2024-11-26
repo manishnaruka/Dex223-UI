@@ -101,7 +101,7 @@ export default function ExplorePoolPage({
                   {formatNumberKilos(pool.token0.totalValueLocked)}
                 </span>
                 <Image
-                  src="/tokens/placeholder.svg"
+                  src="/images/tokens/placeholder.svg"
                   alt="Ethereum"
                   width={24}
                   height={24}
@@ -118,7 +118,7 @@ export default function ExplorePoolPage({
                   {formatNumberKilos(pool.token1.totalValueLocked)}
                 </span>
                 <Image
-                  src="/tokens/placeholder.svg"
+                  src="/images/tokens/placeholder.svg"
                   alt="Ethereum"
                   width={24}
                   height={24}

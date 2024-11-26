@@ -4,7 +4,7 @@
       "minor": 0,
       "major": 1
     },
-    "logoURI": "/token-list-placeholder.svg",
+    "logoURI": "/images/token-list-placeholder.svg",
     "name": "Test list#1",
     "tokens": [
         {
@@ -12,7 +12,7 @@
           "address1": "0x1d796072232c797CD07892FffAb79170af07E5d7",
           "name": "TESTB",
           "symbol": "TB",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 18
         },
@@ -21,7 +21,7 @@
           "address1": "0x3Cd18a6F06f1daF91456347E9e3972b8C532d123",
           "name": "TESTC",
           "symbol": "TC",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 18
         }

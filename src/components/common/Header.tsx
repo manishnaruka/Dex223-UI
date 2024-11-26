@@ -24,7 +24,7 @@ export default function Header() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-5">
               <Link className="relative w-7 h-8 xl:w-[35px] xl:h-10" href="/">
-                <Image src="/logo-short.svg" alt="" fill />
+                <Image src="/images/logo-short.svg" alt="" fill />
               </Link>
               <Navigation />
             </div>
@@ -51,7 +51,7 @@ export default function Header() {
           <div className="flex justify-between items-center w-full flex-wrap gap-2">
             <div className="flex items-center gap-2 justify-between md:justify-start flex-grow">
               Get test tokens for free
-              <Image src="/test-tokens.svg" alt="" width={92} height={48} />
+              <Image src="/images/test-tokens.svg" alt="" width={92} height={48} />
             </div>
             <div className="w-full md:w-[168px]">
               <Button

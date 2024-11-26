@@ -363,7 +363,7 @@ export default function PickTokenDialog({
                             <Image
                               width={24}
                               height={24}
-                              src={pinnedToken.logoURI || "/tokens/placeholder.svg"}
+                              src={pinnedToken.logoURI || "/images/tokens/placeholder.svg"}
                               alt=""
                             />
                             {pinnedToken.symbol}
@@ -405,7 +405,6 @@ export default function PickTokenDialog({
                     )}
                   </div>
                 </div>
-<<<<<<< HEAD
                 <div className="flex-grow flex min-h-0">
                   {Boolean(filteredTokens.length) && (
                     <ScrollbarContainer height="full">
@@ -423,6 +422,7 @@ export default function PickTokenDialog({
                               token.isToken ? token.address0 : `native-${token.wrapped.address0}`
                             }
                             currency={token}
+                            simpleForm={simpleForm}
                           />
                         ))}
                       </div>
@@ -430,52 +430,24 @@ export default function PickTokenDialog({
                   )}
                 </div>
 
-=======
-                {Boolean(filteredTokens.length) && (
-                  <div className="h-[420px] overflow-auto flex flex-col gap-2 md:gap-0 px-4 md:px-0 pb-2">
-                    {filteredTokens.map((token) => (
-                      <TokenRow
-                        setTokenForPortfolio={setTokenForPortfolio}
-                        handlePick={handlePick}
-                        key={token.isToken ? token.address0 : `native-${token.wrapped.address0}`}
-                        currency={token}
-                        simpleForm={simpleForm}
-                      />
-                    ))}
-                  </div>
-                )}
->>>>>>> 25de12816ec14d58d9e18a75f431f3dc81d7a020
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
                   <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[420px] w-full md:w-[570px]">
                     <EmptyStateIcon iconName="search" />
                     <span className="text-secondary-text">{t("token_not_found")}</span>
                   </div>
                 )}
-<<<<<<< HEAD
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setManageOpened(true);
-                  }}
-                  className="flex-shrink-0 w-full text-green hocus:text-green-hover rounded-b-0 md:rounded-b-5 border-t border-secondary-border md:border-t-0 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
-                >
-                  Manage tokens
-                  <Svg iconName="edit" />
-                </button>
-=======
                 {!simpleForm && (
                   <button
                     onClick={() => {
                       setIsOpen(false);
                       setManageOpened(true);
                     }}
-                    className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
+                    className="flex-shrink-0 w-full text-green hocus:text-green-hover rounded-b-0 md:rounded-b-5 border-t border-secondary-border md:border-t-0 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
                   >
                     Manage tokens
                     <Svg iconName="edit" />
                   </button>
                 )}
->>>>>>> 25de12816ec14d58d9e18a75f431f3dc81d7a020
               </div>
             </>
           )}

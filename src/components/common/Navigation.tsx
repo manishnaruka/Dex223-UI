@@ -11,7 +11,7 @@ function NavigationExternalLink({ href, text }: { href: string; text: string }) 
     <a
       target="_blank"
       className={clsx(
-        "text-green hocus:text-green-hover duration-200 inline-block py-2",
+        "text-green hocus:text-green-hover duration-200 inline-block py-1",
         href === "#" && "opacity-50 pointer-events-none",
       )}
       href={href}
@@ -29,7 +29,7 @@ function NavigationExternalLinksContainer({
   links: { href: string; text: string }[];
 }) {
   return (
-    <div className="flex flex-col text-16 text-primary-text gap-2">
+    <div className="flex flex-col text-16 text-primary-text gap-1">
       <div className="text-secondary-text">{title}</div>
       <div className="flex flex-col">
         {links.map((link) => {
@@ -112,7 +112,7 @@ const menuItems: Array<
               text: t("token_statistics"),
             },
             {
-              href: "http://localhost:3000/en/token-listing/contracts",
+              href: "/token-listing/contracts",
               text: t("token_lists"),
             },
           ]}

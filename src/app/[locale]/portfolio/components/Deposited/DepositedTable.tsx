@@ -91,7 +91,7 @@ const DepositedTokenTableItem = ({
         )}
       >
         <div className="flex gap-2">
-          <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+          <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
           <span>{`${deposite.token.name}`}</span>
         </div>
         <div
@@ -217,7 +217,7 @@ const DepositedTokenMobileTableItem = ({
       >
         <div className="flex justify-start items-start gap-1">
           <div className="flex gap-2">
-            <Image src={"/tokens/placeholder.svg"} width={32} height={32} alt="" />
+            <Image src={"/images/tokens/placeholder.svg"} width={32} height={32} alt="" />
             <div className="flex flex-col">
               <span className="text-14">{`${deposite.token.name}`}</span>
               <span className="text-12">{"$ —"}</span>

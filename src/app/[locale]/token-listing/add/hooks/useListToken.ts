@@ -321,14 +321,14 @@ export default function useListToken() {
                         symbol0: tokenA.wrapped.symbol!,
                         symbol1: tokenB.wrapped.symbol!,
                         template: RecentTransactionTitleTemplate.LIST_DOUBLE,
-                        logoURI0: tokenA?.logoURI || "/tokens/placeholder.svg",
-                        logoURI1: tokenB?.logoURI || "/tokens/placeholder.svg",
+                        logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
+                        logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
                         autoListing: autoListing?.name || "Unknown",
                       }
                     : {
                         symbol: tokensToList[0]?.symbol || "Unknown",
                         template: RecentTransactionTitleTemplate.LIST_SINGLE,
-                        logoURI: tokensToList[0]?.logoURI || "/tokens/placeholder.svg",
+                        logoURI: tokensToList[0]?.logoURI || "/images/tokens/placeholder.svg",
                         autoListing: autoListing?.name || "Unknown",
                       },
               },

@@ -163,7 +163,8 @@ export function useAutoListingUpdater() {
         );
         if (
           !currentListing?.lastUpdated ||
-          currentListing?.lastUpdated < autoListingInfo.lastUpdated
+          currentListing?.lastUpdated < autoListingInfo.lastUpdated ||
+          currentListing.list.logoURI !== "/images/token-list-placeholder.svg" // temporary fix to update all images for autolistings.
         ) {
           addressesToActualize.add(autoListingInfo.id.toLowerCase());
         }
@@ -204,7 +205,7 @@ export function useAutoListingUpdater() {
               autoListingContract: resultData[i].id.toLowerCase(),
               lastUpdated: resultData[i].lastUpdated,
               list: {
-                logoURI: "/token-list-placeholder.svg",
+                logoURI: "/images/token-list-placeholder.svg",
                 name,
                 version: {
                   major: 0,
@@ -219,7 +220,7 @@ export function useAutoListingUpdater() {
                     +token.decimals,
                     token.symbol,
                     token.name,
-                    "/tokens/placeholder.svg",
+                    "/images/tokens/placeholder.svg",
                   );
                 }),
               },

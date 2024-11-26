@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 
-import { TokenTrade } from "@/app/[locale]/swap/libs/trading";
+import { TokenTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapDetailsStateStore } from "@/app/[locale]/swap/stores/useSwapDetailsStateStore";
 import { useSwapGasLimitStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
@@ -11,10 +11,8 @@ import Collapse from "@/components/atoms/Collapse";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import { formatFloat } from "@/functions/formatFloat";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { NativeCoin } from "@/sdk_hybrid/entities/ether";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 

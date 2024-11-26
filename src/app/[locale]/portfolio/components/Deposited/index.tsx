@@ -92,7 +92,7 @@ export const Deposited = () => {
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
             <Image
-              src="/approved-bar.svg"
+              src="/images/approved-bar.svg"
               alt="Side Icon"
               width={"134"}
               height={"134"}
@@ -109,7 +109,7 @@ export const Deposited = () => {
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
             <Image
-              src="/deposited-bar.svg"
+              src="/images/deposited-bar.svg"
               alt="Side Icon"
               width={"62"}
               height={"171"}

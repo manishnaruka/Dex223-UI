@@ -51,7 +51,7 @@ export const LiquidityPositions = () => {
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
             <img
-              src="/liq-pos-bar.svg"
+              src="/images/liq-pos-bar.svg"
               alt="Side Icon"
               width={"122"}
               height={"152"}

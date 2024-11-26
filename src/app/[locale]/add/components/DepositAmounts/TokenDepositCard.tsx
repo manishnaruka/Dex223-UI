@@ -139,6 +139,7 @@ function InputTotalAmount({
     >
       <div className="mb-1 flex justify-between items-center">
         <NumericFormat
+          allowedDecimalSeparators={[","]}
           decimalScale={currency?.decimals}
           inputMode="decimal"
           placeholder="0.0"
@@ -159,7 +160,7 @@ function InputTotalAmount({
               className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : ""}`}
             >
               <Image
-                src={currency?.logoURI || "/tokens/placeholder.svg"}
+                src={currency?.logoURI || "/images/tokens/placeholder.svg"}
                 alt=""
                 width={24}
                 height={24}
@@ -415,7 +416,12 @@ export default function TokenDepositCard({
       }`}
     >
       <div className={`flex items-center gap-2 mb-3`}>
-        <Image width={24} height={24} src={currency?.logoURI || "/tokens/placeholder.svg"} alt="" />
+        <Image
+          width={24}
+          height={24}
+          src={currency?.logoURI || "/images/tokens/placeholder.svg"}
+          alt=""
+        />
         <h3 className={`text-16 font-bold text-secondary-text text-nowrap`}>
           {currency
             ? t("token_deposit_amounts", { symbol: currencySymbolShort })

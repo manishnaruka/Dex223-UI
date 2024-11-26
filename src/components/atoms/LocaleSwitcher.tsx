@@ -18,17 +18,17 @@ const localesMap: {
   };
 } = {
   en: {
-    img: "/locales/en.svg",
+    img: "/images/locales/en.svg",
     label: "English",
     symbol: "En",
   },
   es: {
-    img: "/locales/es.svg",
+    img: "/images/locales/es.svg",
     label: "Español",
     symbol: "Es",
   },
   zh: {
-    img: "/locales/zh.svg",
+    img: "/images/locales/zh.svg",
     label: "中国人",
     symbol: "Zh",
   },
@@ -49,7 +49,7 @@ export default function LocaleSwitcher({ isMobile = false }: { isMobile?: boolea
       <Popover
         isOpened={isOpened}
         setIsOpened={setIsOpened}
-        placement={"bottom-start"}
+        placement={isMobile ? "top-start" : "bottom-start"}
         trigger={
           <SelectButton
             className={clsx("px-3 text-secondary-text", isMobile && "bg-tertiary-bg")}

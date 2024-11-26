@@ -58,7 +58,7 @@ export default function ManageTokensDialog() {
                   <Image
                     width={32}
                     height={32}
-                    src={tokenForPortfolio?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenForPortfolio?.logoURI || "/images/tokens/placeholder.svg"}
                     alt=""
                   />
                   {tokenForPortfolio?.name || "Unknown"}

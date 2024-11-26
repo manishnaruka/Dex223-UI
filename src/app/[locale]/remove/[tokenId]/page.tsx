@@ -62,7 +62,7 @@ const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; am
       <div className="flex items-center gap-2">
         <span className="font-bold">{amount}</span>
         <Image
-          src={token?.logoURI || "/tokens/placeholder.svg"}
+          src={token?.logoURI || "/images/tokens/placeholder.svg"}
           alt={token?.symbol || ""}
           width={24}
           height={24}

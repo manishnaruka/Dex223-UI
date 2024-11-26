@@ -260,7 +260,7 @@ export function usePositionFromPositionInfo(positionDetails: PositionInfo) {
         tokenAInfo?.[1],
         tokenAInfo?.[2],
         tokenAInfo?.[3],
-        "/tokens/placeholder.svg",
+        "/images/tokens/placeholder.svg",
       )
     : undefined;
   const tokenBFromNode = tokenBInfo?.length
@@ -271,7 +271,7 @@ export function usePositionFromPositionInfo(positionDetails: PositionInfo) {
         tokenBInfo?.[1],
         tokenBInfo?.[2],
         tokenBInfo?.[3],
-        "/tokens/placeholder.svg",
+        "/images/tokens/placeholder.svg",
       )
     : undefined;
 

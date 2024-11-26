@@ -160,7 +160,7 @@ export default function TokenPortfolioDialog() {
             <Image
               width={32}
               height={32}
-              src={token?.logoURI || "/tokens/placeholder.svg"}
+              src={token?.logoURI || "/images/tokens/placeholder.svg"}
               alt=""
             />
             {token?.name || "Unknown"}

@@ -98,7 +98,7 @@ const WithdrawTableItem = ({
         )}
       >
         <div className="flex gap-2">
-          <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+          <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
           <span>{`${deposite.token.name}`}</span>
         </div>
         <div
@@ -247,7 +247,7 @@ const WithdrawMobileTableItem = ({
       >
         <div className="flex justify-start items-start gap-1">
           <div className="flex gap-2">
-            <Image src={"/tokens/placeholder.svg"} width={24} height={24} alt="" />
+            <Image src={"/images/tokens/placeholder.svg"} width={24} height={24} alt="" />
             <span className="text-14 mt-0.5">{`${deposite.token.name}`}</span>
           </div>
           <div

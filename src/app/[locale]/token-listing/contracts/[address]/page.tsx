@@ -18,15 +18,12 @@ import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/butt
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";
 import { TokenListId } from "@/db/db";
 import { clsxMerge } from "@/functions/clsxMerge";
-import { copyToClipboard } from "@/functions/copyToClipboard";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/navigation";
-import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Token } from "@/sdk_hybrid/entities/token";
 
@@ -95,7 +92,7 @@ export default function AutoListingContractDetails({
         +token.decimals,
         token.symbol,
         token.name,
-        "/tokens/placeholder.svg",
+        "/images/tokens/placeholder.svg",
         lists,
       );
     });
@@ -265,7 +262,12 @@ export default function AutoListingContractDetails({
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <Image width={32} height={32} src="/tokens/placeholder.svg" alt="" />
+                            <Image
+                              width={32}
+                              height={32}
+                              src="/images/tokens/placeholder.svg"
+                              alt=""
+                            />
                             <div className="flex flex-col">
                               <span className="font-medium">{token.name}</span>
                               <span className="text-secondary-text">{token.symbol}</span>
@@ -387,7 +389,12 @@ export default function AutoListingContractDetails({
                       return (
                         <TableRow key={index} className={index % 2 !== 0 ? "bg-tertiary-bg" : ""}>
                           <div className="flex items-center gap-2">
-                            <Image width={24} height={24} src="/tokens/placeholder.svg" alt="" />
+                            <Image
+                              width={24}
+                              height={24}
+                              src="/images/tokens/placeholder.svg"
+                              alt=""
+                            />
                             <span className="font-medium">{token.name}</span>
                             <span className="text-secondary-text">{token.symbol}</span>
                           </div>

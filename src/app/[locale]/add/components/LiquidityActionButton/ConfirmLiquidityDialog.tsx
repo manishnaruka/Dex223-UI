@@ -573,12 +573,22 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
         </div>
 
         <div className="flex justify-center gap-2 items-center mb-3">
-          <Image src={tokenA?.logoURI || "/tokens/placeholder.svg"} alt="" width={24} height={24} />
+          <Image
+            src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
+            alt=""
+            width={24}
+            height={24}
+          />
           <span>
             {formatFloat(parsedAmounts[Field.CURRENCY_A]?.toSignificant() || "")} {tokenA?.symbol}
           </span>
           <Svg iconName="add" />
-          <Image src={tokenB?.logoURI || "/tokens/placeholder.svg"} alt="" width={24} height={24} />
+          <Image
+            src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
+            alt=""
+            width={24}
+            height={24}
+          />
           <span>
             {formatFloat(parsedAmounts[Field.CURRENCY_B]?.toSignificant() || "")} {tokenB?.symbol}
           </span>

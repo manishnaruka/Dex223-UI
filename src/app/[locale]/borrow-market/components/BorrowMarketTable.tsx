@@ -216,7 +216,7 @@ export default function BorrowMarketTable() {
         return (
           <>
             <div className=" pl-3 h-[56px] flex items-center gap-2">
-              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+              <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
               <span>
                 {o.token.minAmount} / {o.token.maxAmount} {o.token.name}
               </span>

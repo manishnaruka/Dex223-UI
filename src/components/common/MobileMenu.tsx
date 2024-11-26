@@ -34,9 +34,7 @@ export function MobileLink({
       href={href}
       className={clsx(
         "flex items-center gap-2 py-3 px-4 duration-200",
-        isActive
-          ? "text-green pointer-events-none"
-          : "bg-tertiary-bg hocus:bg-quaternary-bg text-secondary-text",
+        isActive ? "text-green pointer-events-none" : "hocus:bg-quaternary-bg text-secondary-text",
         disabled && "pointer-events-none opacity-50",
       )}
     >
@@ -196,7 +194,7 @@ export default function MobileMenu() {
                         text: t("token_statistics"),
                       },
                       {
-                        href: "http://localhost:3000/en/token-listing/contracts",
+                        href: "/token-listing/contracts",
                         text: t("token_lists"),
                       },
                     ]}

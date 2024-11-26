@@ -26,7 +26,7 @@ export const Success: Story = {
       template: RecentTransactionTitleTemplate.DEPOSIT,
       symbol: "Native ERC223 token20",
       amount: "9.0099",
-      logoURI: "/tokens/placeholder.svg",
+      logoURI: "/images/tokens/placeholder.svg",
     },
   },
   render: (args) => {
@@ -45,7 +45,7 @@ export const Error: Story = {
       template: RecentTransactionTitleTemplate.DEPOSIT,
       symbol: "Native ERC223 token20",
       amount: "9.0099",
-      logoURI: "/tokens/placeholder.svg",
+      logoURI: "/images/tokens/placeholder.svg",
     },
   },
   render: (args) => {
@@ -64,7 +64,7 @@ export const Error_Approve: Story = {
       template: RecentTransactionTitleTemplate.APPROVE,
       symbol: "sepETH",
       amount: "9.0099",
-      logoURI: "/tokens/placeholder.svg",
+      logoURI: "/images/tokens/placeholder.svg",
     },
   },
   render: (args) => {

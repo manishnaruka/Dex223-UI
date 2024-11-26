@@ -4,9 +4,9 @@ export const sepoliaDefaultList = {
   version: {
     major: 1,
     minor: 0,
-    patch: 7,
+    patch: 8,
   },
-  logoURI: "/token-list-placeholder.svg",
+  logoURI: "/images/token-list-placeholder.svg",
   name: "DEX223 Sepolia Default",
   tokens: [
     new Token(
@@ -16,7 +16,7 @@ export const sepoliaDefaultList = {
       18,
       "TOT1",
       "Total Test 1",
-      "/tokens/placeholder.svg",
+      "/images/tokens/placeholder.svg",
     ),
     new Token(
       11155111,
@@ -25,7 +25,7 @@ export const sepoliaDefaultList = {
       6,
       "TOT2",
       "Total Test 2",
-      "/tokens/placeholder.svg",
+      "/images/tokens/placeholder.svg",
     ),
     new Token(
       11155111,
@@ -34,7 +34,7 @@ export const sepoliaDefaultList = {
       10,
       "TOT3",
       "Total Test 3",
-      "/tokens/placeholder.svg",
+      "/images/tokens/placeholder.svg",
     ),
     new Token(
       11155111,
@@ -43,7 +43,7 @@ export const sepoliaDefaultList = {
       0,
       "TOT4Z",
       "Total Test 4Z",
-      "/tokens/placeholder.svg",
+      "/images/tokens/placeholder.svg",
     ),
   ],
 };

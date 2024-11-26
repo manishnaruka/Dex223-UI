@@ -28,11 +28,7 @@ export const PriceRangeHeader = ({
         <div className="flex gap-3 justify-between md:items-center">
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-12">{t("full_range")}</span>
-            <Switch
-              checked={isFullRange}
-              handleChange={handleSetFullRange}
-              bgColor={"bg-secondary-bg"}
-            />
+            <Switch checked={isFullRange} handleChange={handleSetFullRange} />
           </div>
 
           <div className="flex p-0.5 gap-0.5 rounded-2 bg-secondary-bg">

@@ -7,7 +7,7 @@ import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { useTrade } from "@/app/[locale]/swap/libs/trading";
+import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
@@ -393,7 +393,12 @@ function ReadonlyTokenAmountCard({
       <div className="flex justify-between items-center text-20">
         <span>{amount}</span>
         <div className="flex items-center gap-2">
-          <Image src={token?.logoURI || "/tokens/placeholder.svg"} alt="" width={32} height={32} />
+          <Image
+            src={token?.logoURI || "/images/tokens/placeholder.svg"}
+            alt=""
+            width={32}
+            height={32}
+          />
           {token?.symbol}
           <Badge color="green" text={token?.isNative ? "Native" : standard} />
         </div>
@@ -598,7 +603,7 @@ export default function ConfirmSwapDialog() {
 
               <div className="flex justify-center gap-2 items-center">
                 <Image
-                  src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                  src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                   alt=""
                   width={24}
                   height={24}
@@ -608,7 +613,7 @@ export default function ConfirmSwapDialog() {
                 </span>
                 <Svg iconName="next" />
                 <Image
-                  src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                  src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                   alt=""
                   width={24}
                   height={24}
@@ -698,6 +703,8 @@ export default function ConfirmSwapDialog() {
                       <div className="flex-grow">
                         <div className="relative w-full flex-grow">
                           <NumericFormat
+                            inputMode="decimal"
+                            allowedDecimalSeparators={[","]}
                             isError={+amountToApprove < +typedValue}
                             className="h-8 pl-3"
                             value={amountToApprove}

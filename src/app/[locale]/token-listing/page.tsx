@@ -74,7 +74,7 @@ export default function TokenListingPage() {
               </>
             }
             href="https://github.com/EthereumCommonwealth/Dex223-listings"
-            image="/listing-cards/default-listing.png"
+            image="/images/listing-cards/default-listing.png"
             isExternal
           />
           <ListingVariantCard
@@ -96,7 +96,7 @@ export default function TokenListingPage() {
               </>
             }
             href="/token-listing/contracts"
-            image="/listing-cards/automatic-listing.png"
+            image="/images/listing-cards/automatic-listing.png"
             isExternal={false}
           />
           <ListingVariantCard
@@ -121,7 +121,7 @@ export default function TokenListingPage() {
               </>
             }
             href="https://tokenlists.org/"
-            image="/listing-cards/existing-listing.png"
+            image="/images/listing-cards/existing-listing.png"
             isExternal={true}
             buttonText={"View Uniswap token lists"}
           />

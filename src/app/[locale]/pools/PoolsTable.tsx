@@ -117,9 +117,9 @@ const PoolsTableDesktop = ({
               onClick={() => openPoolHandler(o.id)}
               className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+              <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
               <Image
-                src="/tokens/placeholder.svg"
+                src="/images/tokens/placeholder.svg"
                 width={24}
                 height={24}
                 alt=""
@@ -193,9 +193,9 @@ const PoolsTableItemMobile = ({
       <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
         <div className="flex justify-between gap-2">
           <div className="flex items-center gap-2 text-14">
-            <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+            <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
             <Image
-              src="/tokens/placeholder.svg"
+              src="/images/tokens/placeholder.svg"
               width={24}
               height={24}
               alt=""
