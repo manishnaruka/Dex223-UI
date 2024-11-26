@@ -11,8 +11,7 @@ import {
 } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
-import { useTrade } from "@/app/[locale]/swap/libs/trading";
-import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
+import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
   useSwapGasLimitStore,
@@ -91,6 +90,9 @@ export function useSwapParams() {
   });
 
   const { trade, isLoading: isLoadingTrade } = useTrade();
+
+  console.log("TRADE");
+  console.log(trade);
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
@@ -478,8 +480,8 @@ export default function useSwap() {
                 template: RecentTransactionTitleTemplate.SWAP,
                 amount0: typedValue,
                 amount1: output.toString(),
-                logoURI0: tokenA?.logoURI || "/tokens/placeholder.svg",
-                logoURI1: tokenB?.logoURI || "/tokens/placeholder.svg",
+                logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
+                logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
               },
             },
             address,

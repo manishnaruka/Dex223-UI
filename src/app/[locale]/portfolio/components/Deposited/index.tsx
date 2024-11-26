@@ -75,7 +75,7 @@ export const Deposited = () => {
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
             <img
-              src="/deposited-bar.svg"
+              src="/images/deposited-bar.svg"
               alt="Side Icon"
               width={"62"}
               height={"171"}

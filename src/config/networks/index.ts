@@ -10,12 +10,12 @@ export const networks: Array<{
     chainId: DexChainId.SEPOLIA,
     name: "Sepolia",
     symbol: "SEP",
-    logo: "/chains/sepolia.svg",
+    logo: "/images/chains/sepolia.svg",
   },
   {
     chainId: DexChainId.BSC_TESTNET,
     name: "BSC Testnet",
     symbol: "BNB",
-    logo: "/chains/bsc.svg",
+    logo: "/images/chains/bsc.svg",
   },
 ];

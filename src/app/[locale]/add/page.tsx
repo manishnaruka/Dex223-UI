@@ -167,14 +167,14 @@ export default function AddPoolPage() {
                 <span className="flex gap-2 items-center">
                   <Image
                     className="flex-shrink-0 hidden md:block"
-                    src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={32}
                     height={32}
                   />
                   <Image
                     className="flex-shrink-0 block md:hidden"
-                    src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}
@@ -201,14 +201,14 @@ export default function AddPoolPage() {
                 <span className="flex gap-2 items-center">
                   <Image
                     className="flex-shrink-0 hidden md:block"
-                    src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={32}
                     height={32}
                   />
                   <Image
                     className="flex-shrink-0 block md:hidden"
-                    src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}

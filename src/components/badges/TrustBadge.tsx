@@ -230,7 +230,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
         >
           <Image
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            src={logoURI || "/tokens/placeholder.svg"}
+            src={logoURI || "/images/tokens/placeholder.svg"}
             alt=""
             width={20}
             height={20}

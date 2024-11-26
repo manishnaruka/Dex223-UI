@@ -81,7 +81,7 @@ function serializeAutoListing(gqlAutoListing: GqlAutoListing, chainId: DexChainI
         +token.decimals,
         token.symbol,
         token.name,
-        "/tokens/placeholder.svg",
+        "/images/tokens/placeholder.svg",
       );
     }),
     totalTokens: +gqlAutoListing.totalTokens,

@@ -32,7 +32,7 @@ export const MarginPositions = () => {
             <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
           <img
-            src="/portfolio-bars.svg"
+            src="/images/portfolio-bars.svg"
             alt="Side Icon"
             width={"180"}
             height={"120"}
@@ -89,7 +89,7 @@ export const MarginPositions = () => {
                         index % 2 !== 0 && "bg-tertiary-bg",
                       )}
                     >
-                      <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                      <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
                       <span>{`${o.name}`}</span>
                     </div>
                     <div

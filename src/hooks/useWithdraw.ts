@@ -123,7 +123,7 @@ export default function useWithdraw({
               symbol: token.symbol!,
               template: RecentTransactionTitleTemplate.WITHDRAW,
               amount: formatUnits(amount, token.decimals),
-              logoURI: token?.logoURI || "/tokens/placeholder.svg",
+              logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
             },
           },
           address,

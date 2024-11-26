@@ -348,7 +348,7 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                             <Image
                               width={24}
                               height={24}
-                              src={pinnedToken.logoURI || "/tokens/placeholder.svg"}
+                              src={pinnedToken.logoURI || "/images/tokens/placeholder.svg"}
                               alt=""
                             />
                             {pinnedToken.symbol}

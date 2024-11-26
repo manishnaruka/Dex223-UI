@@ -246,7 +246,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     className="w-12 h-12"
                     width={48}
                     height={48}
-                    src="/tokens/placeholder.svg"
+                    src="/images/tokens/placeholder.svg"
                     alt=""
                   />
                   <div className="flex flex-col text-16">
@@ -351,7 +351,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                         tokenDecimals,
                         tokenSymbol,
                         tokenName,
-                        "/tokens/placeholder.svg",
+                        "/images/tokens/placeholder.svg",
                       );
 
                       if (!currentCustomList) {
@@ -367,7 +367,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                               patch: 0,
                             },
                             tokens: [token],
-                            logoURI: "/token-list-placeholder.svg",
+                            logoURI: "/images/token-list-placeholder.svg",
                           },
                         });
                       } else {

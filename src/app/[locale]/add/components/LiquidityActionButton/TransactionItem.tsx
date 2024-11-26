@@ -129,6 +129,7 @@ export const TransactionItem = ({
           )}
         >
           <NumericFormat
+            allowedDecimalSeparators={[","]}
             decimalScale={token?.decimals}
             inputMode="decimal"
             placeholder="0.0"

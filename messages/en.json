@@ -130,7 +130,7 @@
     "browse": "Browse",
     "select_json_file": "Select JSON file to import",
     "please_select_JSON_to_import": "Please select JSON file to import",
-    "import_files_or_drag_and_drop": "Import files or Drag & Drop",
+    "import_files_or_drag_and_drop": "Browse file or Drag & Drop",
     "custom_tokens_amount": "{amount} {amount, plural, =1 {custom token} other {custom tokens}}",
     "symbol": "Symbol",
     "address": "Address",

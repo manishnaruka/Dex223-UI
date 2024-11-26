@@ -146,7 +146,7 @@ export default function RecentTransactions({
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center min-h-[324px] gap-2">
-                  <Image src="/empty/empty-history.svg" width={80} height={80} alt="" />
+                  <Image src="/images/empty/empty-history.svg" width={80} height={80} alt="" />
                   <span className="text-secondary-text">
                     {t("transactions_will_be_displayed_here")}
                   </span>

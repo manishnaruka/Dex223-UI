@@ -18,7 +18,7 @@ export default function PositionLiquidityCard({
     <div className="flex flex-col lg:flex-row gap-1 lg:gap-0 justify-between items-center">
       <div className="flex items-center gap-2">
         <Image
-          src={token?.logoURI || "/tokens/placeholder.svg"}
+          src={token?.logoURI || "/images/tokens/placeholder.svg"}
           alt={token?.symbol || ""}
           width={24}
           height={24}

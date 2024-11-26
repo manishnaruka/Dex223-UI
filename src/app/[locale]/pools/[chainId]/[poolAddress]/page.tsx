@@ -105,7 +105,7 @@ export default function ExplorePoolPage({
             <div className="flex justify-between">
               <div className="flex gap-2 items-center">
                 <Image
-                  src="/tokens/placeholder.svg"
+                  src="/images/tokens/placeholder.svg"
                   alt="Ethereum"
                   width={24}
                   height={24}
@@ -122,7 +122,7 @@ export default function ExplorePoolPage({
               </div>
               <div className="flex gap-2 items-center">
                 <Image
-                  src="/tokens/placeholder.svg"
+                  src="/images/tokens/placeholder.svg"
                   alt="Ethereum"
                   width={24}
                   height={24}

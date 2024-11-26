@@ -112,6 +112,7 @@ export const RevokeDialog = ({
                   )}
                 >
                   <NumericFormat
+                    allowedDecimalSeparators={[","]}
                     decimalScale={token.decimals}
                     inputMode="decimal"
                     placeholder="0.0"

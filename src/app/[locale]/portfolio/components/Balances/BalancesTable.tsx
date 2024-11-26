@@ -37,7 +37,12 @@ export const BalancesDesktopTable = ({
                 index % 2 !== 0 && "bg-tertiary-bg",
               )}
             >
-              <Image src={o.logoURI || "/tokens/placeholder.svg"} width={24} height={24} alt="" />
+              <Image
+                src={o.logoURI || "/images/tokens/placeholder.svg"}
+                width={24}
+                height={24}
+                alt=""
+              />
               <span>{`${o.name}`}</span>
             </div>
             <div
@@ -92,7 +97,12 @@ export const BalancesMobileTable = ({
           <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2" key={key}>
             <div className="flex justify-start items-start gap-1">
               <div className="flex gap-2">
-                <Image src={o.logoURI || "/tokens/placeholder.svg"} width={32} height={32} alt="" />
+                <Image
+                  src={o.logoURI || "/images/tokens/placeholder.svg"}
+                  width={32}
+                  height={32}
+                  alt=""
+                />
                 <div className="flex flex-col">
                   <span className="text-14">{`${o.name}`}</span>
                   <span className="text-12">{`${o.amountFiat}`}</span>

@@ -60,6 +60,8 @@ type SettingsInputProps = NumericFormatProps & {
 function SettingsInput({ isActive, isError, ...props }: SettingsInputProps) {
   return (
     <NumericFormat
+      inputMode="decimal"
+      allowedDecimalSeparators={[","]}
       isAllowed={(values) => {
         const { floatValue } = values;
         if (values.value === "00" || values.value === "0.0") {
@@ -306,6 +308,7 @@ export default function SwapSettingsDialog() {
 
           <div className="relative">
             <NumericFormat
+              allowedDecimalSeparators={[","]}
               className="pr-[100px] mb-0"
               value={customDeadline}
               onValueChange={(values) => {
@@ -314,6 +317,7 @@ export default function SwapSettingsDialog() {
               isError={+customDeadline > 4000 || +customDeadline < 1}
               allowNegative={false}
               customInput={Input}
+              inputMode="decimal"
             />
             <span className="absolute right-5 top-1/2 -translate-y-1/2 text-secondary-text">
               {t("minutes")}

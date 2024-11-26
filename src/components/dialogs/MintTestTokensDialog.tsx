@@ -193,6 +193,7 @@ export default function MintTestTokensDialog() {
             onChange={(e) => setAmountToMint(e.target.value)}
             placeholder="Amount"
             internalText={tokenToMint?.symbol}
+            isNumeric
           />
 
           {isConnected ? (

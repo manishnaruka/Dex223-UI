@@ -1,30 +1,30 @@
 export const wallets = {
   metamask: {
     name: "Metamask",
-    image: "/wallets/metamask.svg",
+    image: "/images/wallets/metamask.svg",
   },
   wc: {
     name: "WalletConnect",
-    image: "/wallets/wc.svg",
+    image: "/images/wallets/wc.svg",
   },
   keystore: {
     name: "Keystore",
-    image: "/wallets/keystore.svg",
+    image: "/images/wallets/keystore.svg",
   },
   ledger: {
     name: "Ledger",
-    image: "/wallets/ledger.svg",
+    image: "/images/wallets/ledger.svg",
   },
   trustWallet: {
     name: "Trust Wallet",
-    image: "/wallets/trust.svg",
+    image: "/images/wallets/trust.svg",
   },
   coinbase: {
     name: "Coinbase",
-    image: "/wallets/coinbase.svg",
+    image: "/images/wallets/coinbase.svg",
   },
   unknown: {
     name: "Unknown",
-    image: "/wallets/default.svg",
+    image: "/images/wallets/default.svg",
   },
 } as const;

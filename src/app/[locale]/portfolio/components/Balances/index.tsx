@@ -17,8 +17,6 @@ import { Currency } from "@/sdk_hybrid/entities/currency";
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";
 
-// import Icon from "/logo-short.svg";
-
 const filterTable = ({
   searchValue,
   value: { token },
@@ -78,7 +76,7 @@ export const Balances = () => {
           <span className="text-24 lg:text-32 font-medium">$ —</span>
 
           <img
-            src="/logo-short.svg"
+            src="/images/logo-short.svg"
             alt="Side Icon"
             width={"180"}
             height={"120"}
@@ -94,7 +92,7 @@ export const Balances = () => {
           </div>
           <span className="text-24 lg:text-32 font-medium">$ —</span>
           <img
-            src="/portfolio-bars.svg"
+            src="/images/portfolio-bars.svg"
             alt="Side Icon"
             width={"180"}
             height={"120"}

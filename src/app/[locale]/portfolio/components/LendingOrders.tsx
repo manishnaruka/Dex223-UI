@@ -31,7 +31,7 @@ export const LendingOrders = () => {
             <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
           <img
-            src="/lending-bar.svg"
+            src="/images/lending-bar.svg"
             alt="Side Icon"
             width={"121"}
             height={"125"}
@@ -88,7 +88,7 @@ export const LendingOrders = () => {
                       index % 2 !== 0 && "bg-tertiary-bg",
                     )}
                   >
-                    <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                    <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
                     <span>{`${o.name}`}</span>
                   </div>
                   <div

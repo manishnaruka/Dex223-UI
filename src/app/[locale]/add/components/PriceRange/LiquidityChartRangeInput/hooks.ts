@@ -113,7 +113,7 @@ function useTicksFromSubgraph(
 
 const MAX_THE_GRAPH_TICK_FETCH_VALUE = 1000;
 // Fetches all ticks for a given pool
-function useAllV3Ticks(
+export function useAllV3Ticks(
   currencyA: Token | undefined,
   currencyB: Token | undefined,
   feeAmount: FeeAmount | undefined,

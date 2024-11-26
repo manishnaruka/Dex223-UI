@@ -118,7 +118,7 @@ export default function useRevoke({
             symbol: token.symbol!,
             template: RecentTransactionTitleTemplate.APPROVE,
             amount: formatUnits(amountToRevoke, token.decimals),
-            logoURI: token?.logoURI || "/tokens/placeholder.svg",
+            logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
           },
         },
         address,

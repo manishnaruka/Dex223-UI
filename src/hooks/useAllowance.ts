@@ -179,7 +179,7 @@ export function useStoreAllowance({
                 symbol: token.symbol!,
                 template: RecentTransactionTitleTemplate.APPROVE,
                 amount: formatUnits(amountToApprove, token.decimals),
-                logoURI: token?.logoURI || "/tokens/placeholder.svg",
+                logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
               },
             },
             address,

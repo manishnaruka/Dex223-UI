@@ -163,7 +163,7 @@ export function useStoreDeposit({
                 symbol: token.symbol!,
                 template: RecentTransactionTitleTemplate.DEPOSIT,
                 amount: formatUnits(amountToDeposite, token.decimals),
-                logoURI: token?.logoURI || "/tokens/placeholder.svg",
+                logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
               },
             },
             address,

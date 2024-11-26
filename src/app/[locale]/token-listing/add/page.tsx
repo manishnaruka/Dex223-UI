@@ -258,7 +258,7 @@ export default function ListTokenPage() {
           decimals,
           symbol,
           name,
-          "/tokens/placeholder.svg",
+          "/images/tokens/placeholder.svg",
         );
 
         setToken(_token);
@@ -407,7 +407,7 @@ export default function ListTokenPage() {
                             className="mr-1"
                             width={24}
                             height={24}
-                            src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                            src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                             alt=""
                           />
                         )}
@@ -453,7 +453,7 @@ export default function ListTokenPage() {
                             className="mr-1"
                             width={24}
                             height={24}
-                            src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                            src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                             alt=""
                           />
                         )}
@@ -567,7 +567,12 @@ export default function ListTokenPage() {
                               onClick={() => setPaymentDialogSelectOpened(true)}
                               className="flex items-center gap-2 bg-tertiary-bg"
                             >
-                              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                              <Image
+                                src="/images/tokens/placeholder.svg"
+                                width={24}
+                                height={24}
+                                alt=""
+                              />
                               {paymentToken?.token && isZeroAddress(paymentToken.token.address)
                                 ? "ETH"
                                 : paymentToken?.token.symbol}
@@ -591,7 +596,7 @@ export default function ListTokenPage() {
                               {formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18)}
                               <span className="flex items-center gap-2">
                                 <Image
-                                  src="/tokens/placeholder.svg"
+                                  src="/images/tokens/placeholder.svg"
                                   width={24}
                                   height={24}
                                   alt=""

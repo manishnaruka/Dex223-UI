@@ -14,7 +14,7 @@ export default function TokensPair({
       <div className="flex items-center">
         <span className="w-[26px] h-[26px] md:w-[34px] md:h-[34px] rounded-full bg-primary-bg flex items-center justify-center">
           <Image
-            src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+            src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
             alt="Ethereum"
             width={32}
             height={32}
@@ -23,7 +23,7 @@ export default function TokensPair({
         </span>
         <span className="w-[26px] h-[26px] md:w-[34px] md:h-[34px] rounded-full bg-primary-bg flex items-center justify-center -ml-3.5">
           <Image
-            src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+            src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
             alt="Ethereum"
             width={32}
             height={32}

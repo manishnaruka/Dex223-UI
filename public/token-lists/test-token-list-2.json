@@ -4,7 +4,7 @@
       "minor": 0,
       "major": 0
     },
-    "logoURI": "/token-list-placeholder.svg",
+    "logoURI": "/images/token-list-placeholder.svg",
     "name": "Test list#2",
     "tokens": [
         {
@@ -12,7 +12,7 @@
           "address1": "0x47329E626e2FCCed96e14909a154b3F61AfE3477",
           "name": "Test Sep 1",
           "symbol": "TSP1",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 18
         },
@@ -21,7 +21,7 @@
           "address1": "0x4D2D54436afa2B1ee5B7BaaBbBA72E7D6a54BE17",
           "name": "Test Sep 2",
           "symbol": "TSP2",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 6
         },
@@ -30,7 +30,7 @@
           "address1": "0x3a7B42c87EA1Bd76621bee51d96Ad9cd62e3C306",
           "name": "Test Sep 3",
           "symbol": "TSP3",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 0
         },
@@ -39,7 +39,7 @@
           "address1": "0x294C0eb07e830787a4Af9Bdfb0872B505a0288EA",
           "name": "Test Sep 4",
           "symbol": "TSP4",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 18
         },
@@ -48,7 +48,7 @@
           "address1": "0xD339282eDDa851b7B89A9e37D3545d47E1228B9A",
           "name": "Test Sep 5",
           "symbol": "TSP5",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 10
         },
@@ -57,7 +57,7 @@
           "address1": "0x0fDd774f7302BDA5Bd7a3Ac854E91bA20b88C74e",
           "name": "Test Sep 6",
           "symbol": "TSP6",
-          "logoURI": "/tokens/placeholder.svg",
+          "logoURI": "/images/tokens/placeholder.svg",
           "chainId": 11155111,
           "decimals": 6
         }

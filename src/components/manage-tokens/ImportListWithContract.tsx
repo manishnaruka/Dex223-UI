@@ -124,7 +124,7 @@ export default function ImportListWithContract({ setContent }: Props) {
                 className="w-12 h-12"
                 width={48}
                 height={48}
-                src="/token-list-placeholder.svg"
+                src="/images/token-list-placeholder.svg"
                 alt=""
               />
               <div className="flex flex-col text-16">
@@ -166,7 +166,7 @@ export default function ImportListWithContract({ setContent }: Props) {
                   autoListingContract: queryRes.id.toLowerCase(),
                   lastUpdated: queryRes.lastUpdated,
                   list: {
-                    logoURI: "/token-list-placeholder.svg",
+                    logoURI: "/images/token-list-placeholder.svg",
                     name:
                       queryRes.name === "unknown"
                         ? `Autolisting ${queryRes.id.toLowerCase().slice(0, 6)}...${queryRes.id.toLowerCase().slice(-6)}`
@@ -184,7 +184,7 @@ export default function ImportListWithContract({ setContent }: Props) {
                         +token.decimals,
                         token.symbol,
                         token.name,
-                        "/tokens/placeholder.svg",
+                        "/images/tokens/placeholder.svg",
                       );
                     }),
                   },

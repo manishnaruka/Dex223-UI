@@ -118,6 +118,7 @@ function InputTotalAmount({
       <div className="bg-secondary-bg p-4 lg:p-5 pb-3 lg:pb-4 rounded-3">
         <div className="mb-1 flex justify-between items-center">
           <NumericFormat
+            allowedDecimalSeparators={[","]}
             decimalScale={currency?.decimals}
             inputMode="decimal"
             placeholder="0.0"
@@ -134,7 +135,7 @@ function InputTotalAmount({
             {currency ? (
               <>
                 <Image
-                  src={currency?.logoURI || "/tokens/placeholder.svg"}
+                  src={currency?.logoURI || "/images/tokens/placeholder.svg"}
                   alt=""
                   width={24}
                   height={24}
@@ -359,7 +360,7 @@ export default function TokenDepositCard({
           <Image
             width={24}
             height={24}
-            src={currency?.logoURI || "/tokens/placeholder.svg"}
+            src={currency?.logoURI || "/images/tokens/placeholder.svg"}
             alt=""
           />
         )}

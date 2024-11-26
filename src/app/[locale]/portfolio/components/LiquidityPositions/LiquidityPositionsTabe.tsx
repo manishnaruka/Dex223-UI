@@ -23,9 +23,9 @@ const PositionTableItemDesktop = ({ positionInfo }: { positionInfo: PositionInfo
         <span>{`${positionInfo.tokenId}`}</span>
       </div>
       <div className={clsx("h-[56px] flex items-center gap-2")}>
-        <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+        <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
         <Image
-          src="/tokens/placeholder.svg"
+          src="/images/tokens/placeholder.svg"
           width={24}
           height={24}
           alt=""
@@ -84,9 +84,9 @@ const PositionTableItemMobile = ({ positionInfo }: { positionInfo: PositionInfo 
       <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-2 text-14">
-            <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+            <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
             <Image
-              src="/tokens/placeholder.svg"
+              src="/images/tokens/placeholder.svg"
               width={24}
               height={24}
               alt=""

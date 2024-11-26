@@ -15,12 +15,12 @@ const nativeCurrenciesMap: Record<DexChainId, { symbol: string; name: string; lo
   [DexChainId.SEPOLIA]: {
     symbol: "sepETH",
     name: "Sepolia ETH",
-    logoURI: "/coins/ETH.svg",
+    logoURI: "/images/coins/ETH.svg",
   },
   [DexChainId.BSC_TESTNET]: {
     symbol: "tBNB",
     name: "Testnet BNB",
-    logoURI: "/coins/BNB.svg",
+    logoURI: "/images/coins/BNB.svg",
   },
 };
 

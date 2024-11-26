@@ -47,63 +47,81 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
   const { handleOpen } = useTokenPortfolioDialogStore();
 
   return (
-    <div className="bg-tertiary-bg rounded-3 py-2.5 px-5 flex flex-wrap justify-between items-center @container relative z-20">
-      <div className="flex items-center gap-2">
-        <Image
-          src={token.logoURI || "/tokens/placeholder.svg"}
-          alt="Ethereum"
-          width={32}
-          height={32}
-        />
-        <div className="flex flex-col">
-          <div className="flex gap-2 items-center">
-            {token.name}
-            {token.isToken && (
-              <div className="hidden @[620px]:block">
-                <AddressPair token={token} />
-              </div>
-            )}
-          </div>
-          <div className="text-secondary-text text-12">{token.symbol}</div>
-        </div>
-      </div>
-      {token.isToken && (
-        <div className="flex gap-2 items-center">
-          {token.rate && <TrustBadge rate={token?.rate} />}
-
-          <Tooltip
-            text={`Token belongs to ${token.lists?.length || 1} token lists`}
-            renderTrigger={(ref, refProps) => {
-              return (
-                <span
-                  onClick={(e) => e.stopPropagation()}
-                  ref={ref.setReference}
-                  {...refProps}
-                  className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer"
-                >
-                  {token.lists?.length || 1}
-                  <Svg className="text-tertiary-text" iconName="list" />
-                </span>
-              );
-            }}
-          />
-
-          <Tooltip
-            text={"Token details"}
-            renderTrigger={(ref, refProps) => {
-              return (
-                <div
-                  ref={ref.setReference}
-                  {...refProps}
-                  className="w-10 h-10 flex items-center justify-center"
-                >
-                  <IconButton iconName="details" onClick={() => handleOpen(token)} />
+    <div className="bg-tertiary-bg py-2.5 px-5 @container relative z-20 rounded-3 ">
+      <div className="flex justify-between gap-x-4">
+        <div className="flex items-center justify-between flex-wrap sm:flex-nowrap flex-grow gap-2">
+          <div className="flex items-center gap-2">
+            <Image
+              src={token.logoURI || "/images/tokens/placeholder.svg"}
+              alt="Ethereum"
+              width={32}
+              height={32}
+              className="flex-shrink-0"
+            />
+            <div className="flex flex-col">
+              <div className="flex gap-2 items-center">
+                <div className="table table-fixed w-full">
+                  <span className="table-cell overflow-hidden overflow-ellipsis whitespace-nowrap">
+                    {token.name}
+                  </span>
                 </div>
-              );
-            }}
-          />
+                {token.isToken && (
+                  <div className="hidden @[620px]:block">
+                    <AddressPair token={token} />
+                  </div>
+                )}
+              </div>
+              <div className="text-secondary-text text-12">
+                <div className="table table-fixed w-full">
+                  <span className="table-cell overflow-hidden overflow-ellipsis whitespace-nowrap">
+                    {token.symbol}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {token.isToken && (
+            <div className="flex gap-2 items-center flex-shrink-0">
+              {token.rate && <TrustBadge rate={token?.rate} />}
+            </div>
+          )}
         </div>
-      )}
+        {token.isToken && (
+          <div className="flex items-start gap-2 flex-shrink-0">
+            <Tooltip
+              text={`Token belongs to ${token.lists?.length || 1} token lists`}
+              renderTrigger={(ref, refProps) => {
+                return (
+                  <span
+                    onClick={(e) => e.stopPropagation()}
+                    ref={ref.setReference}
+                    {...refProps}
+                    className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer h-10"
+                  >
+                    {token.lists?.length || 1}
+                    <Svg className="text-tertiary-text" iconName="list" />
+                  </span>
+                );
+              }}
+            />
+
+            <Tooltip
+              text={"Token details"}
+              renderTrigger={(ref, refProps) => {
+                return (
+                  <div
+                    ref={ref.setReference}
+                    {...refProps}
+                    className="w-10 h-10 flex items-center justify-center"
+                  >
+                    <IconButton iconName="details" onClick={() => handleOpen(token)} />
+                  </div>
+                );
+              }}
+            />
+          </div>
+        )}
+      </div>
       {token.isToken && (
         <div className="@[620px]:hidden w-full mt-3">
           <AddressPair token={token} />

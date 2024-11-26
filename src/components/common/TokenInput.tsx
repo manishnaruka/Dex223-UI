@@ -222,6 +222,7 @@ export default function TokenInput({
       <div className="flex items-center mb-5 justify-between">
         <div>
           <NumericFormat
+            allowedDecimalSeparators={[","]}
             decimalScale={token?.decimals}
             inputMode="decimal"
             placeholder="0.0"
@@ -254,7 +255,9 @@ export default function TokenInput({
                 width={32}
                 height={32}
               />
-              <span>{token.symbol}</span>
+              <span className="max-w-[100px] md:max-w-[150px] overflow-ellipsis overflow-hidden whitespace-nowrap">
+                {token.symbol}
+              </span>
             </span>
           ) : (
             <span className="whitespace-nowrap text-tertiary-text pl-2">{t("select_token")}</span>

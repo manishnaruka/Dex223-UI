@@ -20,9 +20,11 @@ const config: Config = {
         popover: "0 4px 42px 0px var(--tw-shadow-color)",
       },
       backgroundImage: {
-        "account-card-pattern": "url('/account-bg.svg')",
+        "account-card-pattern": "url('/images/account-bg.svg')",
         "drag-and-drop-dashed-pattern":
           "url(\"data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%2370C59EFF' stroke-width='1' stroke-dasharray='8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e\")",
+        "drag-and-drop-dashed-pattern-error":
+          "url(\"data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%23CD8C8CFF' stroke-width='1' stroke-dasharray='8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e\")",
 
         // empty state gradients
         "gradient-empty-state-green-dark":

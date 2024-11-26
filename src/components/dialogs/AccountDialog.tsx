@@ -119,12 +119,12 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
             {_transactions.length ? (
               <>
                 <div className="flex justify-between items-center mb-3">
-                  <span>
+                  <span className="text-tertiary-text">
                     {tRecentTransactions("total_transactions")} {_transactions.length}
                   </span>
                   <button
                     onClick={clearTransactions}
-                    className="border-primary-border flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hocus:bg-white/20 duration-200 hocus:border-primary-text"
+                    className="border-transparent hocus:border-primary-border text-secondary-text hocus:text-primary-text flex items-center rounded-5 border text-14 py-1.5 pl-6 gap-2 pr-[18px] hocus:bg-white/20 duration-200 bg-quaternary-bg"
                   >
                     {tRecentTransactions("clear_all")}
                     <Svg iconName="delete" />
@@ -140,7 +140,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-2">
-                <Image src="/empty/empty-history.svg" width={80} height={80} alt="" />
+                <Image src="/images/empty/empty-history.svg" width={80} height={80} alt="" />
                 <span className="text-secondary-text">
                   {tRecentTransactions("transactions_will_be_displayed_here")}
                 </span>

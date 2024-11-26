@@ -19,7 +19,7 @@ export default function Svg({ iconName, size = 24, style, sprite = "sprite", ...
       }}
       {...rest}
     >
-      <use xlinkHref={`/${sprite}.svg#${iconName}`} />
+      <use xlinkHref={`/images/${sprite}.svg#${iconName}`} />
     </svg>
   );
 }

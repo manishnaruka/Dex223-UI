@@ -27,7 +27,7 @@ export const Default: Story = {
     isActive: true,
     loading: false,
     label: "Button text",
-    image: "/example.svg",
+    image: "/images/example.svg",
   },
   render: function Render(args) {
     const [{ isActive, loading }, updateArgs] = useArgs();
