@@ -5,7 +5,7 @@ import { Area } from "./Area";
 import { AxisBottom } from "./AxisBottom";
 import { Brush } from "./Brush";
 import { Line } from "./Line";
-import { Bound, ChartEntry, LiquidityChartRangeInputProps } from "./types";
+import { ChartEntry, LiquidityChartRangeInputProps } from "./types";
 import Zoom, { ZoomOverlay } from "./Zoom";
 
 const xAccessor = (d: ChartEntry) => d.price0;
@@ -59,10 +59,26 @@ export function Chart({
     zoom,
   ]);
 
+  // useEffect(() => {
+  //   console.log("Updated series data:", series);
+  // }, [series]);
+
   useEffect(() => {
     // reset zoom as necessary
     setZoom(null);
   }, [zoomLevels]);
+
+  const { leftChart, rightChart } = useMemo(() => {
+    const left = series.filter((d) => xAccessor(d) < current);
+    const right = series.filter((d) => xAccessor(d) >= current);
+
+    const appendix = {
+      activeLiquidity: right[0].activeLiquidity,
+      price0: current,
+    };
+
+    return { leftChart: [...left, appendix], rightChart: [appendix, ...right] };
+  }, [current, series]);
 
   return (
     <>
@@ -81,13 +97,14 @@ export function Chart({
             "reset",
           );
         }}
-        showResetButton={Boolean(ticksAtLimit[Bound.LOWER] || ticksAtLimit[Bound.UPPER])}
+        // showResetButton={Boolean(ticksAtLimit[Bound.LOWER] || ticksAtLimit[Bound.UPPER])}
         zoomLevels={zoomLevels}
       />
       <svg
         width="100%"
         height="100%"
         viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="xMidYMid meet"
         style={{ overflow: "visible" }}
       >
         <defs>
@@ -107,28 +124,65 @@ export function Chart({
               />
             </mask>
           )}
+
+          <linearGradient id={`${id}-gradient-red`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(255,0,0,0.7)" />
+            <stop offset="100%" stopColor="rgba(255,0,0,0.3)" />
+          </linearGradient>
+
+          <linearGradient id={`${id}-gradient-green`} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(0,255,0,0.7)" />
+            <stop offset="100%" stopColor="rgba(0,255,0,0.3)" />
+          </linearGradient>
         </defs>
 
         <g transform={`translate(${margins.left},${margins.top})`}>
           <g clipPath={`url(#${id}-chart-clip)`}>
+            {/* Left side of the Line (red) */}
             <Area
-              series={series}
+              series={leftChart}
               xScale={xScale}
               yScale={yScale}
               xValue={xAccessor}
               yValue={yAccessor}
+              color={"stroke-red fill-red opacity-50"}
+              // fill="red"
+            />
+
+            {/* Right side of the Line (green) */}
+            <Area
+              series={rightChart}
+              xScale={xScale}
+              yScale={yScale}
+              xValue={xAccessor}
+              yValue={yAccessor}
+              // fill="green"
             />
 
             {brushDomain && (
               // duplicate area chart with mask for selected area
               <g mask={`url(#${id}-chart-area-mask)`}>
+                {/* Left side of the Line (red) */}
                 <Area
-                  series={series}
+                  series={leftChart}
                   xScale={xScale}
                   yScale={yScale}
                   xValue={xAccessor}
                   yValue={yAccessor}
-                  fill={styles.area.selection}
+                  color={"stroke-red fill-red opacity-50"}
+                  // fill={styles.area.selection}
+                  fill={`url(#${id}-gradient-red)`}
+                />
+
+                {/* Right side of the Line (green) */}
+                <Area
+                  series={rightChart}
+                  xScale={xScale}
+                  yScale={yScale}
+                  xValue={xAccessor}
+                  yValue={yAccessor}
+                  // fill={styles.area.selection}
+                  fill={`url(#${id}-gradient-green)`}
                 />
               </g>
             )}

@@ -1,8 +1,15 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
+import {
+  Field,
+  useLiquidityAmountsStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
+import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
+import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
 import Svg from "@/components/atoms/Svg";
+import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import { tryParseTick } from "@/functions/tryParseTick";
 import { usePool } from "@/hooks/usePools";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -63,6 +70,8 @@ export const PriceRange = ({
 }) => {
   const t = useTranslations("Liquidity");
   const { tokenA, tokenB, setBothTokens } = useAddLiquidityTokensStore();
+  const { setZoomIn, setZoomOut, setZoomInitial } = useZoomStateStore();
+  const { setRefreshTicksTrigger } = useRefreshTicksDataStore();
   const {
     ticks,
     leftRangeTypedValue,
@@ -77,11 +86,12 @@ export const PriceRange = ({
     setTicks,
   } = useLiquidityPriceRangeStore();
   const { tier } = useLiquidityTierStore();
-  const [poolState, pool] = usePool({
+  const [, pool] = usePool({
     currencyA: tokenA,
     currencyB: tokenB,
     tier,
   });
+  const { setTypedValue } = useLiquidityAmountsStore();
 
   const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
 
@@ -178,7 +188,7 @@ export const PriceRange = ({
   return (
     <div
       className={clsx(
-        "flex flex-col gap-3 bg-tertiary-bg px-4 lg:px-5 py-3 lg:py-4 rounded-3",
+        "flex flex-col gap-3 bg-tertiary-bg px-4 lg:px-5 py-3 lg:py-4 rounded-3 md:max-h-[840px]",
         isFormDisabled && "opacity-20",
       )}
     >
@@ -237,8 +247,7 @@ export const PriceRange = ({
       />
       {outOfRange ? (
         <span className="text-14 border border-orange rounded-3 px-4 py-2 bg-orange-bg">
-          Your position will not earn fees or be used in trades until the market price moves into
-          your range.
+          {t("not_earn_fee_message")}
         </span>
       ) : null}
 
@@ -246,24 +255,23 @@ export const PriceRange = ({
         <>
           <div className="flex px-5 py-3 bg-blue-bg border-blue border rounded-3 gap-2">
             <Svg iconName="info" className="min-w-[24px] text-blue" />
-            <span className="text-16">
-              This pool must be initialized before you can add liquidity. To initialize, select a
-              starting price for the pool. Then, enter your liquidity price range and deposit
-              amount. Gas fees will be higher than usual due to the initialization transaction.
-            </span>
+            <span className="text-14 text-secondary-text">{t("init_pool_message")}</span>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-bold text-16">Starting price</span>
+            <span className="font-bold text-16">{t("starting_price")}</span>
             <input
-              className="outline-0 text-16 w-full rounded-3 bg-primary-bg px-5 py-3"
+              className="outline-0 text-16 w-full rounded-3 bg-secondary-bg px-5 py-3 border border-transparent hocus:shadow hocus:shadow-green/60 focus:border-green focus:shadow focus:shadow-green/60"
               placeholder="0"
               type="text"
               value={startPriceTypedValue}
               onChange={(e) => {
                 setStartPriceTypedValue(e.target.value);
+                if (!Number(e.target.value)) {
+                  setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
+                }
               }}
             />
-            <div className="flex justify-between text-14 text-secondary-text mt-2">
+            <div className="flex justify-between text-14 text-tertiary-text">
               <span>{`Starting ${tokenA?.symbol} price:`}</span>
               <span>{`${formattedPrice} ${tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}`}</span>
             </div>
@@ -271,10 +279,41 @@ export const PriceRange = ({
         </>
       ) : (
         <>
-          <CurrentPrice
-            price={formattedPrice}
-            description={tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}
-          />
+          <div className="flex w-full flex-row">
+            <CurrentPrice
+              price={formattedPrice}
+              description={tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}
+            />
+            <div className="ml-auto flex-col mt-auto">
+              <div
+                onClick={() => {
+                  setRefreshTicksTrigger(true);
+                  setZoomInitial(true);
+                }}
+                className="flex mb-2 text-12 cursor-pointer text-secondary-text hocus:text-green justify-end items-center w-100"
+              >
+                {t("refresh")}
+                <Svg
+                  iconName="convert"
+                  // className="text-tertiary-text group-hocus:text-green mr-1 flex-shrink-0"
+                />
+              </div>
+              <div className="ml-auto flex gap-2 justify-end items-center w-100 ">
+                <IconButton
+                  variant={IconButtonVariant.CONTROL}
+                  buttonSize={24}
+                  iconName="zoom-in"
+                  onClick={() => setZoomIn(true)}
+                />
+                <IconButton
+                  variant={IconButtonVariant.CONTROL}
+                  buttonSize={24}
+                  iconName="zoom-out"
+                  onClick={() => setZoomOut(true)}
+                />
+              </div>
+            </div>
+          </div>
           <LiquidityChartRangeInput
             currencyA={tokenA ?? undefined}
             currencyB={tokenB ?? undefined}

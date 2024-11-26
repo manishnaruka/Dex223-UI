@@ -2,17 +2,15 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Address, formatUnits } from "viem";
 import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
-import { formatFloat } from "@/functions/formatFloat";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -22,28 +20,37 @@ import { Standard } from "@/sdk_hybrid/standard";
 
 import { WalletDeposite } from "../../stores/useWalletsDeposites";
 
+export type TableData = {
+  contractAddress: Address;
+  walletAddresses: Address[];
+  token: Token;
+  deposited: bigint;
+  approved: bigint;
+}[];
+
 const DepositedTokenWithdrawDialog = ({
   isOpen,
   setIsOpen,
   token,
   contractAddress,
+  standard,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   token: Token;
   contractAddress: Address;
+  standard: Standard;
 }) => {
   const {
     withdrawHandler,
     currentDeposit: currentDeposit,
-    estimatedGas: depositEstimatedGas,
     withdrawStatus,
   } = useWithdraw({
     token,
     contractAddress: contractAddress,
   });
 
-  const { data: gasPrice, refetch: refetchGasPrice } = useGasPrice();
+  const { refetch: refetchGasPrice } = useGasPrice(); // data: gasPrice,
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
   useEffect(() => {
@@ -54,25 +61,29 @@ const DepositedTokenWithdrawDialog = ({
     <RevokeDialog
       isOpen={isOpen}
       setIsOpen={setIsOpen}
-      standard={Standard.ERC223}
+      standard={standard}
       token={token}
       status={withdrawStatus}
       currentAllowance={currentDeposit}
       revokeHandler={withdrawHandler}
-      estimatedGas={depositEstimatedGas}
-      gasPrice={gasPrice}
     />
   );
 };
 
 const WithdrawTableItem = ({
   deposite,
-  walletAddress,
+  walletAddresses,
   onDetailsClick,
+  isRevoke,
+  amount,
+  isOdd,
 }: {
   deposite: WalletDeposite;
-  walletAddress: Address;
+  walletAddresses: Address[];
   onDetailsClick: () => void;
+  isRevoke: boolean;
+  amount: bigint;
+  isOdd: boolean;
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
@@ -80,7 +91,12 @@ const WithdrawTableItem = ({
 
   return (
     <>
-      <div className={clsx("h-[56px] flex justify-start items-center gap-2 pl-5 rounded-l-3")}>
+      <div
+        className={clsx(
+          `h-[56px] flex justify-start items-center gap-3 pl-5 rounded-l-3 pr-5`,
+          isOdd ? "bg-tertiary-bg" : "",
+        )}
+      >
         <div className="flex gap-2">
           <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
           <span>{`${deposite.token.name}`}</span>
@@ -91,37 +107,53 @@ const WithdrawTableItem = ({
             onDetailsClick();
           }}
         >
-          {deposite.token.symbol}
+          {truncateMiddle(deposite.token.symbol || "", { charsFromStart: 2, charsFromEnd: 2 })}
         </div>
       </div>
 
-      <div className={clsx("h-[56px] flex items-center")}>
-        {`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}
+      <div className={clsx(`h-[56px] flex items-center pr-5`, isOdd ? "bg-tertiary-bg" : "")}>
+        {`${formatNumber(formatUnits(amount, deposite.token.decimals), 8)} ${truncateMiddle(
+          deposite.token.symbol || "",
+          {
+            charsFromStart: 2,
+            charsFromEnd: 2,
+          },
+        )}`}
       </div>
-      <div className={clsx("h-[56px] flex items-center")}>
+
+      <div className={clsx(`h-[56px] flex items-center`, isOdd ? "bg-tertiary-bg" : "")}>
         <ExternalTextLink
           text={truncateMiddle(deposite.contractAddress || "", {
-            charsFromStart: 5,
-            charsFromEnd: 3,
+            charsFromStart: 7,
+            charsFromEnd: 7,
           })}
           href={getExplorerLink(ExplorerLinkType.ADDRESS, deposite.contractAddress, chainId)}
         />
       </div>
-      <div className={clsx("h-[56px] flex rounded-r-3 flex-col justify-center")}>
-        {address === walletAddress ? (
+      <div
+        className={clsx(
+          `h-[56px] flex rounded-r-3 flex-col justify-center pr-5 pl-5`,
+          isOdd ? "bg-tertiary-bg" : "",
+        )}
+      >
+        {address === walletAddresses[0] ? (
           <Button
             variant={ButtonVariant.CONTAINED}
+            colorScheme={ButtonColor.LIGHT_GREEN}
             size={ButtonSize.MEDIUM}
             onClick={() => setIsWithdrawOpen(true)}
           >
-            Withdraw
+            {isRevoke ? "Revoke" : "Withdraw"}
           </Button>
         ) : (
           <>
             <span className="text-14 text-secondary-text">Token owner</span>
             <ExternalTextLink
-              text={truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
-              href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddress, chainId)}
+              text={truncateMiddle(walletAddresses[0] || "", {
+                charsFromStart: 5,
+                charsFromEnd: 3,
+              })}
+              href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddresses[0], chainId)}
             />
           </>
         )}
@@ -132,6 +164,7 @@ const WithdrawTableItem = ({
           setIsOpen={setIsWithdrawOpen}
           token={deposite.token}
           contractAddress={deposite.contractAddress}
+          standard={isRevoke ? Standard.ERC20 : Standard.ERC223}
         />
       ) : null}
     </>
@@ -142,41 +175,65 @@ export const WithdrawDesktopTable = ({
   tableData,
   setTokenForPortfolio,
 }: {
-  tableData: (WalletDeposite & { walletAddress: Address })[];
+  tableData: TableData;
   setTokenForPortfolio: any;
 }) => {
+  const tableItems: any[] = [];
+  let line = 0;
+  for (let deposite of tableData) {
+    if (deposite.deposited) {
+      tableItems.push(
+        <WithdrawTableItem
+          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address1}`}
+          deposite={deposite}
+          isRevoke={false}
+          isOdd={line % 2 === 1}
+          amount={deposite.deposited}
+          walletAddresses={deposite.walletAddresses}
+          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+        />,
+      );
+      line++;
+    }
+    if (deposite.approved) {
+      tableItems.push(
+        <WithdrawTableItem
+          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
+          deposite={deposite}
+          isRevoke={true}
+          isOdd={line % 2 === 1}
+          amount={deposite.approved}
+          walletAddresses={deposite.walletAddresses}
+          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+        />,
+      );
+      line++;
+    }
+  }
+
   return (
-    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(87px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative min-w-[720px]">
+    <div className="hidden lg:grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(20px,1fr)] pb-2 relative min-w-[600px]">
       <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
-      <div className="text-secondary-text h-[60px] flex items-center gap-2">
-        Amount <Badge color="green" text="ERC-223" />
-      </div>
+      <div className="text-secondary-text h-[60px] flex items-center gap-2">Amount</div>
       <div className="text-secondary-text pr-5 h-[60px] flex items-center">Contract address</div>
       <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action</div>
-      {tableData.map((deposite, index) => {
-        return (
-          <WithdrawTableItem
-            key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
-            deposite={deposite}
-            walletAddress={deposite.walletAddress}
-            onDetailsClick={() => {
-              setTokenForPortfolio(deposite.token);
-            }}
-          />
-        );
-      })}
+      {tableItems}
     </div>
   );
 };
 
 const WithdrawMobileTableItem = ({
   deposite,
-  walletAddress,
+  walletAddresses,
   onDetailsClick,
+  isRevoke,
+  amount,
 }: {
   deposite: WalletDeposite;
-  walletAddress: Address;
+  walletAddresses: Address[];
   onDetailsClick: () => void;
+  isRevoke: boolean;
+  amount: bigint;
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
@@ -190,11 +247,8 @@ const WithdrawMobileTableItem = ({
       >
         <div className="flex justify-start items-start gap-1">
           <div className="flex gap-2">
-            <Image src={"/tokens/placeholder.svg"} width={32} height={32} alt="" />
-            <div className="flex flex-col">
-              <span className="text-14">{`${deposite.token.name}`}</span>
-              <span className="text-12">{"$ —"}</span>
-            </div>
+            <Image src={"/tokens/placeholder.svg"} width={24} height={24} alt="" />
+            <span className="text-14 mt-0.5">{`${deposite.token.name}`}</span>
           </div>
           <div
             className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center hocus:bg-green-bg cursor-pointer duration-200"
@@ -206,36 +260,39 @@ const WithdrawMobileTableItem = ({
           </div>
         </div>
         <div className="flex gap-1 items-center">
-          <Badge color="green" text="ERC-223" />
-          <span className="text-12 text-secondary-text">{`${formatFloat(formatUnits(deposite.value, deposite.token.decimals))} ${deposite.token.symbol}`}</span>
+          <span className="text-12 text-secondary-text">{`${formatNumber(formatUnits(amount, deposite.token.decimals), 8)} ${deposite.token.symbol}`}</span>
         </div>
         <div className="flex justify-between items-center rounded-2 bg-quaternary-bg px-4 py-[10px]">
           <span className="text-14 text-secondary-text">Contract address</span>
           <a
-            className="flex gap-2 text-14 cursor-pointer items-center hocus:text-green-hover"
+            className="flex gap-2 text-14 text-green cursor-pointer items-center hocus:text-green-hover"
             target="_blank"
             href={getExplorerLink(ExplorerLinkType.ADDRESS, deposite.contractAddress, chainId)}
           >
-            {truncateMiddle(deposite.contractAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
+            {truncateMiddle(deposite.contractAddress || "", { charsFromStart: 6, charsFromEnd: 6 })}
             <Svg iconName="forward" />
           </a>
         </div>
         <div className="flex flex-col justify-center mt-1">
-          {address === walletAddress ? (
+          {address === walletAddresses[0] ? (
             <Button
               variant={ButtonVariant.CONTAINED}
+              colorScheme={ButtonColor.LIGHT_GREEN}
               size={ButtonSize.MEDIUM}
               onClick={() => setIsWithdrawOpen(true)}
             >
-              Withdraw
+              {isRevoke ? "Revoke" : "Withdraw"}
             </Button>
           ) : (
             <div className="flex justify-between items-center bg-tertiary-bg px-4 py-[10px] rounded-2">
               <span className="text-14 text-secondary-text">Token owner</span>
               <ExternalTextLink
-                className="text-14"
-                text={truncateMiddle(walletAddress || "", { charsFromStart: 5, charsFromEnd: 3 })}
-                href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddress, chainId)}
+                className="text-14 text-green"
+                text={truncateMiddle(walletAddresses[0] || "", {
+                  charsFromStart: 5,
+                  charsFromEnd: 3,
+                })}
+                href={getExplorerLink(ExplorerLinkType.ADDRESS, walletAddresses[0], chainId)}
               />
             </div>
           )}
@@ -247,6 +304,7 @@ const WithdrawMobileTableItem = ({
           setIsOpen={setIsWithdrawOpen}
           token={deposite.token}
           contractAddress={deposite.contractAddress}
+          standard={isRevoke ? Standard.ERC20 : Standard.ERC223}
         />
       ) : null}
     </>
@@ -257,23 +315,36 @@ export const WithdrawMobileTable = ({
   tableData,
   setTokenForPortfolio,
 }: {
-  tableData: (WalletDeposite & { walletAddress: Address })[];
+  tableData: TableData;
   setTokenForPortfolio: any;
 }) => {
-  return (
-    <div className="flex lg:hidden flex-col gap-4">
-      {tableData.map((deposite, index: number) => {
-        return (
-          <WithdrawMobileTableItem
-            key={`${deposite.walletAddress}_${deposite.contractAddress}_${deposite.token.address0}`}
-            deposite={deposite}
-            walletAddress={deposite.walletAddress}
-            onDetailsClick={() => {
-              setTokenForPortfolio(deposite.token);
-            }}
-          />
-        );
-      })}
-    </div>
-  );
+  const tableItems: any[] = [];
+  for (let deposite of tableData) {
+    if (deposite.deposited) {
+      tableItems.push(
+        <WithdrawMobileTableItem
+          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address1}`}
+          deposite={deposite}
+          isRevoke={false}
+          amount={deposite.deposited}
+          walletAddresses={deposite.walletAddresses}
+          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+        />,
+      );
+    }
+    if (deposite.approved) {
+      tableItems.push(
+        <WithdrawMobileTableItem
+          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
+          deposite={deposite}
+          isRevoke={true}
+          amount={deposite.approved}
+          walletAddresses={deposite.walletAddresses}
+          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+        />,
+      );
+    }
+  }
+
+  return <div className="flex lg:hidden flex-col gap-4">{tableItems}</div>;
 };

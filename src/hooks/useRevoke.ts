@@ -1,5 +1,7 @@
+// @ts-ignore
+
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Abi, Address, formatUnits, getAbiItem, parseUnits } from "viem";
+import { Abi, Address, formatUnits, getAbiItem } from "viem";
 import {
   useAccount,
   useBlockNumber,
@@ -8,13 +10,15 @@ import {
   useWalletClient,
 } from "wagmi";
 
+import { useRevokeGasSettings } from "@/app/[locale]/add/stores/useRevokeGasSettings";
+import { useRevokeGasLimitStore } from "@/app/[locale]/add/stores/useRevokeGasSettings";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
+import useDeepEffect from "@/hooks/useDeepEffect";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import {
-  GasFeeModel,
   RecentTransactionTitleTemplate,
   stringifyObject,
   useRecentTransactionsStore,
@@ -24,6 +28,73 @@ import { AllowanceStatus } from "./useAllowance";
 import useCurrentChainId from "./useCurrentChainId";
 
 const amountToRevoke = BigInt(0);
+
+const useRevokeParams = ({
+  token,
+  contractAddress,
+}: {
+  token: Currency | undefined;
+  contractAddress: Address | undefined;
+}) => {
+  const { address } = useAccount();
+
+  return useMemo(() => {
+    if (!contractAddress || !token || !address) return {};
+
+    const params: {
+      address: Address;
+      account: Address;
+      abi: Abi;
+      functionName: "approve";
+      args: [Address, bigint];
+    } = {
+      address: token.wrapped.address0 as Address,
+      account: address,
+      abi: ERC20_ABI,
+      functionName: "approve",
+      args: [contractAddress!, amountToRevoke!],
+    };
+
+    return { params };
+  }, [token, address, contractAddress]);
+};
+
+const REVOKE_DEFAULT_GAS_LIMIT = BigInt(50000);
+export function useRevokeEstimatedGas({
+  token,
+  contractAddress,
+}: {
+  token: Currency | undefined;
+  contractAddress: Address | undefined;
+}) {
+  const { setEstimatedGas } = useRevokeGasLimitStore();
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+  const { params } = useRevokeParams({ token, contractAddress });
+
+  useDeepEffect(() => {
+    IIFE(async () => {
+      if (!params || !address) {
+        setEstimatedGas(REVOKE_DEFAULT_GAS_LIMIT);
+        console.log("Can't estimate gas");
+        return;
+      }
+
+      try {
+        const estimated = await publicClient?.estimateContractGas(params as any);
+
+        if (estimated) {
+          setEstimatedGas(estimated + BigInt(10000));
+        } else {
+          setEstimatedGas(REVOKE_DEFAULT_GAS_LIMIT);
+        }
+      } catch (e) {
+        console.error(e);
+        setEstimatedGas(REVOKE_DEFAULT_GAS_LIMIT);
+      }
+    });
+  }, [publicClient, address, params]);
+}
 
 export default function useRevoke({
   token,
@@ -59,40 +130,40 @@ export default function useRevoke({
 
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
+  const { gasSettings, customGasLimit, gasModel } = useRevokeGasSettings();
+
   useEffect(() => {
     refetch();
   }, [refetch, blockNumber]);
 
+  const { params } = useRevokeParams({ token, contractAddress });
+
   const writeTokenRevoke = useCallback(async () => {
-    if (!contractAddress || !token || !walletClient || !address || !chainId || !publicClient) {
+    if (
+      !contractAddress ||
+      !token ||
+      !walletClient ||
+      !address ||
+      !chainId ||
+      !publicClient ||
+      !params
+    ) {
       return;
     }
 
     setStatus(AllowanceStatus.PENDING);
 
-    const params: {
-      address: Address;
-      account: Address;
-      abi: Abi;
-      functionName: "approve";
-      args: [Address, bigint];
-    } = {
-      address: token.wrapped.address0 as Address,
-      account: address,
-      abi: ERC20_ABI,
-      functionName: "approve",
-      args: [contractAddress!, amountToRevoke!],
-    };
-
     try {
       const estimatedGas = await publicClient.estimateContractGas(params);
+      const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(10000); // set custom gas here if user changed it
 
       const { request } = await publicClient.simulateContract({
         ...params,
-        gas: estimatedGas + BigInt(30000),
+        ...gasSettings,
+        gas: gasToUse,
       });
-      const hash = await walletClient.writeContract(request);
 
+      const hash = await walletClient.writeContract(request);
       const transaction = await publicClient.getTransaction({
         hash,
       });
@@ -105,10 +176,8 @@ export default function useRevoke({
           nonce,
           chainId,
           gas: {
-            model: GasFeeModel.EIP1559,
-            gas: (estimatedGas + BigInt(30000)).toString(),
-            maxFeePerGas: undefined,
-            maxPriorityFeePerGas: undefined,
+            ...stringifyObject({ ...gasSettings, model: gasModel }),
+            gas: gasToUse.toString(),
           },
           params: {
             ...stringifyObject(params),
@@ -134,44 +203,27 @@ export default function useRevoke({
       setStatus(AllowanceStatus.INITIAL);
       addToast("Unexpected error, please contact support", "error");
     }
-  }, [contractAddress, token, walletClient, address, chainId, publicClient, addRecentTransaction]);
+  }, [
+    contractAddress,
+    token,
+    walletClient,
+    address,
+    chainId,
+    publicClient,
+    params,
+    customGasLimit,
+    gasSettings,
+    addRecentTransaction,
+    gasModel,
+  ]);
 
-  const [estimatedGas, setEstimatedGas] = useState(null as null | bigint);
-
-  useEffect(() => {
-    IIFE(async () => {
-      if (!contractAddress || !token || !walletClient || !address || !chainId || !publicClient) {
-        return;
-      }
-
-      const params: {
-        address: Address;
-        account: Address;
-        abi: Abi;
-        functionName: "approve";
-        args: [Address, bigint];
-      } = {
-        address: token.wrapped.address0 as Address,
-        account: address,
-        abi: ERC20_ABI,
-        functionName: "approve",
-        args: [contractAddress!, amountToRevoke!],
-      };
-
-      try {
-        const estimatedGas = await publicClient.estimateContractGas(params);
-        setEstimatedGas(estimatedGas);
-      } catch (error) {
-        console.warn("🚀 ~ useRevoke ~ estimatedGas ~ error:", error, "params:", params);
-        setEstimatedGas(null);
-      }
-    });
-  }, [contractAddress, token, walletClient, address, chainId, publicClient]);
+  if ((currentAllowanceData || 0) > 0 && status === AllowanceStatus.SUCCESS) {
+    setStatus(AllowanceStatus.INITIAL);
+  }
 
   return {
     revokeStatus: status,
     revokeHandler: writeTokenRevoke,
-    revokeEstimatedGas: estimatedGas,
     currentAllowance: currentAllowanceData,
   };
 }

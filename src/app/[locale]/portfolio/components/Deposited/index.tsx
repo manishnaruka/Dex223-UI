@@ -1,9 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import React from "react";
-import { Address } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -15,9 +15,8 @@ import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolio
 import { Token } from "@/sdk_hybrid/entities/token";
 
 import { useActiveWalletsDeposites } from "../../stores/deposites.hooks";
-import { WalletDeposite } from "../../stores/useWalletsDeposites";
 import { DesktopTable, MobileTable } from "./DepositedTable";
-import { WithdrawDesktopTable, WithdrawMobileTable } from "./DepositedWithdrawTable";
+import { TableData, WithdrawDesktopTable, WithdrawMobileTable } from "./DepositedWithdrawTable";
 
 const filterTable = ({
   searchValue,
@@ -32,9 +31,7 @@ const filterTable = ({
   if (token.address0 === searchValue) return true;
   if (token.address1 === searchValue) return true;
   if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-  if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-
-  return false;
+  return !!token.symbol?.toLowerCase().includes(searchValue.toLowerCase());
 };
 
 export const Deposited = () => {
@@ -49,32 +46,69 @@ export const Deposited = () => {
 
   const { isLoading, deposites } = useActiveWalletsDeposites();
 
-  // TODO: reduce amout of same tokens from different contracts to one item
-  const currentTableData = deposites
-    .reduce(
-      (acc, walletDeposites) => {
-        const deposites: (WalletDeposite & { walletAddress: Address })[] =
-          walletDeposites.deposites.map((deposite) => ({
-            walletAddress: walletDeposites.address,
-            ...deposite,
-          }));
-        return [...acc, ...deposites];
-      },
-      [] as (WalletDeposite & { walletAddress: Address })[],
-    )
-    .filter((value) => filterTable({ searchValue, value }));
+  const currentTableData: TableData = [];
+
+  for (const walletDeposites of deposites) {
+    for (const deposite of walletDeposites.deposites) {
+      const existingRecord = currentTableData.find(
+        (record) => record.token.address0 === deposite.token.address0,
+      );
+
+      if (existingRecord) {
+        // If a record with the same contractAddress exists, update it
+        existingRecord.deposited += deposite.deposited;
+        existingRecord.approved += deposite.approved;
+        if (!existingRecord.walletAddresses.includes(walletDeposites.address)) {
+          existingRecord.walletAddresses.push(walletDeposites.address);
+        }
+      } else {
+        // If no existing record, create a new one
+        if (
+          filterTable({
+            searchValue,
+            value: { token: deposite.token },
+          })
+        ) {
+          currentTableData.push({
+            contractAddress: deposite.contractAddress,
+            walletAddresses: [walletDeposites.address],
+            token: deposite.token,
+            deposited: deposite.deposited,
+            approved: deposite.approved,
+          });
+        }
+      }
+    }
+  }
 
   return (
     <>
-      <div className="mt-5 flex gap-5">
+      <div className="mt-5 flex flex-col lg:flex-row gap-5">
         <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
             <div className="flex items-center gap-1">
-              <span className="text-14 lg:text-16">Deposited to contract</span>
+              <span className="text-14 lg:text-16 text-secondary-text">Approved</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
-            <img
+            <Image
+              src="/approved-bar.svg"
+              alt="Side Icon"
+              width={"134"}
+              height={"134"}
+              className="absolute top-[17px] right-[23px] object-cover"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+          <div className="flex flex-col ">
+            <div className="flex items-center gap-1">
+              <span className="text-14 lg:text-16 text-secondary-text">Deposited to contract</span>
+              <Tooltip iconSize={20} text="Info text" />
+            </div>
+            <span className="text-24 lg:text-32 font-medium">$ —</span>
+            <Image
               src="/deposited-bar.svg"
               alt="Side Icon"
               width={"62"}

@@ -5,6 +5,7 @@ export enum ExplorerLinkType {
   TRANSACTION,
   BLOCK,
   GAS_TRACKER,
+  TOKEN,
 }
 
 const explorerMap: Record<DexChainId, string> = {
@@ -24,6 +25,8 @@ export default function getExplorerLink(
       return `${explorerMap[chainId]}/tx/${value}`;
     case ExplorerLinkType.BLOCK:
       return `${explorerMap[chainId]}/block/${value}`;
+    case ExplorerLinkType.TOKEN:
+      return `${explorerMap[chainId]}/token/${value}`;
     case ExplorerLinkType.GAS_TRACKER:
       return `${explorerMap[chainId]}/gastracker`;
     default:

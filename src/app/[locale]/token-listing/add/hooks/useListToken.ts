@@ -126,8 +126,6 @@ export function useListTokenEstimatedGas() {
         return;
       }
 
-      console.log(listTokenParams);
-
       try {
         const estimated = await publicClient?.estimateContractGas({
           account: address,

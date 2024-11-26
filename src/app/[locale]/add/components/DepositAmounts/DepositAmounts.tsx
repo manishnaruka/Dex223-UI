@@ -9,8 +9,6 @@ import {
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 
-import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
-import { useAddLiquidityGasPrice } from "../../stores/useAddLiquidityGasSettings";
 import { AddLiquidityGasSettings } from "./AddLiquidityGasSettings";
 
 export const DepositAmounts = ({
@@ -40,7 +38,7 @@ export const DepositAmounts = ({
     setTokenBStandardRatio,
   } = useLiquidityAmountsStore();
 
-  const gasPrice = useAddLiquidityGasPrice();
+  // const gasPrice = useAddLiquidityGasPrice();
 
   // get formatted amounts
   const formattedAmounts = useMemo(() => {
@@ -61,7 +59,7 @@ export const DepositAmounts = ({
         isOutOfRange={depositADisabled}
         tokenStandardRatio={tokenAStandardRatio}
         setTokenStandardRatio={setTokenAStandardRatio}
-        gasPrice={gasPrice}
+        // gasPrice={gasPrice}
       />
       <AddLiquidityGasSettings isFormDisabled={isFormDisabled} />
       <TokenDepositCard
@@ -73,7 +71,7 @@ export const DepositAmounts = ({
         isOutOfRange={depositBDisabled}
         tokenStandardRatio={tokenBStandardRatio}
         setTokenStandardRatio={setTokenBStandardRatio}
-        gasPrice={gasPrice}
+        // gasPrice={gasPrice}
       />
     </div>
   );

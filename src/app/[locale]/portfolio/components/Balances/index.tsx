@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { formatUnits } from "viem";
@@ -47,8 +48,16 @@ export const Balances = () => {
     setTokenForPortfolio(null);
   };
 
+  const [prevTokenForPortfolio, setPrevTokenForPortfolio] = useState<Currency | null>(null);
+
   useEffect(() => {
-    setTokenInfoOpened(Boolean(tokenForPortfolio));
+    if (tokenForPortfolio !== prevTokenForPortfolio) {
+      setTokenInfoOpened(Boolean(tokenForPortfolio));
+    }
+  }, [tokenForPortfolio, prevTokenForPortfolio]);
+
+  useEffect(() => {
+    setPrevTokenForPortfolio(tokenForPortfolio);
   }, [tokenForPortfolio]);
 
   const loading = false;
@@ -77,7 +86,7 @@ export const Balances = () => {
 
           <span className="text-24 lg:text-32 font-medium">$ —</span>
 
-          <img
+          <Image
             src="/logo-short.svg"
             alt="Side Icon"
             width={"180"}
@@ -93,7 +102,7 @@ export const Balances = () => {
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-24 lg:text-32 font-medium">$ —</span>
-          <img
+          <Image
             src="/portfolio-bars.svg"
             alt="Side Icon"
             width={"180"}
@@ -102,6 +111,7 @@ export const Balances = () => {
           />
         </div>
       </div>
+
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">

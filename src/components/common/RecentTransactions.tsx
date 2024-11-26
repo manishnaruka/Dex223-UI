@@ -11,6 +11,7 @@ import RecentTransaction from "@/components/common/RecentTransaction";
 import { RecentTransactionsStore } from "@/stores/factories/createRecentTransactionsStore";
 import {
   RecentTransactionStatus,
+  RecentTransactionTitleTemplate,
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
 
@@ -20,6 +21,7 @@ interface Props {
   handleClose: () => void;
   store: UseBoundStore<StoreApi<RecentTransactionsStore>>;
   pageSize?: number;
+  filterFunction?: RecentTransactionTitleTemplate[];
 }
 
 const isInView = (element: HTMLDivElement, visibleHeight = 200) => {
@@ -37,10 +39,14 @@ export default function RecentTransactions({
   handleClose,
   pageSize = PAGE_SIZE,
   store,
+  filterFunction = [],
 }: Props) {
   const t = useTranslations("RecentTransactions");
 
   const { transactions } = useRecentTransactionsStore();
+
+  console.dir(transactions);
+
   const { address } = useAccount();
 
   const componentRef = useRef<HTMLDivElement>(null);
@@ -103,13 +109,23 @@ export default function RecentTransactions({
     return [];
   }, [address, transactions]);
 
+  const _transactionsFiltered = useMemo(() => {
+    if (filterFunction?.length) {
+      return _transactions.filter((tx) => {
+        return filterFunction.includes(tx.title?.template);
+      });
+    }
+
+    return _transactions;
+  }, [filterFunction, _transactions]);
+
   const [currentPage, setCurrentPage] = useState(1);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * pageSize;
     const lastPageIndex = firstPageIndex + pageSize;
-    return _transactions.slice(firstPageIndex, lastPageIndex);
-  }, [_transactions, currentPage, pageSize]);
+    return _transactionsFiltered.slice(firstPageIndex, lastPageIndex);
+  }, [_transactionsFiltered, currentPage, pageSize]);
 
   return (
     <>
@@ -139,7 +155,7 @@ export default function RecentTransactions({
                   <Pagination
                     className="pagination-bar"
                     currentPage={currentPage}
-                    totalCount={_transactions.length}
+                    totalCount={_transactionsFiltered.length}
                     pageSize={pageSize}
                     onPageChange={(page) => setCurrentPage(page as number)}
                   />

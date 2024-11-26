@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { ButtonHTMLAttributes } from "react";
 
 export enum BadgeVariant {
   COLORED,
@@ -34,7 +33,7 @@ export default function Badge(props: Props) {
       return (
         <div
           className={clsx(
-            "rounded-5 px-2 font-medium box-border text-nowrap",
+            "rounded-5 px-2 font-medium box-border",
             color === "blue" && "bg-blue-bg shadow-[0_0_0_1px_theme(colors.blue)_inset] text-blue",
             color === "green" &&
               "bg-erc-20-bg shadow-[0_0_0_1px_theme(colors.erc-20-border)_inset] text-erc-20-text",
@@ -57,7 +56,7 @@ export default function Badge(props: Props) {
       return (
         <div
           className={clsx(
-            "bg-tertiary-bg text-secondary-text px-2 rounded-20 font-medium",
+            "bg-tertiary-bg text-secondary-text px-2 rounded-20 font-medium inline-block",
             size === "small" && "text-14",
             className,
           )}

@@ -2,17 +2,25 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import React, { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
+import {
+  useCollectFeesGasLimitStore,
+  useCollectFeesGasModeStore,
+  useCollectFeesGasPrice,
+  useCollectFeesGasPriceStore,
+} from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesGasSettings";
 import { usePoolRecentTransactionsStore } from "@/app/[locale]/pool/[tokenId]/stores/usePoolRecentTransactionsStore";
-import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
+import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
@@ -27,6 +35,7 @@ import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import truncateMiddle from "@/functions/truncateMiddle";
 import { useCollectFeesEstimatedGas, usePositionFees } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import {
@@ -37,10 +46,11 @@ import {
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/navigation";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
+import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
 
-import { CollectFeesGasSettings } from "./components/CollectFeesGasSettings";
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
 
@@ -80,6 +90,14 @@ export default function PoolPage({
     tier: fee,
   });
 
+  const { isAdvanced, setIsAdvanced } = useCollectFeesGasModeStore();
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useCollectFeesGasPriceStore();
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useCollectFeesGasLimitStore();
+
+  const gasPrice: bigint | undefined = useCollectFeesGasPrice();
+
   const {
     token0Standard,
     token1Standard,
@@ -91,6 +109,8 @@ export default function PoolPage({
     setTokenId,
   } = useCollectFeesStore();
   const { status, hash, setStatus } = useCollectFeesStatusStore();
+  const t = useTranslations("Liquidity");
+  const tr = useTranslations("RecentTransactions");
 
   useEffect(() => {
     setPool(position?.pool);
@@ -129,13 +149,12 @@ export default function PoolPage({
     <Container>
       <div className="w-full md:w-[800px] md:mx-auto md:mt-[40px] mb-5 bg-primary-bg px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
         <div className="flex justify-between items-center py-1.5 -mx-3">
-          <button
+          <IconButton
+            buttonSize={IconButtonSize.LARGE}
+            iconName="back"
             onClick={() => router.push("/pools/positions")}
-            className="flex items-center w-12 h-12 justify-center"
-          >
-            <Svg iconName="back" />
-          </button>
-          <h2 className="text-18 lg:text-20 font-bold">Liquidity position</h2>
+          />
+          <h2 className="text-18 lg:text-20 font-bold">{t("liquidity_position")}</h2>
           <IconButton
             buttonSize={IconButtonSize.LARGE}
             iconName="recent-transactions"
@@ -144,44 +163,56 @@ export default function PoolPage({
           />
         </div>
 
-        <div className="w-full flex justify-between mb-4 lg:mb-5">
-          <div className="flex items-center gap-2">
-            <TokensPair tokenA={token0} tokenB={token1} />
-            {position && (
-              <Badge
-                text={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
-                variant={BadgeVariant.DEFAULT}
+        <div className="w-full flex flex-col mb-4 lg:mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <TokensPair tokenA={token0} tokenB={token1} />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mr-auto">
+              {position && (
+                <Badge
+                  percentage={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
+                  variant={BadgeVariant.PERCENTAGE}
+                />
+              )}
+              <RangeBadge
+                status={
+                  removed
+                    ? PositionRangeStatus.CLOSED
+                    : inRange
+                      ? PositionRangeStatus.IN_RANGE
+                      : PositionRangeStatus.OUT_OF_RANGE
+                }
               />
-            )}
-            <RangeBadge
-              status={
-                removed
-                  ? PositionRangeStatus.CLOSED
-                  : inRange
-                    ? PositionRangeStatus.IN_RANGE
-                    : PositionRangeStatus.OUT_OF_RANGE
-              }
-            />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-secondary-text text-12 lg:text-16">NFT ID:</span>
-            <span className="text-12 lg:text-16">{params.tokenId}</span>
+            <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
+            <ExternalTextLink
+              text={params.tokenId}
+              href={getExplorerLink(
+                ExplorerLinkType.TOKEN,
+                `${NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]}?a=${params.tokenId}`,
+                chainId,
+              )}
+            />
+            {/*<span className="text-12 text-secondary-text lg:text-16">{params.tokenId}</span>*/}
             <button>
               <Svg iconName="arrow-up" />
             </button>
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-secondary-text text-12 lg:text-16">Min tick:</span>
-            <span className="text-12 lg:text-16">{position?.tickLower}</span>
+            <span className="text-tertiary-text text-12 lg:text-16">{t("min_tick")}:</span>
+            <span className="text-12 text-secondary-text lg:text-16">{position?.tickLower}</span>
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
-            <span className="text-secondary-text text-12 lg:text-16">Max tick:</span>
-            <span className="text-12 lg:text-16">{position?.tickUpper}</span>
+            <span className="text-tertiary-text text-12 lg:text-16">{t("max_tick")}:</span>
+            <span className="text-12 text-secondary-text lg:text-16">{position?.tickUpper}</span>
           </div>
         </div>
         <div className="flex flex-col lg:grid lg:grid-cols-2 items-center gap-2 lg:gap-3 mb-4 lg:mb-5">
@@ -191,7 +222,7 @@ export default function PoolPage({
             colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >
-            Increase liquidity
+            {t("increase_liquidity")}
           </Button>
           <Button
             size={ButtonSize.MEDIUM}
@@ -199,19 +230,20 @@ export default function PoolPage({
             colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >
-            Remove liquidity
+            {tr("remove_liquidity_title")}
           </Button>
         </div>
 
         <div className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
           <div>
-            <h3 className="text-12 lg:text-14">Liquidity</h3>
+            <h3 className="text-12 lg:text-14 text-secondary-text">{t("liquidity")}</h3>
             <p className="text-16 lg:text-20 font-bold mb-3">$0.00</p>
-            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-1 lg:bg-quaternary-bg">
+            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20"]}
+                  // {/*}, "ERC-223" */}
                   amount={position?.amount0.toSignificant() || "Loading..."}
                   percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -219,7 +251,8 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20"]}
+                  // {/*}, "ERC-223" */}
                   amount={position?.amount1.toSignificant() || "Loading..."}
                   percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -231,7 +264,7 @@ export default function PoolPage({
           <div>
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-12 lg:text-14">Unclaimed fees</h3>
+                <h3 className="text-12 lg:text-14 text-secondary-text">{t("unclaimed_fees")}</h3>
                 <p className="text-16 lg:text-20 font-bold mb-3 text-green">$0.00</p>
               </div>
               <Button
@@ -240,22 +273,22 @@ export default function PoolPage({
                 mobileSize={ButtonSize.SMALL}
                 disabled={!fees[0] && !fees[1]}
               >
-                Collect fees
+                {t("collect_fees_title")}
               </Button>
             </div>
 
-            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-1 lg:bg-quaternary-bg">
+            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20"]}
                   amount={token0FeeFormatted}
                 />
               </div>
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20"]}
                   amount={token1FeeFormatted}
                 />
               </div>
@@ -288,7 +321,7 @@ export default function PoolPage({
                     : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
-                {token0?.symbol}
+                {truncateMiddle(token0?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
               </button>
               <button
                 onClick={() => setShowFirst(false)}
@@ -299,7 +332,7 @@ export default function PoolPage({
                     : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                 )}
               >
-                {token1?.symbol}
+                {truncateMiddle(token1?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
               </button>
             </div>
           </div>
@@ -325,9 +358,9 @@ export default function PoolPage({
           </div>
           <div className="rounded-3 overflow-hidden">
             <div className="bg-tertiary-bg flex items-center justify-center flex-col py-2 lg:py-3">
-              <div className="text-12 lg:text-14 text-secondary-text">Current price</div>
+              <div className="text-12 lg:text-14 text-secondary-text">{t("current_price")}</div>
               <div className="text-16 lg:text-18">{currentPriceString}</div>
-              <div className="text-12 lg:text-14 text-secondary-text">
+              <div className="text-12 lg:text-14 text-tertiary-text">
                 {showFirst
                   ? `${token0?.symbol} per ${token1?.symbol}`
                   : `${token1?.symbol} per ${token0?.symbol}`}
@@ -339,6 +372,10 @@ export default function PoolPage({
       <div className="lg:w-[800px] mx-auto lg:mb-[40px] gap-5 flex flex-col">
         <SelectedTokensInfo tokenA={token0} tokenB={token1} />
         <RecentTransactions
+          filterFunction={[
+            RecentTransactionTitleTemplate.REMOVE,
+            RecentTransactionTitleTemplate.ADD,
+          ]}
           showRecentTransactions={showRecentTransactions}
           handleClose={() => setShowRecentTransactions(false)}
           pageSize={5}
@@ -408,7 +445,7 @@ export default function PoolPage({
                   <>
                     <div className="flex gap-2 items-center">
                       <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
-                      <span className="text-16 font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
+                      <span className="text-16 font-bold text-secondary-text">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
                       <Badge color="green" text="Native" />
                     </div>
                     <span className="text-14 lg:text-16">
@@ -418,7 +455,7 @@ export default function PoolPage({
                 ) : (
                   <>
                     <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
-                    <span className="text-16 font-bold">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
+                    <span className="text-16 font-bold text-secondary-text">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
                   </>
                 )}
               </div>
@@ -466,7 +503,7 @@ export default function PoolPage({
                   <>
                     <div className="flex gap-2 items-center">
                       <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
-                      <span className="text-16 font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
+                      <span className="text-16 font-bold text-secondary-text">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
                       <Badge color="green" text="Native" />
                     </div>
                     <span className="text-14 lg:text-16">{token1FeeFormatted}</span>
@@ -474,7 +511,7 @@ export default function PoolPage({
                 ) : (
                   <>
                     <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
-                    <span className="text-16 font-bold">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
+                    <span className="text-16 font-bold text-secondary-text">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
                   </>
                 )}
               </div>
@@ -518,19 +555,40 @@ export default function PoolPage({
               )}
             </div>
             <div className="text-secondary-text my-4 text-14 lg:text-16">
-              Collecting fees will withdraw currently available fees for you
+              Collectinq fees will withdraw currently available fees for you
             </div>
-            <CollectFeesGasSettings />
+
+            <RemoveLiquidityGasSettings
+              gasPriceOption={gasPriceOption}
+              gasPriceSettings={gasPriceSettings}
+              setGasPriceOption={setGasPriceOption}
+              setGasPriceSettings={setGasPriceSettings}
+              estimatedGas={estimatedGas}
+              customGasLimit={customGasLimit}
+              setEstimatedGas={setEstimatedGas}
+              setCustomGasLimit={setCustomGasLimit}
+              isAdvanced={isAdvanced}
+              setIsAdvanced={setIsAdvanced}
+              gasPrice={gasPrice}
+            />
 
             {[CollectFeesStatus.INITIAL].includes(status) ? (
               <Button onClick={() => handleCollectFees()} fullWidth>
-                Collect fees
+                {t("collect_fees_title")}
               </Button>
             ) : null}
-            {[CollectFeesStatus.LOADING, CollectFeesStatus.PENDING].includes(status) ? (
-              <Button fullWidth disabled>
+            {CollectFeesStatus.LOADING === status ? (
+              <Button fullWidth isLoading={true}>
+                {t("collect_fees_title")}
                 <span className="flex items-center gap-2">
                   <Preloader size={20} color="black" />
+                </span>
+              </Button>
+            ) : null}
+            {CollectFeesStatus.PENDING === status ? (
+              <Button fullWidth disabled>
+                <span className="flex items-center gap-2">
+                  <Preloader size={20} color="green" type="linear" />
                 </span>
               </Button>
             ) : null}
@@ -541,11 +599,9 @@ export default function PoolPage({
                   type="error"
                   text={
                     <span>
-                      Transaction failed due to lack of gas or an internal contract error. Try using
-                      higher slippage or gas to ensure your transaction is completed. If you still
-                      have issues, click{" "}
-                      <a href="#" className="text-green hocus:underline">
-                        common errors
+                      {t("failed_transaction_error_message")}{" "}
+                      <a href="#" className="text-green underline">
+                        {t("common_errors")}
                       </a>
                       .
                     </span>

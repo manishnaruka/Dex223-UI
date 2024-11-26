@@ -50,7 +50,12 @@ export function SearchInput(props: Props) {
 
   return (
     <div className="relative w-full">
-      <Input className={clsxMerge("pr-12", props.className)} ref={ref} {...props} />
+      <Input
+        className={clsxMerge("pr-12", props.className)}
+        style={{ paddingRight: "2.5rem" }}
+        ref={ref}
+        {...props}
+      />
       <span
         className={clsx(
           "absolute right-2 flex items-center justify-center h-full w-10 top-0",

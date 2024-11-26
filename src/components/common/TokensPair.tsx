@@ -1,13 +1,23 @@
+import clsx from "clsx";
 import Image from "next/image";
 
 import { Currency } from "@/sdk_hybrid/entities/currency";
 
+type TokensPairVariant = "medium-primary" | "bold-secondary";
+
+const variantClassNameMap: Record<TokensPairVariant, string> = {
+  "medium-primary": "font-medium text-primary-text",
+  "bold-secondary": "font-bold text-secondary-bg",
+};
+
 export default function TokensPair({
   tokenA,
   tokenB,
+  variant = "bold-secondary",
 }: {
   tokenA?: Currency | undefined;
   tokenB?: Currency | undefined;
+  variant?: TokensPairVariant;
 }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -31,7 +41,7 @@ export default function TokensPair({
           />
         </span>
       </div>
-      <span className="md:font-bold block">
+      <span className={clsx("md:text-16 text-18 block", variantClassNameMap[variant])}>
         {tokenA?.symbol} / {tokenB?.symbol}
       </span>
     </div>

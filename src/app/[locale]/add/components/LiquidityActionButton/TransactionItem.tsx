@@ -1,7 +1,8 @@
 import clsx from "clsx";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
+import { formatEther, formatUnits, parseUnits } from "viem";
 
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
@@ -39,6 +40,7 @@ export const TransactionItem = ({
   setCustomAmount: (amount: bigint) => void;
   disabled?: boolean;
 }) => {
+  const tSwap = useTranslations("Swap");
   const chainId = useCurrentChainId();
   const [localValue, setLocalValue] = useState(
     formatUnits(transaction?.amount || BigInt(0), transaction?.token.decimals || 18),
@@ -55,7 +57,7 @@ export const TransactionItem = ({
     setCustomAmount(valueBigInt);
 
     if (transaction.amount) {
-      setFieldError(valueBigInt < transaction.amount ? true : false);
+      setFieldError(valueBigInt < transaction.amount);
     }
   };
   if (!transaction) return null;
@@ -74,13 +76,20 @@ export const TransactionItem = ({
       </div>
       <div className="w-full">
         <div className="flex justify-between items-center">
-          <div className="flex gap-2 py-2 items-center">
-            <span>{`${standard === Standard.ERC20 ? "Approve" : "Deposit"} for ${token.symbol}`}</span>
-            <Badge color="green" text={standard} />
+          <div className="flex gap-2 py-2 items-start flex-wrap">
+            <span className="flex-wrap items-baseline gap-1 text-secondary-text">
+              {`${standard === Standard.ERC20 ? "Approve" : "Deposit"} for ${token.symbol}`}
+              <Badge
+                color="green"
+                text={standard}
+                className="inline-block ml-2 relative -top-0.5"
+              />
+            </span>
           </div>
 
           <div className="flex items-center gap-2 justify-end">
             {localValueBigInt !== amount &&
+              !disabled &&
               ![
                 AddLiquidityApproveStatus.PENDING,
                 AddLiquidityApproveStatus.LOADING,
@@ -109,7 +118,9 @@ export const TransactionItem = ({
             {status === AddLiquidityApproveStatus.PENDING && (
               <>
                 <Preloader type="linear" />
-                <span className="text-secondary-text text-14">Proceed in your wallet</span>
+                <span className="text-secondary-text text-14 text-nowrap">
+                  Proceed in your wallet
+                </span>
               </>
             )}
             {status === AddLiquidityApproveStatus.LOADING ? (
@@ -146,17 +157,10 @@ export const TransactionItem = ({
         {isError ? (
           <span className="text-12 mt-2 text-red">{`Must be at least ${formatUnits(amount, token.decimals)} ${token.symbol}`}</span>
         ) : null}
-        <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-5 mt-2">
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Gas price</span>
-            <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Gas limit</span>
-            <span>{estimatedGas?.toString()}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-14 text-secondary-text">Fee</span>
+
+        <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-4 mt-6">
+          <div className="flex gap-1">
+            <span className="text-16 text-secondary-text">{tSwap("network_fee")}:</span>
             <span>{`${gasPrice && estimatedGas ? formatFloat(formatEther(gasPrice * estimatedGas)) : ""} ${chainSymbol}`}</span>
           </div>
         </div>

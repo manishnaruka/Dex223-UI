@@ -10,6 +10,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      width: {
+        "2/3-custom": "72%",
+        "1/3-custom": "28%",
+        "7/8": "88%",
+        "1/8": "12%",
+      },
       screens: {
         xs: "520px",
       },
@@ -63,7 +69,7 @@ const config: Config = {
 
         "gradient-card-account": "linear-gradient(90deg, #1F2020 0%, #3C4B4A 100%);",
 
-        "table-gradient": "linear-gradient(to bottom, #272727 60px, #1D1E1E 60px, #1D1E1E 100%)",
+        "table-gradient": "linear-gradient(to bottom, #2E2F2F 60px, #1D1E1E 60px, #1D1E1E 100%)",
       },
       keyframes: {
         appear: {

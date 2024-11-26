@@ -2,7 +2,11 @@ import { ScaleLinear } from "d3";
 import { useMemo } from "react";
 
 const StyledLine = ({ children, ...props }: any) => (
-  <line className="stroke-[#FFFFFF] opacity-50 stroke-[2px] fill-none" {...props}>
+  <line
+    className="stroke-[#FFFFFF] opacity-50 stroke-[2px] fill-none"
+    strokeDasharray="6,4"
+    {...props}
+  >
     {children}
   </line>
 );

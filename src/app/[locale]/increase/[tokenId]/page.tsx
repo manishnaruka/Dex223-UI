@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
@@ -20,6 +21,7 @@ import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
+import truncateMiddle from "@/functions/truncateMiddle";
 import {
   usePositionFromPositionInfo,
   usePositionFromTokenId,
@@ -44,6 +46,7 @@ export default function IncreaseLiquidityPage({
   };
 }) {
   useRecentTransactionTracking();
+  const t = useTranslations("Liquidity");
   // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
@@ -56,11 +59,11 @@ export default function IncreaseLiquidityPage({
 
   const [showFirst, setShowFirst] = useState(true);
 
-  const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
+  const { position: positionInfo } = usePositionFromTokenId(BigInt(params.tokenId));
   const existedPosition = usePositionFromPositionInfo(positionInfo);
 
   // TODO: tokens already sorted, rename tokenA\B -> token0\1
-  const [tokenA, tokenB, fee] = useMemo(() => {
+  const [tokenA, tokenB] = useMemo(() => {
     return existedPosition?.pool.token0 && existedPosition?.pool.token1 && existedPosition?.pool.fee
       ? [existedPosition.pool.token0, existedPosition.pool.token1, existedPosition.pool.fee]
       : [undefined, undefined];
@@ -93,20 +96,15 @@ export default function IncreaseLiquidityPage({
     }
   }, [initialized, existedPosition, setBothTokens, setTicks, setTier, tokenA, tokenB]);
 
+  const tokenAshort = truncateMiddle(tokenA?.symbol || "", { charsFromStart: 20, charsFromEnd: 0 });
+  const tokenBshort = truncateMiddle(tokenB?.symbol || "", { charsFromStart: 20, charsFromEnd: 0 });
+
   // PRICE RANGE HOOK START
   const { price } = usePriceRange();
   // PRICE RANGE HOOK END
 
   // Deposit Amounts START
-  const {
-    parsedAmounts,
-    position,
-    currencies,
-    noLiquidity,
-    outOfRange,
-    depositADisabled,
-    depositBDisabled,
-  } = useV3DerivedMintInfo({
+  const { parsedAmounts, currencies, depositADisabled, depositBDisabled } = useV3DerivedMintInfo({
     tokenA,
     tokenB,
     tier,
@@ -194,7 +192,7 @@ export default function IncreaseLiquidityPage({
               </div>
 
               <div className="flex justify-between items-center mb-3">
-                <span className="font-bold text-secondary-text">Selected range</span>
+                <span className="font-bold text-secondary-text">{t("selected_range")}</span>
                 <div className="flex p-0.5 gap-0.5 rounded-2 bg-secondary-bg">
                   <button
                     onClick={() => setShowFirst(true)}
@@ -205,7 +203,7 @@ export default function IncreaseLiquidityPage({
                         : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
-                    {tokenA?.symbol}
+                    {tokenAshort}
                   </button>
                   <button
                     onClick={() => setShowFirst(false)}
@@ -216,13 +214,14 @@ export default function IncreaseLiquidityPage({
                         : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
-                    {tokenB?.symbol}
+                    {tokenBshort}
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_12px_1fr] mb-2 lg:mb-3">
                 <PositionPriceRangeCard
+                  className="bg-quaternary-bg"
                   showFirst={showFirst}
                   token0={token0}
                   token1={token1}
@@ -234,6 +233,7 @@ export default function IncreaseLiquidityPage({
                   </div>
                 </div>
                 <PositionPriceRangeCard
+                  className="bg-quaternary-bg"
                   showFirst={showFirst}
                   token0={token0}
                   token1={token1}

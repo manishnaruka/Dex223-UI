@@ -10,6 +10,7 @@ export const Area = ({
   xValue,
   yValue,
   fill,
+  color,
 }: {
   series: ChartEntry[];
   xScale: ScaleLinear<number, number>;
@@ -17,12 +18,13 @@ export const Area = ({
   xValue: (d: ChartEntry) => number;
   yValue: (d: ChartEntry) => number;
   fill?: string;
+  color?: string;
 }) =>
   useMemo(
     () => (
       <path
         fill={fill}
-        className="stroke-green fill-green opacity-50"
+        className={color ? color : "stroke-green fill-green opacity-50"}
         d={
           area()
             .curve(curveStepAfter)
@@ -37,5 +39,5 @@ export const Area = ({
         }
       />
     ),
-    [fill, series, xScale, xValue, yScale, yValue],
+    [color, fill, series, xScale, xValue, yScale, yValue],
   );

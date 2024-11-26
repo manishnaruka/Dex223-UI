@@ -6,29 +6,33 @@ import { Token } from "@/sdk_hybrid/entities/token";
 export type WalletDeposite = {
   token: Token;
   contractAddress: Address;
-  value: bigint;
+  deposited: bigint;
+  approved: bigint;
 };
+
 export type WalletDeposites = {
   address: Address; // wallet address
   deposites: WalletDeposite[];
 };
+
 interface WalletsDepositesStore {
   deposites: WalletDeposites[];
   setAllDeposites: (walletsDeposites: WalletDeposites[]) => void;
-  setWalletDeposites: (walletBalance: WalletDeposites) => void;
+  setWalletDeposites: (walletsDeposites: WalletDeposites) => void;
 }
 
 export const useWalletsDeposites = create<WalletsDepositesStore>((set, get) => ({
   deposites: [],
-  setAllDeposites: (walletsDeposites) =>
-    set((state) => ({
+  approves: [],
+  setAllDeposites: (walletsDeposites: WalletDeposites[]) =>
+    set(() => ({
       deposites: walletsDeposites,
     })),
-  setWalletDeposites: (walletDeposites) =>
+  setWalletDeposites: (walletsDeposites: WalletDeposites) =>
     set((state) => ({
       deposites: [
-        ...state.deposites.filter((balance) => balance.address !== walletDeposites.address),
-        walletDeposites,
+        ...state.deposites.filter((balance) => balance.address !== walletsDeposites.address),
+        walletsDeposites,
       ],
     })),
 }));

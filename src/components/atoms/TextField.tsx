@@ -4,6 +4,7 @@ import { NumericFormat } from "react-number-format";
 
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Tooltip from "@/components/atoms/Tooltip";
+import { IIFE } from "@/functions/iife";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -85,13 +86,17 @@ export default function TextField({
       {variant === "default" ? (
         <div className="relative">
           {props.isNumeric ? (
-            <NumericFormat
-              isError={Boolean(error) || isError}
-              isWarning={Boolean(warning) || isWarning}
-              customInput={Input}
-              {...props}
-              decimalScale={props.decimalScale}
-            />
+            (() => {
+              const { isNumeric, ...rest } = props;
+              return (
+                <NumericFormat
+                  isError={Boolean(error) || isError}
+                  isWarning={Boolean(warning) || isWarning}
+                  customInput={Input}
+                  {...rest}
+                />
+              );
+            })()
           ) : (
             <Input
               isError={Boolean(error) || isError}

@@ -3,9 +3,11 @@ import Image from "next/image";
 import React, { useCallback, useMemo, useState } from "react";
 import { Address } from "viem";
 
+import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
+import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
@@ -14,6 +16,8 @@ import IconButton, {
 import Pagination from "@/components/common/Pagination";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
+import { formatNumberKilos } from "@/functions/formatFloat";
+import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
@@ -46,7 +50,10 @@ function HeaderItem({
     <div
       role={handleSort && "button"}
       onClick={handleSort}
-      className={clsx("h-[60px] flex items-center relative -left-3 mb-2", isFirst && "pl-2")}
+      className={clsx(
+        "h-[60px] flex items-center justify-end text-tertiary-text relative -left-3 mb-2",
+        isFirst && "pl-2",
+      )}
     >
       {handleSort && (
         <IconButton
@@ -76,27 +83,39 @@ const PoolsTableDesktop = ({
   handleSort: () => any;
   openPoolHandler: (id: Address) => any;
 }) => {
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
   return (
-    <div className="hidden lg:grid pr-5 pl-2 rounded-2 overflow-hidden gap-x-2 bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2">
-      <div className=" h-[60px] flex items-center justify-center">#</div>
-      <div className=" h-[60px] flex items-center">Pool</div>
-      <HeaderItem label="Transactions" sorting={sorting} handleSort={handleSort} />
-      <div className=" h-[60px] flex items-center">TVL</div>
-      <div className=" h-[60px] flex items-center">1 day volume</div>
-      <div className=" h-[60px] flex items-center">7 day volume</div>
+    <div className="hidden lg:grid pr-3 pl-2 rounded-3 overflow-hidden bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(30px,1fr),_minmax(30px,1fr),_minmax(30px,1fr)] pb-2">
+      <div className=" h-[60px] flex items-center justify-center  text-tertiary-text ">#</div>
+      <div className=" h-[60px] flex items-center text-tertiary-text">Pool</div>
+      <div className=" h-[60px] flex items-center justify-end  text-tertiary-text ">
+        Transactions
+      </div>
+      <HeaderItem label="TVL" sorting={sorting} handleSort={handleSort} />
+      <div className=" h-[60px] flex items-center justify-end text-tertiary-text ">
+        1 day volume
+      </div>
+      <div className=" h-[60px] flex items-center justify-end text-tertiary-text pr-2">
+        7 day volume
+      </div>
 
       {tableData.map((o: any, index: number) => {
         return (
           <React.Fragment key={o.id}>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center justify-center"
+              className={`h-[56px] cursor-pointer flex items-center rounded-l-4 justify-center text-secondary-text ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
               {(currentPage - 1) * PAGE_SIZE + index + 1}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center gap-2"
+              className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
               <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
               <Image
@@ -104,33 +123,52 @@ const PoolsTableDesktop = ({
                 width={24}
                 height={24}
                 alt=""
-                className="-ml-5 bg-primary-bg rounded-full"
+                className="-ml-3 bg-primary-bg rounded-full"
               />
-              <span>{`${o.token0.symbol}/${o.token1.symbol}`}</span>
+              <span className="ml-3 mr-2">{`${truncateMiddle(o.token0.symbol, {
+                charsFromStart: 4,
+                charsFromEnd: 3,
+              })}/${truncateMiddle(o.token1.symbol, {
+                charsFromStart: 4,
+                charsFromEnd: 3,
+              })}`}</span>
+              <Badge
+                variant={BadgeVariant.PERCENTAGE}
+                percentage={`${(FEE_AMOUNT_DETAIL as any)[o.feeTier as any].label}%`}
+              />
+              {hoveredRow === index && <Svg iconName="next" className="ml-1 text-green" />}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              {o.txCount}
+              {formatNumberKilos(o.txCount)}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              ${formatFloat(o.totalValueLockedUSD)}
+              ${formatNumberKilos(o.totalValueLockedUSD)}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              ${formatFloat(o.poolDayData?.[0]?.volumeUSD || 0)}
+              ${formatNumberKilos(parseFloat(o.poolDayData?.[0]?.volumeUSD) || 0)}
             </div>
             <div
+              onMouseEnter={() => setHoveredRow(index)}
+              onMouseLeave={() => setHoveredRow(null)}
               onClick={() => openPoolHandler(o.id)}
-              className="h-[56px] cursor-pointer flex items-center"
+              className={`h-[56px] cursor-pointer flex justify-end items-center pr-4 rounded-r-4 text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              ${formatFloat(0)}
+              {/* TODO still no way to get 7 day value */}${formatFloat(0)}
             </div>
           </React.Fragment>
         );
@@ -152,7 +190,7 @@ const PoolsTableItemMobile = ({
 }) => {
   return (
     <React.Fragment key={key}>
-      <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-3">
+      <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
         <div className="flex justify-between gap-2">
           <div className="flex items-center gap-2 text-14">
             <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
@@ -165,41 +203,42 @@ const PoolsTableItemMobile = ({
             />
             <span>{`${pool.token0.symbol}/${pool.token1.symbol}`}</span>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center justify-start mr-auto">
             <Badge
-              size="small"
-              variant={BadgeVariant.DEFAULT}
-              text={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
+              // size="small"
+              variant={BadgeVariant.PERCENTAGE}
+              percentage={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
             />
-            <span className="text-secondary-text font-normal">{`# ${index}`}</span>
           </div>
+          <span className="text-secondary-text whitespace-nowrap font-normal">{`# ${index}`}</span>
         </div>
-        <div className="flex justify-between gap-2">
-          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-12 text-secondary-text">Transactions</span>
-            <span className="text-12">{pool.txCount}</span>
+        <div className="flex justify-between gap-x-2">
+          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-14 text-tertiary-text">Transactions</span>
+            <span className="text-14 text-secondary-text">{formatNumberKilos(pool.txCount)}</span>
           </div>
-          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-12 text-secondary-text">TVL</span>
-            <span className="text-12">{`$ ${formatFloat(pool.totalValueLockedUSD)}`}</span>
+          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-14 text-tertiary-text">TVL</span>
+            <span className="text-14 text-secondary-text">{`$${formatNumberKilos(pool.totalValueLockedUSD)}`}</span>
           </div>
-          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-12 text-secondary-text">Turnover</span>
-            <span className="text-12">{`— %`}</span>
-          </div>
+          {/*<div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">*/}
+          {/*  <span className="text-12 text-secondary-text">Turnover</span>*/}
+          {/*  <span className="text-12">{`— %`}</span>*/}
+          {/*</div>*/}
         </div>
-        <div className="flex justify-between gap-2">
-          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-12 text-secondary-text">1 day volume</span>
-            <span className="text-12">{`$ ${formatFloat(pool.poolDayData?.[0]?.volumeUSD || 0)}`}</span>
+        <div className="flex justify-between gap-x-2 pb-1">
+          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-14 text-tertiary-text">1 day volume</span>
+            <span className="text-14 text-secondary-text">{`$${formatNumberKilos(pool.poolDayData?.[0]?.volumeUSD || 0)}`}</span>
           </div>
-          <div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-12 text-secondary-text">7 day volume</span>
-            <span className="text-12">{`$ ${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
+          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+            <span className="text-14 text-tertiary-text">7 day volume</span>
+            <span className="text-14 text-secondary-text">{`$${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
           </div>
         </div>
         <Button
           variant={ButtonVariant.CONTAINED}
+          colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.MEDIUM}
           onClick={() => openPoolHandler(pool.id)}
         >
@@ -214,26 +253,37 @@ const PoolsTableMobile = ({
   tableData,
   currentPage,
   openPoolHandler,
+  handleSort,
+  sorting,
 }: {
   tableData: any[];
   currentPage: number;
-  sorting: SortingType;
   handleSort: () => any;
   openPoolHandler: (id: Address) => any;
+  sorting: SortingType;
 }) => {
   return (
-    <div className="flex lg:hidden flex-col gap-4">
-      {tableData.map((pool: any, index: number) => {
-        return (
-          <PoolsTableItemMobile
-            key={pool.id}
-            index={(currentPage - 1) * PAGE_SIZE + index + 1}
-            pool={pool}
-            openPoolHandler={openPoolHandler}
-          />
-        );
-      })}
-    </div>
+    <>
+      <div
+        className="flex mb-4 gap-2 text-secondary-text flex-row cursor-pointer md:hidden"
+        onClick={handleSort}
+      >
+        <span>TVL</span>
+        <Svg iconName={sorting === SortingType.ASCENDING ? "sort-up" : "sort-down"} />
+      </div>
+      <div className="flex md:hidden flex-col gap-4">
+        {tableData.map((pool: any, index: number) => {
+          return (
+            <PoolsTableItemMobile
+              key={pool.id}
+              index={(currentPage - 1) * PAGE_SIZE + index + 1}
+              pool={pool}
+              openPoolHandler={openPoolHandler}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 };
 export default function PoolsTable({
@@ -242,6 +292,7 @@ export default function PoolsTable({
   filter?: {
     token0Address?: Address;
     token1Address?: Address;
+    searchString?: string;
   };
 }) {
   const [sorting, setSorting] = useState<SortingType>(SortingType.NONE);
@@ -249,12 +300,12 @@ export default function PoolsTable({
   const handleSort = useCallback(() => {
     switch (sorting) {
       case SortingType.NONE:
-        setSorting(SortingType.ASCENDING);
-        return;
-      case SortingType.ASCENDING:
         setSorting(SortingType.DESCENDING);
         return;
       case SortingType.DESCENDING:
+        setSorting(SortingType.ASCENDING);
+        return;
+      case SortingType.ASCENDING:
         setSorting(SortingType.NONE);
         return;
     }
@@ -268,7 +319,8 @@ export default function PoolsTable({
     orderDirection: GQLSorting[sorting],
     filter,
   });
-  const pools = useMemo(() => data?.pools || [], [data?.pools]);
+
+  const pools: any[] = useMemo(() => data?.pools || [], [data?.pools]);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
@@ -290,20 +342,33 @@ export default function PoolsTable({
           </div>
         ) : (
           <>
-            <PoolsTableDesktop
-              tableData={currentTableData}
-              sorting={sorting}
-              currentPage={currentPage}
-              handleSort={handleSort}
-              openPoolHandler={openPoolHandler}
-            />
-            <PoolsTableMobile
-              tableData={currentTableData}
-              sorting={sorting}
-              currentPage={currentPage}
-              handleSort={handleSort}
-              openPoolHandler={openPoolHandler}
-            />
+            {pools.length > 0 ? (
+              <>
+                <PoolsTableDesktop
+                  tableData={currentTableData}
+                  sorting={sorting}
+                  currentPage={currentPage}
+                  handleSort={handleSort}
+                  openPoolHandler={openPoolHandler}
+                />
+                <PoolsTableMobile
+                  tableData={currentTableData}
+                  sorting={sorting}
+                  currentPage={currentPage}
+                  handleSort={handleSort}
+                  openPoolHandler={openPoolHandler}
+                />
+              </>
+            ) : (
+              <div className="w-full overflow-hidden">
+                <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 relative">
+                  <div className="absolute inset-0 overflow-hidden rounded-5">
+                    <EmptyStateIcon iconName="poolList" className="absolute right-0" />
+                  </div>
+                  <p className="text-16 text-secondary-text relative z-10">Pools not found</p>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
