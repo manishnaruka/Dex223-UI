@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo } from "react";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
+import Preloader from "@/components/atoms/Preloader";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -28,7 +29,6 @@ import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensSt
 import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidityDialogOpened";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { APPROVE_BUTTON_TEXT } from "./ConfirmLiquidityDialog";
-import Preloader from "@/components/atoms/Preloader";
 
 export const LiquidityActionButton = ({
   increase = false,
