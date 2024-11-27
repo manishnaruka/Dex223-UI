@@ -27,7 +27,7 @@ import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
@@ -151,7 +151,8 @@ export default function PoolPage({
         <div className="flex justify-between items-center py-1.5 -mx-3">
           <IconButton
             buttonSize={IconButtonSize.LARGE}
-            iconName="back"
+            variant={IconButtonVariant.BACK}
+            // iconName="back"
             onClick={() => router.push("/pools/positions")}
           />
           <h2 className="text-18 lg:text-20 font-bold">{t("liquidity_position")}</h2>

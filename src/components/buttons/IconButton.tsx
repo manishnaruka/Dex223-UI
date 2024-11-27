@@ -70,6 +70,7 @@ export enum IconButtonVariant {
   COPY,
   SORTING,
   ADD,
+  BACK,
 }
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> &
@@ -89,6 +90,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
       }
     | { variant: IconButtonVariant.CONTROL; iconName: IconName }
     | { variant: IconButtonVariant.COPY; text: string }
+    | { variant: IconButtonVariant.BACK }
     | { variant?: IconButtonVariant.DEFAULT | undefined; iconName: IconName; active?: boolean }
     | {
         variant: IconButtonVariant.SORTING;
@@ -221,6 +223,22 @@ export default function IconButton(_props: Props) {
         />
       );
     }
+
+    case IconButtonVariant.BACK: {
+      const { className, ...props } = _props;
+
+      return (
+        <IconButtonFrame
+          iconName="back"
+          className={clsxMerge(
+            "text-secondary-text hocus:text-primary-text duration-200",
+            className,
+          )}
+          {...props}
+        />
+      );
+    }
+
     case IconButtonVariant.CONTROL: {
       const { iconName, buttonSize, className, ...props } = _props;
 

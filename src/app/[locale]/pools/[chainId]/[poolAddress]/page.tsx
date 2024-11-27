@@ -19,6 +19,11 @@ import { useTokens } from "@/hooks/useTokenLists";
 import { Link, useRouter } from "@/navigation";
 
 import { usePoolData } from "../../hooks";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 
 export default function ExplorePoolPage({
   params,
@@ -62,12 +67,19 @@ export default function ExplorePoolPage({
       <div className="w-full md:w-[800px] md:mx-auto md:mt-[40px] mb-5 bg-primary-bg px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
         {/* First line:  Icons | Tokens | Badge | Link */}
         <div className="flex justify-between items-center py-1.5 -mx-3">
-          <button
+          <IconButton
+            variant={IconButtonVariant.BACK}
+            iconSize={IconSize.REGULAR}
+            buttonSize={IconButtonSize.LARGE}
             onClick={() => router.push("/pools")}
-            className="flex items-center w-12 h-12 justify-center"
-          >
-            <Svg iconName="back" />
-          </button>
+            // className="text-tertiary-text"
+          />
+          {/*<button*/}
+          {/*  onClick={() => router.push("/pools")}*/}
+          {/*  className="flex items-center w-12 h-12 justify-center"*/}
+          {/*>*/}
+          {/*  <Svg iconName="back" />*/}
+          {/*</button>*/}
           <h2 className="text-18 lg:text-20 font-bold">{t("stats_title")}</h2>
           <div className="w-12"></div>
         </div>

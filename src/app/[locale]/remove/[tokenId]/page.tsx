@@ -20,7 +20,11 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import InputButton from "@/components/buttons/InputButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
@@ -182,8 +186,9 @@ export default function DecreaseLiquidityPage({
               <IconButton
                 onClick={() => router.push(`/pool/${params.tokenId}`)}
                 buttonSize={IconButtonSize.LARGE}
-                className="hocus:text-white before:bg-transparent"
-                iconName="back"
+                variant={IconButtonVariant.BACK}
+                // className="hocus:text-white before:bg-transparent"
+                // iconName="back"
                 iconSize={IconSize.LARGE}
               />
               <h2 className="text-18 lg:text-20 font-bold flex justify-center items-center text-nowrap">

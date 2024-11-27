@@ -40,7 +40,11 @@ export default function DialogHeader({
           )}
         >
           {onBack && (
-            <IconButton onClick={onBack} iconName="back" buttonSize={IconButtonSize.LARGE} />
+            <IconButton
+              onClick={onBack}
+              variant={IconButtonVariant.BACK}
+              buttonSize={IconButtonSize.LARGE}
+            />
           )}
           {!onBack && titlePosition === "center" && <span />}
           <h2

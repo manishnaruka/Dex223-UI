@@ -15,7 +15,11 @@ import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSw
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
@@ -121,9 +125,10 @@ export default function IncreaseLiquidityPage({
             <IconButton
               onClick={() => router.push(`/pool/${params.tokenId}`)}
               buttonSize={IconButtonSize.LARGE}
-              iconName="back"
+              variant={IconButtonVariant.BACK}
+              // iconName="back"
               iconSize={IconSize.LARGE}
-              className="text-tertiary-text"
+              // className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">Increase Liquidity</h2>

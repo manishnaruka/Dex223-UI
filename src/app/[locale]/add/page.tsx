@@ -129,12 +129,11 @@ export default function AddPoolPage() {
         <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
           <div className="w-[48px] md:w-[104px]">
             <IconButton
-              variant={IconButtonVariant.DEFAULT}
+              variant={IconButtonVariant.BACK}
               iconSize={IconSize.REGULAR}
-              iconName="back"
               buttonSize={IconButtonSize.LARGE}
               onClick={() => router.push("/pools/positions")}
-              className="text-tertiary-text"
+              // className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">{t("add_liquidity_title")}</h2>
