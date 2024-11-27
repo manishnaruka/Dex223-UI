@@ -11,7 +11,6 @@ import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTie
 import { useIncreaseRecentTransactionsStore } from "@/app/[locale]/increase/[tokenId]/stores/useIncreaseRecentTransactionsStore";
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
-import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";

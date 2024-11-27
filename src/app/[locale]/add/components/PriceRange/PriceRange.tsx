@@ -221,7 +221,7 @@ export const PriceRange = ({
         value={
           ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER]
             ? "0"
-            : leftPrice?.toSignificant(8) ?? ""
+            : leftPrice?.toSignificant(8) ?? "0"
         }
         onUserInput={setLeftRangeTypedValue}
         title={t("low_price")}
@@ -236,7 +236,7 @@ export const PriceRange = ({
         value={
           ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER]
             ? "∞"
-            : rightPrice?.toSignificant(8) ?? ""
+            : rightPrice?.toSignificant(8) ?? "0"
         }
         onUserInput={setRightRangeTypedValue}
         decrement={isSorted ? getDecrementUpper : getIncrementLower}
@@ -301,14 +301,17 @@ export const PriceRange = ({
               <div className="ml-auto flex gap-2 justify-end items-center w-100 ">
                 <IconButton
                   variant={IconButtonVariant.CONTROL}
-                  buttonSize={24}
+                  buttonSize={32}
+                  iconSize={24}
                   iconName="zoom-in"
+                  className="bg-tertiary-bg"
                   onClick={() => setZoomIn(true)}
                 />
                 <IconButton
                   variant={IconButtonVariant.CONTROL}
-                  buttonSize={24}
+                  buttonSize={32}
                   iconName="zoom-out"
+                  className="bg-tertiary-bg"
                   onClick={() => setZoomOut(true)}
                 />
               </div>

@@ -9,6 +9,11 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
@@ -19,11 +24,6 @@ import { useTokens } from "@/hooks/useTokenLists";
 import { Link, useRouter } from "@/navigation";
 
 import { usePoolData } from "../../hooks";
-import IconButton, {
-  IconButtonSize,
-  IconButtonVariant,
-  IconSize,
-} from "@/components/buttons/IconButton";
 
 export default function ExplorePoolPage({
   params,

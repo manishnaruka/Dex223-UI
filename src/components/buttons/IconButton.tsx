@@ -247,7 +247,7 @@ export default function IconButton(_props: Props) {
           iconName={iconName}
           buttonSize={buttonSize || IconButtonSize.SMALL}
           className={clsxMerge(
-            "rounded-2 hocus:bg-green-bg bg-transparent duration-200 text-primary-text",
+            "rounded-2 hocus:bg-green-bg bg-primary-bg duration-200 text-tertiary-text hocus:text-primary-text",
             className,
           )}
           {...props}

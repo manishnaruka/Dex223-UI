@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 import { useSwipeable } from "react-swipeable";
 
-import Svg from "@/components/atoms/Svg";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 
 interface Props {
