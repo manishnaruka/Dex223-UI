@@ -7,7 +7,7 @@ type TokensPairVariant = "medium-primary" | "bold-secondary";
 
 const variantClassNameMap: Record<TokensPairVariant, string> = {
   "medium-primary": "font-medium text-primary-text",
-  "bold-secondary": "font-bold text-secondary-bg",
+  "bold-secondary": "font-bold text-secondary-text",
 };
 
 export default function TokensPair({
