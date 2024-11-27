@@ -72,14 +72,7 @@ export default function ExplorePoolPage({
             iconSize={IconSize.REGULAR}
             buttonSize={IconButtonSize.LARGE}
             onClick={() => router.push("/pools")}
-            // className="text-tertiary-text"
           />
-          {/*<button*/}
-          {/*  onClick={() => router.push("/pools")}*/}
-          {/*  className="flex items-center w-12 h-12 justify-center"*/}
-          {/*>*/}
-          {/*  <Svg iconName="back" />*/}
-          {/*</button>*/}
           <h2 className="text-18 lg:text-20 font-bold">{t("stats_title")}</h2>
           <div className="w-12"></div>
         </div>

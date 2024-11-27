@@ -70,7 +70,7 @@ function FeeAmountOption({
         "flex flex-col md:flex-row md:justify-between items-start md:items-center px-4 py-3 md:px-5 md:py-2 rounded-2 border cursor-pointer duration-200 gap-2 md:gap-0",
         active
           ? "bg-quaternary-bg border-secondary-border pointer-events-none"
-          : "border-transparent bg-primary-bg hocus:bg-quaternary-bg",
+          : "border-transparent bg-primary-bg md:hocus:bg-quaternary-bg",
       )}
     >
       <div className="flex flex-col md:flex-row items-start md:items-center gap-2">

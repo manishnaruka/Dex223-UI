@@ -148,7 +148,7 @@ export default function AddPoolPage() {
         </div>
         <div className="rounded-b-5 border-t-0 p-4 pt-0 md:p-10 md:pt-0 bg-primary-bg mb-4 md:mb-5">
           <h3 className="text-16 font-bold mb-1 lg:mb-4">{t("select_pair")}</h3>
-          <div className="flex gap-3 mb-4 md:mb-5">
+          <div className="flex gap-2 md:gap-3 mb-4 md:mb-5">
             <SelectButton
               variant="rounded"
               className="bg-tertiary-bg"

@@ -233,6 +233,14 @@
     "slippage_tooltip": "The actual swap price may be different than the one specified at the moment of sending the transaction. Slippage determines how much of the price change can be tolerated. 5% slippage means that if the price in the pool will change more than 5% from the expected, your transaction will automatically fail (you will pay for GAS but no swap will occur)."
   },
   "Liquidity": {
+    "hide_closed_positions": "Hide closed positions",
+    "show_closed_positions": "Show closed positions",
+    "no_positions_yet": "You have no positions yet",
+    "your_positions_here": "Your active liquidity positions will appear here",
+    "connect_wallet_your_liquidity": "Connect to a wallet to see your liquidity positions",
+    "your_positions": "Your liquidity positions",
+    "liquidity_title": "Liquidity positions",
+    "new_position": "New liquidity position",
     "starting_price": "Starting price",
     "not_earn_fee_message": "Your position will not earn fees or be used in trades until the market price moves into\nyour range",
     "init_pool_message": "This pool must be initialized before you can add liquidity. To initialize, select a\nstarting price for the pool. Then, enter your liquidity price range and deposit\namount. Gas fees will be higher than usual due to the initialization transaction.",

@@ -23,6 +23,7 @@ import usePositions, {
 import { useRouter } from "@/navigation";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { NativeCoin } from "@/sdk_hybrid/entities/ether";
+import { useTranslations } from "next-intl";
 
 type PositionInfo = {
   nonce: bigint;
@@ -90,12 +91,12 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
       <div className="hidden md:flex gap-2 items-center">
         <span className="text-secondary-text">Min:</span> {formatNumber(minTokenAPerTokenB)}{" "}
         {tokenA?.symbol} per {tokenB?.symbol}
-        <Svg iconName="double-arrow" className="text-secondary-text" />
+        <Svg iconName="double-arrow" className="text-tertiary-text" />
         <span className="text-secondary-text">Max:</span> {formatNumber(maxTokenAPerTokenB)}{" "}
         {tokenA?.symbol} per {tokenB?.symbol}
       </div>
       <div className="flex md:hidden gap-2 items-center">
-        <Svg iconName="double-arrow" className="rotate-90 text-secondary-text" size={40} />
+        <Svg iconName="double-arrow" className="rotate-90 text-tertiary-text" size={32} />
         <div className="flex flex-col text-14 gap-1">
           <div>
             {" "}
@@ -115,6 +116,7 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
 const Positions = () => {
   const { isConnected } = useAccount();
   const router = useRouter();
+  const t = useTranslations("Liquidity");
 
   const { loading, positions } = usePositions();
 
@@ -153,7 +155,7 @@ const Positions = () => {
                   <EmptyStateIcon iconName="wallet" className="absolute right-0" />
                 </div>
                 <p className="text-16 text-secondary-text relative z-10">
-                  Connect to a wallet to see your liquidity positions
+                  {t("connect_wallet_your_liquidity")}
                 </p>
               </div>
             </div>
@@ -162,13 +164,15 @@ const Positions = () => {
               {positions?.length ? (
                 <div className="rounded-5 w-full overflow-hidden bg-primary-bg md:px-10 px-5">
                   <div className="flex justify-between py-3">
-                    <span className="text-tertiary-text">Your positions</span>
+                    <span className="text-tertiary-text md:text-16 text-12">
+                      {t("your_positions")}
+                    </span>
                     {hasClosedPositions && (
                       <span
-                        className="text-secondary-text hocus:text-green-hover cursor-pointer"
+                        className="text-secondary-text md:text-16 text-12 hocus:text-green-hover cursor-pointer"
                         onClick={() => setHideClosed(!hideClosed)}
                       >
-                        {!hideClosed ? "Hide closed positions" : "Show closed positions"}
+                        {!hideClosed ? t("hide_closed_positions") : t("show_closed_positions")}
                       </span>
                     )}
                   </div>
@@ -186,7 +190,7 @@ const Positions = () => {
                         );
                       })
                     ) : (
-                      <div>You have no positions yet</div>
+                      <div>{t("no_positions_yet")}</div>
                     )}
                   </div>
                 </div>
@@ -197,7 +201,7 @@ const Positions = () => {
                       <EmptyStateIcon iconName="pool" className="absolute right-0" />
                     </div>
                     <p className="text-16 text-secondary-text relative z-10">
-                      Your active liquidity positions will appear here
+                      {t("your_positions_here")}
                     </p>
                   </div>
                 </div>
@@ -214,6 +218,7 @@ export default function PoolsPage() {
   const router = useRouter();
   const { tokenA, tokenB, setTokenA } = useAddLiquidityTokensStore();
   const chainId = useCurrentChainId();
+  const t = useTranslations("Liquidity");
 
   return (
     <Container>
@@ -229,7 +234,7 @@ export default function PoolsPage() {
               Pools
             </TabButton>
             <TabButton inactiveBackground="bg-secondary-bg" size={48} active>
-              Liquidity positions
+              {t("liquidity_title")}
             </TabButton>
           </div>
           <Button
@@ -246,7 +251,7 @@ export default function PoolsPage() {
             className="lg:w-auto"
           >
             <span className="flex items-center gap-2">
-              New position
+              {t("new_position")}
               <Svg iconName="add" />
             </span>
           </Button>
