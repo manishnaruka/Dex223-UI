@@ -108,8 +108,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
         </div>
 
         {activeTab == 0 && (
-          <div className="flex flex-col items-center justify-center h-[408px] overflow-auto gap-2">
-            <EmptyStateIcon iconName="assets" />
+          <div className="flex flex-col items-center justify-center h-[376px] overflow-auto gap-2 bg-empty-no-tokens bg-no-repeat bg-right-top -mx-4 px-4 md:px-10 md:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
             <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
           </div>
         )}
@@ -130,7 +129,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     <Svg iconName="delete" />
                   </button>
                 </div>
-                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={358}>
+                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={326}>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {_transactions.map((transaction) => {
                       return <RecentTransaction transaction={transaction} key={transaction.hash} />;
@@ -139,8 +138,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                 </ScrollbarContainer>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-2">
-                <Image src="/images/empty/empty-history.svg" width={80} height={80} alt="" />
+              <div className="flex flex-col items-center justify-center gap-2 h-[376px] bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 px-4 md:px-10 md:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
                 <span className="text-secondary-text">
                   {tRecentTransactions("transactions_will_be_displayed_here")}
                 </span>

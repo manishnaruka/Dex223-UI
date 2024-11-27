@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import plugin from "tailwindcss/plugin";
 
+const emptyImagePath = "/images/empty-large";
 /** @type {import('tailwindcss').Config} */
 const config: Config = {
   content: [
@@ -16,6 +17,9 @@ const config: Config = {
         "7/8": "88%",
         "1/8": "12%",
       },
+      backgroundSize: {
+        "size-180": "180px 180px",
+      },
       screens: {
         xs: "520px",
       },
@@ -26,6 +30,37 @@ const config: Config = {
         popover: "0 4px 42px 0px var(--tw-shadow-color)",
       },
       backgroundImage: {
+        "empty-article": `url('${emptyImagePath}/article.svg')`,
+        "empty-article-not-found": `url('${emptyImagePath}/article-not-found.svg')`,
+        "empty-autolisting-not-found": `url('${emptyImagePath}/autolisting-not-found.svg')`,
+        "empty-custom-token": `url('${emptyImagePath}/custom-token.svg')`,
+        "empty-deposited-tokens": `url('${emptyImagePath}/deposited-tokens.svg')`,
+        "empty-guideline-not-found": `url('${emptyImagePath}/guideline-not-found.svg')`,
+        "empty-import-token": `url('${emptyImagePath}/import-token.svg')`,
+        "empty-list": `url('${emptyImagePath}/list.svg')`,
+        "empty-listing-payment-method-not-found": `url('${emptyImagePath}/listing-payment-method-not-found.svg')`,
+        "empty-no-borrow-found": `url('${emptyImagePath}/no-borrow-found.svg')`,
+        "empty-no-borrow-orders-yet": `url('${emptyImagePath}/no-borrow-orders-yet.svg')`,
+        "empty-no-lendings-orders-yet": `url('${emptyImagePath}/no-lendings-orders-yet.svg')`,
+        "empty-no-listed-tokens": `url('${emptyImagePath}/no-listed-tokens.svg')`,
+        "empty-no-margin-positions": `url('${emptyImagePath}/no-margin-positions.svg')`,
+        "empty-no-positions": `url('${emptyImagePath}/no-positions.svg')`,
+        "empty-no-tokens": `url('${emptyImagePath}/no-tokens.svg')`,
+        "empty-no-transactions": `url('${emptyImagePath}/no-transactions.svg')`,
+        "empty-not-found-lending-order": `url('${emptyImagePath}/not-found-lending-order.svg')`,
+        "empty-not-found-lending-position": `url('${emptyImagePath}/not-found-lending-position.svg')`,
+        "empty-not-found-margin-position": `url('${emptyImagePath}/not-found-margin-position.svg')`,
+        "empty-not-found-pools": `url('${emptyImagePath}/not-found-pools.svg')`,
+        "empty-not-found-token": `url('${emptyImagePath}/not-found-token.svg')`,
+        "empty-not-found-list": `url('${emptyImagePath}/not-found-list.svg')`,
+        "empty-not-found-wallet": `url('${emptyImagePath}/not-found-wallet.svg')`,
+        "empty-pool": `url('${emptyImagePath}/pool.svg')`,
+        "empty-wallet": `url('${emptyImagePath}/wallet.svg')`,
+        "empty-url": `url('${emptyImagePath}/url.svg')`,
+        "empty-no-data": `url('${emptyImagePath}/no-data.svg')`,
+        "empty-lock": `url('${emptyImagePath}/lock.svg')`,
+        "empty-import-list": `url('${emptyImagePath}/import-list.svg')`,
+
         "account-card-pattern": "url('/images/account-bg.svg')",
         "drag-and-drop-dashed-pattern":
           "url(\"data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%2370C59EFF' stroke-width='1' stroke-dasharray='8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e\")",

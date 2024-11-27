@@ -89,10 +89,9 @@ export default function ImportListWithContract({ setContent }: Props) {
       />
 
       {!addressToImport && (
-        <div className="flex-grow flex justify-center items-center flex-col gap-2">
-          <EmptyStateIcon iconName="autolisting" />
+        <div className="flex-grow flex justify-center items-center flex-col gap-2 bg-empty-import-list bg-no-repeat bg-right-top max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
           <p className="text-secondary-text text-center">
-            To import a list through a contract, enter contract address in correct format{" "}
+            To import a list through a contract, enter contract address in correct format
           </p>
         </div>
       )}

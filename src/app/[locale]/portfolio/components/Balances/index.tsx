@@ -7,7 +7,6 @@ import { formatUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
@@ -167,14 +166,12 @@ export const Balances = () => {
             />
           </>
         ) : Boolean(searchValue) ? (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="search" />
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-token bg-no-repeat bg-right-top max-md:bg-size-180">
             <span className="text-secondary-text">Token not found</span>
           </div>
         ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="assets" />
-            <span className="text-secondary-text">Token will appear here</span>
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-list bg-no-repeat bg-right-top max-md:bg-size-180">
+            <span className="text-secondary-text">No assets yet</span>
           </div>
         )}
 

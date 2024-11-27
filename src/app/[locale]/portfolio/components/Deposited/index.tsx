@@ -7,7 +7,6 @@ import React from "react";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
@@ -150,13 +149,11 @@ export const Deposited = () => {
             />
           </>
         ) : Boolean(searchValue) ? (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="search" />
-            <span className="text-secondary-text">Deposite not found</span>
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180">
+            <span className="text-secondary-text">Deposited tokens not found</span>
           </div>
         ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="deposited-tokens" />
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-deposited-tokens bg-right-top bg-no-repeat max-md:bg-size-180">
             <span className="text-secondary-text">No deposited tokens yet</span>
           </div>
         )}

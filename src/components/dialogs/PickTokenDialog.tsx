@@ -7,7 +7,6 @@ import { Address } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
@@ -97,7 +96,16 @@ function TokenRow({
     >
       <div className="grid grid-cols-[40px_1fr] gap-2 w-full">
         <div className="flex items-center md:pt-3">
-          <Image width={40} height={40} src={currency?.logoURI || ""} alt="" />
+          <Image
+            width={40}
+            height={40}
+            src={
+              currency?.logoURI !== "/tokens/placeholder.svg"
+                ? currency?.logoURI || ""
+                : "/images/tokens/placeholder.svg"
+            }
+            alt=""
+          />
         </div>
         <div className="w-full">
           <div className="flex items-center justify-between w-full">
@@ -431,8 +439,7 @@ export default function PickTokenDialog({
                 </div>
 
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
-                  <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[420px] w-full md:w-[570px]">
-                    <EmptyStateIcon iconName="search" />
+                  <div className="flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180">
                     <span className="text-secondary-text">{t("token_not_found")}</span>
                   </div>
                 )}
@@ -451,9 +458,8 @@ export default function PickTokenDialog({
               </div>
             </>
           )}
-          {Boolean(!tokens.length) && (
-            <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[520px] w-full md:w-[570px]">
-              <EmptyStateIcon iconName="tokens" />
+          {Boolean(!tokens.length) && ( //probably impossible scenario, handling in case user find a way to turn off all token lists or delete all tokens
+            <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[520px] w-full md:w-[570px] bg-empty-no-tokens bg-right-top bg-no-repeat max-md:bg-size-180">
               <span className="text-secondary-text">{t("no_tokens_here")}</span>
             </div>
           )}

@@ -370,32 +370,30 @@ export default function TrustBadge({ rate, logoURI }: Props) {
         {textMap[rateRange]}
         <Svg size={20} iconName="info" />
       </div>
-      {isOpen && (
-        <FloatingPortal>
-          {isMounted && (
-            <div
-              ref={refs.setFloating}
-              style={{ ...floatingStyles, ...transitionStyles }}
-              {...getFloatingProps()}
-              className="p-5 bg-primary-bg border border-secondary-border rounded-3 relative z-[100]"
-            >
-              <TooltipContent
-                rate={rate}
-                rateRange={rateRange}
-                totalScore={totalScore}
-                logoURI={logoURI}
-              />
-              <FloatingArrow
-                ref={arrowRef}
-                context={context}
-                strokeWidth={1}
-                stroke={"#383C3A"}
-                fill={"#1D1E1E"}
-              />
-            </div>
-          )}
-        </FloatingPortal>
-      )}
+      <FloatingPortal>
+        {isMounted && (
+          <div
+            ref={refs.setFloating}
+            style={{ ...floatingStyles, ...transitionStyles }}
+            {...getFloatingProps()}
+            className="p-5 bg-primary-bg border border-secondary-border rounded-3 relative z-[100]"
+          >
+            <TooltipContent
+              rate={rate}
+              rateRange={rateRange}
+              totalScore={totalScore}
+              logoURI={logoURI}
+            />
+            <FloatingArrow
+              ref={arrowRef}
+              context={context}
+              strokeWidth={1}
+              stroke={"#383C3A"}
+              fill={"#1D1E1E"}
+            />
+          </div>
+        )}
+      </FloatingPortal>
     </>
   );
 }
@@ -473,32 +471,30 @@ export function TrustMarker({ rate, logoURI, totalScore }: TrustMarkerProps) {
       >
         <Svg size={20} iconName="warning-outline" />
       </div>
-      {isOpen && (
-        <FloatingPortal>
-          {isMounted && (
-            <div
-              ref={refs.setFloating}
-              style={{ ...floatingStyles, ...transitionStyles }}
-              {...getFloatingProps()}
-              className="p-5 bg-primary-bg border border-secondary-border rounded-3 relative z-[100]"
-            >
-              <TooltipContent
-                rate={rate}
-                rateRange={rateRange}
-                totalScore={totalScore}
-                logoURI={logoURI}
-              />
-              <FloatingArrow
-                ref={arrowRef}
-                context={context}
-                strokeWidth={1}
-                stroke={"#383C3A"}
-                fill={"#1D1E1E"}
-              />
-            </div>
-          )}
-        </FloatingPortal>
-      )}
+      <FloatingPortal>
+        {isMounted && (
+          <div
+            ref={refs.setFloating}
+            style={{ ...floatingStyles, ...transitionStyles }}
+            {...getFloatingProps()}
+            className="p-5 bg-primary-bg border border-secondary-border rounded-3 relative z-[100]"
+          >
+            <TooltipContent
+              rate={rate}
+              rateRange={rateRange}
+              totalScore={totalScore}
+              logoURI={logoURI}
+            />
+            <FloatingArrow
+              ref={arrowRef}
+              context={context}
+              strokeWidth={1}
+              stroke={"#383C3A"}
+              fill={"#1D1E1E"}
+            />
+          </div>
+        )}
+      </FloatingPortal>
     </div>
   );
 }

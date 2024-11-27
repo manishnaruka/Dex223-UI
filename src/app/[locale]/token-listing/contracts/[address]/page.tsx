@@ -7,7 +7,6 @@ import { Address, formatUnits } from "viem";
 
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import Container from "@/components/atoms/Container";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
@@ -243,8 +242,7 @@ export default function AutoListingContractDetails({
               </div>
             </div>
             {searchValue && !filteredTokens.length && (
-              <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col">
-                <EmptyStateIcon iconName="search-autolisting" />
+              <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col bg-no-repeat bg-right-top bg-empty-not-found-token max-md:bg-size-180">
                 <span className="text-secondary-text">No tokens found</span>
               </div>
             )}
@@ -451,8 +449,7 @@ export default function AutoListingContractDetails({
             )}
 
             {!listingContract.tokens.length && (
-              <div className="flex items-center justify-center min-h-[340px] bg-primary-bg flex-col gap-2 rounded-5">
-                <EmptyStateIcon iconName="tokens" />
+              <div className="flex items-center justify-center min-h-[340px] bg-primary-bg flex-col gap-2 rounded-5 bg-empty-no-tokens bg-no-repeat bg-right-top max-md:bg-size-180">
                 <span className="text-secondary-text">No listed tokens yet</span>
               </div>
             )}

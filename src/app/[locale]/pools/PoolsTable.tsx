@@ -3,7 +3,6 @@ import Image from "next/image";
 import React, { useCallback, useMemo, useState } from "react";
 import { Address } from "viem";
 
-import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -360,13 +359,8 @@ export default function PoolsTable({
                 />
               </>
             ) : (
-              <div className="w-full overflow-hidden">
-                <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 relative">
-                  <div className="absolute inset-0 overflow-hidden rounded-5">
-                    <EmptyStateIcon iconName="poolList" className="absolute right-0" />
-                  </div>
-                  <p className="text-16 text-secondary-text relative z-10">Pools not found</p>
-                </div>
+              <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 bg-empty-not-found-pools bg-right-top bg-no-repeat max-md:bg-size-180">
+                <p className="text-secondary-text">Pools not found</p>
               </div>
             )}
           </>

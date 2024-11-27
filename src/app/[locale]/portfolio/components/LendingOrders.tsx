@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
@@ -127,9 +126,12 @@ export const LendingOrders = () => {
               );
             })}
           </div>
+        ) : Boolean(searchValue) ? (
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-lending-order bg-no-repeat bg-right-top max-md:bg-size-180">
+            <span className="text-secondary-text">Lending orders not found</span>
+          </div>
         ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="lending-orders" />
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-no-lendings-orders-yet bg-no-repeat bg-right-top max-md:bg-size-180">
             <span className="text-secondary-text">No lending orders yet</span>
           </div>
         )}

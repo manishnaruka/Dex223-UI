@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
@@ -93,13 +92,11 @@ export const LiquidityPositions = () => {
             <LiquidityPositionsMobileTable tableData={currentTableData} />
           </>
         ) : Boolean(searchValue) ? (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="search" />
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-pools bg-right-top bg-no-repeat max-md:bg-size-180">
             <span className="text-secondary-text">Positions not found</span>
           </div>
         ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="pool" />
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-pool bg-right-top bg-no-repeat max-md:bg-size-180">
             <span className="text-secondary-text">No liquidity positions yet</span>
           </div>
         )}

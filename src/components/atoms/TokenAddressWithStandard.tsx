@@ -1,6 +1,8 @@
+import { useTranslations } from "next-intl";
 import { Address } from "viem";
 
 import Svg from "@/components/atoms/Svg";
+import Tooltip from "@/components/atoms/Tooltip";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Standard } from "@/sdk_hybrid/standard";
@@ -14,11 +16,25 @@ export default function TokenAddressWithStandard({
   standard: Standard;
   chainId: DexChainId;
 }) {
+  const t = useTranslations("Swap");
+
   return (
     <div className="flex text-10">
-      <div className="border rounded-l-2 border-secondary-border bg-quaternary-bg px-2 flex items-center text-secondary-text">
-        {standard}
-      </div>
+      <Tooltip
+        renderTrigger={(ref, refProps) => (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            ref={ref.setReference}
+            {...refProps}
+            className="border rounded-l-2 border-secondary-border bg-quaternary-bg px-2 flex items-center text-secondary-text cursor-pointer"
+          >
+            {standard}
+          </div>
+        )}
+        iconSize={16}
+        text={standard === Standard.ERC20 ? t("erc20_tooltip") : t("erc223_tooltip")}
+      />
+
       <a
         href={getExplorerLink(ExplorerLinkType.ADDRESS, tokenAddress, chainId)}
         target="_blank"

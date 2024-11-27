@@ -7,7 +7,6 @@ import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/st
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
@@ -46,7 +45,7 @@ export default function ChooseAutoListingDialog() {
         onClose={() => setAutoListingSelectOpened(false)}
         title="Select auto-listing contract"
       />
-      <div className="pb-5 px-4 md:px-10 ">
+      <div className="pb-5 px-4 md:px-10">
         <SearchInput
           value={searchValue}
           onChange={(e) => {
@@ -57,7 +56,7 @@ export default function ChooseAutoListingDialog() {
       </div>
 
       {(!searchValue || (searchValue && !!filteredAutoListings?.length)) && (
-        <div className="flex flex-col gap-2 pb-4">
+        <div className="flex flex-col gap-2 pb-4 flex-grow h-[511px]">
           {filteredAutoListings?.map((a) => {
             return (
               <button
@@ -102,9 +101,8 @@ export default function ChooseAutoListingDialog() {
         </div>
       )}
       {searchValue && !filteredAutoListings?.length && (
-        <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col">
-          <EmptyStateIcon iconName="search-autolisting" />
-          <span className="text-secondary-text">No tokenlists found</span>
+        <div className="h-[531px] flex-grow flex items-center rounded-5 bg-primary-bg justify-center flex-col bg-no-repeat bg-right-top bg-empty-autolisting-not-found -mt-5 pt-5 max-md:bg-size-180">
+          <span className="text-secondary-text">Auto-listing contract not found</span>
         </div>
       )}
     </DrawerDialog>
