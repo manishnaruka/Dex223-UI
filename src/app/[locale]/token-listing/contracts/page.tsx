@@ -6,7 +6,6 @@ import { formatUnits } from "viem";
 
 import useAutoListingContracts from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import Container from "@/components/atoms/Container";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
@@ -258,9 +257,8 @@ export default function TokenListingPage() {
           </>
         )}
         {searchValue && !filteredAutoListings.length && (
-          <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col">
-            <EmptyStateIcon iconName="search-autolisting" />
-            <span className="text-secondary-text">No tokenlists found</span>
+          <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col bg-empty-autolisting-not-found bg-right-top bg-no-repeat max-md:bg-size-180">
+            <span className="text-secondary-text">Auto-listing contract not found</span>
           </div>
         )}
       </Container>

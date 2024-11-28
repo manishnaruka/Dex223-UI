@@ -69,11 +69,11 @@ const buttonSizeClassnameMap: Record<ButtonSize, string> = {
 };
 
 const tabletButtonSizeClassnameMap: Record<ButtonSize, string> = {
-  [ButtonSize.EXTRA_SMALL]: "md:text-12 md:min-h-5 md:rounded-20 md:px-4",
-  [ButtonSize.SMALL]: "md:text-14 md:font-medium md:min-h-8 md:rounded-20 md:px-6",
-  [ButtonSize.MEDIUM]: "md:text-16 md:font-medium md:rounded-2 md:min-h-10 md:px-6",
-  [ButtonSize.LARGE]: "md:text-16 md:font-medium md:rounded-3 md:min-h-12 md:px-6",
-  [ButtonSize.EXTRA_LARGE]: "md:text-18 md:font-medium md:rounded-3 md:min-h-[60px] md:px-6",
+  [ButtonSize.EXTRA_SMALL]: "sm:text-12 sm:min-h-5 sm:rounded-20 sm:px-4",
+  [ButtonSize.SMALL]: "sm:text-14 sm:font-medium sm:min-h-8 sm:rounded-20 sm:px-6",
+  [ButtonSize.MEDIUM]: "sm:text-16 sm:font-medium sm:rounded-2 sm:min-h-10 sm:px-6",
+  [ButtonSize.LARGE]: "sm:text-16 sm:font-medium sm:rounded-3 sm:min-h-12 sm:px-6",
+  [ButtonSize.EXTRA_LARGE]: "sm:text-18 sm:font-medium sm:rounded-3 sm:min-h-[60px] sm:px-6",
 };
 
 const mobileButtonSizeClassnameMap: Record<ButtonSize, string> = {

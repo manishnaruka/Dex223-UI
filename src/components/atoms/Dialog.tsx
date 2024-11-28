@@ -48,25 +48,23 @@ export default function Dialog({ isOpen, setIsOpen, children }: PropsWithChildre
 
   return (
     <>
-      {isOpen && (
-        <FloatingPortal>
-          {isMounted && (
-            <FloatingOverlay className="Dialog-overlay" style={{ ...transitionStyles }} lockScroll>
-              <FloatingFocusManager context={context}>
-                <div
-                  className="bg-primary-bg rounded-5"
-                  ref={refs.setFloating}
-                  aria-labelledby={headingId}
-                  aria-describedby={descriptionId}
-                  {...getFloatingProps()}
-                >
-                  {children}
-                </div>
-              </FloatingFocusManager>
-            </FloatingOverlay>
-          )}
-        </FloatingPortal>
-      )}
+      <FloatingPortal>
+        {isMounted && (
+          <FloatingOverlay className="Dialog-overlay" style={{ ...transitionStyles }} lockScroll>
+            <FloatingFocusManager context={context}>
+              <div
+                className="bg-primary-bg rounded-5"
+                ref={refs.setFloating}
+                aria-labelledby={headingId}
+                aria-describedby={descriptionId}
+                {...getFloatingProps()}
+              >
+                {children}
+              </div>
+            </FloatingFocusManager>
+          </FloatingOverlay>
+        )}
+      </FloatingPortal>
     </>
   );
 }

@@ -67,11 +67,15 @@ export default function ImportListWithURL({ setContent }: Props) {
       return "Enter a link in the format https:// or ipfs://";
     }
 
-    if (tokenListAddressToImport && isValidUrl(tokenListAddressToImport) && !tokenListToImport) {
-      return "Requested source does not contain a token list";
-    }
-
     return "";
+  }, [tokenListAddressToImport]);
+
+  const isNotFound = useMemo(() => {
+    return !!(
+      tokenListAddressToImport &&
+      isValidUrl(tokenListAddressToImport) &&
+      !tokenListToImport
+    );
   }, [tokenListAddressToImport, tokenListToImport]);
 
   return (
@@ -85,32 +89,9 @@ export default function ImportListWithURL({ setContent }: Props) {
         error={error}
       />
 
-      {!tokenListToImport && !tokenListAddressToImport && (
-        <div className="flex-grow flex justify-center items-center flex-col gap-2">
-          <EmptyStateIcon iconName="imported" />
-          <p className="text-secondary-text text-center">{t("to_import_through_URL")}</p>
-        </div>
-      )}
-
-      {tokenListAddressToImport && !isValidUrl(tokenListAddressToImport) && (
-        <div className="flex-grow flex justify-center items-center flex-col gap-2">
-          <EmptyStateIcon iconName="warning" />
-          <p className="text-red-light text-center">Enter valid list location</p>
-        </div>
-      )}
-
-      {tokenListAddressToImport && isValidUrl(tokenListAddressToImport) && !tokenListToImport && (
-        <div className="flex-grow flex justify-center items-center flex-col gap-2">
-          <EmptyStateIcon iconName="warning" />
-          <p className="text-red-light text-center">
-            Requested source does not contain a token list
-          </p>
-        </div>
-      )}
-
       {tokenListToImport && (
         <>
-          <div className="flex-grow">
+          <div className="flex-grow px-4 md:px-10">
             <div className="flex items-center gap-3 py-2.5 mt-3 mb-3">
               <img
                 className="w-12 h-12"
@@ -154,6 +135,25 @@ export default function ImportListWithURL({ setContent }: Props) {
             </Button>
           </div>
         </>
+      )}
+
+      {!tokenListToImport && !tokenListAddressToImport && (
+        <div className="flex-grow flex justify-center items-center flex-col gap-2 bg-empty-url bg-right-top bg-no-repeat max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
+          <p className="text-secondary-text text-center">{t("to_import_through_URL")}</p>
+        </div>
+      )}
+
+      {tokenListAddressToImport && !isValidUrl(tokenListAddressToImport) && (
+        <div className="flex-grow flex justify-center items-center flex-col gap-2">
+          <EmptyStateIcon iconName="warning" />
+          <p className="text-red-light text-center">Enter valid list location</p>
+        </div>
+      )}
+
+      {isNotFound && (
+        <div className="flex-grow flex justify-center items-center flex-col gap-2 bg-empty-not-found-list bg-right-top bg-no-repeat max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
+          <p className="text-secondary-text text-center">List not found</p>
+        </div>
       )}
     </div>
   );

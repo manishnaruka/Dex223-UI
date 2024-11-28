@@ -149,15 +149,10 @@ const Positions = () => {
       ) : (
         <>
           {!isConnected ? (
-            <div className="w-full overflow-hidden">
-              <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 relative">
-                <div className="absolute inset-0 overflow-hidden rounded-5">
-                  <EmptyStateIcon iconName="wallet" className="absolute right-0" />
-                </div>
-                <p className="text-16 text-secondary-text relative z-10">
-                  {t("connect_wallet_your_liquidity")}
-                </p>
-              </div>
+            <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180">
+              <p className="text-secondary-text">
+                {t("connect_wallet_your_liquidity")}
+              </p>
             </div>
           ) : (
             <>
@@ -195,15 +190,10 @@ const Positions = () => {
                   </div>
                 </div>
               ) : (
-                <div className="w-full overflow-hidden">
-                  <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 relative">
-                    <div className="absolute inset-0 overflow-hidden rounded-5">
-                      <EmptyStateIcon iconName="pool" className="absolute right-0" />
-                    </div>
-                    <p className="text-16 text-secondary-text relative z-10">
-                      {t("your_positions_here")}
-                    </p>
-                  </div>
+                <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 relative bg-empty-pool bg-no-repeat bg-right-top max-md:bg-size-180">
+                  <p className="text-secondary-text">
+                    {t("your_positions_here")}
+                  </p>
                 </div>
               )}
             </>

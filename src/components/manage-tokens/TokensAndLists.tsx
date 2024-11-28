@@ -6,7 +6,6 @@ import SimpleBar from "simplebar-react";
 
 import Checkbox from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
@@ -89,8 +88,8 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
     <>
       <DialogHeader onClose={handleClose} title={t("manage_tokens")} />
 
-      <div className="w-full md:w-[600px] h-[580px] flex flex-col px-4 md:px-10">
-        <div className="grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3  mb-3">
+      <div className="w-full md:w-[600px] h-[580px] flex flex-col">
+        <div className="grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3  mb-3 mx-4 md:mx-10">
           {[t("lists"), t("tokens")].map((title, index) => {
             return (
               <TabButton
@@ -108,7 +107,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
 
         {activeTab === 0 && (
           <div className="flex-grow flex flex-col">
-            <div className="flex gap-3">
+            <div className="flex gap-3 px-4 md:px-10">
               <SearchInput
                 value={listSearchValue}
                 onChange={(e) => setListSearchValue(e.target.value)}
@@ -116,7 +115,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               />
             </div>
 
-            <div className="w-full flex items-center mt-3 gap-px">
+            <div className="w-full flex items-center mt-3 gap-px px-4 md:px-10">
               <Button
                 endIcon="import-list"
                 colorScheme={ButtonColor.LIGHT_GREEN}
@@ -130,54 +129,55 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
 
             {Boolean(filteredLists?.length) && (
-              <ScrollbarContainer className="mt-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={392}>
-                <div className="flex flex-col gap-3" id="manage-lists-container">
-                  {filteredLists
-                    ?.filter((l) => Boolean(l.list.tokens.length))
-                    ?.map((tokenList) => {
-                      return (
-                        <TokenListItem
-                          toggle={async () => {
-                            const otherEnabledLists = lists?.filter(
-                              (l) =>
-                                Boolean(l.enabled) &&
-                                Boolean(l.list.tokens.length) &&
-                                l.id !== tokenList.id,
-                            );
-
-                            const totalTokensInOtherEnabledLists = otherEnabledLists?.reduce(
-                              (accumulator, currentValue) =>
-                                accumulator + currentValue.list.tokens.length,
-                              0,
-                            );
-
-                            if (
-                              tokenList.enabled &&
-                              (!totalTokensInOtherEnabledLists ||
-                                totalTokensInOtherEnabledLists < 2)
-                            ) {
-                              addToast(
-                                "You can't disable this token list. Please, enable any other one and try again",
-                                "warning",
+              <div className="px-4 md:px-10">
+                <ScrollbarContainer className="mt-3 -mr-3 pr-3 md:-mr-8 md:pr-8 " height={392}>
+                  <div className="flex flex-col gap-3" id="manage-lists-container">
+                    {filteredLists
+                      ?.filter((l) => Boolean(l.list.tokens.length))
+                      ?.map((tokenList) => {
+                        return (
+                          <TokenListItem
+                            toggle={async () => {
+                              const otherEnabledLists = lists?.filter(
+                                (l) =>
+                                  Boolean(l.enabled) &&
+                                  Boolean(l.list.tokens.length) &&
+                                  l.id !== tokenList.id,
                               );
-                              return;
-                            }
 
-                            (db.tokenLists as any).update(tokenList.id, {
-                              enabled: !tokenList.enabled,
-                            });
-                          }}
-                          tokenList={tokenList}
-                          key={tokenList.id}
-                        />
-                      );
-                    })}
-                </div>
-              </ScrollbarContainer>
+                              const totalTokensInOtherEnabledLists = otherEnabledLists?.reduce(
+                                (accumulator, currentValue) =>
+                                  accumulator + currentValue.list.tokens.length,
+                                0,
+                              );
+
+                              if (
+                                tokenList.enabled &&
+                                (!totalTokensInOtherEnabledLists ||
+                                  totalTokensInOtherEnabledLists < 2)
+                              ) {
+                                addToast(
+                                  "You can't disable this token list. Please, enable any other one and try again",
+                                  "warning",
+                                );
+                                return;
+                              }
+
+                              (db.tokenLists as any).update(tokenList.id, {
+                                enabled: !tokenList.enabled,
+                              });
+                            }}
+                            tokenList={tokenList}
+                            key={tokenList.id}
+                          />
+                        );
+                      })}
+                  </div>
+                </ScrollbarContainer>
+              </div>
             )}
             {Boolean(filteredLists && !filteredLists.length && isListFilterActive) && (
-              <div className="flex items-center justify-center gap-2 flex-col h-full">
-                <EmptyStateIcon iconName="search-list" />
+              <div className="flex items-center justify-center gap-2 flex-col h-full bg-empty-not-found-list bg-right-top bg-no-repeat max-md:bg-size-180">
                 <span className="text-secondary-text">List not found</span>
               </div>
             )}
@@ -185,8 +185,8 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
         )}
 
         {activeTab === 1 && (
-          <div className="flex-grow flex flex-col">
-            <div className="flex gap-3">
+          <div className="flex-grow flex flex-col ">
+            <div className="flex gap-3 px-4 md:px-10">
               <SearchInput
                 value={tokensSearchValue}
                 onChange={(e) => setTokensSearchValue(e.target.value)}
@@ -194,7 +194,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               />
             </div>
 
-            <div className="w-full flex items-center mt-3 gap-px">
+            <div className="w-full flex items-center mt-3 gap-px px-4 md:px-10">
               <Button
                 endIcon="import-token"
                 colorScheme={ButtonColor.LIGHT_GREEN}
@@ -207,7 +207,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               <ButtonTooltip text={t("import_token_tooltip")} />
             </div>
 
-            <div className="flex justify-between items-center my-3">
+            <div className="flex justify-between items-center my-3 px-4 md:px-10">
               <div>
                 {t("total")}{" "}
                 {onlyCustom ? (
@@ -225,9 +225,9 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                 />
               </div>
             </div>
-            <div className="bg-secondary-border h-px" />
+            <div className="bg-secondary-border h-px mx-4 md:mx-10" />
 
-            <div className="flex flex-col flex-grow">
+            <div className="flex flex-col flex-grow px-4 md:px-10">
               <div style={{ flex: "1 1 auto" }} className="pb-[1px] -mr-3 md:-mr-8">
                 {Boolean(filteredTokens.length) && (
                   <SimpleBar
@@ -259,27 +259,18 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                     </div>
                   </SimpleBar>
                 )}
-
-                {Boolean(!filteredTokens.length && onlyCustom && !isTokenFilterActive) && (
-                  <div className="flex items-center justify-center gap-2 flex-col h-full">
-                    <EmptyStateIcon iconName="custom" />
-                    <span className="text-secondary-text">{t("no_custom_yet")}</span>
-                  </div>
-                )}
-                {Boolean(!filteredTokens.length && !onlyCustom && !isTokenFilterActive) && (
-                  <div className="flex items-center justify-center gap-2 flex-col h-full">
-                    <EmptyStateIcon iconName="tokens" />
-                    <span className="text-secondary-text">{t("no_tokens_yet")}</span>
-                  </div>
-                )}
-                {Boolean(!filteredTokens.length && isTokenFilterActive) && (
-                  <div className="flex items-center justify-center gap-2 flex-col h-full">
-                    <EmptyStateIcon iconName="search" />
-                    <span className="text-secondary-text">{t("token_not_found")}</span>
-                  </div>
-                )}
               </div>
             </div>
+            {Boolean(!filteredTokens.length && onlyCustom && !isTokenFilterActive) && (
+              <div className="flex items-center justify-center gap-2 flex-col h-full bg-empty-custom-token bg-right-top bg-no-repeat max-md:bg-size-180">
+                <span className="text-secondary-text">{t("no_custom_yet")}</span>
+              </div>
+            )}
+            {Boolean(!filteredTokens.length && isTokenFilterActive) && (
+              <div className="flex items-center justify-center gap-2 flex-col h-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180">
+                <span className="text-secondary-text">{t("token_not_found")}</span>
+              </div>
+            )}
           </div>
         )}
       </div>

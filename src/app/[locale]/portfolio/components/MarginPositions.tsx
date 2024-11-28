@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
@@ -129,9 +128,12 @@ export const MarginPositions = () => {
               })
             )}
           </div>
+        ) : Boolean(searchValue) ? (
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-margin-position bg-no-repeat bg-right-top max-md:bg-size-180">
+            <span className="text-secondary-text">Margin positions not found</span>
+          </div>
         ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="margin-positions" />
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-no-margin-positions bg-no-repeat bg-right-top max-md:bg-size-180">
             <span className="text-secondary-text">No margin positions yet</span>
           </div>
         )}

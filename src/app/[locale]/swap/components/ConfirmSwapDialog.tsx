@@ -550,7 +550,7 @@ export default function ConfirmSwapDialog() {
         setIsOpen(isOpen);
       }}
     >
-      <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
+      <div className="bg-primary-bg rounded-5 w-full sm:w-[600px]">
         <DialogHeader
           onClose={() => {
             setIsOpen(false);
@@ -686,15 +686,16 @@ export default function ConfirmSwapDialog() {
               {tokenA?.isToken && tokenAStandard === Standard.ERC20 && !isAllowedA && (
                 <div
                   className={clsx(
-                    "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-2 gap-5",
-                    +amountToApprove < +typedValue && "pb-[26px]",
+                    "bg-tertiary-bg rounded-3 flex items-center px-5 py-2 min-h-12 mt-2 gap-2",
+                    +amountToApprove < +typedValue && "sm:pb-[26px]",
                   )}
                 >
-                  <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                    <Tooltip text={"Tooltip_text"} />
-                    <span>Approve amount</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-grow justify-end">
+                  <div className="sm:items-center sm:justify-between sm:gap-5 flex-grow flex flex-col gap-1 sm:flex-row">
+                    <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap sm:flex-row-reverse">
+                      <span>Approve amount</span>
+                      <Tooltip text={"Tooltip_text"} />
+                    </div>
+
                     {!isEditApproveActive ? (
                       <span>
                         {amountToApprove} {tokenA.symbol}
@@ -720,17 +721,22 @@ export default function ConfirmSwapDialog() {
                           </span>
                         </div>
                         {+amountToApprove < +typedValue && (
-                          <span className="text-red-light absolute text-12 translate-y-0.5">
+                          <span className="text-red-light sm:absolute text-12 sm:translate-y-0.5">
                             Must be higher or equal {typedValue}
                           </span>
                         )}
                       </div>
                     )}
+                  </div>
+
+                  <div className="flex items-center">
                     {!isEditApproveActive ? (
                       <Button
                         size={ButtonSize.EXTRA_SMALL}
+                        mobileSize={ButtonSize.SMALL}
                         colorScheme={ButtonColor.LIGHT_GREEN}
                         onClick={() => setEditApproveActive(true)}
+                        className="!rounded-20"
                       >
                         Edit
                       </Button>
@@ -738,8 +744,10 @@ export default function ConfirmSwapDialog() {
                       <Button
                         disabled={+amountToApprove < +typedValue}
                         size={ButtonSize.EXTRA_SMALL}
+                        mobileSize={ButtonSize.SMALL}
                         colorScheme={ButtonColor.LIGHT_GREEN}
                         onClick={() => setEditApproveActive(false)}
+                        className="!rounded-20"
                       >
                         Save
                       </Button>

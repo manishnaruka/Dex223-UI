@@ -54,7 +54,6 @@ export default function ImportList({ setContent, handleClose }: Props) {
         </div>
 
         {importType === "url" && <ImportListWithURL setContent={setContent} />}
-
         {importType === "json" && <ImportListWithJSON setContent={setContent} />}
         {importType === "contract" && <ImportListWithContract setContent={setContent} />}
       </div>

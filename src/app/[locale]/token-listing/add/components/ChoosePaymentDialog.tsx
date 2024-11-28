@@ -9,7 +9,6 @@ import { useChoosePaymentDialogStore } from "@/app/[locale]/token-listing/add/st
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
@@ -52,7 +51,7 @@ export default function ChoosePaymentDialog() {
           placeholder="Search name or paste contract"
         />
       </div>
-      <div className="flex flex-col gap-2 pb-4">
+      <div className="flex flex-col gap-2 pb-4 h-[511px]">
         {Boolean(!searchValue || (searchValue && payments?.length)) &&
           payments?.map((a) => {
             return (
@@ -96,9 +95,8 @@ export default function ChoosePaymentDialog() {
             );
           })}
         {searchValue && payments && !payments.length && (
-          <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col">
-            <EmptyStateIcon iconName="search-autolisting" />
-            <span className="text-secondary-text">No tokens found</span>
+          <div className="h-[531px] flex items-center rounded-5 bg-primary-bg justify-center flex-col bg-empty-listing-payment-method-not-found bg-right-top bg-no-repeat pt-5 -mt-5 max-md:bg-size-180">
+            <span className="text-secondary-text">Listing payment method not found</span>
           </div>
         )}
       </div>
