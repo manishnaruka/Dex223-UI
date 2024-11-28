@@ -394,230 +394,240 @@ export default function PoolPage({
             }
           }}
         >
-          <DialogHeader onClose={handleClose} title="Claim fees" />
-          <div className="px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 h-[80dvh] md:h-auto overflow-y-auto">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
-                  <Image
-                    className="absolute left-0 top-0 w-[24px] h-[24px] lg:w-[34px] lg:h-[34px]"
-                    width={24}
-                    height={24}
-                    src={token0?.logoURI as any}
-                    alt=""
-                  />
-                  <div className="w-[24px] h-[24px] lg:w-[34px] lg:h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
-                    <Image width={32} height={32} src={token1?.logoURI as any} alt="" />
+          <div className="flex flex-col h-screen md:h-auto">
+            {/*<div className="h-16">*/}
+            <DialogHeader onClose={handleClose} title={t("claim_fees_title")} />
+            {/*</div>*/}
+            <div className="flex-grow px-4 md:px-10 md:w-[570px] overflow-y-auto md:overflow-y-hidden">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
+                    <Image
+                      className="absolute left-0 top-0 w-[24px] h-[24px] lg:w-[34px] lg:h-[34px]"
+                      width={24}
+                      height={24}
+                      src={token0?.logoURI as any}
+                      alt=""
+                    />
+                    <div className="w-[24px] h-[24px] lg:w-[34px] lg:h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
+                      <Image width={32} height={32} src={token1?.logoURI as any} alt="" />
+                    </div>
                   </div>
+                  <span className="text-16 lg:text-18 font-bold">{`${token0?.symbol} and ${token1?.symbol}`}</span>
                 </div>
-                <span className="text-16 lg:text-18 font-bold">{`${token0?.symbol} and ${token1?.symbol}`}</span>
-              </div>
-              <div className="flex items-center gap-2 justify-end">
-                {hash && (
-                  <a
-                    target="_blank"
-                    href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
-                  >
-                    <IconButton iconName="forward" />
-                  </a>
-                )}
+                <div className="flex items-center gap-2 justify-end">
+                  {hash && (
+                    <a
+                      target="_blank"
+                      href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
+                    >
+                      <IconButton iconName="forward" />
+                    </a>
+                  )}
 
-                {status === CollectFeesStatus.PENDING && (
-                  <>
-                    <Preloader type="linear" />
-                    <span className="text-secondary-text text-14">Proceed in your wallet</span>
-                  </>
-                )}
-                {status === CollectFeesStatus.LOADING && <Preloader size={20} />}
-                {status === CollectFeesStatus.SUCCESS && (
-                  <Svg className="text-green" iconName="done" size={20} />
-                )}
-                {status === CollectFeesStatus.ERROR && (
-                  <Svg className="text-red-light" iconName="warning" size={24} />
-                )}
+                  {status === CollectFeesStatus.PENDING && (
+                    <>
+                      <Preloader type="linear" />
+                      <span className="text-secondary-text text-14">Proceed in your wallet</span>
+                    </>
+                  )}
+                  {status === CollectFeesStatus.LOADING && <Preloader size={20} />}
+                  {status === CollectFeesStatus.SUCCESS && (
+                    <Svg className="text-green" iconName="done" size={20} />
+                  )}
+                  {status === CollectFeesStatus.ERROR && (
+                    <Svg className="text-red-light" iconName="warning" size={24} />
+                  )}
+                </div>
               </div>
-            </div>
-            {/* Standard A */}
-            <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
-              <div
-                className={clsx("flex gap-2 items-center", token0?.isNative && "justify-between")}
-              >
-                {token0?.isNative ? (
-                  <>
-                    <div className="flex gap-2 items-center">
+              {/* Standard A */}
+              <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
+                <div
+                  className={clsx("flex gap-2 items-center", token0?.isNative && "justify-between")}
+                >
+                  {token0?.isNative ? (
+                    <>
+                      <div className="flex gap-2 items-center">
+                        <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
+                        <span className="text-16 font-bold text-secondary-text">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
+                        <Badge color="green" text="Native" />
+                      </div>
+                      <span className="text-14 lg:text-16">
+                        {`${token0FeeFormatted} ${token0.symbol}`}
+                      </span>
+                    </>
+                  ) : (
+                    <>
                       <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
                       <span className="text-16 font-bold text-secondary-text">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
-                      <Badge color="green" text="Native" />
-                    </div>
-                    <span className="text-14 lg:text-16">
-                      {`${token0FeeFormatted} ${token0.symbol}`}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Image width={24} height={24} src={token0?.logoURI as any} alt="" />
-                    <span className="text-16 font-bold text-secondary-text">{`${token0?.isNative ? "Collecting" : "Standard for collecting"} ${token0?.symbol}`}</span>
-                  </>
+                    </>
+                  )}
+                </div>
+                {token0?.isNative ? null : (
+                  <div className="flex flex-col gap-2 md:gap-3 mt-3">
+                    <RadioButton
+                      isActive={token0Standard === Standard.ERC20}
+                      onClick={() => setToken0Standard(Standard.ERC20)}
+                      disabled={
+                        token0Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
+                      }
+                    >
+                      <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
+                        <div className="flex items-center gap-2 md:w-auto">
+                          <span className="text-sm lg:text-base ">{t("standard")}</span>
+                          <Badge color="green" text="ERC-20" />
+                        </div>
+                        <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
+                          {`${token0FeeFormatted} ${token0?.symbol}`}
+                        </span>
+                      </div>
+                    </RadioButton>
+                    <RadioButton
+                      isActive={token0Standard === Standard.ERC223}
+                      onClick={() => setToken0Standard(Standard.ERC223)}
+                      disabled={
+                        token0Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
+                      }
+                    >
+                      <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
+                        <div className="flex items-center gap-2 md:w-auto">
+                          <span className="text-sm lg:text-base ">{t("standard")}</span>
+                          <Badge color="green" text="ERC-223" />
+                        </div>
+                        <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
+                          {`${token0FeeFormatted} ${token0?.symbol}`}
+                        </span>
+                      </div>
+                    </RadioButton>
+                  </div>
                 )}
               </div>
-              {token0?.isNative ? null : (
-                <div className="flex flex-col gap-2 md:gap-3 mt-3">
-                  <RadioButton
-                    isActive={token0Standard === Standard.ERC20}
-                    onClick={() => setToken0Standard(Standard.ERC20)}
-                    disabled={
-                      token0Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
-                    }
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <span className="text-14 lg:text-16">Standard</span>
-                        <Badge color="green" text="ERC-20" />
+              {/* Standard B */}
+              <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
+                <div
+                  className={clsx("flex gap-2 items-center", token1?.isNative && "justify-between")}
+                >
+                  {token1?.isNative ? (
+                    <>
+                      <div className="flex gap-2 items-center">
+                        <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
+                        <span className="text-16 font-bold text-secondary-text">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
+                        <Badge color="green" text="Native" />
                       </div>
-                      <span className="text-14 lg:text-16">{`${token0FeeFormatted} ${token0?.symbol}`}</span>
-                    </div>
-                  </RadioButton>
-                  <RadioButton
-                    isActive={token0Standard === Standard.ERC223}
-                    onClick={() => setToken0Standard(Standard.ERC223)}
-                    disabled={
-                      token0Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
-                    }
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <span className="text-14 lg:text-16">Standard</span>
-                        <Badge color="green" text="ERC-223" />
-                      </div>
-                      <span className="text-14 lg:text-16">{`${token0FeeFormatted} ${token0?.symbol}`}</span>
-                    </div>
-                  </RadioButton>
-                </div>
-              )}
-            </div>
-            {/* Standard B */}
-            <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
-              <div
-                className={clsx("flex gap-2 items-center", token1?.isNative && "justify-between")}
-              >
-                {token1?.isNative ? (
-                  <>
-                    <div className="flex gap-2 items-center">
+                      <span className="text-14 lg:text-16">{token1FeeFormatted}</span>
+                    </>
+                  ) : (
+                    <>
                       <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
                       <span className="text-16 font-bold text-secondary-text">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
-                      <Badge color="green" text="Native" />
-                    </div>
-                    <span className="text-14 lg:text-16">{token1FeeFormatted}</span>
-                  </>
-                ) : (
-                  <>
-                    <Image width={24} height={24} src={token1?.logoURI as any} alt="" />
-                    <span className="text-16 font-bold text-secondary-text">{`${token1?.isNative ? "Collecting" : "Standard for collecting"} ${token1?.symbol}`}</span>
-                  </>
+                    </>
+                  )}
+                </div>
+                {token1?.isNative ? null : (
+                  <div className="flex flex-col gap-2 mt-3">
+                    <RadioButton
+                      isActive={token1Standard === Standard.ERC20}
+                      onClick={() => setToken1Standard(Standard.ERC20)}
+                      disabled={
+                        token1Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
+                      }
+                    >
+                      <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
+                        <div className="flex items-center gap-2 md:w-auto">
+                          <span className="text-sm lg:text-base ">{t("standard")}</span>
+                          <Badge color="green" text="ERC-20" />
+                        </div>
+                        <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
+                          {`${token1FeeFormatted} ${token1?.symbol}`}
+                        </span>
+                      </div>
+                    </RadioButton>
+                    <RadioButton
+                      isActive={token1Standard === Standard.ERC223}
+                      onClick={() => setToken1Standard(Standard.ERC223)}
+                      disabled={
+                        token1Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
+                      }
+                    >
+                      <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
+                        <div className="flex items-center gap-2 md:w-auto">
+                          <span className="text-sm lg:text-base ">{t("standard")}</span>
+                          <Badge color="green" text="ERC-223" />
+                        </div>
+                        <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
+                          {`${token1FeeFormatted} ${token1?.symbol}`}
+                        </span>
+                      </div>
+                    </RadioButton>
+                  </div>
                 )}
               </div>
-              {token1?.isNative ? null : (
-                <div className="flex flex-col gap-2 mt-3">
-                  <RadioButton
-                    isActive={token1Standard === Standard.ERC20}
-                    onClick={() => setToken1Standard(Standard.ERC20)}
-                    disabled={
-                      token1Standard !== Standard.ERC20 && status !== CollectFeesStatus.INITIAL
-                    }
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <span className="text-14 lg:text-16">Standard</span>
-                        <Badge color="green" text="ERC-20" />
-                      </div>
-                      <span className="text-14 lg:text-16">
-                        {`${token1FeeFormatted} ${token1?.symbol}`}
-                      </span>
-                    </div>
-                  </RadioButton>
-                  <RadioButton
-                    isActive={token1Standard === Standard.ERC223}
-                    onClick={() => setToken1Standard(Standard.ERC223)}
-                    disabled={
-                      token1Standard !== Standard.ERC223 && status !== CollectFeesStatus.INITIAL
-                    }
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <span className="text-14 lg:text-16">Standard</span>
-                        <Badge color="green" text="ERC-223" />
-                      </div>
-                      <span className="text-14 lg:text-16">
-                        {`${token1FeeFormatted} ${token1?.symbol}`}
-                      </span>
-                    </div>
-                  </RadioButton>
-                </div>
-              )}
-            </div>
-            <div className="text-secondary-text my-4 text-14 lg:text-16">
-              Collectinq fees will withdraw currently available fees for you
-            </div>
-
-            <RemoveLiquidityGasSettings
-              gasPriceOption={gasPriceOption}
-              gasPriceSettings={gasPriceSettings}
-              setGasPriceOption={setGasPriceOption}
-              setGasPriceSettings={setGasPriceSettings}
-              estimatedGas={estimatedGas}
-              customGasLimit={customGasLimit}
-              setEstimatedGas={setEstimatedGas}
-              setCustomGasLimit={setCustomGasLimit}
-              isAdvanced={isAdvanced}
-              setIsAdvanced={setIsAdvanced}
-              gasPrice={gasPrice}
-            />
-
-            {[CollectFeesStatus.INITIAL].includes(status) ? (
-              <Button onClick={() => handleCollectFees()} fullWidth>
-                {t("collect_fees_title")}
-              </Button>
-            ) : null}
-            {CollectFeesStatus.LOADING === status ? (
-              <Button fullWidth isLoading={true}>
-                {t("collect_fees_title")}
-                <span className="flex items-center gap-2">
-                  <Preloader size={20} color="black" />
-                </span>
-              </Button>
-            ) : null}
-            {CollectFeesStatus.PENDING === status ? (
-              <Button fullWidth disabled>
-                <span className="flex items-center gap-2">
-                  <Preloader size={20} color="green" type="linear" />
-                </span>
-              </Button>
-            ) : null}
-            {[CollectFeesStatus.ERROR].includes(status) ? (
-              <div className="flex flex-col gap-5">
-                <Alert
-                  withIcon={false}
-                  type="error"
-                  text={
-                    <span>
-                      {t("failed_transaction_error_message")}{" "}
-                      <a href="#" className="text-green underline">
-                        {t("common_errors")}
-                      </a>
-                      .
-                    </span>
-                  }
-                />
-                <Button onClick={() => handleCollectFees()} fullWidth>
-                  Try again
-                </Button>
+              <div className="text-secondary-text my-4 text-14 lg:text-16">
+                {t("collecting_fee_message")}
               </div>
-            ) : null}
-            {[CollectFeesStatus.SUCCESS].includes(status) ? (
-              <Button onClick={handleClose} fullWidth>
-                Close
-              </Button>
-            ) : null}
+            </div>
+            <div className="flex-shrink-0 w-full h-[1px] bg-quaternary-bg mb-4 md:hidden" />
+            <div className="flex-shrink-0 px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 md:h-auto">
+              <RemoveLiquidityGasSettings
+                gasPriceOption={gasPriceOption}
+                gasPriceSettings={gasPriceSettings}
+                setGasPriceOption={setGasPriceOption}
+                setGasPriceSettings={setGasPriceSettings}
+                estimatedGas={estimatedGas}
+                customGasLimit={customGasLimit}
+                setEstimatedGas={setEstimatedGas}
+                setCustomGasLimit={setCustomGasLimit}
+                isAdvanced={isAdvanced}
+                setIsAdvanced={setIsAdvanced}
+                gasPrice={gasPrice}
+              />
+
+              {[CollectFeesStatus.INITIAL].includes(status) ? (
+                <Button onClick={() => handleCollectFees()} fullWidth>
+                  {t("collect_fees_title")}
+                </Button>
+              ) : null}
+              {CollectFeesStatus.LOADING === status ? (
+                <Button fullWidth isLoading={true}>
+                  {t("collect_fees_title")}
+                  <span className="flex items-center gap-2">
+                    <Preloader size={20} color="black" />
+                  </span>
+                </Button>
+              ) : null}
+              {CollectFeesStatus.PENDING === status ? (
+                <Button fullWidth disabled>
+                  <span className="flex items-center gap-2">
+                    <Preloader size={20} color="green" type="linear" />
+                  </span>
+                </Button>
+              ) : null}
+              {[CollectFeesStatus.ERROR].includes(status) ? (
+                <div className="flex flex-col gap-5">
+                  <Alert
+                    withIcon={false}
+                    type="error"
+                    text={
+                      <span>
+                        {t("failed_transaction_error_message")}{" "}
+                        <a href="#" className="text-green underline">
+                          {t("common_errors")}
+                        </a>
+                        .
+                      </span>
+                    }
+                  />
+                  <Button onClick={() => handleCollectFees()} fullWidth>
+                    Try again
+                  </Button>
+                </div>
+              ) : null}
+              {[CollectFeesStatus.SUCCESS].includes(status) ? (
+                <Button onClick={handleClose} fullWidth>
+                  Close
+                </Button>
+              ) : null}
+            </div>
           </div>
         </DrawerDialog>
       </div>
