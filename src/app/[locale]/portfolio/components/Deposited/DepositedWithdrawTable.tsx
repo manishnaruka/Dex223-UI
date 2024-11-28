@@ -174,13 +174,19 @@ const WithdrawTableItem = ({
 export const WithdrawDesktopTable = ({
   tableData,
   setTokenForPortfolio,
+  tokenForWithdraw,
 }: {
   tableData: TableData;
   setTokenForPortfolio: any;
+  tokenForWithdraw: any;
 }) => {
   const tableItems: any[] = [];
   let line = 0;
   for (let deposite of tableData) {
+    if (tokenForWithdraw.token.address0 !== deposite.token.address0) {
+      continue;
+    }
+
     if (deposite.deposited) {
       tableItems.push(
         <WithdrawTableItem
@@ -314,12 +320,17 @@ const WithdrawMobileTableItem = ({
 export const WithdrawMobileTable = ({
   tableData,
   setTokenForPortfolio,
+  tokenForWithdraw,
 }: {
   tableData: TableData;
   setTokenForPortfolio: any;
+  tokenForWithdraw: any;
 }) => {
   const tableItems: any[] = [];
   for (let deposite of tableData) {
+    if (tokenForWithdraw.token.address0 !== deposite.token.address0) {
+      continue;
+    }
     if (deposite.deposited) {
       tableItems.push(
         <WithdrawMobileTableItem

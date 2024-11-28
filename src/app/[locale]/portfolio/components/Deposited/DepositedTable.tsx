@@ -69,12 +69,14 @@ const DepositedTokenTableItem = ({
   deposite,
   walletAddresses,
   onDetailsClick,
+  onWithdrawDetailsClick,
   setIsWithdrawDetailsOpened,
   isOdd,
 }: {
   deposite: WalletDeposite;
   walletAddresses: Address[];
   onDetailsClick: () => void;
+  onWithdrawDetailsClick: () => void;
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
   isOdd: boolean;
 }) => {
@@ -122,6 +124,7 @@ const DepositedTokenTableItem = ({
             variant={ButtonVariant.CONTAINED}
             size={ButtonSize.MEDIUM}
             onClick={() => {
+              onWithdrawDetailsClick();
               setIsWithdrawDetailsOpened(true);
             }}
           >
@@ -155,10 +158,12 @@ const DepositedTokenTableItem = ({
 export const DesktopTable = ({
   tableData,
   setTokenForPortfolio,
+  setTokenForWithdraw,
   setIsWithdrawDetailsOpened,
 }: {
   tableData: TableData;
   setTokenForPortfolio: any;
+  setTokenForWithdraw: any;
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
   let line = -1;
@@ -182,6 +187,9 @@ export const DesktopTable = ({
             deposite={deposite}
             isOdd={line % 2 === 1}
             walletAddresses={deposite.walletAddresses}
+            onWithdrawDetailsClick={() => {
+              setTokenForWithdraw(deposite);
+            }}
             onDetailsClick={() => {
               setTokenForPortfolio(deposite.token);
             }}
@@ -197,11 +205,13 @@ const DepositedTokenMobileTableItem = ({
   deposite,
   walletAddress,
   onDetailsClick,
+  onWithdrawDetailsClick,
   setIsWithdrawDetailsOpened,
 }: {
   deposite: WalletDeposite;
   walletAddress: Address;
   onDetailsClick: () => void;
+  onWithdrawDetailsClick: () => void;
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
   const chainId = useCurrentChainId();
@@ -264,7 +274,10 @@ const DepositedTokenMobileTableItem = ({
               variant={ButtonVariant.CONTAINED}
               colorScheme={ButtonColor.LIGHT_GREEN}
               size={ButtonSize.MEDIUM}
-              onClick={() => setIsWithdrawDetailsOpened(true)}
+              onClick={() => {
+                onWithdrawDetailsClick();
+                setIsWithdrawDetailsOpened(true);
+              }}
             >
               Details
             </Button>
@@ -295,10 +308,12 @@ const DepositedTokenMobileTableItem = ({
 export const MobileTable = ({
   tableData,
   setTokenForPortfolio,
+  setTokenForWithdraw,
   setIsWithdrawDetailsOpened,
 }: {
   tableData: TableData;
   setTokenForPortfolio: any;
+  setTokenForWithdraw: any;
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
   return (
@@ -309,6 +324,9 @@ export const MobileTable = ({
             key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
             deposite={deposite}
             walletAddress={deposite.walletAddresses[0]}
+            onWithdrawDetailsClick={() => {
+              setTokenForWithdraw(deposite);
+            }}
             onDetailsClick={() => {
               setTokenForPortfolio(deposite.token);
             }}

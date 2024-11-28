@@ -37,7 +37,9 @@ export const Deposited = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
+  const [tokenForWithdraw, setTokenForWithdraw] = useState<Token | null>(null);
   const isTokenInfoOpened = Boolean(tokenForPortfolio);
+
   const handleCloseTokenInfo = () => {
     setTokenForPortfolio(null);
   };
@@ -140,11 +142,13 @@ export const Deposited = () => {
             <DesktopTable
               tableData={currentTableData}
               setTokenForPortfolio={setTokenForPortfolio}
+              setTokenForWithdraw={setTokenForWithdraw}
               setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
             />
             <MobileTable
               tableData={currentTableData}
               setTokenForPortfolio={setTokenForPortfolio}
+              setTokenForWithdraw={setTokenForWithdraw}
               setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
             />
           </>
@@ -162,10 +166,12 @@ export const Deposited = () => {
           <div className="px-4 lg:px-10 lg:pb-10 pb-4">
             <WithdrawDesktopTable
               tableData={currentTableData}
+              tokenForWithdraw={tokenForWithdraw}
               setTokenForPortfolio={setTokenForPortfolio}
             />
             <WithdrawMobileTable
               tableData={currentTableData}
+              tokenForWithdraw={tokenForWithdraw}
               setTokenForPortfolio={setTokenForPortfolio}
             />
           </div>
