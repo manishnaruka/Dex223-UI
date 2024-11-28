@@ -395,9 +395,7 @@ export default function PoolPage({
           }}
         >
           <div className="flex flex-col h-screen md:h-auto">
-            {/*<div className="h-16">*/}
             <DialogHeader onClose={handleClose} title={t("claim_fees_title")} />
-            {/*</div>*/}
             <div className="flex-grow px-4 md:px-10 md:w-[570px] overflow-y-auto md:overflow-y-hidden">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">

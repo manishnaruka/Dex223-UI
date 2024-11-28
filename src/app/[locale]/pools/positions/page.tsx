@@ -1,11 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import Container from "@/components/atoms/Container";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -23,7 +23,6 @@ import usePositions, {
 import { useRouter } from "@/navigation";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { NativeCoin } from "@/sdk_hybrid/entities/ether";
-import { useTranslations } from "next-intl";
 
 type PositionInfo = {
   nonce: bigint;
@@ -150,9 +149,7 @@ const Positions = () => {
         <>
           {!isConnected ? (
             <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180">
-              <p className="text-secondary-text">
-                {t("connect_wallet_your_liquidity")}
-              </p>
+              <p className="text-secondary-text">{t("connect_wallet_your_liquidity")}</p>
             </div>
           ) : (
             <>
@@ -191,9 +188,7 @@ const Positions = () => {
                 </div>
               ) : (
                 <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 relative bg-empty-pool bg-no-repeat bg-right-top max-md:bg-size-180">
-                  <p className="text-secondary-text">
-                    {t("your_positions_here")}
-                  </p>
+                  <p className="text-secondary-text">{t("your_positions_here")}</p>
                 </div>
               )}
             </>
