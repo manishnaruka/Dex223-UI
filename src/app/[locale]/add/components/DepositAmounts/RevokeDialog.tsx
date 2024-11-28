@@ -121,13 +121,15 @@ export const RevokeDialog = ({
                   <span>{`${t("withdraw")} ${token.symbol}`}</span>
                 )}
 
-                <Badge color="green" text={standard} />
+                <Badge color="green" text={standard} className="text-nowrap mr-auto" />
               </div>
-              <div className="flex items-center gap-2 justify-end">
+              <div className="flex items-center gap-2 justify-end ml-2 ">
                 {status === AllowanceStatus.PENDING && (
                   <>
                     <Preloader type="linear" />
-                    <span className="text-secondary-text text-14">{t("status_pending")}</span>
+                    <span className="text-secondary-text text-nowrap text-14">
+                      {t("status_pending")}
+                    </span>
                   </>
                 )}
                 {status === AllowanceStatus.LOADING && <Preloader size={20} />}
@@ -145,10 +147,12 @@ export const RevokeDialog = ({
               <>
                 <div
                   className={clsxMerge(
-                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border hocus:shadow hocus:shadow-green/60",
+                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border ",
                     isError ? "border-red" : "",
-                    inputDisabled ? "border-secondary-border" : "",
-                    isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
+                    inputDisabled
+                      ? "border border-secondary-border bg-primary-bg"
+                      : "hocus:shadow hocus:shadow-green/60 border-transparent",
+                    isFocused ? "border border-green shadow shadow-green/60" : "",
                   )}
                 >
                   <NumericFormat
