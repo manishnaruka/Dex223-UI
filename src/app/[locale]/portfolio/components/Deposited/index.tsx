@@ -17,6 +17,7 @@ import { Token } from "@/sdk_hybrid/entities/token";
 import { useActiveWalletsDeposites } from "../../stores/deposites.hooks";
 import { DesktopTable, MobileTable } from "./DepositedTable";
 import { TableData, WithdrawDesktopTable, WithdrawMobileTable } from "./DepositedWithdrawTable";
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 
 const filterTable = ({
   searchValue,
@@ -185,6 +186,8 @@ export const Deposited = () => {
             />
           </div>
         </DrawerDialog>
+
+        <RevokeDialog />
 
         <DrawerDialog isOpen={isTokenInfoOpened} setIsOpen={handleCloseTokenInfo}>
           <DialogHeader

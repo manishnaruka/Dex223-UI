@@ -2,12 +2,11 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import React from "react";
 import { Address, formatUnits } from "viem";
-import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
+import { useAccount } from "wagmi";
 
-import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import { TableData } from "@/app/[locale]/portfolio/components/Deposited/DepositedWithdrawTable";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Badge from "@/components/badges/Badge";
@@ -16,9 +15,6 @@ import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useWithdraw from "@/hooks/useWithdraw";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
 
 import { WalletDeposite } from "../../stores/useWalletsDeposites";
 
@@ -127,7 +123,7 @@ export const DesktopTable = ({
       </div>
       <div className="text-secondary-text h-[60px] flex items-center">Total Amount, $</div>
       <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action / Owner</div>
-      {tableData.map((deposite, index) => {
+      {tableData.map((deposite) => {
         line++;
         return (
           <DepositedTokenTableItem
@@ -164,7 +160,6 @@ const DepositedTokenMobileTableItem = ({
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
-  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   // @ts-ignore
   return (

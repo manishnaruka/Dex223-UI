@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Abi, Address, formatUnits, getAbiItem } from "viem";
 import {
   useAccount,

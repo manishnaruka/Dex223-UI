@@ -5,12 +5,15 @@ import { useAccount, useBalance, useBlockNumber } from "wagmi";
 import Preloader from "@/components/atoms/Preloader";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke from "@/hooks/useRevoke";
 import useWithdraw from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Standard } from "@/sdk_hybrid/standard";
+import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
 import { usePriceRange } from "../../hooks/usePrice";
@@ -30,13 +33,32 @@ import { useConfirmLiquidityDialogStore } from "../../stores/useConfirmLiquidity
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { APPROVE_BUTTON_TEXT } from "./ConfirmLiquidityDialog";
 
-export const LiquidityActionButton = ({
-  increase = false,
-  tokenId,
+const LiquidityStatusNotifier = ({
+  text,
+  buttonText,
+  onClick,
 }: {
-  increase?: boolean;
-  tokenId?: string;
+  text: string;
+  buttonText: string;
+  onClick: () => void;
 }) => {
+  return (
+    <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
+      <Preloader size={20} color="green" type="circular" />
+      <span className="mr-auto items-center text-14 text-primary-text">{text}</span>
+      <Button
+        className="ml-auto mr-3"
+        variant={ButtonVariant.CONTAINED}
+        size={ButtonSize.EXTRA_SMALL}
+        onClick={onClick}
+      >
+        {buttonText}
+      </Button>
+    </div>
+  );
+};
+
+export const LiquidityActionButton = ({ increase = false }: { increase?: boolean }) => {
   const t = useTranslations("Liquidity");
   const tWallet = useTranslations("Wallet");
   const { setIsOpen } = useConfirmLiquidityDialogStore();
@@ -62,9 +84,11 @@ export const LiquidityActionButton = ({
   const { price } = usePriceRange();
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
   const { address, isConnected } = useAccount();
+  const { status: revokeStatus } = useRevokeStatusStore();
 
   const { approveTransactionsCount, approveTransactionsType } = useLiquidityApprove();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
+  const { setIsOpenedRevokeDialog } = useRevokeDialogStatusStore();
 
   const { typedValue } = useLiquidityAmountsStore();
 
@@ -200,6 +224,26 @@ export const LiquidityActionButton = ({
     );
   }
 
+  if ([AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(revokeStatus)) {
+    return (
+      <>
+        <LiquidityStatusNotifier
+          text={t("revoke_withdraw_progress")}
+          buttonText={t("details")}
+          onClick={() => {
+            setIsOpenedRevokeDialog(true);
+          }}
+        />
+        <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
+          {t("revoke_withdraw_title")}
+          <span className="flex items-center gap-2">
+            <Preloader size={20} color="black" type="circular" />
+          </span>
+        </Button>
+      </>
+    );
+  }
+
   if (!tokenA || !tokenB) {
     return (
       <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
@@ -241,22 +285,13 @@ export const LiquidityActionButton = ({
     ) {
       return (
         <>
-          <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
-            <Preloader size={20} color="green" type="circular" />
-            <span className="mr-auto items-center text-14 text-primary-text">
-              {t("approve_liquidity_progress")}
-            </span>
-            <Button
-              className="ml-auto mr-3"
-              variant={ButtonVariant.CONTAINED}
-              size={ButtonSize.EXTRA_SMALL}
-              onClick={() => {
-                setIsOpen(true);
-              }}
-            >
-              {t("details")}
-            </Button>
-          </div>
+          <LiquidityStatusNotifier
+            text={t("approve_liquidity_progress")}
+            buttonText={t("details")}
+            onClick={() => {
+              setIsOpen(true);
+            }}
+          />
           <Button variant={ButtonVariant.CONTAINED} fullWidth isLoading={true}>
             {t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)}
             <span className="flex items-center gap-2">
@@ -266,6 +301,7 @@ export const LiquidityActionButton = ({
         </>
       );
     }
+
     return (
       <Button
         variant={ButtonVariant.CONTAINED}
@@ -291,22 +327,13 @@ export const LiquidityActionButton = ({
   if ([AddLiquidityStatus.MINT_LOADING, AddLiquidityStatus.MINT_PENDING].includes(status)) {
     return (
       <>
-        <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
-          <Preloader size={20} color="green" type="circular" />
-          <span className="mr-auto items-center text-14 text-primary-text">
-            {increase ? t("increase_liquidity_progress") : t("mint_liquidity_progress")}
-          </span>
-          <Button
-            className="ml-auto mr-3"
-            variant={ButtonVariant.CONTAINED}
-            size={ButtonSize.EXTRA_SMALL}
-            onClick={() => {
-              setIsOpen(true);
-            }}
-          >
-            {t("details")}
-          </Button>
-        </div>
+        <LiquidityStatusNotifier
+          text={increase ? t("increase_liquidity_progress") : t("mint_liquidity_progress")}
+          buttonText={t("details")}
+          onClick={() => {
+            setIsOpen(true);
+          }}
+        />
         <Button variant={ButtonVariant.CONTAINED} fullWidth isLoading={true}>
           {increase
             ? t("add_liquidity_title")

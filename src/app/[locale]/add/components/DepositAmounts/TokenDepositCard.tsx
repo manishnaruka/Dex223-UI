@@ -18,11 +18,13 @@ import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Token } from "@/sdk_hybrid/entities/token";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { RevokeDialog } from "./RevokeDialog";
+import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 
 export const InputRange = ({
   value,
@@ -246,8 +248,8 @@ function InputStandardAmount({
     charsFromEnd: 0,
   });
 
-  const [isOpenedRevokeDialog, setIsOpenedRevokeDialog] = useState(false);
-  const { setStatus } = useRevokeStatusStore();
+  const { setIsOpenedRevokeDialog, setDialogParams } = useRevokeDialogStatusStore();
+  const { status, setStatus } = useRevokeStatusStore();
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -314,10 +316,21 @@ function InputStandardAmount({
             )}
             {!!currentAllowance ? (
               <span
-                className="text-12 px-2 pt-[2px] pb-[2px] pl-4 pr-4 bg-green-bg text-secondary-text rounded-3 h-min cursor-pointer border-transparent border hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text duration-200"
+                className={`text-12 px-2 pt-[2px] pb-[2px] pl-4 pr-4 rounded-3 h-min border duration-200 ${
+                  [AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(status)
+                    ? "bg-gray-400 border-secondary-border text-gray-500 cursor-not-allowed" // Disabled styles
+                    : "bg-green-bg border-transparent text-secondary-text cursor-pointer hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text"
+                }`}
                 onClick={() => {
-                  setStatus(AllowanceStatus.INITIAL);
-                  setIsOpenedRevokeDialog(true);
+                  if (![AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(status)) {
+                    setStatus(AllowanceStatus.INITIAL);
+                    setDialogParams(
+                      currency as Token,
+                      NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+                      standard,
+                    );
+                    setIsOpenedRevokeDialog(true);
+                  }
                 }}
               >
                 {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
@@ -326,16 +339,6 @@ function InputStandardAmount({
           </>
         ) : null}
       </div>
-      {currency &&
-        currency.isToken && ( // TODO rewrite
-          <RevokeDialog
-            isOpen={isOpenedRevokeDialog}
-            setIsOpen={setIsOpenedRevokeDialog}
-            standard={standard}
-            token={currency}
-            contractAddress={NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId]}
-          />
-        )}
     </div>
   );
 }

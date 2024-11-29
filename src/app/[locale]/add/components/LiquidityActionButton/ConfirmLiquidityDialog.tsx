@@ -228,7 +228,7 @@ const ApproveDialog = () => {
         ) : null}
         {isFormInvalid ? (
           <Button fullWidth disabled>
-            <span className="flex items-center gap-2">Enter correct values</span>
+            <span className="flex items-center gap-2">{t("enter_correct_values")}</span>
           </Button>
         ) : isPending ? (
           <Button fullWidth disabled>
@@ -238,7 +238,7 @@ const ApproveDialog = () => {
           </Button>
         ) : isLoading ? (
           <Button fullWidth isLoading>
-            Approve
+            {t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)}
             <span className="flex items-center gap-2">
               <Preloader size={20} color="black" type="circular" />
             </span>

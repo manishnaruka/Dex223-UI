@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
 import {
   Field,
@@ -263,6 +264,7 @@ export default function AddPoolPage() {
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
       />
+      <RevokeDialog />
       <ConfirmLiquidityDialog />
     </Container>
   );

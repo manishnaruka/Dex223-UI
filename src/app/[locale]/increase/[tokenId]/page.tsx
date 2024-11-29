@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
@@ -40,6 +40,7 @@ import { LiquidityActionButton } from "../../add/components/LiquidityActionButto
 import { usePriceRange } from "../../add/hooks/usePrice";
 import { useSortedTokens } from "../../add/hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../add/hooks/useV3DerivedMintInfo";
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 
 export default function IncreaseLiquidityPage({
   params,
@@ -50,7 +51,6 @@ export default function IncreaseLiquidityPage({
 }) {
   useRecentTransactionTracking();
   const t = useTranslations("Liquidity");
-  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useIncreaseRecentTransactionsStore();
@@ -257,7 +257,7 @@ export default function IncreaseLiquidityPage({
               </div>
             </div>
           </div>
-          <LiquidityActionButton increase tokenId={params.tokenId} />
+          <LiquidityActionButton increase />
         </div>
         <div className="flex flex-col gap-5">
           <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
@@ -269,6 +269,7 @@ export default function IncreaseLiquidityPage({
           />
         </div>
       </div>
+      <RevokeDialog />
       <ConfirmLiquidityDialog increase tokenId={params.tokenId} />
     </Container>
   );

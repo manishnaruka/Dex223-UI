@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { Address, formatUnits, parseUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import Alert from "@/components/atoms/Alert";
@@ -19,8 +19,8 @@ import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
 import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
+import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import {
@@ -31,22 +31,31 @@ import {
   useWithdrawGasLimitStore,
 } from "../../stores/useRevokeGasSettings";
 
-export const RevokeDialog = ({
-  isOpen,
-  setIsOpen,
-  standard,
-  token,
-  contractAddress,
-}: {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  standard: Standard;
-  token?: Token;
-  contractAddress?: Address;
-}) => {
+export const RevokeDialog = (
+  {
+    // isOpen,
+    // setIsOpen,
+    // standard,
+    // token,
+    // contractAddress,
+  }: {
+    // isOpen: boolean;
+    // setIsOpen: (isOpen: boolean) => void;
+    // standard: Standard;
+    // token?: Token;
+    // contractAddress?: Address;
+  },
+) => {
   const { status } = useRevokeStatusStore();
 
   const t = useTranslations("Liquidity");
+  const {
+    isOpenedRevokeDialog: isOpen,
+    setIsOpenedRevokeDialog: setIsOpen,
+    token,
+    standard,
+    contractAddress,
+  } = useRevokeDialogStatusStore();
 
   const [localValue, setLocalValue] = useState(undefined as undefined | string);
   const localValueBigInt = useMemo(() => {
@@ -218,7 +227,7 @@ export const RevokeDialog = ({
               ) : [AllowanceStatus.INITIAL].includes(status) ? (
                 <Button
                   onClick={() => {
-                    revokeHandler(localValueBigInt);
+                    revokeHandler(localValueBigInt).then();
                   }}
                   fullWidth
                 >

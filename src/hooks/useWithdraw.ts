@@ -223,10 +223,6 @@ export default function useWithdraw({
     ],
   );
 
-  if ((currentDeposit.data || 0) > 0 && status === AllowanceStatus.SUCCESS) {
-    setStatus(AllowanceStatus.INITIAL);
-  }
-
   return {
     withdrawStatus: status,
     withdrawHandler: writeTokenWithdraw,
