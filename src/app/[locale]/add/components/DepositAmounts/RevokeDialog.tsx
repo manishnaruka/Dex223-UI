@@ -31,21 +31,7 @@ import {
   useWithdrawGasLimitStore,
 } from "../../stores/useRevokeGasSettings";
 
-export const RevokeDialog = (
-  {
-    // isOpen,
-    // setIsOpen,
-    // standard,
-    // token,
-    // contractAddress,
-  }: {
-    // isOpen: boolean;
-    // setIsOpen: (isOpen: boolean) => void;
-    // standard: Standard;
-    // token?: Token;
-    // contractAddress?: Address;
-  },
-) => {
+export const RevokeDialog = () => {
   const { status } = useRevokeStatusStore();
 
   const t = useTranslations("Liquidity");

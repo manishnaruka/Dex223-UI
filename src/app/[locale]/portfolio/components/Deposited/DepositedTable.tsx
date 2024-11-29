@@ -2,7 +2,6 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useState } from "react";
 import React from "react";
 import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -17,6 +16,13 @@ import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 import { WalletDeposite } from "../../stores/useWalletsDeposites";
+import { AllowanceStatus } from "@/hooks/useAllowance";
+import Preloader from "@/components/atoms/Preloader";
+import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
+import { useTranslations } from "next-intl";
+import { Standard } from "@/sdk_hybrid/standard";
+import useTranslation from "next-translate/useTranslation";
 
 const DepositedTokenTableItem = ({
   deposite,
@@ -75,6 +81,7 @@ const DepositedTokenTableItem = ({
           <Button
             variant={ButtonVariant.CONTAINED}
             size={ButtonSize.MEDIUM}
+            colorScheme={ButtonColor.LIGHT_GREEN}
             onClick={() => {
               onWithdrawDetailsClick();
               setIsWithdrawDetailsOpened(true);
@@ -111,37 +118,61 @@ export const DesktopTable = ({
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
   let line = -1;
+  const { status: revokeStatus } = useRevokeStatusStore();
+  const t = useTranslations("Liquidity");
+  const { setIsOpenedRevokeDialog, standard } = useRevokeDialogStatusStore();
 
   return (
-    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(60px,1.33fr),_minmax(60px,1.33fr),_minmax(50px,1.33fr),_minmax(60px,1.33fr)] pb-2 relative">
-      <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
-      <div className="text-secondary-text h-[60px] flex items-center gap-2">
-        Approved <Badge color="green" text="ERC-20" />
-      </div>
-      <div className="text-secondary-text h-[60px] flex items-center gap-2">
-        Deposited <Badge color="green" text="ERC-223" />
-      </div>
-      <div className="text-secondary-text h-[60px] flex items-center">Total Amount, $</div>
-      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action / Owner</div>
-      {tableData.map((deposite) => {
-        line++;
-        return (
-          <DepositedTokenTableItem
-            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
-            deposite={deposite}
-            isOdd={line % 2 === 1}
-            walletAddresses={deposite.walletAddresses}
-            onWithdrawDetailsClick={() => {
-              setTokenForWithdraw(deposite);
+    <>
+      {[AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(revokeStatus) && (
+        <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-6 rounded-3 items-center justify-between px-2">
+          <Preloader size={20} color="green" type="circular" />
+          <span className="mr-auto items-center text-14 text-primary-text">
+            {standard === Standard.ERC20 ? t("revoke_in_progress") : t("withdraw_in_progress")}
+          </span>
+          <Button
+            className="ml-auto mr-3"
+            variant={ButtonVariant.CONTAINED}
+            size={ButtonSize.EXTRA_SMALL}
+            onClick={() => {
+              setIsOpenedRevokeDialog(true);
             }}
-            onDetailsClick={() => {
-              setTokenForPortfolio(deposite.token);
-            }}
-            setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
-          />
-        );
-      })}
-    </div>
+          >
+            {t("details")}
+          </Button>
+        </div>
+      )}
+
+      <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(60px,1.33fr),_minmax(60px,1.33fr),_minmax(50px,1.33fr),_minmax(40px,1.1fr)] pb-2 relative">
+        <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
+        <div className="text-secondary-text h-[60px] flex items-center gap-2">
+          Approved <Badge color="green" text="ERC-20" />
+        </div>
+        <div className="text-secondary-text h-[60px] flex items-center gap-2">
+          Deposited <Badge color="green" text="ERC-223" />
+        </div>
+        <div className="text-secondary-text h-[60px] flex items-center">Total Amount, $</div>
+        <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action / Owner</div>
+        {tableData.map((deposite) => {
+          line++;
+          return (
+            <DepositedTokenTableItem
+              key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
+              deposite={deposite}
+              isOdd={line % 2 === 1}
+              walletAddresses={deposite.walletAddresses}
+              onWithdrawDetailsClick={() => {
+                setTokenForWithdraw(deposite);
+              }}
+              onDetailsClick={() => {
+                setTokenForPortfolio(deposite.token);
+              }}
+              setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 };
 
@@ -161,7 +192,6 @@ const DepositedTokenMobileTableItem = ({
   const chainId = useCurrentChainId();
   const { address } = useAccount();
 
-  // @ts-ignore
   return (
     <>
       <div
@@ -252,23 +282,25 @@ export const MobileTable = ({
   setIsWithdrawDetailsOpened: (isOpened: boolean) => void;
 }) => {
   return (
-    <div className="flex lg:hidden flex-col gap-4">
-      {tableData.map((deposite, index: number) => {
-        return (
-          <DepositedTokenMobileTableItem
-            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
-            deposite={deposite}
-            walletAddress={deposite.walletAddresses[0]}
-            onWithdrawDetailsClick={() => {
-              setTokenForWithdraw(deposite);
-            }}
-            onDetailsClick={() => {
-              setTokenForPortfolio(deposite.token);
-            }}
-            setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
-          />
-        );
-      })}
-    </div>
+    <>
+      <div className="flex lg:hidden flex-col gap-4">
+        {tableData.map((deposite, index: number) => {
+          return (
+            <DepositedTokenMobileTableItem
+              key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
+              deposite={deposite}
+              walletAddress={deposite.walletAddresses[0]}
+              onWithdrawDetailsClick={() => {
+                setTokenForWithdraw(deposite);
+              }}
+              onDetailsClick={() => {
+                setTokenForPortfolio(deposite.token);
+              }}
+              setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 };

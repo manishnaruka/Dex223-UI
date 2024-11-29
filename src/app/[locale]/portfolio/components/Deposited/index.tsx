@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import React from "react";
 
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
@@ -17,7 +18,6 @@ import { Token } from "@/sdk_hybrid/entities/token";
 import { useActiveWalletsDeposites } from "../../stores/deposites.hooks";
 import { DesktopTable, MobileTable } from "./DepositedTable";
 import { TableData, WithdrawDesktopTable, WithdrawMobileTable } from "./DepositedWithdrawTable";
-import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 
 const filterTable = ({
   searchValue,

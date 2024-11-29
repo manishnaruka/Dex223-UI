@@ -2,28 +2,26 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import React, { useEffect, useMemo, useState } from "react";
 import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
-import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { AllowanceStatus } from "@/hooks/useAllowance";
-import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
+import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { WalletDeposite } from "../../stores/useWalletsDeposites";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 
 export type TableData = {
   contractAddress: Address;
@@ -52,6 +50,16 @@ const WithdrawTableItem = ({
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
+  const { status: revokeStatus } = useRevokeStatusStore();
+  const t = useTranslations("Liquidity");
+
+  const [status, setStatus] = useState<boolean>(false);
+
+  const isLoading = useMemo(() => {
+    const going = [AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(revokeStatus);
+    if (!going) setStatus(false);
+    return going;
+  }, [revokeStatus]);
 
   return (
     <>
@@ -105,15 +113,24 @@ const WithdrawTableItem = ({
             variant={ButtonVariant.CONTAINED}
             colorScheme={ButtonColor.LIGHT_GREEN}
             size={ButtonSize.MEDIUM}
+            isLoading={isLoading}
             onClick={() => {
-              onClick();
+              if (!isLoading) {
+                setStatus(true);
+                onClick();
+              }
             }}
           >
-            {isRevoke ? "Revoke" : "Withdraw"}
+            {isRevoke ? t("revoke") : t("withdraw")}
+            {status && (
+              <span className="flex items-center gap-2">
+                <Preloader size={20} color="black" type="circular" />
+              </span>
+            )}
           </Button>
         ) : (
           <>
-            <span className="text-14 text-secondary-text">Token owner</span>
+            <span className="text-14 text-secondary-text">{t("token_owner")}</span>
             <ExternalTextLink
               text={truncateMiddle(walletAddresses[0] || "", {
                 charsFromStart: 5,
@@ -139,7 +156,7 @@ export const WithdrawDesktopTable = ({
   tokenForWithdraw: any;
   setIsWithdrawDetailsOpened: any;
 }) => {
-  const { setIsOpenedRevokeDialog, setDialogParams } = useRevokeDialogStatusStore();
+  const { setIsOpenedRevokeDialog, setDialogParams, standard } = useRevokeDialogStatusStore();
   const { status, setStatus } = useRevokeStatusStore();
 
   const tableItems = tableData
@@ -194,6 +211,10 @@ export const WithdrawDesktopTable = ({
       return items;
     });
 
+  const { status: revokeStatus } = useRevokeStatusStore();
+
+  const t = useTranslations("Liquidity");
+
   useEffect(() => {
     if (!tableItems.length) {
       setIsWithdrawDetailsOpened(false);
@@ -203,12 +224,38 @@ export const WithdrawDesktopTable = ({
   return (
     <>
       <div className="hidden lg:grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(20px,1fr)] pb-2 relative min-w-[600px]">
-        <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
-        <div className="text-secondary-text h-[60px] flex items-center gap-2">Amount</div>
-        <div className="text-secondary-text pr-5 h-[60px] flex items-center">Contract address</div>
-        <div className="text-secondary-text px-5 h-[60px] flex items-center">Action</div>
+        <div className="text-secondary-text pl-5 h-[60px] flex items-center">
+          {t("token_title")}
+        </div>
+        <div className="text-secondary-text h-[60px] flex items-center gap-2">
+          {t("amount_title")}
+        </div>
+        <div className="text-secondary-text pr-5 h-[60px] flex items-center">
+          {t("contract_address_title")}
+        </div>
+        <div className="text-secondary-text px-5 h-[60px] flex items-center">
+          {t("action_title")}
+        </div>
         {tableItems}
       </div>
+      {[AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(revokeStatus) && (
+        <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mt-4 mb-4 rounded-3 items-center justify-between px-2">
+          <Preloader size={20} color="green" type="circular" />
+          <span className="mr-auto items-center text-14 text-primary-text">
+            {standard === Standard.ERC20 ? t("revoke_in_progress") : t("withdraw_in_progress")}
+          </span>
+          <Button
+            className="ml-auto mr-3"
+            variant={ButtonVariant.CONTAINED}
+            size={ButtonSize.EXTRA_SMALL}
+            onClick={() => {
+              setIsOpenedRevokeDialog(true);
+            }}
+          >
+            {t("details")}
+          </Button>
+        </div>
+      )}
     </>
   );
 };
@@ -230,6 +277,7 @@ const WithdrawMobileTableItem = ({
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
+  const t = useTranslations("Liquidity");
 
   return (
     <>
@@ -252,10 +300,10 @@ const WithdrawMobileTableItem = ({
           </div>
         </div>
         <div className="flex gap-1 items-center">
-          <span className="text-12 text-secondary-text">{`${formatNumber(formatUnits(amount, deposite.token.decimals), 8)} ${deposite.token.symbol}`}</span>
+          <span className="text-12 text-primary-text">{`${formatNumber(formatUnits(amount, deposite.token.decimals), 8)} ${deposite.token.symbol}`}</span>
         </div>
         <div className="flex justify-between items-center rounded-2 bg-quaternary-bg px-4 py-[10px]">
-          <span className="text-14 text-secondary-text">Contract address</span>
+          <span className="text-14 text-secondary-text">{t("contract_address_title")}</span>
           <a
             className="flex gap-2 text-14 text-green cursor-pointer items-center hocus:text-green-hover"
             target="_blank"
@@ -279,7 +327,7 @@ const WithdrawMobileTableItem = ({
             </Button>
           ) : (
             <div className="flex justify-between items-center bg-tertiary-bg px-4 py-[10px] rounded-2">
-              <span className="text-14 text-secondary-text">Token owner</span>
+              <span className="text-14 text-secondary-text">{t("token_owner")}</span>
               <ExternalTextLink
                 className="text-14 text-green"
                 text={truncateMiddle(walletAddresses[0] || "", {

@@ -88,7 +88,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
 
   const { approveTransactionsCount, approveTransactionsType } = useLiquidityApprove();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
-  const { setIsOpenedRevokeDialog } = useRevokeDialogStatusStore();
+  const { setIsOpenedRevokeDialog, standard } = useRevokeDialogStatusStore();
 
   const { typedValue } = useLiquidityAmountsStore();
 
@@ -228,7 +228,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
     return (
       <>
         <LiquidityStatusNotifier
-          text={t("revoke_withdraw_progress")}
+          text={standard === Standard.ERC20 ? t("revoke_in_progress") : t("withdraw_in_progress")}
           buttonText={t("details")}
           onClick={() => {
             setIsOpenedRevokeDialog(true);
