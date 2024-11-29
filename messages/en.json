@@ -37,7 +37,7 @@
     "deposit_success_notification": "{symbol} deposited",
     "deposit_revert_notification": "Failed to deposit {symbol}",
     "withdraw_title": "Withdraw {symbol}",
-    "withdraw_success_notification": "{symbol} withdrew",
+    "withdraw_success_notification": "{symbol} withdrawn",
     "withdraw_revert_notification": "Failed to withdraw {symbol}",
     "swap_title": "Swap",
     "swap_success_notification": "Swap successful",

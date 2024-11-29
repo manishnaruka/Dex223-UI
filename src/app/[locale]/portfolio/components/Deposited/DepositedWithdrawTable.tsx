@@ -4,7 +4,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Address, formatUnits } from "viem";
-import { useAccount, useBlockNumber, useGasPrice } from "wagmi";
+import { useAccount } from "wagmi";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
@@ -13,12 +13,14 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
+import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useWithdraw from "@/hooks/useWithdraw";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
 
 import { WalletDeposite } from "../../stores/useWalletsDeposites";
+import { AllowanceStatus } from "@/hooks/useAllowance";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 export type TableData = {
   contractAddress: Address;
@@ -28,51 +30,10 @@ export type TableData = {
   approved: bigint;
 }[];
 
-const DepositedTokenWithdrawDialog = ({
-  isOpen,
-  setIsOpen,
-  token,
-  contractAddress,
-  standard,
-}: {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  token: Token;
-  contractAddress: Address;
-  standard: Standard;
-}) => {
-  const {
-    withdrawHandler,
-    currentDeposit: currentDeposit,
-    withdrawStatus,
-  } = useWithdraw({
-    token,
-    contractAddress: contractAddress,
-  });
-
-  const { refetch: refetchGasPrice } = useGasPrice(); // data: gasPrice,
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-
-  useEffect(() => {
-    refetchGasPrice();
-  }, [blockNumber, refetchGasPrice]);
-
-  return (
-    <RevokeDialog
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      standard={standard}
-      token={token}
-      status={withdrawStatus}
-      currentAllowance={currentDeposit}
-      revokeHandler={withdrawHandler}
-    />
-  );
-};
-
 const WithdrawTableItem = ({
   deposite,
   walletAddresses,
+  onClick,
   onDetailsClick,
   isRevoke,
   amount,
@@ -80,6 +41,7 @@ const WithdrawTableItem = ({
 }: {
   deposite: WalletDeposite;
   walletAddresses: Address[];
+  onClick: () => void;
   onDetailsClick: () => void;
   isRevoke: boolean;
   amount: bigint;
@@ -87,7 +49,6 @@ const WithdrawTableItem = ({
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
-  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   return (
     <>
@@ -141,7 +102,9 @@ const WithdrawTableItem = ({
             variant={ButtonVariant.CONTAINED}
             colorScheme={ButtonColor.LIGHT_GREEN}
             size={ButtonSize.MEDIUM}
-            onClick={() => setIsWithdrawOpen(true)}
+            onClick={() => {
+              onClick();
+            }}
           >
             {isRevoke ? "Revoke" : "Withdraw"}
           </Button>
@@ -158,15 +121,6 @@ const WithdrawTableItem = ({
           </>
         )}
       </div>
-      {isWithdrawOpen ? (
-        <DepositedTokenWithdrawDialog
-          isOpen={isWithdrawOpen}
-          setIsOpen={setIsWithdrawOpen}
-          token={deposite.token}
-          contractAddress={deposite.contractAddress}
-          standard={isRevoke ? Standard.ERC20 : Standard.ERC223}
-        />
-      ) : null}
     </>
   );
 };
@@ -175,75 +129,114 @@ export const WithdrawDesktopTable = ({
   tableData,
   setTokenForPortfolio,
   tokenForWithdraw,
+  setIsWithdrawDetailsOpened,
 }: {
   tableData: TableData;
   setTokenForPortfolio: any;
   tokenForWithdraw: any;
+  setIsWithdrawDetailsOpened: any;
 }) => {
-  const tableItems: any[] = [];
-  let line = 0;
-  for (let deposite of tableData) {
-    if (tokenForWithdraw.token.address0 !== deposite.token.address0) {
-      continue;
-    }
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [dialogParams, setDialogParams] = useState<{
+    standard: Standard;
+    token: Token | undefined;
+    contractAddress: Address;
+  }>({
+    standard: Standard.ERC20,
+    token: undefined,
+    contractAddress: ZERO_ADDRESS,
+  });
 
-    if (deposite.deposited) {
-      tableItems.push(
-        <WithdrawTableItem
-          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address1}`}
-          deposite={deposite}
-          isRevoke={false}
-          isOdd={line % 2 === 1}
-          amount={deposite.deposited}
-          walletAddresses={deposite.walletAddresses}
-          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
-        />,
-      );
-      line++;
-    }
-    if (deposite.approved) {
-      tableItems.push(
-        <WithdrawTableItem
-          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
-          deposite={deposite}
-          isRevoke={true}
-          isOdd={line % 2 === 1}
-          amount={deposite.approved}
-          walletAddresses={deposite.walletAddresses}
-          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
-        />,
-      );
-      line++;
-    }
-  }
+  const { setStatus } = useRevokeStatusStore();
+  const handleOpenDialog = (token: Token, contractAddress: Address, standard: Standard) => {
+    setDialogParams({ token, standard, contractAddress });
+    setStatus(AllowanceStatus.INITIAL);
+    setIsWithdrawOpen(true);
+  };
+
+  const tableItems = tableData
+    .filter((deposite) => tokenForWithdraw.token.address0 === deposite.token.address0)
+    .flatMap((deposite, index) => {
+      const items: any[] = [];
+
+      if (deposite.deposited) {
+        items.push(
+          <WithdrawTableItem
+            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address1}`}
+            deposite={deposite}
+            isRevoke={false}
+            isOdd={index % 2 === 1}
+            amount={deposite.deposited}
+            walletAddresses={deposite.walletAddresses}
+            onClick={
+              () => handleOpenDialog(deposite.token, deposite.contractAddress, Standard.ERC223) // currentDeposit,   withdrawHandler
+            }
+            onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+          />,
+        );
+      }
+
+      if (deposite.approved) {
+        items.push(
+          <WithdrawTableItem
+            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
+            deposite={deposite}
+            isRevoke={true}
+            isOdd={(index + 1) % 2 === 1}
+            amount={deposite.approved}
+            walletAddresses={deposite.walletAddresses}
+            onClick={() =>
+              handleOpenDialog(deposite.token, deposite.contractAddress, Standard.ERC20)
+            }
+            onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+          />,
+        );
+      }
+
+      return items;
+    });
+
+  // TODO should we close table if its empty?
+  // useEffect(() => {
+  //   if (!tableItems.length) {
+  //     console.log("trying to close table");
+  //     setIsWithdrawDetailsOpened(false);
+  //   }
+  // }, [setIsWithdrawDetailsOpened, tableItems]);
 
   return (
-    <div className="hidden lg:grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(20px,1fr)] pb-2 relative min-w-[600px]">
-      <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
-      <div className="text-secondary-text h-[60px] flex items-center gap-2">Amount</div>
-      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Contract address</div>
-      <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action</div>
-      {tableItems}
-    </div>
+    <>
+      <div className="hidden lg:grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(20px,1fr)] pb-2 relative min-w-[600px]">
+        <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
+        <div className="text-secondary-text h-[60px] flex items-center gap-2">Amount</div>
+        <div className="text-secondary-text pr-5 h-[60px] flex items-center">Contract address</div>
+        <div className="text-secondary-text px-5 h-[60px] flex items-center">Action</div>
+        {tableItems}
+      </div>
+      {isWithdrawOpen && (
+        <RevokeDialog isOpen={isWithdrawOpen} setIsOpen={setIsWithdrawOpen} {...dialogParams} />
+      )}
+    </>
   );
 };
 
 const WithdrawMobileTableItem = ({
   deposite,
   walletAddresses,
+  onClick,
   onDetailsClick,
   isRevoke,
   amount,
 }: {
   deposite: WalletDeposite;
   walletAddresses: Address[];
+  onClick: () => void;
   onDetailsClick: () => void;
   isRevoke: boolean;
   amount: bigint;
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
-  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   return (
     <>
@@ -285,7 +278,9 @@ const WithdrawMobileTableItem = ({
               variant={ButtonVariant.CONTAINED}
               colorScheme={ButtonColor.LIGHT_GREEN}
               size={ButtonSize.MEDIUM}
-              onClick={() => setIsWithdrawOpen(true)}
+              onClick={() => {
+                onClick();
+              }}
             >
               {isRevoke ? "Revoke" : "Withdraw"}
             </Button>
@@ -304,15 +299,6 @@ const WithdrawMobileTableItem = ({
           )}
         </div>
       </div>
-      {isWithdrawOpen ? (
-        <DepositedTokenWithdrawDialog
-          isOpen={isWithdrawOpen}
-          setIsOpen={setIsWithdrawOpen}
-          token={deposite.token}
-          contractAddress={deposite.contractAddress}
-          standard={isRevoke ? Standard.ERC20 : Standard.ERC223}
-        />
-      ) : null}
     </>
   );
 };
@@ -321,41 +307,85 @@ export const WithdrawMobileTable = ({
   tableData,
   setTokenForPortfolio,
   tokenForWithdraw,
+  setIsWithdrawDetailsOpened,
 }: {
   tableData: TableData;
   setTokenForPortfolio: any;
   tokenForWithdraw: any;
+  setIsWithdrawDetailsOpened: any;
 }) => {
-  const tableItems: any[] = [];
-  for (let deposite of tableData) {
-    if (tokenForWithdraw.token.address0 !== deposite.token.address0) {
-      continue;
-    }
-    if (deposite.deposited) {
-      tableItems.push(
-        <WithdrawMobileTableItem
-          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address1}`}
-          deposite={deposite}
-          isRevoke={false}
-          amount={deposite.deposited}
-          walletAddresses={deposite.walletAddresses}
-          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
-        />,
-      );
-    }
-    if (deposite.approved) {
-      tableItems.push(
-        <WithdrawMobileTableItem
-          key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
-          deposite={deposite}
-          isRevoke={true}
-          amount={deposite.approved}
-          walletAddresses={deposite.walletAddresses}
-          onDetailsClick={() => setTokenForPortfolio(deposite.token)}
-        />,
-      );
-    }
-  }
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [dialogParams, setDialogParams] = useState<{
+    standard: Standard;
+    token: Token | undefined;
+    contractAddress: Address;
+  }>({
+    standard: Standard.ERC20,
+    token: undefined,
+    contractAddress: ZERO_ADDRESS,
+  });
 
-  return <div className="flex lg:hidden flex-col gap-4">{tableItems}</div>;
+  const { setStatus } = useRevokeStatusStore();
+  const handleOpenDialog = (token: Token, contractAddress: Address, standard: Standard) => {
+    setDialogParams({ token, standard, contractAddress });
+    setStatus(AllowanceStatus.INITIAL);
+    setIsWithdrawOpen(true);
+  };
+
+  const tableItems = tableData
+    .filter((deposite) => tokenForWithdraw.token.address0 === deposite.token.address0)
+    .flatMap((deposite) => {
+      const items: any[] = [];
+
+      if (deposite.deposited) {
+        items.push(
+          <WithdrawMobileTableItem
+            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address1}`}
+            deposite={deposite}
+            isRevoke={false}
+            amount={deposite.deposited}
+            walletAddresses={deposite.walletAddresses}
+            onClick={
+              () => handleOpenDialog(deposite.token, deposite.contractAddress, Standard.ERC223) // currentDeposit,   withdrawHandler
+            }
+            onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+          />,
+        );
+      }
+
+      if (deposite.approved) {
+        items.push(
+          <WithdrawMobileTableItem
+            key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}
+            deposite={deposite}
+            isRevoke={true}
+            amount={deposite.approved}
+            walletAddresses={deposite.walletAddresses}
+            onClick={() =>
+              handleOpenDialog(deposite.token, deposite.contractAddress, Standard.ERC20)
+            }
+            onDetailsClick={() => setTokenForPortfolio(deposite.token)}
+          />,
+        );
+      }
+
+      return items;
+    });
+
+  // TODO should we close table if its empty?
+  // useEffect(() => {
+  //   if (!tableItems.length) {
+  //     console.log("trying to close table");
+  //     setIsWithdrawDetailsOpened(false);
+  //   }
+  // }, [setIsWithdrawDetailsOpened, tableItems]);
+
+  return (
+    <>
+      <div className="flex lg:hidden flex-col gap-4">{tableItems}</div>
+      {isWithdrawOpen && (
+        <RevokeDialog isOpen={isWithdrawOpen} setIsOpen={setIsWithdrawOpen} {...dialogParams} />
+      )}
+    </>
+  );
 };

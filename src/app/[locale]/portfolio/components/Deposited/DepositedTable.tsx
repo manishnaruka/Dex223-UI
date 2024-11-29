@@ -22,49 +22,6 @@ import { Standard } from "@/sdk_hybrid/standard";
 
 import { WalletDeposite } from "../../stores/useWalletsDeposites";
 
-const DepositedTokenWithdrawDialog = ({
-  isOpen,
-  setIsOpen,
-  token,
-  contractAddress,
-}: {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  token: Token;
-  contractAddress: Address;
-}) => {
-  const {
-    withdrawHandler,
-    currentDeposit: currentDeposit,
-    // estimatedGas: depositEstimatedGas,
-    withdrawStatus,
-  } = useWithdraw({
-    token,
-    contractAddress: contractAddress,
-  });
-
-  const { refetch: refetchGasPrice } = useGasPrice(); // data: gasPrice,
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-
-  useEffect(() => {
-    refetchGasPrice();
-  }, [blockNumber, refetchGasPrice]);
-
-  return (
-    <RevokeDialog
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      standard={Standard.ERC223}
-      token={token}
-      status={withdrawStatus}
-      currentAllowance={currentDeposit}
-      revokeHandler={withdrawHandler}
-      // estimatedGas={depositEstimatedGas}
-      // gasPrice={gasPrice}
-    />
-  );
-};
-
 const DepositedTokenTableItem = ({
   deposite,
   walletAddresses,
@@ -82,7 +39,6 @@ const DepositedTokenTableItem = ({
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
-  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   return (
     <>
@@ -143,14 +99,6 @@ const DepositedTokenTableItem = ({
           </>
         )}
       </div>
-      {isWithdrawOpen ? (
-        <DepositedTokenWithdrawDialog
-          isOpen={isWithdrawOpen}
-          setIsOpen={setIsWithdrawOpen}
-          token={deposite.token}
-          contractAddress={deposite.contractAddress}
-        />
-      ) : null}
     </>
   );
 };
@@ -293,14 +241,6 @@ const DepositedTokenMobileTableItem = ({
           )}
         </div>
       </div>
-      {isWithdrawOpen ? (
-        <DepositedTokenWithdrawDialog
-          isOpen={isWithdrawOpen}
-          setIsOpen={setIsWithdrawOpen}
-          token={deposite.token}
-          contractAddress={deposite.contractAddress}
-        />
-      ) : null}
     </>
   );
 };

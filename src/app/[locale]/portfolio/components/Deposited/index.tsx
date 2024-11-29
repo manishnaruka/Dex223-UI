@@ -11,6 +11,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
+import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Token } from "@/sdk_hybrid/entities/token";
 
 import { useActiveWalletsDeposites } from "../../stores/deposites.hooks";
@@ -34,6 +35,7 @@ const filterTable = ({
 };
 
 export const Deposited = () => {
+  useRecentTransactionTracking();
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
@@ -162,14 +164,21 @@ export const Deposited = () => {
           </div>
         )}
         <DrawerDialog isOpen={isWithdrawDetailsOpened} setIsOpen={setIsWithdrawDetailsOpened}>
-          <DialogHeader onClose={() => setIsWithdrawDetailsOpened(false)} title="Details" />
+          <DialogHeader
+            onClose={() => {
+              setIsWithdrawDetailsOpened(false);
+            }}
+            title="Details"
+          />
           <div className="px-4 lg:px-10 lg:pb-10 pb-4">
             <WithdrawDesktopTable
+              setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
               tableData={currentTableData}
               tokenForWithdraw={tokenForWithdraw}
               setTokenForPortfolio={setTokenForPortfolio}
             />
             <WithdrawMobileTable
+              setIsWithdrawDetailsOpened={setIsWithdrawDetailsOpened}
               tableData={currentTableData}
               tokenForWithdraw={tokenForWithdraw}
               setTokenForPortfolio={setTokenForPortfolio}

@@ -20,6 +20,7 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { RevokeDialog } from "./RevokeDialog";
 
@@ -209,20 +210,12 @@ function InputStandardAmount({
   standard,
   value,
   currency,
-  status,
   currentAllowance,
-  revokeHandler,
-  // estimatedGas,
-  // gasPrice,
 }: {
   standard: Standard;
   value?: number | string;
   currency?: Currency;
   currentAllowance: bigint; // currentAllowance or currentDeposit
-  status: AllowanceStatus;
-  revokeHandler: (customAmount?: bigint) => void; // onWithdraw or onWithdraw
-  // gasPrice?: bigint;
-  // estimatedGas: bigint | null;
 }) {
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
@@ -254,6 +247,7 @@ function InputStandardAmount({
   });
 
   const [isOpenedRevokeDialog, setIsOpenedRevokeDialog] = useState(false);
+  const { setStatus } = useRevokeStatusStore();
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -321,7 +315,10 @@ function InputStandardAmount({
             {!!currentAllowance ? (
               <span
                 className="text-12 px-2 pt-[2px] pb-[2px] pl-4 pr-4 bg-green-bg text-secondary-text rounded-3 h-min cursor-pointer border-transparent border hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text duration-200"
-                onClick={() => setIsOpenedRevokeDialog(true)}
+                onClick={() => {
+                  setStatus(AllowanceStatus.INITIAL);
+                  setIsOpenedRevokeDialog(true);
+                }}
               >
                 {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
               </span>
@@ -329,19 +326,16 @@ function InputStandardAmount({
           </>
         ) : null}
       </div>
-      {currency && currency.isToken && (
-        <RevokeDialog
-          isOpen={isOpenedRevokeDialog}
-          setIsOpen={setIsOpenedRevokeDialog}
-          standard={standard}
-          token={currency}
-          status={status}
-          currentAllowance={currentAllowance}
-          revokeHandler={revokeHandler}
-          // estimatedGas={estimatedGas}
-          // gasPrice={gasPrice}
-        />
-      )}
+      {currency &&
+        currency.isToken && ( // TODO rewrite
+          <RevokeDialog
+            isOpen={isOpenedRevokeDialog}
+            setIsOpen={setIsOpenedRevokeDialog}
+            standard={standard}
+            token={currency}
+            contractAddress={NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId]}
+          />
+        )}
     </div>
   );
 }
@@ -382,20 +376,12 @@ export default function TokenDepositCard({
   const ERC223Value = (valueBigInt * BigInt(tokenStandardRatio)) / BigInt(100);
   const ERC20Value = valueBigInt - ERC223Value;
 
-  const {
-    revokeHandler,
-    currentAllowance: currentAllowance,
-    revokeStatus,
-  } = useRevoke({
+  const { currentAllowance: currentAllowance } = useRevoke({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
 
-  const {
-    withdrawHandler,
-    currentDeposit: currentDeposit,
-    withdrawStatus,
-  } = useWithdraw({
+  const { currentDeposit: currentDeposit } = useWithdraw({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
@@ -445,20 +431,12 @@ export default function TokenDepositCard({
                 value={formatUnits(ERC20Value, currency?.decimals || 18)}
                 currentAllowance={currentAllowance || BigInt(0)}
                 currency={currency}
-                revokeHandler={revokeHandler}
-                status={revokeStatus}
-                // estimatedGas={revokeEstimatedGas}
-                // gasPrice={gasPrice}
               />
               <InputStandardAmount
                 standard={Standard.ERC223}
                 value={formatUnits(ERC223Value, currency?.decimals || 18)}
                 currency={currency}
                 currentAllowance={currentDeposit || BigInt(0)}
-                revokeHandler={withdrawHandler}
-                // estimatedGas={depositEstimatedGas}
-                status={withdrawStatus}
-                // gasPrice={gasPrice}
               />
             </div>
           </>
