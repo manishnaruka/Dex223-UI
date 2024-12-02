@@ -21,6 +21,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
+import { useTranslations } from "next-intl";
 
 export enum SortingType {
   NONE,
@@ -295,6 +296,7 @@ export default function PoolsTable({
   };
 }) {
   const [sorting, setSorting] = useState<SortingType>(SortingType.NONE);
+  const t = useTranslations("Liquidity");
 
   const handleSort = useCallback(() => {
     switch (sorting) {
@@ -360,7 +362,7 @@ export default function PoolsTable({
               </>
             ) : (
               <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 bg-empty-not-found-pools bg-right-top bg-no-repeat max-md:bg-size-180">
-                <p className="text-secondary-text">Pools not found</p>
+                <p className="text-secondary-text">{t("pools_not_found")}</p>
               </div>
             )}
           </>

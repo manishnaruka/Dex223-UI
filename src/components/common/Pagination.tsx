@@ -2,6 +2,7 @@ import clsx from "clsx";
 
 import Svg from "@/components/atoms/Svg";
 import { DOTS, usePagination } from "@/hooks/usePagination";
+import { clsxMerge } from "@/functions/clsxMerge";
 
 interface Props {
   onPageChange: (page: number | string) => void;
@@ -44,9 +45,9 @@ export default function Pagination({
     <ul className="flex items-center gap-2 justify-center">
       {/* Left navigation arrow */}
       <li
-        className={clsx(
-          "text-primary-text w-10 lg:w-12 h-10 lg:h-12 hocus:bg-green-bg rounded-full text-16 flex items-center duration-200 justify-center cursor-pointer",
-          currentPage === 1 && "opacity-50 pointer-events-none",
+        className={clsxMerge(
+          "text-tertiary-text w-10 lg:w-12 h-10 lg:h-12 hocus:bg-green-bg hocus:text-primary-text rounded-full text-16 flex items-center duration-200 justify-center cursor-pointer",
+          currentPage === 1 && "opacity-50 text-tertiary-text pointer-events-none",
         )}
         onClick={onPrevious}
       >
@@ -83,9 +84,9 @@ export default function Pagination({
       })}
       {/*  Right Navigation arrow */}
       <li
-        className={clsx(
-          "text-tertiary-text w-10 lg:w-12 h-10 lg:h-12 rounded-full hocus:bg-green-bg text-16 cursor-pointer duration-200 flex items-center justify-center",
-          currentPage === lastPage && "opacity-50 pointer-events-none",
+        className={clsxMerge(
+          "text-tertiary-text w-10 lg:w-12 h-10 lg:h-12 rounded-full hocus:bg-green-bg hocus:text-primary-text text-16 cursor-pointer duration-200 flex items-center justify-center",
+          currentPage === lastPage && "opacity-50 text-tertiary-text pointer-events-none",
         )}
         onClick={onNext}
       >

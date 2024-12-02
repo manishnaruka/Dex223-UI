@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect } from "react";
 
-import { useLiquidityAmountsStore } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
 import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
 import Svg from "@/components/atoms/Svg";
