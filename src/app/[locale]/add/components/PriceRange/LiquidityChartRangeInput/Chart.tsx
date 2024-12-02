@@ -73,7 +73,7 @@ export function Chart({
     const right = series.filter((d) => xAccessor(d) >= current);
 
     const appendix = {
-      activeLiquidity: right[0].activeLiquidity,
+      activeLiquidity: right[0]?.activeLiquidity || 0,
       price0: current,
     };
 

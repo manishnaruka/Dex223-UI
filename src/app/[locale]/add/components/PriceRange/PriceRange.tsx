@@ -252,7 +252,7 @@ export const PriceRange = ({
             <span className="text-14 text-secondary-text">{t("init_pool_message")}</span>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-bold text-16">{t("starting_price")}</span>
+            <span className="font-bold text-16 text-secondary-text">{t("starting_price")}</span>
             <input
               className="outline-0 text-16 w-full rounded-3 bg-secondary-bg px-5 py-3 border border-transparent hocus:shadow hocus:shadow-green/60 focus:border-green focus:shadow focus:shadow-green/60"
               placeholder="0"
@@ -265,8 +265,8 @@ export const PriceRange = ({
                 }
               }}
             />
-            <div className="flex justify-between text-14 text-tertiary-text">
-              <span>{`Starting ${tokenA?.symbol} price:`}</span>
+            <div className="flex justify-between text-12 text-tertiary-text">
+              <span>{`${t("token_starting_price", { symbol: tokenA?.symbol })}:`}</span>
               <span>{`${formattedPrice} ${tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}`}</span>
             </div>
           </div>

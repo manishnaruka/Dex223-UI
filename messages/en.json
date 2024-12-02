@@ -232,6 +232,7 @@
     "slippage_tooltip": "The actual swap price may be different than the one specified at the moment of sending the transaction. Slippage determines how much of the price change can be tolerated. 5% slippage means that if the price in the pool will change more than 5% from the expected, your transaction will automatically fail (you will pay for GAS but no swap will occur)."
   },
   "Liquidity": {
+    "token_starting_price": "Starting {symbol} price",
     "pools_not_found": "Pools not found",
     "token_owner": "Token owner",
     "action_title": "Action",
@@ -294,9 +295,9 @@
     "fee_tier_select": "{select}% select",
     "fee_tier_not_created": "Not created",
     "fee_tier_no_data": "No data",
-    "tier_500_description": "Best for stable pairs.",
-    "tier_3000_description": "Best for most pairs.",
-    "tier_10000_description": "Best for exotic pairs.",
+    "tier_500_description": "Best for stable pairs",
+    "tier_3000_description": "Best for most pairs",
+    "tier_10000_description": "Best for exotic pairs",
     "out_of_range": "The market price is outside your specified price range. Single-asset deposit only.",
     "token_deposit_amounts": "{symbol} deposit amounts",
     "balance": "Balance: {balance} {symbol}",

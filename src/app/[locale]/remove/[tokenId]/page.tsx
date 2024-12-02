@@ -404,7 +404,7 @@ export default function DecreaseLiquidityPage({
 
               {status === RemoveLiquidityStatus.PENDING && (
                 <>
-                  <Preloader type="linear" />
+                  <Preloader type="linear" smallDots={true} />
                   <span className="mr-3 text-secondary-text text-14 whitespace-nowrap">
                     {t("status_pending")}
                   </span>
