@@ -142,10 +142,10 @@ function InputTotalAmount({
           onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
           onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
         />
-        <div className="justify-end bg-secondary-bg rounded-5 py-1 pl-1 flex items-center gap-2 min-w-[88px]">
+        <div className="justify-end bg-secondary-bg rounded-5 py-1 pl-1 flex items-center gap-2 ">
           {currency ? (
             <div
-              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : ""}`}
+              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : "bg-primary-bg"}`}
             >
               <Image
                 src={currency?.logoURI || "/images/tokens/placeholder.svg"}
@@ -153,14 +153,14 @@ function InputTotalAmount({
                 width={24}
                 height={24}
               />
-              <span className="text-nowrap pr-8">{currencySymbolShortX2}</span>
+              <span className="text-nowrap pr-7">{currencySymbolShortX2}</span>
             </div>
           ) : (
             <div
-              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : ""}`}
+              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : "bg-primary-bg"}`}
             >
               <Image src={"/images/tokens/placeholder.svg"} alt="" width={24} height={24} />
-              <span className="text-nowrap pr-8">{t("select_token")}</span>
+              <span className="text-nowrap pr-7">{t("select_token")}</span>
             </div>
           )}
         </div>

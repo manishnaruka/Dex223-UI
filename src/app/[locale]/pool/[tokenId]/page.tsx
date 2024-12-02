@@ -411,7 +411,7 @@ export default function PoolPage({
                       <Image width={32} height={32} src={token1?.logoURI as any} alt="" />
                     </div>
                   </div>
-                  <span className="text-16 lg:text-18 font-bold">{`${token0?.symbol} and ${token1?.symbol}`}</span>
+                  <span className="text-16 lg:text-18 font-bold text-secondary-text">{`${token0?.symbol} and ${token1?.symbol}`}</span>
                 </div>
                 <div className="flex items-center gap-2 justify-end">
                   {hash && (
