@@ -1,14 +1,14 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import InputButton from "@/components/buttons/InputButton";
 import { formatFloat } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { AllowanceStatus } from "@/hooks/useAllowance";
@@ -77,36 +77,19 @@ function InputTotalAmount({
   onChange,
   isDisabled,
   tokenStandardRatio = 0,
+  isMax = false,
+  token0Balance,
+  token1Balance,
 }: {
   currency?: Currency;
   value: string;
   onChange: (value: string) => void;
   isDisabled?: boolean;
   tokenStandardRatio: number;
+  isMax: boolean;
+  token0Balance: any;
+  token1Balance: any;
 }) {
-  const { address } = useAccount();
-
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-  const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
-    address: currency ? address : undefined,
-    token: currency && !currency.isNative ? currency.address0 : undefined,
-    query: {
-      enabled: Boolean(currency),
-    },
-  });
-  const { data: token1Balance, refetch: refetchBalance1 } = useBalance({
-    address: currency ? address : undefined,
-    token: currency && !currency.isNative ? currency.address1 : undefined,
-    query: {
-      enabled: Boolean(currency),
-    },
-  });
-
-  useEffect(() => {
-    refetchBalance0();
-    refetchBalance1();
-  }, [blockNumber, refetchBalance0, refetchBalance1]);
-
   const totalBalance = currency?.isNative
     ? token0Balance?.value || BigInt(0)
     : (token0Balance?.value || BigInt(0)) + (token1Balance?.value || BigInt(0));
@@ -118,6 +101,7 @@ function InputTotalAmount({
 
   const maxHandler = () => {
     if (currency) {
+      // TODO set button state
       onChange(formatFloat(formatUnits(maxBalance, currency.decimals)));
     }
   };
@@ -194,14 +178,16 @@ function InputTotalAmount({
               : "—"}
           </span>
           {currency && (
-            <Button
-              variant={ButtonVariant.CONTAINED}
-              size={ButtonSize.EXTRA_SMALL}
-              className="bg-tertiary-bg text-green md:px-2 lg:px-2 xl:px-2 px-2 hocus:bg-green-bg"
-              onClick={maxHandler}
-            >
-              {t("max_title")}
-            </Button>
+            <InputButton onClick={maxHandler} isActive={isMax} text={t("max_title")} />
+            // <Button
+            //   variant={ButtonVariant.CONTAINED}
+            //   size={ButtonSize.EXTRA_SMALL}
+            //   className="bg-tertiary-bg text-green md:px-2 lg:px-2 xl:px-2 px-2 hocus:bg-green-bg"
+            //   onClick={maxHandler}
+            //   isActive={isMax}
+            // >
+            //   {t("max_title")}
+            // </Button>
           )}
         </div>
       </div>
@@ -218,6 +204,7 @@ function InputStandardAmount({
   isDisabled,
   onChange,
   setTokenStandardRatio,
+  tokenBalance,
 }: {
   standard: Standard;
   value?: number | string;
@@ -226,19 +213,20 @@ function InputStandardAmount({
   isDisabled?: boolean;
   onChange: (value: string) => void;
   setTokenStandardRatio: (value: number) => void;
+  tokenBalance: any;
 }) {
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
-  const { address } = useAccount();
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-  const { data: tokenBalance, refetch: refetchBalance } = useBalance({
-    address: currency ? address : undefined,
-    token: currency ? getTokenAddressForStandard(currency, standard) : undefined,
-  });
-
-  useEffect(() => {
-    refetchBalance();
-  }, [blockNumber, refetchBalance]);
+  // const { address } = useAccount();
+  // const { data: blockNumber } = useBlockNumber({ watch: true });
+  // const { data: tokenBalance, refetch: refetchBalance } = useBalance({
+  //   address: currency ? address : undefined,
+  //   token: currency ? getTokenAddressForStandard(currency, standard) : undefined,
+  // });
+  //
+  // useEffect(() => {
+  //   refetchBalance();
+  // }, [blockNumber, refetchBalance]);
 
   const chainId = useCurrentChainId();
   useRevokeEstimatedGas({
@@ -395,11 +383,50 @@ export default function TokenDepositCard({
     charsFromEnd: 0,
   });
 
+  const { address } = useAccount();
+
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address0 : undefined,
+    query: {
+      enabled: Boolean(currency),
+    },
+  });
+  const { data: token1Balance, refetch: refetchBalance1 } = useBalance({
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address1 : undefined,
+    query: {
+      enabled: Boolean(currency),
+    },
+  });
+
+  useEffect(() => {
+    refetchBalance0();
+    refetchBalance1();
+  }, [blockNumber, refetchBalance0, refetchBalance1]);
+
   const chainId = useCurrentChainId();
   const valueBigInt = value ? BigInt(value.quotient.toString()) : BigInt(0);
 
   const ERC223Value = (valueBigInt * BigInt(tokenStandardRatio)) / BigInt(100);
   const ERC20Value = valueBigInt - ERC223Value;
+
+  const isMax: boolean = useMemo(() => {
+    return tokenStandardRatio === 0
+      ? formattedValue !== "0" &&
+          formatFloat(formatUnits(token0Balance?.value || BigInt(0), currency?.decimals || 18)) ===
+            formattedValue
+      : formattedValue !== "0" &&
+          formatFloat(formatUnits(token1Balance?.value || BigInt(0), currency?.decimals || 18)) ===
+            formattedValue;
+  }, [
+    currency?.decimals,
+    formattedValue,
+    token0Balance?.value,
+    token1Balance?.value,
+    tokenStandardRatio,
+  ]);
 
   const { currentAllowance: currentAllowance } = useRevoke({
     token: currency,
@@ -446,6 +473,9 @@ export default function TokenDepositCard({
           onChange={onChange}
           isDisabled={isDisabled}
           tokenStandardRatio={tokenStandardRatio}
+          isMax={isMax}
+          token0Balance={token0Balance}
+          token1Balance={token1Balance}
         />
         {currency?.isNative && currency ? null : (
           <>
@@ -459,6 +489,7 @@ export default function TokenDepositCard({
                 onChange={onChange}
                 currency={currency}
                 setTokenStandardRatio={setTokenStandardRatio}
+                tokenBalance={token0Balance}
               />
               <InputStandardAmount
                 standard={Standard.ERC223}
@@ -468,6 +499,7 @@ export default function TokenDepositCard({
                 onChange={onChange}
                 setTokenStandardRatio={setTokenStandardRatio}
                 currentAllowance={currentDeposit || BigInt(0)}
+                tokenBalance={token1Balance}
               />
             </div>
           </>
