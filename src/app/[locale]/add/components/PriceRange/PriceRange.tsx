@@ -273,22 +273,23 @@ export const PriceRange = ({
         </>
       ) : (
         <>
-          <div className="flex w-full flex-row">
+          <div className="flex w-full flex-row mt-1">
             <CurrentPrice
               price={formattedPrice}
               description={tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}
             />
-            <div className="ml-auto flex-col mt-auto">
+            <div className="ml-auto flex-col mt-1">
               <div
                 onClick={() => {
                   setRefreshTicksTrigger(true);
                   setZoomInitial(true);
                 }}
-                className="flex mb-2 text-12 cursor-pointer text-secondary-text hocus:text-green justify-end items-center w-100"
+                className="flex mb-1 gap-2 text-12 cursor-pointer text-secondary-text hocus:text-green justify-end items-center w-100"
               >
                 {t("refresh")}
                 <Svg
-                  iconName="convert"
+                  size={20}
+                  iconName="reset"
                   // className="text-tertiary-text group-hocus:text-green mr-1 flex-shrink-0"
                 />
               </div>
