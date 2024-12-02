@@ -8,7 +8,6 @@ import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
 
-import { NumericalInput } from "@/app/[locale]/add/components/PriceRange/NumericalInput";
 import useRemoveLiquidity, {
   useRemoveLiquidityEstimatedGas,
 } from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
@@ -17,7 +16,6 @@ import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Input from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
