@@ -55,6 +55,9 @@ import {
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
 import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
+import { NumericalInput } from "@/app/[locale]/add/components/PriceRange/NumericalInput";
+import Input from "@/components/atoms/Input";
+import { NumericFormat } from "react-number-format";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
@@ -218,10 +221,30 @@ export default function DecreaseLiquidityPage({
 
               <div className="lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1">
                 <div className="lg:mb-5 mt-4 mb-5 ml-5 mr-5">
-                  <span className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</span>
+                  <span className="text-12 lg:text-16 mb-2 text-secondary-text">
+                    {t("amount_title")}
+                  </span>
                   <div className="flex justify-between items-center mb-4">
                     <div className="text-24 lg:text-24 font-medium relative">
-                      <span>{percentage}</span>
+                      <NumericFormat
+                        inputMode="decimal"
+                        allowedDecimalSeparators={[""]}
+                        className="h-8 bg-secondary-bg w-[4rem] "
+                        value={percentage}
+                        onValueChange={(values) => {
+                          const { value } = values;
+                          const numericValue = value === "" ? 1 : Number(value);
+                          setPercentage(numericValue);
+                        }}
+                        allowNegative={false}
+                        type="text"
+                        decimalScale={0}
+                        isAllowed={(values) => {
+                          const { value } = values;
+                          const numericValue = value === "" ? 1 : Number(value);
+                          return numericValue >= 1 && numericValue <= 100;
+                        }}
+                      />
                       <span className="text-secondary-text absolute top-0 left-[70px]">%</span>
                     </div>
                     <div className="flex gap-2">
@@ -376,8 +399,8 @@ export default function DecreaseLiquidityPage({
       >
         <DialogHeader onClose={handleClose} title={t("confirm_removing_liquidity")} />
         <div className="px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 md:h-auto overflow-y-auto">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
+          <div className="flex justify-between items-start">
+            <div className="flex items-start gap-2">
               <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
                 <Image
                   className="absolute left-0 top-0 w-[24px] lg:w-[34px] h-[24px] lg:h-[34px]"
@@ -390,9 +413,9 @@ export default function DecreaseLiquidityPage({
                   <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
                 </div>
               </div>
-              <span className="text-16 lg:text-18 font-bold text-secondary-text">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
+              <span className="text-16 lg:text-18 font-bold text-secondary-text mt-0.5">{`${tokenA.symbol} and ${tokenB.symbol} `}</span>
             </div>
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2 mt-1.5 justify-end">
               {hash && (
                 <a
                   target="_blank"
