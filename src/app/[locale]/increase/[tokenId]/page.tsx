@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "@/app/[locale]/add/stores/useLiquidityPriceRangeStore";
@@ -40,7 +41,6 @@ import { LiquidityActionButton } from "../../add/components/LiquidityActionButto
 import { usePriceRange } from "../../add/hooks/usePrice";
 import { useSortedTokens } from "../../add/hooks/useSortedTokens";
 import { useV3DerivedMintInfo } from "../../add/hooks/useV3DerivedMintInfo";
-import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 
 export default function IncreaseLiquidityPage({
   params,
