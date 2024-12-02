@@ -144,7 +144,7 @@ const PoolsTableDesktop = ({
               onClick={() => openPoolHandler(o.id)}
               className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              {formatNumberKilos(o.txCount)}
+              {formatNumberKilos(o.txCount, { significantDigits: 0 })}
             </div>
             <div
               onMouseEnter={() => setHoveredRow(index)}
