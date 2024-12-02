@@ -7,6 +7,7 @@ import { clsxMerge } from "@/functions/clsxMerge";
 interface Props extends AnchorHTMLAttributes<HTMLAnchorElement> {
   text: string;
   href: string;
+  arrowSize?: number;
   color?: "green" | "white";
 }
 
@@ -15,6 +16,7 @@ export default function ExternalTextLink({
   href,
   color = "green",
   className,
+  arrowSize = 24,
   ...props
 }: Props) {
   return (
@@ -29,7 +31,7 @@ export default function ExternalTextLink({
       )}
     >
       {text}
-      <Svg iconName="forward" />
+      <Svg iconName="forward" size={arrowSize} />
     </a>
   );
 }

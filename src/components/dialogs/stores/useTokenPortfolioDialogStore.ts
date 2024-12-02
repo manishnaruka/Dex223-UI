@@ -13,5 +13,10 @@ export const useTokenPortfolioDialogStore = create<TokenPortfolioDialogStore>((s
   token: null,
   isOpen: false,
   handleOpen: (token) => set({ token, isOpen: true }),
-  handleClose: () => set({ isOpen: false, token: null }),
+  handleClose: () => {
+    set({ isOpen: false });
+    setTimeout(() => {
+      set({ token: null });
+    }, 500);
+  },
 }));

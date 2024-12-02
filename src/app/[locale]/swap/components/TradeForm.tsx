@@ -21,7 +21,7 @@ import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStor
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";
 import TokenInput from "@/components/common/TokenInput";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
@@ -66,7 +66,7 @@ function OpenConfirmDialogButton({
 
   if (!isConnected) {
     return (
-      <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+      <Button onClick={() => setWalletConnectOpened(true)} fullWidth size={ButtonSize.LARGE}>
         {tWallet("connect_wallet")}
       </Button>
     );
@@ -74,7 +74,7 @@ function OpenConfirmDialogButton({
 
   if (isLoadingSwap) {
     return (
-      <Button fullWidth isLoading>
+      <Button fullWidth isLoading size={ButtonSize.LARGE}>
         <span className="flex items-center gap-2">
           <span>{t("processing_swap")}</span>
           <Preloader size={20} color="black" />
@@ -85,7 +85,7 @@ function OpenConfirmDialogButton({
 
   if (isLoadingApprove) {
     return (
-      <Button fullWidth isLoading>
+      <Button fullWidth isLoading size={ButtonSize.LARGE}>
         <span className="flex items-center gap-2">
           <span>{t("approving_in_progress")}</span>
           <Preloader size={20} color="black" />
@@ -96,7 +96,7 @@ function OpenConfirmDialogButton({
 
   if (isPendingApprove || isPendingSwap) {
     return (
-      <Button fullWidth isLoading>
+      <Button fullWidth isLoading size={ButtonSize.LARGE}>
         <span className="flex items-center gap-2">
           <span>{t("waiting_for_confirmation")}</span>
           <Preloader size={20} color="black" />
@@ -107,7 +107,7 @@ function OpenConfirmDialogButton({
 
   if (!tokenA || !tokenB) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ButtonSize.LARGE}>
         {t("select_tokens")}
       </Button>
     );
@@ -115,7 +115,7 @@ function OpenConfirmDialogButton({
 
   if (!typedValue) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ButtonSize.LARGE}>
         {t("enter_amount")}
       </Button>
     );
@@ -123,7 +123,7 @@ function OpenConfirmDialogButton({
 
   if (isTradeLoading) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ButtonSize.LARGE}>
         {t("looking_for_the_best_trade")}
       </Button>
     );
@@ -131,7 +131,7 @@ function OpenConfirmDialogButton({
 
   if (!isTradeReady) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ButtonSize.LARGE}>
         {t("swap_is_unavailable_for_this_pair")}
       </Button>
     );
@@ -139,14 +139,14 @@ function OpenConfirmDialogButton({
 
   if (!isSufficientBalance) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ButtonSize.LARGE}>
         {t("insufficient_balance")}
       </Button>
     );
   }
 
   return (
-    <Button onClick={() => setConfirmSwapDialogOpen(true)} fullWidth>
+    <Button onClick={() => setConfirmSwapDialogOpen(true)} fullWidth size={ButtonSize.LARGE}>
       {t("swap")}
     </Button>
   );
@@ -377,7 +377,7 @@ export default function TradeForm() {
   const nativeCurrency = useNativeCurrency();
 
   return (
-    <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
+    <div className="px-4 md:px-10 pt-2.5 pb-4 md:pb-10 bg-primary-bg rounded-5">
       <div className="flex justify-between items-center mb-2.5">
         <h3 className="font-bold text-20">{t("swap")}</h3>
         <div className="flex items-center relative left-3">

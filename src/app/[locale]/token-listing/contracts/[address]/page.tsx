@@ -3,8 +3,10 @@
 import { isZeroAddress } from "@ethereumjs/util";
 import Image from "next/image";
 import React, { HTMLAttributes, ReactNode, useMemo, useState } from "react";
-import { Address, formatUnits } from "viem";
+import { Address, formatUnits, isAddress } from "viem";
+import { useReadContract } from "wagmi";
 
+import { SingleAddressToken } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import Container from "@/components/atoms/Container";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
@@ -15,6 +17,8 @@ import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";
+import { ERC223_ABI } from "@/config/abis/erc223";
+import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { TokenListId } from "@/db/db";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
@@ -23,6 +27,7 @@ import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/navigation";
+import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Token } from "@/sdk_hybrid/entities/token";
 
@@ -36,8 +41,8 @@ function TokenListInfoCard({ title, value, className, ...props }: TokenListInfoC
       {...props}
       className={clsxMerge("bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col", className)}
     >
-      <h3 className="text-secondary-text">{title}</h3>
-      <span className="text-18">{value}</span>
+      <h3 className="text-tertiary-text">{title}</h3>
+      <span className="text-secondary-text text-20 font-medium">{value}</span>
     </div>
   );
 }
@@ -46,12 +51,155 @@ function TableRow({ children, className }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={clsxMerge(
-        "grid grid-cols-[minmax(300px,2fr)_minmax(198px,1fr)_minmax(198px,1fr)_100px__minmax(67px,max-content)_minmax(54px,max-content)] pl-5 py-2 pr-2 gap-6 rounded-3 bg-primary-bg",
+        "grid grid-cols-[minmax(300px,2fr)_minmax(198px,1fr)_minmax(198px,1fr)_minmax(67px,max-content)_minmax(54px,max-content)] pl-5 py-2 pr-2 gap-6 rounded-3 bg-primary-bg",
         className,
       )}
     >
       {children}
     </div>
+  );
+}
+
+function TokenSymbolButton({ tokenToPay }: { tokenToPay: SingleAddressToken }) {
+  const { handleOpen } = useTokenPortfolioDialogStore();
+
+  const { data: standard } = useReadContract({
+    abi: ERC223_ABI,
+    functionName: "standard",
+    address: tokenToPay.address as Address,
+    chainId: tokenToPay.chainId,
+    query: {
+      enabled: !!tokenToPay.address && isAddress(tokenToPay.address),
+    },
+  });
+
+  const { data: isWrapper } = useReadContract({
+    abi: TOKEN_CONVERTER_ABI,
+    functionName: "isWrapper",
+    address: CONVERTER_ADDRESS[tokenToPay.chainId],
+    args: [tokenToPay.address as Address],
+    chainId: tokenToPay.chainId,
+    query: {
+      enabled: !!tokenToPay.address && isAddress(tokenToPay.address),
+    },
+  });
+
+  const otherAddressFunctionName = useMemo(() => {
+    if (isWrapper == null) {
+      return null;
+    }
+
+    if (isWrapper) {
+      if (standard === 223) {
+        return "getERC20OriginFor";
+      }
+      return "getERC223OriginFor";
+    }
+
+    return "predictWrapperAddress";
+  }, [isWrapper, standard]);
+
+  const otherAddressCheckFunctionName = useMemo(() => {
+    if (otherAddressFunctionName !== "predictWrapperAddress") {
+      return null;
+    }
+
+    if (standard === 223) {
+      return "getERC20WrapperFor";
+    }
+    return "getERC223WrapperFor";
+  }, [otherAddressFunctionName, standard]);
+
+  const { data: otherAddress } = useReadContract({
+    abi: TOKEN_CONVERTER_ABI,
+    functionName: otherAddressCheckFunctionName!,
+    address: CONVERTER_ADDRESS[tokenToPay.chainId],
+    args: [tokenToPay.address as Address],
+    chainId: tokenToPay.chainId,
+    query: {
+      enabled:
+        !!tokenToPay.address &&
+        isAddress(tokenToPay.address) &&
+        Boolean(otherAddressCheckFunctionName),
+    },
+  });
+
+  const { data: predictedOtherAddress } = useReadContract({
+    abi: TOKEN_CONVERTER_ABI,
+    functionName: otherAddressFunctionName!,
+    address: CONVERTER_ADDRESS[tokenToPay.chainId],
+    args: [tokenToPay.address as Address, standard !== 223],
+    chainId: tokenToPay.chainId,
+    query: {
+      enabled:
+        !!tokenToPay.address && isAddress(tokenToPay.address) && Boolean(otherAddressFunctionName),
+    },
+  });
+
+  const { erc20AddressToImport, erc223AddressToImport, isErc20Exist, isErc223Exist } =
+    useMemo(() => {
+      if (standard === 223) {
+        return {
+          erc20AddressToImport: predictedOtherAddress,
+          erc223AddressToImport: tokenToPay.address,
+          isErc20Exist: otherAddress && isAddress(otherAddress) && !isZeroAddress(otherAddress),
+          isErc223Exist: true,
+        };
+      }
+
+      return {
+        erc223AddressToImport: predictedOtherAddress,
+        erc20AddressToImport: tokenToPay.address,
+        isErc223Exist: otherAddress && isAddress(otherAddress) && !isZeroAddress(otherAddress),
+        isErc20Exist: true,
+      };
+    }, [otherAddress, predictedOtherAddress, standard, tokenToPay.address]);
+
+  const tokenLists = useTokenLists();
+
+  return (
+    <>
+      <button
+        className="rounded-2 bg-quaternary-bg py-1 flex items-center justify-center"
+        onClick={() =>
+          handleOpen(
+            new Token(
+              tokenToPay.chainId,
+              erc20AddressToImport || tokenToPay.address,
+              erc223AddressToImport || tokenToPay.address,
+              tokenToPay.decimals,
+              tokenToPay.symbol,
+              tokenToPay.name,
+              "/images/tokens/placeholder.svg",
+              tokenLists
+                ?.filter((tokenList) => {
+                  return !!tokenList.list.tokens.find(
+                    (t) =>
+                      t.address0.toLowerCase() === tokenToPay.address.toLowerCase() ||
+                      t.address1.toLowerCase() === tokenToPay.address.toLowerCase(),
+                  );
+                })
+                .map((t) => t.id),
+            ),
+          )
+        }
+      >
+        {tokenToPay.symbol}
+      </button>
+      <div className="flex items-center">
+        <Badge
+          variant={BadgeVariant.COLORED}
+          color="green"
+          text={
+            tokenToPay.address && isZeroAddress(tokenToPay.address)
+              ? "Native"
+              : standard === 20
+                ? "ERC-20"
+                : "ERC-223"
+          }
+        />
+      </div>
+    </>
   );
 }
 export default function AutoListingContractDetails({
@@ -108,9 +256,9 @@ export default function AutoListingContractDetails({
   return (
     <>
       <Container>
-        <div className="my-2 md:my-10 px-4">
+        <div className="my-2 md:my-10 px-4 flex">
           <Link href="/token-listing/contracts">
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 text-secondary-text hocus:text-green-hover duration-200">
               <Svg iconName="back" />
               Back to token listing
             </span>
@@ -126,10 +274,10 @@ export default function AutoListingContractDetails({
               <Button>List token(s)</Button>
             </Link>
           </div>
-          <div className="bg-primary-bg rounded-5 grid xl:grid-cols-6 xl:grid-areas-[first_second_third_fourth_fifth_sixth] pb-4 px-4 pt-3 xl:p-10 gap-3 mb-4 xl:mb-10 grid-cols-2 grid-areas-[first_first,second_second,third_fourth,fifth_sixth]">
+          <div className="bg-primary-bg rounded-5 grid xl:grid-cols-5 xl:grid-areas-[first_first_first_first_first,second_third_fourth_fifth_sixth] pb-4 px-4 pt-3 xl:p-10 gap-3 mb-4 xl:mb-10 grid-cols-2 grid-areas-[first_first,second_second,third_fourth,fifth_sixth]">
             <div className="flex flex-col justify-center grid-in-[first]">
               <h3 className="text-18 md:text-20 font-medium">{listingContract.name}</h3>
-              <p>{listingContract.totalTokens} tokens</p>
+              <p className="text-secondary-text">{listingContract.totalTokens} tokens</p>
             </div>
             <TokenListInfoCard
               title="Chain"
@@ -183,7 +331,7 @@ export default function AutoListingContractDetails({
                   </h3>
                   <Tooltip text="Avalialbe tooltip" />
                 </div>
-                <div className="grid grid-cols-[minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)] gap-x-2 gap-y-3">
+                <div className="flex flex-col sm:grid sm:grid-cols-[minmax(224px,1fr)_minmax(224px,1fr)] md:grid-cols-[minmax(224px,1fr)_minmax(224px,1fr)_minmax(224px,1fr)] xl:grid-cols-[minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)] gap-x-2 gap-y-3">
                   {listingContract.tokensToPay.map((tokenToPay, index) => {
                     return (
                       <div
@@ -203,20 +351,7 @@ export default function AutoListingContractDetails({
                             : formatFloat(formatUnits(tokenToPay.price, tokenToPay.token.decimals))}
                         </div>
 
-                        <div className="rounded-2 bg-secondary-bg py-1 flex items-center justify-center">
-                          {tokenToPay.token.symbol}
-                        </div>
-                        <div className="flex items-center">
-                          <Badge
-                            variant={BadgeVariant.COLORED}
-                            color="green"
-                            text={
-                              tokenToPay.token.address && isZeroAddress(tokenToPay.token.address)
-                                ? "Native"
-                                : "ERC-20"
-                            }
-                          />
-                        </div>
+                        <TokenSymbolButton tokenToPay={tokenToPay.token} />
                       </div>
                     );
                   })}
@@ -365,8 +500,8 @@ export default function AutoListingContractDetails({
                   })}
                 </div>
                 <div className="hidden xl:contents">
-                  <div className="grid px-5 py-[18px] bg-tertiary-bg rounded-t-5">
-                    <TableRow className="bg-tertiary-bg">
+                  <div className="grid px-5 py-2.5 bg-tertiary-bg rounded-t-5">
+                    <TableRow className="bg-tertiary-bg text-tertiary-text">
                       <div>Name</div>
                       <div className="flex items-center gap-2">
                         Address
@@ -376,7 +511,6 @@ export default function AutoListingContractDetails({
                         Address
                         <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-223" />
                       </div>
-                      <div>Tags</div>
                       <div>Found in</div>
                       <div>Details</div>
                     </TableRow>
@@ -394,7 +528,7 @@ export default function AutoListingContractDetails({
                               alt=""
                             />
                             <span className="font-medium">{token.name}</span>
-                            <span className="text-secondary-text">{token.symbol}</span>
+                            <span className="text-tertiary-text">{token.symbol}</span>
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
@@ -418,7 +552,6 @@ export default function AutoListingContractDetails({
                             />{" "}
                             <IconButton variant={IconButtonVariant.COPY} text={token.address1} />
                           </div>
-                          <div className="flex items-center"></div>
                           <div className="flex items-center">{token.lists?.length || 0} list</div>
                           <div className="flex items-center justify-end">
                             {" "}

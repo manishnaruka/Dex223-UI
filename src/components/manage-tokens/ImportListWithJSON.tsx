@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from "react";
 
+import Alert from "@/components/atoms/Alert";
 import Checkbox from "@/components/atoms/Checkbox";
 import Svg from "@/components/atoms/Svg";
 import { HelperText } from "@/components/atoms/TextField";
@@ -44,6 +45,13 @@ export default function ImportListWithJSON({ setContent }: Props) {
             const fileContents: any = e.target.result;
             const parsedJson = JSON.parse(fileContents);
             //TODO: Check that all tokens in list from same chain
+
+            if (!parsedJson.tokens || !parsedJson.tokens || !parsedJson.version) {
+              setError("Unsupported tokenlist format");
+              return;
+            } else {
+              setError("");
+            }
 
             console.log(parsedJson);
             const listChainId = parsedJson.tokens[0].chainId;
@@ -132,15 +140,20 @@ export default function ImportListWithJSON({ setContent }: Props) {
         </div>
         <p className="overflow-hidden overflow-ellipsis whitespace-nowrap min-w-[200px] max-w-[300px] text-right">
           {tokenListFile?.name ? (
-            `${tokenListFile?.name}`
+            <span className="flex items-center gap-1">
+              <Svg className="text-tertiary-text" iconName="file" />
+              {tokenListFile?.name}
+            </span>
           ) : (
-            <span className="text-secondary-text">{t("select_json_file")}</span>
+            <span className="text-tertiary-text">{t("select_json_file")}</span>
           )}
         </p>
       </div>
       {(!tokenListFileContent || Boolean(error)) && (
         <>
-          <h3 className="text-16 font-bold mt-5 mb-1">{t("please_select_JSON_to_import")}</h3>
+          <h3 className="text-16 font-bold mt-5 mb-1 text-secondary-text">
+            {t("please_select_JSON_to_import")}
+          </h3>
           <div
             onDragOver={handleDragOver}
             onDrop={handleDrop}
@@ -152,9 +165,11 @@ export default function ImportListWithJSON({ setContent }: Props) {
               }
             }}
             className={clsx(
-              "rounded-2 flex justify-center items-center flex-col gap-3 h-[288px] bg-drag-and-drop-dashed-pattern flex-grow duration-200 t text-20 hocus:bg-green-bg cursor-pointer",
-              dragEntered ? "bg-green-bg" : "bg-secondary-bg",
-              !!error && "shadow shadow-red/20 bg-drag-and-drop-dashed-pattern-error",
+              "rounded-2  flex justify-center items-center flex-col gap-3 bg-drag-and-drop-dashed-pattern flex-grow duration-200 t text-20  cursor-pointer text-tertiary-text",
+              !dragEntered ? "bg-secondary-bg" : !error ? "bg-green-bg" : "bg-red-bg",
+              !!error
+                ? "shadow shadow-red/20 bg-drag-and-drop-dashed-pattern-error hocus:bg-red-bg"
+                : "hocus:bg-green-bg",
             )}
           >
             <svg
@@ -166,13 +181,17 @@ export default function ImportListWithJSON({ setContent }: Props) {
             >
               <path
                 d="M15 5C13.625 5 12.4479 5.48958 11.4688 6.46875C10.4896 7.44792 10 8.625 10 10V50C10 51.375 10.4896 52.5521 11.4688 53.5312C12.4479 54.5104 13.625 55 15 55H32.9375C33.6042 55 34.2396 54.875 34.8438 54.625C35.4479 54.375 35.9792 54.0208 36.4375 53.5625L48.5625 41.4375C49.0208 40.9792 49.375 40.4479 49.625 39.8438C49.875 39.2396 50 38.6042 50 37.9375V10C50 8.625 49.5104 7.44792 48.5312 6.46875C47.5521 5.48958 46.375 5 45 5H15ZM32.5 40C32.5 39.2917 32.7396 38.6979 33.2188 38.2188C33.6979 37.7396 34.2917 37.5 35 37.5H45L32.5 50V40Z"
-                fill="#798180"
+                fill={!tokenListFile ? "#798180" : "#D1DEDF"}
               />
             </svg>
 
-            {tokenListFile ? tokenListFile.name : t("import_files_or_drag_and_drop")}
+            {tokenListFile ? (
+              <span className="text-primary-text">{tokenListFile.name}</span>
+            ) : (
+              t("import_files_or_drag_and_drop")
+            )}
           </div>
-          <HelperText helperText={"Max 2MB, file type JSON"} error={error} />
+          <HelperText helperText={"Max 2MB, file type JSON"} error={error ? error : undefined} />
         </>
       )}
       {tokenListFileContent && !error && (
@@ -193,10 +212,7 @@ export default function ImportListWithJSON({ setContent }: Props) {
                 </span>
               </div>
             </div>
-            <div className="px-5 py-3 flex gap-2 rounded-1 border border-orange bg-orange-bg">
-              <Svg className="text-orange shrink-0" iconName="warning" />
-              <p className="text-16 text-primary-text flex-grow">{t("adding_list_warning")}</p>
-            </div>
+            <Alert text={t("adding_list_warning")} type="warning" />
           </div>
 
           <div className="flex flex-col gap-5">
@@ -205,11 +221,12 @@ export default function ImportListWithJSON({ setContent }: Props) {
               handleChange={() => setCheckedUnderstand(!checkedUnderstand)}
               id="approve-list-import"
               label={t("i_understand")}
+              labelClassName="text-secondary-text"
             />
             <Button
               fullWidth
               disabled={!checkedUnderstand || Boolean(error)}
-              size={ButtonSize.MEDIUM}
+              size={ButtonSize.LARGE}
               onClick={() => {
                 handleJSONImport();
                 setContent("default");

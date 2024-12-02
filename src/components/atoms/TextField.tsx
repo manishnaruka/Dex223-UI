@@ -58,7 +58,7 @@ export function HelperText({
   return (
     <div className="text-12 mt-1 min-h-4">
       {typeof helperText !== "undefined" && !error && (
-        <div className={clsx("text-12 text-secondary-text h-4", disabled && "opacity-50")}>
+        <div className={clsx("text-12 text-tertiary-text h-4", disabled && "opacity-50")}>
           {helperText}
         </div>
       )}
