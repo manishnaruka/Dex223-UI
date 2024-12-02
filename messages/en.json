@@ -14,7 +14,7 @@
     "social_media": "Social media",
     "social_telegram_discussions": "Telegram discussions",
     "social_telegram_announcements": "Telegram announcements channel",
-    "social_x_account": "DEX223 X account",
+    "social_x_account": "DEX223",
     "social_discord": "Discord",
     "social_dex_x_account": "Dexaran’s X account",
     "useful_links": "Useful links",
@@ -347,7 +347,7 @@
     "prices_update_on_every_block": "Prices update on every block.",
     "discussions": "Discussions",
     "announcements": "Announcements",
-    "x": "DEX223 X",
+    "x": "DEX223",
     "discord": "Discord"
   },
   "Feedback": {

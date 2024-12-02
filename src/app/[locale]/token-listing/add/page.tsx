@@ -359,7 +359,7 @@ export default function ListTokenPage() {
 
           <div className="flex justify-center grid-in-[right]">
             <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">
-              <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
+              <div className="px-4 md:px-10 pt-2.5 pb-4 md:pb-10 bg-primary-bg rounded-5">
                 <div className="flex justify-between items-center mb-2.5">
                   <IconButton
                     onClick={() => router.replace(destination)}
@@ -504,7 +504,7 @@ export default function ListTokenPage() {
                     <SelectButton
                       fullWidth
                       size="medium"
-                      className="bg-secondary-bg justify-between pl-5"
+                      className="bg-tertiary-bg justify-between pl-5"
                       onClick={() => setAutoListingSelectOpened(true)}
                     >
                       {autoListing?.name || (
@@ -516,9 +516,11 @@ export default function ListTokenPage() {
                         !autoListing ? (
                           "Choose contract address you want to list"
                         ) : (
-                          <span className="flex items-center gap-2">
+                          <span className="flex items-center gap-1">
                             Contract address:{" "}
                             <ExternalTextLink
+                              className="text-12"
+                              arrowSize={16}
                               text={truncateMiddle(autoListing.id)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,

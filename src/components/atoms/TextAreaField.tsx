@@ -4,6 +4,7 @@ import { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
 
 import Input from "@/components/atoms/Input";
 import TextArea from "@/components/atoms/TextArea";
+import { HelperText } from "@/components/atoms/TextField";
 import Tooltip from "@/components/atoms/Tooltip";
 
 type Props = TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -39,13 +40,7 @@ export default function TextAreaField({
         {tooltipText && <Tooltip iconSize={20} text={tooltipText} />}
       </p>
       <TextArea isError={Boolean(error)} isWarning={Boolean(warning)} {...props} />
-      <div className="text-12 mt-0.5 h-4">
-        {!error && !warning && helperText && (
-          <span className="text-secondary-text">{helperText}</span>
-        )}
-        {error && <span className="text-red">{error}</span>}
-        {warning && <span className="text-orange">{error}</span>}
-      </div>
+      <HelperText helperText={helperText} error={error} warning={warning} />
     </div>
   );
 }

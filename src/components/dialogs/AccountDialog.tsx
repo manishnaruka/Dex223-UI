@@ -1,19 +1,18 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Popover from "@/components/atoms/Popover";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonSize } from "@/components/buttons/Button";
-import IconButton from "@/components/buttons/IconButton";
+import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import TabButton from "@/components/buttons/TabButton";
 import RecentTransaction from "@/components/common/RecentTransaction";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
@@ -62,13 +61,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                   href={getExplorerLink(ExplorerLinkType.ADDRESS, address, chainId)}
                 />
               )}
-              <IconButton
-                iconName="copy"
-                onClick={async () => {
-                  await copyToClipboard(address || "");
-                  addToast(tToast("successfully_copied"));
-                }}
-              />
+              <IconButton variant={IconButtonVariant.COPY} text={address || ""} />
             </div>
           </div>
           <button
