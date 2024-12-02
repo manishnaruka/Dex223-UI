@@ -220,9 +220,9 @@ export default function DecreaseLiquidityPage({
                 <div className="lg:mb-5 mt-4 mb-5 ml-5 mr-5">
                   <span className="text-12 lg:text-16 mb-2 text-secondary-text">Amount</span>
                   <div className="flex justify-between items-center mb-4">
-                    <div className="text-24 lg:text-24 font-medium">
+                    <div className="text-24 lg:text-24 font-medium relative">
                       <span>{percentage}</span>
-                      <span className="text-secondary-text ml-10">%</span>
+                      <span className="text-secondary-text absolute top-0 left-[70px]">%</span>
                     </div>
                     <div className="flex gap-2">
                       <InputButton

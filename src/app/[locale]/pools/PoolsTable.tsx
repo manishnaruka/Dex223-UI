@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 import { Address } from "viem";
 
@@ -21,7 +22,6 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
-import { useTranslations } from "next-intl";
 
 export enum SortingType {
   NONE,

@@ -18,11 +18,11 @@ import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
+import { Token } from "@/sdk_hybrid/entities/token";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
-import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 export const InputRange = ({
   value,

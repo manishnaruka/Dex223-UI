@@ -1,8 +1,8 @@
 import clsx from "clsx";
 
 import Svg from "@/components/atoms/Svg";
-import { DOTS, usePagination } from "@/hooks/usePagination";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { DOTS, usePagination } from "@/hooks/usePagination";
 
 interface Props {
   onPageChange: (page: number | string) => void;
