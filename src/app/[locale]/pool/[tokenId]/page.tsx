@@ -243,8 +243,7 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20"]}
-                  // {/*}, "ERC-223" */}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={position?.amount0.toSignificant() || "Loading..."}
                   percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -252,8 +251,7 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20"]}
-                  // {/*}, "ERC-223" */}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={position?.amount1.toSignificant() || "Loading..."}
                   percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
                 />
@@ -282,14 +280,14 @@ export default function PoolPage({
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20"]}
+                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={token0FeeFormatted}
                 />
               </div>
               <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                 <PositionLiquidityCard
                   token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20"]}
+                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
                   amount={token1FeeFormatted}
                 />
               </div>
