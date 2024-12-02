@@ -2,27 +2,26 @@
 
 import clsx from "clsx";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import { TableData } from "@/app/[locale]/portfolio/components/Deposited/DepositedWithdrawTable";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import Preloader from "@/components/atoms/Preloader";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
-
-import { WalletDeposite } from "../../stores/useWalletsDeposites";
 import { AllowanceStatus } from "@/hooks/useAllowance";
-import Preloader from "@/components/atoms/Preloader";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { Standard } from "@/sdk_hybrid/standard";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
-import { useTranslations } from "next-intl";
-import { Standard } from "@/sdk_hybrid/standard";
-import useTranslation from "next-translate/useTranslation";
+
+import { WalletDeposite } from "../../stores/useWalletsDeposites";
 
 const DepositedTokenTableItem = ({
   deposite,
@@ -284,7 +283,7 @@ export const MobileTable = ({
   return (
     <>
       <div className="flex lg:hidden flex-col gap-4">
-        {tableData.map((deposite, index: number) => {
+        {tableData.map((deposite) => {
           return (
             <DepositedTokenMobileTableItem
               key={`${deposite.walletAddresses[0]}_${deposite.contractAddress}_${deposite.token.address0}`}

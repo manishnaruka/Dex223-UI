@@ -25,6 +25,7 @@ import LiquidityChartRangeInput from "./LiquidityChartRangeInput";
 import { Bound } from "./LiquidityChartRangeInput/types";
 import { PriceRangeHeader } from "./PriceRangeHeader";
 import PriceRangeInput from "./PriceRangeInput";
+import { NumericalInput } from "@/app/[locale]/add/components/PriceRange/NumericalInput";
 
 export const PriceRange = ({
   noLiquidity,
@@ -265,9 +266,9 @@ export const PriceRange = ({
               type="text"
               value={startPriceTypedValue}
               onChange={(e) => {
-                setStartPriceTypedValue(e.target.value);
-                if (!Number(e.target.value)) {
-                  setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
+                const value = e.target.value;
+                if (/^\d*\.?\d*$/.test(value)) {
+                  setStartPriceTypedValue(value);
                 }
               }}
             />
