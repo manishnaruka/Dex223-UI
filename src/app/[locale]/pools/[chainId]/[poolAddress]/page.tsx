@@ -90,9 +90,11 @@ export default function ExplorePoolPage({
               href={getExplorerLink(ExplorerLinkType.ADDRESS, pool.id, chainId as any)}
               className="w-max"
             >
-              <div className="flex items-center gap-1 bg-quaternary-bg rounded-[8px] px-2 py-1 text-secondary-text hocus:text-primary-text hocus:bg-erc-20-bg ">
-                <span className="text-14">{renderShortAddress(pool.id)}</span>
-                <Svg iconName="forward" size={16} />
+              <div className="flex items-center duration-200 gap-1 bg-quaternary-bg rounded-[8px] px-2 py-0.5 text-secondary-text hocus:text-primary-text hocus:bg-erc-20-bg ">
+                <span className="text-14">
+                  {renderShortAddress(pool.id.toUpperCase().replace("0X", "0x"))}
+                </span>
+                <Svg iconName="forward" size={20} />
               </div>
             </a>
           </div>

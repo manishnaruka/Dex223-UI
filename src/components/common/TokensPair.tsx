@@ -20,8 +20,8 @@ export default function TokensPair({
   variant?: TokensPairVariant;
 }) {
   return (
-    <div className="flex gap-2.5">
-      <div className="flex items-baseline mt-0.5">
+    <div className="flex items-start  gap-2.5">
+      <div className="flex items-center ">
         <span className="w-[26px] h-[26px] md:w-[34px] md:h-[34px] rounded-full bg-primary-bg flex items-center justify-center">
           <Image
             src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
@@ -41,7 +41,7 @@ export default function TokensPair({
           />
         </span>
       </div>
-      <span className={clsx("md:text-16 text-18 block", variantClassNameMap[variant])}>
+      <span className={clsx("md:text-16 text-18 block mt-1", variantClassNameMap[variant])}>
         {tokenA?.symbol} / {tokenB?.symbol}
       </span>
     </div>
