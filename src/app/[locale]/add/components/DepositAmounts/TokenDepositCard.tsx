@@ -22,8 +22,6 @@ import { Token } from "@/sdk_hybrid/entities/token";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
-
-import { RevokeDialog } from "./RevokeDialog";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 
 export const InputRange = ({
@@ -38,6 +36,10 @@ export const InputRange = ({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(parseInt(event.target.value));
   };
+
+  useEffect(() => {
+    setValue(value);
+  }, [value]);
 
   const handleMouseUp = () => {
     let newValue = locValue >= 50 ? 100 : 0;
@@ -213,11 +215,17 @@ function InputStandardAmount({
   value,
   currency,
   currentAllowance,
+  isDisabled,
+  onChange,
+  setTokenStandardRatio,
 }: {
   standard: Standard;
   value?: number | string;
   currency?: Currency;
   currentAllowance: bigint; // currentAllowance or currentDeposit
+  isDisabled?: boolean;
+  onChange: (value: string) => void;
+  setTokenStandardRatio: (value: number) => void;
 }) {
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
@@ -250,6 +258,7 @@ function InputStandardAmount({
 
   const { setIsOpenedRevokeDialog, setDialogParams } = useRevokeDialogStatusStore();
   const { status, setStatus } = useRevokeStatusStore();
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -261,16 +270,29 @@ function InputStandardAmount({
           text={standard === Standard.ERC20 ? tSwap("erc20_tooltip") : tSwap("erc223_tooltip")}
         />
       </div>
-      <div className="bg-secondary-bg px-4 lg:px-5 pt-2 lg:pt-3 pb-3 lg:pb-4 w-full rounded-2">
+      <div
+        className={clsx(
+          "bg-secondary-bg px-4 lg:px-5 pt-2 lg:pt-3 pb-3 lg:pb-4 w-full rounded-2 border hocus:shadow hocus:shadow-green/60",
+          isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
+        )}
+      >
         <div className="mb-1 flex justify-between items-center">
           <input
             className="bg-transparent outline-0 text-16 w-full"
             placeholder="0"
             type="text"
             value={value || ""}
-            disabled
+            disabled={isDisabled}
             // onChange={(e) => onChange(e.target.value)}
-            onChange={() => {}}
+            // onChange={() => {}}
+            onChange={(e) => {
+              onChange(e.target.value);
+            }}
+            onFocus={() => {
+              setTokenStandardRatio(standard === Standard.ERC20 ? 0 : 100);
+              setIsFocused(true);
+            }}
+            onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
           />
         </div>
         <div className="flex justify-end items-center text-10 lg:text-12 text-tertiary-text">
@@ -433,12 +455,18 @@ export default function TokenDepositCard({
                 standard={Standard.ERC20}
                 value={formatUnits(ERC20Value, currency?.decimals || 18)}
                 currentAllowance={currentAllowance || BigInt(0)}
+                isDisabled={isDisabled}
+                onChange={onChange}
                 currency={currency}
+                setTokenStandardRatio={setTokenStandardRatio}
               />
               <InputStandardAmount
                 standard={Standard.ERC223}
                 value={formatUnits(ERC223Value, currency?.decimals || 18)}
                 currency={currency}
+                isDisabled={isDisabled}
+                onChange={onChange}
+                setTokenStandardRatio={setTokenStandardRatio}
                 currentAllowance={currentDeposit || BigInt(0)}
               />
             </div>

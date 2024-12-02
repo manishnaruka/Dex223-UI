@@ -2,10 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect } from "react";
 
-import {
-  Field,
-  useLiquidityAmountsStore,
-} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
+import { useLiquidityAmountsStore } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
 import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
 import Svg from "@/components/atoms/Svg";
@@ -25,7 +22,6 @@ import LiquidityChartRangeInput from "./LiquidityChartRangeInput";
 import { Bound } from "./LiquidityChartRangeInput/types";
 import { PriceRangeHeader } from "./PriceRangeHeader";
 import PriceRangeInput from "./PriceRangeInput";
-import { NumericalInput } from "@/app/[locale]/add/components/PriceRange/NumericalInput";
 
 export const PriceRange = ({
   noLiquidity,
@@ -92,8 +88,6 @@ export const PriceRange = ({
     currencyB: tokenB,
     tier,
   });
-  const { setTypedValue } = useLiquidityAmountsStore();
-
   const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
 
   const handleSetFullRange = useCallback(() => {
