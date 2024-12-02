@@ -5,9 +5,11 @@ export default function BlogPage() {
     <div>
       {posts.map((post) => {
         return (
-          <div key={post.id} className="bg-tertiary-bg rounded-2 p-4">
+          <div key={post.id} className="bg-tertiary-bg rounded-2 p-4 flex gap-3">
             {post.title}
-            <a href={`/blog/${post.id}`}>Link</a>
+            <a href={`/blog/${post.id}`} className="text-green underline hocus:text-green-hover">
+              Link to article
+            </a>
           </div>
         );
       })}
