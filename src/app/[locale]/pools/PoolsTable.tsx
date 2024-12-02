@@ -203,14 +203,14 @@ const PoolsTableItemMobile = ({
             />
             <span>{`${pool.token0.symbol}/${pool.token1.symbol}`}</span>
           </div>
-          <div className="flex gap-2 items-center justify-start mr-auto">
+          <div className="flex gap-2 items-baseline mt-0.5 justify-start mr-auto">
             <Badge
               // size="small"
               variant={BadgeVariant.PERCENTAGE}
               percentage={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
             />
           </div>
-          <span className="text-secondary-text whitespace-nowrap font-normal">{`# ${index}`}</span>
+          <span className="text-secondary-text items-baseline whitespace-nowrap font-normal">{`# ${index}`}</span>
         </div>
         <div className="flex justify-between gap-x-2">
           <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
@@ -268,8 +268,13 @@ const PoolsTableMobile = ({
         className="flex mb-4 gap-2 text-secondary-text flex-row cursor-pointer md:hidden"
         onClick={handleSort}
       >
-        <span>TVL</span>
-        <Svg iconName={sorting === SortingType.ASCENDING ? "sort-up" : "sort-down"} />
+        <span className={sorting === SortingType.NONE ? "text-secondary-text" : "text-green"}>
+          TVL
+        </span>
+        <Svg
+          iconName={sorting === SortingType.ASCENDING ? "sort-up" : "sort-down"}
+          className={sorting === SortingType.NONE ? "text-secondary-text" : "text-green"}
+        />
       </div>
       <div className="flex md:hidden flex-col gap-4">
         {tableData.map((pool: any, index: number) => {

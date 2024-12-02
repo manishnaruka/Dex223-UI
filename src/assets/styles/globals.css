@@ -11,8 +11,8 @@
   --wcm-color-overlay: #5A5A5A!important;
   --wcm-container-border-radius: 8px!important;
 
-  --sorting-arrow-up-fill: theme("colors.secondary-text");
-  --sorting-arrow-down-fill: theme("colors.secondary-text");
+  --sorting-arrow-up-fill: theme("colors.tertiary-text");
+  --sorting-arrow-down-fill: theme("colors.tertiary-text");
 
   --sorting-arrow-up-drop-shadow: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
   --sorting-arrow-down-drop-shadow: drop-shadow(0 0 0 rgba(0, 0, 0, 0));

@@ -165,11 +165,11 @@ export default function PoolPage({
         </div>
 
         <div className="w-full flex flex-col mb-4 lg:mb-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-1">
             <div>
               <TokensPair tokenA={token0} tokenB={token1} />
             </div>
-            <div className="flex flex-wrap items-center gap-2 mr-auto">
+            <div className="flex flex-wrap items-center justify-end gap-2 ">
               {position && (
                 <Badge
                   percentage={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
@@ -189,7 +189,7 @@ export default function PoolPage({
           </div>
         </div>
         <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
-          <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
+          <div className="flex items-center gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />
             <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
             <ExternalTextLink
@@ -200,10 +200,6 @@ export default function PoolPage({
                 chainId,
               )}
             />
-            {/*<span className="text-12 text-secondary-text lg:text-16">{params.tokenId}</span>*/}
-            <button>
-              <Svg iconName="arrow-up" />
-            </button>
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
             <Tooltip text="Tooltip text" />

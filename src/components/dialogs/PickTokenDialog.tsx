@@ -199,10 +199,10 @@ function TokenRow({
           </div>
 
           <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid min-h-4">
-            {!isTokenPinned && (
+            {(!isTokenPinned || simpleForm) && (
               <span className="text-secondary-text text-12">{currency.symbol}</span>
             )}
-            {erc20Balance && currency.isNative && (
+            {erc20Balance && !simpleForm && currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
                 <span className="text-secondary-text text-12">
@@ -210,7 +210,7 @@ function TokenRow({
                 </span>
               </div>
             )}
-            {erc20Balance && !currency.isNative && (
+            {erc20Balance && !simpleForm && !currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
                 <span className="text-secondary-text text-12">
@@ -218,7 +218,7 @@ function TokenRow({
                 </span>
               </div>
             )}
-            {erc223Balance && !currency.isNative && (
+            {erc223Balance && !simpleForm && !currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
                 <span className="text-secondary-text text-12">
@@ -230,7 +230,7 @@ function TokenRow({
         </div>
       </div>
       <div className="auto-cols-fr grid grid-flow-col gap-2 md:hidden mt-1">
-        {erc20Balance && currency.isNative && (
+        {erc20Balance && !simpleForm && currency.isNative && (
           <div className="flex items-center gap-1">
             <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
             <span className="text-secondary-text text-12">
@@ -238,7 +238,7 @@ function TokenRow({
             </span>
           </div>
         )}
-        {erc20Balance && !currency.isNative && (
+        {erc20Balance && !simpleForm && !currency.isNative && (
           <div className="flex items-center gap-1">
             <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
             <span className="text-secondary-text text-12">
@@ -246,7 +246,7 @@ function TokenRow({
             </span>
           </div>
         )}
-        {erc223Balance && !currency.isNative && (
+        {erc223Balance && !simpleForm && !currency.isNative && (
           <div className="flex items-center gap-1">
             <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
             <span className="text-secondary-text text-12">
@@ -322,7 +322,9 @@ export default function PickTokenDialog({
           {Boolean(tokens.length) && (
             <>
               <div className="w-full md:w-[600px] max-h-[580px] h-[calc(100vh-60px)] flex flex-col">
-                <div className={clsx("px-4 md:px-10", !pinnedTokens.length && "pb-3")}>
+                <div
+                  className={clsx("px-4 md:px-10", (!pinnedTokens.length || simpleForm) && "pb-3")}
+                >
                   <SearchInput
                     value={tokensSearchValue}
                     onChange={(e) => setTokensSearchValue(e.target.value)}
@@ -331,72 +333,75 @@ export default function PickTokenDialog({
                   <div
                     className={clsx(
                       "flex flex-wrap gap-3",
-                      !!pinnedTokens.length && "border-b border-secondary-border pb-3 mt-3",
+                      !!pinnedTokens.length &&
+                        !simpleForm &&
+                        "border-b border-secondary-border pb-3 mt-3",
                     )}
                   >
-                    {pinnedTokens.map((pinnedToken) => {
-                      if (!pinnedToken) {
-                        return;
-                      }
+                    {!simpleForm &&
+                      pinnedTokens.map((pinnedToken) => {
+                        if (!pinnedToken) {
+                          return;
+                        }
 
-                      return (
-                        <div
-                          key={
-                            pinnedToken.isToken
-                              ? pinnedToken.address0
-                              : `native-${pinnedToken.wrapped.address0}`
-                          }
-                          className="group relative"
-                        >
-                          <button
-                            onClick={() => {
-                              if (isMobile && isEditActivated) {
+                        return (
+                          <div
+                            key={
+                              pinnedToken.isToken
+                                ? pinnedToken.address0
+                                : `native-${pinnedToken.wrapped.address0}`
+                            }
+                            className="group relative"
+                          >
+                            <button
+                              onClick={() => {
+                                if (isMobile && isEditActivated) {
+                                  toggleToken(
+                                    pinnedToken.isNative ? "native" : pinnedToken.address0,
+                                    pinnedToken.chainId,
+                                  );
+                                } else {
+                                  handlePick(pinnedToken);
+                                }
+                              }}
+                              className={clsx(
+                                isEditActivated
+                                  ? "bg-transparent border-secondary-border"
+                                  : "bg-tertiary-bg border-transparent",
+                                "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                                !isMobile && isEditActivated && "hocus:bg-transparent",
+                                !isMobile && !isEditActivated && "hocus:bg-green-bg",
+                              )}
+                            >
+                              <Image
+                                width={24}
+                                height={24}
+                                src={pinnedToken.logoURI || "/images/tokens/placeholder.svg"}
+                                alt=""
+                              />
+                              {pinnedToken.symbol}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 toggleToken(
                                   pinnedToken.isNative ? "native" : pinnedToken.address0,
                                   pinnedToken.chainId,
                                 );
-                              } else {
-                                handlePick(pinnedToken);
-                              }
-                            }}
-                            className={clsx(
-                              isEditActivated
-                                ? "bg-transparent border-secondary-border"
-                                : "bg-tertiary-bg border-transparent",
-                              "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
-                              !isMobile && isEditActivated && "hocus:bg-transparent",
-                              !isMobile && !isEditActivated && "hocus:bg-green-bg",
-                            )}
-                          >
-                            <Image
-                              width={24}
-                              height={24}
-                              src={pinnedToken.logoURI || "/images/tokens/placeholder.svg"}
-                              alt=""
-                            />
-                            {pinnedToken.symbol}
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleToken(
-                                pinnedToken.isNative ? "native" : pinnedToken.address0,
-                                pinnedToken.chainId,
-                              );
-                            }}
-                            className={clsxMerge(
-                              "opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text  -right-1 -top-1",
-                              isEditActivated && "opacity-100",
-                              !isMobile &&
-                                "group-hocus:opacity-100 hocus:opacity-100 hocus:text-primary-text",
-                            )}
-                          >
-                            <Svg size={16} iconName="close" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                    {!!pinnedTokens.length && (
+                              }}
+                              className={clsxMerge(
+                                "opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text  -right-1 -top-1",
+                                isEditActivated && "opacity-100",
+                                !isMobile &&
+                                  "group-hocus:opacity-100 hocus:opacity-100 hocus:text-primary-text",
+                              )}
+                            >
+                              <Svg size={16} iconName="close" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    {!!pinnedTokens.length && !simpleForm && (
                       <span className="md:hidden">
                         <button
                           className={clsx(
@@ -419,7 +424,7 @@ export default function PickTokenDialog({
                       <div
                         className={clsx(
                           "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2",
-                          !!pinnedTokens.length && "pt-3",
+                          !!pinnedTokens.length && !simpleForm && "pt-3",
                         )}
                       >
                         {filteredTokens.map((token) => (
