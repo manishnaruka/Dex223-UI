@@ -390,7 +390,7 @@ export default function DecreaseLiquidityPage({
                   <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
                 </div>
               </div>
-              <span className="text-16 lg:text-18 font-bold">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
+              <span className="text-16 lg:text-18 font-bold text-secondary-text">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
             </div>
             <div className="flex items-center gap-2 justify-end">
               {hash && (

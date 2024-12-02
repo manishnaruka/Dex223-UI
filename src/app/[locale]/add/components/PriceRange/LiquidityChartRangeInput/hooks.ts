@@ -302,8 +302,6 @@ export function useDensityChartData({
   const { isLoading, error, data } = usePoolActiveLiquidity(currencyA, currencyB, feeAmount);
 
   const formatData = useCallback(() => {
-    console.log("getting new data");
-
     if (!data?.length) {
       return undefined;
     }

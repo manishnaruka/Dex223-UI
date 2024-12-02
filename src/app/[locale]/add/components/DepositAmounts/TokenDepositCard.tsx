@@ -20,7 +20,7 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Token } from "@/sdk_hybrid/entities/token";
-import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
+import { Standard } from "@/sdk_hybrid/standard";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
@@ -101,7 +101,6 @@ function InputTotalAmount({
 
   const maxHandler = () => {
     if (currency) {
-      // TODO set button state
       onChange(formatFloat(formatUnits(maxBalance, currency.decimals)));
     }
   };
