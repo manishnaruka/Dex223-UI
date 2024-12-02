@@ -478,7 +478,7 @@ export default function DecreaseLiquidityPage({
                 text={
                   <span>
                     {t("failed_transaction_error_message")}{" "}
-                    <a href="#" className="text-green underline">
+                    <a href="#" className="text-green hocus:text-green-hover underline">
                       {t("common_errors")}
                     </a>
                     .
@@ -504,7 +504,9 @@ export default function DecreaseLiquidityPage({
                   <span>
                     {t("removed_liquidity_message")}:{" "}
                     <Link href={`/pool/${params.tokenId}`}>
-                      <span className="text-green underline">{t("claim_tokens")}</span>
+                      <span className="text-green hocus:text-green-hover underline">
+                        {t("claim_tokens")}
+                      </span>
                     </Link>
                   </span>
                 }

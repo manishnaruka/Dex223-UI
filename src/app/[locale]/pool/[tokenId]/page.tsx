@@ -608,7 +608,7 @@ export default function PoolPage({
                     text={
                       <span>
                         {t("failed_transaction_error_message")}{" "}
-                        <a href="#" className="text-green underline">
+                        <a href="#" className="text-green hocus:text-green-hover underline">
                           {t("common_errors")}
                         </a>
                         .

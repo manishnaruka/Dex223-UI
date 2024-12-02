@@ -113,7 +113,7 @@ function InputTotalAmount({
 
   const maxBalance = currency?.isNative
     ? token0Balance?.value || BigInt(0)
-    : (token0Balance?.value || BigInt(0)) * BigInt(100 - tokenStandardRatio) +
+    : (token0Balance?.value || BigInt(0)) * BigInt((100 - tokenStandardRatio) / 100) +
       (token1Balance?.value || BigInt(0)) * BigInt(tokenStandardRatio / 100);
 
   const maxHandler = () => {
