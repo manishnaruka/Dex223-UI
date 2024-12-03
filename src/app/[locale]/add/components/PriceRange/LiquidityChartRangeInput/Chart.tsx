@@ -59,25 +59,42 @@ export function Chart({
     zoom,
   ]);
 
-  // useEffect(() => {
-  //   console.log("Updated series data:", series);
-  // }, [series]);
-
   useEffect(() => {
     // reset zoom as necessary
     setZoom(null);
   }, [zoomLevels]);
 
-  const { leftChart, rightChart } = useMemo(() => {
+  const { leftChart, rightChart, yMax, leftMax, rightMax } = useMemo(() => {
     const left = series.filter((d) => xAccessor(d) < current);
     const right = series.filter((d) => xAccessor(d) >= current);
+    const yMax = series.reduce((prev, current) =>
+      yAccessor(prev) > yAccessor(current) ? prev : current,
+    );
+
+    const leftMax = left.reduce((prev, current) =>
+      yAccessor(prev) > yAccessor(current) ? prev : current,
+    );
+    const rightMax = right.reduce((prev, current) =>
+      yAccessor(prev) > yAccessor(current) ? prev : current,
+    );
+
+    // console.log(yMax);
+    // console.log(yAccessor(yMax));
+    // console.log(yScale(yAccessor(yMax)));
+    // console.log(yScale(0));
 
     const appendix = {
       activeLiquidity: right[0]?.activeLiquidity || 0,
       price0: current,
     };
 
-    return { leftChart: [...left, appendix], rightChart: [appendix, ...right] };
+    return {
+      leftChart: [...left, appendix],
+      rightChart: [appendix, ...right],
+      yMax: yAccessor(yMax),
+      leftMax: yAccessor(leftMax),
+      rightMax: yAccessor(rightMax),
+    };
   }, [current, series]);
 
   return (
@@ -116,7 +133,7 @@ export function Chart({
             // mask to highlight selected area
             <mask id={`${id}-chart-area-mask`}>
               <rect
-                fill="white"
+                fill="rgba(125, 164, 145, 0.1)"
                 x={xScale(brushDomain[0])}
                 y="0"
                 width={xScale(brushDomain[1]) - xScale(brushDomain[0])}
@@ -125,14 +142,26 @@ export function Chart({
             </mask>
           )}
 
-          <linearGradient id={`${id}-gradient-red`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,0,0,0.7)" />
-            <stop offset="100%" stopColor="rgba(255,0,0,0.3)" />
+          <linearGradient
+            id={`${id}-gradient-red`}
+            x1="0%"
+            x2="0%"
+            y2="100%"
+            y1={`${(leftMax / yMax) * 100 - 100}%`}
+          >
+            <stop offset="0%" stopColor="rgba(220, 65, 65, 0.7)" />
+            <stop offset="100%" stopColor="rgba(220, 65, 65, 0.1)" />
           </linearGradient>
 
-          <linearGradient id={`${id}-gradient-green`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(0,255,0,0.7)" />
-            <stop offset="100%" stopColor="rgba(0,255,0,0.3)" />
+          <linearGradient
+            id={`${id}-gradient-green`}
+            x1="0%"
+            x2="0%"
+            y2={`100%`}
+            y1={`${(rightMax / yMax) * 100 - 100}%`}
+          >
+            <stop offset={`0%`} stopColor="rgba(112, 197, 158, 0.7)" />
+            <stop offset={`100%`} stopColor="rgba(112, 197, 158, 0.1)" />
           </linearGradient>
         </defs>
 
@@ -145,8 +174,8 @@ export function Chart({
               yScale={yScale}
               xValue={xAccessor}
               yValue={yAccessor}
-              color={"stroke-red fill-red opacity-50"}
-              // fill="red"
+              // color={"stroke-red fill-red opacity-50"}
+              fill={`url(#${id}-gradient-red)`}
             />
 
             {/* Right side of the Line (green) */}
@@ -156,6 +185,7 @@ export function Chart({
               yScale={yScale}
               xValue={xAccessor}
               yValue={yAccessor}
+              fill={`url(#${id}-gradient-green)`}
               // fill="green"
             />
 
@@ -169,7 +199,7 @@ export function Chart({
                   yScale={yScale}
                   xValue={xAccessor}
                   yValue={yAccessor}
-                  color={"stroke-red fill-red opacity-50"}
+                  // color={"stroke-red fill-red opacity-50"}
                   // fill={styles.area.selection}
                   fill={`url(#${id}-gradient-red)`}
                 />
