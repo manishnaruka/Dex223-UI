@@ -84,14 +84,14 @@ function FeeAmountOption({
   );
 }
 
-export default function FeeAmountSettings() {
+export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisabled?: boolean }) {
   const t = useTranslations("Liquidity");
   const [isFeeOpened, setIsFeeOpened] = useState(false);
   const { tier, setTier } = useLiquidityTierStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { clearPriceRange } = useLiquidityPriceRangeStore();
   const { setTypedValue } = useLiquidityAmountsStore();
-  const isDisabled = !tokenA || !tokenB;
+  const isDisabled = !tokenA || !tokenB || isAllDisabled;
 
   const { isLoading, isError, largestUsageFeeTier, distributions } = useFeeTierDistribution({
     tokenA,

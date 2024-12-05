@@ -9,6 +9,7 @@ import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
 import {
   Field,
   useLiquidityAmountsStore,
+  useTokensStandards,
 } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityRecentTransactionsStore } from "@/app/[locale]/add/stores/useAddLiquidityRecentTransactionsStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
@@ -35,6 +36,13 @@ import { PriceRange } from "./components/PriceRange/PriceRange";
 import { usePriceRange } from "./hooks/usePrice";
 import { useV3DerivedMintInfo } from "./hooks/useV3DerivedMintInfo";
 import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStore";
+import {
+  AddLiquidityApproveStatus,
+  AddLiquidityStatus,
+  useAddLiquidityStatusStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
+import { AllowanceStatus } from "@/hooks/useAllowance";
 
 export default function AddPoolPage() {
   usePoolsSearchParams();
@@ -117,8 +125,21 @@ export default function AddPoolPage() {
 
   // Deposit Amounts END
 
-  const isFormDisabled = !tokenA || !tokenB;
+  const { status, approve0Status, approve1Status, deposite0Status, deposite1Status } =
+    useAddLiquidityStatusStore();
+  const { status: revokeStatus } = useRevokeStatusStore();
 
+  const isAllDisabled =
+    [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(revokeStatus) ||
+    [AddLiquidityStatus.MINT_PENDING, AddLiquidityStatus.MINT_LOADING].includes(status) ||
+    [approve0Status, approve1Status, deposite0Status, deposite1Status].includes(
+      AddLiquidityApproveStatus.LOADING,
+    ) ||
+    [approve0Status, approve1Status, deposite0Status, deposite1Status].includes(
+      AddLiquidityApproveStatus.PENDING,
+    );
+
+  const isFormDisabled = !tokenA || !tokenB || isAllDisabled;
   // User need to provide values to price range & Starting price on pool creating
   const { LOWER: tickLower, UPPER: tickUpper } = ticks;
   const isCreatePoolFormFilled =
@@ -151,6 +172,7 @@ export default function AddPoolPage() {
           <h3 className="text-16 font-bold mb-1 lg:mb-4">{t("select_pair")}</h3>
           <div className="flex gap-2 md:gap-3 mb-4 md:mb-5">
             <SelectButton
+              disabled={isAllDisabled}
               variant="rounded"
               className="bg-tertiary-bg"
               fullWidth
@@ -185,6 +207,7 @@ export default function AddPoolPage() {
               )}
             </SelectButton>
             <SelectButton
+              disabled={isAllDisabled}
               variant="rounded"
               className="bg-tertiary-bg"
               fullWidth
@@ -219,7 +242,7 @@ export default function AddPoolPage() {
               )}
             </SelectButton>
           </div>
-          <FeeAmountSettings />
+          <FeeAmountSettings isAllDisabled={isAllDisabled} />
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-5 mb-4 lg:mb-5">
             <DepositAmounts
               parsedAmounts={parsedAmounts}
