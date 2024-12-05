@@ -31,16 +31,13 @@ const useDistributionText = ({
     (feeAmount: FeeAmount) => {
       const poolState = poolStates[feeAmount];
 
-      const distributionText =
-        !distributions || poolState === PoolState.NOT_EXISTS || poolState === PoolState.INVALID
-          ? t("fee_tier_not_created")
-          : distributions[feeAmount] !== undefined
-            ? t("fee_tier_select", {
-                select: distributions[feeAmount]?.toFixed(0),
-              })
-            : t("fee_tier_no_data");
-
-      return distributionText;
+      return !distributions || poolState === PoolState.NOT_EXISTS || poolState === PoolState.INVALID
+        ? t("fee_tier_not_created")
+        : distributions[feeAmount] !== undefined
+          ? t("fee_tier_select", {
+              select: distributions[feeAmount]?.toFixed(0),
+            })
+          : t("fee_tier_no_data");
     },
     [t, distributions, poolStates],
   );
@@ -93,7 +90,7 @@ export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisa
   const { setTypedValue } = useLiquidityAmountsStore();
   const isDisabled = !tokenA || !tokenB || isAllDisabled;
 
-  const { isLoading, isError, largestUsageFeeTier, distributions } = useFeeTierDistribution({
+  const { distributions } = useFeeTierDistribution({
     tokenA,
     tokenB,
   });

@@ -9,9 +9,13 @@ import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
 import {
   Field,
   useLiquidityAmountsStore,
-  useTokensStandards,
 } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityRecentTransactionsStore } from "@/app/[locale]/add/stores/useAddLiquidityRecentTransactionsStore";
+import {
+  AddLiquidityApproveStatus,
+  AddLiquidityStatus,
+  useAddLiquidityStatusStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import Container from "@/components/atoms/Container";
@@ -24,10 +28,12 @@ import IconButton, {
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
+import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/navigation";
 import { Currency } from "@/sdk_hybrid/entities/currency";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "./components/LiquidityActionButton/ConfirmLiquidityDialog";
@@ -36,13 +42,6 @@ import { PriceRange } from "./components/PriceRange/PriceRange";
 import { usePriceRange } from "./hooks/usePrice";
 import { useV3DerivedMintInfo } from "./hooks/useV3DerivedMintInfo";
 import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStore";
-import {
-  AddLiquidityApproveStatus,
-  AddLiquidityStatus,
-  useAddLiquidityStatusStore,
-} from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
-import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
-import { AllowanceStatus } from "@/hooks/useAllowance";
 
 export default function AddPoolPage() {
   usePoolsSearchParams();

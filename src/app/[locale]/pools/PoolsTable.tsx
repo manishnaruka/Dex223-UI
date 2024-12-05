@@ -22,6 +22,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
+import { Pool } from "undici-types";
 
 export enum SortingType {
   NONE,
@@ -291,6 +292,22 @@ const PoolsTableMobile = ({
     </>
   );
 };
+
+function localSorting(data: any[], sorting: SortingType): any[] {
+  const arrayForSort = [...data];
+  if (sorting === SortingType.DESCENDING) {
+    arrayForSort.sort((a, b) => {
+      return Number(b.totalValueLockedUSD) - Number(a.totalValueLockedUSD);
+    });
+  }
+  if (sorting === SortingType.ASCENDING) {
+    arrayForSort.sort((a, b) => {
+      return Number(a.totalValueLockedUSD) - Number(b.totalValueLockedUSD);
+    });
+  }
+  return arrayForSort;
+}
+
 export default function PoolsTable({
   filter,
 }: {
@@ -322,11 +339,14 @@ export default function PoolsTable({
   const chainId = useCurrentChainId();
   const { data, loading } = usePoolsData({
     chainId,
-    orderDirection: GQLSorting[sorting],
+    orderDirection: GQLSorting[SortingType.NONE], //sorting],
     filter,
   });
 
-  const pools: any[] = useMemo(() => data?.pools || [], [data?.pools]);
+  const pools: any[] = useMemo(() => {
+    const pools = data?.pools || [];
+    return localSorting(pools, sorting);
+  }, [data?.pools, sorting]);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
