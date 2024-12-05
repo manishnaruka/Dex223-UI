@@ -426,6 +426,7 @@ export default function TokenDepositCard({
           ) === formattedValue;
   }, [
     currency?.decimals,
+    currentDeposit,
     formattedValue,
     token0Balance?.value,
     token1Balance?.value,
