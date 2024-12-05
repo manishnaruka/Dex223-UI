@@ -473,5 +473,7 @@ export const useLiquidityApprove = () => {
     approveTransactionsType,
     approveTotalGasLimit,
     updateAllowance,
+    currentDepositA,
+    currentDepositB,
   };
 };

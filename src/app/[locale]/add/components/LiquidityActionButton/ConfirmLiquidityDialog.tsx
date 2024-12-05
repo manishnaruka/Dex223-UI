@@ -89,8 +89,14 @@ const ApproveDialog = () => {
 
   const { gasPriceOption } = useAddLiquidityGasPriceStore();
 
-  const { handleApprove, approveTransactionsType, approveTransactions, approveTotalGasLimit } =
-    useLiquidityApprove();
+  const {
+    handleApprove,
+    approveTransactionsType,
+    approveTransactions,
+    approveTotalGasLimit,
+    currentDepositA,
+    currentDepositB,
+  } = useLiquidityApprove();
 
   const isLoadingA20 = approveTransactions.approveA
     ? [AddLiquidityApproveStatus.LOADING].includes(approveTransactions.approveA?.status)
@@ -129,17 +135,27 @@ const ApproveDialog = () => {
       token: "tokenA" as TokenType,
     },
     {
-      transaction: approveTransactions.depositA!,
+      transaction: approveTransactions.depositA
+        ? {
+            ...approveTransactions.depositA,
+            amount: approveTransactions.depositA.amount - (currentDepositA || BigInt(0)),
+          }
+        : undefined,
       standard: Standard.ERC223,
       token: "tokenA" as TokenType,
     },
     {
-      transaction: approveTransactions.approveB!,
+      transaction: approveTransactions.approveB,
       standard: Standard.ERC20,
       token: "tokenB" as TokenType,
     },
     {
-      transaction: approveTransactions.depositB!,
+      transaction: approveTransactions.depositB
+        ? {
+            ...approveTransactions.depositB,
+            amount: approveTransactions.depositB.amount - (currentDepositB || BigInt(0)),
+          }
+        : undefined,
       standard: Standard.ERC223,
       token: "tokenB" as TokenType,
     },
@@ -174,7 +190,7 @@ const ApproveDialog = () => {
       <div className="w-full md:w-[570px] px-4 md:px-10 md:pb-10 pb-4 mx-auto">
         {transactionItems.map(({ transaction, standard, token }, index) => (
           <TransactionItem
-            key={`${transaction.token.symbol}_${standard}`}
+            key={`${transaction?.token.symbol}_${standard}`}
             transaction={transaction}
             standard={standard}
             gasPrice={gasPrice}

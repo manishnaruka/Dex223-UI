@@ -80,6 +80,7 @@ function InputTotalAmount({
   isMax = false,
   token0Balance,
   token1Balance,
+  currentDeposit = BigInt(0),
 }: {
   currency?: Currency;
   value: string;
@@ -89,6 +90,7 @@ function InputTotalAmount({
   isMax: boolean;
   token0Balance: any;
   token1Balance: any;
+  currentDeposit: bigint;
 }) {
   const totalBalance = currency?.isNative
     ? token0Balance?.value || BigInt(0)
@@ -97,7 +99,7 @@ function InputTotalAmount({
   const maxBalance = currency?.isNative
     ? token0Balance?.value || BigInt(0)
     : (token0Balance?.value || BigInt(0)) * BigInt((100 - tokenStandardRatio) / 100) +
-      (token1Balance?.value || BigInt(0)) * BigInt(tokenStandardRatio / 100);
+      ((token1Balance?.value || BigInt(0)) + currentDeposit) * BigInt(tokenStandardRatio / 100);
 
   const maxHandler = () => {
     if (currency) {
@@ -176,18 +178,7 @@ function InputTotalAmount({
                 })
               : "—"}
           </span>
-          {currency && (
-            <InputButton onClick={maxHandler} isActive={isMax} text={t("max_title")} />
-            // <Button
-            //   variant={ButtonVariant.CONTAINED}
-            //   size={ButtonSize.EXTRA_SMALL}
-            //   className="bg-tertiary-bg text-green md:px-2 lg:px-2 xl:px-2 px-2 hocus:bg-green-bg"
-            //   onClick={maxHandler}
-            //   isActive={isMax}
-            // >
-            //   {t("max_title")}
-            // </Button>
-          )}
+          {currency && <InputButton onClick={maxHandler} isActive={isMax} text={t("max_title")} />}
         </div>
       </div>
     </div>
@@ -411,22 +402,6 @@ export default function TokenDepositCard({
   const ERC223Value = (valueBigInt * BigInt(tokenStandardRatio)) / BigInt(100);
   const ERC20Value = valueBigInt - ERC223Value;
 
-  const isMax: boolean = useMemo(() => {
-    return tokenStandardRatio === 0
-      ? formattedValue !== "0" &&
-          formatFloat(formatUnits(token0Balance?.value || BigInt(0), currency?.decimals || 18)) ===
-            formattedValue
-      : formattedValue !== "0" &&
-          formatFloat(formatUnits(token1Balance?.value || BigInt(0), currency?.decimals || 18)) ===
-            formattedValue;
-  }, [
-    currency?.decimals,
-    formattedValue,
-    token0Balance?.value,
-    token1Balance?.value,
-    tokenStandardRatio,
-  ]);
-
   const { currentAllowance: currentAllowance } = useRevoke({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
@@ -436,6 +411,26 @@ export default function TokenDepositCard({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
+
+  const isMax: boolean = useMemo(() => {
+    return tokenStandardRatio === 0
+      ? formattedValue !== "0" &&
+          formatFloat(formatUnits(token0Balance?.value || BigInt(0), currency?.decimals || 18)) ===
+            formattedValue
+      : formattedValue !== "0" &&
+          formatFloat(
+            formatUnits(
+              (token1Balance?.value || BigInt(0)) + currentDeposit,
+              currency?.decimals || 18,
+            ),
+          ) === formattedValue;
+  }, [
+    currency?.decimals,
+    formattedValue,
+    token0Balance?.value,
+    token1Balance?.value,
+    tokenStandardRatio,
+  ]);
 
   if (isOutOfRange) {
     return (
@@ -475,6 +470,7 @@ export default function TokenDepositCard({
           isMax={isMax}
           token0Balance={token0Balance}
           token1Balance={token1Balance}
+          currentDeposit={currentDeposit}
         />
         {currency?.isNative && currency ? null : (
           <>

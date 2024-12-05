@@ -22,7 +22,6 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/navigation";
 
 import { usePoolsData } from "./hooks";
-import { Pool } from "undici-types";
 
 export enum SortingType {
   NONE,
