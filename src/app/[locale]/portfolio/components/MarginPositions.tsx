@@ -30,7 +30,7 @@ export const MarginPositions = () => {
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
-          <img
+          <Image
             src="/images/portfolio-bars.svg"
             alt="Side Icon"
             width={"180"}
