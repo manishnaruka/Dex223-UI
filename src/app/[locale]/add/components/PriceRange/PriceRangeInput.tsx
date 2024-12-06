@@ -97,7 +97,7 @@ export default function PriceRangeInput({
           onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
           onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
         />
-        <span className="text-12 text-secondary-text">
+        <span className="text-12 text-tertiary-text">
           {tokenA && tokenB
             ? t("price_per", {
                 symbol0: tokenB.symbol,
@@ -111,14 +111,14 @@ export default function PriceRangeInput({
           variant={IconButtonVariant.CONTROL}
           iconName="add"
           onClick={handleIncrement}
-          className="rounded-2 bg-primary-bg hocus:bg-green-bg duration-200 text-primary-text"
+          // className="rounded-2 bg-primary-bg hocus:bg-green-bg duration-200 "
           disabled={noLiquidity}
         />
         <IconButton
           variant={IconButtonVariant.CONTROL}
           iconName="minus"
           onClick={handleDecrement}
-          className="rounded-2 bg-primary-bg hocus:bg-green-bg duration-200 text-primary-text"
+          // className="rounded-2 bg-primary-bg hocus:bg-green-bg duration-200 "
           disabled={noLiquidity}
         />
       </div>

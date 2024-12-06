@@ -294,22 +294,24 @@ export const useLiquidityApprove = () => {
       }
     },
     [
-      tokenA,
-      approveA,
-      depositA,
+      amountToCheckA,
+      publicClient,
+      approve0Status,
+      amountToCheckB,
+      tokenA?.isToken,
       tokenAStandard,
       currentAllowanceA,
       currentDepositA,
-      amountToCheckA,
-      publicClient,
-      setApprove0Status,
-      setDeposite0Status,
-      setApprove0Hash,
-      setDeposite0Hash,
       openConfirmInWalletAlert,
-      closeConfirmInWalletAlert,
       t,
+      setApprove0Status,
+      approveA,
       gasSettings,
+      closeConfirmInWalletAlert,
+      setApprove0Hash,
+      setDeposite0Status,
+      depositA,
+      setDeposite0Hash,
     ],
   );
   const handleApprove1 = useCallback(
@@ -392,22 +394,23 @@ export const useLiquidityApprove = () => {
       }
     },
     [
-      tokenB,
-      approveB,
-      depositB,
+      amountToCheckB,
+      publicClient,
+      approve1Status,
+      tokenB?.isToken,
       tokenBStandard,
       currentAllowanceB,
       currentDepositB,
-      amountToCheckB,
-      publicClient,
-      setApprove1Status,
-      setDeposite1Status,
-      setApprove1Hash,
-      setDeposite1Hash,
       openConfirmInWalletAlert,
-      closeConfirmInWalletAlert,
       t,
+      setApprove1Status,
+      approveB,
       gasSettings,
+      closeConfirmInWalletAlert,
+      setApprove1Hash,
+      setDeposite1Status,
+      depositB,
+      setDeposite1Hash,
     ],
   );
 
@@ -426,7 +429,7 @@ export const useLiquidityApprove = () => {
       //   await Promise.all([handleApprove0({ customAmountA }), handleApprove1({ customAmountB })]);
       // }
     },
-    [handleApprove0, handleApprove1],
+    [handleApprove0],
   );
 
   const updateAllowance = useCallback(async () => {
@@ -470,5 +473,7 @@ export const useLiquidityApprove = () => {
     approveTransactionsType,
     approveTotalGasLimit,
     updateAllowance,
+    currentDepositA,
+    currentDepositB,
   };
 };

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Address, formatUnits, getAbiItem } from "viem";
 import {
   useAccount,
@@ -12,18 +12,18 @@ import {
   useWithdrawGasLimitStore,
   useWithdrawGasSettings,
 } from "@/app/[locale]/add/stores/useRevokeGasSettings";
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
-// import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { AllowanceStatus } from "./useAllowance";
 import useCurrentChainId from "./useCurrentChainId";
@@ -102,7 +102,7 @@ export default function useWithdraw({
   token: Currency | undefined;
   contractAddress: Address | undefined;
 }) {
-  const [status, setStatus] = useState(AllowanceStatus.INITIAL);
+  const { status, setStatus } = useRevokeStatusStore();
 
   const { address } = useAccount();
   const chainId = useCurrentChainId();
@@ -131,6 +131,7 @@ export default function useWithdraw({
 
   const { gasSettings, customGasLimit, gasModel } = useWithdrawGasSettings();
   const { params } = useWithdrawParams({ token, contractAddress, amountToWithdraw });
+  const { setRefreshDepositsTrigger } = useRefreshDepositsDataStore();
 
   const writeTokenWithdraw = useCallback(
     async (customAmount?: bigint) => {
@@ -196,6 +197,7 @@ export default function useWithdraw({
           setStatus(AllowanceStatus.LOADING);
           await publicClient.waitForTransactionReceipt({ hash });
           setStatus(AllowanceStatus.SUCCESS);
+          setRefreshDepositsTrigger(true);
         }
       } catch (e) {
         console.log(e);
@@ -211,17 +213,15 @@ export default function useWithdraw({
       address,
       chainId,
       publicClient,
+      setStatus,
       params,
       customGasLimit,
       gasSettings,
       addRecentTransaction,
       gasModel,
+      setRefreshDepositsTrigger,
     ],
   );
-
-  if ((currentDeposit.data || 0) > 0 && status === AllowanceStatus.SUCCESS) {
-    setStatus(AllowanceStatus.INITIAL);
-  }
 
   return {
     withdrawStatus: status,

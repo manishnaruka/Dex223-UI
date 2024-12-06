@@ -44,7 +44,7 @@ export function usePositionFromTokenId(tokenId: bigint) {
       loading,
       position: positions?.[0],
     };
-  }, [loading, positions?.[0]]);
+  }, [loading, positions]);
 }
 export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
   const chainId = useCurrentChainId();
@@ -76,20 +76,7 @@ export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
             return undefined;
           }
 
-          const [
-            nonce,
-            operator,
-            token0,
-            token1,
-            tier,
-            tickLower,
-            tickUpper,
-            liquidity,
-            feeGrowthInside0LastX128,
-            feeGrowthInside1LastX128,
-            tokensOwed0,
-            tokensOwed1,
-          ] = pos.result as any;
+          const [token0, token1, tier, tickLower, tickUpper, liquidity] = pos.result as any;
           return {
             token0,
             token1,

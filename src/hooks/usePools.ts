@@ -179,7 +179,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
           sqrtPriceX96.toString(),
           liquidity.toString(),
           tick,
-          poolAddresses?.[index]?.address
+          poolAddresses?.[index]?.address && ticksMap
             ? ticksMap[poolAddresses[index]!.address!.toLowerCase()].sort(
                 (a, b) => a.index - b.index,
               )

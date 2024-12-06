@@ -1,6 +1,4 @@
-// @ts-ignore
-
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Abi, Address, formatUnits, getAbiItem } from "viem";
 import {
   useAccount,
@@ -12,8 +10,8 @@ import {
 
 import { useRevokeGasSettings } from "@/app/[locale]/add/stores/useRevokeGasSettings";
 import { useRevokeGasLimitStore } from "@/app/[locale]/add/stores/useRevokeGasSettings";
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
-import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import addToast from "@/other/toast";
@@ -23,6 +21,7 @@ import {
   stringifyObject,
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { AllowanceStatus } from "./useAllowance";
 import useCurrentChainId from "./useCurrentChainId";
@@ -103,13 +102,15 @@ export default function useRevoke({
   token: Currency | undefined;
   contractAddress: Address | undefined;
 }) {
-  const [status, setStatus] = useState(AllowanceStatus.INITIAL);
+  const { status, setStatus } = useRevokeStatusStore();
   const { address } = useAccount();
   const chainId = useCurrentChainId();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
 
   const { addRecentTransaction } = useRecentTransactionsStore();
+
+  const { setRefreshDepositsTrigger } = useRefreshDepositsDataStore();
 
   const { refetch, data: currentAllowanceData } = useReadContract({
     abi: ERC20_ABI,
@@ -197,6 +198,8 @@ export default function useRevoke({
         setStatus(AllowanceStatus.LOADING);
         await publicClient.waitForTransactionReceipt({ hash });
         setStatus(AllowanceStatus.SUCCESS);
+        console.log("revoke status SUCCESS");
+        setRefreshDepositsTrigger(true);
       }
     } catch (e) {
       console.log(e);
@@ -211,15 +214,18 @@ export default function useRevoke({
     chainId,
     publicClient,
     params,
+    setStatus,
     customGasLimit,
     gasSettings,
     addRecentTransaction,
     gasModel,
+    setRefreshDepositsTrigger,
   ]);
 
-  if ((currentAllowanceData || 0) > 0 && status === AllowanceStatus.SUCCESS) {
-    setStatus(AllowanceStatus.INITIAL);
-  }
+  // if ((currentAllowanceData || 0) > 0 && status === AllowanceStatus.SUCCESS) {
+  //   console.log("resetting revoke status");
+  //   setStatus(AllowanceStatus.INITIAL);
+  // }
 
   return {
     revokeStatus: status,

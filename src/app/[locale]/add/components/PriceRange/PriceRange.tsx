@@ -2,10 +2,6 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect } from "react";
 
-import {
-  Field,
-  useLiquidityAmountsStore,
-} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
 import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
 import Svg from "@/components/atoms/Svg";
@@ -91,8 +87,6 @@ export const PriceRange = ({
     currencyB: tokenB,
     tier,
   });
-  const { setTypedValue } = useLiquidityAmountsStore();
-
   const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
 
   const handleSetFullRange = useCallback(() => {
@@ -221,7 +215,7 @@ export const PriceRange = ({
         value={
           ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER]
             ? "0"
-            : leftPrice?.toSignificant(8) ?? ""
+            : leftPrice?.toSignificant(8) ?? "0"
         }
         onUserInput={setLeftRangeTypedValue}
         title={t("low_price")}
@@ -236,7 +230,7 @@ export const PriceRange = ({
         value={
           ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER]
             ? "∞"
-            : rightPrice?.toSignificant(8) ?? ""
+            : rightPrice?.toSignificant(8) ?? "0"
         }
         onUserInput={setRightRangeTypedValue}
         decrement={isSorted ? getDecrementUpper : getIncrementLower}
@@ -258,57 +252,61 @@ export const PriceRange = ({
             <span className="text-14 text-secondary-text">{t("init_pool_message")}</span>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-bold text-16">{t("starting_price")}</span>
+            <span className="font-bold text-16 text-secondary-text">{t("starting_price")}</span>
             <input
               className="outline-0 text-16 w-full rounded-3 bg-secondary-bg px-5 py-3 border border-transparent hocus:shadow hocus:shadow-green/60 focus:border-green focus:shadow focus:shadow-green/60"
               placeholder="0"
               type="text"
               value={startPriceTypedValue}
               onChange={(e) => {
-                setStartPriceTypedValue(e.target.value);
-                if (!Number(e.target.value)) {
-                  setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
+                const value = e.target.value;
+                if (/^\d*\.?\d*$/.test(value)) {
+                  setStartPriceTypedValue(value);
                 }
               }}
             />
-            <div className="flex justify-between text-14 text-tertiary-text">
-              <span>{`Starting ${tokenA?.symbol} price:`}</span>
+            <div className="flex justify-between text-12 text-tertiary-text">
+              <span>{`${t("token_starting_price", { symbol: tokenA?.symbol })}:`}</span>
               <span>{`${formattedPrice} ${tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}`}</span>
             </div>
           </div>
         </>
       ) : (
         <>
-          <div className="flex w-full flex-row">
+          <div className="flex w-full flex-row mt-1">
             <CurrentPrice
               price={formattedPrice}
               description={tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}
             />
-            <div className="ml-auto flex-col mt-auto">
+            <div className="ml-auto flex-col mt-1">
               <div
                 onClick={() => {
                   setRefreshTicksTrigger(true);
                   setZoomInitial(true);
                 }}
-                className="flex mb-2 text-12 cursor-pointer text-secondary-text hocus:text-green justify-end items-center w-100"
+                className="flex mb-1 gap-2 text-12 cursor-pointer text-secondary-text hocus:text-green justify-end items-center w-100"
               >
                 {t("refresh")}
                 <Svg
-                  iconName="convert"
+                  size={20}
+                  iconName="reset"
                   // className="text-tertiary-text group-hocus:text-green mr-1 flex-shrink-0"
                 />
               </div>
               <div className="ml-auto flex gap-2 justify-end items-center w-100 ">
                 <IconButton
                   variant={IconButtonVariant.CONTROL}
-                  buttonSize={24}
+                  buttonSize={32}
+                  iconSize={24}
                   iconName="zoom-in"
+                  className="bg-tertiary-bg"
                   onClick={() => setZoomIn(true)}
                 />
                 <IconButton
                   variant={IconButtonVariant.CONTROL}
-                  buttonSize={24}
+                  buttonSize={32}
                   iconName="zoom-out"
+                  className="bg-tertiary-bg"
                   onClick={() => setZoomOut(true)}
                 />
               </div>

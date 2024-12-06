@@ -24,7 +24,7 @@ export const Area = ({
     () => (
       <path
         fill={fill}
-        className={color ? color : "stroke-green fill-green opacity-50"}
+        // className={color ? color : "stroke-green fill-green opacity-50"}
         d={
           area()
             .curve(curveStepAfter)
@@ -39,5 +39,5 @@ export const Area = ({
         }
       />
     ),
-    [color, fill, series, xScale, xValue, yScale, yValue],
+    [fill, series, xScale, xValue, yScale, yValue],
   );

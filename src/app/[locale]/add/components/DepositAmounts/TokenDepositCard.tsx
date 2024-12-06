@@ -1,14 +1,14 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits } from "viem";
 import { useAccount, useBalance, useBlockNumber } from "wagmi";
 
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import InputButton from "@/components/buttons/InputButton";
 import { formatFloat } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { AllowanceStatus } from "@/hooks/useAllowance";
@@ -19,9 +19,10 @@ import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
-
-import { RevokeDialog } from "./RevokeDialog";
+import { Token } from "@/sdk_hybrid/entities/token";
+import { Standard } from "@/sdk_hybrid/standard";
+import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 export const InputRange = ({
   value,
@@ -35,6 +36,10 @@ export const InputRange = ({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(parseInt(event.target.value));
   };
+
+  useEffect(() => {
+    setValue(value);
+  }, [value]);
 
   const handleMouseUp = () => {
     let newValue = locValue >= 50 ? 100 : 0;
@@ -72,44 +77,29 @@ function InputTotalAmount({
   onChange,
   isDisabled,
   tokenStandardRatio = 0,
+  isMax = false,
+  token0Balance,
+  token1Balance,
+  currentDeposit = BigInt(0),
 }: {
   currency?: Currency;
   value: string;
   onChange: (value: string) => void;
   isDisabled?: boolean;
   tokenStandardRatio: number;
+  isMax: boolean;
+  token0Balance: any;
+  token1Balance: any;
+  currentDeposit: bigint;
 }) {
-  const { address } = useAccount();
-
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-  const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
-    address: currency ? address : undefined,
-    token: currency && !currency.isNative ? currency.address0 : undefined,
-    query: {
-      enabled: Boolean(currency),
-    },
-  });
-  const { data: token1Balance, refetch: refetchBalance1 } = useBalance({
-    address: currency ? address : undefined,
-    token: currency && !currency.isNative ? currency.address1 : undefined,
-    query: {
-      enabled: Boolean(currency),
-    },
-  });
-
-  useEffect(() => {
-    refetchBalance0();
-    refetchBalance1();
-  }, [blockNumber, refetchBalance0, refetchBalance1]);
-
   const totalBalance = currency?.isNative
     ? token0Balance?.value || BigInt(0)
     : (token0Balance?.value || BigInt(0)) + (token1Balance?.value || BigInt(0));
 
   const maxBalance = currency?.isNative
     ? token0Balance?.value || BigInt(0)
-    : (token0Balance?.value || BigInt(0)) * BigInt(100 - tokenStandardRatio) +
-      (token1Balance?.value || BigInt(0)) * BigInt(tokenStandardRatio / 100);
+    : (token0Balance?.value || BigInt(0)) * BigInt((100 - tokenStandardRatio) / 100) +
+      ((token1Balance?.value || BigInt(0)) + currentDeposit) * BigInt(tokenStandardRatio / 100);
 
   const maxHandler = () => {
     if (currency) {
@@ -154,10 +144,10 @@ function InputTotalAmount({
           onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
           onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
         />
-        <div className="justify-end bg-secondary-bg rounded-5 py-1 pl-1 flex items-center gap-2 min-w-[88px]">
+        <div className="justify-end bg-secondary-bg rounded-5 py-1 pl-1 flex items-center gap-2 ">
           {currency ? (
             <div
-              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : ""}`}
+              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : "bg-primary-bg"}`}
             >
               <Image
                 src={currency?.logoURI || "/images/tokens/placeholder.svg"}
@@ -165,14 +155,14 @@ function InputTotalAmount({
                 width={24}
                 height={24}
               />
-              <span className="text-nowrap pr-8">{currencySymbolShortX2}</span>
+              <span className="text-nowrap pr-7">{currencySymbolShortX2}</span>
             </div>
           ) : (
             <div
-              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : ""}`}
+              className={`rounded-3 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : "bg-primary-bg"}`}
             >
               <Image src={"/images/tokens/placeholder.svg"} alt="" width={24} height={24} />
-              <span className="text-nowrap pr-8">{t("select_token")}</span>
+              <span className="text-nowrap pr-7">{t("select_token")}</span>
             </div>
           )}
         </div>
@@ -188,16 +178,7 @@ function InputTotalAmount({
                 })
               : "—"}
           </span>
-          {currency && (
-            <Button
-              variant={ButtonVariant.CONTAINED}
-              size={ButtonSize.EXTRA_SMALL}
-              className="bg-tertiary-bg text-green md:px-2 lg:px-2 xl:px-2 px-2 hocus:bg-green-bg"
-              onClick={maxHandler}
-            >
-              {t("max_title")}
-            </Button>
-          )}
+          {currency && <InputButton onClick={maxHandler} isActive={isMax} text={t("max_title")} />}
         </div>
       </div>
     </div>
@@ -209,33 +190,33 @@ function InputStandardAmount({
   standard,
   value,
   currency,
-  status,
   currentAllowance,
-  revokeHandler,
-  // estimatedGas,
-  // gasPrice,
+  isDisabled,
+  onChange,
+  setTokenStandardRatio,
+  tokenBalance,
 }: {
   standard: Standard;
   value?: number | string;
   currency?: Currency;
   currentAllowance: bigint; // currentAllowance or currentDeposit
-  status: AllowanceStatus;
-  revokeHandler: (customAmount?: bigint) => void; // onWithdraw or onWithdraw
-  // gasPrice?: bigint;
-  // estimatedGas: bigint | null;
+  isDisabled?: boolean;
+  onChange: (value: string) => void;
+  setTokenStandardRatio: (value: number) => void;
+  tokenBalance: any;
 }) {
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
-  const { address } = useAccount();
-  const { data: blockNumber } = useBlockNumber({ watch: true });
-  const { data: tokenBalance, refetch: refetchBalance } = useBalance({
-    address: currency ? address : undefined,
-    token: currency ? getTokenAddressForStandard(currency, standard) : undefined,
-  });
-
-  useEffect(() => {
-    refetchBalance();
-  }, [blockNumber, refetchBalance]);
+  // const { address } = useAccount();
+  // const { data: blockNumber } = useBlockNumber({ watch: true });
+  // const { data: tokenBalance, refetch: refetchBalance } = useBalance({
+  //   address: currency ? address : undefined,
+  //   token: currency ? getTokenAddressForStandard(currency, standard) : undefined,
+  // });
+  //
+  // useEffect(() => {
+  //   refetchBalance();
+  // }, [blockNumber, refetchBalance]);
 
   const chainId = useCurrentChainId();
   useRevokeEstimatedGas({
@@ -253,7 +234,9 @@ function InputStandardAmount({
     charsFromEnd: 0,
   });
 
-  const [isOpenedRevokeDialog, setIsOpenedRevokeDialog] = useState(false);
+  const { setIsOpenedRevokeDialog, setDialogParams } = useRevokeDialogStatusStore();
+  const { status, setStatus } = useRevokeStatusStore();
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -265,16 +248,29 @@ function InputStandardAmount({
           text={standard === Standard.ERC20 ? tSwap("erc20_tooltip") : tSwap("erc223_tooltip")}
         />
       </div>
-      <div className="bg-secondary-bg px-4 lg:px-5 pt-2 lg:pt-3 pb-3 lg:pb-4 w-full rounded-2">
+      <div
+        className={clsx(
+          "bg-secondary-bg px-4 lg:px-5 pt-2 lg:pt-3 pb-3 lg:pb-4 w-full rounded-2 border hocus:shadow hocus:shadow-green/60",
+          isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
+        )}
+      >
         <div className="mb-1 flex justify-between items-center">
           <input
             className="bg-transparent outline-0 text-16 w-full"
             placeholder="0"
             type="text"
             value={value || ""}
-            disabled
+            disabled={isDisabled}
             // onChange={(e) => onChange(e.target.value)}
-            onChange={() => {}}
+            // onChange={() => {}}
+            onChange={(e) => {
+              onChange(e.target.value);
+            }}
+            onFocus={() => {
+              setTokenStandardRatio(standard === Standard.ERC20 ? 0 : 100);
+              setIsFocused(true);
+            }}
+            onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
           />
         </div>
         <div className="flex justify-end items-center text-10 lg:text-12 text-tertiary-text">
@@ -320,8 +316,22 @@ function InputStandardAmount({
             )}
             {!!currentAllowance ? (
               <span
-                className="text-12 px-2 pt-[2px] pb-[2px] pl-4 pr-4 bg-green-bg text-secondary-text rounded-3 h-min cursor-pointer border-transparent border hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text duration-200"
-                onClick={() => setIsOpenedRevokeDialog(true)}
+                className={`text-12 px-2 pt-[2px] pb-[2px] pl-4 pr-4 rounded-3 h-min border duration-200 ${
+                  [AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(status)
+                    ? "bg-gray-400 border-secondary-border text-gray-500 cursor-not-allowed" // Disabled styles
+                    : "bg-green-bg border-transparent text-secondary-text cursor-pointer hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text"
+                }`}
+                onClick={() => {
+                  if (![AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(status)) {
+                    setStatus(AllowanceStatus.INITIAL);
+                    setDialogParams(
+                      currency as Token,
+                      NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
+                      standard,
+                    );
+                    setIsOpenedRevokeDialog(true);
+                  }
+                }}
               >
                 {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
               </span>
@@ -329,19 +339,6 @@ function InputStandardAmount({
           </>
         ) : null}
       </div>
-      {currency && currency.isToken && (
-        <RevokeDialog
-          isOpen={isOpenedRevokeDialog}
-          setIsOpen={setIsOpenedRevokeDialog}
-          standard={standard}
-          token={currency}
-          status={status}
-          currentAllowance={currentAllowance}
-          revokeHandler={revokeHandler}
-          // estimatedGas={estimatedGas}
-          // gasPrice={gasPrice}
-        />
-      )}
     </div>
   );
 }
@@ -376,29 +373,65 @@ export default function TokenDepositCard({
     charsFromEnd: 0,
   });
 
+  const { address } = useAccount();
+
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address0 : undefined,
+    query: {
+      enabled: Boolean(currency),
+    },
+  });
+  const { data: token1Balance, refetch: refetchBalance1 } = useBalance({
+    address: currency ? address : undefined,
+    token: currency && !currency.isNative ? currency.address1 : undefined,
+    query: {
+      enabled: Boolean(currency),
+    },
+  });
+
+  useEffect(() => {
+    refetchBalance0();
+    refetchBalance1();
+  }, [blockNumber, refetchBalance0, refetchBalance1]);
+
   const chainId = useCurrentChainId();
   const valueBigInt = value ? BigInt(value.quotient.toString()) : BigInt(0);
 
   const ERC223Value = (valueBigInt * BigInt(tokenStandardRatio)) / BigInt(100);
   const ERC20Value = valueBigInt - ERC223Value;
 
-  const {
-    revokeHandler,
-    currentAllowance: currentAllowance,
-    revokeStatus,
-  } = useRevoke({
+  const { currentAllowance: currentAllowance } = useRevoke({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
 
-  const {
-    withdrawHandler,
-    currentDeposit: currentDeposit,
-    withdrawStatus,
-  } = useWithdraw({
+  const { currentDeposit: currentDeposit } = useWithdraw({
     token: currency,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
+
+  const isMax: boolean = useMemo(() => {
+    return tokenStandardRatio === 0
+      ? formattedValue !== "0" &&
+          formatFloat(formatUnits(token0Balance?.value || BigInt(0), currency?.decimals || 18)) ===
+            formattedValue
+      : formattedValue !== "0" &&
+          formatFloat(
+            formatUnits(
+              (token1Balance?.value || BigInt(0)) + currentDeposit,
+              currency?.decimals || 18,
+            ),
+          ) === formattedValue;
+  }, [
+    currency?.decimals,
+    currentDeposit,
+    formattedValue,
+    token0Balance?.value,
+    token1Balance?.value,
+    tokenStandardRatio,
+  ]);
 
   if (isOutOfRange) {
     return (
@@ -435,6 +468,10 @@ export default function TokenDepositCard({
           onChange={onChange}
           isDisabled={isDisabled}
           tokenStandardRatio={tokenStandardRatio}
+          isMax={isMax}
+          token0Balance={token0Balance}
+          token1Balance={token1Balance}
+          currentDeposit={currentDeposit}
         />
         {currency?.isNative && currency ? null : (
           <>
@@ -444,21 +481,21 @@ export default function TokenDepositCard({
                 standard={Standard.ERC20}
                 value={formatUnits(ERC20Value, currency?.decimals || 18)}
                 currentAllowance={currentAllowance || BigInt(0)}
+                isDisabled={isDisabled}
+                onChange={onChange}
                 currency={currency}
-                revokeHandler={revokeHandler}
-                status={revokeStatus}
-                // estimatedGas={revokeEstimatedGas}
-                // gasPrice={gasPrice}
+                setTokenStandardRatio={setTokenStandardRatio}
+                tokenBalance={token0Balance}
               />
               <InputStandardAmount
                 standard={Standard.ERC223}
                 value={formatUnits(ERC223Value, currency?.decimals || 18)}
                 currency={currency}
+                isDisabled={isDisabled}
+                onChange={onChange}
+                setTokenStandardRatio={setTokenStandardRatio}
                 currentAllowance={currentDeposit || BigInt(0)}
-                revokeHandler={withdrawHandler}
-                // estimatedGas={depositEstimatedGas}
-                status={withdrawStatus}
-                // gasPrice={gasPrice}
+                tokenBalance={token1Balance}
               />
             </div>
           </>

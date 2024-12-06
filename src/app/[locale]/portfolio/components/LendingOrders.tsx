@@ -29,7 +29,7 @@ export const LendingOrders = () => {
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
           </div>
-          <img
+          <Image
             src="/images/lending-bar.svg"
             alt="Side Icon"
             width={"121"}

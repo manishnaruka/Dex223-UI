@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 import { useSwipeable } from "react-swipeable";
 
-import Svg from "@/components/atoms/Svg";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 
 interface Props {
@@ -40,7 +39,11 @@ export default function DialogHeader({
           )}
         >
           {onBack && (
-            <IconButton onClick={onBack} iconName="back" buttonSize={IconButtonSize.LARGE} />
+            <IconButton
+              onClick={onBack}
+              variant={IconButtonVariant.BACK}
+              buttonSize={IconButtonSize.LARGE}
+            />
           )}
           {!onBack && titlePosition === "center" && <span />}
           <h2

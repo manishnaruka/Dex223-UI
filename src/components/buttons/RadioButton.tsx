@@ -19,7 +19,7 @@ export default function RadioButton({
   return (
     <button
       className={clsxMerge(
-        "duration-200 text-14 md:text-16 h-10 flex px-3 md:px-4 lg:px-5 items-center rounded-2 group gap-2  disabled:pointer-events-none disabled:opacity-50",
+        "duration-200 items-baseline text-14 md:text-16 pt-3 pb-3 min-h-12 flex px-4 md:px-4 lg:px-5 rounded-3 group gap-x-2 md:gap-2  disabled:pointer-events-none disabled:opacity-50",
         isActive
           ? "text-primary-text"
           : "text-secondary-text hocus:bg-green-bg  hocus:text-primary-text",
@@ -30,8 +30,7 @@ export default function RadioButton({
     >
       <span
         className={clsx(
-          "flex-shrink-0 duration-200 w-4 h-4 rounded-full border relative bg-secondary-bg",
-          // bgColor,
+          "flex-shrink-0 duration-200 w-4 h-4  rounded-full border relative bg-secondary-bg top-[3px]",
           isActive ? "border-green" : "border-secondary-border group-hocus:border-green",
         )}
       >

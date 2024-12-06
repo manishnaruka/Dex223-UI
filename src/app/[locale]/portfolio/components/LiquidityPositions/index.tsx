@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
@@ -49,7 +50,7 @@ export const LiquidityPositions = () => {
               <Tooltip iconSize={20} text="Info text" />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
-            <img
+            <Image
               src="/images/liq-pos-bar.svg"
               alt="Side Icon"
               width={"122"}

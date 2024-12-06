@@ -31,16 +31,13 @@ const useDistributionText = ({
     (feeAmount: FeeAmount) => {
       const poolState = poolStates[feeAmount];
 
-      const distributionText =
-        !distributions || poolState === PoolState.NOT_EXISTS || poolState === PoolState.INVALID
-          ? t("fee_tier_not_created")
-          : distributions[feeAmount] !== undefined
-            ? t("fee_tier_select", {
-                select: distributions[feeAmount]?.toFixed(0),
-              })
-            : t("fee_tier_no_data");
-
-      return distributionText;
+      return !distributions || poolState === PoolState.NOT_EXISTS || poolState === PoolState.INVALID
+        ? t("fee_tier_not_created")
+        : distributions[feeAmount] !== undefined
+          ? t("fee_tier_select", {
+              select: distributions[feeAmount]?.toFixed(0),
+            })
+          : t("fee_tier_no_data");
     },
     [t, distributions, poolStates],
   );
@@ -70,7 +67,7 @@ function FeeAmountOption({
         "flex flex-col md:flex-row md:justify-between items-start md:items-center px-4 py-3 md:px-5 md:py-2 rounded-2 border cursor-pointer duration-200 gap-2 md:gap-0",
         active
           ? "bg-quaternary-bg border-secondary-border pointer-events-none"
-          : "border-transparent bg-primary-bg hocus:bg-quaternary-bg",
+          : "border-transparent bg-primary-bg md:hocus:bg-quaternary-bg",
       )}
     >
       <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
@@ -84,16 +81,16 @@ function FeeAmountOption({
   );
 }
 
-export default function FeeAmountSettings() {
+export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisabled?: boolean }) {
   const t = useTranslations("Liquidity");
   const [isFeeOpened, setIsFeeOpened] = useState(false);
   const { tier, setTier } = useLiquidityTierStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { clearPriceRange } = useLiquidityPriceRangeStore();
   const { setTypedValue } = useLiquidityAmountsStore();
-  const isDisabled = !tokenA || !tokenB;
+  const isDisabled = !tokenA || !tokenB || isAllDisabled;
 
-  const { isLoading, isError, largestUsageFeeTier, distributions } = useFeeTierDistribution({
+  const { distributions } = useFeeTierDistribution({
     tokenA,
     tokenB,
   });
