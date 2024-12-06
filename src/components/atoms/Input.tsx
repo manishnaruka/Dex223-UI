@@ -1,3 +1,4 @@
+"use client";
 import clsx from "clsx";
 import { ChangeEvent, forwardRef, InputHTMLAttributes, useRef } from "react";
 

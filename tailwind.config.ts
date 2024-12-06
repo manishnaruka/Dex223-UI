@@ -158,7 +158,7 @@ const config: Config = {
     colors: {
       transparent: "transparent",
       current: "currentColor",
-
+      inherit: "inherit",
       // main background colors
 
       "primary-bg": "#1D1E1E",
@@ -281,6 +281,7 @@ const config: Config = {
 
       addUtilities(newUtilities, ["responsive", "hover"]);
     },
+    require("@tailwindcss/typography"),
   ],
 };
 export default config;
