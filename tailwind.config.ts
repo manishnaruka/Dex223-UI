@@ -282,6 +282,7 @@ const config: Config = {
       addUtilities(newUtilities, ["responsive", "hover"]);
     },
     require("@tailwindcss/typography"),
+    require("@tailwindcss/aspect-ratio"),
   ],
 };
 export default config;
