@@ -261,6 +261,8 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                     id="isActive"
                   />
                   <Image
+                    width={40}
+                    height={40}
                     key={address}
                     className={clsx(
                       "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
@@ -298,6 +300,8 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                 >
                   <div className="flex items-center gap-3 relative">
                     <Image
+                      width={40}
+                      height={40}
                       key={address}
                       className={clsx(
                         "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
@@ -356,6 +360,8 @@ const ManageWallets = () => {
           <div className="flex items-center">
             {wallets.slice(0, 3).map(({ address }, index) => (
               <Image
+                width={24}
+                height={24}
                 key={address}
                 className={clsx(
                   "w-6 h-6 min-h-6 min-w-6 rounded-1 border-2 border-primary-bg",
@@ -427,6 +433,8 @@ export function Portfolio() {
               <div className="flex px-4 lg:px-5">
                 {activeAddresses.slice(0, 3).map((ad, index) => (
                   <Image
+                    width={40}
+                    height={40}
                     key={ad}
                     className={clsx(
                       "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
