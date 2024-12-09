@@ -77,18 +77,20 @@ export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
           }
 
           const [
-            nonce,
-            operator,
+            ,
+            ,
+            //nonce,
+            //operator,
             token0,
             token1,
             tier,
             tickLower,
             tickUpper,
             liquidity,
-            feeGrowthInside0LastX128,
-            feeGrowthInside1LastX128,
-            tokensOwed0,
-            tokensOwed1,
+            // feeGrowthInside0LastX128,
+            // feeGrowthInside1LastX128,
+            // tokensOwed0,
+            // tokensOwed1,
           ] = pos.result as any;
           return {
             token0,
