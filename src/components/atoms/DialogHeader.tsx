@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { useSwipeable } from "react-swipeable";
 
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
+import { clsxMerge } from "@/functions/clsxMerge";
 
 interface Props {
   onClose: () => void;
@@ -11,6 +12,7 @@ interface Props {
   onBack?: () => void;
   settings?: ReactNode;
   titlePosition?: "left" | "center";
+  className?: string;
 }
 export default function DialogHeader({
   onBack,
@@ -19,6 +21,7 @@ export default function DialogHeader({
   paragraph,
   settings,
   titlePosition = "left",
+  className,
 }: Props) {
   const handlers = useSwipeable({
     onSwipedDown: (eventData) => {
@@ -28,7 +31,10 @@ export default function DialogHeader({
   });
 
   return (
-    <div {...handlers} className={onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10"}>
+    <div
+      {...handlers}
+      className={clsxMerge(onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10", className)}
+    >
       <div className={clsx("h-[60px] flex items-center")}>
         <div
           className={clsx(

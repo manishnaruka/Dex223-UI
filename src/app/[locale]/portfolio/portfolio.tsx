@@ -4,7 +4,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Address, isAddress } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
@@ -13,7 +13,7 @@ import Checkbox from "@/components/atoms/Checkbox";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Popover from "@/components/atoms/Popover";
@@ -55,7 +55,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
 
   const error =
     Boolean(tokenAddressToImport) && !isAddress(tokenAddressToImport)
-      ? t("enter_in_correct_format")
+      ? t("enter_address_correct_format")
       : "";
 
   const { addWallet } = usePortfolioStore();
@@ -78,6 +78,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
           value={tokenAddressToImport}
           onChange={(e) => setTokenAddressToImport(e.target.value)}
           placeholder={t("add_wallet_placeholder")}
+          isError={!!error}
         />
         <div
           className={clsx("absolute right-1 flex items-center justify-center h-full w-10 top-0")}
@@ -188,10 +189,15 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   return (
     <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
       <DialogHeader
+        className="md:pr-3 px-4 md:pl-5"
         onClose={() => {
-          setIsOpened(false);
+          if (!popupBackHandler) {
+            setIsOpened(false);
+          } else {
+            popupBackHandler();
+          }
         }}
-        onBack={popupBackHandler}
+        // onBack={popupBackHandler}
         settings={
           content === "list" ? (
             <Button
@@ -208,7 +214,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
         }
         title={PopoverTitles[content]}
       />
-      <div className="flex flex-col pb-5 border-t border-primary-border">
+      <div className="flex flex-col pb-5 border-t border-secondary-border">
         {content === "add" ? (
           <div className="flex flex-col pt-5 px-5">
             <AddWalletInput onAdd={() => setContent("list")} />
@@ -231,12 +237,12 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
           </div>
         ) : content === "list" ? (
           <>
-            <div className="flex justify-between text-green text-18 font-medium px-5">
+            <div className="flex justify-between text-secondary-text text-16 font-medium px-5">
               <span
                 className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => setAllWalletActive()}
               >
-                Select all
+                {t("select_all")}
               </span>
               <span
                 className="py-2 cursor-pointer hocus:text-green-hover"
@@ -251,7 +257,10 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
               {wallets.map(({ address, isActive }) => (
                 <div
                   key={address}
-                  className="flex items-center px-5 py-[10px] bg-tertiary-bg rounded-3 gap-3 relative"
+                  className="cursor-pointer flex items-center px-5 py-2 hocus:bg-quaternary-bg bg-tertiary-bg rounded-3 gap-3 relative"
+                  onClick={() => {
+                    setIsWalletActive(address, !isActive);
+                  }}
                 >
                   <Checkbox
                     checked={isActive}
@@ -261,6 +270,8 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                     id="isActive"
                   />
                   <Image
+                    width={40}
+                    height={40}
                     key={address}
                     className={clsx(
                       "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
@@ -277,7 +288,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                 </div>
               ))}
             </div>
-            <div className="flex w-full px-5 pt-5 mt-5 border-t border-primary-border">
+            <div className="flex w-full px-5 pt-5 mt-5 border-t border-secondary-border">
               <Button fullWidth onClick={() => setIsOpened(false)}>
                 {t("show_portfolio")}
               </Button>
@@ -298,6 +309,8 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                 >
                   <div className="flex items-center gap-3 relative">
                     <Image
+                      width={40}
+                      height={40}
                       key={address}
                       className={clsx(
                         "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
@@ -356,6 +369,8 @@ const ManageWallets = () => {
           <div className="flex items-center">
             {wallets.slice(0, 3).map(({ address }, index) => (
               <Image
+                width={24}
+                height={24}
                 key={address}
                 className={clsx(
                   "w-6 h-6 min-h-6 min-w-6 rounded-1 border-2 border-primary-bg",
@@ -427,6 +442,8 @@ export function Portfolio() {
               <div className="flex px-4 lg:px-5">
                 {activeAddresses.slice(0, 3).map((ad, index) => (
                   <Image
+                    width={40}
+                    height={40}
                     key={ad}
                     className={clsx(
                       "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
@@ -464,9 +481,19 @@ export function Portfolio() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0">
-              <EmptyStateIcon iconName="wallet" size={40} />
-              <span className="text-secondary-text">{t("connect_wallet_placeholder")}</span>
+            // min-h-[340px] bg-primary-bg justify-center w-full flex-col gap-2 rounded-5 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180
+            // <div className=" min-h-[80px] flex items-center justify-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-60">
+            //   <p className="text-secondary-text text-16">{t("connect_wallet_placeholder")}</p>
+            // </div>
+            <div className="min-h-[40px] flex items-center w-full relative justify-between gap-x-3 px-4 lg:px-5 lg:pb-0 ">
+              <span className="text-secondary-text mr-auto text-16">
+                {t("connect_wallet_placeholder")}
+              </span>
+              <EmptyStateIcon
+                iconName="wallet"
+                size={80}
+                className="absolute right-0 top-0 -mt-5 object-cover"
+              />
             </div>
           )}
         </div>

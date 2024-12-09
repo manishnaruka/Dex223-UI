@@ -102,7 +102,7 @@ const PoolsTableDesktop = ({
 
       {tableData.map((o: any, index: number) => {
         return (
-          <React.Fragment key={o.id}>
+          <React.Fragment key={o.id || index}>
             <div
               onMouseEnter={() => setHoveredRow(index)}
               onMouseLeave={() => setHoveredRow(null)}
@@ -178,18 +178,18 @@ const PoolsTableDesktop = ({
 };
 
 const PoolsTableItemMobile = ({
-  key,
+  // key,
   pool,
   openPoolHandler,
   index,
 }: {
-  key: any;
+  // key: any;
   pool: any;
   openPoolHandler: (id: Address) => any;
   index: number;
 }) => {
   return (
-    <React.Fragment key={key}>
+    <React.Fragment key={index}>
       <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
         <div className="flex justify-between gap-2">
           <div className="flex items-center gap-2 text-14">
@@ -280,7 +280,7 @@ const PoolsTableMobile = ({
         {tableData.map((pool: any, index: number) => {
           return (
             <PoolsTableItemMobile
-              key={pool.id}
+              key={pool.id || index}
               index={(currentPage - 1) * PAGE_SIZE + index + 1}
               pool={pool}
               openPoolHandler={openPoolHandler}

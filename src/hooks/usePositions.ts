@@ -76,7 +76,20 @@ export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
             return undefined;
           }
 
-          const [token0, token1, tier, tickLower, tickUpper, liquidity] = pos.result as any;
+          const [
+            nonce,
+            operator,
+            token0,
+            token1,
+            tier,
+            tickLower,
+            tickUpper,
+            liquidity,
+            feeGrowthInside0LastX128,
+            feeGrowthInside1LastX128,
+            tokensOwed0,
+            tokensOwed1,
+          ] = pos.result as any;
           return {
             token0,
             token1,
@@ -128,6 +141,8 @@ export default function usePositions() {
   const { data: tokenIdsData, isLoading: tokenIdsLoading } = useReadContracts({
     contracts: tokenIdsContracts,
   });
+
+  // console.dir(tokenIdsData);
 
   const { positions, loading: positionsLoading } = usePositionsFromTokenIds(
     tokenIdsData
