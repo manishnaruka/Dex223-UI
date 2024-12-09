@@ -4,7 +4,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Address, isAddress } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
@@ -13,7 +13,7 @@ import Checkbox from "@/components/atoms/Checkbox";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Popover from "@/components/atoms/Popover";
@@ -472,9 +472,19 @@ export function Portfolio() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0">
-              <EmptyStateIcon iconName="wallet" size={40} />
-              <span className="text-secondary-text">{t("connect_wallet_placeholder")}</span>
+            // min-h-[340px] bg-primary-bg justify-center w-full flex-col gap-2 rounded-5 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180
+            // <div className=" min-h-[80px] flex items-center justify-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-60">
+            //   <p className="text-secondary-text text-16">{t("connect_wallet_placeholder")}</p>
+            // </div>
+            <div className="min-h-[40px] flex items-center w-full relative justify-between gap-x-3 px-4 lg:px-5 lg:pb-0 ">
+              <span className="text-secondary-text mr-auto text-16">
+                {t("connect_wallet_placeholder")}
+              </span>
+              <EmptyStateIcon
+                iconName="wallet"
+                size={80}
+                className="absolute right-0 top-0 -mt-5 object-cover"
+              />
             </div>
           )}
         </div>
