@@ -189,10 +189,15 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   return (
     <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
       <DialogHeader
+        className="md:pr-3 px-4 md:pl-5"
         onClose={() => {
-          setIsOpened(false);
+          if (!popupBackHandler) {
+            setIsOpened(false);
+          } else {
+            popupBackHandler();
+          }
         }}
-        onBack={popupBackHandler}
+        // onBack={popupBackHandler}
         settings={
           content === "list" ? (
             <Button
@@ -209,7 +214,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
         }
         title={PopoverTitles[content]}
       />
-      <div className="flex flex-col pb-5 border-t border-primary-border">
+      <div className="flex flex-col pb-5 border-t border-secondary-border">
         {content === "add" ? (
           <div className="flex flex-col pt-5 px-5">
             <AddWalletInput onAdd={() => setContent("list")} />
@@ -232,12 +237,12 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
           </div>
         ) : content === "list" ? (
           <>
-            <div className="flex justify-between text-green text-18 font-medium px-5">
+            <div className="flex justify-between text-secondary-text text-16 font-medium px-5">
               <span
                 className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => setAllWalletActive()}
               >
-                Select all
+                {t("select_all")}
               </span>
               <span
                 className="py-2 cursor-pointer hocus:text-green-hover"
@@ -252,7 +257,10 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
               {wallets.map(({ address, isActive }) => (
                 <div
                   key={address}
-                  className="flex items-center px-5 py-[10px] bg-tertiary-bg rounded-3 gap-3 relative"
+                  className="cursor-pointer flex items-center px-5 py-[10px] hocus:bg-quaternary-bg bg-tertiary-bg rounded-3 gap-3 relative"
+                  onClick={(event) => {
+                    setIsWalletActive(address, !isActive);
+                  }}
                 >
                   <Checkbox
                     checked={isActive}
@@ -280,7 +288,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                 </div>
               ))}
             </div>
-            <div className="flex w-full px-5 pt-5 mt-5 border-t border-primary-border">
+            <div className="flex w-full px-5 pt-5 mt-5 border-t border-secondary-border">
               <Button fullWidth onClick={() => setIsOpened(false)}>
                 {t("show_portfolio")}
               </Button>
