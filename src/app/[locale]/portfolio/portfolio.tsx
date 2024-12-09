@@ -257,8 +257,8 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
               {wallets.map(({ address, isActive }) => (
                 <div
                   key={address}
-                  className="cursor-pointer flex items-center px-5 py-[10px] hocus:bg-quaternary-bg bg-tertiary-bg rounded-3 gap-3 relative"
-                  onClick={(event) => {
+                  className="cursor-pointer flex items-center px-5 py-2 hocus:bg-quaternary-bg bg-tertiary-bg rounded-3 gap-3 relative"
+                  onClick={() => {
                     setIsWalletActive(address, !isActive);
                   }}
                 >
