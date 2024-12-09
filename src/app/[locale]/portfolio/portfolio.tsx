@@ -55,7 +55,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
 
   const error =
     Boolean(tokenAddressToImport) && !isAddress(tokenAddressToImport)
-      ? t("enter_in_correct_format")
+      ? t("enter_address_correct_format")
       : "";
 
   const { addWallet } = usePortfolioStore();
@@ -78,6 +78,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
           value={tokenAddressToImport}
           onChange={(e) => setTokenAddressToImport(e.target.value)}
           placeholder={t("add_wallet_placeholder")}
+          isError={!!error}
         />
         <div
           className={clsx("absolute right-1 flex items-center justify-center h-full w-10 top-0")}
