@@ -170,11 +170,11 @@ const Positions = () => {
                   </div>
                   <div className="flex flex-col gap-3 pb-10">
                     {filteredPositions?.length ? (
-                      filteredPositions.map((position) => {
+                      filteredPositions.map((position, index) => {
                         return (
                           <PoolPosition
                             positionInfo={position}
-                            key={(position as any).nonce}
+                            key={(position as any).nonce || index}
                             onClick={() =>
                               router.push(`/pool/${(position as any).tokenId.toString()}`)
                             }
