@@ -160,7 +160,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   const { disconnect } = useDisconnect();
 
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
-  const { setAllWalletActive, removeWallet } = usePortfolioStore();
+  const { setAllWalletActive, removeWallet, isAllWalletActive } = usePortfolioStore();
   const { wallets, setIsWalletActive } = usePortfolioWallets();
   const [content, setContent] = useState<ManageWalletsPopoverContent>(
     wallets.length ? "list" : "add",
@@ -242,7 +242,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                 className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => setAllWalletActive()}
               >
-                {t("select_all")}
+                {isAllWalletActive ? t("deselect_all") : t("select_all")}
               </span>
               <span
                 className="py-2 cursor-pointer hocus:text-green-hover"

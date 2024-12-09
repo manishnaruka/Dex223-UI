@@ -395,7 +395,8 @@
     "deposited_title": "Approved and Deposited tokens",
     "enter_in_correct_format": "Enter token address in correct format",
     "enter_address_correct_format": "Enter wallet address in correct format",
-    "select_all": "Select all"
+    "select_all": "Select all",
+    "deselect_all": "Deselect all"
 
   }
 }

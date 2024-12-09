@@ -80,11 +80,6 @@ export function Chart({
       return yAccessor(prev) > yAccessor(current) ? prev : current;
     }, def);
 
-    // console.log(yMax);
-    // console.log(yAccessor(yMax));
-    // console.log(yScale(yAccessor(yMax)));
-    // console.log(yScale(0));
-
     const appendix = {
       activeLiquidity: right[0]?.activeLiquidity || 0,
       price0: current,
