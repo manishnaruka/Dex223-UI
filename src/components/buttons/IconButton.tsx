@@ -57,7 +57,7 @@ function IconButtonFrame({
       )}
       {...props}
     >
-      <Svg size={iconSize} iconName={iconName} />
+      <Svg size={iconSize} iconName={iconName} className="z-10 relative" />
     </button>
   );
 }
@@ -90,7 +90,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
       }
     | { variant: IconButtonVariant.CONTROL; iconName: IconName }
     | { variant: IconButtonVariant.COPY; text: string }
-    | { variant: IconButtonVariant.BACK }
+    | { variant: IconButtonVariant.BACK; iconName: IconName }
     | { variant?: IconButtonVariant.DEFAULT | undefined; iconName: IconName; active?: boolean }
     | {
         variant: IconButtonVariant.SORTING;
@@ -186,7 +186,7 @@ export default function IconButton(_props: Props) {
           iconName="delete"
           onClick={_props.handleDelete}
           className={clsxMerge(
-            "rounded-full bg-transparent hocus:bg-red-bg text-tertiary-text hocus:text-red duration-200",
+            "rounded-full before:rounded-full before:z-0 before:blur bg-transparent duration-200 before:opacity-0 before:duration-200 hocus:before:opacity-100 text-tertiary-text before:absolute before:w-8 before:h-8 before:bg-red-bg hocus:text-red-light-hover",
             className,
           )}
           {...props}
@@ -225,11 +225,11 @@ export default function IconButton(_props: Props) {
     }
 
     case IconButtonVariant.BACK: {
-      const { className, ...props } = _props;
+      const { className, iconName, ...props } = _props;
 
       return (
         <IconButtonFrame
-          iconName="back"
+          iconName={iconName ? iconName : "back"}
           className={clsxMerge(
             "text-secondary-text hocus:text-primary-text duration-200",
             className,

@@ -35,7 +35,7 @@ const checkAllActive = (wallets: any[]) => {
 
 export const usePortfolioStore = create<PortfolioStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       wallets: [],
       addWallet: (address) =>
         set((state) => ({
@@ -115,7 +115,7 @@ interface PortfolioActiveTabStore {
   setActiveTab: (tab: ActiveTab) => void;
 }
 
-export const usePortfolioActiveTabStore = create<PortfolioActiveTabStore>((set, get) => ({
+export const usePortfolioActiveTabStore = create<PortfolioActiveTabStore>((set) => ({
   activeTab: ActiveTab.balances,
   setActiveTab: (tab) =>
     set(() => ({

@@ -329,7 +329,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                     <IconButton
                       iconName="logout"
                       className="text-secondary-text"
-                      variant={IconButtonVariant.DEFAULT}
+                      variant={IconButtonVariant.BACK}
                       onClick={() => {
                         disconnect();
                       }}
