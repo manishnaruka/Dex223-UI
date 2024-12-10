@@ -396,7 +396,14 @@
     "enter_in_correct_format": "Enter token address in correct format",
     "enter_address_correct_format": "Enter wallet address in correct format",
     "select_all": "Select all",
-    "deselect_all": "Deselect all"
+    "deselect_all": "Deselect all",
+    "wallet_balance": "Wallet balance",
+    "margin_balance": "Margin positions balance",
+    "liquidity_balance": "Liquidity balance",
+    "lending_balance": "Lending order balance",
+    "deposited_contract": "Deposited to contract",
+    "liquidity_positions_suffix": "liquidity positions",
+    "tokens_suffix": "tokens"
 
   }
 }

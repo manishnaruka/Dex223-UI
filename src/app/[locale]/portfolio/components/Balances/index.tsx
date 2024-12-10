@@ -16,6 +16,7 @@ import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";
+import usePositions from "@/hooks/usePositions";
 
 const filterTable = ({
   searchValue,
@@ -59,6 +60,8 @@ export const Balances = () => {
 
   const loading = false;
 
+  const { positions } = usePositions();
+
   const { tokenBalances, activeAddresses } = useActiveWalletBalances();
 
   const currentTableData = tokenBalances
@@ -77,7 +80,7 @@ export const Balances = () => {
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
         <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-6 w-full relative overflow-hidden">
           <div className="flex items-center gap-1 mb-auto">
-            <span className="text-14 lg:text-16">Wallet balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("wallet_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
 
@@ -95,7 +98,7 @@ export const Balances = () => {
         {/*TODO: Extract card to separate component. 01.10.2024*/}
         <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-6 w-full overflow-hidden">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Margin positions balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("margin_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-24 lg:text-32 font-medium">$ —</span>
@@ -112,31 +115,35 @@ export const Balances = () => {
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Liquidity balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("liquidity_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
-            — liquidity positions
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
+            {`${positions?.length ? positions.length : "—"} ${t("liquidity_positions_suffix")}`}
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Lending order balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("lending_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
             — lending orders
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Deposited to contract</span>
+            <span className="text-14 lg:text-16 text-secondary-text">
+              {t("deposited_contract")}
+            </span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">— tokens</span>
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
+            {`${currentTableData?.length ? currentTableData.length : "—"} ${t("tokens_suffix")}`}
+          </span>
         </div>
       </div>
 

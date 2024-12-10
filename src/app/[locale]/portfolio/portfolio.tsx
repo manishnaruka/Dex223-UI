@@ -123,6 +123,9 @@ const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
         placeholder={t("search_placeholder")}
+        isError={!!error}
+        style={{ paddingRight: "100px" }}
+        nocloseicon={"true"}
         className={clsx(
           "bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]",
           searchValue && "pr-[92px]",
@@ -296,7 +299,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
           </>
         ) : content === "manage" ? (
           <div className="flex flex-col pt-5 ">
-            <div className="flex flex-col px-5">
+            <div className="flex flex-col px-5 mb-2">
               <AddWalletInput
               // onAdd={() => setContent("list")}
               />
@@ -467,15 +470,7 @@ export function Portfolio() {
                       text={truncateMiddle(ad || "", { charsFromStart: 5, charsFromEnd: 3 })}
                       href={getExplorerLink(ExplorerLinkType.ADDRESS, ad, chainId)}
                     />
-                    <IconButton
-                      buttonSize={IconButtonSize.SMALL}
-                      iconName="copy"
-                      iconSize={IconSize.REGULAR}
-                      onClick={async () => {
-                        await copyToClipboard(ad);
-                        addToast(tToast("successfully_copied"));
-                      }}
-                    />
+                    <IconButton variant={IconButtonVariant.COPY} text={ad} /> {/*<IconButton*/}
                   </div>
                 ))}
               </div>

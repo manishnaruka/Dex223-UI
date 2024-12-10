@@ -50,6 +50,8 @@ export const Deposited = () => {
 
   const { isLoading, deposites } = useActiveWalletsDeposites();
 
+  console.dir(deposites);
+
   const currentTableData: TableData = [];
 
   for (const walletDeposites of deposites) {

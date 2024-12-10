@@ -90,7 +90,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
       }
     | { variant: IconButtonVariant.CONTROL; iconName: IconName }
     | { variant: IconButtonVariant.COPY; text: string }
-    | { variant: IconButtonVariant.BACK; iconName: IconName }
+    | { variant: IconButtonVariant.BACK; iconName?: IconName }
     | { variant?: IconButtonVariant.DEFAULT | undefined; iconName: IconName; active?: boolean }
     | {
         variant: IconButtonVariant.SORTING;
@@ -201,7 +201,7 @@ export default function IconButton(_props: Props) {
           iconName="add"
           onClick={_props.handleAdd}
           className={clsxMerge(
-            "bg-green text-black hocus:bg-green-hover rounded-2 duration-200",
+            "bg-green-bg-hover text-secondary-text hocus:text-primary-text hocus:border-green hocus:border rounded-2 duration-200 disabled:bg-tertiary-bg disabled:text-tertiary-text disabled:opacity-100",
             className,
           )}
           {...props}
