@@ -65,7 +65,7 @@ export const LendingOrders = () => {
         </div>
       </div>
 
-      <div className="mt-5 min-h-[640px] mb-5 w-full">
+      <div className="mt-5 min-h-[340px] w-full">
         {loading ? (
           <div className="flex justify-center items-center h-full min-h-[550px]">
             <Preloader type="awaiting" size={48} />

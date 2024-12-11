@@ -160,7 +160,7 @@ export const Balances = () => {
       </div>
       {/*  */}
 
-      <div className="mt-5 min-h-[640px] mb-5 w-full">
+      <div className="mt-5 min-h-[340px] w-full">
         {!loading && activeAddresses.length && currentTableData.length ? (
           <>
             <BalancesDesktopTable
@@ -174,11 +174,11 @@ export const Balances = () => {
           </>
         ) : Boolean(searchValue) ? (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-token bg-no-repeat bg-right-top max-md:bg-size-180">
-            <span className="text-secondary-text">Token not found</span>
+            <span className="text-secondary-text">{t("token_not_found")}</span>
           </div>
         ) : (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-list bg-no-repeat bg-right-top max-md:bg-size-180">
-            <span className="text-secondary-text">No assets yet</span>
+            <span className="text-secondary-text">{t("no_assets")}</span>
           </div>
         )}
 
@@ -188,6 +188,7 @@ export const Balances = () => {
           </div>
         ) : null}
       </div>
+
       <DrawerDialog isOpen={isTokenInfoOpened} setIsOpen={handleClosTokenInfo}>
         <DialogHeader onClose={handleClosTokenInfo} title={tokenForPortfolio?.name || "Unknown"} />
         {tokenForPortfolio ? (

@@ -192,7 +192,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   return (
     <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
       <DialogHeader
-        className="md:pr-3 px-4 md:pl-5"
+        className={content === "add" ? "md:pr-3 px-4 md:pl-3" : "md:pr-3 px-4 md:pl-5"}
         onClose={() => {
           if (!popupBackHandler) {
             setIsOpened(false);
@@ -200,7 +200,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
             popupBackHandler();
           }
         }}
-        // onBack={popupBackHandler}
+        onBack={content === "add" ? popupBackHandler : undefined}
         settings={
           content === "list" ? (
             <Button
@@ -423,7 +423,6 @@ export function Portfolio() {
 
   const chainId = useCurrentChainId();
   const t = useTranslations("Portfolio");
-  const tToast = useTranslations("Toast");
 
   const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
 
@@ -476,10 +475,6 @@ export function Portfolio() {
               </div>
             </div>
           ) : (
-            // min-h-[340px] bg-primary-bg justify-center w-full flex-col gap-2 rounded-5 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180
-            // <div className=" min-h-[80px] flex items-center justify-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-60">
-            //   <p className="text-secondary-text text-16">{t("connect_wallet_placeholder")}</p>
-            // </div>
             <div className="min-h-[40px] flex items-center w-full relative justify-between gap-x-3 px-4 lg:px-5 lg:pb-0 ">
               <span className="text-secondary-text mr-auto text-16">
                 {t("connect_wallet_placeholder")}
@@ -499,7 +494,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.balances}
             onClick={() => setActiveTab(ActiveTab.balances)}
           >
-            <span className="text-nowrap px-4">{t("balances_tab")}</span>
+            <span className="text-nowrap text-16 px-4">{t("balances_tab")}</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -531,7 +526,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.deposited}
             onClick={() => setActiveTab(ActiveTab.deposited)}
           >
-            <span className="text-nowrap px-4">{t("approved_deposited")}</span>
+            <span className="text-nowrap px-1">{t("approved_deposited")}</span>
           </TabButton>
         </div>
         {activeTab === ActiveTab.balances ? (

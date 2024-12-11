@@ -141,6 +141,8 @@ export default function DecreaseLiquidityPage({
     setIsOpen(false);
   };
 
+  const [isFocused, setIsFocused] = useState(false);
+
   useEffect(() => {
     // TODO: recursion, idk why
     if (position && !storedPosition) {
@@ -187,8 +189,6 @@ export default function DecreaseLiquidityPage({
                 onClick={() => router.push(`/pool/${params.tokenId}`)}
                 buttonSize={IconButtonSize.LARGE}
                 variant={IconButtonVariant.BACK}
-                // className="hocus:text-white before:bg-transparent"
-                // iconName="back"
                 iconSize={IconSize.LARGE}
               />
               <h2 className="text-18 lg:text-20 font-bold flex justify-center items-center text-nowrap">
@@ -217,7 +217,15 @@ export default function DecreaseLiquidityPage({
                 />
               </div>
 
-              <div className="lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1">
+              <div
+                className={clsx(
+                  "lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1 border hocus:shadow hocus:shadow-green/60",
+                  isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
+                )}
+                onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
+                onClick={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
+              >
                 <div className="lg:mb-5 mt-4 mb-5 ml-5 mr-5">
                   <span className="text-12 lg:text-16 mb-2 text-secondary-text">
                     {t("amount_title")}
@@ -400,13 +408,9 @@ export default function DecreaseLiquidityPage({
           <div className="flex justify-between items-start">
             <div className="flex items-start gap-2">
               <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
-                <Image
-                  className="absolute left-0 top-0 w-[24px] lg:w-[34px] h-[24px] lg:h-[34px]"
-                  width={32}
-                  height={32}
-                  src={tokenA.logoURI as any}
-                  alt=""
-                />
+                <div className="flex absolute left-0 top-0 w-[24px] lg:w-[34px] h-[24px] lg:h-[34px] items-center justify-center">
+                  <Image width={32} height={32} src={tokenA.logoURI as any} alt="" />
+                </div>
                 <div className="w-[24px] lg:w-[34px] h-[24px] lg:h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
                   <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
                 </div>

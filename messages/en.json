@@ -403,7 +403,11 @@
     "lending_balance": "Lending order balance",
     "deposited_contract": "Deposited to contract",
     "liquidity_positions_suffix": "liquidity positions",
-    "tokens_suffix": "tokens"
-
+    "tokens_suffix": "tokens",
+    "token_not_found": "Token not found",
+    "no_assets": "No assets yet",
+    "margins_not_found": "Margin positions not found",
+    "no_margins": "No margin positions yet",
+    "withdraw_button": "Withdraw"
   }
 }

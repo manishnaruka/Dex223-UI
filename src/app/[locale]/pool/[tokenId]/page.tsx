@@ -53,6 +53,7 @@ import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsSt
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
+import { useMediaQuery } from "react-responsive";
 
 export default function PoolPage({
   params,
@@ -97,6 +98,7 @@ export default function PoolPage({
     useCollectFeesGasLimitStore();
 
   const gasPrice: bigint | undefined = useCollectFeesGasPrice();
+  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
 
   const {
     token0Standard,
@@ -190,10 +192,12 @@ export default function PoolPage({
         </div>
         <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
           <div className="flex items-center gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg">
-            <Tooltip text="Tooltip text" />
+            <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
             <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
             <ExternalTextLink
               text={params.tokenId}
+              className="text-12 lg:text-16"
+              arrowSize={isMobile ? 16 : 24}
               href={getExplorerLink(
                 ExplorerLinkType.TOKEN,
                 `${NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]}?a=${params.tokenId}`,
@@ -202,12 +206,12 @@ export default function PoolPage({
             />
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
-            <Tooltip text="Tooltip text" />
+            <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
             <span className="text-tertiary-text text-12 lg:text-16">{t("min_tick")}:</span>
             <span className="text-12 text-secondary-text lg:text-16">{position?.tickLower}</span>
           </div>
           <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
-            <Tooltip text="Tooltip text" />
+            <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
             <span className="text-tertiary-text text-12 lg:text-16">{t("max_tick")}:</span>
             <span className="text-12 text-secondary-text lg:text-16">{position?.tickUpper}</span>
           </div>
@@ -394,13 +398,9 @@ export default function PoolPage({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
-                    <Image
-                      className="absolute left-0 top-0 w-[24px] h-[24px] lg:w-[34px] lg:h-[34px]"
-                      width={24}
-                      height={24}
-                      src={token0?.logoURI as any}
-                      alt=""
-                    />
+                    <div className="flex absolute left-0 top-0 w-[24px] h-[24px] lg:w-[34px] lg:h-[34px] rounded-full items-center justify-center">
+                      <Image width={32} height={32} src={token0?.logoURI as any} alt="" />
+                    </div>
                     <div className="w-[24px] h-[24px] lg:w-[34px] lg:h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
                       <Image width={32} height={32} src={token1?.logoURI as any} alt="" />
                     </div>

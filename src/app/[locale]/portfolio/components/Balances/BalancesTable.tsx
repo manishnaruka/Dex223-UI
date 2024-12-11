@@ -32,7 +32,7 @@ export const BalancesDesktopTable = ({
           <React.Fragment key={key}>
             <div
               className={clsx(
-                "h-[56px] flex items-center gap-2 pl-5 rounded-l-3",
+                "h-[56px] flex text-secondary-text items-center gap-2 pl-5 rounded-l-3",
                 index % 2 !== 0 && "bg-tertiary-bg",
               )}
             >
@@ -46,7 +46,7 @@ export const BalancesDesktopTable = ({
                 <span>{`${o.name}`}</span>
               </div>
               <div
-                className="px-2 py-1 text-16 text-secondary-text bg-quaternary-bg rounded-2 flex justify-center items-center hocus:bg-green-bg cursor-pointer duration-200"
+                className="px-2 py-1 text-16  bg-quaternary-bg rounded-2 flex justify-center items-center hocus:bg-green-bg cursor-pointer duration-200"
                 onClick={() => {
                   setTokenForPortfolio(o.token);
                 }}
@@ -65,24 +65,13 @@ export const BalancesDesktopTable = ({
               {`${formatNumberKilos(parseFloat(o.amountERC223))} ${o.token.symbol}`}
             </div>
             <div
-              className={clsx("h-[56px] flex items-center", index % 2 !== 0 && "bg-tertiary-bg")}
+              className={clsx(
+                "h-[56px] flex text-secondary-text items-center",
+                index % 2 !== 0 && "bg-tertiary-bg",
+              )}
             >
               {o.amountFiat}
             </div>
-            {/*<div*/}
-            {/*  className={clsx(*/}
-            {/*    "h-[56px] flex items-center justify-end pr-5 rounded-r-3",*/}
-            {/*    index % 2 !== 0 && "bg-tertiary-bg",*/}
-            {/*  )}*/}
-            {/*>*/}
-            {/*  <IconButton*/}
-            {/*    iconName="details"*/}
-            {/*    variant={IconButtonVariant.DEFAULT}*/}
-            {/*    onClick={() => {*/}
-            {/*      setTokenForPortfolio(o.token);*/}
-            {/*    }}*/}
-            {/*  />*/}
-            {/*</div>*/}
           </React.Fragment>
         );
       })}

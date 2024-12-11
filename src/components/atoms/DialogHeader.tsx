@@ -33,7 +33,7 @@ export default function DialogHeader({
   return (
     <div
       {...handlers}
-      className={clsxMerge(onBack ? "px-4 md:px-6" : "md:pr-6 px-4 md:pl-10", className)}
+      className={clsxMerge(onBack ? "pr-4 md:pr-6" : "md:pr-6 px-4 md:pl-10", className)}
     >
       <div className={clsx("h-[60px] flex items-center")}>
         <div

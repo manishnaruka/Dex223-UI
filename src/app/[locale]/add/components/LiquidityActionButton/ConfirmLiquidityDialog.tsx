@@ -356,13 +356,9 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="flex items-center relative w-12 h-[34px]">
-                <Image
-                  className="absolute left-0 top-0"
-                  width={32}
-                  height={32}
-                  src={tokenA.logoURI as any}
-                  alt=""
-                />
+                <div className="absolute left-0 top-0 w-[34px] h-[34px] items-center justify-center">
+                  <Image width={32} height={32} src={tokenA.logoURI as any} alt="" />
+                </div>
                 <div className="w-[34px] h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
                   <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
                 </div>
