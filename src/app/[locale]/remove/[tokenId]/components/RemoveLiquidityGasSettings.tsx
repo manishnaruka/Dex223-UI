@@ -8,6 +8,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import { getChainSymbol } from "@/functions/getChainSymbol";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
+import { useMediaQuery } from "react-responsive";
 
 const gasOptionTitle: Record<GasOption, any> = {
   [GasOption.CHEAP]: "cheap",
@@ -42,6 +43,7 @@ export const RemoveLiquidityGasSettings = ({
 }) => {
   const chainId = useCurrentChainId();
   const t = useTranslations("GasSettings");
+  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
 
   const [isOpenedFee, setIsOpenedFee] = useState(false);
   const gasToUse = customGasLimit || estimatedGas;
@@ -70,13 +72,13 @@ export const RemoveLiquidityGasSettings = ({
 
       {/* Second row container with custom 33.33% width */}
       <div className="flex w-full md:w-1/3-custom items-center gap-2 mt-2 md:mt-0">
-        <span className="flex items-center justify-center md:px-2 px-4 md:text-12 text-14 h-8 md:h-6 rounded-20 text-secondary-text border border-secondary-border">
+        <span className="flex items-center justify-center font-medium md:px-2 px-4 md:text-12 text-14 h-8 md:h-6 rounded-20 text-secondary-text border border-secondary-border">
           {t(gasOptionTitle[gasPriceOption])}
         </span>
         <Button
-          className="w-full md:w-auto h-8 md:h-auto"
+          className="w-full md:w-auto h-8 md:h-auto rounded-20 font-medium"
           colorScheme={ButtonColor.LIGHT_GREEN}
-          size={ButtonSize.EXTRA_SMALL}
+          size={isMobile ? ButtonSize.SMALL : ButtonSize.EXTRA_SMALL}
           onClick={() => setIsOpenedFee(true)}
         >
           {t("edit")}

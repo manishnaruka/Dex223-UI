@@ -29,7 +29,6 @@ import TabButton from "@/components/buttons/TabButton";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { toDataUrl } from "@/functions/blockies";
 import { clsxMerge } from "@/functions/clsxMerge";
-import { copyToClipboard } from "@/functions/copyToClipboard";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";

@@ -132,8 +132,10 @@ function InputTotalAmount({
           allowedDecimalSeparators={[","]}
           decimalScale={currency?.decimals}
           inputMode="decimal"
-          placeholder="0.0"
-          className={clsx("bg-transparent outline-0 border-0 text-20 w-full peer")}
+          placeholder="0"
+          className={clsx(
+            "placeholder:text-tertiary-text bg-transparent outline-0 border-0 text-20 w-full peer",
+          )}
           type="text"
           value={value}
           onValueChange={(values) => {
@@ -255,21 +257,25 @@ function InputStandardAmount({
         )}
       >
         <div className="mb-1 flex justify-between items-center">
-          <input
-            className="bg-transparent outline-0 text-16 w-full"
+          <NumericFormat
+            allowedDecimalSeparators={[","]}
+            decimalScale={currency?.decimals}
+            inputMode="decimal"
             placeholder="0"
+            className={clsx(
+              "placeholder:text-tertiary-text bg-transparent outline-0 border-0 text-16 w-full peer",
+            )}
             type="text"
-            value={value || ""}
-            disabled={isDisabled}
-            // onChange={(e) => onChange(e.target.value)}
-            // onChange={() => {}}
-            onChange={(e) => {
-              onChange(e.target.value);
+            value={value === "0" ? "" : value}
+            onValueChange={(values) => {
+              onChange(values.value);
             }}
+            allowNegative={false}
+            disabled={isDisabled}
             onFocus={() => {
               setTokenStandardRatio(standard === Standard.ERC20 ? 0 : 100);
               setIsFocused(true);
-            }}
+            }} // Set focus state when NumericFormat is focused
             onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
           />
         </div>

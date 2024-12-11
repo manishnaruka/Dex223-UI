@@ -392,7 +392,7 @@ export default function PoolPage({
             }
           }}
         >
-          <div className="flex flex-col h-screen md:h-auto">
+          <div className="flex flex-col max-h-svh md:h-auto">
             <DialogHeader onClose={handleClose} title={t("claim_fees_title")} />
             <div className="flex-grow px-4 md:px-10 md:w-[570px] overflow-y-auto md:overflow-y-hidden">
               <div className="flex justify-between items-center">
@@ -435,7 +435,7 @@ export default function PoolPage({
               {/* Standard A */}
               <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
                 <div
-                  className={clsx("flex gap-2 items-center", token0?.isNative && "justify-between")}
+                  className={clsx("flex gap-2 items-start", token0?.isNative && "justify-between")}
                 >
                   {token0?.isNative ? (
                     <>
@@ -497,7 +497,7 @@ export default function PoolPage({
               {/* Standard B */}
               <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
                 <div
-                  className={clsx("flex gap-2 items-center", token1?.isNative && "justify-between")}
+                  className={clsx("flex gap-2 items-start", token1?.isNative && "justify-between")}
                 >
                   {token1?.isNative ? (
                     <>

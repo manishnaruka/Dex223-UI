@@ -5,7 +5,7 @@ import Image from "next/image";
 import React from "react";
 
 import Badge from "@/components/badges/Badge";
-import { formatNumber, formatNumberKilos } from "@/functions/formatFloat";
+import { formatNumberKilos } from "@/functions/formatFloat";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 
 export const BalancesDesktopTable = ({
