@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { formatEther, formatGwei } from "viem";
 
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
@@ -8,7 +9,6 @@ import { formatFloat } from "@/functions/formatFloat";
 import { getChainSymbol } from "@/functions/getChainSymbol";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
-import { useMediaQuery } from "react-responsive";
 
 const gasOptionTitle: Record<GasOption, any> = {
   [GasOption.CHEAP]: "cheap",
@@ -49,7 +49,7 @@ export const RemoveLiquidityGasSettings = ({
   const gasToUse = customGasLimit || estimatedGas;
 
   return (
-    <div className="flex flex-col md:flex-row items-center px-5 pt-2 pb-4 bg-tertiary-bg rounded-3 mb-2 md:mb-5">
+    <div className="flex flex-col md:flex-row items-center px-5 py-2ш bg-tertiary-bg rounded-3 mb-2 md:mb-5">
       {/* First row container with custom 66.67% width */}
       <div className="flex w-full md:w-2/3-custom gap-2 md:gap-6 justify-between md:justify-start">
         <div className="flex flex-col">

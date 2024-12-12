@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { formatUnits } from "viem";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
@@ -53,7 +54,6 @@ import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsSt
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
-import { useMediaQuery } from "react-responsive";
 
 export default function PoolPage({
   params,

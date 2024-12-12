@@ -407,7 +407,7 @@ export default function DecreaseLiquidityPage({
         <div className="px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 md:h-auto overflow-y-auto">
           <div className="flex justify-between items-start">
             <div className="flex items-start gap-2">
-              <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
+              <div className="flex items-center relative w-12 lg:w-14 h-[24px] lg:h-[34px]">
                 <div className="flex absolute left-0 top-0 w-[24px] lg:w-[34px] h-[24px] lg:h-[34px] items-center justify-center">
                   <Image width={32} height={32} src={tokenA.logoURI as any} alt="" />
                 </div>
@@ -417,9 +417,10 @@ export default function DecreaseLiquidityPage({
               </div>
               <span className="text-16 lg:text-18 font-bold text-secondary-text mt-0.5">{`${tokenA.symbol} and ${tokenB.symbol} `}</span>
             </div>
-            <div className="flex items-center gap-2 mt-1.5 justify-end">
+            <div className="flex items-start gap-2 mt-1 justify-end">
               {hash && (
                 <a
+                  className="flex items-center -mt-2 justify-center"
                   target="_blank"
                   href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
                 >
@@ -429,7 +430,9 @@ export default function DecreaseLiquidityPage({
 
               {status === RemoveLiquidityStatus.PENDING && (
                 <>
-                  <Preloader type="linear" smallDots={true} />
+                  <div className="mt-2">
+                    <Preloader type="linear" smallDots={true} />
+                  </div>
                   <span className="mr-3 text-secondary-text text-14 whitespace-nowrap">
                     {t("status_pending")}
                   </span>

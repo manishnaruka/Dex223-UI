@@ -10,12 +10,14 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import Alert from "@/components/atoms/Alert";
 
 export const MarginPositions = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
 
   const [marginBalance, setMarginBalance] = useState<number>(0);
+  const [isInfoShown, setInfoShown] = useState<boolean>(false);
   const [marginPositions, setMarginPositions] = useState<any[]>([]);
 
   const loading = false;
@@ -27,7 +29,7 @@ export const MarginPositions = () => {
         <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col">
             <div className="flex items-center gap-1">
-              <span className="text-14 lg:text-16">{t("margin_balance")}</span>
+              <span className="text-14 lg:text-16 text-secondary-text">{t("margin_balance")}</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
             <span className="text-24 lg:text-32 font-medium">{`$ ${marginBalance > 0 ? marginBalance : "—"}`}</span>
@@ -54,7 +56,7 @@ export const MarginPositions = () => {
       <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
         <h1 className="text-18 lg:text-32 font-medium">{t("margin_title")}</h1>
         <div className="flex flex-col lg:flex-row gap-3">
-          <Button>
+          <Button onClick={() => setInfoShown(true)}>
             <span className="flex items-center gap-2 w-max">
               Margin positions
               <Svg iconName="forward" />
@@ -139,9 +141,18 @@ export const MarginPositions = () => {
             <span className="text-secondary-text">{t("margins_not_found")}</span>
           </div>
         ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-no-margin-positions bg-no-repeat bg-right-top max-md:bg-size-180">
-            <span className="text-secondary-text">{t("no_margins")}</span>
-          </div>
+          <>
+            <div className="relative flex justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 bg-empty-no-margin-positions bg-no-repeat bg-right-top max-md:bg-size-180">
+              <div className="flex flex-col items-center">
+                <span className="text-secondary-text">{t("no_margins")}</span>
+              </div>
+              {isInfoShown && (
+                <div className="absolute bottom-[80px]">
+                  <Alert type="info" text={<span>Margin positions page under construction</span>} />
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </>

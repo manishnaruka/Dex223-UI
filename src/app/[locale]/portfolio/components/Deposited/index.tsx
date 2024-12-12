@@ -127,14 +127,16 @@ export const Deposited = () => {
 
       <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
         <h1 className="text-18 lg:text-32 font-medium">{t("deposited_title")}</h1>
-        <div className="flex flex-col lg:flex-row gap-3">
-          <SearchInput
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder={t("balances_search_placeholder")}
-            className="bg-primary-bg lg:w-[480px]"
-          />
-        </div>
+        {currentTableData.length > 0 && (
+          <div className="flex flex-col lg:flex-row gap-3">
+            <SearchInput
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder={t("balances_search_placeholder")}
+              className="bg-primary-bg lg:w-[480px]"
+            />
+          </div>
+        )}
       </div>
       {/*  */}
       <div className="mt-5 min-h-[340px] w-full">

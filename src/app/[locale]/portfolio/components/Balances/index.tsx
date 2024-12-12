@@ -12,11 +12,11 @@ import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
+import usePositions from "@/hooks/usePositions";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";
-import usePositions from "@/hooks/usePositions";
 
 const filterTable = ({
   searchValue,

@@ -51,7 +51,7 @@ const WithdrawTableItem = ({
   const chainId = useCurrentChainId();
   const { address } = useAccount();
   const { status: revokeStatus } = useRevokeStatusStore();
-  const t = useTranslations("Liquidity");
+  const t = useTranslations("Portfolio");
 
   const [status, setStatus] = useState<boolean>(false);
 
@@ -213,7 +213,7 @@ export const WithdrawDesktopTable = ({
 
   const { status: revokeStatus } = useRevokeStatusStore();
 
-  const t = useTranslations("Liquidity");
+  const t = useTranslations("Portfolio");
 
   useEffect(() => {
     if (!tableItems.length) {
@@ -223,17 +223,17 @@ export const WithdrawDesktopTable = ({
 
   return (
     <>
-      <div className="hidden lg:grid rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(20px,1fr)] pb-2 relative min-w-[600px]">
-        <div className="text-secondary-text pl-5 h-[60px] flex items-center">
+      <div className="hidden lg:grid overflow-hidden bg-primary-bg grid-cols-[minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(30px,1.33fr),_minmax(20px,1fr)] pb-2 relative min-w-[600px]">
+        <div className="rounded-l-3 bg-table-gradient text-tertiary-text pl-5 h-[60px] flex items-center">
           {t("token_title")}
         </div>
-        <div className="text-secondary-text h-[60px] flex items-center gap-2">
+        <div className="text-tertiary-text bg-table-gradient h-[60px] flex items-center gap-2">
           {t("amount_title")}
         </div>
-        <div className="text-secondary-text pr-5 h-[60px] flex items-center">
+        <div className="text-tertiary-text bg-table-gradient pr-5 h-[60px] flex items-center">
           {t("contract_address_title")}
         </div>
-        <div className="text-secondary-text px-5 h-[60px] flex items-center">
+        <div className="text-tertiary-text bg-table-gradient px-5 h-[60px] flex items-center rounded-r-3">
           {t("action_title")}
         </div>
         {tableItems}
@@ -277,7 +277,7 @@ const WithdrawMobileTableItem = ({
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
-  const t = useTranslations("Liquidity");
+  const t = useTranslations("Portfolio");
 
   return (
     <>

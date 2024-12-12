@@ -112,7 +112,7 @@ export const RevokeDialog = () => {
             onClose={() => setIsOpen(false)}
             title={standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
           />
-          <div className="w-full md:w-[570px] px-4 pb-4 md:px-10 md:pb-10 gap-1">
+          <div className="w-full md:w-[570px] px-4 pb-4 md:px-10 gap-1">
             <div className="flex justify-between items-center">
               <div className="flex gap-2 py-2 items-center">
                 {standard === Standard.ERC20 ? (
@@ -148,11 +148,13 @@ export const RevokeDialog = () => {
                 <div
                   className={clsxMerge(
                     "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border ",
-                    isError ? "border-red" : "",
                     inputDisabled
                       ? "border border-secondary-border bg-primary-bg"
                       : "hocus:shadow hocus:shadow-green/60 border-transparent",
                     isFocused ? "border border-green shadow shadow-green/60" : "",
+                    isError
+                      ? "border border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
+                      : "",
                   )}
                 >
                   <NumericFormat
