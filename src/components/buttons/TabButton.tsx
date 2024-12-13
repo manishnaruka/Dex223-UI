@@ -16,7 +16,7 @@ export default function TabButton({
   return (
     <button
       className={clsx(
-        "rounded-2 hocus:bg-green-bg duration-200 border",
+        "rounded-2 md:hocus:bg-green-bg duration-200 border",
         size === 28 && "h-7 text-12",
         size === 32 && "h-8 text-12",
         size === 40 && "h-10 text-16",

@@ -29,7 +29,6 @@ import TabButton from "@/components/buttons/TabButton";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { toDataUrl } from "@/functions/blockies";
 import { clsxMerge } from "@/functions/clsxMerge";
-import { copyToClipboard } from "@/functions/copyToClipboard";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -123,6 +122,9 @@ const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
         placeholder={t("search_placeholder")}
+        isError={!!error}
+        style={{ paddingRight: "100px" }}
+        nocloseicon={"true"}
         className={clsx(
           "bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]",
           searchValue && "pr-[92px]",
@@ -160,7 +162,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   const { disconnect } = useDisconnect();
 
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
-  const { setAllWalletActive, removeWallet } = usePortfolioStore();
+  const { setAllWalletActive, removeWallet, isAllWalletActive } = usePortfolioStore();
   const { wallets, setIsWalletActive } = usePortfolioWallets();
   const [content, setContent] = useState<ManageWalletsPopoverContent>(
     wallets.length ? "list" : "add",
@@ -189,7 +191,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   return (
     <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
       <DialogHeader
-        className="md:pr-3 px-4 md:pl-5"
+        className={content === "add" ? "md:pr-3 px-4 md:pl-3" : "md:pr-3 px-4 md:pl-5"}
         onClose={() => {
           if (!popupBackHandler) {
             setIsOpened(false);
@@ -197,7 +199,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
             popupBackHandler();
           }
         }}
-        // onBack={popupBackHandler}
+        onBack={content === "add" ? popupBackHandler : undefined}
         settings={
           content === "list" ? (
             <Button
@@ -242,7 +244,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                 className="py-2 cursor-pointer hocus:text-green-hover"
                 onClick={() => setAllWalletActive()}
               >
-                {t("select_all")}
+                {isAllWalletActive ? t("deselect_all") : t("select_all")}
               </span>
               <span
                 className="py-2 cursor-pointer hocus:text-green-hover"
@@ -296,7 +298,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
           </>
         ) : content === "manage" ? (
           <div className="flex flex-col pt-5 ">
-            <div className="flex flex-col px-5">
+            <div className="flex flex-col px-5 mb-2">
               <AddWalletInput
               // onAdd={() => setContent("list")}
               />
@@ -329,7 +331,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                     <IconButton
                       iconName="logout"
                       className="text-secondary-text"
-                      variant={IconButtonVariant.DEFAULT}
+                      variant={IconButtonVariant.BACK}
                       onClick={() => {
                         disconnect();
                       }}
@@ -420,7 +422,7 @@ export function Portfolio() {
 
   const chainId = useCurrentChainId();
   const t = useTranslations("Portfolio");
-  const tToast = useTranslations("Toast");
+  const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
 
   const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
 
@@ -429,14 +431,14 @@ export function Portfolio() {
   return (
     <Container>
       <div className="p-4 lg:p-10 flex flex-col max-w-[100dvw]">
-        <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
+        <div className="flex flex-col lg:flex-row w-full justify-between gap-3 lg:gap-0">
           <h1 className="text-24 lg:text-40 font-medium">{t("title")}</h1>
-          <div className="flex flex-col lg:flex-row gap-2 lg:gap-3">
-            <WalletSearchInput />
+          <div className="flex flex-col lg:flex-row gap-y-2 lg:gap-x-3">
             <ManageWallets />
+            <WalletSearchInput />
           </div>
         </div>
-        <div className="mt-5 flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
+        <div className="flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
           {activeAddresses.length ? (
             <div className="flex gap-3 lg:gap-0 flex-col lg:flex-row w-full overflow-hidden">
               <div className="flex px-4 lg:px-5">
@@ -467,32 +469,20 @@ export function Portfolio() {
                       text={truncateMiddle(ad || "", { charsFromStart: 5, charsFromEnd: 3 })}
                       href={getExplorerLink(ExplorerLinkType.ADDRESS, ad, chainId)}
                     />
-                    <IconButton
-                      buttonSize={IconButtonSize.SMALL}
-                      iconName="copy"
-                      iconSize={IconSize.REGULAR}
-                      onClick={async () => {
-                        await copyToClipboard(ad);
-                        addToast(tToast("successfully_copied"));
-                      }}
-                    />
+                    <IconButton variant={IconButtonVariant.COPY} text={ad} /> {/*<IconButton*/}
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            // min-h-[340px] bg-primary-bg justify-center w-full flex-col gap-2 rounded-5 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180
-            // <div className=" min-h-[80px] flex items-center justify-center gap-3 px-4 lg:px-5 pb-4 lg:pb-0 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-60">
-            //   <p className="text-secondary-text text-16">{t("connect_wallet_placeholder")}</p>
-            // </div>
-            <div className="min-h-[40px] flex items-center w-full relative justify-between gap-x-3 px-4 lg:px-5 lg:pb-0 ">
-              <span className="text-secondary-text mr-auto text-16">
+            <div className="min-h-[72px] md:min-h-[40px] flex items-center w-full relative -mt-5 md:mt-0 pt-1 md:py-0 md:gap-x-3 px-4 lg:px-5 lg:pb-0">
+              <span className="text-secondary-text flex w-full mr-[80px] md:mr-auto text-16 items-center ">
                 {t("connect_wallet_placeholder")}
               </span>
               <EmptyStateIcon
                 iconName="wallet"
-                size={80}
-                className="absolute right-0 top-0 -mt-5 object-cover"
+                size={isMobile ? 72 : 80}
+                className="absolute right-0 top-0 mt-1 md:-mt-5 object-cover"
               />
             </div>
           )}
@@ -504,7 +494,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.balances}
             onClick={() => setActiveTab(ActiveTab.balances)}
           >
-            <span className="text-nowrap px-4">{t("balances_tab")}</span>
+            <span className="text-nowrap text-16 px-4">{t("balances_tab")}</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -536,7 +526,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.deposited}
             onClick={() => setActiveTab(ActiveTab.deposited)}
           >
-            <span className="text-nowrap px-4">{t("approved_deposited")}</span>
+            <span className="text-nowrap px-1">{t("approved_deposited")}</span>
           </TabButton>
         </div>
         {activeTab === ActiveTab.balances ? (

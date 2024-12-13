@@ -1,6 +1,5 @@
 import uniqby from "lodash.uniqby";
 import { Address } from "viem";
-import { useAccount } from "wagmi";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -18,13 +17,25 @@ interface PortfolioStore {
   setIsConnectedWalletActive: (isActive: boolean) => void;
   searchValue: string;
   setSearchValue: (value: string) => void;
+  isAllWalletActive: boolean;
 }
 
 const localStorageKey = "portfolio-state";
 
+const checkAllActive = (wallets: any[]) => {
+  let allActive = true;
+  for (let wallet of wallets) {
+    if (!wallet.isActive) {
+      allActive = false;
+      break;
+    }
+  }
+  return allActive;
+};
+
 export const usePortfolioStore = create<PortfolioStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       wallets: [],
       addWallet: (address) =>
         set((state) => ({
@@ -33,8 +44,8 @@ export const usePortfolioStore = create<PortfolioStore>()(
       removeWallet: (address) =>
         set((state) => ({ wallets: state.wallets.filter((wallet) => wallet.address !== address) })),
       setIsWalletActive: (address, isActive) =>
-        set((state) => ({
-          wallets: uniqby(
+        set((state) => {
+          const wallets = uniqby(
             state.wallets.map((wallet) => {
               if (wallet.address === address) {
                 return {
@@ -46,17 +57,26 @@ export const usePortfolioStore = create<PortfolioStore>()(
               }
             }),
             "address",
-          ),
-        })),
+          );
+
+          let allActive = checkAllActive(wallets);
+
+          console.log(allActive);
+
+          return { wallets, isAllWalletActive: allActive && state.isConnectedWalletActive };
+        }),
       setAllWalletActive: () =>
         set((state) => {
+          const newVal = !state.isAllWalletActive;
+
           return {
-            isConnectedWalletActive: true,
+            isConnectedWalletActive: newVal,
+            isAllWalletActive: newVal,
             wallets: uniqby(
               state.wallets.map((wallet) => {
                 return {
                   ...wallet,
-                  isActive: true,
+                  isActive: newVal,
                 };
               }),
               "address",
@@ -64,10 +84,12 @@ export const usePortfolioStore = create<PortfolioStore>()(
           };
         }),
       isConnectedWalletActive: true,
+      isAllWalletActive: false,
       setIsConnectedWalletActive: (isActive) =>
-        set(() => ({
-          isConnectedWalletActive: isActive,
-        })),
+        set((state) => {
+          const iaAllActive = isActive ? checkAllActive(state.wallets) : false;
+          return { isConnectedWalletActive: isActive, isAllWalletActive: iaAllActive };
+        }),
       searchValue: "",
       setSearchValue: (value) =>
         set(() => ({
@@ -93,7 +115,7 @@ interface PortfolioActiveTabStore {
   setActiveTab: (tab: ActiveTab) => void;
 }
 
-export const usePortfolioActiveTabStore = create<PortfolioActiveTabStore>((set, get) => ({
+export const usePortfolioActiveTabStore = create<PortfolioActiveTabStore>((set) => ({
   activeTab: ActiveTab.balances,
   setActiveTab: (tab) =>
     set(() => ({

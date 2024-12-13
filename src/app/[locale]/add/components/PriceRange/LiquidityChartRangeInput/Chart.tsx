@@ -67,21 +67,18 @@ export function Chart({
   const { leftChart, rightChart, yMax, leftMax, rightMax } = useMemo(() => {
     const left = series.filter((d) => xAccessor(d) < current);
     const right = series.filter((d) => xAccessor(d) >= current);
-    const yMax = series.reduce((prev, current) =>
-      yAccessor(prev) > yAccessor(current) ? prev : current,
-    );
 
-    const leftMax = left.reduce((prev, current) =>
-      yAccessor(prev) > yAccessor(current) ? prev : current,
-    );
-    const rightMax = right.reduce((prev, current) =>
-      yAccessor(prev) > yAccessor(current) ? prev : current,
-    );
+    const def = { activeLiquidity: 0, price0: 0 };
 
-    // console.log(yMax);
-    // console.log(yAccessor(yMax));
-    // console.log(yScale(yAccessor(yMax)));
-    // console.log(yScale(0));
+    const yMax = series.reduce((prev, current) => {
+      return yAccessor(prev) > yAccessor(current) ? prev : current;
+    }, def);
+    const leftMax = left.reduce((prev = def, current) => {
+      return yAccessor(prev) > yAccessor(current) ? prev : current;
+    }, def);
+    const rightMax = right.reduce((prev = def, current) => {
+      return yAccessor(prev) > yAccessor(current) ? prev : current;
+    }, def);
 
     const appendix = {
       activeLiquidity: right[0]?.activeLiquidity || 0,
