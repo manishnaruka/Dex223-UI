@@ -41,27 +41,27 @@ export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
+  // const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
+  const isTokenInfoOpened = Boolean(tokenForPortfolio);
   const handleClosTokenInfo = () => {
     setTokenForPortfolio(null);
   };
 
-  const [prevTokenForPortfolio, setPrevTokenForPortfolio] = useState<Currency | null>(null);
-
-  useEffect(() => {
-    if (tokenForPortfolio !== prevTokenForPortfolio) {
-      setTokenInfoOpened(Boolean(tokenForPortfolio));
-    }
-  }, [tokenForPortfolio, prevTokenForPortfolio]);
-
-  useEffect(() => {
-    setPrevTokenForPortfolio(tokenForPortfolio);
-  }, [tokenForPortfolio]);
+  // const [prevTokenForPortfolio, setPrevTokenForPortfolio] = useState<Currency | null>(null);
+  //
+  // useEffect(() => {
+  //   if (tokenForPortfolio !== prevTokenForPortfolio) {
+  //     setTokenInfoOpened(Boolean(tokenForPortfolio));
+  //   }
+  // }, [tokenForPortfolio, prevTokenForPortfolio]);
+  //
+  // useEffect(() => {
+  //   setPrevTokenForPortfolio(tokenForPortfolio);
+  // }, [tokenForPortfolio]);
 
   const loading = false;
 
   const { positions } = usePositions();
-
   const { tokenBalances, activeAddresses } = useActiveWalletBalances();
 
   const currentTableData = tokenBalances

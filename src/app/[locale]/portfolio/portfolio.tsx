@@ -433,14 +433,12 @@ export function Portfolio() {
       <div className="p-4 lg:p-10 flex flex-col max-w-[100dvw]">
         <div className="flex flex-col lg:flex-row w-full justify-between gap-3 lg:gap-0">
           <h1 className="text-24 lg:text-40 font-medium">{t("title")}</h1>
-          <div className="flex flex-col lg:flex-row lg:gap-x-3">
+          <div className="flex flex-col lg:flex-row gap-y-2 lg:gap-x-3">
+            <ManageWallets />
             <WalletSearchInput />
-            <div className="-mt-3">
-              <ManageWallets />
-            </div>
           </div>
         </div>
-        <div className="mt-5 flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
+        <div className="flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
           {activeAddresses.length ? (
             <div className="flex gap-3 lg:gap-0 flex-col lg:flex-row w-full overflow-hidden">
               <div className="flex px-4 lg:px-5">

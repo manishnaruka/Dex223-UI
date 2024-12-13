@@ -226,7 +226,7 @@ export default function DecreaseLiquidityPage({
                 onClick={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
               >
-                <div className="lg:mb-5 mt-4 mb-5 ml-5 mr-5">
+                <div className="md:mb-5 md:mt-2 md:ml-5 md:mr-5 mt-1 mb-4 ml-4 mr-4">
                   <span className="text-12 lg:text-16 mb-2 text-secondary-text">
                     {t("amount_title")}
                   </span>
@@ -251,7 +251,9 @@ export default function DecreaseLiquidityPage({
                           return numericValue >= 1 && numericValue <= 100;
                         }}
                       />
-                      <span className="text-secondary-text absolute top-0 left-[70px]">%</span>
+                      <span className="text-secondary-text absolute top-0 left-[45px] md:left-[70px]">
+                        %
+                      </span>
                     </div>
                     <div className="flex gap-2">
                       <InputButton

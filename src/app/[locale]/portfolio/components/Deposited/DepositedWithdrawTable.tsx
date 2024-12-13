@@ -56,6 +56,7 @@ const WithdrawTableItem = ({
   const [status, setStatus] = useState<boolean>(false);
 
   const isLoading = useMemo(() => {
+    console.log(revokeStatus);
     const going = [AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(revokeStatus);
     if (!going) setStatus(false);
     return going;
@@ -122,7 +123,7 @@ const WithdrawTableItem = ({
             }}
           >
             {isRevoke ? t("revoke") : t("withdraw")}
-            {status && (
+            {isLoading && status && (
               <span className="flex items-center gap-2">
                 <Preloader size={20} color="black" type="circular" />
               </span>
@@ -174,9 +175,7 @@ export const WithdrawDesktopTable = ({
             amount={deposite.deposited}
             walletAddresses={deposite.walletAddresses}
             onClick={() => {
-              console.log("click revoke");
               if (![AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(status)) {
-                console.log("resetting status");
                 setStatus(AllowanceStatus.INITIAL);
               }
               setDialogParams(deposite.token, deposite.contractAddress, Standard.ERC223);

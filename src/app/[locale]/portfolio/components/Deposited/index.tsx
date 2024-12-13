@@ -47,10 +47,7 @@ export const Deposited = () => {
     setTokenForPortfolio(null);
   };
   const [isWithdrawDetailsOpened, setIsWithdrawDetailsOpened] = useState(false);
-
   const { isLoading, deposites } = useActiveWalletsDeposites();
-
-  console.dir(deposites);
 
   const currentTableData: TableData = [];
 

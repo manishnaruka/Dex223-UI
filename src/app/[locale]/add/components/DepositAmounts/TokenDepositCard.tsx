@@ -171,7 +171,7 @@ function InputTotalAmount({
       </div>
       <div className="flex justify-between items-center">
         <span className="text-secondary-text text-12 lg:text-14">—</span>
-        <div className="flex gap-1">
+        <div className="flex gap-1 items-baseline">
           <span className="text-12 text-tertiary-text md:text-tertiary-text md:text-14">
             {currency
               ? t("balance", {
