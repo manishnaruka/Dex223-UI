@@ -4,7 +4,6 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
-import { useMediaQuery } from "react-responsive";
 
 import Alert from "@/components/atoms/Alert";
 import { SearchInput } from "@/components/atoms/Input";
