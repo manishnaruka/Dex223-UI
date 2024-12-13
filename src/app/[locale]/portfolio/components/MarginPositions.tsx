@@ -4,13 +4,14 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
+import { useMediaQuery } from "react-responsive";
 
+import Alert from "@/components/atoms/Alert";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import Alert from "@/components/atoms/Alert";
 
 export const MarginPositions = () => {
   const t = useTranslations("Portfolio");
@@ -26,8 +27,8 @@ export const MarginPositions = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
-          <div className="flex flex-col">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-2.5 md:py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+          <div className="flex flex-col z-20">
             <div className="flex items-center gap-1">
               <span className="text-14 lg:text-16 text-secondary-text">{t("margin_balance")}</span>
               <Tooltip iconSize={20} text="Info text" />
@@ -56,9 +57,9 @@ export const MarginPositions = () => {
       <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
         <h1 className="text-18 lg:text-32 font-medium">{t("margin_title")}</h1>
         <div className="flex flex-col lg:flex-row gap-3">
-          <Button onClick={() => setInfoShown(true)}>
+          <Button onClick={() => setInfoShown(true)} mobileSize={ButtonSize.MEDIUM}>
             <span className="flex items-center gap-2 w-max">
-              Margin positions
+              {t("margin_title")}
               <Svg iconName="forward" />
             </span>
           </Button>

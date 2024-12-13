@@ -78,7 +78,7 @@ export const Balances = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-6 w-full relative overflow-hidden">
+        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-2.5 md:py-6 w-full relative overflow-hidden">
           <div className="flex items-center gap-1 mb-auto">
             <span className="text-14 lg:text-16 text-secondary-text">{t("wallet_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
@@ -96,8 +96,8 @@ export const Balances = () => {
         </div>
 
         {/*TODO: Extract card to separate component. 01.10.2024*/}
-        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-6 w-full overflow-hidden">
-          <div className="flex items-center gap-1">
+        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-2.5 md:py-6 w-full overflow-hidden">
+          <div className="flex items-center gap-1 z-10">
             <span className="text-14 lg:text-16 text-secondary-text">{t("margin_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
@@ -107,7 +107,7 @@ export const Balances = () => {
             alt="Side Icon"
             width={"180"}
             height={"120"}
-            className="absolute top-0 right-0 object-cover"
+            className="absolute top-0 right-0 object-cover z-0"
           />
         </div>
       </div>

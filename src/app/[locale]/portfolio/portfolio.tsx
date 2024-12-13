@@ -422,6 +422,7 @@ export function Portfolio() {
 
   const chainId = useCurrentChainId();
   const t = useTranslations("Portfolio");
+  const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
 
   const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
 
@@ -430,11 +431,13 @@ export function Portfolio() {
   return (
     <Container>
       <div className="p-4 lg:p-10 flex flex-col max-w-[100dvw]">
-        <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
+        <div className="flex flex-col lg:flex-row w-full justify-between gap-3 lg:gap-0">
           <h1 className="text-24 lg:text-40 font-medium">{t("title")}</h1>
-          <div className="flex flex-col lg:flex-row gap-2 lg:gap-3">
+          <div className="flex flex-col lg:flex-row lg:gap-x-3">
             <WalletSearchInput />
-            <ManageWallets />
+            <div className="-mt-3">
+              <ManageWallets />
+            </div>
           </div>
         </div>
         <div className="mt-5 flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
@@ -474,14 +477,14 @@ export function Portfolio() {
               </div>
             </div>
           ) : (
-            <div className="min-h-[40px] flex items-center w-full relative justify-between gap-x-3 px-4 lg:px-5 lg:pb-0 ">
-              <span className="text-secondary-text mr-auto text-16">
+            <div className="min-h-[72px] md:min-h-[40px] flex items-center w-full relative -mt-5 md:mt-0 pt-1 md:py-0 md:gap-x-3 px-4 lg:px-5 lg:pb-0">
+              <span className="text-secondary-text flex w-full mr-[80px] md:mr-auto text-16 items-center ">
                 {t("connect_wallet_placeholder")}
               </span>
               <EmptyStateIcon
                 iconName="wallet"
-                size={80}
-                className="absolute right-0 top-0 -mt-5 object-cover"
+                size={isMobile ? 72 : 80}
+                className="absolute right-0 top-0 mt-1 md:-mt-5 object-cover"
               />
             </div>
           )}

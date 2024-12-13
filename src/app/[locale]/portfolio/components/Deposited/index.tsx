@@ -90,9 +90,9 @@ export const Deposited = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:py-3 lg:px-5 py-2.5  lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 z-10">
               <span className="text-14 lg:text-16 text-secondary-text">Approved</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
@@ -102,14 +102,14 @@ export const Deposited = () => {
               alt="Side Icon"
               width={"134"}
               height={"134"}
-              className="absolute top-[17px] right-[23px] object-cover"
+              className="absolute top-[17px] right-[23px] object-cover z-5"
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-2.5  md:py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 z-10">
               <span className="text-14 lg:text-16 text-secondary-text">Deposited to contract</span>
               <Tooltip iconSize={20} text="Info text" />
             </div>
@@ -119,7 +119,7 @@ export const Deposited = () => {
               alt="Side Icon"
               width={"62"}
               height={"171"}
-              className="absolute top-[20px] right-[40px] object-cover"
+              className="absolute top-[20px] right-[40px] object-cover z-5"
             />
           </div>
         </div>
@@ -133,7 +133,7 @@ export const Deposited = () => {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder={t("balances_search_placeholder")}
-              className="bg-primary-bg lg:w-[480px]"
+              className="bg-primary-bg lg:w-[480px] max-h-[40px] md:max-h-[48px]"
             />
           </div>
         )}
@@ -161,11 +161,11 @@ export const Deposited = () => {
           </>
         ) : Boolean(searchValue) ? (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180">
-            <span className="text-secondary-text">Deposited tokens not found</span>
+            <span className="text-secondary-text">{t("deposited_not_found")}</span>
           </div>
         ) : (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-deposited-tokens bg-right-top bg-no-repeat max-md:bg-size-180">
-            <span className="text-secondary-text">No deposited tokens yet</span>
+            <span className="text-secondary-text">{t("no_deposited_yet")}</span>
           </div>
         )}
         <DrawerDialog isOpen={isWithdrawDetailsOpened} setIsOpen={setIsWithdrawDetailsOpened}>

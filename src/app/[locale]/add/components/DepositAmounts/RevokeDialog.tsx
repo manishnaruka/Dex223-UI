@@ -112,7 +112,7 @@ export const RevokeDialog = () => {
             onClose={() => setIsOpen(false)}
             title={standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
           />
-          <div className="w-full md:w-[570px] px-4 pb-4 md:px-10 gap-1">
+          <div className="w-full md:w-[570px] px-4 md:pb-4 md:px-10 gap-1">
             <div className="flex justify-between items-center">
               <div className="flex gap-2 py-2 items-center">
                 {standard === Standard.ERC20 ? (

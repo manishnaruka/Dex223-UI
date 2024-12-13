@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React from "react";
+import { useMediaQuery } from "react-responsive";
 import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
@@ -190,6 +191,7 @@ const DepositedTokenMobileTableItem = ({
 }) => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
+  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
 
   return (
     <>
@@ -200,23 +202,25 @@ const DepositedTokenMobileTableItem = ({
         <div className="flex justify-start items-start gap-1">
           <div className="flex gap-2">
             <Image src={"/images/tokens/placeholder.svg"} width={32} height={32} alt="" />
-            <div className="flex flex-col">
-              <span className="text-14">{`${deposite.token.name}`}</span>
-              <span className="text-12">{"$ —"}</span>
+            <div className="flex flex-col min-w-0 ">
+              <div className="flex flex-row gap-2">
+                <span className="text-14 max-w-[70%] truncate">{`${deposite.token.name}`}</span>
+                <div
+                  className="px-2 truncate min-w-0 max-w-[75px] -mt-0.5 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 justify-center items-center"
+                  onClick={() => {
+                    onDetailsClick();
+                  }}
+                >
+                  {deposite.token.symbol}
+                </div>
+              </div>
+              <span className="text-12 text-primary-text">{"$ —"}</span>
             </div>
           </div>
-          <div
-            className="px-2 py-[2px] text-14 text-secondary-text bg-quaternary-bg rounded-1 flex justify-center items-center hocus:bg-green-bg cursor-pointer duration-200"
-            onClick={() => {
-              onDetailsClick();
-            }}
-          >
-            {deposite.token.symbol}
-          </div>
         </div>
-        <div className="flex gap-1 items-center">
-          <div className="flex gap-2 w-1/2">
-            <Badge color="green" text="ERC-20" />
+        <div className="flex gap-1 items-baseline">
+          <div className="flex gap-2 w-1/2 items-baseline">
+            <Badge color="green" text="ERC-20" size={isMobile ? "small" : "default"} />
             <span className="text-12 text-secondary-text">
               {`${formatNumber(formatUnits(deposite.approved, deposite.token.decimals), 6)} ${truncateMiddle(
                 deposite.token.symbol || "",
@@ -227,8 +231,8 @@ const DepositedTokenMobileTableItem = ({
               )}`}
             </span>
           </div>
-          <div className="flex gap-2">
-            <Badge color="green" text="ERC-223" />
+          <div className="flex gap-2 w-1/2 items-baseline">
+            <Badge color="green" text="ERC-223" size={isMobile ? "small" : "default"} />
             <span className="text-12 text-secondary-text">
               {`${formatNumber(formatUnits(deposite.deposited, deposite.token.decimals), 6)} ${truncateMiddle(
                 deposite.token.symbol || "",

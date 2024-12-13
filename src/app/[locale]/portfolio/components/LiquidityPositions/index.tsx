@@ -8,7 +8,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonSize } from "@/components/buttons/Button";
 import { Link } from "@/navigation";
 
 import { useActiveWalletsPositions } from "../../stores/positions.hooks";
@@ -43,9 +43,9 @@ export const LiquidityPositions = () => {
   return (
     <>
       <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 py-2.5 md:py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 z-10">
               <span className="text-14 lg:text-16 text-secondary-text">
                 {t("provided_liq_balance")}
               </span>
@@ -57,7 +57,7 @@ export const LiquidityPositions = () => {
               alt="Side Icon"
               width={"122"}
               height={"152"}
-              className="absolute top-[4px] right-[30px] object-cover"
+              className="absolute top-[4px] right-[30px] object-cover z-5"
             />
           </div>
         </div>
@@ -67,9 +67,9 @@ export const LiquidityPositions = () => {
         <h1 className="text-18 lg:text-32 font-medium">{t("liquidity_title")}</h1>
         <div className="flex flex-col lg:flex-row gap-3">
           <Link href="/pools/positions" className="w-full lg:w-auto">
-            <Button fullWidth>
+            <Button fullWidth mobileSize={ButtonSize.MEDIUM}>
               <span className="flex items-center gap-2 w-max">
-                Liquidity positions
+                {t("liquidity_title")}
                 <Svg iconName="forward" />
               </span>
             </Button>
