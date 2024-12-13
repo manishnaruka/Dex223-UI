@@ -9,7 +9,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonSize } from "@/components/buttons/Button";
-import { Link } from "@/navigation";
+import { Link } from "@/i18n/routing";
 
 import { useActiveWalletsPositions } from "../../stores/positions.hooks";
 import { WalletPositions } from "../../stores/useWalletsPosotions";

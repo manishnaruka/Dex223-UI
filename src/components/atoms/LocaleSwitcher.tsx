@@ -8,7 +8,7 @@ import { useState } from "react";
 import Popover from "@/components/atoms/Popover";
 import SelectButton from "@/components/atoms/SelectButton";
 import SelectOption from "@/components/atoms/SelectOption";
-import { locales, usePathname, useRouter } from "@/navigation";
+import { locales, usePathname, useRouter } from "@/i18n/routing";
 
 const localesMap: {
   [key: string]: {

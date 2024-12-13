@@ -141,6 +141,7 @@ export default function FeedbackDialog() {
               {t.rich("feel_free_to_share", {
                 github: (chunks) => (
                   <a
+                    target="_blank"
                     href="https://github.com/EthereumCommonwealth/Dex223-UI/issues"
                     className="text-green underline hocus:text-green-hover duration-200"
                   >

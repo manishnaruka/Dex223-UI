@@ -3,7 +3,7 @@ import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/routing";
 
 import { useTokens } from "./useTokenLists";
 

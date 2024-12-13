@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { isAddress } from "viem";
 
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/routing";
 
 enum AutoListingQueryParams {
   autoListingContract = "autoListingContract",

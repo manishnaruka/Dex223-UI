@@ -17,7 +17,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterAutoListings } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
-import { Link } from "@/navigation";
+import { Link } from "@/i18n/routing";
 import { DexChainId } from "@/sdk_hybrid/chains";
 
 export default function TokenListingPage() {
@@ -52,12 +52,12 @@ export default function TokenListingPage() {
             </span>
           </Link>
         </div>
-        <div className="pb-5">
-          <div className="flex justify-between mb-20 flex-col xl:flex-row px-4">
+        <div className="xl:pb-5 pb-4">
+          <div className="flex justify-between flex-col gap-2 xl:flex-row px-4">
             <h1 className="font-medium  text-24 lg:text-40">Auto-listing contracts</h1>
             <div className="w-full md:w-[480px]">
               <SearchInput
-                className="bg-tertiary-bg"
+                className="bg-tertiary-bg max-sm:h-10"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Search name or paste contract"
@@ -71,16 +71,17 @@ export default function TokenListingPage() {
             <div className="grid grid-cols-1 xl:hidden px-4 gap-4">
               {filteredAutoListings.map((autoListing) => {
                 return (
-                  <Link
+                  <div
                     key={autoListing.id}
-                    href={`/token-listing/contracts/${autoListing.id}`}
-                    className="hocus:bg-tertiary-bg duration-200 group bg-primary-bg rounded-5 pb-4 px-4 pt-3 group"
+                    className="duration-200 group bg-primary-bg rounded-3 pb-4 px-4 pt-3 group"
                   >
                     <div className="text-18 font-medium flex items-center">{autoListing.name}</div>
-                    <div className="mb-3">{autoListing.totalTokens} tokens</div>
+                    <div className="mb-3 text-14 text-secondary-text">
+                      {autoListing.totalTokens} tokens
+                    </div>
                     <div
                       className={clsxMerge(
-                        "flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-3",
+                        "flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-3 text-14",
                         !autoListing.isFree && "flex-grow w-full flex-wrap justify-start",
                       )}
                     >
@@ -92,45 +93,47 @@ export default function TokenListingPage() {
                       >
                         Listing price
                       </span>
-                      {autoListing.tokensToPay.length
-                        ? autoListing.tokensToPay.map((paymentMethod) => (
-                            <span
-                              key={paymentMethod.token.address}
-                              className="flex items-center gap-1 bg-quaternary-bg rounded-2 px-2 py-1"
-                            >
-                              <span>
-                                <span className="overflow-hidden ">
-                                  {formatUnits(
-                                    paymentMethod.price,
-                                    paymentMethod.token.decimals ?? 18,
-                                  ).slice(0, 7) === "0.00000"
-                                    ? truncateMiddle(
-                                        formatUnits(
-                                          paymentMethod.price,
-                                          paymentMethod.token.decimals ?? 18,
-                                        ),
-                                        {
-                                          charsFromStart: 3,
-                                          charsFromEnd: 2,
-                                        },
-                                      )
-                                    : formatFloat(
-                                        formatUnits(
-                                          paymentMethod.price,
-                                          paymentMethod.token.decimals != null
-                                            ? paymentMethod.token.decimals
-                                            : 18,
-                                        ),
-                                      )}
-                                </span>{" "}
-                                {paymentMethod.token.symbol}
-                              </span>
-                              <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
+                      {autoListing.tokensToPay.length ? (
+                        autoListing.tokensToPay.map((paymentMethod) => (
+                          <span
+                            key={paymentMethod.token.address}
+                            className="flex items-center gap-1 bg-quaternary-bg rounded-2 px-2 py-1 text-secondary-text"
+                          >
+                            <span>
+                              <span className="overflow-hidden">
+                                {formatUnits(
+                                  paymentMethod.price,
+                                  paymentMethod.token.decimals ?? 18,
+                                ).slice(0, 7) === "0.00000"
+                                  ? truncateMiddle(
+                                      formatUnits(
+                                        paymentMethod.price,
+                                        paymentMethod.token.decimals ?? 18,
+                                      ),
+                                      {
+                                        charsFromStart: 3,
+                                        charsFromEnd: 2,
+                                      },
+                                    )
+                                  : formatFloat(
+                                      formatUnits(
+                                        paymentMethod.price,
+                                        paymentMethod.token.decimals != null
+                                          ? paymentMethod.token.decimals
+                                          : 18,
+                                      ),
+                                    )}
+                              </span>{" "}
+                              {paymentMethod.token.symbol}
                             </span>
-                          ))
-                        : "Free"}
+                            <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-secondary-text">Free</span>
+                      )}
                     </div>
-                    <div className="flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-3">
+                    <div className="flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-3 text-14">
                       <span className="text-secondary-text">Contract link</span>
                       <ExternalTextLink
                         onClick={(e) => e.stopPropagation()}
@@ -142,22 +145,30 @@ export default function TokenListingPage() {
                         )}
                       />
                     </div>
-                    <div className="flex-grow">
+                    <div className="flex-grow grid grid-cols-2 gap-2">
+                      <Link
+                        href={`/token-listing/contracts/${autoListing.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          fullWidth
+                          colorScheme={ButtonColor.LIGHT_GREEN}
+                          size={ButtonSize.MEDIUM}
+                        >
+                          View
+                        </Button>
+                      </Link>
+
                       <Link
                         onClick={(e) => e.stopPropagation()}
                         href={`/token-listing/add/?autoListingContract=${autoListing.id}&dest=${encodeURIComponent("/token-listing/contracts/")}`}
                       >
-                        <Button
-                          fullWidth
-                          className="hocus:bg-green hocus:text-black"
-                          colorScheme={ButtonColor.LIGHT_GREEN}
-                          size={ButtonSize.MEDIUM}
-                        >
+                        <Button fullWidth colorScheme={ButtonColor.GREEN} size={ButtonSize.MEDIUM}>
                           List tokens
                         </Button>
                       </Link>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

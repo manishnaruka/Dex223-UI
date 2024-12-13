@@ -3,9 +3,8 @@
 import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import { ReactNode, useEffect, useState } from "react";
 
-import Logo from "@/components/atoms/Logo";
 import { clsxMerge } from "@/functions/clsxMerge";
-import { Locale } from "@/navigation";
+import { Locale, routing } from "@/i18n/routing";
 import DatabaseProvider from "@/providers/DatabaseProvider";
 import DialogsProvider from "@/providers/DialogsProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";

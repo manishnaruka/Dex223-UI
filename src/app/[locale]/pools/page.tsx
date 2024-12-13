@@ -10,7 +10,7 @@ import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import TabButton from "@/components/buttons/TabButton";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import PoolsTable from "./PoolsTable";

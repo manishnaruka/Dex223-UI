@@ -46,7 +46,7 @@ import {
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";

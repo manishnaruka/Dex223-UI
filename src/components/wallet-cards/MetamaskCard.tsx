@@ -10,7 +10,7 @@ import {
 import { wallets } from "@/config/wallets";
 import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 import usePreloaderTimeout from "@/hooks/usePreloader";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/routing";
 import addToast from "@/other/toast";
 
 const { image, name } = wallets.metamask;

@@ -33,7 +33,7 @@ import {
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 
 import { DepositAmounts } from "../../add/components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "../../add/components/LiquidityActionButton/ConfirmLiquidityDialog";

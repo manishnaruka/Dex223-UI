@@ -63,7 +63,7 @@ export function SearchInput(props: Props) {
           props.value === "" && "pointer-events-none",
         )}
       >
-        {props.value === "" || props.nocloseicon === "true" ? (
+        {props.value === "" || ref.current?.value === "" || props.nocloseicon === "true" ? (
           <Svg className="text-secondary-text" iconName="search" />
         ) : (
           <IconButton

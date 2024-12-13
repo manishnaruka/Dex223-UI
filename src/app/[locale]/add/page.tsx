@@ -31,7 +31,7 @@ import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 

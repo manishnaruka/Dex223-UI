@@ -19,7 +19,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import { formatNumberKilos } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 
 import { usePoolsData } from "./hooks";
 
