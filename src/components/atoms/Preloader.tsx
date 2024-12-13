@@ -5,9 +5,15 @@ interface Props {
   size?: number;
   type?: "circular" | "linear" | "awaiting";
   color?: "green" | "black";
+  smallDots?: boolean;
 }
 
-export default function Preloader({ size = 24, type = "circular", color = "green" }: Props) {
+export default function Preloader({
+  size = 24,
+  type = "circular",
+  color = "green",
+  smallDots = false,
+}: Props) {
   const internalSize = useMemo(() => {
     return size / Math.sqrt(2);
   }, [size]);
@@ -33,9 +39,24 @@ export default function Preloader({ size = 24, type = "circular", color = "green
     case "linear":
       return (
         <div className="flex items-center gap-[5px]">
-          <span className="block rounded-full w-2 h-2 animate-flicker1 bg-green" />
-          <span className="block rounded-full w-2 h-2 animate-flicker2 bg-green" />
-          <span className="block rounded-full w-2 h-2 animate-flicker3 bg-green" />
+          <span
+            className={clsx(
+              "block rounded-full animate-flicker1 bg-green",
+              smallDots ? "w-[6px] h-[6px]" : "w-2 h-2 ",
+            )}
+          />
+          <span
+            className={clsx(
+              "block rounded-full animate-flicker2 bg-green",
+              smallDots ? "w-[6px] h-[6px]" : "w-2 h-2 ",
+            )}
+          />
+          <span
+            className={clsx(
+              "block rounded-full animate-flicker3 bg-green",
+              smallDots ? "w-[6px] h-[6px]" : "w-2 h-2 ",
+            )}
+          />
         </div>
       );
     case "awaiting":

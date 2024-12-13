@@ -1,11 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import Container from "@/components/atoms/Container";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -90,12 +90,12 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
       <div className="hidden md:flex gap-2 items-center">
         <span className="text-secondary-text">Min:</span> {formatNumber(minTokenAPerTokenB)}{" "}
         {tokenA?.symbol} per {tokenB?.symbol}
-        <Svg iconName="double-arrow" className="text-secondary-text" />
+        <Svg iconName="double-arrow" className="text-tertiary-text" />
         <span className="text-secondary-text">Max:</span> {formatNumber(maxTokenAPerTokenB)}{" "}
         {tokenA?.symbol} per {tokenB?.symbol}
       </div>
       <div className="flex md:hidden gap-2 items-center">
-        <Svg iconName="double-arrow" className="rotate-90 text-secondary-text" size={40} />
+        <Svg iconName="double-arrow" className="rotate-90 text-tertiary-text" size={32} />
         <div className="flex flex-col text-14 gap-1">
           <div>
             {" "}
@@ -115,6 +115,7 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
 const Positions = () => {
   const { isConnected } = useAccount();
   const router = useRouter();
+  const t = useTranslations("Liquidity");
 
   const { loading, positions } = usePositions();
 
@@ -148,32 +149,32 @@ const Positions = () => {
         <>
           {!isConnected ? (
             <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full flex-col gap-2 rounded-5 bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180">
-              <p className="text-secondary-text">
-                Connect to a wallet to see your liquidity positions
-              </p>
+              <p className="text-secondary-text">{t("connect_wallet_your_liquidity")}</p>
             </div>
           ) : (
             <>
               {positions?.length ? (
                 <div className="rounded-5 w-full overflow-hidden bg-primary-bg md:px-10 px-5">
                   <div className="flex justify-between py-3">
-                    <span className="text-tertiary-text">Your positions</span>
+                    <span className="text-tertiary-text md:text-16 text-12">
+                      {t("your_positions")}
+                    </span>
                     {hasClosedPositions && (
                       <span
-                        className="text-secondary-text hocus:text-green-hover cursor-pointer"
+                        className="text-secondary-text md:text-16 text-12 hocus:text-green-hover cursor-pointer"
                         onClick={() => setHideClosed(!hideClosed)}
                       >
-                        {!hideClosed ? "Hide closed positions" : "Show closed positions"}
+                        {!hideClosed ? t("hide_closed_positions") : t("show_closed_positions")}
                       </span>
                     )}
                   </div>
                   <div className="flex flex-col gap-3 pb-10">
                     {filteredPositions?.length ? (
-                      filteredPositions.map((position) => {
+                      filteredPositions.map((position, index) => {
                         return (
                           <PoolPosition
                             positionInfo={position}
-                            key={(position as any).nonce}
+                            key={(position as any).nonce || index}
                             onClick={() =>
                               router.push(`/pool/${(position as any).tokenId.toString()}`)
                             }
@@ -181,15 +182,13 @@ const Positions = () => {
                         );
                       })
                     ) : (
-                      <div>You have no positions yet</div>
+                      <div>{t("no_positions_yet")}</div>
                     )}
                   </div>
                 </div>
               ) : (
                 <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 relative bg-empty-pool bg-no-repeat bg-right-top max-md:bg-size-180">
-                  <p className="text-secondary-text">
-                    Your active liquidity positions will appear here
-                  </p>
+                  <p className="text-secondary-text">{t("your_positions_here")}</p>
                 </div>
               )}
             </>
@@ -204,6 +203,7 @@ export default function PoolsPage() {
   const router = useRouter();
   const { tokenA, tokenB, setTokenA } = useAddLiquidityTokensStore();
   const chainId = useCurrentChainId();
+  const t = useTranslations("Liquidity");
 
   return (
     <Container>
@@ -219,7 +219,7 @@ export default function PoolsPage() {
               Pools
             </TabButton>
             <TabButton inactiveBackground="bg-secondary-bg" size={48} active>
-              Liquidity positions
+              {t("liquidity_title")}
             </TabButton>
           </div>
           <Button
@@ -236,7 +236,7 @@ export default function PoolsPage() {
             className="lg:w-auto"
           >
             <span className="flex items-center gap-2">
-              New position
+              {t("new_position")}
               <Svg iconName="add" />
             </span>
           </Button>

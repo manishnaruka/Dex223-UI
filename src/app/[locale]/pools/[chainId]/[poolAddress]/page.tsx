@@ -9,6 +9,11 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
@@ -62,12 +67,12 @@ export default function ExplorePoolPage({
       <div className="w-full md:w-[800px] md:mx-auto md:mt-[40px] mb-5 bg-primary-bg px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
         {/* First line:  Icons | Tokens | Badge | Link */}
         <div className="flex justify-between items-center py-1.5 -mx-3">
-          <button
+          <IconButton
+            variant={IconButtonVariant.BACK}
+            iconSize={IconSize.REGULAR}
+            buttonSize={IconButtonSize.LARGE}
             onClick={() => router.push("/pools")}
-            className="flex items-center w-12 h-12 justify-center"
-          >
-            <Svg iconName="back" />
-          </button>
+          />
           <h2 className="text-18 lg:text-20 font-bold">{t("stats_title")}</h2>
           <div className="w-12"></div>
         </div>
@@ -85,9 +90,11 @@ export default function ExplorePoolPage({
               href={getExplorerLink(ExplorerLinkType.ADDRESS, pool.id, chainId as any)}
               className="w-max"
             >
-              <div className="flex items-center gap-1 bg-quaternary-bg rounded-[8px] px-2 py-1 text-secondary-text hocus:text-primary-text hocus:bg-erc-20-bg ">
-                <span className="text-14">{renderShortAddress(pool.id)}</span>
-                <Svg iconName="forward" size={16} />
+              <div className="flex items-center duration-200 gap-1 bg-quaternary-bg rounded-[8px] px-2 py-0.5 text-secondary-text hocus:text-primary-text hocus:bg-erc-20-bg ">
+                <span className="text-14">
+                  {renderShortAddress(pool.id.toUpperCase().replace("0X", "0x"))}
+                </span>
+                <Svg iconName="forward" size={20} />
               </div>
             </a>
           </div>

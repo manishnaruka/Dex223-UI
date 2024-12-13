@@ -4,27 +4,24 @@ import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits, parseUnits } from "viem";
 
-// import { useAddLiquidityGasPrice } from "../../stores/useAddLiquidityGasSettings";
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
-// import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import { clsxMerge } from "@/functions/clsxMerge";
-// import { formatFloat } from "@/functions/formatFloat";
-// import { getChainSymbol } from "@/functions/getChainSymbol";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useRevokeEstimatedGas } from "@/hooks/useRevoke";
-import { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
+import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
+import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
-import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
+import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import {
   useRevokeGasLimitStore,
@@ -34,34 +31,37 @@ import {
   useWithdrawGasLimitStore,
 } from "../../stores/useRevokeGasSettings";
 
-export const RevokeDialog = ({
-  isOpen,
-  setIsOpen,
-  standard,
-  token,
-  status,
-  currentAllowance,
-  revokeHandler,
-  // estimatedGas,
-  // gasPrice,
-}: {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  standard: Standard;
-  token?: Token;
-  currentAllowance: bigint; // currentAllowance or currentDeposit
-  status: AllowanceStatus;
-  revokeHandler: (customAmount?: bigint) => void; // onWithdraw or onWithdraw
-  // gasPrice?: bigint;
-  // estimatedGas: bigint | null;
-}) => {
+export const RevokeDialog = () => {
+  const { status } = useRevokeStatusStore();
+
   const t = useTranslations("Liquidity");
+  const {
+    isOpenedRevokeDialog: isOpen,
+    setIsOpenedRevokeDialog: setIsOpen,
+    token,
+    standard,
+    contractAddress,
+  } = useRevokeDialogStatusStore();
 
   const [localValue, setLocalValue] = useState(undefined as undefined | string);
   const localValueBigInt = useMemo(() => {
     if (!token || !localValue) return undefined;
     return parseUnits(localValue, token?.decimals);
   }, [localValue, token]);
+
+  const { withdrawHandler, currentDeposit } = useWithdraw({
+    token: token,
+    contractAddress: contractAddress,
+  });
+  const { revokeHandler: rHandler, currentAllowance: revokeAllowance } = useRevoke({
+    token: token,
+    contractAddress: contractAddress,
+  });
+
+  const currentAllowance =
+    standard === Standard.ERC20 ? revokeAllowance || BigInt(0) : currentDeposit;
+
+  const revokeHandler = standard === Standard.ERC20 ? rHandler : withdrawHandler;
 
   const [isError, setIsError] = useState(false);
   const updateValue = (value: string) => {
@@ -121,13 +121,15 @@ export const RevokeDialog = ({
                   <span>{`${t("withdraw")} ${token.symbol}`}</span>
                 )}
 
-                <Badge color="green" text={standard} />
+                <Badge color="green" text={standard} className="text-nowrap mr-auto" />
               </div>
-              <div className="flex items-center gap-2 justify-end">
+              <div className="flex items-center gap-2 justify-end ml-2 ">
                 {status === AllowanceStatus.PENDING && (
                   <>
                     <Preloader type="linear" />
-                    <span className="text-secondary-text text-14">{t("status_pending")}</span>
+                    <span className="text-secondary-text text-nowrap text-14">
+                      {t("status_pending")}
+                    </span>
                   </>
                 )}
                 {status === AllowanceStatus.LOADING && <Preloader size={20} />}
@@ -145,10 +147,12 @@ export const RevokeDialog = ({
               <>
                 <div
                   className={clsxMerge(
-                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border hocus:shadow hocus:shadow-green/60",
+                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border ",
                     isError ? "border-red" : "",
-                    inputDisabled ? "border-secondary-border" : "",
-                    isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
+                    inputDisabled
+                      ? "border border-secondary-border bg-primary-bg"
+                      : "hocus:shadow hocus:shadow-green/60 border-transparent",
+                    isFocused ? "border border-green shadow shadow-green/60" : "",
                   )}
                 >
                   <NumericFormat
@@ -207,7 +211,12 @@ export const RevokeDialog = ({
                   <span className="flex items-center gap-2">Enter correct values</span>
                 </Button>
               ) : [AllowanceStatus.INITIAL].includes(status) ? (
-                <Button onClick={() => revokeHandler(localValueBigInt)} fullWidth>
+                <Button
+                  onClick={() => {
+                    revokeHandler(localValueBigInt).then();
+                  }}
+                  fullWidth
+                >
                   {standard === Standard.ERC20 ? t("revoke") : t("withdraw")}
                 </Button>
               ) : AllowanceStatus.PENDING === status ? (

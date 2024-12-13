@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 import { Address } from "viem";
 
@@ -101,7 +102,7 @@ const PoolsTableDesktop = ({
 
       {tableData.map((o: any, index: number) => {
         return (
-          <React.Fragment key={o.id}>
+          <React.Fragment key={o.id || index}>
             <div
               onMouseEnter={() => setHoveredRow(index)}
               onMouseLeave={() => setHoveredRow(null)}
@@ -143,7 +144,7 @@ const PoolsTableDesktop = ({
               onClick={() => openPoolHandler(o.id)}
               className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
             >
-              {formatNumberKilos(o.txCount)}
+              {formatNumberKilos(o.txCount, { significantDigits: 0 })}
             </div>
             <div
               onMouseEnter={() => setHoveredRow(index)}
@@ -177,18 +178,18 @@ const PoolsTableDesktop = ({
 };
 
 const PoolsTableItemMobile = ({
-  key,
+  // key,
   pool,
   openPoolHandler,
   index,
 }: {
-  key: any;
+  // key: any;
   pool: any;
   openPoolHandler: (id: Address) => any;
   index: number;
 }) => {
   return (
-    <React.Fragment key={key}>
+    <React.Fragment key={index}>
       <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
         <div className="flex justify-between gap-2">
           <div className="flex items-center gap-2 text-14">
@@ -202,14 +203,14 @@ const PoolsTableItemMobile = ({
             />
             <span>{`${pool.token0.symbol}/${pool.token1.symbol}`}</span>
           </div>
-          <div className="flex gap-2 items-center justify-start mr-auto">
+          <div className="flex gap-2 items-baseline mt-0.5 justify-start mr-auto">
             <Badge
               // size="small"
               variant={BadgeVariant.PERCENTAGE}
               percentage={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier].label}%`}
             />
           </div>
-          <span className="text-secondary-text whitespace-nowrap font-normal">{`# ${index}`}</span>
+          <span className="text-secondary-text items-baseline whitespace-nowrap font-normal">{`# ${index}`}</span>
         </div>
         <div className="flex justify-between gap-x-2">
           <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
@@ -267,14 +268,19 @@ const PoolsTableMobile = ({
         className="flex mb-4 gap-2 text-secondary-text flex-row cursor-pointer md:hidden"
         onClick={handleSort}
       >
-        <span>TVL</span>
-        <Svg iconName={sorting === SortingType.ASCENDING ? "sort-up" : "sort-down"} />
+        <span className={sorting === SortingType.NONE ? "text-secondary-text" : "text-green"}>
+          TVL
+        </span>
+        <Svg
+          iconName={sorting === SortingType.ASCENDING ? "sort-up" : "sort-down"}
+          className={sorting === SortingType.NONE ? "text-secondary-text" : "text-green"}
+        />
       </div>
       <div className="flex md:hidden flex-col gap-4">
         {tableData.map((pool: any, index: number) => {
           return (
             <PoolsTableItemMobile
-              key={pool.id}
+              key={pool.id || index}
               index={(currentPage - 1) * PAGE_SIZE + index + 1}
               pool={pool}
               openPoolHandler={openPoolHandler}
@@ -285,6 +291,22 @@ const PoolsTableMobile = ({
     </>
   );
 };
+
+function localSorting(data: any[], sorting: SortingType): any[] {
+  const arrayForSort = [...data];
+  if (sorting === SortingType.DESCENDING) {
+    arrayForSort.sort((a, b) => {
+      return Number(b.totalValueLockedUSD) - Number(a.totalValueLockedUSD);
+    });
+  }
+  if (sorting === SortingType.ASCENDING) {
+    arrayForSort.sort((a, b) => {
+      return Number(a.totalValueLockedUSD) - Number(b.totalValueLockedUSD);
+    });
+  }
+  return arrayForSort;
+}
+
 export default function PoolsTable({
   filter,
 }: {
@@ -295,6 +317,7 @@ export default function PoolsTable({
   };
 }) {
   const [sorting, setSorting] = useState<SortingType>(SortingType.NONE);
+  const t = useTranslations("Liquidity");
 
   const handleSort = useCallback(() => {
     switch (sorting) {
@@ -315,11 +338,14 @@ export default function PoolsTable({
   const chainId = useCurrentChainId();
   const { data, loading } = usePoolsData({
     chainId,
-    orderDirection: GQLSorting[sorting],
+    orderDirection: GQLSorting[SortingType.NONE], //sorting],
     filter,
   });
 
-  const pools: any[] = useMemo(() => data?.pools || [], [data?.pools]);
+  const pools: any[] = useMemo(() => {
+    const pools = data?.pools || [];
+    return localSorting(pools, sorting);
+  }, [data?.pools, sorting]);
 
   const currentTableData = useMemo(() => {
     const firstPageIndex = (currentPage - 1) * PAGE_SIZE;
@@ -360,7 +386,7 @@ export default function PoolsTable({
               </>
             ) : (
               <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 bg-empty-not-found-pools bg-right-top bg-no-repeat max-md:bg-size-180">
-                <p className="text-secondary-text">Pools not found</p>
+                <p className="text-secondary-text">{t("pools_not_found")}</p>
               </div>
             )}
           </>

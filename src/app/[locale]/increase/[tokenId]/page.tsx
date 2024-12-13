@@ -2,8 +2,9 @@
 
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "@/app/[locale]/add/stores/useLiquidityPriceRangeStore";
@@ -11,11 +12,14 @@ import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTie
 import { useIncreaseRecentTransactionsStore } from "@/app/[locale]/increase/[tokenId]/stores/useIncreaseRecentTransactionsStore";
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
-import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
@@ -47,7 +51,6 @@ export default function IncreaseLiquidityPage({
 }) {
   useRecentTransactionTracking();
   const t = useTranslations("Liquidity");
-  // const [showRecentTransactions, setShowRecentTransactions] = useState(true);
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useIncreaseRecentTransactionsStore();
@@ -121,9 +124,10 @@ export default function IncreaseLiquidityPage({
             <IconButton
               onClick={() => router.push(`/pool/${params.tokenId}`)}
               buttonSize={IconButtonSize.LARGE}
-              iconName="back"
+              variant={IconButtonVariant.BACK}
+              // iconName="back"
               iconSize={IconSize.LARGE}
-              className="text-tertiary-text"
+              // className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">Increase Liquidity</h2>
@@ -253,7 +257,7 @@ export default function IncreaseLiquidityPage({
               </div>
             </div>
           </div>
-          <LiquidityActionButton increase tokenId={params.tokenId} />
+          <LiquidityActionButton increase />
         </div>
         <div className="flex flex-col gap-5">
           <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
@@ -265,6 +269,7 @@ export default function IncreaseLiquidityPage({
           />
         </div>
       </div>
+      <RevokeDialog />
       <ConfirmLiquidityDialog increase tokenId={params.tokenId} />
     </Container>
   );

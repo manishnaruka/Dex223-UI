@@ -30,7 +30,7 @@ export default function PositionLiquidityCard({
           {token?.symbol}
         </span>
         {standards?.map((standard) => {
-          return <Badge key={standard} color="green" text={standard} />;
+          return <Badge key={standard} color="green" text={standard} className={"text-nowrap"} />;
         })}
       </div>
       <div className="flex items-center gap-1">

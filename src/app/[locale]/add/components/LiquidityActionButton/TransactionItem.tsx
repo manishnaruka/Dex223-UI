@@ -75,9 +75,9 @@ export const TransactionItem = ({
         ) : null}
       </div>
       <div className="w-full">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-2 py-2 items-start flex-wrap">
-            <span className="flex-wrap items-baseline gap-1 text-secondary-text">
+        <div className="flex justify-between items-start">
+          <div className="flex gap-2 py-2 items-center flex-wrap">
+            <span className="flex-wrap items-center gap-1 text-secondary-text">
               {`${standard === Standard.ERC20 ? "Approve" : "Deposit"} for ${token.symbol}`}
               <Badge
                 color="green"
@@ -116,12 +116,12 @@ export const TransactionItem = ({
             )}
 
             {status === AddLiquidityApproveStatus.PENDING && (
-              <>
+              <span className="flex gap-2 mt-2 flex-nowrap">
                 <Preloader type="linear" />
                 <span className="text-secondary-text text-14 text-nowrap">
                   Proceed in your wallet
                 </span>
-              </>
+              </span>
             )}
             {status === AddLiquidityApproveStatus.LOADING ? (
               <Preloader size={20} />

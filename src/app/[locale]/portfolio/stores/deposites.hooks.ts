@@ -2,6 +2,7 @@ import { multicall } from "@wagmi/core";
 import { useEffect, useMemo, useState } from "react";
 import { Address } from "viem";
 
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { config } from "@/config/wagmi/config";
@@ -94,6 +95,7 @@ export const useActiveWalletsDeposites = () => {
   const tokens = useTokens();
   const { deposites, setAllDeposites } = useWalletsDeposites();
   const chainId = useCurrentChainId();
+  const { refreshDepositsTrigger, setRefreshDepositsTrigger } = useRefreshDepositsDataStore();
 
   const contractAddresses: Address[] = useMemo(() => {
     return [NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]];
@@ -114,8 +116,16 @@ export const useActiveWalletsDeposites = () => {
       );
       setAllDeposites(result);
       setIsLoading(false);
+      setRefreshDepositsTrigger(false);
     })();
-  }, [tokens, activeAddresses, setAllDeposites, contractAddresses]);
+  }, [
+    tokens,
+    activeAddresses,
+    setAllDeposites,
+    contractAddresses,
+    refreshDepositsTrigger,
+    setRefreshDepositsTrigger,
+  ]);
 
   return { isLoading, deposites };
 };

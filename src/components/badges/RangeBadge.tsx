@@ -15,12 +15,16 @@ interface Props {
 
 const iconsMap: Record<PositionRangeStatus, ReactNode> = {
   [PositionRangeStatus.IN_RANGE]: (
-    <div className="w-6 h-6 flex justify-center items-center">
-      <div className="w-2 h-2 rounded-full bg-green" />
+    <div className="w-4 h-4 md:w-6 md:h-6 flex justify-center items-center">
+      <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green" />
     </div>
   ),
-  [PositionRangeStatus.OUT_OF_RANGE]: <Svg iconName="error" />,
-  [PositionRangeStatus.CLOSED]: <Svg iconName="closed" />,
+  [PositionRangeStatus.OUT_OF_RANGE]: (
+    <Svg iconName="error" size={24} className="max-w-4 max-h-4 md:max-w-6 md:max-h-6" />
+  ),
+  [PositionRangeStatus.CLOSED]: (
+    <Svg iconName="closed" size={24} className="max-w-4 max-h-4 md:max-w-6 md:max-h-6" />
+  ),
 };
 
 const textMap: Record<PositionRangeStatus, string> = {

@@ -6,7 +6,7 @@ export function formatFloat(
   },
 ) {
   const numberValue = Number(value);
-  const maximumSignificantDigits = options?.significantDigits || 2;
+  const maximumSignificantDigits = options?.significantDigits ?? 2;
 
   if (numberValue < 1e-10) {
     if (options?.trimZero) {
@@ -46,9 +46,15 @@ export function formatNumber(num: string, maxPrecision = 15) {
   }
 }
 
-export function formatNumberKilos(num: number): string {
+export function formatNumberKilos(
+  num: number,
+  options?: {
+    significantDigits?: number;
+    trimZero?: boolean;
+  },
+): string {
   if (num < 1000) {
-    return formatFloat(num); // Numbers less than 1000 remain as is.
+    return formatFloat(num, options); // Numbers less than 1000 remain as is.
   }
 
   const suffixes = ["K", "M", "B", "T"]; // Thousand, Million, Billion, Trillion
@@ -56,5 +62,5 @@ export function formatNumberKilos(num: number): string {
   power = Math.min(power, suffixes.length); // Ensure it doesn't exceed defined suffixes
   const scaled = num / Math.pow(1000, power);
 
-  return scaled.toFixed(2).replace(/\.0$/, "") + suffixes[power - 1];
+  return scaled.toFixed(options?.significantDigits ?? 2).replace(/\.0$/, "") + suffixes[power - 1];
 }

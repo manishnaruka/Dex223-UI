@@ -44,7 +44,7 @@ export function usePositionFromTokenId(tokenId: bigint) {
       loading,
       position: positions?.[0],
     };
-  }, [loading, positions?.[0]]);
+  }, [loading, positions]);
 }
 export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
   const chainId = useCurrentChainId();
@@ -141,6 +141,8 @@ export default function usePositions() {
   const { data: tokenIdsData, isLoading: tokenIdsLoading } = useReadContracts({
     contracts: tokenIdsContracts,
   });
+
+  // console.dir(tokenIdsData);
 
   const { positions, loading: positionsLoading } = usePositionsFromTokenIds(
     tokenIdsData

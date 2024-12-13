@@ -4,12 +4,18 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
 import {
   Field,
   useLiquidityAmountsStore,
 } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityRecentTransactionsStore } from "@/app/[locale]/add/stores/useAddLiquidityRecentTransactionsStore";
+import {
+  AddLiquidityApproveStatus,
+  AddLiquidityStatus,
+  useAddLiquidityStatusStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import Container from "@/components/atoms/Container";
@@ -22,10 +28,12 @@ import IconButton, {
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
+import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "./components/LiquidityActionButton/ConfirmLiquidityDialog";
@@ -116,8 +124,21 @@ export default function AddPoolPage() {
 
   // Deposit Amounts END
 
-  const isFormDisabled = !tokenA || !tokenB;
+  const { status, approve0Status, approve1Status, deposite0Status, deposite1Status } =
+    useAddLiquidityStatusStore();
+  const { status: revokeStatus } = useRevokeStatusStore();
 
+  const isAllDisabled =
+    [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(revokeStatus) ||
+    [AddLiquidityStatus.MINT_PENDING, AddLiquidityStatus.MINT_LOADING].includes(status) ||
+    [approve0Status, approve1Status, deposite0Status, deposite1Status].includes(
+      AddLiquidityApproveStatus.LOADING,
+    ) ||
+    [approve0Status, approve1Status, deposite0Status, deposite1Status].includes(
+      AddLiquidityApproveStatus.PENDING,
+    );
+
+  const isFormDisabled = !tokenA || !tokenB || isAllDisabled;
   // User need to provide values to price range & Starting price on pool creating
   const { LOWER: tickLower, UPPER: tickUpper } = ticks;
   const isCreatePoolFormFilled =
@@ -129,12 +150,11 @@ export default function AddPoolPage() {
         <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
           <div className="w-[48px] md:w-[104px]">
             <IconButton
-              variant={IconButtonVariant.DEFAULT}
+              variant={IconButtonVariant.BACK}
               iconSize={IconSize.REGULAR}
-              iconName="back"
               buttonSize={IconButtonSize.LARGE}
               onClick={() => router.push("/pools/positions")}
-              className="text-tertiary-text"
+              // className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">{t("add_liquidity_title")}</h2>
@@ -149,8 +169,9 @@ export default function AddPoolPage() {
         </div>
         <div className="rounded-b-5 border-t-0 p-4 pt-0 md:p-10 md:pt-0 bg-primary-bg mb-4 md:mb-5">
           <h3 className="text-16 font-bold mb-1 lg:mb-4">{t("select_pair")}</h3>
-          <div className="flex gap-3 mb-4 md:mb-5">
+          <div className="flex gap-2 md:gap-3 mb-4 md:mb-5">
             <SelectButton
+              disabled={isAllDisabled}
               variant="rounded"
               className="bg-tertiary-bg"
               fullWidth
@@ -185,6 +206,7 @@ export default function AddPoolPage() {
               )}
             </SelectButton>
             <SelectButton
+              disabled={isAllDisabled}
               variant="rounded"
               className="bg-tertiary-bg"
               fullWidth
@@ -219,7 +241,7 @@ export default function AddPoolPage() {
               )}
             </SelectButton>
           </div>
-          <FeeAmountSettings />
+          <FeeAmountSettings isAllDisabled={isAllDisabled} />
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-5 mb-4 lg:mb-5">
             <DepositAmounts
               parsedAmounts={parsedAmounts}
@@ -264,6 +286,7 @@ export default function AddPoolPage() {
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
       />
+      <RevokeDialog />
       <ConfirmLiquidityDialog />
     </Container>
   );
