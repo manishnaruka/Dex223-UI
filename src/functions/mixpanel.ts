@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { watchAccount } from "wagmi/actions";
 
 import { config } from "@/config/wagmi/config";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/routing";
 
 enum MIXPANEL_EVENTS {
   "connectWallet" = "connectWallet",

@@ -1,3 +1,5 @@
+export type ContentType = "video" | "vide_and_content" | "content";
+
 export type Post = {
   id: string;
   title: string;
@@ -34,7 +36,7 @@ export type PostDetails = {
     alt: string;
   };
   tags: string[];
-  author: null;
+  author: null | { name: string; email: string; id: string };
   createdAt: string;
   updatedAt: string;
   links: [
@@ -45,7 +47,7 @@ export type PostDetails = {
     },
   ];
   medias: [];
-  content: string;
+  content: ContentType;
   content_markdown: string;
   keyword_seed: null;
   language_code: string;

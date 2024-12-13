@@ -55,7 +55,7 @@ import { useFees } from "@/hooks/useFees";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokens } from "@/hooks/useTokenLists";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount } from "@/sdk_hybrid/constants";

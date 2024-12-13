@@ -34,7 +34,7 @@ import {
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { Link, useRouter } from "@/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";

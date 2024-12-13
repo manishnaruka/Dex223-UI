@@ -16,7 +16,7 @@ import { formatNumberKilos } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { renderShortAddress } from "@/functions/renderAddress";
 import { useTokens } from "@/hooks/useTokenLists";
-import { Link, useRouter } from "@/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 
 import { usePoolData } from "../../hooks";
 

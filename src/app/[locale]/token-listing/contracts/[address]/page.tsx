@@ -26,7 +26,7 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { useTokenLists } from "@/hooks/useTokenLists";
-import { Link } from "@/navigation";
+import { Link } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Token } from "@/sdk_hybrid/entities/token";

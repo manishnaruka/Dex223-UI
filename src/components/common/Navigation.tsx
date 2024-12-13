@@ -9,7 +9,7 @@ import Svg from "@/components/atoms/Svg";
 import { MobileLink } from "@/components/common/MobileMenu";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
 import { IconName } from "@/config/types/IconName";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/routing";
 
 function NavigationExternalLink({ href, text }: { href: string; text: string }) {
   return (
@@ -204,7 +204,6 @@ function NavigationMoreDropdown() {
               title="Blog"
               handleClose={() => setSubmenuOpened(false)}
               className="pr-5"
-              disabled
             />
             <MobileLink
               href="#"

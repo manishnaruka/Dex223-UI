@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { usePortfolioActiveTabStore } from "@/app/[locale]/portfolio/stores/usePortfolioStore";
 import { ActiveTab } from "@/app/[locale]/portfolio/stores/usePortfolioStore";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/i18n/routing";
 
 enum PoolsQueryParams {
   tab = "tab",

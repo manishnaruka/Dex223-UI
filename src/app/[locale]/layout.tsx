@@ -1,21 +1,14 @@
-import { Golos_Text } from "next/font/google";
 import { notFound } from "next/navigation";
+import { getMessages } from "next-intl/server";
 import { PropsWithChildren } from "react";
 
 import { Providers } from "@/app/[locale]/providers";
 import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
-import NoTokenListsEnabledWarning from "@/components/dialogs/NoTokenListsEnabledWarning";
-
-const golos_text = Golos_Text({
-  subsets: ["latin"],
-  display: "swap",
-  adjustFontFallback: false,
-});
-
+import { Locale, routing } from "@/i18n/routing";
 interface Props {
   params: {
-    locale: "es" | "en" | "zh";
+    locale: Locale;
   };
 }
 
@@ -23,14 +16,13 @@ export default async function RootLayout({
   children,
   params: { locale },
 }: PropsWithChildren<Props>) {
-  let messages;
-
-  try {
-    messages = (await import(`../../../messages/${locale}.json`)).default;
-  } catch (error) {
-    console.log(error);
+  if (!routing.locales.includes(locale as any)) {
     notFound();
   }
+
+  // Providing all messages to the client
+  // side is the easiest way to get started
+  const messages = await getMessages();
 
   return (
     <>

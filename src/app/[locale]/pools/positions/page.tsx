@@ -20,7 +20,7 @@ import usePositions, {
   usePositionFromPositionInfo,
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { NativeCoin } from "@/sdk_hybrid/entities/ether";
 

@@ -12,7 +12,7 @@ import TokenListsSettings from "@/components/common/TokenListsSettings";
 import AccountDialog from "@/components/dialogs/AccountDialog";
 import { useMintTestTokensDialogStore } from "@/components/dialogs/stores/useMintTestTokensDialogStore";
 import { useMixpanelConnectWalletEvents } from "@/functions/mixpanel";
-import { Link } from "@/navigation";
+import { Link } from "@/i18n/routing";
 
 export default function Header() {
   useMixpanelConnectWalletEvents();

@@ -5,7 +5,7 @@ import { ReactNode, useState } from "react";
 import Popover from "@/components/atoms/Popover";
 import Svg from "@/components/atoms/Svg";
 import IconButton from "@/components/buttons/IconButton";
-import { Link, usePathname } from "@/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 
 interface Props {
   href: string;

@@ -12,7 +12,7 @@ import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
-import { Link, usePathname } from "@/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 export function MobileLink({
   href,
   iconName,
@@ -232,7 +232,6 @@ export default function MobileMenu() {
                     title="Blog"
                     handleClose={() => setMobileMenuOpened(false)}
                     className="pr-5"
-                    disabled
                   />
                   <MobileLink
                     disabled

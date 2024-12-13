@@ -1,21 +1,20 @@
 import createMiddleware from "next-intl/middleware";
 
-export default createMiddleware({
-  // A list of all locales that are supported
-  locales: ["en", "es", "zh"],
+import { routing } from "./i18n/routing";
 
-  // Used when no locale matches
-  defaultLocale: "en",
-});
+export default createMiddleware(routing);
 
 export const config = {
-  // Match only internationalized pathnames
   matcher: [
-    /*
-     * Match all paths except:
-     * - API routes
-     * - Static files
-     */
-    "/((?!api|_next|favicon.ico|images|robots.txt|sitemap.xml|static).*)",
+    // Enable a redirect to a matching locale at the root
+    "/",
+
+    // Set a cookie to remember the previous locale for
+    // all requests that have a locale prefix
+    "/(es|en|zh)/:path*",
+
+    // Enable redirects that add missing locales
+    // (e.g. `/pathnames` -> `/en/pathnames`)
+    "/((?!_next|_vercel|favicon.ico|images|robots.txt|sitemap.xml|static).*)",
   ],
 };

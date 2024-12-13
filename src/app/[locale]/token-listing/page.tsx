@@ -5,7 +5,7 @@ import React, { ReactNode } from "react";
 
 import Container from "@/components/atoms/Container";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
-import { Link } from "@/navigation";
+import { Link } from "@/i18n/routing";
 
 function ListingVariantCard({
   href,

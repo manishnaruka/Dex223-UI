@@ -17,7 +17,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterAutoListings } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
-import { Link } from "@/navigation";
+import { Link } from "@/i18n/routing";
 import { DexChainId } from "@/sdk_hybrid/chains";
 
 export default function TokenListingPage() {

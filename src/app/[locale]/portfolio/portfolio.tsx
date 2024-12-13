@@ -33,7 +33,7 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { usePortfolioSearchParams } from "@/hooks/usePortfolioSearchParams";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import addToast from "@/other/toast";
 
 import { Balances } from "./components/Balances";
