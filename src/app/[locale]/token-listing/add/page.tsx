@@ -10,7 +10,6 @@ import { useMediaQuery } from "react-responsive";
 import { Address, formatEther, formatGwei, formatUnits, isAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 
-import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import ChooseAutoListingDialog from "@/app/[locale]/token-listing/add/components/ChooseAutoListingDialog";
 import ChoosePaymentDialog from "@/app/[locale]/token-listing/add/components/ChoosePaymentDialog";
 import ConfirmListingDialog from "@/app/[locale]/token-listing/add/components/ConfirmListingDialog";
@@ -39,7 +38,7 @@ import Svg from "@/components/atoms/Svg";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
@@ -83,7 +82,12 @@ function OpenConfirmListTokenButton({
 
   if (!isConnected) {
     return (
-      <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+      <Button
+        size={ButtonSize.EXTRA_LARGE}
+        tabletSize={ButtonSize.LARGE}
+        onClick={() => setWalletConnectOpened(true)}
+        fullWidth
+      >
         {tWallet("connect_wallet")}
       </Button>
     );
@@ -91,7 +95,7 @@ function OpenConfirmListTokenButton({
 
   if (isLoadingList) {
     return (
-      <Button fullWidth isLoading>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
           <span>Processing list operation</span>
           <Preloader size={20} color="black" />
@@ -102,7 +106,7 @@ function OpenConfirmListTokenButton({
 
   if (isLoadingApprove) {
     return (
-      <Button fullWidth isLoading>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
           <span>{t("approving_in_progress")}</span>
           <Preloader size={20} color="black" />
@@ -113,7 +117,7 @@ function OpenConfirmListTokenButton({
 
   if (isPendingApprove || isPendingList) {
     return (
-      <Button fullWidth isLoading>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
           <span>{t("waiting_for_confirmation")}</span>
           <Preloader size={20} color="black" />
@@ -124,7 +128,7 @@ function OpenConfirmListTokenButton({
 
   if (!tokenA || !tokenB) {
     return (
-      <Button fullWidth disabled>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth disabled>
         {t("select_tokens")}
       </Button>
     );
@@ -132,7 +136,7 @@ function OpenConfirmListTokenButton({
 
   if (!isPoolExists) {
     return (
-      <Button fullWidth disabled>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth disabled>
         Pool doesn&apos;t exists
       </Button>
     );
@@ -140,14 +144,19 @@ function OpenConfirmListTokenButton({
 
   if (isBothTokensAlreadyInList) {
     return (
-      <Button fullWidth disabled>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth disabled>
         Both tokens are already listed
       </Button>
     );
   }
 
   return (
-    <Button onClick={() => setConfirmListTokenDialogOpened(true)} fullWidth>
+    <Button
+      size={ButtonSize.EXTRA_LARGE}
+      tabletSize={ButtonSize.LARGE}
+      onClick={() => setConfirmListTokenDialogOpened(true)}
+      fullWidth
+    >
       List token
     </Button>
   );
@@ -360,7 +369,7 @@ export default function ListTokenPage() {
           <div className="flex justify-center grid-in-[right]">
             <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">
               <div className="px-4 md:px-10 pt-2.5 pb-4 md:pb-10 bg-primary-bg rounded-5">
-                <div className="flex justify-between items-center mb-2.5">
+                <div className="flex justify-between items-center mb-2.5 -mx-3">
                   <IconButton
                     onClick={() => router.replace(destination)}
                     iconName="back"
@@ -412,7 +421,7 @@ export default function ListTokenPage() {
                           />
                         )}
                         {tokenA?.symbol || <span className="text-tertiary-text">Select token</span>}
-                        <Svg iconName="small-expand-arrow" />
+                        <Svg className="text-secondary-text" iconName="small-expand-arrow" />
                       </button>
                       <div
                         className={clsx(
@@ -458,7 +467,7 @@ export default function ListTokenPage() {
                           />
                         )}
                         {tokenB?.symbol || <span className="text-tertiary-text">Select token</span>}
-                        <Svg iconName="small-expand-arrow" />
+                        <Svg className="text-secondary-text" iconName="small-expand-arrow" />
                       </button>
                       <div
                         className={clsx(

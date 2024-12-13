@@ -61,11 +61,11 @@ const buttonVariantClassnameMap: Record<ButtonVariant, Record<ButtonColor, strin
 };
 
 const buttonSizeClassnameMap: Record<ButtonSize, string> = {
-  [ButtonSize.EXTRA_SMALL]: "xl:text-12 xl:min-h-5 xl:rounded-20 xl:px-4",
-  [ButtonSize.SMALL]: "xl:text-14 xl:font-medium xl:min-h-8 xl:rounded-20 xl:px-6",
-  [ButtonSize.MEDIUM]: "xl:text-16 xl:font-medium xl:min-h-10 xl:rounded-2 xl:px-6",
-  [ButtonSize.LARGE]: "xl:text-16 xl:font-medium xl:min-h-12 xl:rounded-3 xl:px-6",
-  [ButtonSize.EXTRA_LARGE]: "xl:text-18 xl:font-medium xl:min-h-[60px] xl:rounded-3 xl:px-6",
+  [ButtonSize.EXTRA_SMALL]: "lg:text-12 lg:min-h-5 lg:rounded-20 lg:px-4",
+  [ButtonSize.SMALL]: "lg:text-14 lg:font-medium lg:min-h-8 lg:rounded-20 lg:px-6",
+  [ButtonSize.MEDIUM]: "lg:text-16 lg:font-medium lg:min-h-10 lg:rounded-2 lg:px-6",
+  [ButtonSize.LARGE]: "lg:text-16 lg:font-medium lg:min-h-12 lg:rounded-3 lg:px-6",
+  [ButtonSize.EXTRA_LARGE]: "lg:text-18 lg:font-medium lg:min-h-[60px] lg:rounded-3 lg:px-6",
 };
 
 const tabletButtonSizeClassnameMap: Record<ButtonSize, string> = {

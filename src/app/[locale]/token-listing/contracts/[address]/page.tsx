@@ -256,7 +256,7 @@ export default function AutoListingContractDetails({
   return (
     <>
       <Container>
-        <div className="my-2 md:my-10 px-4 flex">
+        <div className="mb-2 mt-4 xl:my-10 px-4 flex">
           <Link href="/token-listing/contracts">
             <span className="flex items-center gap-2 text-secondary-text hocus:text-green-hover duration-200">
               <Svg iconName="back" />
@@ -264,8 +264,8 @@ export default function AutoListingContractDetails({
             </span>
           </Link>
         </div>
-        <div className="my-2 md:my-10 px-4">
-          <div className="flex justify-between mb-5">
+        <div className="my-2 xl:my-10 px-4">
+          <div className="flex justify-between mb-2 xl:mb-5">
             <h1 className="text-24 xl:text-40">Listing contract details</h1>
             <Link
               className="hidden xl:block"
@@ -274,7 +274,7 @@ export default function AutoListingContractDetails({
               <Button>List token(s)</Button>
             </Link>
           </div>
-          <div className="bg-primary-bg rounded-5 grid xl:grid-cols-5 xl:grid-areas-[first_first_first_first_first,second_third_fourth_fifth_sixth] pb-4 px-4 pt-3 xl:p-10 gap-3 mb-4 xl:mb-10 grid-cols-2 grid-areas-[first_first,second_second,third_fourth,fifth_sixth]">
+          <div className="bg-primary-bg rounded-5 grid xl:grid-cols-5 xl:grid-areas-[first_first_first_first_first,second_third_fourth_fifth_sixth] pb-4 px-4 pt-3 xl:p-5 gap-3 mb-4 xl:mb-10 grid-cols-2 grid-areas-[first_first,second_second,third_fourth,fifth_sixth]">
             <div className="flex flex-col justify-center grid-in-[first]">
               <h3 className="text-18 md:text-20 font-medium">{listingContract.name}</h3>
               <p className="text-secondary-text">{listingContract.totalTokens} tokens</p>
@@ -321,8 +321,8 @@ export default function AutoListingContractDetails({
           </Link>
           {!listingContract.isFree && (
             <>
-              <div className="mb-5">
-                <h1 className="text-18 xl:text-40">Listing price</h1>
+              <div className="mb-2 xl:mb-5">
+                <h1 className="text-18 xl:text-32 font-medium">Listing price</h1>
               </div>
               <div className="px-5 pb-5 pt-3 bg-primary-bg rounded-5 mb-10">
                 <div className="flex items-center gap-1 mb-3">
@@ -362,8 +362,8 @@ export default function AutoListingContractDetails({
 
           <div>
             <div>
-              <div className="flex justify-between mb-5 flex-col xl:flex-row">
-                <h1 className="mb-3 text-18 md:text-40 font-medium">Tokens</h1>
+              <div className="flex justify-between mb-4 xl:mb-5 flex-col xl:flex-row">
+                <h1 className="text-18 xl:text-32 font-medium mb-2 xl:mb-0">Tokens</h1>
                 {!!listingContract.tokens.length && (
                   <div className="w-full md:w-[480px]">
                     <SearchInput
