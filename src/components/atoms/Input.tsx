@@ -8,7 +8,7 @@ import { clsxMerge } from "@/functions/clsxMerge";
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   isError?: boolean;
   isWarning?: boolean;
-  nocloseicon?: string;
+  // nocloseicon?: string;
 }
 
 const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
@@ -63,11 +63,12 @@ export function SearchInput(props: Props) {
           props.value === "" && "pointer-events-none",
         )}
       >
-        {props.value === "" || ref.current?.value === "" || props.nocloseicon === "true" ? (
-          <Svg className="text-secondary-text" iconName="search" />
+        {props.value === "" || ref.current?.value === "" ? (
+          <Svg className="text-tertiary-text" iconName="search" />
         ) : (
           <IconButton
             variant={IconButtonVariant.CLOSE}
+            className="text-tertiary-text"
             handleClose={() => {
               handleClear();
               ref.current?.focus();

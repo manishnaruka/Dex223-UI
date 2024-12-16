@@ -1,3 +1,4 @@
+import { findIndex } from "lodash";
 import uniqby from "lodash.uniqby";
 import { Address } from "viem";
 import { create } from "zustand";
@@ -9,6 +10,8 @@ interface PortfolioStore {
     isActive: boolean;
     isConnectedWallet?: boolean;
   }[];
+  hasWallet: (address: Address) => void;
+  setShowFromSearch: (value: boolean) => void;
   addWallet: (address: Address) => void;
   removeWallet: (address: Address) => void;
   setIsWalletActive: (address: Address, isActive: boolean) => void;
@@ -18,6 +21,8 @@ interface PortfolioStore {
   searchValue: string;
   setSearchValue: (value: string) => void;
   isAllWalletActive: boolean;
+  hasSearchWallet: boolean;
+  showFromSearch: boolean;
 }
 
 const localStorageKey = "portfolio-state";
@@ -37,6 +42,17 @@ export const usePortfolioStore = create<PortfolioStore>()(
   persist(
     (set) => ({
       wallets: [],
+      setShowFromSearch: (value) =>
+        set(() => ({
+          showFromSearch: value,
+        })),
+      hasWallet: (address) =>
+        set((state) => {
+          const res = findIndex(state.wallets, function (o) {
+            return o.address.toString().toLowerCase() == address.toString().toLowerCase();
+          });
+          return { hasSearchWallet: res > -1 };
+        }),
       addWallet: (address) =>
         set((state) => ({
           wallets: uniqby([...state.wallets, { address, isActive: true }], "address"),
@@ -60,9 +76,6 @@ export const usePortfolioStore = create<PortfolioStore>()(
           );
 
           let allActive = checkAllActive(wallets);
-
-          console.log(allActive);
-
           return { wallets, isAllWalletActive: allActive && state.isConnectedWalletActive };
         }),
       setAllWalletActive: () =>
@@ -84,7 +97,9 @@ export const usePortfolioStore = create<PortfolioStore>()(
           };
         }),
       isConnectedWalletActive: true,
+      hasSearchWallet: false,
       isAllWalletActive: false,
+      showFromSearch: false,
       setIsConnectedWalletActive: (isActive) =>
         set((state) => {
           const iaAllActive = isActive ? checkAllActive(state.wallets) : false;
@@ -98,6 +113,7 @@ export const usePortfolioStore = create<PortfolioStore>()(
     }),
     {
       name: localStorageKey, // name of the item in the storage (must be unique)
+      // storage: typeof window !== "undefined" && window.localStorage ? localStorage : undefined,
     },
   ),
 );

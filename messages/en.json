@@ -378,6 +378,7 @@
     "title": "Portfolio",
     "manage_title": "Manage",
     "show_portfolio": "Show portfolio",
+    "reset_search": "Reset search & Show my wallets",
     "add_wallet_placeholder": "Add address or domain",
     "add_wallet": "Add wallet",
     "connect_wallet_placeholder": "Add address or connect wallet to view portfolio",
@@ -421,6 +422,10 @@
     "details": "Details",
     "token_owner": "Token owner",
     "revoke": "Revoke",
-    "withdraw": "Withdraw"
+    "withdraw": "Withdraw",
+    "search_result": "Search results for",
+    "add_to_wallets": "Add to my wallets",
+    "already_in_wallets": "Wallet is already in your wallets",
+    "my_wallets": "My wallets"
   }
 }

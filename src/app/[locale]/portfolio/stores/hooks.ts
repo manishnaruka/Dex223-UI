@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { Address, isAddress } from "viem";
 import { useAccount } from "wagmi";
 
@@ -44,7 +44,7 @@ export const usePortfolioWallets = () => {
 };
 
 export const useActiveAddresses = () => {
-  const { searchValue, setSearchValue } = usePortfolioStore();
+  const { searchValue, setSearchValue, setShowFromSearch } = usePortfolioStore();
   const { wallets } = usePortfolioWallets();
   const t = useTranslations("Portfolio");
 
@@ -54,11 +54,13 @@ export const useActiveAddresses = () => {
 
   const activeAddresses = useMemo(() => {
     if (searchValue && !errorSearch) {
+      if (setShowFromSearch) setShowFromSearch(true);
       return [searchValue as Address];
     } else {
+      if (setShowFromSearch) setShowFromSearch(false);
       return wallets.filter((ad) => ad.isActive).map((ad) => ad.address);
     }
-  }, [wallets, errorSearch, searchValue]);
+  }, [searchValue, errorSearch, setShowFromSearch, wallets]);
 
   return {
     activeAddresses,
