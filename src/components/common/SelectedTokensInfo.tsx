@@ -65,11 +65,6 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
                     {token.name}
                   </span>
                 </div>
-                {token.isToken && (
-                  <div className="hidden @[620px]:block">
-                    <AddressPair token={token} />
-                  </div>
-                )}
               </div>
               <div className="text-secondary-text text-12">
                 <div className="table table-fixed w-full">
@@ -123,7 +118,7 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
         )}
       </div>
       {token.isToken && (
-        <div className="@[620px]:hidden w-full mt-3">
+        <div className="w-full mt-3">
           <AddressPair token={token} />
         </div>
       )}

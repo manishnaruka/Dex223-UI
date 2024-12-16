@@ -122,7 +122,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     <Svg iconName="delete" />
                   </button>
                 </div>
-                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={326}>
+                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={314}>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {_transactions.map((transaction) => {
                       return <RecentTransaction transaction={transaction} key={transaction.hash} />;

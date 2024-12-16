@@ -4,7 +4,7 @@ import { isAddress } from "viem";
 
 import Checkbox from "@/components/atoms/Checkbox";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import { SearchInput } from "@/components/atoms/Input";
+import { InputSize, SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonSize } from "@/components/buttons/Button";
@@ -81,6 +81,7 @@ export default function ImportListWithURL({ setContent }: Props) {
   return (
     <div className="flex flex-col flex-grow">
       <TextField
+        size={InputSize.LARGE}
         variant={"search"}
         label={t("import_with_URL")}
         value={tokenListAddressToImport}

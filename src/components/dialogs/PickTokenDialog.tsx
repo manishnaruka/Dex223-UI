@@ -92,7 +92,7 @@ function TokenRow({
     <button
       role="button"
       onClick={() => handlePick(currency)}
-      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:px-10 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
+      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:pl-10 md:pr-4 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
     >
       <div className="grid grid-cols-[40px_1fr] gap-2 w-full">
         <div className="flex items-center md:pt-3">
@@ -199,7 +199,7 @@ function TokenRow({
           </div>
 
           <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid min-h-4">
-            {(!isTokenPinned || simpleForm) && (
+            {(!isTokenPinned || simpleForm || (!erc20Balance && !erc223Balance)) && (
               <span className="text-secondary-text text-12">{currency.symbol}</span>
             )}
             {erc20Balance && !simpleForm && currency.isNative && (
@@ -279,7 +279,7 @@ export default function PickTokenDialog({
   }, [chainId, pinnedTokensAddresses, tokens]);
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  const [isEditActivated, setEditActivated] = useState<boolean>(true);
+  const [isEditActivated, setEditActivated] = useState<boolean>(false);
   const { isOpen: isManageOpened, setIsOpen: setManageOpened } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
@@ -368,7 +368,7 @@ export default function PickTokenDialog({
                                 isEditActivated
                                   ? "bg-transparent border-secondary-border"
                                   : "bg-tertiary-bg border-transparent",
-                                "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                                "items-center border justify-center px-4 duration-200 h-10 rounded-2  flex gap-2",
                                 !isMobile && isEditActivated && "hocus:bg-transparent",
                                 !isMobile && !isEditActivated && "hocus:bg-green-bg",
                               )}

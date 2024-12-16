@@ -31,7 +31,8 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         rounded-2
         outline-1
         gap-2
-        px-5
+        px-4
+        md:px-5
         py-2
         overflow-hidden
         group

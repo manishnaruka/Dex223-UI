@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FocusEvent, ReactNode, useMemo } from "react";
 import { formatGwei } from "viem";
 
+import { InputSize } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
 import ErrorsAndWarnings from "@/components/gas-settings/ErrorsAndWarnings";
 import { formatFloat } from "@/functions/formatFloat";
@@ -95,6 +96,7 @@ export default function EIP1559Fields({
               {currentMaxFeePerGas ? formatFloat(formatGwei(currentMaxFeePerGas)) : "0"} Gwei
             </div>
           }
+          inputSize={InputSize.DEFAULT}
         />
 
         <TextField
@@ -132,6 +134,7 @@ export default function EIP1559Fields({
               Gwei
             </div>
           }
+          inputSize={InputSize.DEFAULT}
         />
       </div>
 

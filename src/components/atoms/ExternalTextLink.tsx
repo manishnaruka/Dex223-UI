@@ -9,6 +9,7 @@ interface Props extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
   arrowSize?: number;
   color?: "green" | "white";
+  textClassname?: string;
 }
 
 export default function ExternalTextLink({
@@ -17,6 +18,7 @@ export default function ExternalTextLink({
   color = "green",
   className,
   arrowSize = 24,
+  textClassname,
   ...props
 }: Props) {
   return (
@@ -30,8 +32,8 @@ export default function ExternalTextLink({
         className,
       )}
     >
-      {text}
-      <Svg iconName="forward" size={arrowSize} />
+      <span className={textClassname}>{text}</span>
+      <Svg className="flex-shrink-0" iconName="forward" size={arrowSize} />
     </a>
   );
 }

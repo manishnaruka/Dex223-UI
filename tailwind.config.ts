@@ -251,6 +251,7 @@ const config: Config = {
       full: "50%",
     },
     fontSize: {
+      0: ["0px", "0px"],
       8: ["8px", "12px"],
       10: ["10px", "14px"],
       12: ["12px", "16px"],

@@ -149,7 +149,10 @@ function StandardOption({
                 standard === Standard.ERC223 ? "text-right" : "text-left",
               )}
             >
-              {t("balance")} {balance || "0.0"} {symbol}
+              <span className={standard === active ? "text-secondary-text" : "text-tertiary-text"}>
+                {t("balance")}
+              </span>{" "}
+              {balance || "0.0"} {symbol}
             </span>
           </span>
         )}
@@ -237,7 +240,7 @@ export default function TokenInput({
             }}
             allowNegative={false}
           />
-          <span className="text-12 block -mt-1 text-secondary-text">$0.00</span>
+          <span className="text-12 block -mt-1 text-tertiary-text">$0.00</span>
           <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
         <SelectButton

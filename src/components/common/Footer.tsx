@@ -116,7 +116,7 @@ export default function Footer() {
       <footer className="before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:top-0 before:left-0 pb-[56px] md:pb-0">
         <Container>
           <div className="flex justify-between py-3 px-5 items-center flex-col-reverse lg:flex-row gap-3">
-            <span className="text-12 text-secondary-text">
+            <span className="text-12 text-secondary-text max-md:mb-3">
               © {new Date(Date.now()).getFullYear()} DEX223
             </span>
             <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 lg:gap-3 w-full lg:w-auto">

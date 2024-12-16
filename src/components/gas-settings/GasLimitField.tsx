@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useEffect, useMemo } from "react";
 
+import { InputSize } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
 import ErrorsAndWarnings from "@/components/gas-settings/ErrorsAndWarnings";
 
@@ -58,6 +59,7 @@ export default function GasLimitField({
             {estimatedGas ? estimatedGas?.toString() : 100000} Gwei
           </div>
         }
+        inputSize={InputSize.DEFAULT}
       />
       <ErrorsAndWarnings errors={gasLimitErrors} />
     </>

@@ -403,7 +403,7 @@ export default function AutoListingContractDetails({
                             />
                             <div className="flex flex-col">
                               <span className="font-medium">{token.name}</span>
-                              <span className="text-secondary-text">{token.symbol}</span>
+                              <span className="text-secondary-text text-12">{token.symbol}</span>
                             </div>
                           </div>
 
@@ -446,12 +446,12 @@ export default function AutoListingContractDetails({
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2 ">
-                          <div className="bg-tertiary-bg pb-1 pl-4 pt-3 rounded-2">
-                            <div className="flex items-center gap-2 text-secondary-text">
+                          <div className="bg-tertiary-bg pb-1 pl-4 pt-2.5 rounded-2">
+                            <div className="flex items-center gap-2 text-secondary-text text-14">
                               Address
                               <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
                             </div>
-                            <div className="flex items-center">
+                            <div className="flex items-center text-14 -mt-0.5">
                               <ExternalTextLink
                                 text={truncateMiddle(token.address0, {
                                   charsFromStart: 3,
@@ -464,18 +464,18 @@ export default function AutoListingContractDetails({
                                 )}
                               />{" "}
                               <IconButton
-                                buttonSize={IconButtonSize.LARGE}
+                                buttonSize={IconButtonSize.SMALL}
                                 variant={IconButtonVariant.COPY}
                                 text={token.address0}
                               />
                             </div>
                           </div>
-                          <div className="bg-tertiary-bg pb-1 pl-4 pt-3 rounded-2">
-                            <div className="flex items-center gap-2 text-secondary-text">
+                          <div className="bg-tertiary-bg pb-1 pl-4 pt-2.5 rounded-2">
+                            <div className="flex items-center gap-2 text-secondary-text text-14">
                               Address
                               <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
                             </div>
-                            <div className="flex items-center">
+                            <div className="flex items-center text-14 -mt-0.5">
                               <ExternalTextLink
                                 text={truncateMiddle(token.address1, {
                                   charsFromStart: 3,
@@ -488,7 +488,7 @@ export default function AutoListingContractDetails({
                                 )}
                               />{" "}
                               <IconButton
-                                buttonSize={IconButtonSize.LARGE}
+                                buttonSize={IconButtonSize.SMALL}
                                 variant={IconButtonVariant.COPY}
                                 text={token.address1}
                               />
@@ -532,6 +532,7 @@ export default function AutoListingContractDetails({
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
+                              textClassname="w-[13ch]"
                               text={truncateMiddle(token.address0)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
@@ -543,6 +544,7 @@ export default function AutoListingContractDetails({
                           </div>
                           <div className="flex items-center">
                             <ExternalTextLink
+                              textClassname="w-[13ch]"
                               text={truncateMiddle(token.address1)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,

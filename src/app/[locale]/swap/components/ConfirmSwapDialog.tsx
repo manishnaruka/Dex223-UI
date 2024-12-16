@@ -6,6 +6,7 @@ import { NumericFormat } from "react-number-format";
 import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
+import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -408,25 +409,6 @@ function ReadonlyTokenAmountCard({
   );
 }
 
-function SwapDetailsRow({
-  title,
-  value,
-  tooltipText,
-}: {
-  title: string;
-  value: string | ReactNode;
-  tooltipText: string;
-}) {
-  return (
-    <div className="flex justify-between items-center">
-      <div className="flex gap-2 items-center text-secondary-text">
-        <Tooltip iconSize={20} text={tooltipText} />
-        {title}
-      </div>
-      <span>{value}</span>
-    </div>
-  );
-}
 export default function ConfirmSwapDialog() {
   const t = useTranslations("Swap");
   const {
