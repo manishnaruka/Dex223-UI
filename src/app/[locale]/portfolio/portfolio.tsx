@@ -191,7 +191,11 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   return (
     <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
       <DialogHeader
-        className={content === "add" ? "md:pr-3 px-4 md:pl-3" : "md:pr-3 px-4 md:pl-5"}
+        className={
+          content === "add" || content === "manage"
+            ? "md:pr-3 px-4 md:pl-3"
+            : "md:pr-3 px-4 md:pl-5"
+        }
         onClose={() => {
           if (!popupBackHandler) {
             setIsOpened(false);
@@ -199,7 +203,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
             popupBackHandler();
           }
         }}
-        onBack={content === "add" ? popupBackHandler : undefined}
+        onBack={content === "add" || content === "manage" ? popupBackHandler : undefined}
         settings={
           content === "list" ? (
             <Button

@@ -534,7 +534,7 @@ export default function DecreaseLiquidityPage({
                   <span>
                     {t("removed_liquidity_message")}:{" "}
                     <Link href={`/pool/${params.tokenId}`}>
-                      <span className="text-green hocus:text-green-hover underline">
+                      <span className="text-green duration-200 hocus:text-green-hover underline">
                         {t("claim_tokens")}
                       </span>
                     </Link>
