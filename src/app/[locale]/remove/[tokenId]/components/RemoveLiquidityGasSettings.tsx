@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { formatEther, formatGwei } from "viem";
 
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
@@ -42,12 +43,13 @@ export const RemoveLiquidityGasSettings = ({
 }) => {
   const chainId = useCurrentChainId();
   const t = useTranslations("GasSettings");
+  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
 
   const [isOpenedFee, setIsOpenedFee] = useState(false);
   const gasToUse = customGasLimit || estimatedGas;
 
   return (
-    <div className="flex flex-col md:flex-row items-center px-5 pt-2 pb-4 bg-tertiary-bg rounded-3 mb-2 md:mb-5">
+    <div className="flex flex-col md:flex-row items-center px-5 py-2 bg-tertiary-bg rounded-3 mb-2 md:mb-5">
       {/* First row container with custom 66.67% width */}
       <div className="flex w-full md:w-2/3-custom gap-2 md:gap-6 justify-between md:justify-start">
         <div className="flex flex-col">
@@ -70,13 +72,13 @@ export const RemoveLiquidityGasSettings = ({
 
       {/* Second row container with custom 33.33% width */}
       <div className="flex w-full md:w-1/3-custom items-center gap-2 mt-2 md:mt-0">
-        <span className="flex items-center justify-center md:px-2 px-4 md:text-12 text-14 h-8 md:h-6 rounded-20 text-secondary-text border border-secondary-border">
+        <span className="flex items-center justify-center font-medium md:px-2 px-4 md:text-12 text-14 h-8 md:h-6 rounded-20 text-secondary-text border border-secondary-border">
           {t(gasOptionTitle[gasPriceOption])}
         </span>
         <Button
-          className="w-full md:w-auto h-8 md:h-auto"
+          className="w-full md:w-auto h-8 md:h-auto rounded-20 font-medium"
           colorScheme={ButtonColor.LIGHT_GREEN}
-          size={ButtonSize.EXTRA_SMALL}
+          size={isMobile ? ButtonSize.SMALL : ButtonSize.EXTRA_SMALL}
           onClick={() => setIsOpenedFee(true)}
         >
           {t("edit")}

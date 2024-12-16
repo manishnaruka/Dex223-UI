@@ -1,4 +1,3 @@
-"use client";
 import clsx from "clsx";
 import { ChangeEvent, forwardRef, InputHTMLAttributes, useRef } from "react";
 
@@ -14,6 +13,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   isError?: boolean;
   isWarning?: boolean;
   inputSize?: InputSize;
+  noCloseIcon?: boolean;
 }
 
 const inputSizeMap: Record<InputSize, string> = {
@@ -64,7 +64,7 @@ export function SearchInput(props: Props) {
     <div className="relative w-full">
       <Input
         className={clsxMerge("pr-12", props.className)}
-        style={{ paddingRight: "2.5rem" }}
+        style={props.style ? props.style : { paddingRight: "2.5rem" }}
         ref={ref}
         {...props}
       />
@@ -74,7 +74,7 @@ export function SearchInput(props: Props) {
           props.value === "" && "pointer-events-none",
         )}
       >
-        {props.value === "" || ref.current?.value === "" ? (
+        {props.value === "" || ref.current?.value === "" || !!props.noCloseIcon ? (
           <Svg className="text-secondary-text" iconName="search" />
         ) : (
           <IconButton

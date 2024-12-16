@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import Alert from "@/components/atoms/Alert";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Price } from "@/sdk_hybrid/entities/fractions/price";
@@ -186,27 +187,31 @@ export default function LiquidityChartRangeInput({
       }}
     >
       {isUninitialized ? (
-        <InfoBox
-          message={<span>{t("price_chart_data_will_appear_here")}</span>}
-          // icon={<Inbox size={56} stroke={theme.neutral1} />}
-          icon={<span>Inbox</span>}
-        />
-      ) : isLoading ? (
-        <InfoBox icon={<span>Loader</span>} />
-      ) : error ? (
-        <InfoBox
-          message={<span>{t("price_chart_data_not_available")}</span>}
-          // icon={<CloudOff size={56} stroke={theme.neutral2} />}
-          icon={<span>CloudOff</span>}
-        />
-      ) : // ) : !formattedData || formattedData.length === 0 || !price ? (
+        <Alert type="info" text={t("price_chart_data_will_appear_here")} />
+      ) : // <InfoBox
+      //   message={<span>{t("price_chart_data_will_appear_here")}</span>}
+      //   // icon={<Inbox size={56} stroke={theme.neutral1} />}
+      //   icon={"Inbox"}
+      // />
+      isLoading ? (
+        <Alert type="info" text="Loader" />
+      ) : // <InfoBox icon={<span>Loader</span>} />
+      error ? (
+        <Alert type="error" text={t("price_chart_data_not_available")} />
+      ) : // <InfoBox
+      //   message={<span>{t("price_chart_data_not_available")}</span>}
+      //   // icon={<CloudOff size={56} stroke={theme.neutral2} />}
+      //   icon={<span>CloudOff</span>}
+      // />
+      // ) : !formattedData || formattedData.length === 0 || !price ? (
       !price ? (
-        <InfoBox
-          message={<span>{t("price_chart_no_data")}</span>}
-          // icon={<BarChart2 size={56} stroke={theme.neutral2} />}
-          icon={<span>BarChart2 </span>}
-        />
+        <Alert type="error" text={t("price_chart_no_data")} />
       ) : (
+        // <InfoBox
+        //   message={<span>{t("price_chart_no_data")}</span>}
+        //   // icon={<BarChart2 size={56} stroke={theme.neutral2} />}
+        //   icon={<span>BarChart2 </span>}
+        // />
         <ChartWrapper>
           <Chart
             data={{ series: formattedData!, current: price }}

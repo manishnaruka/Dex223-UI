@@ -12,6 +12,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
+import usePositions from "@/hooks/usePositions";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
@@ -40,25 +41,27 @@ export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
+  // const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
+  const isTokenInfoOpened = Boolean(tokenForPortfolio);
   const handleClosTokenInfo = () => {
     setTokenForPortfolio(null);
   };
 
-  const [prevTokenForPortfolio, setPrevTokenForPortfolio] = useState<Currency | null>(null);
-
-  useEffect(() => {
-    if (tokenForPortfolio !== prevTokenForPortfolio) {
-      setTokenInfoOpened(Boolean(tokenForPortfolio));
-    }
-  }, [tokenForPortfolio, prevTokenForPortfolio]);
-
-  useEffect(() => {
-    setPrevTokenForPortfolio(tokenForPortfolio);
-  }, [tokenForPortfolio]);
+  // const [prevTokenForPortfolio, setPrevTokenForPortfolio] = useState<Currency | null>(null);
+  //
+  // useEffect(() => {
+  //   if (tokenForPortfolio !== prevTokenForPortfolio) {
+  //     setTokenInfoOpened(Boolean(tokenForPortfolio));
+  //   }
+  // }, [tokenForPortfolio, prevTokenForPortfolio]);
+  //
+  // useEffect(() => {
+  //   setPrevTokenForPortfolio(tokenForPortfolio);
+  // }, [tokenForPortfolio]);
 
   const loading = false;
 
+  const { positions } = usePositions();
   const { tokenBalances, activeAddresses } = useActiveWalletBalances();
 
   const currentTableData = tokenBalances
@@ -75,9 +78,9 @@ export const Balances = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-6 w-full relative overflow-hidden">
+        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-2.5 md:py-6 w-full relative overflow-hidden">
           <div className="flex items-center gap-1 mb-auto">
-            <span className="text-14 lg:text-16">Wallet balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("wallet_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
 
@@ -93,9 +96,9 @@ export const Balances = () => {
         </div>
 
         {/*TODO: Extract card to separate component. 01.10.2024*/}
-        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-6 w-full overflow-hidden">
-          <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Margin positions balance</span>
+        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-2.5 md:py-6 w-full overflow-hidden">
+          <div className="flex items-center gap-1 z-10">
+            <span className="text-14 lg:text-16 text-secondary-text">{t("margin_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-24 lg:text-32 font-medium">$ —</span>
@@ -104,7 +107,7 @@ export const Balances = () => {
             alt="Side Icon"
             width={"180"}
             height={"120"}
-            className="absolute top-0 right-0 object-cover"
+            className="absolute top-0 right-0 object-cover z-0"
           />
         </div>
       </div>
@@ -112,31 +115,35 @@ export const Balances = () => {
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Liquidity balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("liquidity_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
-            — liquidity positions
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
+            {`${positions?.length ? positions.length : "—"} ${t("liquidity_positions_suffix")}`}
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Lending order balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("lending_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
             — lending orders
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Deposited to contract</span>
+            <span className="text-14 lg:text-16 text-secondary-text">
+              {t("deposited_contract")}
+            </span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">— tokens</span>
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
+            {`${currentTableData?.length ? currentTableData.length : "—"} ${t("tokens_suffix")}`}
+          </span>
         </div>
       </div>
 
@@ -153,7 +160,7 @@ export const Balances = () => {
       </div>
       {/*  */}
 
-      <div className="mt-5 min-h-[640px] mb-5 w-full">
+      <div className="mt-5 min-h-[340px] w-full">
         {!loading && activeAddresses.length && currentTableData.length ? (
           <>
             <BalancesDesktopTable
@@ -167,11 +174,11 @@ export const Balances = () => {
           </>
         ) : Boolean(searchValue) ? (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-token bg-no-repeat bg-right-top max-md:bg-size-180">
-            <span className="text-secondary-text">Token not found</span>
+            <span className="text-secondary-text">{t("token_not_found")}</span>
           </div>
         ) : (
           <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-list bg-no-repeat bg-right-top max-md:bg-size-180">
-            <span className="text-secondary-text">No assets yet</span>
+            <span className="text-secondary-text">{t("no_assets")}</span>
           </div>
         )}
 
@@ -181,6 +188,7 @@ export const Balances = () => {
           </div>
         ) : null}
       </div>
+
       <DrawerDialog isOpen={isTokenInfoOpened} setIsOpen={handleClosTokenInfo}>
         <DialogHeader onClose={handleClosTokenInfo} title={tokenForPortfolio?.name || "Unknown"} />
         {tokenForPortfolio ? (
