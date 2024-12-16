@@ -41,6 +41,7 @@ export const TransactionItem = ({
   disabled?: boolean;
 }) => {
   const tSwap = useTranslations("Swap");
+  const t = useTranslations("Liquidity");
   const chainId = useCurrentChainId();
   const [localValue, setLocalValue] = useState(
     formatUnits(transaction?.amount || BigInt(0), transaction?.token.decimals || 18),
@@ -135,7 +136,9 @@ export const TransactionItem = ({
         <div
           className={clsxMerge(
             "flex justify-between px-5 py-3 rounded-3 mt-2 border border-transparent",
-            isError ? "border-red" : "",
+            isError
+              ? "border border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
+              : "",
             disabled ? "border-secondary-border bg-primary-bg" : "bg-secondary-bg",
           )}
         >
@@ -156,7 +159,11 @@ export const TransactionItem = ({
           <span className="text-secondary-text min-w-max">{`Amount ${token.symbol}`}</span>
         </div>
         {isError ? (
-          <span className="text-12 mt-2 text-red">{`Must be at least ${formatUnits(amount, token.decimals)} ${token.symbol}`}</span>
+          <span className="text-12 mt-2 text-red-light">
+            {t("must_be_at_least", {
+              val: `${formatUnits(amount, token.decimals)} ${token.symbol}`,
+            })}
+          </span>
         ) : null}
 
         <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-4 mt-6">

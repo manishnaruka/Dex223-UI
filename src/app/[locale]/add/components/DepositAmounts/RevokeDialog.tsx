@@ -184,7 +184,11 @@ export const RevokeDialog = () => {
                   </span>
                 </div>
                 {isError ? (
-                  <span className="text-12 mt-2 text-red">{`Must be no more than ${formatUnits(currentAllowance, token.decimals)} ${token.symbol}`}</span>
+                  <span className="text-12 mt-2 text-red-light">
+                    {t("must_be_value", {
+                      val: `${formatUnits(currentAllowance, token.decimals)} ${token.symbol}`,
+                    })}
+                  </span>
                 ) : null}
               </>
             )}

@@ -58,12 +58,10 @@ function TokenRow({
   currency,
   handlePick,
   setTokenForPortfolio,
-  simpleForm = false,
 }: {
   currency: Currency;
   handlePick: (currency: Currency) => void;
   setTokenForPortfolio: (currency: Currency) => void;
-  simpleForm?: boolean;
 }) {
   const { toggleToken, isTokenPinned, pinnedTokens } = usePinnedTokensStore((s) => ({
     toggleToken: s.toggleToken,
@@ -114,29 +112,27 @@ function TokenRow({
                 <span className="whitespace-nowrap overflow-ellipsis overflow-hidden">
                   {currency.name}
                 </span>
-                {!simpleForm && (
-                  <div className="flex relative items-center">
-                    {scoreObj && (
-                      <>
-                        {scoreObj[0] < 20 && (
-                          <>
-                            {currency.isToken && currency.rate && (
-                              <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
-                            )}
-                          </>
-                        )}
-                        {scoreObj[1] && (
-                          <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
-                            <FoundInOtherListMarker />
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
+                <div className="flex relative items-center">
+                  {scoreObj && (
+                    <>
+                      {scoreObj[0] < 20 && (
+                        <>
+                          {currency.isToken && currency.rate && (
+                            <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
+                          )}
+                        </>
+                      )}
+                      {scoreObj[1] && (
+                        <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
+                          <FoundInOtherListMarker />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
 
-              {isTokenPinned && !simpleForm ? (
+              {isTokenPinned ? (
                 <span className="block w-full text-primary-text text-12 md:hidden">$0.00</span>
               ) : (
                 <span className="w-full ">
@@ -148,10 +144,8 @@ function TokenRow({
             </div>
 
             <div className="flex items-center gap-1">
-              {!simpleForm && (
-                <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
-              )}
-              {currency.isToken && !simpleForm ? (
+              <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
+              {currency.isToken ? (
                 <Tooltip
                   text={`Token belongs to ${currency.lists?.length || 1} token lists`}
                   renderTrigger={(ref, refProps) => {
@@ -182,33 +176,24 @@ function TokenRow({
               ) : (
                 <span className="block w-10" />
               )}
-              {!simpleForm && (
-                <IconButton
-                  iconName={isTokenPinned ? "pin-fill" : "pin"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (pinnedTokens[currency.chainId].length < 8 || isTokenPinned) {
-                      toggleToken(
-                        currency.isNative ? "native" : currency.address0,
-                        currency.chainId,
-                      );
-                    }
-                  }}
-                  active={isTokenPinned}
-                />
-              )}
+              <IconButton
+                iconName={isTokenPinned ? "pin-fill" : "pin"}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (pinnedTokens[currency.chainId].length < 8 || isTokenPinned) {
+                    toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
+                  }
+                }}
+                active={isTokenPinned}
+              />
             </div>
           </div>
 
           <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid min-h-4">
-            {(!isTokenPinned || simpleForm) && (
-              <span
-                className={clsxMerge("text-secondary-text ", simpleForm ? "text-14" : "text-12")}
-              >
-                {currency.symbol}
-              </span>
+            {!isTokenPinned && (
+              <span className={clsxMerge("text-secondary-text text-12")}>{currency.symbol}</span>
             )}
-            {erc20Balance && !simpleForm && currency.isNative && (
+            {erc20Balance && currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
                 <span className="text-secondary-text text-12">
@@ -216,7 +201,7 @@ function TokenRow({
                 </span>
               </div>
             )}
-            {erc20Balance && !simpleForm && !currency.isNative && (
+            {erc20Balance && !currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
                 <span className="text-secondary-text text-12">
@@ -224,7 +209,7 @@ function TokenRow({
                 </span>
               </div>
             )}
-            {erc223Balance && !simpleForm && !currency.isNative && (
+            {erc223Balance && !currency.isNative && (
               <div className="flex items-center gap-1">
                 <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
                 <span className="text-secondary-text text-12">
@@ -236,34 +221,32 @@ function TokenRow({
         </div>
       </div>
 
-      {!simpleForm && (
-        <div className="auto-cols-fr grid grid-flow-col gap-2 md:hidden mt-1">
-          {erc20Balance && currency.isNative && (
-            <div className="flex items-center gap-1">
-              <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
-              <span className="text-secondary-text text-12">
-                {formatFloat(erc20Balance?.formatted)} {currency.symbol}
-              </span>
-            </div>
-          )}
-          {erc20Balance && !currency.isNative && (
-            <div className="flex items-center gap-1">
-              <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
-              <span className="text-secondary-text text-12">
-                {formatFloat(erc20Balance?.formatted)} {currency.symbol}
-              </span>
-            </div>
-          )}
-          {erc223Balance && !currency.isNative && (
-            <div className="flex items-center gap-1">
-              <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
-              <span className="text-secondary-text text-12">
-                {formatFloat(erc223Balance?.formatted)} {currency.symbol}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="auto-cols-fr grid grid-flow-col gap-2 md:hidden mt-1">
+        {erc20Balance && currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc20Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+        {erc20Balance && !currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc20Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+        {erc223Balance && !currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc223Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+      </div>
     </button>
   );
 }
@@ -527,7 +510,6 @@ export default function PickTokenDialog({
                                 token.isToken ? token.address0 : `native-${token.wrapped.address0}`
                               }
                               currency={token}
-                              simpleForm={simpleForm}
                             />
                           );
                         })}
