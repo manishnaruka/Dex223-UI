@@ -78,9 +78,10 @@ export default function ExplorePoolPage({
         </div>
         <div className="bg-tertiary-bg rounded-[12px] p-4 lg:p-5">
           <div className="flex flex-col lg:flex-row gap-2 lg:items-center">
-            <div className="flex gap-2 lg:items-center">
+            <div className="flex gap-2 items-start lg:items-center">
               <TokensPair tokenA={pool.token0} tokenB={pool.token1} />
               <Badge
+                className="mt-1 md:mt-0"
                 variant={BadgeVariant.PERCENTAGE}
                 percentage={`${(FEE_AMOUNT_DETAIL as any)[pool.feeTier as any].label}%`}
               />
@@ -150,7 +151,7 @@ export default function ExplorePoolPage({
         </div>
 
         {/* Buttons line:  SWAP | Add liquidity */}
-        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 mt-2 lg:mt-4">
+        <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 mt-4 lg:mt-4">
           <Link href={`/swap?tokenA=${pool.token0.id}&tokenB=${pool.token1.id}`} className="w-full">
             <Button colorScheme={ButtonColor.LIGHT_GREEN} fullWidth>
               <span className="flex items-center gap-2">
@@ -173,7 +174,7 @@ export default function ExplorePoolPage({
         </div>
 
         {/* Last line:  TVL | 24H Volume | 24H Fees */}
-        <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-4 mt-4">
+        <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-3 mt-4">
           <div className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] p-4 w-full">
             <span className="text-secondary-text text-14 lg:text-16">{t("tvl_title")}</span>
             <span className="text-20 lg:text-24 font-medium">{`$${formatNumberKilos(pool.totalValueLockedUSD)}`}</span>

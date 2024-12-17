@@ -154,7 +154,7 @@ export const Balances = () => {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t("balances_search_placeholder")}
-            className="bg-primary-bg lg:w-[480px]"
+            className="h-10 md:h-12 bg-primary-bg lg:w-[480px]"
           />
         </div>
       </div>

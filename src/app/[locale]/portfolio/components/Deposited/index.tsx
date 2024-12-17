@@ -130,7 +130,7 @@ export const Deposited = () => {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder={t("balances_search_placeholder")}
-              className="bg-primary-bg lg:w-[480px] max-h-[40px] md:max-h-[48px]"
+              className="bg-primary-bg lg:w-[480px] max-h-10 md:max-h-12"
             />
           </div>
         )}

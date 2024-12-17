@@ -97,7 +97,7 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
           className="w-full md:w-auto h-8 md:h-auto"
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.EXTRA_SMALL}
-          disabled={isFormDisabled}
+          disabled={isFormDisabled || disabledGasSettings}
           onClick={() => setIsOpenedFee(true)}
         >
           Edit

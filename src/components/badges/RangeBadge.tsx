@@ -42,7 +42,7 @@ export default function RangeBadge({ status }: Props) {
   return (
     <div
       className={clsx(
-        "rounded-5 py-1 flex items-center gap-1 font-medium text-12 md:text-16",
+        "rounded-5 py-1 flex items-center gap-1 font-medium text-12 md:text-16 text-nowrap",
         textColorMap[status],
       )}
     >
