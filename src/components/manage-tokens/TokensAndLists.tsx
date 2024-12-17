@@ -207,7 +207,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               <ButtonTooltip text={t("import_token_tooltip")} />
             </div>
 
-            <div className="flex justify-between items-center my-3 px-4 md:px-10">
+            <div className="flex justify-between items-center my-3 px-4 md:px-10 text-secondary-text">
               <div>
                 {t("total")}{" "}
                 {onlyCustom ? (

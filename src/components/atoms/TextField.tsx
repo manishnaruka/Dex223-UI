@@ -2,9 +2,8 @@ import clsx from "clsx";
 import { InputHTMLAttributes, ReactNode } from "react";
 import { NumericFormat } from "react-number-format";
 
-import Input, { SearchInput } from "@/components/atoms/Input";
+import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
 import Tooltip from "@/components/atoms/Tooltip";
-import { IIFE } from "@/functions/iife";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -15,6 +14,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   internalTextClassName?: string;
   isError?: boolean;
   isWarning?: boolean;
+  inputSize?: InputSize;
 } & (
     | {
         error?: boolean | string;
@@ -35,12 +35,22 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
       }
   );
 
-export function InputLabel({ label, tooltipText, ...props }: Omit<Props, "helperText">) {
+const inputLabelSizeMap: Record<InputSize, string> = {
+  [InputSize.DEFAULT]: "text-14",
+  [InputSize.LARGE]: "text-16",
+};
+export function InputLabel({
+  label,
+  tooltipText,
+  inputSize = InputSize.DEFAULT,
+  ...props
+}: Omit<Props & { inputSize?: InputSize }, "helperText">) {
   return (
     <p
       className={clsx(
-        "text-14 font-bold mb-1 flex items-center gap-1 text-secondary-text",
+        "font-bold mb-1 flex items-center gap-1 text-secondary-text",
         props.disabled && "opacity-50",
+        inputLabelSizeMap[inputSize],
       )}
     >
       {label}
@@ -78,11 +88,12 @@ export default function TextField({
   internalText,
   isError = false,
   isWarning = false,
+  inputSize = InputSize.LARGE,
   ...props
 }: Props) {
   return (
     <div>
-      <InputLabel label={label} tooltipText={tooltipText} />
+      <InputLabel inputSize={inputSize} label={label} tooltipText={tooltipText} />
       {variant === "default" ? (
         <div className="relative">
           {props.isNumeric ? (
@@ -95,6 +106,7 @@ export default function TextField({
                   isError={Boolean(error) || isError}
                   isWarning={Boolean(warning) || isWarning}
                   customInput={Input}
+                  inputSize={inputSize}
                   {...rest}
                 />
               );

@@ -57,75 +57,87 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
   switch (title.template) {
     case RecentTransactionTitleTemplate.APPROVE:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="check" />
-          <span className="text-16 font-medium block mr-1">
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="check" />
+
+          <span className="font-medium inline text-16">
             {t("approve_title", { symbol: title.symbol })}
           </span>
-          {/*<Badge color="green" text="ERC-20" />*/}
-        </div>
+        </span>
       );
     case RecentTransactionTitleTemplate.LIST_SINGLE:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="listing" />
-          <span className="text-16 font-medium block mr-1">List token</span>
-        </div>
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="listing" />
+
+          <span className="font-medium inline text-16">List token</span>
+        </span>
       );
     case RecentTransactionTitleTemplate.LIST_DOUBLE:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="listing" />
-          <span className="text-16 font-medium block mr-1">List tokens</span>
-        </div>
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="listing" />
+
+          <span className="font-medium inline text-16">List tokens</span>
+        </span>
       );
     case RecentTransactionTitleTemplate.DEPOSIT:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="deposit" />
-          <span className="text-16 font-medium block mr-1">
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="deposit" />
+
+          <span className="font-medium inline text-16">
             {t("deposit_title", { symbol: title.symbol })}
           </span>
-          {/*<Badge color="green" text="ERC-223" />*/}
-        </div>
+        </span>
       );
     case RecentTransactionTitleTemplate.WITHDRAW:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="withdraw" />
-          <span className="text-16 font-medium block mr-1">
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="withdraw" />
+
+          <span className="font-medium inline text-16">
             {t("withdraw_title", { symbol: title.symbol })}
           </span>
-          {/*<Badge color="green" text="ERC-223" />*/}
-        </div>
+        </span>
       );
     case RecentTransactionTitleTemplate.SWAP:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="swap" />
-          <span className="text-16 font-medium">{t("swap_title")}</span>
-        </div>
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="swap" />
+
+          <span className="font-medium inline-block text-16 align-top">{t("swap_title")}</span>
+        </span>
       );
     case RecentTransactionTitleTemplate.COLLECT:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="collect" />
-          <span className="text-16 font-medium">{t("collect_fees_title")}</span>
-        </div>
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="collect" />
+
+          <span className="font-medium inline-block text-16 align-top">
+            {t("collect_fees_title")}
+          </span>
+        </span>
       );
     case RecentTransactionTitleTemplate.REMOVE:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="minus" />
-          <span className="text-16 font-medium">{t("remove_liquidity_title")}</span>
-        </div>
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="minus" />
+
+          <span className="font-medium inline-block text-16 align-top">
+            {t("remove_liquidity_title")}
+          </span>
+        </span>
       );
     case RecentTransactionTitleTemplate.ADD:
       return (
-        <div className="flex items-center gap-1">
-          <Svg className="text-tertiary-text" iconName="add" />
-          <span className="text-16 font-medium">{t("add_liquidity_title")}</span>
-        </div>
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="add" />
+
+          <span className="font-medium inline-block text-16 align-top">
+            {t("add_liquidity_title")}
+          </span>
+        </span>
       );
   }
 }
@@ -243,7 +255,7 @@ export default function RecentTransaction({
     <div
       key={transaction.hash}
       className={clsxMerge(
-        "flex justify-between w-full bg-tertiary-bg rounded-3 p-5 items-center @container flex-wrap",
+        "flex justify-between w-full bg-tertiary-bg rounded-3 p-4 md:p-5 items-center @container flex-wrap",
         view === "transparent" && "bg-transparent rounded-0 p-0",
       )}
     >
@@ -253,15 +265,15 @@ export default function RecentTransaction({
           isWaitingForProceeding && "flex flex-col sm:grid sm:grid-cols-[1fr_auto]",
         )}
       >
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2">
           <RecentTransactionLogo title={transaction.title} />
-          <div className="grid">
+          <div className="flex flex-col mt-0.5">
             <RecentTransactionTitle title={transaction.title} />
             <RecentTransactionSubTitle title={transaction.title} />
           </div>
         </div>
 
-        <div className="flex @[420px]:items-center gap-3">
+        <div className="flex gap-3">
           {!isWaitingForProceeding ? (
             <>
               {transaction.replacement === "cancelled" && (
@@ -271,7 +283,7 @@ export default function RecentTransaction({
                 </span>
               )}
               <a
-                className="relative -top-2 @[420px]:static @[420px]:top-0"
+                className="relative -top-2"
                 target="_blank"
                 href={getExplorerLink(
                   ExplorerLinkType.TRANSACTION,

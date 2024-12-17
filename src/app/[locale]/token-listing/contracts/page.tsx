@@ -136,6 +136,7 @@ export default function TokenListingPage() {
                     <div className="flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-3 text-14">
                       <span className="text-secondary-text">Contract link</span>
                       <ExternalTextLink
+                        textClassname="w-[13ch]"
                         onClick={(e) => e.stopPropagation()}
                         text={truncateMiddle(autoListing.id)}
                         href={getExplorerLink(
@@ -245,6 +246,7 @@ export default function TokenListingPage() {
                       </div>
                       <div className=" h-[56px] z-10 relative flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
                         <ExternalTextLink
+                          textClassname="w-[13ch]"
                           onClick={(e) => e.stopPropagation()}
                           color="green"
                           text={truncateMiddle(autoListing.id)}

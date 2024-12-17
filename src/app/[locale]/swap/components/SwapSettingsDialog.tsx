@@ -21,7 +21,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import TextButton from "@/components/buttons/TextButton";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
@@ -116,7 +116,7 @@ function getTitle(slippageType: SlippageType, value: string, t: any) {
   }
 }
 
-export default function SwapSettingsDialog() {
+function SwapSettingsDialogContent() {
   const { isOpen, setIsOpen } = useTransactionSettingsDialogStore();
 
   const t = useTranslations("Swap");
@@ -130,9 +130,11 @@ export default function SwapSettingsDialog() {
     setSlippageType: _setSlippageType,
   } = useSwapSettingsStore();
 
-  const [customSlippage, setCustomSlippage] = useState("");
+  const [customSlippage, setCustomSlippage] = useState(
+    _slippageType === SlippageType.CUSTOM ? slippage.toString() : "",
+  );
   const [customDeadline, setCustomDeadline] = useState(deadline.toString());
-  const [slippageType, setSlippageType] = useState<SlippageType>(SlippageType.MEDIUM);
+  const [slippageType, setSlippageType] = useState<SlippageType>(_slippageType);
 
   const handleSave = useCallback(() => {
     setDeadline(+customDeadline);
@@ -226,117 +228,123 @@ export default function SwapSettingsDialog() {
   }, [deadlineChanged, deadlineError, slippageChanged, slippageError]);
 
   return (
+    <div className="px-4 md:px-10 pb-4 md:pb-5.5 w-full md:w-[600px]">
+      <div className="flex justify-between items-center mb-1">
+        <div className="flex gap-1 items-center">
+          <h3 className="font-bold text-16">{t("maximum_slippage")}</h3>
+          <Tooltip text={t("slippage_tooltip")} />
+        </div>
+        <span className="text-secondary-text">{getTitle(slippageType, customSlippage, t)}</span>
+      </div>
+      <div className="flex gap-3 md:gap-5">
+        <span>
+          <SettingsButton
+            onClick={() => {
+              setSlippageType(SlippageType.AUTO);
+              setCustomSlippage("0.5");
+            }}
+            isActive={slippageType === SlippageType.AUTO}
+            text={t("auto")}
+            className="w-[58px] md:w-full"
+          />
+        </span>
+        <SettingsButtons>
+          {defaultTypes.map((sl) => {
+            return (
+              <SettingsButton
+                key={sl}
+                onClick={() => setSlippageType(sl)}
+                isActive={slippageType === sl}
+                text={`${values[sl]}%`}
+              />
+            );
+          })}
+          <SettingsInput
+            onFocus={() => setSlippageType(SlippageType.CUSTOM)}
+            placeholder={t("custom")}
+            value={customSlippage}
+            onChange={(e) => setCustomSlippage(e.target.value)}
+            isActive={slippageType === SlippageType.CUSTOM}
+            isError={+customSlippage > 50 && slippageType === SlippageType.CUSTOM}
+          />
+        </SettingsButtons>
+      </div>
+      {+customSlippage > 1 && +customSlippage < 50 && slippageType === SlippageType.CUSTOM && (
+        <div className="mt-3">
+          <Alert
+            type="warning"
+            text="Slippage tolerance above 1% could lead to an unfavorable rate. It’s recommended to use the auto setting."
+          />
+        </div>
+      )}
+      {+customSlippage > 50 && slippageType === SlippageType.CUSTOM && (
+        <div className="mt-3">
+          <Alert type="error" text="Max slippage cannot exceed 50%" />
+        </div>
+      )}
+      {+customSlippage < 0.05 &&
+        Boolean(+customSlippage) &&
+        slippageType === SlippageType.CUSTOM && (
+          <div className="mt-3">
+            <Alert type="warning" text="Slippage below 0.05% may result in a failed transaction" />
+          </div>
+        )}
+
+      <div className="mt-5">
+        <div className="flex justify-between items-center">
+          <p className={clsx("text-16 font-bold mb-1 flex items-center gap-1")}>
+            {t("transaction_deadline")}
+            <Tooltip iconSize={24} text={t("deadline_tooltip")} />
+          </p>
+          {+customDeadline !== 20 && (
+            <TextButton className="pr-0" endIcon="reset" onClick={() => setCustomDeadline("20")}>
+              {t("set_default")}
+            </TextButton>
+          )}
+        </div>
+
+        <div className="relative">
+          <NumericFormat
+            allowedDecimalSeparators={[","]}
+            className="pr-[100px] mb-0"
+            value={customDeadline}
+            onValueChange={(values) => {
+              setCustomDeadline(values.value);
+            }}
+            isError={+customDeadline > 4000 || +customDeadline < 1}
+            allowNegative={false}
+            customInput={Input}
+            inputMode="decimal"
+          />
+          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-secondary-text">
+            {t("minutes")}
+          </span>
+        </div>
+        <div className="h-3 text-12 text-red-light">{deadlineError && deadlineError}</div>
+
+        <div className="text-12 mt-0.5 h-4" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} onClick={handleCancel}>
+          {t("cancel")}
+        </Button>
+        <Button disabled={isButtonDisabled} fullWidth onClick={handleSave}>
+          {t("save_settings")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export default function SwapSettingsDialog() {
+  const { isOpen, setIsOpen } = useTransactionSettingsDialogStore();
+  const t = useTranslations("Swap");
+
+  return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title={t("settings")} />
-      <div className="px-4 md:px-10 pb-4 md:pb-5.5 w-full md:w-[600px]">
-        <div className="flex justify-between items-center mb-1">
-          <div className="flex gap-1 items-center">
-            <h3 className="font-bold text-16">{t("maximum_slippage")}</h3>
-            <Tooltip text={t("slippage_tooltip")} />
-          </div>
-          <span className="text-secondary-text">{getTitle(slippageType, customSlippage, t)}</span>
-        </div>
-        <div className="flex gap-3 md:gap-5">
-          <span>
-            <SettingsButton
-              onClick={() => {
-                setSlippageType(SlippageType.AUTO);
-                setCustomSlippage("0.5");
-              }}
-              isActive={slippageType === SlippageType.AUTO}
-              text={t("auto")}
-              className="w-[58px] md:w-full"
-            />
-          </span>
-          <SettingsButtons>
-            {defaultTypes.map((sl) => {
-              return (
-                <SettingsButton
-                  key={sl}
-                  onClick={() => setSlippageType(sl)}
-                  isActive={slippageType === sl}
-                  text={`${values[sl]}%`}
-                />
-              );
-            })}
-            <SettingsInput
-              onFocus={() => setSlippageType(SlippageType.CUSTOM)}
-              placeholder={t("custom")}
-              value={customSlippage}
-              onChange={(e) => setCustomSlippage(e.target.value)}
-              isActive={slippageType === SlippageType.CUSTOM}
-              isError={+customSlippage > 50 && slippageType === SlippageType.CUSTOM}
-            />
-          </SettingsButtons>
-        </div>
-        {+customSlippage > 1 && +customSlippage < 50 && slippageType === SlippageType.CUSTOM && (
-          <div className="mt-3">
-            <Alert
-              type="warning"
-              text="Slippage tolerance above 1% could lead to an unfavorable rate. It’s recommended to use the auto setting."
-            />
-          </div>
-        )}
-        {+customSlippage > 50 && slippageType === SlippageType.CUSTOM && (
-          <div className="mt-3">
-            <Alert type="error" text="Max slippage cannot exceed 50%" />
-          </div>
-        )}
-        {+customSlippage < 0.05 &&
-          Boolean(+customSlippage) &&
-          slippageType === SlippageType.CUSTOM && (
-            <div className="mt-3">
-              <Alert
-                type="warning"
-                text="Slippage below 0.05% may result in a failed transaction"
-              />
-            </div>
-          )}
-
-        <div className="mt-5">
-          <div className="flex justify-between items-center">
-            <p className={clsx("text-16 font-bold mb-1 flex items-center gap-1")}>
-              {t("transaction_deadline")}
-              <Tooltip iconSize={24} text={t("deadline_tooltip")} />
-            </p>
-            {+customDeadline !== 20 && (
-              <TextButton className="pr-0" endIcon="reset" onClick={() => setCustomDeadline("20")}>
-                {t("set_default")}
-              </TextButton>
-            )}
-          </div>
-
-          <div className="relative">
-            <NumericFormat
-              allowedDecimalSeparators={[","]}
-              className="pr-[100px] mb-0"
-              value={customDeadline}
-              onValueChange={(values) => {
-                setCustomDeadline(values.value);
-              }}
-              isError={+customDeadline > 4000 || +customDeadline < 1}
-              allowNegative={false}
-              customInput={Input}
-              inputMode="decimal"
-            />
-            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-secondary-text">
-              {t("minutes")}
-            </span>
-          </div>
-          <div className="h-3 text-12 text-red-light">{deadlineError && deadlineError}</div>
-
-          <div className="text-12 mt-0.5 h-4" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} onClick={handleCancel}>
-            {t("cancel")}
-          </Button>
-          <Button disabled={isButtonDisabled} fullWidth onClick={handleSave}>
-            {t("save_settings")}
-          </Button>
-        </div>
-      </div>
+      <SwapSettingsDialogContent />
     </DrawerDialog>
   );
 }

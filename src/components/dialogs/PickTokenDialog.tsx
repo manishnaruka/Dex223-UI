@@ -90,7 +90,7 @@ function TokenRow({
     <button
       role="button"
       onClick={() => handlePick(currency)}
-      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:px-10 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
+      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:pl-10 md:pr-4 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
     >
       <div className="grid grid-cols-[40px_1fr] gap-2 w-full">
         <div className="flex items-center md:pt-3">
@@ -190,8 +190,8 @@ function TokenRow({
           </div>
 
           <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid min-h-4">
-            {!isTokenPinned && (
-              <span className={clsxMerge("text-secondary-text text-12")}>{currency.symbol}</span>
+            {(!isTokenPinned || (!erc20Balance && !erc223Balance)) && (
+              <span className="text-secondary-text text-12">{currency.symbol}</span>
             )}
             {erc20Balance && currency.isNative && (
               <div className="flex items-center gap-1">
@@ -338,7 +338,7 @@ export default function PickTokenDialog({
   }, [chainId, pinnedTokensAddresses, tokens]);
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  const [isEditActivated, setEditActivated] = useState<boolean>(true);
+  const [isEditActivated, setEditActivated] = useState<boolean>(false);
   const { isOpen: isManageOpened, setIsOpen: setManageOpened } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
@@ -427,7 +427,7 @@ export default function PickTokenDialog({
                                 isEditActivated
                                   ? "bg-transparent border-secondary-border"
                                   : "bg-tertiary-bg border-transparent",
-                                "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                                "items-center border justify-center px-4 duration-200 h-10 rounded-2  flex gap-2",
                                 !isMobile && isEditActivated && "hocus:bg-transparent",
                                 !isMobile && !isEditActivated && "hocus:bg-green-bg",
                               )}
@@ -477,42 +477,26 @@ export default function PickTokenDialog({
                     )}
                   </div>
                 </div>
-                <div className="flex-grow flex min-h-0 overflow-hidden md:pb-5">
+                <div className="flex-grow flex min-h-0">
                   {Boolean(filteredTokens.length) && (
                     <ScrollbarContainer height="full">
                       <div
                         className={clsx(
-                          "flex flex-col gap-0 pl-2 md:pl-0 pr-3 md:pr-[11px] pb-2",
+                          "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2",
                           !!pinnedTokens.length && !simpleForm && "pt-3",
-                          simpleForm ? "pl-2 pr-3" : "pl-4 pr-4",
                         )}
                       >
-                        {filteredTokens.map((token) => {
-                          if (simpleForm)
-                            return (
-                              <TokenRowSimple
-                                setTokenForPortfolio={setTokenForPortfolio}
-                                handlePick={handlePick}
-                                key={
-                                  token.isToken
-                                    ? token.address0
-                                    : `native-${token.wrapped.address0}`
-                                }
-                                currency={token}
-                                isMobile={isMobile}
-                              />
-                            );
-                          return (
-                            <TokenRow
-                              setTokenForPortfolio={setTokenForPortfolio}
-                              handlePick={handlePick}
-                              key={
-                                token.isToken ? token.address0 : `native-${token.wrapped.address0}`
-                              }
-                              currency={token}
-                            />
-                          );
-                        })}
+                        {filteredTokens.map((token) => (
+                          <TokenRow
+                            setTokenForPortfolio={setTokenForPortfolio}
+                            handlePick={handlePick}
+                            key={
+                              token.isToken ? token.address0 : `native-${token.wrapped.address0}`
+                            }
+                            currency={token}
+                            simpleForm={simpleForm}
+                          />
+                        ))}
                       </div>
                     </ScrollbarContainer>
                   )}

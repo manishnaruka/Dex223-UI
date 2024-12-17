@@ -26,7 +26,7 @@ export default function TokenAddressWithStandard({
             onClick={(e) => e.stopPropagation()}
             ref={ref.setReference}
             {...refProps}
-            className="border rounded-l-2 border-secondary-border bg-quaternary-bg px-2 flex items-center text-secondary-text cursor-pointer"
+            className="whitespace-nowrap border rounded-l-2 border-secondary-border bg-quaternary-bg px-2 flex items-center text-secondary-text cursor-pointer"
           >
             {standard}
           </div>

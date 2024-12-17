@@ -85,7 +85,6 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
         <div
           className={clsx("absolute right-1 flex items-center justify-center h-full w-10 top-0")}
         >
-          {/*{!hasSearchWallet && (*/}
           <IconButton
             variant={IconButtonVariant.ADD}
             buttonSize={IconButtonSize.REGULAR}
@@ -93,7 +92,6 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
             disabled={!!error || !tokenAddressToImport || hasSearchWallet}
             handleAdd={handleAddWallet}
           />
-          {/*)}*/}
         </div>
       </div>
       {error && <p className="text-12 text-red-light mt-1">{error}</p>}

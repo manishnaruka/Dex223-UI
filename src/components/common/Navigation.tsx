@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
 import NavigationItem, { NavigationItemWithSubmenu } from "@/components/atoms/NavigationItem";
@@ -149,15 +149,11 @@ function NavigationMoreDropdown() {
 
   const isSmallScreen = useMediaQuery({ query: "(max-width: 1280px)" });
 
-  useMemo(() => {
+  useEffect(() => {
     if (isSmallScreen) {
       setSubmenuOpened(false);
     }
   }, [isSmallScreen]);
-
-  if (isSmallScreen) {
-    return;
-  }
 
   return (
     <Popover

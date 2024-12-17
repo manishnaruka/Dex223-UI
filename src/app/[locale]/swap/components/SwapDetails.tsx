@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 
+import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import { TokenTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapDetailsStateStore } from "@/app/[locale]/swap/stores/useSwapDetailsStateStore";
@@ -16,25 +17,6 @@ import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 
-function SwapDetailsRow({
-  title,
-  value,
-  tooltipText,
-}: {
-  title: string;
-  value: string;
-  tooltipText: string;
-}) {
-  return (
-    <div className="flex justify-between items-center">
-      <div className="flex gap-2 items-center text-secondary-text">
-        <Tooltip iconSize={20} text={tooltipText} />
-        {title}
-      </div>
-      <span>{value}</span>
-    </div>
-  );
-}
 export default function SwapDetails({
   trade,
   tokenA,
@@ -67,7 +49,7 @@ export default function SwapDetails({
       >
         <div
           className={clsx(
-            "min-h-10 flex justify-between duration-200 px-5 text-secondary-text py-2 gap-2",
+            "min-h-12 flex justify-between duration-200 px-5 text-secondary-text py-3 gap-2",
             !isDetailsExpanded ? "hocus:bg-green-bg rounded-3" : "rounded-t-3",
           )}
           role="button"
@@ -97,7 +79,16 @@ export default function SwapDetails({
           </button>
 
           <div className="flex gap-3">
-            <div className="max-sm:hidden text-14 flex items-center">{t("swap_details")}</div>
+            {/*{!isDetailsExpanded && (*/}
+            <div
+              className={clsx(
+                "max-sm:hidden text-14 flex items-center duration-200",
+                isDetailsExpanded && "opacity-0",
+              )}
+            >
+              {t("swap_details")}
+            </div>
+            {/*)}*/}
             <span>
               <Svg
                 className={clsx("duration-200", isDetailsExpanded && "-rotate-180")}

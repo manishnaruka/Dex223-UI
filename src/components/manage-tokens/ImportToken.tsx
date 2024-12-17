@@ -8,6 +8,7 @@ import Checkbox from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import { InputSize } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -213,6 +214,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
       <div className="w-full md:w-[600px] pb-4 px-4 md:px-10 md:pb-10 min-h-[580px] flex flex-col">
         <TextField
           label={t("import_token")}
+          size={InputSize.LARGE}
           value={tokenAddressToImport}
           onChange={(e) => setTokenAddressToImport(e.target.value)}
           placeholder={t("token_address_placeholder")}
