@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 
 import Svg from "@/components/atoms/Svg";
-import { IconName } from "@/config/types/IconName";
 
 export enum PositionRangeStatus {
   IN_RANGE = "in-range",

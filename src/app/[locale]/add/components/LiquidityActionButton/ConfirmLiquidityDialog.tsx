@@ -349,11 +349,11 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
     return null;
   }
 
-  const aSymbol = `${tokenA.symbol} justify-betweenendj lkjsf klj`;
-  const bSymbol = `${tokenB.symbol} justify-betweenendj lkjsf klj`;
+  const aSymbol = `${tokenA.symbol}`;
+  const bSymbol = `${tokenB.symbol}`;
 
   const isLongName = aSymbol.length > 20 || bSymbol.length > 20;
-  const doubleName = `${tokenA.symbol} / ${tokenB.symbol} justify-betweenendj lkjsf klj`;
+  const doubleName = `${tokenA.symbol} / ${tokenB.symbol}`;
   const isLongDoubleName = doubleName.length > 25;
 
   return (

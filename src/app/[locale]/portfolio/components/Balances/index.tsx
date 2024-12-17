@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { formatUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";

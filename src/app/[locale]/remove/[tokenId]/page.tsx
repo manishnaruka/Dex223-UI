@@ -30,6 +30,7 @@ import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import { clsxMerge } from "@/functions/clsxMerge";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import {
@@ -56,7 +57,6 @@ import {
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
 import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
-import { clsxMerge } from "@/functions/clsxMerge";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
@@ -424,7 +424,7 @@ export default function DecreaseLiquidityPage({
                 </div>
               </div>
               <div className={clsxMerge("flex gap-x-2 md:mt-1 md:pl-3 md:flex-row")}>
-                <span className="text-16 lg:text-18 items-center font-bold text-secondary-text">{`${tokenA.symbol} and ${tokenB.symbol} klsfdj klfdjl sadkjlposd posd kjlkj `}</span>
+                <span className="text-16 lg:text-18 items-center font-bold text-secondary-text">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
               </div>
             </div>
             <div className="flex items-start gap-2 mt-1 justify-end">
