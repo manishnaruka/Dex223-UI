@@ -38,7 +38,7 @@ export default function Preloader({
       );
     case "linear":
       return (
-        <div className="flex items-center gap-[5px]">
+        <div className="flex items-center gap-[5px]" style={{ height: size }}>
           <span
             className={clsx(
               "block rounded-full animate-flicker1 bg-green",

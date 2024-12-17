@@ -266,7 +266,7 @@ export default function AutoListingContractDetails({
         </div>
         <div className="my-2 xl:my-10 px-4">
           <div className="flex justify-between mb-2 xl:mb-5">
-            <h1 className="text-24 xl:text-40">Listing contract details</h1>
+            <h1 className="text-24 xl:text-40 font-medium">Listing contract details</h1>
             <Link
               className="hidden xl:block"
               href={`/token-listing/add/?autoListingContract=${params.address}&dest=${encodeURIComponent(`/token-listing/contracts/${params.address}`)}`}

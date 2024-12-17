@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useFormik } from "formik";
+import debounce from "lodash.debounce";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, formatGwei, parseGwei } from "viem";
 
@@ -511,7 +512,7 @@ function NetworkFeeDialogContent({
         })}
       </div>
 
-      <div className="px-4 pb-4 md:px-10 md:pb-10 pt-4 grid grid-cols-2 gap-3">
+      <div className="px-4 mb-4 md:px-10 md:mb-10 pt-4 grid grid-cols-2 gap-3">
         <Button
           type="button"
           fullWidth
@@ -565,14 +566,23 @@ export default function NetworkFeeConfigDialog({
       const viewportHeight = window.innerHeight;
 
       // Set container height to 100vh only if content exceeds the viewport height
-      if (contentHeight > viewportHeight) {
-        setContainerHeight("100vh");
+      if (contentHeight > viewportHeight && window.innerWidth < 768) {
+        setContainerHeight("100dvh");
       } else {
         setContainerHeight("auto");
       }
     };
 
     adjustHeight();
+    const debouncedAdjustHeight = debounce(adjustHeight, 300);
+
+    window.addEventListener("resize", debouncedAdjustHeight);
+
+    // Cleanup function to remove the listener and cancel debounce
+    return () => {
+      window.removeEventListener("resize", debouncedAdjustHeight);
+      debouncedAdjustHeight.cancel(); // Cancel any pending invocations of the debounced function
+    };
   }, [isAdvanced]);
 
   return (

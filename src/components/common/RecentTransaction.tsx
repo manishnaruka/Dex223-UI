@@ -277,7 +277,7 @@ export default function RecentTransaction({
           {!isWaitingForProceeding ? (
             <>
               {transaction.replacement === "cancelled" && (
-                <span className="@[420px]:flex hidden items-center gap-1 text-red-light">
+                <span className="@[420px]:flex hidden gap-1 text-red-light">
                   Cancelled
                   <Svg iconName="cancel" />
                 </span>
@@ -301,8 +301,8 @@ export default function RecentTransaction({
               </span>
             </>
           ) : (
-            <div className="flex items-center gap-2 justify-end">
-              <Preloader type="linear" />
+            <div className="flex gap-2 justify-end">
+              <Preloader size={20} type="linear" />
               <span className="text-secondary-text text-14">Proceed in your wallet</span>
             </div>
           )}
