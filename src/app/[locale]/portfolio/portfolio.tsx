@@ -100,7 +100,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
 };
 
 const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
-  const { searchValue, setSearchValue, errorSearch } = useActiveAddresses();
+  const { searchValue, setSearchValue } = useActiveAddresses();
 
   const t = useTranslations("Portfolio");
 
@@ -217,7 +217,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   }, [content, wallets.length]);
 
   return (
-    <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
+    <div className="bg-primary-bg  lg:min-w-[450px]">
       <DialogHeader
         className={
           content === "add" || content === "manage"
@@ -516,7 +516,7 @@ const ManageWallets = () => {
           placement={"bottom-start"}
           trigger={trigger}
         >
-          <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popover shadow-black/70">
+          <div className="bg-primary-bg rounded-5 border border-secondary-border overflow-hidden shadow-popover shadow-black/70">
             <ManageWalletsContent setIsOpened={setIsOpened} />
           </div>
         </Popover>

@@ -10,7 +10,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import clsx from "clsx";
-import { PropsWithChildren, useEffect, useId, useState } from "react";
+import { PropsWithChildren, useId } from "react";
 
 interface Props {
   isOpen: boolean;
@@ -83,7 +83,7 @@ export default function Drawer({
           <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
             <div
               className={clsx(
-                "drawer-container bg-primary-bg",
+                "drawer-container bg-primary-bg rounded-t-5",
                 placement === "left" && "h-full",
                 placement === "bottom" && "w-full max-h-[100vh]",
               )}

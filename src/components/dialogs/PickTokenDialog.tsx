@@ -339,7 +339,7 @@ export default function PickTokenDialog({
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
   const [isEditActivated, setEditActivated] = useState<boolean>(false);
-  const { isOpen: isManageOpened, setIsOpen: setManageOpened } = useManageTokensDialogStore();
+  const { setIsOpen: setManageOpened } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
     setIsOpen(false);

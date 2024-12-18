@@ -193,7 +193,7 @@ export const RevokeDialog = () => {
               </>
             )}
 
-            <div style={{ margin: "12px 0" }}>
+            <div className="mt-3">
               <RemoveLiquidityGasSettings
                 gasPriceOption={gasPriceOption}
                 gasPriceSettings={gasPriceSettings}
@@ -211,7 +211,7 @@ export const RevokeDialog = () => {
               />
             </div>
 
-            <div style={{ margin: "24px 0" }}>
+            <div className="mb-4 mt-4">
               {isError ? (
                 <Button fullWidth disabled>
                   <span className="flex items-center gap-2">Enter correct values</span>

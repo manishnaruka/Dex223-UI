@@ -32,7 +32,7 @@ export default function Popover({
   customOffset,
   customStyles = {},
 }: PropsWithChildren<Props>) {
-  const { refs, floatingStyles, context, strategy, x, y } = useFloating({
+  const { refs, floatingStyles, context } = useFloating({
     open: isOpened,
     onOpenChange: setIsOpened,
     middleware: [

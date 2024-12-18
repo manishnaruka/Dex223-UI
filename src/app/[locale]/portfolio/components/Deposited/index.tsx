@@ -87,7 +87,7 @@ export const Deposited = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:py-3 lg:px-5 py-2.5  lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 md:py-3 lg:px-5 py-2.5  lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
             <div className="flex items-center gap-1 z-10">
               <span className="text-14 lg:text-16 text-secondary-text">Approved</span>
