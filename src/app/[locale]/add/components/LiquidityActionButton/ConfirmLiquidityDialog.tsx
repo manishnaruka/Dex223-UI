@@ -13,7 +13,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { clsxMerge } from "@/functions/clsxMerge";
@@ -188,7 +188,7 @@ const ApproveDialog = () => {
         }}
         title={`${t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)} ${t("approve_transaction_modal_title")}`}
       />
-      <div className="w-full md:w-[570px] px-4 md:px-10 md:pb-10 pb-4 mx-auto">
+      <div className="w-full md:w-[570px] px-4 md:px-10 mx-auto">
         {transactionItems.map(({ transaction, standard, token }, index) => (
           <TransactionItem
             key={`${transaction?.token.symbol}_${standard}`}
@@ -216,43 +216,52 @@ const ApproveDialog = () => {
             }}
           />
         ))}
-        <div className="w-full h-[2px] bg-tertiary-bg mb-5" /> {/* Line above */}
+      </div>
+
+      {/* Line above */}
+      <div className="w-full md:w-[570px] md:px-10 md:pt-1 mx-auto">
+        <div className="w-full h-[2px] bg-tertiary-bg mb-4 md:mb-5" />
+      </div>
+
+      {/* Gas & Button block */}
+      <div className="w-full md:w-[570px] px-4 md:px-10 md:pb-10 pb-4 mx-auto">
         {approveTotalGasLimit > 0 ? (
-          <div className="flex items-center gap-2 px-5 py-2 bg-tertiary-bg rounded-3 mb-5 flex-nowrap">
-            <div className="flex flex-grow gap-8 md:justify-start w-full">
-              <div className="flex flex-col min-w-0">
-                <div className="text-secondary-text flex items-center gap-1 text-14">
+          <div className="flex items-center gap-2 px-5 py-2 bg-tertiary-bg rounded-3 mb-2 md:mb-5 flex-nowrap">
+            <div className="flex w-full  gap-2 md:gap-6 justify-between md:justify-center md:items-center">
+              <div className="flex flex-col">
+                <div className="text-tertiary-text flex items-center gap-1 text-12 md:text-14">
                   {t("gas_price")}
                 </div>
-                <span className="text-secondary-text text-16 truncate">
+                <span className="text-tertiary-text text-12 md:text-16">
                   {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
                 </span>
               </div>
-              <div className="flex flex-col min-w-0">
-                <div className="text-secondary-text text-14">{t("total_network_fee")}</div>
-                <span className="truncate">
-                  {`${gasPrice && approveTotalGasLimit ? formatFloat(formatEther(gasPrice * approveTotalGasLimit)) : ""} ${chainSymbol}`}
+
+              <div className="flex flex-col">
+                <div className="text-tertiary-text text-12 md:text-14">
+                  {t("total_network_fee")}
+                </div>
+                <span className="text-12 md:text-16">{`${gasPrice && approveTotalGasLimit ? formatFloat(formatEther(gasPrice * approveTotalGasLimit)) : ""} ${chainSymbol}`}</span>
+              </div>
+              <div className="flex-shrink-0 w-auto md:ml-auto">
+                <span className="flex items-center justify-center px-4 py-[6px] md:pt-[1px] md:pb-[3px] md:px-2 text-14 md:text-12 rounded-20 font-medium md:font-500 text-tertiary-text border border-secondary-border">
+                  {tSwap(gasOptionTitle[gasPriceOption])}
                 </span>
               </div>
             </div>
-
-            <div className="flex-shrink-0 w-auto">
-              <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
-                {tSwap(gasOptionTitle[gasPriceOption])}
-              </span>
-            </div>
           </div>
         ) : null}
+
         {isFormInvalid ? (
           <Button fullWidth disabled>
             <span className="flex items-center gap-2">{t("enter_correct_values")}</span>
           </Button>
         ) : isPending ? (
-          <Button fullWidth disabled>
+          <div className="flex justify-center items-center w-full bg-tertiary-bg opacity-50 h-[48px] rounded-2">
             <span className="flex items-center gap-2">
               <Preloader size={20} color="green" type="linear" />
             </span>
-          </Button>
+          </div>
         ) : isLoading ? (
           <Button fullWidth isLoading>
             {t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)}
@@ -581,11 +590,11 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
             </span>
           </Button>
         ) : AddLiquidityStatus.MINT_PENDING === status ? (
-          <Button fullWidth disabled className="bg-tertiary-bg opacity-50">
+          <div className="flex justify-center items-center w-full bg-tertiary-bg opacity-50 h-[48px] rounded-2">
             <span className="flex items-center gap-2">
               <Preloader size={20} color="green" type="linear" />
             </span>
-          </Button>
+          </div>
         ) : (
           <Button
             onClick={() => {

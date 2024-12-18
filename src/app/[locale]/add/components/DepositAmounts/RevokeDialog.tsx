@@ -114,7 +114,7 @@ export const RevokeDialog = () => {
           />
           <div className="w-full md:w-[570px] px-4 md:pb-4 md:px-10 gap-1">
             <div className="flex justify-between items-center">
-              <div className="flex gap-2 py-2 items-center">
+              <div className="flex gap-2 py-2 items-center text-secondary-text">
                 {standard === Standard.ERC20 ? (
                   <span>{`${t("approve")} 0 ${token.symbol}`}</span>
                 ) : (
@@ -179,7 +179,7 @@ export const RevokeDialog = () => {
                     onBlur={() => setIsFocused(false)}
                     allowNegative={false}
                   />
-                  <span className="text-secondary-text min-w-max">
+                  <span className="text-tertiary-text min-w-max">
                     {t("amount", { symbol: token.symbol })}
                   </span>
                 </div>

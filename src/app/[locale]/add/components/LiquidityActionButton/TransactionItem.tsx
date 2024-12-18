@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
+import { useMediaQuery } from "react-responsive";
 import { formatEther, formatUnits, parseUnits } from "viem";
 
 import Preloader from "@/components/atoms/Preloader";
@@ -42,6 +43,8 @@ export const TransactionItem = ({
 }) => {
   const tSwap = useTranslations("Swap");
   const t = useTranslations("Liquidity");
+  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
+
   const chainId = useCurrentChainId();
   const [localValue, setLocalValue] = useState(
     formatUnits(transaction?.amount || BigInt(0), transaction?.token.decimals || 18),
@@ -76,7 +79,12 @@ export const TransactionItem = ({
         ) : null}
       </div>
       <div className="w-full">
-        <div className="flex justify-between items-start">
+        <div
+          className={clsxMerge(
+            "flex justify-between items-start",
+            status === AddLiquidityApproveStatus.PENDING && "flex-col md:flex-row md:mb-0 pb-2",
+          )}
+        >
           <div className="flex gap-2 py-2 items-center flex-wrap">
             <span className="flex-wrap items-center gap-1 text-secondary-text">
               {`${standard === Standard.ERC20 ? "Approve" : "Deposit"} for ${token.symbol}`}
@@ -97,13 +105,13 @@ export const TransactionItem = ({
                 AddLiquidityApproveStatus.SUCCESS,
               ].includes(status) && (
                 <div
-                  className="flex gap-2 text-green cursor-pointer"
+                  className="flex gap-2 text-secondary-text text-12 mt-2.5 md:mt-2 md:text-16 font-medium cursor-pointer hocus:text-green-hover duration-200"
                   onClick={() => {
                     updateValue(formatUnits(amount, token.decimals));
                   }}
                 >
-                  <span>Set Default</span>
-                  <Svg iconName="reset" />
+                  <span className="mt-0.5 md:mt-0">{t("set_default")}</span>
+                  <Svg iconName="reset" size={isMobile ? 20 : 24} />
                 </div>
               )}
 
@@ -135,10 +143,10 @@ export const TransactionItem = ({
         </div>
         <div
           className={clsxMerge(
-            "flex justify-between px-5 py-3 rounded-3 mt-2 border border-transparent",
+            "flex justify-between px-5 py-3 -mb-1 rounded-3 mt-2 border border-transparent",
             isError
-              ? "border border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
-              : "",
+              ? "border border-red-light hocus:border-red-light hocus:shadow hocus:shadow-red-light-shadow/60"
+              : " ",
             disabled ? "border-secondary-border bg-primary-bg" : "bg-secondary-bg",
           )}
         >
@@ -159,14 +167,16 @@ export const TransactionItem = ({
           <span className="text-secondary-text min-w-max">{`Amount ${token.symbol}`}</span>
         </div>
         {isError ? (
-          <span className="text-12 mt-2 text-red-light">
+          <span className="text-12 text-red-light">
             {t("must_be_at_least", {
               val: `${formatUnits(amount, token.decimals)} ${token.symbol}`,
             })}
           </span>
-        ) : null}
+        ) : (
+          <div className="h-6"></div>
+        )}
 
-        <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-4 mt-6">
+        <div className="flex justify-between bg-tertiary-bg px-5 py-3 rounded-3 mb-4 mt-1">
           <div className="flex gap-1">
             <span className="text-16 text-secondary-text">{tSwap("network_fee")}:</span>
             <span>{`${gasPrice && estimatedGas ? formatFloat(formatEther(gasPrice * estimatedGas)) : ""} ${chainSymbol}`}</span>
