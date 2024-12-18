@@ -79,7 +79,6 @@ export default function SwapDetails({
           </button>
 
           <div className="flex gap-3">
-            {/*{!isDetailsExpanded && (*/}
             <div
               className={clsx(
                 "max-sm:hidden text-14 flex items-center duration-200",
@@ -88,7 +87,6 @@ export default function SwapDetails({
             >
               {t("swap_details")}
             </div>
-            {/*)}*/}
             <span>
               <Svg
                 className={clsx("duration-200", isDetailsExpanded && "-rotate-180")}

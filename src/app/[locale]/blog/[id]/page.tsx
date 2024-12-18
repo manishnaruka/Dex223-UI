@@ -52,6 +52,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         "table",
         "tr",
         "tbody",
+        "thead",
       ], // Add 'iframe' to the allowed tags
       ALLOWED_ATTR: [
         "src",
@@ -62,6 +63,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         "frameborder",
         "style",
         "href",
+        "target",
       ], // Allow necessary iframe attributes
     }).replace(
       /<iframe([\s\S]*?)<\/iframe>/g,
@@ -102,8 +104,12 @@ export default async function PostPage({ params }: { params: { id: string } }) {
               );
             })}
 
-            <div className="bg-tertiary-bg flex gap-1 items-center py-2 px-4 rounded-2">
-              <Svg className="text-tertiary-text" iconName="date" size={20} />
+            <div className="bg-tertiary-bg flex gap-1 items-center h-8 md:h-10 text-12 md:text-16 px-4 rounded-2">
+              <Svg
+                className="text-tertiary-text !w-4 !h-4 md:!w-5 md:!h-5"
+                iconName="date"
+                size={20}
+              />
               <span className="text-tertiary-text">Publication date:</span>
               <span className="text-secondary-text">
                 {new Date(post.createdAt)
@@ -118,7 +124,11 @@ export default async function PostPage({ params }: { params: { id: string } }) {
 
             {post.author && (
               <div className="bg-tertiary-bg flex gap-1 items-center py-2 px-4 rounded-2">
-                <Svg className="text-tertiary-text" iconName="author" size={20} />
+                <Svg
+                  className="text-tertiary-text !w-4 !h-4 md:!w-5 md:!h-5"
+                  iconName="author"
+                  size={20}
+                />
                 <span className="text-tertiary-text">Author:</span>
                 <span className="text-secondary-text">{post.author.email}</span>
               </div>
@@ -143,7 +153,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         </Container>
       )}
       <PostContainer>
-        <div className="prose text-primary-text prose-li:marker:text-secondary-text hover:prose-a:text-green-hover prose-a:duration-200 prose-a:cursor-pointer prose-lg prose-p:text-secondary-text prose-strong:text-inherit max-w-none prose-a:text-green prose-h2:text-primary-text prose-h3:text-primary-text">
+        <div className="prose first:prose-th:pl-5 first:prose-td:pl-5 prose-table:rounded-5 prose-table:overflow-hidden prose-td:bg-primary-bg prose-tr:border-secondary-border prose-th:bg-quaternary-bg [&>p]:prose-li:my-2 text-primary-text prose-li:my-2 prose-li:text-secondary-text prose-li:marker:text-secondary-text hover:prose-a:text-green-hover prose-a:duration-200 prose-a:cursor-pointer prose-lg max-lg:prose-base prose-p:text-secondary-text prose-strong:text-inherit max-w-none prose-a:text-green prose-headings::text-primary-text  prose-a:font-normal">
           <div dangerouslySetInnerHTML={sanitizedData()} />
         </div>
       </PostContainer>

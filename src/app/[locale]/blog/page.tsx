@@ -214,10 +214,10 @@ export default function BlogPage() {
 
   return (
     <Container className="px-4">
-      <div className="flex items-center justify-between py-4 md:py-10 flex-wrap max-lg:flex-col max-lg:items-start gap-2">
+      <div className="flex items-center justify-between pb-6 pt-4 md:py-10 flex-wrap max-lg:flex-col max-lg:items-start gap-2">
         <h1 className="text-24 md:text-40">Blog</h1>
-        <div className="flex items-center gap-3 flex-shrink-0 max-lg:flex-col-reverse max-lg:w-full">
-          <div className="flex items-center gap-3 flex-shrink-0 max-md:grid-cols-1 max-lg:grid-cols-2 max-lg:grid max-lg:w-full">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 max-lg:flex-col-reverse max-lg:w-full">
+          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 max-md:grid-cols-1 max-lg:grid-cols-2 max-lg:grid max-lg:w-full">
             <Popover
               placement="bottom"
               isOpened={isOpenedContentType}
@@ -225,17 +225,17 @@ export default function BlogPage() {
               trigger={
                 <SelectButton
                   onClick={() => setIsOpenedContentType(!isOpenedContentType)}
-                  className="flex-shrink-0 h-12 justify-between max-lg:w-full"
+                  className="flex-shrink-0 h-10 md:h-12 justify-between max-lg:w-full"
                 >
                   {filterMap[contentType]}
                 </SelectButton>
               }
             >
-              <div className="py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
+              <div className="w-full py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
                 <ul>
                   {contents.map((content) => {
                     return (
-                      <li className="min-w-[200px]" key={content}>
+                      <li className="w-full min-w-[200px]" key={content}>
                         <SelectOption
                           onClick={() => {
                             setContentType(content);
@@ -259,7 +259,7 @@ export default function BlogPage() {
               setIsOpened={setIsOpened}
               trigger={
                 <SelectButton
-                  className={clsx("px-3 flex-shrink-0 h-12 max-lg:w-full justify-between")}
+                  className={clsx("px-3 flex-shrink-0 h-10 md:h-12 max-lg:w-full justify-between")}
                   isOpen={isOpened}
                   onClick={() => setIsOpened(!isOpened)}
                 >
@@ -267,7 +267,7 @@ export default function BlogPage() {
                 </SelectButton>
               }
             >
-              <div className="py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
+              <div className="w-full py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
                 <ul>
                   <li className="min-w-[200px]">
                     <SelectOption
@@ -304,7 +304,7 @@ export default function BlogPage() {
 
           <div className="max-lg:w-full lg:w-[386px]">
             <SearchInput
-              className="bg-primary-bg"
+              className="bg-primary-bg h-10 md:h-12"
               placeholder="Search article or video"
               value={searchValue}
               onChange={(e) => {

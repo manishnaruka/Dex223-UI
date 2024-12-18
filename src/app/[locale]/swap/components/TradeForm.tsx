@@ -72,7 +72,7 @@ function OpenConfirmDialogButton({
         onClick={() => setWalletConnectOpened(true)}
         fullWidth
         size={ActionButtonSize}
-        tabletSize={MobileActionButtonSize}
+        mobileSize={MobileActionButtonSize}
       >
         {tWallet("connect_wallet")}
       </Button>
@@ -81,7 +81,7 @@ function OpenConfirmDialogButton({
 
   if (isLoadingSwap) {
     return (
-      <Button fullWidth isLoading size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         <span className="flex items-center gap-2">
           <span>{t("processing_swap")}</span>
           <Preloader size={20} color="black" />
@@ -92,7 +92,7 @@ function OpenConfirmDialogButton({
 
   if (isLoadingApprove) {
     return (
-      <Button fullWidth isLoading size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         <span className="flex items-center gap-2">
           <span>{t("approving_in_progress")}</span>
           <Preloader size={20} color="black" />
@@ -103,7 +103,7 @@ function OpenConfirmDialogButton({
 
   if (isPendingApprove || isPendingSwap) {
     return (
-      <Button fullWidth isLoading size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         <span className="flex items-center gap-2">
           <span>{t("waiting_for_confirmation")}</span>
           <Preloader size={20} color="black" />
@@ -114,7 +114,7 @@ function OpenConfirmDialogButton({
 
   if (!tokenA || !tokenB) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("select_tokens")}
       </Button>
     );
@@ -122,7 +122,7 @@ function OpenConfirmDialogButton({
 
   if (!typedValue) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("enter_amount")}
       </Button>
     );
@@ -130,7 +130,7 @@ function OpenConfirmDialogButton({
 
   if (isTradeLoading) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("looking_for_the_best_trade")}
       </Button>
     );
@@ -138,7 +138,7 @@ function OpenConfirmDialogButton({
 
   if (!isTradeReady) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("swap_is_unavailable_for_this_pair")}
       </Button>
     );
@@ -146,7 +146,7 @@ function OpenConfirmDialogButton({
 
   if (!isSufficientBalance) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} tabletSize={MobileActionButtonSize}>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("insufficient_balance")}
       </Button>
     );
