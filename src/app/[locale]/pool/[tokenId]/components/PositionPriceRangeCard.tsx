@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { formatNumber } from "@/functions/formatFloat";
@@ -19,6 +20,7 @@ export default function PositionPriceRangeCard({
   isMax?: boolean;
   className?: string;
 }) {
+  const t = useTranslations("Liquidity");
   // TODO check if correct
   const symbol = useMemo(() => {
     if (isMax) {
@@ -46,8 +48,8 @@ export default function PositionPriceRangeCard({
             : `${token1?.symbol} per ${token0?.symbol}`}
         </div>
       </div>
-      <div className="lg:min-h-[45%] min-h-[45%] flex-grow overflow-hidden text-12 lg:text-14 bg-quaternary-bg py-2 lg:py-3 px-2 lg:px-5 border-t-2 border-tertiary-bg text-tertiary-text text-center">
-        Your position will be 100% {symbol} at this price
+      <div className="lg:min-h-[50%] min-h-[50%] flex-grow overflow-hidden text-12 lg:text-14 bg-quaternary-bg py-2 lg:py-3 px-2 lg:px-5 border-t-2 border-tertiary-bg text-tertiary-text text-center">
+        {t("position_100_price", { symbol })}
       </div>
     </div>
   );

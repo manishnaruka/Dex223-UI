@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 
 import Svg from "@/components/atoms/Svg";
-import { IconName } from "@/config/types/IconName";
 
 export enum PositionRangeStatus {
   IN_RANGE = "in-range",
@@ -42,7 +41,7 @@ export default function RangeBadge({ status }: Props) {
   return (
     <div
       className={clsx(
-        "rounded-5 py-1 flex items-center gap-1 font-medium text-12 md:text-16",
+        "rounded-5 py-1 flex items-center gap-1 font-medium text-12 md:text-16 text-nowrap",
         textColorMap[status],
       )}
     >

@@ -80,10 +80,10 @@ export default function Drawer({
           <FloatingOverlay className="drawer-overlay" style={{ ...transitionStyles }} lockScroll />
         )}
         {isMountedDrawer && (
-          <FloatingFocusManager context={context}>
+          <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
             <div
               className={clsx(
-                "drawer-container bg-primary-bg",
+                "drawer-container bg-primary-bg rounded-t-5",
                 placement === "left" && "h-full",
                 placement === "bottom" && "w-full max-h-[100vh]",
               )}

@@ -180,7 +180,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
           liquidity.toString(),
           tick,
           poolAddresses?.[index]?.address && ticksMap
-            ? ticksMap[poolAddresses[index]!.address!.toLowerCase()].sort(
+            ? ticksMap[poolAddresses[index]!.address!.toLowerCase()]?.sort(
                 (a, b) => a.index - b.index,
               )
             : undefined,

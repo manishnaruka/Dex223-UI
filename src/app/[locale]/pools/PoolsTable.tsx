@@ -192,7 +192,7 @@ const PoolsTableItemMobile = ({
     <React.Fragment key={index}>
       <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
         <div className="flex justify-between gap-2">
-          <div className="flex items-center gap-2 text-14">
+          <div className="flex flex-row items-start gap-x-2 text-16">
             <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
             <Image
               src="/images/tokens/placeholder.svg"

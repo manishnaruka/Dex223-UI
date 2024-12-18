@@ -168,7 +168,7 @@ const Positions = () => {
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col gap-3 pb-10">
+                  <div className="flex flex-col gap-3 pb-4 md:pb-10">
                     {filteredPositions?.length ? (
                       filteredPositions.map((position, index) => {
                         return (

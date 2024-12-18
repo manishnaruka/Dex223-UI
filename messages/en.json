@@ -209,7 +209,7 @@
     "learn_more_about_swap": "Learn more about swap",
     "proceed_in_your_wallet": "Proceed in your wallet",
     "executing_swap": "Executing swap",
-    "confirm_action_in_your_wallet_alert": "Confirm action in your wallet",
+    "confirm_action_in_your_wallet_alert": "Please confirm action in your wallet",
     "successful_swap": "Successful swap",
     "swap_failed": "Swap failed",
     "processing_swap": "Processing swap",
@@ -232,6 +232,10 @@
     "slippage_tooltip": "The actual swap price may be different than the one specified at the moment of sending the transaction. Slippage determines how much of the price change can be tolerated. 5% slippage means that if the price in the pool will change more than 5% from the expected, your transaction will automatically fail (you will pay for GAS but no swap will occur)."
   },
   "Liquidity": {
+    "set_default": "Set default",
+    "position_100_price": "Your position will be 100% {symbol} at this price",
+    "must_be_value": "Must be no more than {val}",
+    "must_be_at_least": "Must be at least {val}",
     "token_starting_price": "Starting {symbol} price",
     "pools_not_found": "Pools not found",
     "amount_title": "Amount",
@@ -287,6 +291,7 @@
     "collect_fees_title": "Collect fees",
     "edit": "Edit",
     "hide": "Hide",
+    "fee_tier_title": "Fee tier",
     "fee_tier": "{tier}% fee tier",
     "fee_tier_select": "{select}% select",
     "fee_tier_not_created": "Not created",
@@ -376,6 +381,7 @@
     "title": "Portfolio",
     "manage_title": "Manage",
     "show_portfolio": "Show portfolio",
+    "reset_search": "Reset search & Show my wallets",
     "add_wallet_placeholder": "Add address or domain",
     "add_wallet": "Add wallet",
     "connect_wallet_placeholder": "Add address or connect wallet to view portfolio",
@@ -390,7 +396,7 @@
     "liquidity_search_placeholder": "Search by ID",
     "deposited_title": "Approved and Deposited tokens",
     "enter_in_correct_format": "Enter token address in correct format",
-    "enter_address_correct_format": "Enter wallet address in correct format",
+    "enter_address_correct_format": "Enter a valid wallet address",
     "select_all": "Select all",
     "deselect_all": "Deselect all",
     "wallet_balance": "Wallet balance",
@@ -419,6 +425,10 @@
     "details": "Details",
     "token_owner": "Token owner",
     "revoke": "Revoke",
-    "withdraw": "Withdraw"
+    "withdraw": "Withdraw",
+    "search_result": "Search results for",
+    "add_to_wallets": "Add to my wallets",
+    "already_in_wallets": "Wallet is already in your wallets",
+    "my_wallets": "My wallets"
   }
 }

@@ -234,7 +234,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
             setIsOpenedRevokeDialog(true);
           }}
         />
-        <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
+        <Button variant={ButtonVariant.CONTAINED} fullWidth disabled className="bg-tertiary-bg">
           {t("revoke_withdraw_title")}
           <span className="flex items-center gap-2">
             <Preloader size={20} color="black" type="circular" />
@@ -246,7 +246,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
 
   if (!tokenA || !tokenB) {
     return (
-      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
+      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled className="bg-tertiary-bg">
         {t("select_pair")}
       </Button>
     );
@@ -254,7 +254,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
 
   if (!typedValue || typedValue === "0") {
     return (
-      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
+      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled className="bg-tertiary-bg">
         {t("button_enter_amount")}
       </Button>
     );
@@ -262,7 +262,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
 
   if (!isSufficientBalance) {
     return (
-      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled>
+      <Button variant={ButtonVariant.CONTAINED} fullWidth disabled className="bg-tertiary-bg">
         {t("button_insufficient_balance")}
       </Button>
     );
