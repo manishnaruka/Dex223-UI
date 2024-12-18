@@ -263,7 +263,7 @@ function TokenRowSimple({
   isMobile: boolean;
 }) {
   return (
-    <button
+    <div
       role="button"
       onClick={() => handlePick(currency)}
       className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:px-10 bg-transparent hocus:bg-tertiary-bg duration-200 group py-1 md:py-2 w-full text-left"
@@ -314,7 +314,7 @@ function TokenRowSimple({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -427,7 +427,7 @@ export default function PickTokenDialog({
                                 isEditActivated
                                   ? "bg-transparent border-secondary-border"
                                   : "bg-tertiary-bg border-transparent",
-                                "items-center border justify-center px-4 duration-200 h-10 rounded-2  flex gap-2",
+                                "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
                                 !isMobile && isEditActivated && "hocus:bg-transparent",
                                 !isMobile && !isEditActivated && "hocus:bg-green-bg",
                               )}
@@ -477,26 +477,42 @@ export default function PickTokenDialog({
                     )}
                   </div>
                 </div>
-                <div className="flex-grow flex min-h-0">
+                <div className="flex-grow flex min-h-0 overflow-hidden md:pb-5">
                   {Boolean(filteredTokens.length) && (
                     <ScrollbarContainer height="full">
                       <div
                         className={clsx(
                           "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2",
                           !!pinnedTokens.length && !simpleForm && "pt-3",
+                          simpleForm ? "pl-2 pr-3" : "pl-4 pr-4",
                         )}
                       >
-                        {filteredTokens.map((token) => (
-                          <TokenRow
-                            setTokenForPortfolio={setTokenForPortfolio}
-                            handlePick={handlePick}
-                            key={
-                              token.isToken ? token.address0 : `native-${token.wrapped.address0}`
-                            }
-                            currency={token}
-                            simpleForm={simpleForm}
-                          />
-                        ))}
+                        {filteredTokens.map((token) => {
+                          if (simpleForm)
+                            return (
+                              <TokenRowSimple
+                                setTokenForPortfolio={setTokenForPortfolio}
+                                handlePick={handlePick}
+                                key={
+                                  token.isToken
+                                    ? token.address0
+                                    : `native-${token.wrapped.address0}`
+                                }
+                                currency={token}
+                                isMobile={isMobile}
+                              />
+                            );
+                          return (
+                            <TokenRow
+                              setTokenForPortfolio={setTokenForPortfolio}
+                              handlePick={handlePick}
+                              key={
+                                token.isToken ? token.address0 : `native-${token.wrapped.address0}`
+                              }
+                              currency={token}
+                            />
+                          );
+                        })}
                       </div>
                     </ScrollbarContainer>
                   )}

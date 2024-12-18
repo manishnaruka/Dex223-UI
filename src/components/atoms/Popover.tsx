@@ -61,8 +61,8 @@ export default function Popover({
     <>
       {React.cloneElement(trigger, { ...getReferenceProps, ref: refs.setReference })}
       {isMounted && (
-        <FloatingFocusManager context={context} modal={false}>
-          <FloatingPortal>
+        <FloatingPortal>
+          <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
             <div
               ref={refs.setFloating}
               style={{
@@ -78,8 +78,8 @@ export default function Popover({
             >
               {children}
             </div>
-          </FloatingPortal>
-        </FloatingFocusManager>
+          </FloatingFocusManager>
+        </FloatingPortal>
       )}
     </>
   );

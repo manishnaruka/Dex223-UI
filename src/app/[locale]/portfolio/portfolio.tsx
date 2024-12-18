@@ -94,7 +94,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
           />
         </div>
       </div>
-      {error && <p className="text-12 text-red-light mt-1">{error}</p>}
+      {error && <p className="text-12 text-red-light">{error}</p>}
     </>
   );
 };
@@ -104,7 +104,8 @@ const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
 
   const t = useTranslations("Portfolio");
 
-  const error = Boolean(searchValue) && !isAddress(searchValue) ? t("enter_in_correct_format") : "";
+  const error =
+    Boolean(searchValue) && !isAddress(searchValue) ? t("enter_address_correct_format") : "";
 
   const { addWallet, hasWallet, hasSearchWallet } = usePortfolioStore();
 
@@ -140,7 +141,7 @@ const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
           searchValue && "pr-[92px]",
         )}
       />
-      {<p className="text-12 text-red-light mt-1 h-4">{errorSearch}</p>}
+      {<p className="text-12 text-red-light mb-1 h-4">{error}</p>}
       {searchValue && !hasSearchWallet ? (
         <div className={clsx("absolute right-[48px] top-1 flex items-center justify-center")}>
           <IconButton

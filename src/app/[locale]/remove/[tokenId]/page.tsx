@@ -4,7 +4,7 @@ import clsx from "clsx";
 import JSBI from "jsbi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
 
@@ -143,6 +143,25 @@ export default function DecreaseLiquidityPage({
   };
 
   const [isFocused, setIsFocused] = useState(false);
+  const divRef = useRef(null);
+
+  // Effect to handle clicks outside the div
+  useEffect(() => {
+    const handleClickOutside = (event: { target: any }) => {
+      // @ts-ignore
+      if (divRef.current && !divRef.current.contains(event.target)) {
+        setIsFocused(false);
+      }
+    };
+
+    // Attach event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup the event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     // TODO: recursion, idk why
@@ -219,13 +238,14 @@ export default function DecreaseLiquidityPage({
               </div>
 
               <div
+                ref={divRef}
                 className={clsx(
                   "lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1 border hocus:shadow hocus:shadow-green/60",
                   isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
                 )}
                 onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
                 onClick={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
+                // onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
               >
                 <div className="md:mb-5 md:mt-2 md:ml-5 md:mr-5 mt-1 mb-4 ml-4 mr-4">
                   <span className="text-12 lg:text-16 mb-2 text-secondary-text">

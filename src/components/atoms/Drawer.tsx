@@ -10,7 +10,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import clsx from "clsx";
-import { PropsWithChildren, useId } from "react";
+import { PropsWithChildren, useEffect, useId, useState } from "react";
 
 interface Props {
   isOpen: boolean;
@@ -80,7 +80,7 @@ export default function Drawer({
           <FloatingOverlay className="drawer-overlay" style={{ ...transitionStyles }} lockScroll />
         )}
         {isMountedDrawer && (
-          <FloatingFocusManager context={context}>
+          <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
             <div
               className={clsx(
                 "drawer-container bg-primary-bg",

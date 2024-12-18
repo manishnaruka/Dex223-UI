@@ -174,6 +174,7 @@ const config: Config = {
       "yellow-light": "#D2BD8B",
       red: "#D24B4B",
       "red-light": "#CD8C8C",
+      "red-light-shadow": "#C0A0A0",
       blue: "#7D97A4",
       purple: "#8089BD",
 
