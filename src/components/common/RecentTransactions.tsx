@@ -131,7 +131,7 @@ export default function RecentTransactions({
     <>
       {showRecentTransactions && (
         <div id="recent-transactions-container" ref={componentRef}>
-          <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
+          <div className="card-spacing pt-2.5 pb-5 bg-primary-bg rounded-5">
             <div className="flex justify-between items-center mb-2.5">
               <h3 className="font-bold text-20">{t("transactions")}</h3>
               <div className="flex items-center">
@@ -141,7 +141,7 @@ export default function RecentTransactions({
             <div>
               {currentTableData.length ? (
                 <>
-                  <div className="pb-5 flex flex-col gap-3">
+                  <div className="flex flex-col gap-3">
                     {currentTableData.map((transaction) => {
                       return (
                         <RecentTransaction
@@ -161,7 +161,7 @@ export default function RecentTransactions({
                   />
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center min-h-[400px] gap-2 bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 px-4 md:px-10 md:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+                <div className="flex flex-col items-center justify-center min-h-[400px] gap-2 bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
                   <span className="text-secondary-text">
                     {t("transactions_will_be_displayed_here")}
                   </span>

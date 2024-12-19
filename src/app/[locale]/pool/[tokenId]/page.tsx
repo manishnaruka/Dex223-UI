@@ -394,7 +394,7 @@ export default function PoolPage({
         >
           <div className="flex flex-col max-h-svh md:h-auto">
             <DialogHeader onClose={handleClose} title={t("claim_fees_title")} />
-            <div className="flex-grow px-4 md:px-10 md:w-[570px] overflow-y-auto md:overflow-y-hidden">
+            <div className="flex-grow card-spacing-x md:w-[570px] overflow-y-auto md:overflow-y-hidden">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
@@ -559,7 +559,7 @@ export default function PoolPage({
               </div>
             </div>
             <div className="flex-shrink-0 w-full h-[1px] bg-quaternary-bg mb-4 md:hidden" />
-            <div className="flex-shrink-0 px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 md:h-auto">
+            <div className="flex-shrink-0 card-spacing md:w-[570px] md:h-auto">
               <RemoveLiquidityGasSettings
                 gasPriceOption={gasPriceOption}
                 gasPriceSettings={gasPriceSettings}

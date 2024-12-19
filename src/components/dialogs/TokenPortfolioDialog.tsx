@@ -128,10 +128,10 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
         </div>
       </div>
       <div className="mx-4 md:mx-10 bg-secondary-border h-px" />
-      <p className="text-secondary-text px-4 md:px-10 py-3">
+      <p className="text-secondary-text card-spacing-x py-3">
         {t("found_in", { amount: token.lists?.length })}
       </p>
-      <div className="flex flex-col gap-3 pb-4 md:pb-10 px-4 md:px-10">
+      <div className="flex flex-col gap-3 card-spacing">
         {token.lists?.map((listId) => {
           return (
             <div className="flex gap-3 items-center justify-between" key={listId}>

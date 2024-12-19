@@ -406,7 +406,7 @@ export default function DecreaseLiquidityPage({
         }}
       >
         <DialogHeader onClose={handleClose} title={t("confirm_removing_liquidity")} />
-        <div className="px-4 md:px-10 md:w-[570px] pb-4 md:pb-10 md:h-auto overflow-y-auto">
+        <div className="card-spacing md:w-[570px] md:h-auto overflow-y-auto">
           <div className="flex justify-between items-start">
             <div className="flex items-start gap-2">
               <div className="flex items-center relative w-12 lg:w-14 h-[24px] lg:h-[34px]">

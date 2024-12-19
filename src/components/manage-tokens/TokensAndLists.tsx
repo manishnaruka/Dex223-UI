@@ -107,7 +107,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
 
         {activeTab === 0 && (
           <div className="flex-grow flex flex-col">
-            <div className="flex gap-3 px-4 md:px-10">
+            <div className="flex gap-3 card-spacing-x">
               <SearchInput
                 value={listSearchValue}
                 onChange={(e) => setListSearchValue(e.target.value)}
@@ -115,7 +115,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               />
             </div>
 
-            <div className="w-full flex items-center mt-3 gap-px px-4 md:px-10">
+            <div className="w-full flex items-center mt-3 gap-px card-spacing-x">
               <Button
                 endIcon="import-list"
                 colorScheme={ButtonColor.LIGHT_GREEN}
@@ -129,7 +129,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
 
             {Boolean(filteredLists?.length) && (
-              <div className="px-4 md:px-10">
+              <div className="card-spacing-x">
                 <ScrollbarContainer className="mt-3 -mr-3 pr-3 md:-mr-8 md:pr-8 " height={392}>
                   <div className="flex flex-col gap-3" id="manage-lists-container">
                     {filteredLists
@@ -186,7 +186,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
 
         {activeTab === 1 && (
           <div className="flex-grow flex flex-col ">
-            <div className="flex gap-3 px-4 md:px-10">
+            <div className="flex gap-3 card-spacing-x">
               <SearchInput
                 value={tokensSearchValue}
                 onChange={(e) => setTokensSearchValue(e.target.value)}
@@ -194,7 +194,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               />
             </div>
 
-            <div className="w-full flex items-center mt-3 gap-px px-4 md:px-10">
+            <div className="w-full flex items-center mt-3 gap-px card-spacing-x">
               <Button
                 endIcon="import-token"
                 colorScheme={ButtonColor.LIGHT_GREEN}
@@ -207,7 +207,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
               <ButtonTooltip text={t("import_token_tooltip")} />
             </div>
 
-            <div className="flex justify-between items-center my-3 px-4 md:px-10 text-secondary-text">
+            <div className="flex justify-between items-center my-3 card-spacing-x text-secondary-text">
               <div>
                 {t("total")}{" "}
                 {onlyCustom ? (
@@ -227,7 +227,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
             </div>
             <div className="bg-secondary-border h-px mx-4 md:mx-10" />
 
-            <div className="flex flex-col flex-grow px-4 md:px-10">
+            <div className="flex flex-col flex-grow card-spacing-x">
               <div style={{ flex: "1 1 auto" }} className="pb-[1px] -mr-3 md:-mr-8">
                 {Boolean(filteredTokens.length) && (
                   <SimpleBar

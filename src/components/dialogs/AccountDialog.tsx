@@ -101,7 +101,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
         </div>
 
         {activeTab == 0 && (
-          <div className="flex flex-col items-center justify-center h-[376px] overflow-auto gap-2 bg-empty-no-tokens bg-no-repeat bg-right-top -mx-4 px-4 md:px-10 md:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+          <div className="flex flex-col items-center justify-center h-[376px] overflow-auto gap-2 bg-empty-no-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x md:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
             <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
           </div>
         )}
@@ -131,7 +131,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                 </ScrollbarContainer>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center gap-2 h-[376px] bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 px-4 md:px-10 md:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+              <div className="flex flex-col items-center justify-center gap-2 h-[376px] bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 card-spacing-x md:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
                 <span className="text-secondary-text">
                   {tRecentTransactions("transactions_will_be_displayed_here")}
                 </span>

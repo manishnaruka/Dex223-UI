@@ -280,7 +280,7 @@ function NetworkFeeDialogContent({
 
   return (
     <form className="max-md:h-[calc(100%-60px)]" onSubmit={handleSubmit}>
-      <div className="max-md:h-[calc(100%-80px)] overflow-auto flex flex-col gap-2 px-4 md:px-10">
+      <div className="max-md:h-[calc(100%-80px)] overflow-auto flex flex-col gap-2 card-spacing-x">
         {gasOptions.map((_gasOption) => {
           return (
             <GasOptionRadioButton

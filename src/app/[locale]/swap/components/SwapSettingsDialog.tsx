@@ -228,7 +228,7 @@ function SwapSettingsDialogContent() {
   }, [deadlineChanged, deadlineError, slippageChanged, slippageError]);
 
   return (
-    <div className="px-4 md:px-10 pb-4 md:pb-10 w-full md:w-[600px]">
+    <div className="px-4 md:px-6 lg:px-10 pb-4 md:pb-10 w-full md:w-[600px]">
       <div className="flex justify-between items-center mb-1">
         <div className="flex gap-1 items-center">
           <h3 className="font-bold text-16">{t("maximum_slippage")}</h3>

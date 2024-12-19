@@ -527,7 +527,7 @@ export default function ConfirmListingDialog() {
           }}
           title={"Review listing tokens"}
         />
-        <div className="px-4 pb-4 md:px-10 md:pb-9">
+        <div className="card-spacing">
           {!isSettledList && !isRevertedApprove && (
             <div className="mb-5">
               {tokensToList.length === 1 && tokensToList[0] && (

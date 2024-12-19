@@ -187,7 +187,7 @@ const ApproveDialog = () => {
         }}
         title={`${t(APPROVE_BUTTON_TEXT[approveTransactionsType] as any)} ${t("approve_transaction_modal_title")}`}
       />
-      <div className="w-full md:w-[570px] px-4 md:px-10 md:pb-10 pb-4 mx-auto">
+      <div className="w-full md:w-[570px] card-spacing mx-auto">
         {transactionItems.map(({ transaction, standard, token }, index) => (
           <TransactionItem
             key={`${transaction?.token.symbol}_${standard}`}
@@ -351,7 +351,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   return (
     <>
       <DialogHeader onClose={() => setIsOpen(false)} title="Add liquidity" />
-      <div className="px-4 md:px-10 pb-4 md:pb-10 h-[80dvh] md:h-auto flex flex-col">
+      <div className="card-spacing h-[80dvh] md:h-auto flex flex-col">
         <div className="flex-grow overflow-y-auto">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -557,7 +557,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
   return (
     <>
       <DialogHeader onClose={() => setIsOpen(false)} title="Add liquidity" />
-      <div className="px-4 md:px-10 pb-4 md:pb-10 h-[80dvh] md:h-auto overflow-y-auto">
+      <div className="card-spacing h-[80dvh] md:h-auto overflow-y-auto">
         <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
           {isError ? (
             <EmptyStateIcon iconName="warning" />

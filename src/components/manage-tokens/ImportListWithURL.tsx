@@ -92,7 +92,7 @@ export default function ImportListWithURL({ setContent }: Props) {
 
       {tokenListToImport && (
         <>
-          <div className="flex-grow px-4 md:px-10">
+          <div className="flex-grow card-spacing-x">
             <div className="flex items-center gap-3 py-2.5 mt-3 mb-3">
               <img
                 className="w-12 h-12"

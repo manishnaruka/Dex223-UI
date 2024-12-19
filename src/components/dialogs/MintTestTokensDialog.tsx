@@ -136,7 +136,7 @@ export default function MintTestTokensDialog() {
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
       <DialogHeader onClose={handleClose} title="Get test tokens" />
-      <div className="mx-auto pb-4 px-4 md:px-10 md:pb-10 rounded-2 bg-primary-bg md:w-[600px] w-full border border-transparent">
+      <div className="mx-auto card-spacing rounded-2 bg-primary-bg md:w-[600px] w-full border border-transparent">
         <InputLabel label="Token for mint" />
         <div className="flex flex-col gap-4 relative">
           <Popover

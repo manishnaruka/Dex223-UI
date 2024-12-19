@@ -389,7 +389,7 @@ export default function TradeForm() {
   const nativeCurrency = useNativeCurrency();
 
   return (
-    <div className="px-4 md:px-10 pt-2.5 pb-4 md:pb-10 bg-primary-bg rounded-5">
+    <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">
       <div className="flex justify-between items-center mb-2.5">
         <h3 className="font-bold text-20">{t("swap")}</h3>
         <div className="flex items-center relative left-3">

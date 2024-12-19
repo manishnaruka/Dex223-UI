@@ -368,7 +368,7 @@ export default function ListTokenPage() {
 
           <div className="flex justify-center grid-in-[right]">
             <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">
-              <div className="px-4 md:px-10 pt-2.5 pb-4 md:pb-10 bg-primary-bg rounded-5">
+              <div className="pt-2.5 card-spacing bg-primary-bg rounded-5">
                 <div className="flex justify-between items-center mb-2.5 -mx-3">
                   <IconButton
                     onClick={() => router.replace(destination)}

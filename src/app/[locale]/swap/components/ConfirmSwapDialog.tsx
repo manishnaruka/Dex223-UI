@@ -539,7 +539,7 @@ export default function ConfirmSwapDialog() {
           }}
           title={t("review_swap")}
         />
-        <div className="px-4 pb-4 md:px-10 md:pb-9">
+        <div className="card-spacing">
           {!isSettledSwap && !isRevertedApprove && (
             <div className="flex flex-col gap-3">
               <ReadonlyTokenAmountCard

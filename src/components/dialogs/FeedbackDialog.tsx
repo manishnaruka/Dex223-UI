@@ -58,7 +58,7 @@ function SuccessFeedback() {
   const t = useTranslations("Feedback");
 
   return (
-    <div className="px-4 pb-4 md:pb-10 md:px-10 w-full md:w-[600px]">
+    <div className="card-spacing w-full md:w-[600px]">
       <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
         <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green"></div>
         <Svg
@@ -137,7 +137,7 @@ export default function FeedbackDialog() {
         {isSubmitted ? (
           <SuccessFeedback />
         ) : (
-          <div className="w-full md:w-[600px] px-4 pb-4 md:px-10 md:pb-10">
+          <div className="w-full md:w-[600px] card-spacing">
             <p className="text-secondary-text text-16 mb-5">
               {t.rich("feel_free_to_share", {
                 github: (chunks) => (

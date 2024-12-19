@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
+.card-spacing-x {
+  @apply px-4 sm:px-6 lg:px-10;
+}
+
+.card-spacing-b {
+  @apply pb-4 sm:pb-5 lg:pb-10
+}
+
+.card-spacing {
+  @apply card-spacing-x card-spacing-b;
+}
+
 :root {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 0, 0, 0;
