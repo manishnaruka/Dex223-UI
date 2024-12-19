@@ -391,9 +391,9 @@ export default function AutoListingContractDetails({
                     return (
                       <div
                         key={token.address0}
-                        className="bg-primary-bg rounded-3 pt-3 pl-4 pb-4 pr-3"
+                        className="bg-primary-bg rounded-3 pt-2 pl-4 pb-4 pr-3"
                       >
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <Image
                               width={32}
