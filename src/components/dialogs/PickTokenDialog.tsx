@@ -30,6 +30,7 @@ interface Props {
   setIsOpen: (isOpen: boolean) => void;
   handlePick: (token: Currency) => void;
   simpleForm?: boolean;
+  prevToken?: Currency | null;
 }
 
 function FoundInOtherListMarker() {
@@ -256,17 +257,19 @@ function TokenRowSimple({
   handlePick,
   setTokenForPortfolio,
   isMobile,
+  prevToken,
 }: {
   currency: Currency;
   handlePick: (currency: Currency) => void;
   setTokenForPortfolio: (currency: Currency) => void;
   isMobile: boolean;
+  prevToken: Currency | null;
 }) {
   return (
     <div
       role="button"
       onClick={() => handlePick(currency)}
-      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:px-10 bg-transparent hocus:bg-tertiary-bg duration-200 group py-1 md:py-2 w-full text-left"
+      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:pl-10 md:pr-7 bg-transparent hocus:bg-tertiary-bg duration-200 group py-1 md:py-2 w-full text-left"
     >
       <div className="grid md:grid-cols-[40px_1fr] grid-cols-[32px_1fr] gap-2 w-full">
         <div className="flex items-center">
@@ -299,6 +302,9 @@ function TokenRowSimple({
 
             <div className="flex items-center gap-1">
               <span className="block w-10" />
+              {prevToken && prevToken.name === currency.name && (
+                <Svg iconName="check" className="text-green mr-1.5" />
+              )}
               {currency.isToken ? (
                 <IconButton
                   iconName="details"
@@ -323,6 +329,7 @@ export default function PickTokenDialog({
   setIsOpen,
   handlePick,
   simpleForm = false,
+  prevToken = null,
 }: Props) {
   const tokens = useTokens();
   const t = useTranslations("ManageTokens");
@@ -506,6 +513,7 @@ export default function PickTokenDialog({
                                   }
                                   currency={token}
                                   isMobile={isMobile}
+                                  prevToken={prevToken}
                                 />
                               );
                             })

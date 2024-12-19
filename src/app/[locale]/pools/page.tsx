@@ -22,6 +22,7 @@ export default function PoolsPage() {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedToken, setSelectedToken] = useState<Currency | null>(null);
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
   const [tokenA, setTokenA] = useState<Currency>();
@@ -80,6 +81,8 @@ export default function PoolsPage() {
               onClick={() => {
                 setCurrentlyPicking("tokenA");
                 setIsOpenedTokenPick(true);
+                console.log("selectedToken", tokenA);
+                setSelectedToken(tokenA || null);
               }}
               size="medium"
               withArrow={!tokenA}
@@ -123,6 +126,7 @@ export default function PoolsPage() {
               onClick={() => {
                 setCurrentlyPicking("tokenB");
                 setIsOpenedTokenPick(true);
+                setSelectedToken(tokenB || null);
               }}
               size="medium"
               withArrow={!tokenB}
@@ -181,6 +185,7 @@ export default function PoolsPage() {
         />
       </div>
       <PickTokenDialog
+        prevToken={selectedToken}
         handlePick={handlePick}
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
