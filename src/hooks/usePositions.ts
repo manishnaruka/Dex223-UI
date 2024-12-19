@@ -1,5 +1,5 @@
 import JSBI from "jsbi";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Address } from "viem";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 
@@ -19,6 +19,7 @@ import { Standard } from "@/sdk_hybrid/standard";
 
 import useCurrentChainId from "./useCurrentChainId";
 import { usePool } from "./usePools";
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 
 export type PositionInfo = {
   nonce: bigint;
@@ -36,8 +37,11 @@ export type PositionInfo = {
   tokenId: bigint | undefined;
 };
 
-export function usePositionFromTokenId(tokenId: bigint) {
-  const { positions, loading } = usePositionsFromTokenIds(tokenId ? [tokenId] : undefined);
+export function usePositionFromTokenId(tokenId: bigint, forceRefresh = true) {
+  const { positions, loading } = usePositionsFromTokenIds(
+    tokenId ? [tokenId] : undefined,
+    forceRefresh,
+  );
 
   return useMemo(() => {
     return {
@@ -46,8 +50,23 @@ export function usePositionFromTokenId(tokenId: bigint) {
     };
   }, [loading, positions]);
 }
-export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
+
+export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined, forceRefresh = true) {
   const chainId = useCurrentChainId();
+
+  const currentTokens = useRef<bigint[] | undefined>(undefined);
+  const { refreshDepositsTrigger } = useRefreshDepositsDataStore();
+
+  const toRefresh = useMemo(() => {
+    return (
+      currentTokens.current?.length === tokenIds?.length &&
+      tokenIds &&
+      currentTokens.current?.every((value, index) => value === tokenIds[index]) &&
+      !(refreshDepositsTrigger || forceRefresh)
+    );
+  }, [forceRefresh, refreshDepositsTrigger, tokenIds]);
+  currentTokens.current = tokenIds;
+
   const positionsContracts = useMemo(() => {
     if (!tokenIds) {
       return [];
@@ -65,6 +84,9 @@ export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
 
   const { data: positionsData, isLoading: positionsLoading } = useReadContracts({
     contracts: positionsContracts,
+    query: {
+      enabled: !toRefresh,
+    },
   });
 
   return useMemo(() => {
@@ -106,6 +128,7 @@ export function usePositionsFromTokenIds(tokenIds: bigint[] | undefined) {
     };
   }, [positionsData, positionsLoading, tokenIds]);
 }
+
 export default function usePositions() {
   const chainId = useCurrentChainId();
   const { address: account } = useAccount();
@@ -144,8 +167,6 @@ export default function usePositions() {
     contracts: tokenIdsContracts,
   });
 
-  // console.dir(tokenIdsData);
-
   const { positions, loading: positionsLoading } = usePositionsFromTokenIds(
     tokenIdsData
       ?.filter((value) => !!value.result && typeof value.result === "bigint")
@@ -174,7 +195,7 @@ export function usePositionFromPositionInfo(positionDetails: PositionInfo) {
       }
     });
     if (token && tokenStandard) return { token, tokenStandard };
-  }, [positionDetails?.token0, tokens]);
+  }, [positionDetails?.token0, tokens]); // refreshDepositsTrigger
 
   const tokenBFromLists = useMemo(() => {
     let tokenStandard: Standard | undefined = undefined;
@@ -287,6 +308,8 @@ export function usePositionFromPositionInfo(positionDetails: PositionInfo) {
     currencyB: tokenB,
     tier: positionDetails?.tier,
   });
+
+  // setRefreshDepositsTrigger(false);
 
   return useMemo(() => {
     if (pool[1] && positionDetails) {

@@ -81,7 +81,6 @@ export default function PoolsPage() {
               onClick={() => {
                 setCurrentlyPicking("tokenA");
                 setIsOpenedTokenPick(true);
-                console.log("selectedToken", tokenA);
                 setSelectedToken(tokenA || null);
               }}
               size="medium"

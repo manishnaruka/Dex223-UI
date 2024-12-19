@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { Address, formatUnits, getAbiItem } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { IIFE } from "@/functions/iife";
@@ -116,6 +117,7 @@ export function useRemoveLiquidityEstimatedGas() {
 export default function useRemoveLiquidity() {
   const { tokenA, tokenB } = useRemoveLiquidityStore();
   const { setStatus, setHash } = useRemoveLiquidityStatusStore();
+  const { setRefreshDepositsTrigger } = useRefreshDepositsDataStore();
   const { address: accountAddress } = useAccount();
 
   const publicClient = usePublicClient();
@@ -193,6 +195,7 @@ export default function useRemoveLiquidity() {
         setStatus(RemoveLiquidityStatus.LOADING);
         await publicClient.waitForTransactionReceipt({ hash });
         setStatus(RemoveLiquidityStatus.SUCCESS);
+        setRefreshDepositsTrigger(true);
         return { success: true };
       }
     } catch (e) {
