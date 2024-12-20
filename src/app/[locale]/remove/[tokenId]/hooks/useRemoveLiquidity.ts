@@ -33,7 +33,7 @@ import { useRemoveLiquidityStore } from "../stores/useRemoveLiquidityStore";
 
 const useRemoveLiquidityParams = () => {
   const { percentage, tokenId, position } = useRemoveLiquidityStore();
-  const { slippage, deadline: _deadline } = useTransactionSettingsStore();
+  const { deadline: _deadline } = useTransactionSettingsStore();
   const deadline = useTransactionDeadline(_deadline);
   const chainId = useCurrentChainId();
   const { address: accountAddress } = useAccount();

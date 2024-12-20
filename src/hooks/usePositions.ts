@@ -1,8 +1,9 @@
 import JSBI from "jsbi";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { Address } from "viem";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
@@ -19,7 +20,6 @@ import { Standard } from "@/sdk_hybrid/standard";
 
 import useCurrentChainId from "./useCurrentChainId";
 import { usePool } from "./usePools";
-import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 
 export type PositionInfo = {
   nonce: bigint;
