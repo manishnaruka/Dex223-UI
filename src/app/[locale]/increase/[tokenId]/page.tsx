@@ -130,7 +130,7 @@ export default function IncreaseLiquidityPage({
               // className="text-tertiary-text"
             />
           </div>
-          <h2 className="text-18 md:text-20 font-bold">Increase Liquidity</h2>
+          <h2 className="text-18 md:text-20 font-bold">{t("increase_liquidity")}</h2>
           <div className="w-[96px] md:w-[104px] flex items-center gap-0 lg:gap-2 justify-end">
             <IconButton
               buttonSize={IconButtonSize.LARGE}
@@ -146,7 +146,7 @@ export default function IncreaseLiquidityPage({
             />
           </div>
         </div>
-        <div className="flex flex-col bg-primary-bg p-4 lg:p-10 pt-0 mb-5 rounded-3 rounded-t-0">
+        <div className="flex flex-col bg-primary-bg p-4 lg:px-10 lg:pb-10 pt-0 mb-5 rounded-3 rounded-t-0">
           <div className="flex items-start mb-4 lg:mb-5 gap-2">
             <TokensPair tokenA={tokenA} tokenB={tokenB} />
             <RangeBadge

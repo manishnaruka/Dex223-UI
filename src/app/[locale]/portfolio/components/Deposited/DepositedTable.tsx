@@ -64,11 +64,15 @@ const DepositedTokenTableItem = ({
         </div>
       </div>
 
-      <div className={clsx("h-[56px] flex items-center", isOdd ? "bg-tertiary-bg" : "")}>
-        {`${formatNumber(formatUnits(deposite.approved, deposite.token.decimals), 8)} ${deposite.token.symbol}`}
+      <div className={clsx("h-[56px] flex items-center ", isOdd ? "bg-tertiary-bg" : "")}>
+        <div className="px-1 truncate">
+          {`${formatNumber(formatUnits(deposite.approved, deposite.token.decimals), 8)} ${deposite.token.symbol}`}
+        </div>
       </div>
-      <div className={clsx("h-[56px] flex items-center", isOdd ? "bg-tertiary-bg" : "")}>
-        {`${formatNumber(formatUnits(deposite.deposited, deposite.token.decimals), 8)} ${deposite.token.symbol}`}
+      <div className={clsx("h-[56px] flex items-center ", isOdd ? "bg-tertiary-bg" : "")}>
+        <div className="px-1 truncate">
+          {`${formatNumber(formatUnits(deposite.deposited, deposite.token.decimals), 8)} ${deposite.token.symbol}`}
+        </div>
       </div>
       <div className={clsx("h-[56px] flex items-center", isOdd ? "bg-tertiary-bg" : "")}>$ —</div>
       <div

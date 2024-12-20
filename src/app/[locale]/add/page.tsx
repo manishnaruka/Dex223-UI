@@ -43,6 +43,14 @@ import { usePriceRange } from "./hooks/usePrice";
 import { useV3DerivedMintInfo } from "./hooks/useV3DerivedMintInfo";
 import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStore";
 
+function compareTokens(tokenA: Currency, tokenB: Currency) {
+  const tokenAaddress = tokenA.isNative ? tokenA.wrapped.address0 : tokenA.address0;
+  const tokenBaddress = tokenB.isNative ? tokenB.wrapped.address0 : tokenB.address0;
+  console.log(tokenA.name, tokenAaddress);
+  console.log(tokenB.name, tokenBaddress);
+  return tokenAaddress.toString() > tokenBaddress.toString();
+}
+
 export default function AddPoolPage() {
   usePoolsSearchParams();
   useRecentTransactionTracking();
@@ -54,7 +62,7 @@ export default function AddPoolPage() {
 
   const router = useRouter();
 
-  const { tokenA, tokenB, setTokenA, setTokenB } = useAddLiquidityTokensStore();
+  const { tokenA, tokenB, setTokenA, setTokenB, setBothTokens } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
   const { ticks, clearPriceRange } = useLiquidityPriceRangeStore();
   const { setTypedValue } = useLiquidityAmountsStore();
@@ -64,19 +72,43 @@ export default function AddPoolPage() {
 
   const handlePick = useCallback(
     (token: Currency) => {
+      console.log("handlePick");
       if (currentlyPicking === "tokenA") {
         if (token === tokenB) {
-          setTokenB(tokenA);
+          setIsOpenedTokenPick(false);
+          return;
         }
 
-        setTokenA(token);
+        let res = false;
+        if (token && tokenB) {
+          res = compareTokens(token, tokenB);
+        }
+
+        if (res) {
+          console.log("swapping tokens in A");
+          setBothTokens({ tokenA: tokenB, tokenB: token });
+        } else {
+          setTokenA(token);
+        }
       }
 
       if (currentlyPicking === "tokenB") {
         if (token === tokenA) {
-          setTokenA(tokenB);
+          setIsOpenedTokenPick(false);
+          return;
         }
-        setTokenB(token);
+
+        let res = false;
+        if (token && tokenA) {
+          res = compareTokens(tokenA, token);
+        }
+
+        if (res) {
+          console.log("swapping tokens in B");
+          setBothTokens({ tokenA: token, tokenB: tokenA });
+        } else {
+          setTokenB(token);
+        }
       }
 
       clearPriceRange();
@@ -93,6 +125,7 @@ export default function AddPoolPage() {
       setTokenA,
       setTokenB,
       tokenA,
+      setBothTokens,
     ],
   );
 

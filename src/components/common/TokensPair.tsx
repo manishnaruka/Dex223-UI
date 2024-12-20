@@ -41,7 +41,7 @@ export default function TokensPair({
           />
         </span>
       </div>
-      <span className={clsx("md:text-16 text-18 block md:mt-1", variantClassNameMap[variant])}>
+      <span className={clsx("text-16 block mt-[1px] md:mt-1", variantClassNameMap[variant])}>
         {tokenA?.symbol} / {tokenB?.symbol}
       </span>
     </div>

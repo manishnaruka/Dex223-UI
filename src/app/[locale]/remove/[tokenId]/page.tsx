@@ -4,10 +4,11 @@ import clsx from "clsx";
 import JSBI from "jsbi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
 
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import useRemoveLiquidity, {
   useRemoveLiquidityEstimatedGas,
 } from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
@@ -30,6 +31,7 @@ import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import { clsxMerge } from "@/functions/clsxMerge";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import {
@@ -96,7 +98,7 @@ export default function DecreaseLiquidityPage({
   const tWallet = useTranslations("Wallet");
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
 
-  const { position: positionInfo } = usePositionFromTokenId(tokenId);
+  const { position: positionInfo } = usePositionFromTokenId(tokenId, false);
   const position = usePositionFromPositionInfo(positionInfo);
   const chainId = useCurrentChainId();
   // const [value, setValue] = useState(25);
@@ -131,17 +133,44 @@ export default function DecreaseLiquidityPage({
     setTokenId,
     position: storedPosition,
   } = useRemoveLiquidityStore();
-  const { status, hash } = useRemoveLiquidityStatusStore();
+  const { setStatus, status, hash } = useRemoveLiquidityStatusStore();
+  const { setRefreshDepositsTrigger, refreshDepositsTrigger } = useRefreshDepositsDataStore();
   const t = useTranslations("Liquidity");
 
   const { handleRemoveLiquidity } = useRemoveLiquidity();
 
   const handleClose = () => {
-    reset();
+    // reset();
     setIsOpen(false);
   };
 
   const [isFocused, setIsFocused] = useState(false);
+  const divRef = useRef(null);
+
+  useEffect(() => {
+    if (refreshDepositsTrigger) {
+      reset(); // do reset only if removed liquidity
+      setRefreshDepositsTrigger(false);
+    }
+  }, [position, refreshDepositsTrigger, reset, setRefreshDepositsTrigger]);
+
+  // Effect to handle clicks outside the div
+  useEffect(() => {
+    const handleClickOutside = (event: { target: any }) => {
+      // @ts-ignore
+      if (divRef.current && !divRef.current.contains(event.target)) {
+        setIsFocused(false);
+      }
+    };
+
+    // Attach event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup the event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     // TODO: recursion, idk why
@@ -156,8 +185,9 @@ export default function DecreaseLiquidityPage({
     setTokenB(tokenB);
   }, [tokenB, setTokenB]);
   useEffect(() => {
+    reset();
     setTokenId(tokenId);
-  }, [tokenId, setTokenId]);
+  }, [tokenId, setTokenId, reset]);
 
   if (!tokenA || !tokenB) return <div>Error: Token A or B undefined</div>;
 
@@ -218,13 +248,14 @@ export default function DecreaseLiquidityPage({
               </div>
 
               <div
+                ref={divRef}
                 className={clsx(
                   "lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1 border hocus:shadow hocus:shadow-green/60",
                   isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
                 )}
                 onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
                 onClick={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
+                // onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
               >
                 <div className="md:mb-5 md:mt-2 md:ml-5 md:mr-5 mt-1 mb-4 ml-4 mr-4">
                   <span className="text-12 lg:text-16 mb-2 text-secondary-text">
@@ -378,7 +409,11 @@ export default function DecreaseLiquidityPage({
                 ) : (
                   <Button
                     className="h-[48px] md:h-[60px]"
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => {
+                      setIsOpen(true);
+                      setStatus(RemoveLiquidityStatus.INITIAL);
+                      setRefreshDepositsTrigger(false);
+                    }}
                     fullWidth
                   >
                     {t("remove_title")}
@@ -407,17 +442,24 @@ export default function DecreaseLiquidityPage({
       >
         <DialogHeader onClose={handleClose} title={t("confirm_removing_liquidity")} />
         <div className="card-spacing md:w-[570px] md:h-auto overflow-y-auto">
-          <div className="flex justify-between items-start">
+          <div
+            className={clsxMerge(
+              "flex justify-between items-start",
+              status === RemoveLiquidityStatus.PENDING && "flex-col md:flex-row",
+            )}
+          >
             <div className="flex items-start gap-2">
-              <div className="flex items-center relative w-12 lg:w-14 h-[24px] lg:h-[34px]">
+              <div className="flex items-start relative min-w-[36px]  h-[24px] lg:h-[34px]">
                 <div className="flex absolute left-0 top-0 w-[24px] lg:w-[34px] h-[24px] lg:h-[34px] items-center justify-center">
                   <Image width={32} height={32} src={tokenA.logoURI as any} alt="" />
                 </div>
-                <div className="w-[24px] lg:w-[34px] h-[24px] lg:h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
+                <div className="w-[24px] lg:w-[34px] h-[24px] lg:h-[34px] flex absolute left-[12px] lg:left-[17px] top-0 bg-tertiary-bg rounded-full items-center justify-center">
                   <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
                 </div>
               </div>
-              <span className="text-16 lg:text-18 font-bold text-secondary-text mt-0.5">{`${tokenA.symbol} and ${tokenB.symbol} `}</span>
+              <div className={clsxMerge("flex gap-x-2 md:mt-1 md:pl-3 md:flex-row")}>
+                <span className="text-16 lg:text-18 items-center font-bold text-secondary-text">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
+              </div>
             </div>
             <div className="flex items-start gap-2 mt-1 justify-end">
               {hash && (
@@ -430,23 +472,33 @@ export default function DecreaseLiquidityPage({
                 </a>
               )}
 
-              {status === RemoveLiquidityStatus.PENDING && (
-                <>
-                  <div className="mt-2">
-                    <Preloader type="linear" smallDots={true} />
+              <div className="flex items-start">
+                {status === RemoveLiquidityStatus.PENDING && (
+                  <div className="flex flex-row flex-nowrap gap-2 mt-2 md:mt-1">
+                    <div className="-mt-0.5">
+                      <Preloader type="linear" smallDots={true} />
+                    </div>
+                    <span className="mr-3 text-secondary-text text-14 whitespace-nowrap">
+                      {t("status_pending")}
+                    </span>
                   </div>
-                  <span className="mr-3 text-secondary-text text-14 whitespace-nowrap">
-                    {t("status_pending")}
-                  </span>
-                </>
-              )}
-              {status === RemoveLiquidityStatus.LOADING && <Preloader size={24} />}
-              {status === RemoveLiquidityStatus.SUCCESS && (
-                <Svg className="text-green" iconName="done" size={24} />
-              )}
-              {status === RemoveLiquidityStatus.ERROR && (
-                <Svg className="text-red-light" iconName="warning" size={24} />
-              )}
+                )}
+                {status === RemoveLiquidityStatus.LOADING && (
+                  <div className="flex flex-row flex-nowrap gap-2 -mt-1 md:mt-0.5">
+                    <Preloader size={24} />
+                  </div>
+                )}
+                {status === RemoveLiquidityStatus.SUCCESS && (
+                  <div className="flex flex-row flex-nowrap gap-2 -mt-1 md:mt-0.5">
+                    <Svg className="text-green" iconName="done" size={24} />
+                  </div>
+                )}
+                {status === RemoveLiquidityStatus.ERROR && (
+                  <div className="flex flex-row flex-nowrap gap-2 -mt-1 md:mt-0.5">
+                    <Svg className="text-red-light" iconName="warning" size={24} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="py-5">
@@ -493,7 +545,7 @@ export default function DecreaseLiquidityPage({
           ) : null}
 
           {RemoveLiquidityStatus.PENDING === status ? (
-            <Button fullWidth disabled>
+            <Button fullWidth disabled className="bg-tertiary-bg opacity-50">
               <span className="flex items-center gap-2">
                 <Preloader size={20} color="green" type="linear" />
               </span>
@@ -534,7 +586,7 @@ export default function DecreaseLiquidityPage({
                   <span>
                     {t("removed_liquidity_message")}:{" "}
                     <Link href={`/pool/${params.tokenId}`}>
-                      <span className="text-green hocus:text-green-hover underline">
+                      <span className="text-green duration-200 hocus:text-green-hover underline">
                         {t("claim_tokens")}
                       </span>
                     </Link>

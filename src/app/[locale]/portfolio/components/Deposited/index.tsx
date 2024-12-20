@@ -87,7 +87,7 @@ export const Deposited = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:py-3 lg:px-5 py-2.5  lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 md:py-3 lg:px-5 py-2.5  lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
             <div className="flex items-center gap-1 z-10">
               <span className="text-14 lg:text-16 text-secondary-text">Approved</span>
@@ -124,13 +124,13 @@ export const Deposited = () => {
 
       <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
         <h1 className="text-18 lg:text-32 font-medium">{t("deposited_title")}</h1>
-        {currentTableData.length > 0 && (
+        {(currentTableData.length > 0 || searchValue.length > 0) && (
           <div className="flex flex-col lg:flex-row gap-3">
             <SearchInput
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder={t("balances_search_placeholder")}
-              className="bg-primary-bg lg:w-[480px] max-h-[40px] md:max-h-[48px]"
+              className="bg-primary-bg lg:w-[480px] max-h-10 md:max-h-12"
             />
           </div>
         )}

@@ -114,7 +114,7 @@ export const RevokeDialog = () => {
           />
           <div className="w-full md:w-[570px] card-spacing gap-1">
             <div className="flex justify-between items-center">
-              <div className="flex gap-2 py-2 items-center">
+              <div className="flex gap-2 py-2 items-center text-secondary-text">
                 {standard === Standard.ERC20 ? (
                   <span>{`${t("approve")} 0 ${token.symbol}`}</span>
                 ) : (
@@ -179,17 +179,21 @@ export const RevokeDialog = () => {
                     onBlur={() => setIsFocused(false)}
                     allowNegative={false}
                   />
-                  <span className="text-secondary-text min-w-max">
+                  <span className="text-tertiary-text min-w-max">
                     {t("amount", { symbol: token.symbol })}
                   </span>
                 </div>
                 {isError ? (
-                  <span className="text-12 mt-2 text-red">{`Must be no more than ${formatUnits(currentAllowance, token.decimals)} ${token.symbol}`}</span>
+                  <span className="text-12 mt-2 text-red-light">
+                    {t("must_be_value", {
+                      val: `${formatUnits(currentAllowance, token.decimals)} ${token.symbol}`,
+                    })}
+                  </span>
                 ) : null}
               </>
             )}
 
-            <div style={{ margin: "12px 0" }}>
+            <div className="mt-3">
               <RemoveLiquidityGasSettings
                 gasPriceOption={gasPriceOption}
                 gasPriceSettings={gasPriceSettings}
@@ -207,7 +211,7 @@ export const RevokeDialog = () => {
               />
             </div>
 
-            <div style={{ margin: "24px 0" }}>
+            <div className="mb-4 mt-4">
               {isError ? (
                 <Button fullWidth disabled>
                   <span className="flex items-center gap-2">Enter correct values</span>

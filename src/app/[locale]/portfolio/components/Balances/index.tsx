@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { formatUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -41,23 +41,10 @@ export const Balances = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  // const [isTokenInfoOpened, setTokenInfoOpened] = useState(false);
   const isTokenInfoOpened = Boolean(tokenForPortfolio);
   const handleClosTokenInfo = () => {
     setTokenForPortfolio(null);
   };
-
-  // const [prevTokenForPortfolio, setPrevTokenForPortfolio] = useState<Currency | null>(null);
-  //
-  // useEffect(() => {
-  //   if (tokenForPortfolio !== prevTokenForPortfolio) {
-  //     setTokenInfoOpened(Boolean(tokenForPortfolio));
-  //   }
-  // }, [tokenForPortfolio, prevTokenForPortfolio]);
-  //
-  // useEffect(() => {
-  //   setPrevTokenForPortfolio(tokenForPortfolio);
-  // }, [tokenForPortfolio]);
 
   const loading = false;
 
@@ -78,7 +65,8 @@ export const Balances = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-2.5 md:py-6 w-full relative overflow-hidden">
+        {/* Wallet balance info box */}
+        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-6 w-full relative overflow-hidden">
           <div className="flex items-center gap-1 mb-auto">
             <span className="text-14 lg:text-16 text-secondary-text">{t("wallet_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
@@ -96,7 +84,7 @@ export const Balances = () => {
         </div>
 
         {/*TODO: Extract card to separate component. 01.10.2024*/}
-        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-2.5 md:py-6 w-full overflow-hidden">
+        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-4 md:px-5 py-2.5 md:py-6 w-full overflow-hidden">
           <div className="flex items-center gap-1 z-10">
             <span className="text-14 lg:text-16 text-secondary-text">{t("margin_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
@@ -154,7 +142,7 @@ export const Balances = () => {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t("balances_search_placeholder")}
-            className="bg-primary-bg lg:w-[480px]"
+            className="h-10 md:h-12 bg-primary-bg lg:w-[480px]"
           />
         </div>
       </div>

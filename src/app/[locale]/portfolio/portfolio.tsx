@@ -4,7 +4,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Address, isAddress } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
@@ -57,7 +57,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
       ? t("enter_address_correct_format")
       : "";
 
-  const { addWallet } = usePortfolioStore();
+  const { addWallet, hasWallet, hasSearchWallet } = usePortfolioStore();
 
   const handleAddWallet = useCallback(() => {
     if (tokenAddressToImport && !error) {
@@ -75,7 +75,10 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
         <Input
           className={clsxMerge("pr-12")}
           value={tokenAddressToImport}
-          onChange={(e) => setTokenAddressToImport(e.target.value)}
+          onChange={(e) => {
+            setTokenAddressToImport(e.target.value);
+            hasWallet(e.target.value as Address);
+          }}
           placeholder={t("add_wallet_placeholder")}
           isError={!!error}
         />
@@ -86,24 +89,31 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
             variant={IconButtonVariant.ADD}
             buttonSize={IconButtonSize.REGULAR}
             iconSize={IconSize.REGULAR}
-            disabled={!!error || !tokenAddressToImport}
+            disabled={!!error || !tokenAddressToImport || hasSearchWallet}
             handleAdd={handleAddWallet}
           />
         </div>
       </div>
-      {error && <p className="text-12 text-red-light mt-1">{error}</p>}
+      {error && <p className="text-12 text-red-light">{error}</p>}
     </>
   );
 };
 
 const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
-  const { searchValue, setSearchValue, errorSearch } = useActiveAddresses();
+  const { searchValue, setSearchValue } = useActiveAddresses();
 
   const t = useTranslations("Portfolio");
 
-  const error = Boolean(searchValue) && !isAddress(searchValue) ? t("enter_in_correct_format") : "";
+  const error =
+    Boolean(searchValue) && !isAddress(searchValue) ? t("enter_address_correct_format") : "";
 
-  const { addWallet } = usePortfolioStore();
+  const { addWallet, hasWallet, hasSearchWallet } = usePortfolioStore();
+
+  useEffect(() => {
+    if (searchValue) {
+      hasWallet(searchValue as Address);
+    }
+  }, [error, hasSearchWallet, hasWallet, searchValue]);
 
   const handleAddWallet = useCallback(() => {
     if (searchValue && !error) {
@@ -123,15 +133,16 @@ const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
         onChange={(e) => setSearchValue(e.target.value)}
         placeholder={t("search_placeholder")}
         isError={!!error}
-        style={{ paddingRight: "100px" }}
-        noCloseIcon
+        style={
+          searchValue && !hasSearchWallet ? { paddingRight: "100px" } : { paddingRight: "60px" }
+        }
         className={clsx(
           "bg-primary-bg lg:w-[480px] h-[40px] lg:h-[48px]",
           searchValue && "pr-[92px]",
         )}
       />
-      {<p className="text-12 text-red-light mt-1 h-4">{errorSearch}</p>}
-      {searchValue ? (
+      {<p className="text-12 text-red-light mb-1 h-4">{error}</p>}
+      {searchValue && !hasSearchWallet ? (
         <div className={clsx("absolute right-[48px] top-1 flex items-center justify-center")}>
           <IconButton
             variant={IconButtonVariant.ADD}
@@ -162,11 +173,28 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   const { disconnect } = useDisconnect();
 
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
-  const { setAllWalletActive, removeWallet, isAllWalletActive } = usePortfolioStore();
+  const {
+    setAllWalletActive,
+    removeWallet,
+    isAllWalletActive,
+    showFromSearch,
+    setShowFromSearch,
+    setSearchValue,
+    searchValue,
+    addWallet,
+    hasSearchWallet,
+  } = usePortfolioStore();
   const { wallets, setIsWalletActive } = usePortfolioWallets();
   const [content, setContent] = useState<ManageWalletsPopoverContent>(
-    wallets.length ? "list" : "add",
+    wallets.length || showFromSearch ? "list" : "add",
   );
+
+  const handleAddWallet = useCallback(() => {
+    addWallet(searchValue as Address);
+    setSearchValue("");
+    addToast("Successfully added!");
+    setShowFromSearch(false);
+  }, [addWallet, searchValue, setSearchValue, setShowFromSearch]);
 
   const popupBackHandler = useMemo(() => {
     if (content === "list") {
@@ -189,19 +217,19 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   }, [content, wallets.length]);
 
   return (
-    <div className="bg-primary-bg rounded-5 border border-secondary-border lg:min-w-[450px]">
+    <div className="bg-primary-bg  lg:min-w-[450px]">
       <DialogHeader
-        className={content === "add" ? "md:pr-3 px-4 md:pl-3" : "md:pr-3 px-4 md:pl-5"}
+        className={
+          content === "add" || content === "manage"
+            ? "md:pr-3 px-4 md:pl-3"
+            : "md:pr-3 px-4 md:pl-5"
+        }
         onClose={() => {
-          if (!popupBackHandler) {
-            setIsOpened(false);
-          } else {
-            popupBackHandler();
-          }
+          setIsOpened(false);
         }}
-        onBack={content === "add" ? popupBackHandler : undefined}
+        onBack={content === "add" || content === "manage" ? popupBackHandler : undefined}
         settings={
-          content === "list" ? (
+          content === "list" && !showFromSearch ? (
             <Button
               colorScheme={ButtonColor.LIGHT_GREEN}
               size={ButtonSize.MEDIUM}
@@ -227,6 +255,7 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
                   <span className="text-secondary-text">or</span>
                   <div className="w-full h-[1px] bg-secondary-border" />
                 </div>
+
                 <Button
                   onClick={() => setWalletConnectOpened(true)}
                   fullWidth
@@ -239,27 +268,97 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
           </div>
         ) : content === "list" ? (
           <>
-            <div className="flex justify-between text-secondary-text text-16 font-medium px-5">
-              <span
-                className="py-2 cursor-pointer hocus:text-green-hover"
-                onClick={() => setAllWalletActive()}
-              >
-                {isAllWalletActive ? t("deselect_all") : t("select_all")}
-              </span>
-              <span
-                className="py-2 cursor-pointer hocus:text-green-hover"
-                onClick={() => {
-                  setContent("manage");
-                }}
-              >
-                {t("manage_title")}
-              </span>
-            </div>
+            {showFromSearch ? (
+              <>
+                <div
+                  className={clsx(
+                    "flex flex-col justify-between text-secondary-text text-18 px-5",
+                    wallets.length > 0 && "mb-4",
+                  )}
+                >
+                  <span className="py-2 text-tertiary-text">{t("search_result")}</span>
+                  <div
+                    className={clsxMerge(
+                      "flex items-center pl-5 pr-3 py-2  bg-tertiary-bg rounded-3 gap-3 relative",
+                    )}
+                  >
+                    <Image
+                      width={40}
+                      height={40}
+                      key={searchValue as Address}
+                      className={clsx(
+                        "w-10 h-10 min-h-10 min-w-10 rounded-2 border-2 border-primary-bg",
+                      )}
+                      src={toDataUrl(searchValue as Address)}
+                      alt={searchValue as Address}
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium text-16 text-primary-text">
+                        {truncateMiddle((searchValue as Address) || "", {
+                          charsFromStart: 6,
+                          charsFromEnd: 6,
+                        })}
+                      </span>
+                      <span className="text-secondary-text text-14">$ —</span>
+                    </div>
+                    <div className="ml-auto flex flex-row gap-x-1">
+                      {!hasSearchWallet && (
+                        <IconButton
+                          variant={IconButtonVariant.ADD}
+                          buttonSize={IconButtonSize.REGULAR}
+                          iconSize={IconSize.REGULAR}
+                          handleAdd={() => handleAddWallet()}
+                        />
+                      )}
+                      <IconButton
+                        variant={IconButtonVariant.CLOSE}
+                        buttonSize={IconButtonSize.REGULAR}
+                        iconSize={IconSize.REGULAR}
+                        handleClose={() => {
+                          setShowFromSearch(false);
+                          setSearchValue("");
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {wallets.length > 0 && (
+                  <>
+                    <div className="flex-shrink-0 w-full h-[1px] bg-quaternary-bg my-2" />
+                    <div className="flex justify-between text-secondary-text text-18 px-5">
+                      <span className="py-2 text-tertiary-text">{t("my_wallets")}</span>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="flex justify-between text-secondary-text text-16 font-medium px-5">
+                <span
+                  className="py-2 cursor-pointer hocus:text-green-hover"
+                  onClick={() => setAllWalletActive()}
+                >
+                  {isAllWalletActive ? t("deselect_all") : t("select_all")}
+                </span>
+                <span
+                  className="py-2 cursor-pointer hocus:text-green-hover"
+                  onClick={() => {
+                    setContent("manage");
+                  }}
+                >
+                  {t("manage_title")}
+                </span>
+              </div>
+            )}
             <div className="flex flex-col gap-3 px-5 max-h-[380px] overflow-auto">
               {wallets.map(({ address, isActive }) => (
                 <div
                   key={address}
-                  className="cursor-pointer flex items-center px-5 py-2 hocus:bg-quaternary-bg bg-tertiary-bg rounded-3 gap-3 relative"
+                  className={clsxMerge(
+                    "flex items-center px-5 py-2  bg-tertiary-bg rounded-3 gap-3 relative",
+                    showFromSearch
+                      ? "disabled opacity-50 pointer-events-none"
+                      : "cursor-pointer hocus:bg-quaternary-bg",
+                  )}
                   onClick={() => {
                     setIsWalletActive(address, !isActive);
                   }}
@@ -291,8 +390,17 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
               ))}
             </div>
             <div className="flex w-full px-5 pt-5 mt-5 border-t border-secondary-border">
-              <Button fullWidth onClick={() => setIsOpened(false)}>
-                {t("show_portfolio")}
+              <Button
+                fullWidth
+                onClick={() => {
+                  if (showFromSearch) {
+                    setShowFromSearch(false);
+                    setSearchValue("");
+                    // setIsOpened(false);
+                  } else setIsOpened(false);
+                }}
+              >
+                {showFromSearch ? t("reset_search") : t("show_portfolio")}
               </Button>
             </div>
           </>
@@ -408,7 +516,7 @@ const ManageWallets = () => {
           placement={"bottom-start"}
           trigger={trigger}
         >
-          <div className="bg-primary-bg rounded-5 border border-secondary-border shadow-popover shadow-black/70">
+          <div className="bg-primary-bg rounded-5 border border-secondary-border overflow-hidden shadow-popover shadow-black/70">
             <ManageWalletsContent setIsOpened={setIsOpened} />
           </div>
         </Popover>
@@ -425,8 +533,15 @@ export function Portfolio() {
   const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
 
   const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
-
+  const { showFromSearch, hasSearchWallet, addWallet, searchValue, setSearchValue } =
+    usePortfolioStore();
   const { activeAddresses } = useActiveAddresses();
+
+  const handleAddWallet = useCallback(() => {
+    addWallet(searchValue as Address);
+    setSearchValue("");
+    addToast("Successfully added!");
+  }, [addWallet, searchValue, setSearchValue]);
 
   return (
     <Container>
@@ -441,6 +556,11 @@ export function Portfolio() {
         <div className="flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
           {activeAddresses.length ? (
             <div className="flex gap-3 lg:gap-0 flex-col lg:flex-row w-full overflow-hidden">
+              {showFromSearch && (
+                <div className="flex pl-4 lg:pl-5 items-center text-18 font-medium text-tertiary-text text-nowrap">
+                  {t("search_result")}
+                </div>
+              )}
               <div className="flex px-4 lg:px-5">
                 {activeAddresses.slice(0, 3).map((ad, index) => (
                   <Image
@@ -459,12 +579,14 @@ export function Portfolio() {
                   <div className="w-10 h-10 min-h-10 min-w-10 bg-tertiary-bg rounded-2 border-2 border-primary-bg ml-[-12px] flex justify-center items-center">{`+${activeAddresses.length - 3}`}</div>
                 )}
               </div>
-              <div className="flex gap-3 w-full overflow-x-auto px-4 lg:pr-5 lg:pl-0 lg:flex-wrap pb-4 lg:pb-0">
+              <div
+                className={clsxMerge(
+                  "flex gap-3 overflow-x-auto lg:pl-0 lg:flex-wrap pb-4 lg:pb-0",
+                  showFromSearch ? "pl-4 pr-2" : "w-full px-4 lg:pr-5",
+                )}
+              >
                 {activeAddresses.map((ad) => (
-                  <div
-                    key={ad}
-                    className="flex items-center gap-1 p-r pl-3 bg-tertiary-bg rounded-2"
-                  >
+                  <div key={ad} className="flex items-center gap-1 pl-3 bg-tertiary-bg rounded-2">
                     <ExternalTextLink
                       text={truncateMiddle(ad || "", { charsFromStart: 5, charsFromEnd: 3 })}
                       href={getExplorerLink(ExplorerLinkType.ADDRESS, ad, chainId)}
@@ -473,6 +595,18 @@ export function Portfolio() {
                   </div>
                 ))}
               </div>
+              {showFromSearch && (
+                <Button
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  size={ButtonSize.MEDIUM}
+                  onClick={() => (hasSearchWallet ? handleAddWallet() : {})}
+                  disabled={hasSearchWallet}
+                >
+                  <div className="flex items-center gap-2  text-nowrap">
+                    <span>{hasSearchWallet ? t("already_in_wallets") : t("add_to_wallets")}</span>
+                  </div>
+                </Button>
+              )}
             </div>
           ) : (
             <div className="min-h-[72px] md:min-h-[40px] flex items-center w-full relative -mt-5 md:mt-0 pt-1 md:py-0 md:gap-x-3 px-4 lg:px-5 lg:pb-0">

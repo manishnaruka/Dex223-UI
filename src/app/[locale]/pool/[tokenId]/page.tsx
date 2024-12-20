@@ -167,11 +167,11 @@ export default function PoolPage({
         </div>
 
         <div className="w-full flex flex-col mb-4 lg:mb-5">
-          <div className="flex flex-wrap items-center justify-between gap-1">
+          <div className="flex flex-wrap items-center gap-2">
             <div>
               <TokensPair tokenA={token0} tokenB={token1} />
             </div>
-            <div className="flex flex-wrap items-center justify-end gap-2 ">
+            <div className="flex flex-wrap items-center gap-2 md:-mt-0.5">
               {position && (
                 <Badge
                   percentage={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}

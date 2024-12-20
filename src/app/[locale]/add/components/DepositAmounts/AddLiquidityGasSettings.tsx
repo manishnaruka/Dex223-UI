@@ -20,12 +20,6 @@ import {
   useAddLiquidityGasPriceStore,
 } from "../../stores/useAddLiquidityGasSettings";
 
-const gasOptionTitle: Record<GasOption, any> = {
-  [GasOption.CHEAP]: "cheap",
-  [GasOption.FAST]: "fast",
-  [GasOption.CUSTOM]: "custom",
-};
-
 export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: boolean }) => {
   //
   const chainId = useCurrentChainId();
@@ -89,15 +83,11 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
         </div>
       </div>
       <div className="flex w-full md:w-1/8 items-center gap-2 mt-2 md:mt-0">
-        {/*<div className="flex items-center gap-2">*/}
-        {/*<span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">*/}
-        {/*  {tSwap(gasOptionTitle[gasPriceOption])}*/}
-        {/*</span>*/}
         <Button
           className="w-full md:w-auto h-8 md:h-auto"
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.EXTRA_SMALL}
-          disabled={isFormDisabled}
+          disabled={isFormDisabled || disabledGasSettings}
           onClick={() => setIsOpenedFee(true)}
         >
           Edit
