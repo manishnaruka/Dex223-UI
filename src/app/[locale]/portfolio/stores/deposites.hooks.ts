@@ -1,8 +1,9 @@
 import { multicall } from "@wagmi/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Address } from "viem";
 
 import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
+import { useWalletDepositsLoadingStore } from "@/app/[locale]/portfolio/stores/useWalletDepositsLoading";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { config } from "@/config/wagmi/config";
@@ -90,7 +91,7 @@ const getWalletDeposites = async (
 };
 
 export const useActiveWalletsDeposites = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, setIsLoading } = useWalletDepositsLoadingStore();
   const { activeAddresses } = useActiveAddresses();
   const tokens = useTokens();
   const { deposites, setAllDeposites } = useWalletsDeposites();
@@ -101,30 +102,56 @@ export const useActiveWalletsDeposites = () => {
     return [NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]];
   }, [chainId]);
 
+  const activeProcessRef = useRef<Promise<void> | null>(null);
+
   useEffect(() => {
-    if (!tokens.length) return;
-    (async () => {
+    if (!tokens.length || !activeAddresses.length) return;
+
+    // Wait for the current process to complete if ongoing
+    const waitForCurrentProcess = async () => {
+      if (activeProcessRef.current) {
+        await activeProcessRef.current; // Wait for the current operation to finish
+      }
+    };
+
+    const processDeposits = async () => {
       setIsLoading(true);
-      const result = await Promise.all(
-        activeAddresses.map((address) => {
-          return getWalletDeposites(
-            address,
-            tokens.map((token) => token.wrapped),
-            contractAddresses,
-          );
-        }),
-      );
-      setAllDeposites(result);
-      setIsLoading(false);
-      setRefreshDepositsTrigger(false);
+
+      try {
+        const result = await Promise.all(
+          activeAddresses.map((address) =>
+            getWalletDeposites(
+              address,
+              tokens.map((token) => token.wrapped),
+              contractAddresses,
+            ),
+          ),
+        );
+        setAllDeposites(result);
+      } catch (error) {
+        console.error("Error fetching deposits:", error);
+      } finally {
+        setIsLoading(false);
+        setRefreshDepositsTrigger(false);
+        activeProcessRef.current = null; // Clear the reference when done
+      }
+    };
+
+    // Manage ongoing process
+    (async () => {
+      await waitForCurrentProcess(); // Ensure the ongoing process completes first
+      activeProcessRef.current = processDeposits(); // Start the new process and track it
     })();
   }, [
-    tokens,
-    activeAddresses,
+    tokens.length,
+    activeAddresses.length,
     setAllDeposites,
     contractAddresses,
     refreshDepositsTrigger,
     setRefreshDepositsTrigger,
+    setIsLoading,
+    tokens,
+    activeAddresses,
   ]);
 
   return { isLoading, deposites };

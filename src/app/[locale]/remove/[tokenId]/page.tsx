@@ -8,6 +8,7 @@ import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react"
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
 
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import useRemoveLiquidity, {
   useRemoveLiquidityEstimatedGas,
 } from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
@@ -97,7 +98,7 @@ export default function DecreaseLiquidityPage({
   const tWallet = useTranslations("Wallet");
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
 
-  const { position: positionInfo } = usePositionFromTokenId(tokenId);
+  const { position: positionInfo } = usePositionFromTokenId(tokenId, false);
   const position = usePositionFromPositionInfo(positionInfo);
   const chainId = useCurrentChainId();
   // const [value, setValue] = useState(25);
@@ -132,18 +133,26 @@ export default function DecreaseLiquidityPage({
     setTokenId,
     position: storedPosition,
   } = useRemoveLiquidityStore();
-  const { status, hash } = useRemoveLiquidityStatusStore();
+  const { setStatus, status, hash } = useRemoveLiquidityStatusStore();
+  const { setRefreshDepositsTrigger, refreshDepositsTrigger } = useRefreshDepositsDataStore();
   const t = useTranslations("Liquidity");
 
   const { handleRemoveLiquidity } = useRemoveLiquidity();
 
   const handleClose = () => {
-    reset();
+    // reset();
     setIsOpen(false);
   };
 
   const [isFocused, setIsFocused] = useState(false);
   const divRef = useRef(null);
+
+  useEffect(() => {
+    if (refreshDepositsTrigger) {
+      reset(); // do reset only if removed liquidity
+      setRefreshDepositsTrigger(false);
+    }
+  }, [position, refreshDepositsTrigger, reset, setRefreshDepositsTrigger]);
 
   // Effect to handle clicks outside the div
   useEffect(() => {
@@ -176,8 +185,9 @@ export default function DecreaseLiquidityPage({
     setTokenB(tokenB);
   }, [tokenB, setTokenB]);
   useEffect(() => {
+    reset();
     setTokenId(tokenId);
-  }, [tokenId, setTokenId]);
+  }, [tokenId, setTokenId, reset]);
 
   if (!tokenA || !tokenB) return <div>Error: Token A or B undefined</div>;
 
@@ -399,7 +409,11 @@ export default function DecreaseLiquidityPage({
                 ) : (
                   <Button
                     className="h-[48px] md:h-[60px]"
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => {
+                      setIsOpen(true);
+                      setStatus(RemoveLiquidityStatus.INITIAL);
+                      setRefreshDepositsTrigger(false);
+                    }}
                     fullWidth
                   >
                     {t("remove_title")}
@@ -461,7 +475,7 @@ export default function DecreaseLiquidityPage({
               <div className="flex items-start">
                 {status === RemoveLiquidityStatus.PENDING && (
                   <div className="flex flex-row flex-nowrap gap-2 mt-2 md:mt-1">
-                    <div className="mt-2">
+                    <div className="-mt-0.5">
                       <Preloader type="linear" smallDots={true} />
                     </div>
                     <span className="mr-3 text-secondary-text text-14 whitespace-nowrap">
