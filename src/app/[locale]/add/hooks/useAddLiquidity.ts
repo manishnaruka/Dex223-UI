@@ -5,6 +5,7 @@ import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
@@ -347,8 +348,9 @@ export const useAddLiquidity = ({
 
         setLiquidityHash(hash);
 
-        const transaction = await publicClient.getTransaction({
+        const transaction = await getTransactionWithRetries({
           hash,
+          publicClient,
         });
 
         const nonce = transaction.nonce;

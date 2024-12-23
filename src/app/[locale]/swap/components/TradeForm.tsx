@@ -364,7 +364,7 @@ export default function TradeForm() {
     }
 
     return undefined;
-  }, [baseFee, gasPriceOption, gasPriceSettings, priorityFee]);
+  }, [baseFee, gasPrice, gasPriceOption, gasPriceSettings, priorityFee]);
 
   const computedGasSpendingETH = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {

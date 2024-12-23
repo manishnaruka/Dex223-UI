@@ -5,6 +5,7 @@ import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
@@ -160,8 +161,9 @@ export default function useRemoveLiquidity() {
       const hash = await walletClient.writeContract({ ...request, account: undefined });
       setHash(hash);
 
-      const transaction = await publicClient.getTransaction({
+      const transaction = await getTransactionWithRetries({
         hash,
+        publicClient,
       });
 
       const nonce = transaction.nonce;

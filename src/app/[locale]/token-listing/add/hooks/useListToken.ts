@@ -22,6 +22,7 @@ import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/us
 import { AUTO_LISTING_ABI } from "@/config/abis/autolisting";
 import { ROUTER_ABI } from "@/config/abis/router";
 import { getGasSettings } from "@/functions/gasSettings";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -294,8 +295,9 @@ export default function useListToken() {
 
         if (hash) {
           setListTokenHash(hash);
-          const transaction = await publicClient.getTransaction({
+          const transaction = await getTransactionWithRetries({
             hash,
+            publicClient,
           });
 
           const nonce = transaction.nonce;

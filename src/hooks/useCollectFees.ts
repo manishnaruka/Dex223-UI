@@ -16,6 +16,7 @@ import {
   useTokensOutCode,
 } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -223,8 +224,9 @@ export function usePositionFees(): {
       const hash = await walletClient.writeContract(request);
 
       setHash(hash);
-      const transaction = await publicClient.getTransaction({
+      const transaction = await getTransactionWithRetries({
         hash,
+        publicClient,
       });
 
       const nonce = transaction.nonce;

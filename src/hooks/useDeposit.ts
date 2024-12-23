@@ -4,6 +4,7 @@ import { useAccount, usePublicClient, useReadContract, useWalletClient } from "w
 
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import addToast from "@/other/toast";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -138,8 +139,9 @@ export function useStoreDeposit({
         }
 
         if (hash) {
-          const transaction = await publicClient.getTransaction({
+          const transaction = await getTransactionWithRetries({
             hash,
+            publicClient,
           });
 
           const nonce = transaction.nonce;

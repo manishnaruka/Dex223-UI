@@ -4,6 +4,7 @@ import { useAccount, usePublicClient, useReadContract, useWalletClient } from "w
 
 import { AddLiquidityApproveStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -155,57 +156,48 @@ export function useStoreAllowance({
         }
 
         if (hash) {
-          let transaction = null;
-          const maxRetries = 10;
-          const delay = 2000; // 2 seconds
+          const transaction = await getTransactionWithRetries({ hash, publicClient });
 
-          for (let attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-              transaction = await publicClient.getTransaction({ hash });
-              if (transaction) {
-                const transaction = await publicClient.getTransaction({
-                  hash,
-                  blockTag: "pending" as any,
-                });
+          if (transaction) {
+            const transaction = await publicClient.getTransaction({
+              hash,
+              blockTag: "pending" as any,
+            });
 
-                const nonce = transaction.nonce;
+            const nonce = transaction.nonce;
 
-                addRecentTransaction(
-                  {
-                    hash,
-                    nonce,
-                    chainId,
-                    gas: {
-                      model: GasFeeModel.EIP1559,
-                      gas: gasLimit.toString(),
-                      maxFeePerGas: undefined,
-                      maxPriorityFeePerGas: undefined,
-                    },
-                    params: {
-                      ...stringifyObject(params),
-                      abi: [getAbiItem({ name: "approve", abi: ERC20_ABI })],
-                    },
-                    title: {
-                      symbol: token.symbol!,
-                      template: RecentTransactionTitleTemplate.APPROVE,
-                      amount: formatUnits(amountToApprove, token.decimals),
-                      logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
-                    },
-                  },
-                  address,
-                );
+            addRecentTransaction(
+              {
+                hash,
+                nonce,
+                chainId,
+                gas: {
+                  model: GasFeeModel.EIP1559,
+                  gas: gasLimit.toString(),
+                  maxFeePerGas: undefined,
+                  maxPriorityFeePerGas: undefined,
+                },
+                params: {
+                  ...stringifyObject(params),
+                  abi: [getAbiItem({ name: "approve", abi: ERC20_ABI })],
+                },
+                title: {
+                  symbol: token.symbol!,
+                  template: RecentTransactionTitleTemplate.APPROVE,
+                  amount: formatUnits(amountToApprove, token.decimals),
+                  logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
+                },
+              },
+              address,
+            );
 
-                // no await needed, function should return hash without waiting
-                waitAndReFetch(hash);
+            // no await needed, function should return hash without waiting
+            waitAndReFetch(hash);
 
-                return { success: true as const, hash };
-              }
-            } catch (err) {
-              console.log(`Attempt ${attempt + 1}: Transaction not found yet.`);
-            }
-            await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
+            return { success: true as const, hash };
           }
         }
+
         return { success: false as const };
       } catch (e) {
         console.log(e);

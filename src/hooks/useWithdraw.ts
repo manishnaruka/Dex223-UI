@@ -8,6 +8,7 @@ import {
 } from "@/app/[locale]/add/stores/useRevokeGasSettings";
 import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
@@ -159,8 +160,9 @@ export default function useWithdraw({
 
         const hash = await walletClient.writeContract(request);
 
-        const transaction = await publicClient.getTransaction({
+        const transaction = await getTransactionWithRetries({
           hash,
+          publicClient,
         });
 
         const nonce = transaction.nonce;
