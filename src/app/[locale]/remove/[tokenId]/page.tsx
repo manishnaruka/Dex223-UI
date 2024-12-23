@@ -402,13 +402,15 @@ export default function DecreaseLiquidityPage({
               ) : position && tokenA && tokenB ? (
                 [RemoveLiquidityStatus.LOADING, RemoveLiquidityStatus.PENDING].includes(status) ? (
                   <>
-                    <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
-                      <Preloader size={20} color="green" type="circular" />
-                      <span className="mr-auto items-center text-14 text-primary-text">
-                        {t("remove_liquidity_progress")}
-                      </span>
+                    <div className="flex w-full mt-4 md:mt-0 md:pl-6 pl-4 md:pr-6 pr-4 md:min-h-12 min-h-[76px] md:flex-row flex-col bg-tertiary-bg gap-2 mb-4 rounded-3 items-center md:justify-between">
+                      <div className="flex gap-2 flex-nowrap mr-auto items-center md:mt-0 mt-3 mb-1 md:mb-0">
+                        <Preloader size={20} color="green" type="circular" />
+                        <span className="mr-auto items-center text-14 text-primary-text">
+                          {t("remove_liquidity_progress")}
+                        </span>
+                      </div>
                       <Button
-                        className="ml-auto mr-3"
+                        className="md:ml-auto md:mr-3 w-full md:w-auto"
                         variant={ButtonVariant.CONTAINED}
                         size={ButtonSize.EXTRA_SMALL}
                         onClick={() => {
