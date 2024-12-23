@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { ButtonHTMLAttributes, useCallback, useState } from "react";
+import { ButtonHTMLAttributes, useCallback, useEffect, useState } from "react";
 import { MouseEvent } from "react";
 
 import { SortingType } from "@/app/[locale]/borrow-market/components/BorrowMarketTable";
@@ -57,7 +57,7 @@ function IconButtonFrame({
       )}
       {...props}
     >
-      <Svg size={iconSize} iconName={iconName} />
+      <Svg size={iconSize} iconName={iconName} className="z-10 relative" />
     </button>
   );
 }
@@ -70,6 +70,7 @@ export enum IconButtonVariant {
   COPY,
   SORTING,
   ADD,
+  BACK,
 }
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> &
@@ -89,6 +90,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
       }
     | { variant: IconButtonVariant.CONTROL; iconName: IconName }
     | { variant: IconButtonVariant.COPY; text: string }
+    | { variant: IconButtonVariant.BACK; iconName?: IconName }
     | { variant?: IconButtonVariant.DEFAULT | undefined; iconName: IconName; active?: boolean }
     | {
         variant: IconButtonVariant.SORTING;
@@ -106,12 +108,16 @@ function CopyIconButton(_props: CopyIconButtonProps) {
   const { text, buttonSize, className, ...props } = _props;
 
   const handleCopy = useCallback(async () => {
-    await copyToClipboard(text);
-    setIsCopied(true);
-    addToast(t("successfully_copied"));
-    setTimeout(() => {
-      setIsCopied(false);
-    }, 800);
+    try {
+      await copyToClipboard(text);
+      setIsCopied(true);
+      addToast(t("successfully_copied"));
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 800);
+    } catch (e) {
+      addToast("Clipboard API not supported", "error");
+    }
   }, [t, text]);
 
   return (
@@ -129,6 +135,14 @@ function CopyIconButton(_props: CopyIconButtonProps) {
   );
 }
 export default function IconButton(_props: Props) {
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
+      setIsTouchDevice(true);
+    }
+  }, []);
+
   switch (_props.variant) {
     case IconButtonVariant.DEFAULT:
     case undefined: {
@@ -137,8 +151,9 @@ export default function IconButton(_props: Props) {
         <IconButtonFrame
           iconName={_props.iconName}
           className={clsxMerge(
-            "text-tertiary-text  hocus:text-green-hover-icon relative before:opacity-0 before:duration-200 hocus:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[9px] duration-200",
+            "text-tertiary-text relative before:opacity-0 before:duration-200 hocus:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:blur-[9px] duration-200",
             active && "text-green",
+            !isTouchDevice && "hocus:text-green-hover-icon before:bg-green-hover-icon",
             className,
           )}
           {...props}
@@ -171,7 +186,7 @@ export default function IconButton(_props: Props) {
           iconName="delete"
           onClick={_props.handleDelete}
           className={clsxMerge(
-            "rounded-full bg-transparent hocus:bg-red-bg text-tertiary-text hocus:text-red duration-200",
+            "rounded-full before:rounded-full before:z-0 before:blur bg-transparent duration-200 before:opacity-0 before:duration-200 hocus:before:opacity-100 text-tertiary-text before:absolute before:w-8 before:h-8 before:bg-red-bg hocus:text-red-light-hover",
             className,
           )}
           {...props}
@@ -186,7 +201,7 @@ export default function IconButton(_props: Props) {
           iconName="add"
           onClick={_props.handleAdd}
           className={clsxMerge(
-            "bg-green text-black hocus:bg-green-hover rounded-2 duration-200",
+            "bg-green-bg-hover text-secondary-text hocus:text-primary-text hocus:border-green hocus:border rounded-2 duration-200 disabled:bg-tertiary-bg disabled:text-tertiary-text disabled:opacity-100",
             className,
           )}
           {...props}
@@ -208,6 +223,22 @@ export default function IconButton(_props: Props) {
         />
       );
     }
+
+    case IconButtonVariant.BACK: {
+      const { className, iconName, ...props } = _props;
+
+      return (
+        <IconButtonFrame
+          iconName={iconName ? iconName : "back"}
+          className={clsxMerge(
+            "text-secondary-text hocus:text-primary-text duration-200",
+            className,
+          )}
+          {...props}
+        />
+      );
+    }
+
     case IconButtonVariant.CONTROL: {
       const { iconName, buttonSize, className, ...props } = _props;
 
@@ -216,7 +247,7 @@ export default function IconButton(_props: Props) {
           iconName={iconName}
           buttonSize={buttonSize || IconButtonSize.SMALL}
           className={clsxMerge(
-            "rounded-2 hocus:bg-green-bg bg-transparent duration-200 text-primary-text",
+            "rounded-2 hocus:bg-green-bg bg-primary-bg duration-200 text-tertiary-text hocus:text-primary-text",
             className,
           )}
           {...props}

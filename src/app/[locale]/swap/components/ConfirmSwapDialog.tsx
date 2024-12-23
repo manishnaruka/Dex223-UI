@@ -2,11 +2,13 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, ReactNode, useEffect, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
 import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
+import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { useTrade } from "@/app/[locale]/swap/libs/trading";
+import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
@@ -14,7 +16,11 @@ import {
   useSwapGasPriceStore,
 } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
-import { SwapError, useSwapStatusStore } from "@/app/[locale]/swap/stores/useSwapStatusStore";
+import {
+  SwapError,
+  SwapStatus,
+  useSwapStatusStore,
+} from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -133,14 +139,14 @@ function SwapRow({
         <div
           className={clsxMerge(
             "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green",
+            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
             isReverted && "bg-red-bg",
           )}
         >
           <Svg
             className={clsxMerge(
               "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-secondary-bg",
+              isDisabled ? "text-tertiary-text" : "text-green",
               isReverted && "text-red-light",
             )}
             iconName="swap"
@@ -388,7 +394,12 @@ function ReadonlyTokenAmountCard({
       <div className="flex justify-between items-center text-20">
         <span>{amount}</span>
         <div className="flex items-center gap-2">
-          <Image src={token?.logoURI || "/tokens/placeholder.svg"} alt="" width={32} height={32} />
+          <Image
+            src={token?.logoURI || "/images/tokens/placeholder.svg"}
+            alt=""
+            width={32}
+            height={32}
+          />
           {token?.symbol}
           <Badge color="green" text={token?.isNative ? "Native" : standard} />
         </div>
@@ -398,25 +409,6 @@ function ReadonlyTokenAmountCard({
   );
 }
 
-function SwapDetailsRow({
-  title,
-  value,
-  tooltipText,
-}: {
-  title: string;
-  value: string | ReactNode;
-  tooltipText: string;
-}) {
-  return (
-    <div className="flex justify-between items-center">
-      <div className="flex gap-2 items-center text-secondary-text">
-        <Tooltip iconSize={20} text={tooltipText} />
-        {title}
-      </div>
-      <span>{value}</span>
-    </div>
-  );
-}
 export default function ConfirmSwapDialog() {
   const t = useTranslations("Swap");
   const {
@@ -432,6 +424,8 @@ export default function ConfirmSwapDialog() {
   const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
 
   const { trade } = useTrade();
+
+  console.log(trade);
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
@@ -456,6 +450,9 @@ export default function ConfirmSwapDialog() {
     isSettledSwap,
     isRevertedApprove,
   } = useSwapStatus();
+
+  const { status: swapStatus, setStatus: setSwapStatus } = useSwapStatusStore();
+
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
 
   const isProcessing = useMemo(() => {
@@ -509,10 +506,18 @@ export default function ConfirmSwapDialog() {
   }, [baseFee, gasPriceSettings]);
 
   useEffect(() => {
-    if (isSettledSwap && !isOpen) {
+    if (isSuccessSwap && !isOpen) {
       resetAmounts();
     }
-  }, [isOpen, isSettledSwap, resetAmounts, resetTokens]);
+  }, [isSuccessSwap, resetAmounts, isOpen]);
+
+  useEffect(() => {
+    if ((isSuccessSwap || isRevertedSwap || isRevertedApprove) && !isOpen) {
+      setTimeout(() => {
+        setSwapStatus(SwapStatus.INITIAL);
+      }, 400);
+    }
+  }, [isOpen, isRevertedApprove, isRevertedSwap, isSuccessSwap, setSwapStatus, swapStatus]);
 
   const [isEditApproveActive, setEditApproveActive] = useState(false);
 
@@ -527,22 +532,16 @@ export default function ConfirmSwapDialog() {
       isOpen={isOpen}
       setIsOpen={(isOpen) => {
         setIsOpen(isOpen);
-        if (isSettledSwap) {
-          resetAmounts();
-        }
       }}
     >
-      <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
+      <div className="bg-primary-bg rounded-5 w-full sm:w-[600px]">
         <DialogHeader
           onClose={() => {
-            if (isSettledSwap) {
-              resetAmounts();
-            }
             setIsOpen(false);
           }}
           title={t("review_swap")}
         />
-        <div className="px-4 pb-4 md:px-10 md:pb-9">
+        <div className="card-spacing">
           {!isSettledSwap && !isRevertedApprove && (
             <div className="flex flex-col gap-3">
               <ReadonlyTokenAmountCard
@@ -588,7 +587,7 @@ export default function ConfirmSwapDialog() {
 
               <div className="flex justify-center gap-2 items-center">
                 <Image
-                  src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                  src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                   alt=""
                   width={24}
                   height={24}
@@ -598,7 +597,7 @@ export default function ConfirmSwapDialog() {
                 </span>
                 <Svg iconName="next" />
                 <Image
-                  src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                  src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                   alt=""
                   width={24}
                   height={24}
@@ -671,15 +670,16 @@ export default function ConfirmSwapDialog() {
               {tokenA?.isToken && tokenAStandard === Standard.ERC20 && !isAllowedA && (
                 <div
                   className={clsx(
-                    "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-2 gap-5",
-                    +amountToApprove < +typedValue && "pb-[26px]",
+                    "bg-tertiary-bg rounded-3 flex items-center px-5 py-2 min-h-12 mt-2 gap-2",
+                    +amountToApprove < +typedValue && "sm:pb-[26px]",
                   )}
                 >
-                  <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                    <Tooltip text={"Tooltip_text"} />
-                    <span>Approve amount</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-grow justify-end">
+                  <div className="sm:items-center sm:justify-between sm:gap-5 flex-grow flex flex-col gap-1 sm:flex-row">
+                    <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap sm:flex-row-reverse">
+                      <span>Approve amount</span>
+                      <Tooltip text={"Tooltip_text"} />
+                    </div>
+
                     {!isEditApproveActive ? (
                       <span>
                         {amountToApprove} {tokenA.symbol}
@@ -687,11 +687,17 @@ export default function ConfirmSwapDialog() {
                     ) : (
                       <div className="flex-grow">
                         <div className="relative w-full flex-grow">
-                          <Input
+                          <NumericFormat
+                            inputMode="decimal"
+                            allowedDecimalSeparators={[","]}
                             isError={+amountToApprove < +typedValue}
                             className="h-8 pl-3"
                             value={amountToApprove}
-                            onChange={(e) => setAmountToApprove(e.target.value)}
+                            onValueChange={(values) => {
+                              setAmountToApprove(values.value);
+                            }}
+                            customInput={Input}
+                            allowNegative={false}
                             type="text"
                           />
                           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
@@ -699,17 +705,22 @@ export default function ConfirmSwapDialog() {
                           </span>
                         </div>
                         {+amountToApprove < +typedValue && (
-                          <span className="text-red-light absolute text-12 translate-y-0.5">
+                          <span className="text-red-light sm:absolute text-12 sm:translate-y-0.5">
                             Must be higher or equal {typedValue}
                           </span>
                         )}
                       </div>
                     )}
+                  </div>
+
+                  <div className="flex items-center">
                     {!isEditApproveActive ? (
                       <Button
                         size={ButtonSize.EXTRA_SMALL}
+                        mobileSize={ButtonSize.SMALL}
                         colorScheme={ButtonColor.LIGHT_GREEN}
                         onClick={() => setEditApproveActive(true)}
+                        className="!rounded-20"
                       >
                         Edit
                       </Button>
@@ -717,8 +728,10 @@ export default function ConfirmSwapDialog() {
                       <Button
                         disabled={+amountToApprove < +typedValue}
                         size={ButtonSize.EXTRA_SMALL}
+                        mobileSize={ButtonSize.SMALL}
                         colorScheme={ButtonColor.LIGHT_GREEN}
                         onClick={() => setEditApproveActive(false)}
+                        className="!rounded-20"
                       >
                         Save
                       </Button>

@@ -1,12 +1,13 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { formatGwei, formatUnits, parseUnits } from "viem";
+import { useMediaQuery } from "react-responsive";
+import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { useTrade } from "@/app/[locale]/swap/libs/trading";
+import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
@@ -19,7 +20,7 @@ import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettings
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonSize } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";
 import TokenInput from "@/components/common/TokenInput";
@@ -32,6 +33,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
@@ -41,6 +43,9 @@ import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Standard } from "@/sdk_hybrid/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
+
+const ActionButtonSize = ButtonSize.EXTRA_LARGE;
+const MobileActionButtonSize = ButtonSize.LARGE;
 function OpenConfirmDialogButton({
   isSufficientBalance,
   isTradeReady,
@@ -63,7 +68,12 @@ function OpenConfirmDialogButton({
 
   if (!isConnected) {
     return (
-      <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+      <Button
+        onClick={() => setWalletConnectOpened(true)}
+        fullWidth
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         {tWallet("connect_wallet")}
       </Button>
     );
@@ -71,7 +81,7 @@ function OpenConfirmDialogButton({
 
   if (isLoadingSwap) {
     return (
-      <Button fullWidth isLoading>
+      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         <span className="flex items-center gap-2">
           <span>{t("processing_swap")}</span>
           <Preloader size={20} color="black" />
@@ -82,7 +92,7 @@ function OpenConfirmDialogButton({
 
   if (isLoadingApprove) {
     return (
-      <Button fullWidth isLoading>
+      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         <span className="flex items-center gap-2">
           <span>{t("approving_in_progress")}</span>
           <Preloader size={20} color="black" />
@@ -93,7 +103,7 @@ function OpenConfirmDialogButton({
 
   if (isPendingApprove || isPendingSwap) {
     return (
-      <Button fullWidth isLoading>
+      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         <span className="flex items-center gap-2">
           <span>{t("waiting_for_confirmation")}</span>
           <Preloader size={20} color="black" />
@@ -104,7 +114,7 @@ function OpenConfirmDialogButton({
 
   if (!tokenA || !tokenB) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("select_tokens")}
       </Button>
     );
@@ -112,7 +122,7 @@ function OpenConfirmDialogButton({
 
   if (!typedValue) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("enter_amount")}
       </Button>
     );
@@ -120,7 +130,7 @@ function OpenConfirmDialogButton({
 
   if (isTradeLoading) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("looking_for_the_best_trade")}
       </Button>
     );
@@ -128,7 +138,7 @@ function OpenConfirmDialogButton({
 
   if (!isTradeReady) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("swap_is_unavailable_for_this_pair")}
       </Button>
     );
@@ -136,14 +146,19 @@ function OpenConfirmDialogButton({
 
   if (!isSufficientBalance) {
     return (
-      <Button fullWidth disabled>
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("insufficient_balance")}
       </Button>
     );
   }
 
   return (
-    <Button onClick={() => setConfirmSwapDialogOpen(true)} fullWidth>
+    <Button
+      onClick={() => setConfirmSwapDialogOpen(true)}
+      fullWidth
+      size={ActionButtonSize}
+      tabletSize={MobileActionButtonSize}
+    >
       {t("swap")}
     </Button>
   );
@@ -297,8 +312,13 @@ export default function TradeForm() {
     refetchBBalance();
   }, [blockNumber, refetchABalance, refetchBBalance]);
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useSwapGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useSwapGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useSwapGasLimitStore();
   const { isAdvanced, setIsAdvanced } = useSwapGasModeStore();
@@ -308,9 +328,17 @@ export default function TradeForm() {
   const { setIsOpen: setConfirmSwapDialogOpen } = useConfirmSwapDialogStore();
   const { baseFee, priorityFee, gasPrice } = useFees();
 
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
+
   const computedGasSpending = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
       return formatFloat(formatGwei(gasPriceSettings.gasPrice));
+    }
+
+    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPrice) {
+      return formatFloat(formatGwei(gasPrice));
     }
 
     if (
@@ -338,11 +366,46 @@ export default function TradeForm() {
     return undefined;
   }, [baseFee, gasPriceOption, gasPriceSettings, priorityFee]);
 
+  const computedGasSpendingETH = useMemo(() => {
+    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
+      return formatFloat(formatEther(gasPriceSettings.gasPrice * estimatedGas));
+    }
+
+    if (
+      gasPriceSettings.model === GasFeeModel.EIP1559 &&
+      gasPriceSettings.maxFeePerGas &&
+      gasPriceSettings.maxPriorityFeePerGas &&
+      baseFee &&
+      gasPriceOption === GasOption.CUSTOM
+    ) {
+      const lowerFeePerGas =
+        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
+
+      return formatFloat(
+        formatEther((lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas) * estimatedGas),
+      );
+    }
+
+    if (
+      gasPriceSettings.model === GasFeeModel.EIP1559 &&
+      baseFee &&
+      priorityFee &&
+      gasPriceOption !== GasOption.CUSTOM
+    ) {
+      return formatFloat(formatEther((baseFee + priorityFee) * estimatedGas));
+    }
+
+    return undefined;
+  }, [baseFee, estimatedGas, gasPriceOption, gasPriceSettings, priorityFee]);
+
+  const _isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+  const nativeCurrency = useNativeCurrency();
+
   return (
-    <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
+    <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">
       <div className="flex justify-between items-center mb-2.5">
         <h3 className="font-bold text-20">{t("swap")}</h3>
-        <div className="flex items-center">
+        <div className="flex items-center relative left-3">
           <IconButton
             buttonSize={IconButtonSize.LARGE}
             active={showRecentTransactions}
@@ -489,48 +552,61 @@ export default function TradeForm() {
       {tokenA && tokenB && typedValue ? (
         <div
           className={clsx(
-            "rounded-3 py-3.5 flex flex-col md:flex-row justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center",
+            "rounded-3 py-3.5 flex justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center flex-wrap",
           )}
-          // role="button"
+          role="button"
         >
           {computedGasSpending ? (
             <>
-              <div className="flex items-center gap-1">
-                <Tooltip
-                  text={t("network_fee_tooltip", {
-                    networkName: networks.find((n) => n.chainId === chainId)?.name,
-                  })}
-                />
-                <div className="text-secondary-text text-14 flex items-center">
-                  {t("network_fee")}
+              <div className="flex flex-col justify-center">
+                <div className="flex items-center gap-1">
+                  <Tooltip
+                    iconSize={_isMobile ? 16 : 24}
+                    text={t("network_fee_tooltip", {
+                      networkName: networks.find((n) => n.chainId === chainId)?.name,
+                    })}
+                  />
+                  <div className="text-secondary-text text-12 md:text-14 flex items-center ">
+                    {t("network_fee")}
+                  </div>
+                  <span className="mr-1 text-12 md:hidden">~$0.00</span>
+                </div>
+                <div className="flex items-center gap-2 max-sm:hidden">
+                  <span className="text-secondary-text text-12 md:text-14 ">
+                    {computedGasSpendingETH} {nativeCurrency.symbol}
+                  </span>
+                  <span className="block h-4 w-px bg-primary-border" />
+                  <span className="text-tertiary-text mr-1 text-12 md:text-14 ">
+                    {computedGasSpending} GWEI
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 justify-between md:justify-end">
-                <span className="flex gap-2 items-center">
-                  {gasPriceOption === GasOption.CUSTOM && (
-                    <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text bg-quaternary-bg">
-                      {t(gasOptionTitle[gasPriceOption])}
-                    </span>
-                  )}
-                  <div>
-                    <span className="text-secondary-text mr-1 text-14">
-                      {computedGasSpending} GWEI
-                    </span>{" "}
-                    <span className="mr-1 text-14">~$0.00</span>
-                  </div>
+                <span className="mr-1 text-14 max-md:hidden">~$0.00</span>
+                <span className="flex items-center justify-center px-2 text-12 md:text-14 h-5 rounded-20 font-500 text-tertiary-text border border-secondary-border">
+                  {t(gasOptionTitle[gasPriceOption])}
                 </span>
-
-                <button
-                  // disabled
-                  className="border border-green flex px-4 rounded-5 hocus:bg-green-bg duration-200"
+                <Button
+                  size={ButtonSize.EXTRA_SMALL}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsOpenedFee(true);
                   }}
                 >
                   {t("edit")}
-                </button>
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-2 sm:hidden w-full mt-0.5">
+                <span className="text-secondary-text text-12 md:text-14 ">
+                  {computedGasSpendingETH} {nativeCurrency.symbol}
+                </span>
+                <span className="block h-4 w-px bg-primary-border" />
+                <span className="text-tertiary-text mr-1 text-12 md:text-14 ">
+                  {computedGasSpending} GWEI
+                </span>
               </div>
             </>
           ) : (
@@ -580,7 +656,15 @@ export default function TradeForm() {
         isTradeLoading={isLoadingTrade}
       />
 
-      {trade && tokenA && tokenB && <SwapDetails trade={trade} tokenA={tokenA} tokenB={tokenB} />}
+      {trade && tokenA && tokenB && (
+        <SwapDetails
+          trade={trade}
+          tokenA={tokenA}
+          tokenB={tokenB}
+          networkFee={computedGasSpendingETH}
+          gasPrice={computedGasSpending}
+        />
+      )}
 
       <NetworkFeeConfigDialog
         isAdvanced={isAdvanced}

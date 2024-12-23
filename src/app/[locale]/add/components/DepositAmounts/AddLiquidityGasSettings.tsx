@@ -20,16 +20,9 @@ import {
   useAddLiquidityGasPriceStore,
 } from "../../stores/useAddLiquidityGasSettings";
 
-const gasOptionTitle: Record<GasOption, any> = {
-  [GasOption.CHEAP]: "cheap",
-  [GasOption.FAST]: "fast",
-  [GasOption.CUSTOM]: "custom",
-};
-
 export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: boolean }) => {
   //
   const chainId = useCurrentChainId();
-  const tSwap = useTranslations("Swap");
   const [isOpenedFee, setIsOpenedFee] = useState(false);
 
   const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
@@ -37,7 +30,6 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useAddLiquidityGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const { isAdvanced, setIsAdvanced } = useAddLiquidityGasModeStore();
 
   const gasPrice = useAddLiquidityGasPrice();
@@ -59,7 +51,7 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
 
   return (
     <div className="flex flex-col items-center gap-2 md:flex-row px-5 py-2 bg-tertiary-bg rounded-3">
-      <div className="flex w-full gap-8">
+      <div className="flex w-full md:w-7/8 justify-between md:justify-start gap-8">
         <div className="flex flex-col">
           <div className="text-secondary-text flex items-center gap-1 text-14">
             {t("gas_price")}
@@ -68,7 +60,9 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
           {disabledGasSettings ? (
             <span className="text-secondary-text">—</span>
           ) : (
-            <span>{gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI</span>
+            <span className="text-secondary-text text-16">
+              {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
+            </span>
           )}
         </div>
         <div className="flex flex-col">
@@ -88,15 +82,12 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        {gasPriceOption === GasOption.CUSTOM && (
-          <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
-            {tSwap(gasOptionTitle[gasPriceOption])}
-          </span>
-        )}
+      <div className="flex w-full md:w-1/8 items-center gap-2 mt-2 md:mt-0">
         <Button
+          className="w-full md:w-auto h-8 md:h-auto"
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.EXTRA_SMALL}
+          disabled={isFormDisabled || disabledGasSettings}
           onClick={() => setIsOpenedFee(true)}
         >
           Edit

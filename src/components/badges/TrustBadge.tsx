@@ -202,7 +202,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
 
   return (
     <>
-      <div className="grid grid-cols-3">
+      <div className="grid grid-cols-[10fr_16fr_10fr] md:grid-cols-3">
         <div className="flex justify-start">
           <InternalTrustBadge rateRange="low" />
         </div>
@@ -230,7 +230,7 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
         >
           <Image
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            src={logoURI || "/tokens/placeholder.svg"}
+            src={logoURI || "/images/tokens/placeholder.svg"}
             alt=""
             width={20}
             height={20}
@@ -248,14 +248,17 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
             const rateValueMap = rateMap[key as RateKey] as RateValueMap<typeof key>;
             const { text, score } = rateValueMap[value as OtherListCheck];
             return (
-              <div key={key} className="flex justify-between items-center gap-2">
-                <div className="flex items-center gap-2">
+              <div key={key} className="flex justify-between items-start gap-2">
+                <p className="flex items-start gap-2">
                   <Svg
-                    className={score >= 0 ? "text-green" : "text-red-light"}
+                    className={clsx(
+                      score >= 0 ? "text-green" : "text-red-light",
+                      "flex-shrink-0 mt-[0.2em]",
+                    )}
                     iconName={score >= 0 ? "success" : "warning"}
                   />
                   <span>{text}</span>
-                </div>
+                </p>
                 {score >= 0 ? (
                   <span className="text-green">+{score}</span>
                 ) : (
@@ -268,11 +271,11 @@ function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps)
             const { text, score } = rateValueMap[value as TrustRateCheck];
 
             return (
-              <div key={key} className="flex justify-between items-center gap-2">
-                <div className="flex items-center gap-2">
+              <div key={key} className="flex justify-between items-start gap-2">
+                <div className="flex items-start gap-2">
                   <Svg
                     size={20}
-                    className={score >= 0 ? "text-green" : "text-red-light"}
+                    className={clsx(score >= 0 ? "text-green" : "text-red-light", "flex-shrink-0")}
                     iconName={score >= 0 ? "success" : "warning"}
                   />
                   <span>{text}</span>

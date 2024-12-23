@@ -1,23 +1,31 @@
 "use client";
 
 import clsx from "clsx";
-import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import React, { useEffect, useMemo, useState } from "react";
 
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "@/app/[locale]/add/stores/useLiquidityPriceRangeStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
+import { useIncreaseRecentTransactionsStore } from "@/app/[locale]/increase/[tokenId]/stores/useIncreaseRecentTransactionsStore";
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import IconButton, { IconButtonSize, IconSize } from "@/components/buttons/IconButton";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
+import truncateMiddle from "@/functions/truncateMiddle";
 import {
   usePositionFromPositionInfo,
   usePositionFromTokenId,
@@ -25,7 +33,7 @@ import {
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 
 import { DepositAmounts } from "../../add/components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "../../add/components/LiquidityActionButton/ConfirmLiquidityDialog";
@@ -42,7 +50,10 @@ export default function IncreaseLiquidityPage({
   };
 }) {
   useRecentTransactionTracking();
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  const t = useTranslations("Liquidity");
+
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useIncreaseRecentTransactionsStore();
 
   const { setIsOpen } = useTransactionSettingsDialogStore();
   const { setTicks } = useLiquidityPriceRangeStore();
@@ -51,11 +62,11 @@ export default function IncreaseLiquidityPage({
 
   const [showFirst, setShowFirst] = useState(true);
 
-  const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
+  const { position: positionInfo } = usePositionFromTokenId(BigInt(params.tokenId));
   const existedPosition = usePositionFromPositionInfo(positionInfo);
 
   // TODO: tokens already sorted, rename tokenA\B -> token0\1
-  const [tokenA, tokenB, fee] = useMemo(() => {
+  const [tokenA, tokenB] = useMemo(() => {
     return existedPosition?.pool.token0 && existedPosition?.pool.token1 && existedPosition?.pool.fee
       ? [existedPosition.pool.token0, existedPosition.pool.token1, existedPosition.pool.fee]
       : [undefined, undefined];
@@ -88,20 +99,15 @@ export default function IncreaseLiquidityPage({
     }
   }, [initialized, existedPosition, setBothTokens, setTicks, setTier, tokenA, tokenB]);
 
+  const tokenAshort = truncateMiddle(tokenA?.symbol || "", { charsFromStart: 20, charsFromEnd: 0 });
+  const tokenBshort = truncateMiddle(tokenB?.symbol || "", { charsFromStart: 20, charsFromEnd: 0 });
+
   // PRICE RANGE HOOK START
   const { price } = usePriceRange();
   // PRICE RANGE HOOK END
 
   // Deposit Amounts START
-  const {
-    parsedAmounts,
-    position,
-    currencies,
-    noLiquidity,
-    outOfRange,
-    depositADisabled,
-    depositBDisabled,
-  } = useV3DerivedMintInfo({
+  const { parsedAmounts, currencies, depositADisabled, depositBDisabled } = useV3DerivedMintInfo({
     tokenA,
     tokenB,
     tier,
@@ -118,18 +124,19 @@ export default function IncreaseLiquidityPage({
             <IconButton
               onClick={() => router.push(`/pool/${params.tokenId}`)}
               buttonSize={IconButtonSize.LARGE}
-              iconName="back"
+              variant={IconButtonVariant.BACK}
+              // iconName="back"
               iconSize={IconSize.LARGE}
-              className="text-tertiary-text"
+              // className="text-tertiary-text"
             />
           </div>
-          <h2 className="text-18 md:text-20 font-bold">Increase Liquidity</h2>
+          <h2 className="text-18 md:text-20 font-bold">{t("increase_liquidity")}</h2>
           <div className="w-[96px] md:w-[104px] flex items-center gap-0 lg:gap-2 justify-end">
             <IconButton
               buttonSize={IconButtonSize.LARGE}
               iconName="recent-transactions"
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-              className={showRecentTransactions ? "text-green" : "text-tertiary-text"}
+              active={showRecentTransactions}
             />
             <IconButton
               buttonSize={IconButtonSize.LARGE}
@@ -139,7 +146,7 @@ export default function IncreaseLiquidityPage({
             />
           </div>
         </div>
-        <div className="flex flex-col bg-primary-bg p-4 lg:p-10 pt-0 mb-5 rounded-3 rounded-t-0">
+        <div className="flex flex-col bg-primary-bg p-4 lg:px-10 lg:pb-10 pt-0 mb-5 rounded-3 rounded-t-0">
           <div className="flex items-start mb-4 lg:mb-5 gap-2">
             <TokensPair tokenA={tokenA} tokenB={tokenB} />
             <RangeBadge
@@ -189,7 +196,7 @@ export default function IncreaseLiquidityPage({
               </div>
 
               <div className="flex justify-between items-center mb-3">
-                <span className="font-bold text-secondary-text">Selected range</span>
+                <span className="font-bold text-secondary-text">{t("selected_range")}</span>
                 <div className="flex p-0.5 gap-0.5 rounded-2 bg-secondary-bg">
                   <button
                     onClick={() => setShowFirst(true)}
@@ -200,7 +207,7 @@ export default function IncreaseLiquidityPage({
                         : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
-                    {tokenA?.symbol}
+                    {tokenAshort}
                   </button>
                   <button
                     onClick={() => setShowFirst(false)}
@@ -211,13 +218,14 @@ export default function IncreaseLiquidityPage({
                         : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                     )}
                   >
-                    {tokenB?.symbol}
+                    {tokenBshort}
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_12px_1fr] mb-2 lg:mb-3">
                 <PositionPriceRangeCard
+                  className="bg-quaternary-bg"
                   showFirst={showFirst}
                   token0={token0}
                   token1={token1}
@@ -229,6 +237,7 @@ export default function IncreaseLiquidityPage({
                   </div>
                 </div>
                 <PositionPriceRangeCard
+                  className="bg-quaternary-bg"
                   showFirst={showFirst}
                   token0={token0}
                   token1={token1}
@@ -248,7 +257,7 @@ export default function IncreaseLiquidityPage({
               </div>
             </div>
           </div>
-          <LiquidityActionButton increase tokenId={params.tokenId} />
+          <LiquidityActionButton increase />
         </div>
         <div className="flex flex-col gap-5">
           <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
@@ -256,9 +265,11 @@ export default function IncreaseLiquidityPage({
             showRecentTransactions={showRecentTransactions}
             handleClose={() => setShowRecentTransactions(false)}
             pageSize={5}
+            store={useIncreaseRecentTransactionsStore}
           />
         </div>
       </div>
+      <RevokeDialog />
       <ConfirmLiquidityDialog increase tokenId={params.tokenId} />
     </Container>
   );

@@ -1,3 +1,4 @@
+import { useLocale } from "next-intl";
 import React, { useMemo, useState } from "react";
 
 import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
@@ -6,19 +7,20 @@ import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/st
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterAutoListings, filterTokenLists } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 export default function ChooseAutoListingDialog() {
   const { isOpen: isAutoListingSelectOpened, setIsOpen: setAutoListingSelectOpened } =
     useChooseAutoListingDialogStore();
+  const locale = useLocale();
   const chainId = useCurrentChainId();
   const [searchValue, setSearchValue] = useState("");
   const autoListings = useAutoListingContracts();
@@ -33,11 +35,7 @@ export default function ChooseAutoListingDialog() {
     if (!searchValue) {
       return autoListings;
     } else {
-      return autoListings.filter(
-        (l) =>
-          l.name.toLowerCase().startsWith(searchValue.toLowerCase()) ||
-          l.id.toLowerCase().startsWith(searchValue.toLowerCase()),
-      );
+      return filterAutoListings(searchValue, autoListings);
     }
   }, [autoListings, searchValue]);
 
@@ -47,7 +45,7 @@ export default function ChooseAutoListingDialog() {
         onClose={() => setAutoListingSelectOpened(false)}
         title="Select auto-listing contract"
       />
-      <div className="pb-5 px-4 md:px-10 ">
+      <div className="card-spacing">
         <SearchInput
           value={searchValue}
           onChange={(e) => {
@@ -58,7 +56,7 @@ export default function ChooseAutoListingDialog() {
       </div>
 
       {(!searchValue || (searchValue && !!filteredAutoListings?.length)) && (
-        <div className="flex flex-col gap-2 pb-4">
+        <div className="flex flex-col gap-2 pb-4 flex-grow h-[511px]">
           {filteredAutoListings?.map((a) => {
             return (
               <button
@@ -67,7 +65,7 @@ export default function ChooseAutoListingDialog() {
                   setAutoListingSelectOpened(false);
                 }}
                 key={a.id}
-                className="w-full flex items-center justify-between hocus:bg-tertiary-bg duration-200 px-4 md:px-10 py-2"
+                className="w-full flex items-center justify-between hocus:bg-tertiary-bg duration-200 card-spacing-x py-2"
               >
                 <div className="flex flex-col items-start">
                   <span className="font-medium w-[70px] overflow-ellipsis overflow-hidden md:w-[244px] whitespace-nowrap text-left">
@@ -89,7 +87,11 @@ export default function ChooseAutoListingDialog() {
                     text={truncateMiddle(a.id, { charsFromEnd: 3, charsFromStart: 3 })}
                     href={getExplorerLink(ExplorerLinkType.ADDRESS, a.id, chainId)}
                   />
-                  <a target="_blank" onClick={(e) => e.stopPropagation()} href="#">
+                  <a
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                    href={`/${locale}/token-listing/contracts/${a.id}`}
+                  >
                     <IconButton iconName="listing-details" />
                   </a>
                 </div>
@@ -99,9 +101,8 @@ export default function ChooseAutoListingDialog() {
         </div>
       )}
       {searchValue && !filteredAutoListings?.length && (
-        <div className="h-[340px] flex items-center rounded-5 bg-primary-bg justify-center flex-col">
-          <EmptyStateIcon iconName="search-autolisting" />
-          <span className="text-secondary-text">No tokenlists found</span>
+        <div className="h-[531px] flex-grow flex items-center rounded-5 bg-primary-bg justify-center flex-col bg-no-repeat bg-right-top bg-empty-autolisting-not-found -mt-5 pt-5 max-md:bg-size-180">
+          <span className="text-secondary-text">Auto-listing contract not found</span>
         </div>
       )}
     </DrawerDialog>

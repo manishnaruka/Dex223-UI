@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -14,12 +15,10 @@ import IconButton, {
 } from "@/components/buttons/IconButton";
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";
 import { TokenListId } from "@/db/db";
-import { copyToClipboard } from "@/functions/copyToClipboard";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useTokenLists } from "@/hooks/useTokenLists";
-import addToast from "@/other/toast";
-import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
+import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 function TokenListInfo({ listId }: { listId: TokenListId }) {
   const t = useTranslations("ManageTokens");
@@ -28,10 +27,12 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
   const tokenList = useMemo(() => {
     return tokenLists?.find((tl) => tl.id === listId);
   }, [listId, tokenLists]);
-
+  const { isOpen, setIsOpen, setActiveTab, activeTab, content, setScrollTo, setContent } =
+    useManageTokensDialogStore();
+  const { handleClose } = useTokenPortfolioDialogStore();
   return (
-    <div className="flex justify-between w-full">
-      <div className="flex gap-3 items-center">
+    <div className="flex justify-between w-full flex-col xs:flex-row bg-tertiary-bg rounded-3 xs:bg-transparent pb-1.5 pt-2 pl-4 xs:p-0">
+      <div className="flex gap-2 md:gap-3 items-center">
         {tokenList?.id?.toString()?.startsWith("default") && (
           <TokenListLogo type={TokenListLogoType.DEFAULT} chainId={tokenList.chainId} />
         )}
@@ -46,15 +47,37 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
         )}
 
         <div className="flex flex-col">
-          <span>{tokenList?.list.name}</span>
-          <div className="flex gap-1 items-cente text-secondary-text">
+          <div className="table table-fixed w-full">
+            <span className="text-14 md:text-16 table-cell whitespace-nowrap overflow-ellipsis overflow-hidden">
+              {tokenList?.list.name}
+            </span>
+          </div>
+          <div className="flex gap-1 items-cente text-secondary-text text-12 md:text-16">
             {t("tokens_amount", { amount: tokenList?.list.tokens.length })}
           </div>
         </div>
       </div>
-      <button className="text-green opacity-50 pointer-events-none flex items-center gap-2">
-        View list
-        <Svg iconName="next" />
+      <button
+        onClick={() => {
+          setIsOpen(true);
+          setActiveTab(0);
+          setContent("default");
+          setScrollTo(tokenList?.id || null);
+          handleClose();
+        }}
+        className="pl-12 text-12 md:text-16 md:pl-0 text-secondary-text hocus:text-green-hover duration-200 flex items-center gap-2 flex-shrink-0"
+      >
+        Manage list
+        {
+          <span className="md:hidden">
+            <Svg size={20} iconName="next" />
+          </span>
+        }
+        {
+          <span className="hidden md:inline">
+            <Svg size={24} iconName="next" />
+          </span>
+        }
       </button>
     </div>
   );
@@ -62,10 +85,10 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
 
 export function TokenPortfolioDialogContent({ token }: { token: Token }) {
   const t = useTranslations("ManageTokens");
-  const tToast = useTranslations("Toast");
+
   return (
     <div className="w-full md:w-[600px]">
-      <div className="px-4 pb-5 md:px-10 border-b border-primary-border flex flex-col gap-2">
+      <div className="px-4 pb-5 md:px-10 flex flex-col gap-2">
         <div className="flex justify-between">
           <span className="text-secondary-text">{t("symbol")}</span>
           <span>{token.symbol}</span>
@@ -104,10 +127,11 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
           <span>{token.decimals}</span>
         </div>
       </div>
-      <p className="text-secondary-text px-4 md:px-10 py-3">
+      <div className="mx-4 md:mx-10 bg-secondary-border h-px" />
+      <p className="text-secondary-text card-spacing-x py-3">
         {t("found_in", { amount: token.lists?.length })}
       </p>
-      <div className="flex flex-col gap-3 pb-4 md:pb-10 px-4 md:px-10">
+      <div className="flex flex-col gap-3 card-spacing">
         {token.lists?.map((listId) => {
           return (
             <div className="flex gap-3 items-center justify-between" key={listId}>
@@ -125,7 +149,21 @@ export default function TokenPortfolioDialog() {
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
-      <DialogHeader onClose={handleClose} title={token?.name || "Unknown"} />
+      <DialogHeader
+        titlePosition="center"
+        onClose={handleClose}
+        title={
+          <span className="flex items-center gap-2">
+            <Image
+              width={32}
+              height={32}
+              src={token?.logoURI || "/images/tokens/placeholder.svg"}
+              alt=""
+            />
+            {token?.name || "Unknown"}
+          </span>
+        }
+      />
       {token && <TokenPortfolioDialogContent token={token} />}
     </DrawerDialog>
   );

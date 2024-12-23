@@ -9,7 +9,6 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { NativeCoin } from "@/sdk_hybrid/entities/ether";
 import { Token } from "@/sdk_hybrid/entities/token";
-import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 
 export async function fetchTokenList(url: string) {
   const data = await fetch(url);
@@ -210,7 +209,7 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
                 item.decimals,
                 item.symbol || "Unknown",
                 item.name || "Unknown",
-                item?.logoURI || "/tokens/placeholder.svg",
+                item?.logoURI || "/images/tokens/placeholder.svg",
                 map.has(lowercaseAddress)
                   ? Array.from(new Set([...(map.get(lowercaseAddress)?.lists || []), id]))
                   : [id],

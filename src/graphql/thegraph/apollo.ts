@@ -26,36 +26,29 @@ const CHAIN_SUBGRAPH_URL: Record<DexChainId, string> = {
   [DexChainId.SEPOLIA]: "https://api.studio.thegraph.com/query/56540/dex223-v1-sepolia/1.0.82",
   // [DexChainId.CALLISTO]: "",
   [DexChainId.BSC_TESTNET]: "",
-  [DexChainId.EOS]:
-    "https://gateway.testnet.thegraph.com/api/deployments/id/Qmc7USxnNW5EHkzNGA61YbddgiZy68zdWZXDgfL9JQ4sZQ",
+  [DexChainId.EOS]: "https://graph.dex223.io/subgraphs/name/dex223-eosevm",
 };
 
 const httpLink = new HttpLink({ uri: CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA] });
+export function getAuthMiddleware(chainId: DexChainId) {
+  return new ApolloLink((operation, forward) => {
+    operation.setContext(() => ({
+      uri:
+        chainId && CHAIN_SUBGRAPH_URL[chainId]
+          ? CHAIN_SUBGRAPH_URL[chainId]
+          : CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA],
+    }));
 
-// TODO remove hardcode
-const CHAIN_ID = DexChainId.SEPOLIA;
+    return forward(operation);
+  });
+}
 
-// This middleware will allow us to dynamically update the uri for the requests based off chainId
-// For more information: https://www.apollographql.com/docs/react/networking/advanced-http-networking/
-export const authMiddleware = new ApolloLink((operation, forward) => {
-  // add the authorization to the headers
-  // const chainId = store.getState().application.chainId;
-  const chainId = CHAIN_ID;
-
-  operation.setContext(() => ({
-    uri:
-      chainId && CHAIN_SUBGRAPH_URL[chainId]
-        ? CHAIN_SUBGRAPH_URL[chainId]
-        : CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA],
-  }));
-
-  return forward(operation);
-});
-
-export const apolloClient = new ApolloClient({
-  cache: new InMemoryCache(),
-  link: concat(authMiddleware, httpLink),
-});
+export function apolloClient(chainId: DexChainId) {
+  return new ApolloClient({
+    cache: new InMemoryCache(),
+    link: concat(getAuthMiddleware(chainId), httpLink),
+  });
+}
 
 export const chainToApolloClient: Record<DexChainId, ApolloClient<NormalizedCacheObject>> = {
   // [ChainId.MAINNET]: new ApolloClient({
@@ -96,7 +89,7 @@ export const chainToApolloClient: Record<DexChainId, ApolloClient<NormalizedCach
   }),
   [DexChainId.EOS]: new ApolloClient({
     cache: new InMemoryCache(),
-    uri: CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA],
+    uri: CHAIN_SUBGRAPH_URL[DexChainId.EOS],
   }),
   // [DexChainId.CALLISTO]: new ApolloClient({
   //   cache: new InMemoryCache(),

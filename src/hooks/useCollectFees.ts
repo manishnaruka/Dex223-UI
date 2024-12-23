@@ -12,6 +12,7 @@ import {
 } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesStatusStore";
 import {
   useCollectFeesStore,
+  useRefreshStore,
   useTokensOutCode,
 } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
@@ -22,7 +23,6 @@ import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
 import {
-  GasFeeModel,
   RecentTransactionTitleTemplate,
   stringifyObject,
   useRecentTransactionsStore,
@@ -40,6 +40,7 @@ const useCollectFees = () => {
   const chainId = useCurrentChainId();
   const { address } = useAccount();
   const recipient = address || ZERO_ADDRESS;
+  const { refreshKey } = useRefreshStore();
 
   const { data: collectResult } = useSimulateContract({
     address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
@@ -58,14 +59,14 @@ const useCollectFees = () => {
     query: {
       enabled: Boolean(tokenId),
     },
+    // @ts-ignore
+    dependencies: [tokenId, refreshKey],
   });
 
-  const fees = useMemo(() => {
+  return useMemo(() => {
     if (!pool || !collectResult?.result) return [undefined, undefined] as [undefined, undefined];
     return [collectResult?.result[0], collectResult?.result[1]] as [bigint, bigint];
   }, [pool, collectResult]);
-
-  return fees;
 };
 
 const useCollectFeesParams = () => {

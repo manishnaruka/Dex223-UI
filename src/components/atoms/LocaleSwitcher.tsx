@@ -8,7 +8,7 @@ import { useState } from "react";
 import Popover from "@/components/atoms/Popover";
 import SelectButton from "@/components/atoms/SelectButton";
 import SelectOption from "@/components/atoms/SelectOption";
-import { locales, usePathname, useRouter } from "@/navigation";
+import { locales, usePathname, useRouter } from "@/i18n/routing";
 
 const localesMap: {
   [key: string]: {
@@ -18,17 +18,17 @@ const localesMap: {
   };
 } = {
   en: {
-    img: "/locales/en.svg",
+    img: "/images/locales/en.svg",
     label: "English",
     symbol: "En",
   },
   es: {
-    img: "/locales/es.svg",
+    img: "/images/locales/es.svg",
     label: "Español",
     symbol: "Es",
   },
   zh: {
-    img: "/locales/zh.svg",
+    img: "/images/locales/zh.svg",
     label: "中国人",
     symbol: "Zh",
   },
@@ -49,7 +49,7 @@ export default function LocaleSwitcher({ isMobile = false }: { isMobile?: boolea
       <Popover
         isOpened={isOpened}
         setIsOpened={setIsOpened}
-        placement={"bottom-start"}
+        placement={isMobile ? "top-start" : "bottom-start"}
         trigger={
           <SelectButton
             className={clsx("px-3 text-secondary-text", isMobile && "bg-tertiary-bg")}

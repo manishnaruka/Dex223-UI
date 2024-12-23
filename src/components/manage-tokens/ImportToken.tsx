@@ -8,6 +8,7 @@ import Checkbox from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import { InputSize } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -42,8 +43,7 @@ function EmptyState({
 
   if (!tokenAddressToImport) {
     return (
-      <div className="flex-grow flex justify-center items-center flex-col gap-2">
-        <EmptyStateIcon iconName="imported" />
+      <div className="flex-grow flex justify-center items-center flex-col gap-2 bg-empty-import-token bg-right-top bg-no-repeat max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
         <p className="text-secondary-text text-center">{t("to_import_a_token")}</p>
       </div>
     );
@@ -60,8 +60,7 @@ function EmptyState({
 
   if (!isFound) {
     return (
-      <div className="flex items-center justify-center gap-2 flex-col flex-grow">
-        <EmptyStateIcon iconName="search" />
+      <div className="flex items-center justify-center gap-2 flex-col flex-grow bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
         <span className="text-secondary-text">{t("token_not_found")}</span>
       </div>
     );
@@ -212,9 +211,10 @@ export default function ImportToken({ setContent, handleClose }: Props) {
         onClose={handleClose}
         title={t("import_token")}
       />
-      <div className="w-full md:w-[600px] px-4 pb-4 md:px-10 md:pb-10 min-h-[580px] flex flex-col">
+      <div className="w-full md:w-[600px] card-spacing min-h-[580px] flex flex-col">
         <TextField
           label={t("import_token")}
+          size={InputSize.LARGE}
           value={tokenAddressToImport}
           onChange={(e) => setTokenAddressToImport(e.target.value)}
           placeholder={t("token_address_placeholder")}
@@ -246,7 +246,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     className="w-12 h-12"
                     width={48}
                     height={48}
-                    src="/tokens/placeholder.svg"
+                    src="/images/tokens/placeholder.svg"
                     alt=""
                   />
                   <div className="flex flex-col text-16">
@@ -351,7 +351,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                         tokenDecimals,
                         tokenSymbol,
                         tokenName,
-                        "/tokens/placeholder.svg",
+                        "/images/tokens/placeholder.svg",
                       );
 
                       if (!currentCustomList) {
@@ -367,7 +367,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                               patch: 0,
                             },
                             tokens: [token],
-                            logoURI: "/token-list-placeholder.svg",
+                            logoURI: "/images/token-list-placeholder.svg",
                           },
                         });
                       } else {

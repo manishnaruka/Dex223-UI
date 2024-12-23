@@ -47,16 +47,15 @@ export default function SwapPage() {
               : "xl:grid-cols-[600px] xl:max-w-[600px] grid-areas-[right]",
           )}
         >
-          {showRecentTransactions && (
-            <div className="grid-in-[left] flex justify-center">
-              <div className="w-full sm:max-w-[600px] xl:max-w-full">
-                <RecentTransactions
-                  showRecentTransactions={showRecentTransactions}
-                  handleClose={() => setShowRecentTransactions(false)}
-                />
-              </div>
+          <div className="grid-in-[left] flex justify-center">
+            <div className="w-full sm:max-w-[600px] xl:max-w-full">
+              <RecentTransactions
+                showRecentTransactions={showRecentTransactions}
+                handleClose={() => setShowRecentTransactions(false)}
+                store={useSwapRecentTransactionsStore}
+              />
             </div>
-          )}
+          </div>
 
           <div className="flex justify-center grid-in-[right]">
             <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">

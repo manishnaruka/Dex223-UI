@@ -33,7 +33,6 @@ export const CollectFeesGasSettings = () => {
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useCollectFeesGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const gasToUse = customGasLimit || estimatedGas;
   const { isAdvanced, setIsAdvanced } = useCollectFeesGasModeStore();
 
@@ -59,11 +58,9 @@ export const CollectFeesGasSettings = () => {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {gasPriceOption === GasOption.CUSTOM && (
-          <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
-            {t(gasOptionTitle[gasPriceOption])}
-          </span>
-        )}
+        <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
+          {t(gasOptionTitle[gasPriceOption])}
+        </span>
         <Button
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.EXTRA_SMALL}

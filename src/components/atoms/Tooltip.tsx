@@ -82,9 +82,10 @@ export default function Tooltip({ text, iconSize = 24, renderTrigger, customOffs
         renderTrigger(refs, getReferenceProps())
       ) : (
         <span
-          className="cursor-pointer text-tertiary-text"
+          className="cursor-pointer text-tertiary-text pointer-events-auto"
           ref={refs.setReference}
           {...getReferenceProps()}
+          onClick={(e) => e.stopPropagation()}
         >
           <Svg size={iconSize} iconName="info" />
         </span>

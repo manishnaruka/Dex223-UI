@@ -1,10 +1,9 @@
 import ms from "ms";
 import { useMemo } from "react";
-import { useBlockNumber } from "wagmi";
 
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
 
 import useFeeTierDistributionQuery from "../graphql/thegraph/FeeTierDistributionQuery";
 import { PoolsParams, PoolState, usePools } from "./usePools";
@@ -108,7 +107,7 @@ export function useFeeTierDistribution({
 }
 
 function usePoolTVL({ tokenA, tokenB }: { tokenA?: Currency; tokenB?: Currency }) {
-  const { data: latestBlock } = useBlockNumber({ watch: true });
+  const { data: latestBlock } = useScopedBlockNumber({ watch: true });
   // TODO
   const { isLoading, error, data } = useFeeTierDistributionQuery(
     tokenA?.wrapped.address0,

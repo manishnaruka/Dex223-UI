@@ -19,7 +19,9 @@ export default function Switch({ checked, handleChange, small = false, disabled 
         type="checkbox"
       />
       <span
-        className={clsx(`
+        className={clsx(
+          `
+          bg-secondary-bg
                       absolute
                       cursor-pointer
                       w-full
@@ -30,9 +32,14 @@ export default function Switch({ checked, handleChange, small = false, disabled 
                       left-0
                       duration-200
                       peer-checked:border-green
+                      peer-checked:bg-green-bg
+                      peer-checked:hocus:shadow
+                      peer-checked:hocus:shadow-green/60
                       border-primary-border
                       border
                       rounded-5
+                      peer-hocus:before:bg-green
+                      peer-hocus:border-green
                       peer-checked:before:bg-green
                       peer-checked:before:translate-x-6
                       before:content-['']
@@ -44,7 +51,8 @@ export default function Switch({ checked, handleChange, small = false, disabled 
                       before:bg-primary-border
                       before:rounded-full
                       before:duration-200
-                  `)}
+                  `,
+        )}
       />
     </label>
   );

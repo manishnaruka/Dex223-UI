@@ -23,7 +23,7 @@ export const HighTrust: Story = {
       [Check.SAME_NAME_IN_OTHER_LIST]: TrustRateCheck.FALSE,
       [Check.ERC223_VERSION_EXIST]: TrustRateCheck.FALSE,
     },
-    logoURI: "/example.svg",
+    logoURI: "/images/example.svg",
   },
 };
 
@@ -36,7 +36,7 @@ export const MediumTrust: Story = {
       [Check.SAME_NAME_IN_OTHER_LIST]: TrustRateCheck.TRUE,
       [Check.ERC223_VERSION_EXIST]: TrustRateCheck.TRUE,
     },
-    logoURI: "/example.svg",
+    logoURI: "/images/example.svg",
   },
 };
 
@@ -49,6 +49,6 @@ export const LowTrust: Story = {
       [Check.SAME_NAME_IN_OTHER_LIST]: TrustRateCheck.TRUE,
       [Check.ERC223_VERSION_EXIST]: TrustRateCheck.TRUE,
     },
-    logoURI: "/example.svg",
+    logoURI: "/images/example.svg",
   },
 };

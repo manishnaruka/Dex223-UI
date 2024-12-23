@@ -19,13 +19,3 @@ export const baseFeeMultipliers: Record<DexChainId, Record<GasOptionWithoutCusto
 };
 
 export const SCALING_FACTOR = BigInt(100);
-
-export const eip1559SupportMap: Record<DexChainId, boolean> = {
-  [DexChainId.SEPOLIA]: true,
-  [DexChainId.BSC_TESTNET]: false,
-  [DexChainId.EOS]: true,
-};
-
-export function isEip1559Supported(chainId: DexChainId) {
-  return eip1559SupportMap[chainId];
-}

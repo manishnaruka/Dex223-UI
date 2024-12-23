@@ -7,7 +7,9 @@ import { clsxMerge } from "@/functions/clsxMerge";
 interface Props extends AnchorHTMLAttributes<HTMLAnchorElement> {
   text: string;
   href: string;
+  arrowSize?: number;
   color?: "green" | "white";
+  textClassname?: string;
 }
 
 export default function ExternalTextLink({
@@ -15,6 +17,8 @@ export default function ExternalTextLink({
   href,
   color = "green",
   className,
+  arrowSize = 24,
+  textClassname,
   ...props
 }: Props) {
   return (
@@ -23,13 +27,13 @@ export default function ExternalTextLink({
       target="_blank"
       href={href}
       className={clsxMerge(
-        "flex gap-1 items-center duration-200",
+        "flex items-center duration-200",
         color === "green" ? "text-green hocus:text-green-hover" : "text-white hocus:text-green",
         className,
       )}
     >
-      {text}
-      <Svg iconName="forward" />
+      <span className={textClassname}>{text}</span>
+      <Svg className="flex-shrink-0" iconName="forward" size={arrowSize} />
     </a>
   );
 }

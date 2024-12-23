@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useCallback, useState } from "react";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -11,21 +12,22 @@ import { Token } from "@/sdk_hybrid/entities/token";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 export default function ManageTokensDialog() {
-  const { isOpen, setIsOpen } = useManageTokensDialogStore();
+  const { isOpen, setIsOpen, content, setContent } = useManageTokensDialogStore();
 
-  const [content, setContent] = useState<ManageTokensDialogContent>("default");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
+  const { setActiveTab } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setTimeout(() => {
       setContent("default");
+      setActiveTab(0);
       setTokenForPortfolio(null);
     }, 400);
-  }, [setIsOpen]);
+  }, [setIsOpen, setContent, setActiveTab]);
 
   return (
-    <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
+    <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
       <div className="z-[1000]">
         {content === "default" && (
           <TokensAndLists
@@ -51,7 +53,17 @@ export default function ManageTokensDialog() {
                 setContent("default");
                 setTokenForPortfolio(null);
               }}
-              title={tokenForPortfolio.name || "Unknown"}
+              title={
+                <span className="flex items-center gap-2">
+                  <Image
+                    width={32}
+                    height={32}
+                    src={tokenForPortfolio?.logoURI || "/images/tokens/placeholder.svg"}
+                    alt=""
+                  />
+                  {tokenForPortfolio?.name || "Unknown"}
+                </span>
+              }
             />
             <TokenPortfolioDialogContent token={tokenForPortfolio} />
           </>

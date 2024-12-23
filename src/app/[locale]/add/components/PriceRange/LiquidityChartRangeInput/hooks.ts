@@ -1,6 +1,7 @@
 import JSBI from "jsbi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
 import { useAllV3TicksQuery } from "@/graphql/thegraph/__generated__/types-and-hooks";
 import { TickData, Ticks } from "@/graphql/thegraph/AllV3TicksQuery";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
@@ -95,9 +96,10 @@ function useTicksFromSubgraph(
   feeAmount: FeeAmount | undefined,
   skip = 0,
   chainId: DexChainId,
+  refreshTicksTrigger: boolean,
 ) {
   const apolloClient = chainToApolloClient[chainId];
-  const { poolAddress, poolAddressLoading } = useComputePoolAddressDex({
+  const { poolAddress } = useComputePoolAddressDex({
     tokenA: currencyA,
     tokenB: currencyB,
     tier: feeAmount,
@@ -113,7 +115,7 @@ function useTicksFromSubgraph(
 
 const MAX_THE_GRAPH_TICK_FETCH_VALUE = 1000;
 // Fetches all ticks for a given pool
-function useAllV3Ticks(
+export function useAllV3Ticks(
   currencyA: Token | undefined,
   currencyB: Token | undefined,
   feeAmount: FeeAmount | undefined,
@@ -125,11 +127,27 @@ function useAllV3Ticks(
 } {
   const [skipNumber, setSkipNumber] = useState(0);
   const [subgraphTickData, setSubgraphTickData] = useState<Ticks>([]);
+  const { refreshTicksTrigger, setRefreshTicksTrigger } = useRefreshTicksDataStore();
   const {
     data,
     error,
     loading: isLoading,
-  } = useTicksFromSubgraph(currencyA, currencyB, feeAmount, skipNumber, chainId);
+  } = useTicksFromSubgraph(
+    currencyA,
+    currencyB,
+    feeAmount,
+    skipNumber,
+    chainId,
+    refreshTicksTrigger,
+  );
+
+  useEffect(() => {
+    if (refreshTicksTrigger) setRefreshTicksTrigger(false);
+  }, [refreshTicksTrigger, setRefreshTicksTrigger]);
+
+  useEffect(() => {
+    setSubgraphTickData([]);
+  }, [currencyA, currencyB, feeAmount]);
 
   useEffect(() => {
     if (data?.ticks.length) {

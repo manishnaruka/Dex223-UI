@@ -1,19 +1,19 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { formatUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@/components/atoms/Preloader";
 import Tooltip from "@/components/atoms/Tooltip";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
+import usePositions from "@/hooks/usePositions";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";
@@ -34,9 +34,7 @@ const filterTable = ({
   if (token.wrapped.address0 === searchValue) return true;
   if (token.wrapped.address1 === searchValue) return true;
   if (token.name?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-  if (token.symbol?.toLowerCase().includes(searchValue.toLowerCase())) return true;
-
-  return false;
+  return !!token.symbol?.toLowerCase().includes(searchValue.toLowerCase());
 };
 
 export const Balances = () => {
@@ -50,6 +48,7 @@ export const Balances = () => {
 
   const loading = false;
 
+  const { positions } = usePositions();
   const { tokenBalances, activeAddresses } = useActiveWalletBalances();
 
   const currentTableData = tokenBalances
@@ -66,51 +65,73 @@ export const Balances = () => {
   return (
     <>
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
-        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-5 py-6 w-full">
-          <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Wallet balance</span>
+        {/* Wallet balance info box */}
+        <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-6 w-full relative overflow-hidden">
+          <div className="flex items-center gap-1 mb-auto">
+            <span className="text-14 lg:text-16 text-secondary-text">{t("wallet_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
 
           <span className="text-24 lg:text-32 font-medium">$ —</span>
+
+          <Image
+            src="/images/logo-short.svg"
+            alt="Side Icon"
+            width={"180"}
+            height={"120"}
+            className="absolute top-[-32px] right-0 object-cover opacity-10"
+          />
         </div>
+
         {/*TODO: Extract card to separate component. 01.10.2024*/}
-        <div className="flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-5 py-6 w-full">
-          <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Margin positions balance</span>
+        <div className="relative flex flex-col bg-gradient-card-blue-light-fill  rounded-3 px-4 md:px-5 py-2.5 md:py-6 w-full overflow-hidden">
+          <div className="flex items-center gap-1 z-10">
+            <span className="text-14 lg:text-16 text-secondary-text">{t("margin_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-24 lg:text-32 font-medium">$ —</span>
+          <Image
+            src="/images/portfolio-bars.svg"
+            alt="Side Icon"
+            width={"180"}
+            height={"120"}
+            className="absolute top-0 right-0 object-cover z-0"
+          />
         </div>
       </div>
+
       <div className="mt-5 flex flex-col lg:flex-row gap-5">
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Liquidity balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("liquidity_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
-            — liquidity positions
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
+            {`${positions?.length ? positions.length : "—"} ${t("liquidity_positions_suffix")}`}
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Lending order balance</span>
+            <span className="text-14 lg:text-16 text-secondary-text">{t("lending_balance")}</span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
             — lending orders
           </span>
         </div>
         <div className="flex flex-col bg-primary-bg rounded-3 px-5 py-6 w-full">
           <div className="flex items-center gap-1">
-            <span className="text-14 lg:text-16">Deposited to contract</span>
+            <span className="text-14 lg:text-16 text-secondary-text">
+              {t("deposited_contract")}
+            </span>
             <Tooltip iconSize={20} text="Info text" />
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
-          <span className="px-2 py-[2px] bg-quaternary-bg text-14 rounded-1 w-max">— tokens</span>
+          <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
+            {`${currentTableData?.length ? currentTableData.length : "—"} ${t("tokens_suffix")}`}
+          </span>
         </div>
       </div>
 
@@ -121,13 +142,13 @@ export const Balances = () => {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t("balances_search_placeholder")}
-            className="bg-primary-bg lg:w-[480px]"
+            className="h-10 md:h-12 bg-primary-bg lg:w-[480px]"
           />
         </div>
       </div>
       {/*  */}
 
-      <div className="mt-5 min-h-[640px] mb-5 w-full">
+      <div className="mt-5 min-h-[340px] w-full">
         {!loading && activeAddresses.length && currentTableData.length ? (
           <>
             <BalancesDesktopTable
@@ -140,14 +161,12 @@ export const Balances = () => {
             />
           </>
         ) : Boolean(searchValue) ? (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="search" />
-            <span className="text-secondary-text">Token not found</span>
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-token bg-no-repeat bg-right-top max-md:bg-size-180">
+            <span className="text-secondary-text">{t("token_not_found")}</span>
           </div>
         ) : (
-          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1">
-            <EmptyStateIcon iconName="assets" />
-            <span className="text-secondary-text">Token will appear here</span>
+          <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-list bg-no-repeat bg-right-top max-md:bg-size-180">
+            <span className="text-secondary-text">{t("no_assets")}</span>
           </div>
         )}
 
@@ -157,6 +176,7 @@ export const Balances = () => {
           </div>
         ) : null}
       </div>
+
       <DrawerDialog isOpen={isTokenInfoOpened} setIsOpen={handleClosTokenInfo}>
         <DialogHeader onClose={handleClosTokenInfo} title={tokenForPortfolio?.name || "Unknown"} />
         {tokenForPortfolio ? (

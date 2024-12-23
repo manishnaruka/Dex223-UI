@@ -1,11 +1,15 @@
+import { useQuery } from "@apollo/client";
+import gql from "graphql-tag";
 import { useMemo } from "react";
 import { useReadContracts } from "wagmi";
 
 import { POOL_STATE_ABI } from "@/config/abis/poolState";
+import { apolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Pool } from "@/sdk_hybrid/entities/pool";
+import { Tick } from "@/sdk_hybrid/entities/tick";
 import {
   getPoolAddressKey,
   useComputePoolAddressesDex,
@@ -30,11 +34,26 @@ export type PoolParams = {
 
 export type PoolsParams = PoolParams[];
 
-type UsePoolsResult = [PoolState, Pool | null][];
+export type PoolResult = [PoolState, Pool | null];
+export type PoolsResult = PoolResult[];
 
 // TODO: mb we need add additional logic to update pool data on liquidity data changes
 // TODO: mb we need to add loading state
-export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
+
+const query = gql`
+  query PoolsTicks($addresses: [ID!]) {
+    pools(where: { id_in: $addresses }) {
+      id
+      ticks {
+        tickIdx
+        liquidityGross
+        liquidityNet
+      }
+    }
+  }
+`;
+
+export const usePools = (poolsParams: PoolsParams): PoolsResult => {
   const { pools, addPool } = usePoolsStore();
   const chainId = useCurrentChainId();
 
@@ -74,6 +93,39 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
     });
   }, [poolTokens]);
   const poolAddresses = useComputePoolAddressesDex(poolAddressesParams);
+
+  console.log(poolAddresses);
+  console.log(chainId);
+
+  const _apolloClient = useMemo(() => {
+    return apolloClient(chainId);
+  }, [chainId]);
+
+  const { data, loading } = useQuery(query, {
+    variables: {
+      addresses: poolAddresses.map((p) => p?.address?.toLowerCase()),
+    },
+    client: _apolloClient,
+  });
+
+  const ticksMap = useMemo(() => {
+    const _temp: { [key: string]: Tick[] } = {};
+
+    if (data?.pools) {
+      for (let i = 0; i < data.pools.length; i++) {
+        _temp[data.pools[i].id] = data.pools[i].ticks.map(
+          (_tick: any) =>
+            new Tick({
+              index: _tick.tickIdx,
+              liquidityGross: _tick.liquidityGross,
+              liquidityNet: _tick.liquidityNet,
+            }),
+        );
+      }
+    }
+
+    return _temp;
+  }, [data?.pools]);
 
   const slot0Contracts = useMemo(() => {
     return poolAddresses.map((address) => {
@@ -127,6 +179,17 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
 
       const liquidity = liquidityData[index].result as bigint;
       try {
+        const ticks =
+          poolAddresses?.[index]?.address && ticksMap
+            ? ticksMap[poolAddresses[index]!.address!.toLowerCase()]?.sort(
+                (a, b) => a.index - b.index,
+              )
+            : undefined;
+
+        if (!ticks) {
+          return;
+        }
+
         const newPool = new Pool(
           token0,
           token1,
@@ -134,6 +197,7 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
           sqrtPriceX96.toString(),
           liquidity.toString(),
           tick,
+          ticks,
         );
         addPool(key, newPool);
         return [PoolState.EXISTS, newPool];
@@ -152,6 +216,8 @@ export const usePools = (poolsParams: PoolsParams): UsePoolsResult => {
     pools,
     addPool,
     chainId,
+    poolAddresses,
+    ticksMap,
   ]);
 
   //

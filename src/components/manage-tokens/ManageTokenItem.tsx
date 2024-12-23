@@ -33,7 +33,7 @@ export default function ManageTokenItem({
     <div className="group">
       <div className="flex justify-between py-1.5">
         <div className="flex gap-3 items-center">
-          <img className="rounded-full" width={40} height={40} src={token.logoURI} alt="" />
+          <Image className="rounded-full" width={40} height={40} src={token.logoURI || ""} alt="" />
           <div className="flex flex-col">
             <span>{token.name}</span>
             <span className="text-secondary-text">{token.symbol}</span>
@@ -117,6 +117,7 @@ export default function ManageTokenItem({
               renderTrigger={(ref, refProps) => {
                 return (
                   <span
+                    onClick={(e) => e.stopPropagation()}
                     ref={ref.setReference}
                     {...refProps}
                     className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer"

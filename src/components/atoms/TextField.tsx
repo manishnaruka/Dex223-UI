@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { InputHTMLAttributes, ReactNode } from "react";
 import { NumericFormat } from "react-number-format";
 
-import Input, { SearchInput } from "@/components/atoms/Input";
+import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
 import Tooltip from "@/components/atoms/Tooltip";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
@@ -14,6 +14,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   internalTextClassName?: string;
   isError?: boolean;
   isWarning?: boolean;
+  inputSize?: InputSize;
 } & (
     | {
         error?: boolean | string;
@@ -34,16 +35,26 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
       }
   );
 
-export function InputLabel({ label, tooltipText, ...props }: Omit<Props, "helperText">) {
+const inputLabelSizeMap: Record<InputSize, string> = {
+  [InputSize.DEFAULT]: "text-14",
+  [InputSize.LARGE]: "text-16",
+};
+export function InputLabel({
+  label,
+  tooltipText,
+  inputSize = InputSize.DEFAULT,
+  ...props
+}: Omit<Props & { inputSize?: InputSize }, "helperText">) {
   return (
     <p
       className={clsx(
-        "text-16 font-bold mb-1 flex items-center gap-1 text-secondary-text",
+        "font-bold mb-1 flex items-center gap-1 text-secondary-text",
         props.disabled && "opacity-50",
+        inputLabelSizeMap[inputSize],
       )}
     >
       {label}
-      {tooltipText && <Tooltip iconSize={24} text={tooltipText} />}
+      {tooltipText && <Tooltip iconSize={20} text={tooltipText} />}
     </p>
   );
 }
@@ -57,12 +68,12 @@ export function HelperText({
   return (
     <div className="text-12 mt-1 min-h-4">
       {typeof helperText !== "undefined" && !error && (
-        <div className={clsx("text-12 text-secondary-text mt-1 h-4", disabled && "opacity-50")}>
+        <div className={clsx("text-12 text-tertiary-text h-4", disabled && "opacity-50")}>
           {helperText}
         </div>
       )}
-      {typeof error !== "undefined" && <p className="text-12 text-red-light mt-1">{error}</p>}
-      {warning && <p className="text-12 text-orange mt-1">{warning}</p>}
+      {typeof error !== "undefined" && <p className="text-12 text-red-light h-4">{error}</p>}
+      {warning && <p className="text-12 text-orange mt-1 h-4">{warning}</p>}
     </div>
   );
 }
@@ -77,21 +88,29 @@ export default function TextField({
   internalText,
   isError = false,
   isWarning = false,
+  inputSize = InputSize.LARGE,
   ...props
 }: Props) {
   return (
     <div>
-      <InputLabel label={label} tooltipText={tooltipText} />
+      <InputLabel inputSize={inputSize} label={label} tooltipText={tooltipText} />
       {variant === "default" ? (
         <div className="relative">
           {props.isNumeric ? (
-            <NumericFormat
-              isError={Boolean(error) || isError}
-              isWarning={Boolean(warning) || isWarning}
-              customInput={Input}
-              {...props}
-              decimalScale={props.decimalScale}
-            />
+            (() => {
+              const { isNumeric, ...rest } = props;
+              return (
+                <NumericFormat
+                  inputMode="decimal"
+                  allowedDecimalSeparators={[","]}
+                  isError={Boolean(error) || isError}
+                  isWarning={Boolean(warning) || isWarning}
+                  customInput={Input}
+                  inputSize={inputSize}
+                  {...rest}
+                />
+              );
+            })()
           ) : (
             <Input
               isError={Boolean(error) || isError}

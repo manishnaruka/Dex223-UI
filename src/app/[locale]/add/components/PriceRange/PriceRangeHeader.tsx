@@ -23,7 +23,7 @@ export const PriceRangeHeader = ({
   const t = useTranslations("Liquidity");
   return (
     <div className="flex flex-col gap-1 md:gap-0 md:flex-row md:justify-between md:items-center">
-      <h3 className="text-16 font-bold">{t("set_price_range")}</h3>
+      <h3 className="text-16 font-bold text-secondary-text">{t("set_price_range")}</h3>
       {button0Text && button1Text ? (
         <div className="flex gap-3 justify-between md:items-center">
           <div className="flex items-center gap-2">

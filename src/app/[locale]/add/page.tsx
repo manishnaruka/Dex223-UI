@@ -4,7 +4,18 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 
+import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
+import {
+  Field,
+  useLiquidityAmountsStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
+import { useAddLiquidityRecentTransactionsStore } from "@/app/[locale]/add/stores/useAddLiquidityRecentTransactionsStore";
+import {
+  AddLiquidityApproveStatus,
+  AddLiquidityStatus,
+  useAddLiquidityStatusStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import Container from "@/components/atoms/Container";
@@ -17,12 +28,12 @@ import IconButton, {
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
-import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
+import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "./components/LiquidityActionButton/ConfirmLiquidityDialog";
@@ -32,43 +43,90 @@ import { usePriceRange } from "./hooks/usePrice";
 import { useV3DerivedMintInfo } from "./hooks/useV3DerivedMintInfo";
 import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStore";
 
+function compareTokens(tokenA: Currency, tokenB: Currency) {
+  const tokenAaddress = tokenA.isNative ? tokenA.wrapped.address0 : tokenA.address0;
+  const tokenBaddress = tokenB.isNative ? tokenB.wrapped.address0 : tokenB.address0;
+  console.log(tokenA.name, tokenAaddress);
+  console.log(tokenB.name, tokenBaddress);
+  return tokenAaddress.toString() > tokenBaddress.toString();
+}
+
 export default function AddPoolPage() {
   usePoolsSearchParams();
   useRecentTransactionTracking();
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
-  const [showRecentTransactions, setShowRecentTransactions] = useState(true);
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useAddLiquidityRecentTransactionsStore();
+
   const t = useTranslations("Liquidity");
 
   const router = useRouter();
 
-  const { tokenA, tokenB, setTokenA, setTokenB } = useAddLiquidityTokensStore();
+  const { tokenA, tokenB, setTokenA, setTokenB, setBothTokens } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
-  const { setIsOpen } = useTransactionSettingsDialogStore();
   const { ticks, clearPriceRange } = useLiquidityPriceRangeStore();
+  const { setTypedValue } = useLiquidityAmountsStore();
+  const { setStartPriceTypedValue } = useLiquidityPriceRangeStore();
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
   const handlePick = useCallback(
     (token: Currency) => {
+      console.log("handlePick");
       if (currentlyPicking === "tokenA") {
         if (token === tokenB) {
-          setTokenB(tokenA);
+          setIsOpenedTokenPick(false);
+          return;
         }
 
-        setTokenA(token);
+        let res = false;
+        if (token && tokenB) {
+          res = compareTokens(token, tokenB);
+        }
+
+        if (res) {
+          console.log("swapping tokens in A");
+          setBothTokens({ tokenA: tokenB, tokenB: token });
+        } else {
+          setTokenA(token);
+        }
       }
 
       if (currentlyPicking === "tokenB") {
         if (token === tokenA) {
-          setTokenA(tokenB);
+          setIsOpenedTokenPick(false);
+          return;
         }
-        setTokenB(token);
+
+        let res = false;
+        if (token && tokenA) {
+          res = compareTokens(tokenA, token);
+        }
+
+        if (res) {
+          console.log("swapping tokens in B");
+          setBothTokens({ tokenA: token, tokenB: tokenA });
+        } else {
+          setTokenB(token);
+        }
       }
 
       clearPriceRange();
+      setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
+      setStartPriceTypedValue("");
       setIsOpenedTokenPick(false);
     },
-    [currentlyPicking, setTokenA, setTokenB, tokenA, tokenB, clearPriceRange],
+    [
+      currentlyPicking,
+      clearPriceRange,
+      setTypedValue,
+      setStartPriceTypedValue,
+      tokenB,
+      setTokenA,
+      setTokenB,
+      tokenA,
+      setBothTokens,
+    ],
   );
 
   // PRICE RANGE HOOK START
@@ -99,8 +157,21 @@ export default function AddPoolPage() {
 
   // Deposit Amounts END
 
-  const isFormDisabled = !tokenA || !tokenB;
+  const { status, approve0Status, approve1Status, deposite0Status, deposite1Status } =
+    useAddLiquidityStatusStore();
+  const { status: revokeStatus } = useRevokeStatusStore();
 
+  const isAllDisabled =
+    [AllowanceStatus.LOADING, AllowanceStatus.PENDING].includes(revokeStatus) ||
+    [AddLiquidityStatus.MINT_PENDING, AddLiquidityStatus.MINT_LOADING].includes(status) ||
+    [approve0Status, approve1Status, deposite0Status, deposite1Status].includes(
+      AddLiquidityApproveStatus.LOADING,
+    ) ||
+    [approve0Status, approve1Status, deposite0Status, deposite1Status].includes(
+      AddLiquidityApproveStatus.PENDING,
+    );
+
+  const isFormDisabled = !tokenA || !tokenB || isAllDisabled;
   // User need to provide values to price range & Starting price on pool creating
   const { LOWER: tickLower, UPPER: tickUpper } = ticks;
   const isCreatePoolFormFilled =
@@ -112,30 +183,28 @@ export default function AddPoolPage() {
         <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
           <div className="w-[48px] md:w-[104px]">
             <IconButton
-              variant={IconButtonVariant.DEFAULT}
+              variant={IconButtonVariant.BACK}
               iconSize={IconSize.REGULAR}
-              iconName="back"
               buttonSize={IconButtonSize.LARGE}
               onClick={() => router.push("/pools/positions")}
-              className="text-tertiary-text"
+              // className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">{t("add_liquidity_title")}</h2>
           <div className="w-[48px] md:w-[104px] flex items-center gap-2 justify-end">
             <IconButton
-              variant={IconButtonVariant.DEFAULT}
               buttonSize={IconButtonSize.LARGE}
               iconName="recent-transactions"
               active={showRecentTransactions}
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-              className="text-tertiary-text"
             />
           </div>
         </div>
         <div className="rounded-b-5 border-t-0 p-4 pt-0 md:p-10 md:pt-0 bg-primary-bg mb-4 md:mb-5">
           <h3 className="text-16 font-bold mb-1 lg:mb-4">{t("select_pair")}</h3>
-          <div className="flex gap-3 mb-4 md:mb-5">
+          <div className="flex gap-2 md:gap-3 mb-4 md:mb-5">
             <SelectButton
+              disabled={isAllDisabled}
               variant="rounded"
               className="bg-tertiary-bg"
               fullWidth
@@ -149,14 +218,14 @@ export default function AddPoolPage() {
                 <span className="flex gap-2 items-center">
                   <Image
                     className="flex-shrink-0 hidden md:block"
-                    src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={32}
                     height={32}
                   />
                   <Image
                     className="flex-shrink-0 block md:hidden"
-                    src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}
@@ -170,6 +239,7 @@ export default function AddPoolPage() {
               )}
             </SelectButton>
             <SelectButton
+              disabled={isAllDisabled}
               variant="rounded"
               className="bg-tertiary-bg"
               fullWidth
@@ -183,14 +253,14 @@ export default function AddPoolPage() {
                 <span className="flex gap-2 items-center">
                   <Image
                     className="flex-shrink-0 hidden md:block"
-                    src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={32}
                     height={32}
                   />
                   <Image
                     className="flex-shrink-0 block md:hidden"
-                    src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}
@@ -204,7 +274,7 @@ export default function AddPoolPage() {
               )}
             </SelectButton>
           </div>
-          <FeeAmountSettings />
+          <FeeAmountSettings isAllDisabled={isAllDisabled} />
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-5 mb-4 lg:mb-5">
             <DepositAmounts
               parsedAmounts={parsedAmounts}
@@ -239,6 +309,7 @@ export default function AddPoolPage() {
             showRecentTransactions={showRecentTransactions}
             handleClose={() => setShowRecentTransactions(false)}
             pageSize={5}
+            store={useAddLiquidityRecentTransactionsStore}
           />
         </div>
       </div>
@@ -248,6 +319,7 @@ export default function AddPoolPage() {
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
       />
+      <RevokeDialog />
       <ConfirmLiquidityDialog />
     </Container>
   );

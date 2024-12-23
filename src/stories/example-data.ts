@@ -14,7 +14,7 @@ export const exampleToken: Token = new Token(
   18,
   "USDT",
   "Tether USD",
-  "/example.svg",
+  "/images/example.svg",
 );
 
 export const exampleToken1: Token = new Token(
@@ -24,13 +24,13 @@ export const exampleToken1: Token = new Token(
   18,
   "DAI",
   "DAI Token",
-  "/example.svg",
+  "/images/example.svg",
 );
 
 export const exampleTitleForOne: IRecentTransactionTitle = {
   template: RecentTransactionTitleTemplate.APPROVE,
   amount: "1",
-  logoURI: "/example.svg",
+  logoURI: "/images/example.svg",
   symbol: "USDT",
 };
 
@@ -38,8 +38,8 @@ export const exampleTitleForTwo: IRecentTransactionTitle = {
   template: RecentTransactionTitleTemplate.SWAP,
   amount0: "1",
   amount1: "2",
-  logoURI0: "/example.svg",
-  logoURI1: "/example.svg",
+  logoURI0: "/images/example.svg",
+  logoURI1: "/images/example.svg",
   symbol0: "USDT",
   symbol1: "DAI",
 };

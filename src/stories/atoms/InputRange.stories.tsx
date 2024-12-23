@@ -16,7 +16,7 @@ export const Default: Story = {
   render: function Render(args) {
     const [{ value }, updateArgs] = useArgs();
 
-    function onChange(value: 0 | 100) {
+    function onChange(value: number) {
       updateArgs({ value });
     }
 

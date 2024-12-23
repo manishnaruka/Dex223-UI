@@ -2,6 +2,10 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { ButtonHTMLAttributes, useCallback, useMemo, useState } from "react";
 
+import {
+  Field,
+  useLiquidityAmountsStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import Collapse from "@/components/atoms/Collapse";
@@ -27,16 +31,13 @@ const useDistributionText = ({
     (feeAmount: FeeAmount) => {
       const poolState = poolStates[feeAmount];
 
-      const distributionText =
-        !distributions || poolState === PoolState.NOT_EXISTS || poolState === PoolState.INVALID
-          ? t("fee_tier_not_created")
-          : distributions[feeAmount] !== undefined
-            ? t("fee_tier_select", {
-                select: distributions[feeAmount]?.toFixed(0),
-              })
-            : t("fee_tier_no_data");
-
-      return distributionText;
+      return !distributions || poolState === PoolState.NOT_EXISTS || poolState === PoolState.INVALID
+        ? t("fee_tier_not_created")
+        : distributions[feeAmount] !== undefined
+          ? t("fee_tier_select", {
+              select: distributions[feeAmount]?.toFixed(0),
+            })
+          : t("fee_tier_no_data");
     },
     [t, distributions, poolStates],
   );
@@ -65,8 +66,8 @@ function FeeAmountOption({
       className={clsx(
         "flex flex-col md:flex-row md:justify-between items-start md:items-center px-4 py-3 md:px-5 md:py-2 rounded-2 border cursor-pointer duration-200 gap-2 md:gap-0",
         active
-          ? "bg-green-bg shadow shadow-green/60 border-green pointer-events-none"
-          : "border-transparent bg-primary-bg hocus:bg-green-bg",
+          ? "bg-quaternary-bg border-secondary-border pointer-events-none"
+          : "border-transparent bg-primary-bg md:hocus:bg-quaternary-bg",
       )}
     >
       <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
@@ -80,15 +81,16 @@ function FeeAmountOption({
   );
 }
 
-export default function FeeAmountSettings() {
+export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisabled?: boolean }) {
   const t = useTranslations("Liquidity");
   const [isFeeOpened, setIsFeeOpened] = useState(false);
   const { tier, setTier } = useLiquidityTierStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { clearPriceRange } = useLiquidityPriceRangeStore();
-  const isDisabled = !tokenA || !tokenB;
+  const { setTypedValue } = useLiquidityAmountsStore();
+  const isDisabled = !tokenA || !tokenB || isAllDisabled;
 
-  const { isLoading, isError, largestUsageFeeTier, distributions } = useFeeTierDistribution({
+  const { distributions } = useFeeTierDistribution({
     tokenA,
     tokenB,
   });
@@ -142,7 +144,7 @@ export default function FeeAmountSettings() {
         }}
         className={clsx(
           "flex justify-between items-center px-4 py-2 md:px-5 md:py-4 rounded-3 duration-200",
-          !isFeeOpened && !isDisabled && "hocus:bg-green-bg",
+          !isFeeOpened && !isDisabled && "hocus:bg-quaternary-bg",
           isDisabled && "cursor-default",
         )}
       >
@@ -172,6 +174,7 @@ export default function FeeAmountSettings() {
               onClick={() => {
                 setTier(_feeAmount);
                 clearPriceRange();
+                setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
               }}
             />
           ))}

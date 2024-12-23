@@ -25,14 +25,14 @@ export default function TokenListLogo(props: Props) {
     case TokenListLogoType.CUSTOM:
     case TokenListLogoType.DEFAULT:
       return (
-        <div className="w-10 h-10 relative">
+        <div className="w-10 h-10 relative flex-shrink-0">
           <Image
             width={40}
             height={40}
             src={
               props.type === TokenListLogoType.CUSTOM
-                ? "/custom-tokenlist.svg"
-                : "/default-tokenlist.svg"
+                ? "/images/custom-tokenlist.svg"
+                : "/images/default-tokenlist.svg"
             }
             alt=""
           />
@@ -47,8 +47,8 @@ export default function TokenListLogo(props: Props) {
       );
     case TokenListLogoType.AUTOLISTING:
       return (
-        <div className="w-10 h-10 relative">
-          <Image width={40} height={40} src="/autolisting-default.svg" alt="" />
+        <div className="w-10 h-10 relative flex-shrink-0">
+          <Image width={40} height={40} src="/images/autolisting-default.svg" alt="" />
           <Image
             width={18}
             height={18}
@@ -60,7 +60,7 @@ export default function TokenListLogo(props: Props) {
       );
     case TokenListLogoType.OTHER:
       return (
-        <div className="w-10 h-10 relative">
+        <div className="w-10 h-10 relative flex-shrink-0">
           <Image width={40} height={40} src={props.url} alt="" />
         </div>
       );

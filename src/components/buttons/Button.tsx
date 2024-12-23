@@ -61,19 +61,19 @@ const buttonVariantClassnameMap: Record<ButtonVariant, Record<ButtonColor, strin
 };
 
 const buttonSizeClassnameMap: Record<ButtonSize, string> = {
-  [ButtonSize.EXTRA_SMALL]: "xl:text-12 xl:min-h-5 xl:rounded-20 xl:px-4",
-  [ButtonSize.SMALL]: "xl:text-14 xl:font-medium xl:min-h-8 xl:rounded-20 xl:px-6",
-  [ButtonSize.MEDIUM]: "xl:text-16 xl:font-medium xl:min-h-10 xl:rounded-2 xl:px-6",
-  [ButtonSize.LARGE]: "xl:text-16 xl:font-medium xl:min-h-12 xl:rounded-3 xl:px-6",
-  [ButtonSize.EXTRA_LARGE]: "xl:text-18 xl:font-medium xl:min-h-[60px] xl:rounded-3 xl:px-6",
+  [ButtonSize.EXTRA_SMALL]: "lg:text-12 lg:min-h-5 lg:rounded-20 lg:px-4",
+  [ButtonSize.SMALL]: "lg:text-14 lg:font-medium lg:min-h-8 lg:rounded-20 lg:px-6",
+  [ButtonSize.MEDIUM]: "lg:text-16 lg:font-medium lg:min-h-10 lg:rounded-2 lg:px-6",
+  [ButtonSize.LARGE]: "lg:text-16 lg:font-medium lg:min-h-12 lg:rounded-3 lg:px-6",
+  [ButtonSize.EXTRA_LARGE]: "lg:text-18 lg:font-medium lg:min-h-[60px] lg:rounded-3 lg:px-6",
 };
 
 const tabletButtonSizeClassnameMap: Record<ButtonSize, string> = {
-  [ButtonSize.EXTRA_SMALL]: "md:text-12 md:min-h-5 md:rounded-20 md:px-4",
-  [ButtonSize.SMALL]: "md:text-14 md:font-medium md:min-h-8 md:rounded-20 md:px-6",
-  [ButtonSize.MEDIUM]: "md:text-16 md:font-medium md:rounded-2 md:min-h-10 md:px-6",
-  [ButtonSize.LARGE]: "md:text-16 md:font-medium md:rounded-3 md:min-h-12 md:px-6",
-  [ButtonSize.EXTRA_LARGE]: "md:text-18 md:font-medium md:rounded-3 md:min-h-[60px] md:px-6",
+  [ButtonSize.EXTRA_SMALL]: "sm:text-12 sm:min-h-5 sm:rounded-20 sm:px-4",
+  [ButtonSize.SMALL]: "sm:text-14 sm:font-medium sm:min-h-8 sm:rounded-20 sm:px-6",
+  [ButtonSize.MEDIUM]: "sm:text-16 sm:font-medium sm:rounded-2 sm:min-h-10 sm:px-6",
+  [ButtonSize.LARGE]: "sm:text-16 sm:font-medium sm:rounded-3 sm:min-h-12 sm:px-6",
+  [ButtonSize.EXTRA_LARGE]: "sm:text-18 sm:font-medium sm:rounded-3 sm:min-h-[60px] sm:px-6",
 };
 
 const mobileButtonSizeClassnameMap: Record<ButtonSize, string> = {
@@ -85,7 +85,7 @@ const mobileButtonSizeClassnameMap: Record<ButtonSize, string> = {
 };
 
 const disabledClassnameMap: Record<ButtonVariant, string> = {
-  [ButtonVariant.CONTAINED]: "disabled:bg-quaternary-bg disabled:text-secondary-text",
+  [ButtonVariant.CONTAINED]: "disabled:bg-tertiary-bg disabled:text-secondary-text",
   [ButtonVariant.OUTLINED]: "disabled:text-secondary-text disabled:border-secondary-border",
 };
 

@@ -22,7 +22,7 @@ export default function DrawerDialog({ isOpen, children, setIsOpen }: PropsWithC
   return (
     <>
       {isMobile ? (
-        <Drawer handlers={handlers} isOpen={isOpen} setIsOpen={setIsOpen}>
+        <Drawer isOpen={isOpen} setIsOpen={setIsOpen}>
           {children}
         </Drawer>
       ) : (

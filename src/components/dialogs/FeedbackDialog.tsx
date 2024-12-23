@@ -7,9 +7,10 @@ import * as Yup from "yup";
 import { CheckboxButton } from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import { InputSize } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextAreaField from "@/components/atoms/TextAreaField";
-import TextField from "@/components/atoms/TextField";
+import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button from "@/components/buttons/Button";
 import {
   FeedbackTag,
@@ -47,7 +48,7 @@ interface Values {
 const FeedbackSchema = Yup.object().shape({
   email: Yup.string(),
   description: Yup.string()
-    .required("Required")
+    .required("This field is required")
     .min(3, "Must be at least 3 characters")
     .max(20000, "Max number of characters 20000"),
   tags: Yup.array().of(Yup.string()),
@@ -57,7 +58,7 @@ function SuccessFeedback() {
   const t = useTranslations("Feedback");
 
   return (
-    <div className="px-4 pb-4 md:pb-10 md:px-10 w-full md:w-[600px]">
+    <div className="card-spacing w-full md:w-[600px]">
       <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
         <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green"></div>
         <Svg
@@ -136,13 +137,14 @@ export default function FeedbackDialog() {
         {isSubmitted ? (
           <SuccessFeedback />
         ) : (
-          <div className="w-full md:w-[600px] px-4 pb-4 md:px-10 md:pb-10">
+          <div className="w-full md:w-[600px] card-spacing">
             <p className="text-secondary-text text-16 mb-5">
               {t.rich("feel_free_to_share", {
                 github: (chunks) => (
                   <a
+                    target="_blank"
                     href="https://github.com/EthereumCommonwealth/Dex223-UI/issues"
-                    className="text-green hocus:underline"
+                    className="text-green underline hocus:text-green-hover duration-200"
                   >
                     {chunks}
                   </a>
@@ -228,9 +230,7 @@ export default function FeedbackDialog() {
                       value={values.email}
                     />
 
-                    <h3 className="text-16 font-bold mb-1 flex items-center gap-1 mt-5">
-                      {t("feedback_category")}
-                    </h3>
+                    <InputLabel label="Feedback category" inputSize={InputSize.LARGE} />
                     <div className="grid gap-2 grid-cols-2 mb-5">
                       {[
                         FeedbackTag.COMMENT,

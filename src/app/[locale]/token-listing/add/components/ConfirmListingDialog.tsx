@@ -2,8 +2,9 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { Address, formatGwei, formatUnits, parseUnits } from "viem";
-import { useGasPrice, useReadContract } from "wagmi";
+import { useGasPrice } from "wagmi";
 
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapGasPriceStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
@@ -37,10 +38,10 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { useStoreAllowance } from "@/hooks/useAllowance";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { ADDRESS_ZERO } from "@/sdk_hybrid/constants";
 import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 function ApproveRow({
@@ -134,14 +135,14 @@ function ListTokenRow({
         <div
           className={clsxMerge(
             "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green",
+            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
             isReverted && "bg-red-bg",
           )}
         >
           <Svg
             className={clsxMerge(
               "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-secondary-bg",
+              isDisabled ? "text-tertiary-text" : "text-green",
               isReverted && "text-red-light",
             )}
             iconName="swap"
@@ -365,6 +366,8 @@ function SingleCard({
   title: string;
   address: Address;
 }) {
+  const chainId = useCurrentChainId();
+
   return (
     <div
       className={clsx(
@@ -380,12 +383,18 @@ function SingleCard({
             : "bg-tertiary-bg",
         )}
       >
-        {underlineText && <div className="text-secondary-text text-14">{underlineText}</div>}
+        {underlineText && (
+          <div className="text-secondary-text text-14 px-2 text-center">{underlineText}</div>
+        )}
         <div className="text-18 text-center px-4">{title}</div>
       </div>
 
       <div className="bg-quaternary-bg flex items-center text-16 py-4 justify-center">
-        <ExternalTextLink text={truncateMiddle(address)} href="#" />
+        <ExternalTextLink
+          className="max-sm:text-14"
+          text={truncateMiddle(address)}
+          href={getExplorerLink(ExplorerLinkType.ADDRESS, address, chainId)}
+        />
       </div>
     </div>
   );
@@ -455,8 +464,18 @@ export default function ConfirmListingDialog() {
   const [isEditApproveActive, setEditApproveActive] = useState(false);
 
   const [amountToApprove, setAmountToApprove] = useState(
-    paymentToken ? formatUnits(paymentToken.price, paymentToken.token.decimals) : "0",
+    paymentToken && tokensToList.length
+      ? formatUnits(paymentToken.price * BigInt(tokensToList.length), paymentToken.token.decimals)
+      : "0",
   );
+
+  useEffect(() => {
+    if (tokensToList.length && paymentToken) {
+      setAmountToApprove(
+        formatUnits(paymentToken.price * BigInt(tokensToList.length), paymentToken.token.decimals),
+      );
+    }
+  }, [paymentToken, tokensToList]);
 
   const { autoListingContract } = useAutoListingContractStore();
 
@@ -482,8 +501,11 @@ export default function ConfirmListingDialog() {
           )
         : undefined,
     contractAddress: autoListingContract,
-    amountToCheck: paymentToken ? paymentToken.price * BigInt(2) : null,
+    amountToCheck:
+      paymentToken && tokensToList.length ? paymentToken.price * BigInt(tokensToList.length) : null,
   });
+
+  const isMobile = useMediaQuery({ query: "(max-width: 550px)" });
 
   return (
     <DrawerDialog
@@ -505,7 +527,7 @@ export default function ConfirmListingDialog() {
           }}
           title={"Review listing tokens"}
         />
-        <div className="px-4 pb-4 md:px-10 md:pb-9">
+        <div className="card-spacing">
           {!isSettledList && !isRevertedApprove && (
             <div className="mb-5">
               {tokensToList.length === 1 && tokensToList[0] && (
@@ -523,7 +545,9 @@ export default function ConfirmListingDialog() {
                   <SingleCard
                     address={autoListing?.id!}
                     title={autoListing?.name || "Unknown"}
-                    underlineText="In the auto-listing contract"
+                    underlineText={
+                      isMobile ? "In the auto-listing" : "In the auto-listing сontract"
+                    }
                   />
                 </div>
               )}
@@ -555,7 +579,7 @@ export default function ConfirmListingDialog() {
                   <SingleCard
                     address={autoListing?.id!}
                     title={autoListing?.name || "Unknown"}
-                    underlineText="In the auto-listing contract"
+                    underlineText="In the auto-listing сontract"
                   />
                 </>
               )}
@@ -591,8 +615,10 @@ export default function ConfirmListingDialog() {
             <div className="mb-5">
               <InputLabel label="Payment for listing" tooltipText="Tooltip text" />
               <div className="h-12 rounded-2  w-full bg-tertiary-bg text-primary-text flex justify-between items-center px-5">
-                {formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18).slice(0, 7) ===
-                "0.00000"
+                {formatUnits(
+                  paymentToken.price * BigInt(tokensToList.length),
+                  paymentToken.token.decimals ?? 18,
+                ).slice(0, 7) === "0.00000"
                   ? truncateMiddle(
                       formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18),
                       {
@@ -607,7 +633,7 @@ export default function ConfirmListingDialog() {
                       ),
                     )}
                 <span className="flex items-center gap-2">
-                  <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                  <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
 
                   {paymentToken.token.symbol}
                   <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
@@ -617,8 +643,8 @@ export default function ConfirmListingDialog() {
                 <div
                   className={clsx(
                     "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5",
-                    parseUnits(amountToApprove, paymentToken.token.decimals) < paymentToken.price &&
-                      "pb-[26px]",
+                    parseUnits(amountToApprove, paymentToken.token.decimals) <
+                      paymentToken.price * BigInt(tokensToList.length) && "pb-[26px]",
                   )}
                 >
                   <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
@@ -636,7 +662,7 @@ export default function ConfirmListingDialog() {
                           <Input
                             isError={
                               parseUnits(amountToApprove, paymentToken.token.decimals) <
-                              paymentToken.price
+                              paymentToken.price * BigInt(tokensToList.length)
                             }
                             className="h-8 pl-3"
                             value={amountToApprove}
@@ -648,10 +674,13 @@ export default function ConfirmListingDialog() {
                           </span>
                         </div>
                         {parseUnits(amountToApprove, paymentToken.token.decimals) <
-                          paymentToken.price && (
+                          paymentToken.price * BigInt(tokensToList.length) && (
                           <span className="text-red-light absolute text-12 translate-y-0.5">
                             Must be higher or equal{" "}
-                            {formatUnits(paymentToken.price, paymentToken.token.decimals)}
+                            {formatUnits(
+                              paymentToken.price * BigInt(tokensToList.length),
+                              paymentToken.token.decimals,
+                            )}
                           </span>
                         )}
                       </div>
@@ -668,7 +697,7 @@ export default function ConfirmListingDialog() {
                       <Button
                         disabled={
                           parseUnits(amountToApprove, paymentToken.token.decimals) <
-                          paymentToken.price
+                          paymentToken.price * BigInt(tokensToList.length)
                         }
                         size={ButtonSize.EXTRA_SMALL}
                         colorScheme={ButtonColor.LIGHT_GREEN}

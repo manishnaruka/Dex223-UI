@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { PropsWithChildren } from "react";
 
 import { clsxMerge } from "@/functions/clsxMerge";

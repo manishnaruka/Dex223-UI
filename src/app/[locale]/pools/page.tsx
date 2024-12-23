@@ -1,22 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
+import React, { useCallback, useState } from "react";
 
 import Container from "@/components/atoms/Container";
+import { SearchInput } from "@/components/atoms/Input";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import TabButton from "@/components/buttons/TabButton";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 
 import PoolsTable from "./PoolsTable";
 
 export default function PoolsPage() {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
+  const t = useTranslations("Liquidity");
 
   const router = useRouter();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedToken, setSelectedToken] = useState<Currency | null>(null);
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
   const [tokenA, setTokenA] = useState<Currency>();
@@ -56,12 +62,12 @@ export default function PoolsPage() {
     <Container>
       <div className="p-4 lg:p-10 flex flex-col items-center">
         <div className="flex flex-col lg:flex-row w-full justify-between items-center mb-6 gap-2">
-          <div className="w-full lg:w-[384px] grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3">
-            <TabButton inactiveBackground="bg-primary-bg" size={48} active>
+          <div className="w-full lg:w-[384px] grid grid-cols-2 bg-primary-bg p-1 gap-1 rounded-3">
+            <TabButton inactiveBackground="bg-secondary-bg" size={48} active>
               Pools
             </TabButton>
             <TabButton
-              inactiveBackground="bg-primary-bg"
+              inactiveBackground="bg-secondary-bg"
               size={48}
               active={false}
               onClick={() => router.push("/pools/positions")}
@@ -69,12 +75,13 @@ export default function PoolsPage() {
               Liquidity positions
             </TabButton>
           </div>
-          <div className="flex w-full lg:w-auto gap-2 items-center">
+          <div className="flex w-full lg:w-auto gap-2 items-center ml-auto">
             <SelectButton
               fullWidth
               onClick={() => {
                 setCurrentlyPicking("tokenA");
                 setIsOpenedTokenPick(true);
+                setSelectedToken(tokenA || null);
               }}
               size="medium"
               withArrow={!tokenA}
@@ -83,14 +90,14 @@ export default function PoolsPage() {
                 <span className="flex gap-2 items-center">
                   <Image
                     className="flex-shrink-0 hidden md:block"
-                    src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}
                   />
                   <Image
                     className="flex-shrink-0 block md:hidden"
-                    src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}
@@ -109,7 +116,7 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">Token</span>
+                <span className="text-tertiary-text">{t("select_token")}</span>
               )}
             </SelectButton>
             <span>—</span>
@@ -118,6 +125,7 @@ export default function PoolsPage() {
               onClick={() => {
                 setCurrentlyPicking("tokenB");
                 setIsOpenedTokenPick(true);
+                setSelectedToken(tokenB || null);
               }}
               size="medium"
               withArrow={!tokenB}
@@ -126,14 +134,14 @@ export default function PoolsPage() {
                 <span className="flex gap-2 items-center">
                   <Image
                     className="flex-shrink-0 hidden md:block"
-                    src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}
                   />
                   <Image
                     className="flex-shrink-0 block md:hidden"
-                    src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                    src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                     alt="Ethereum"
                     width={24}
                     height={24}
@@ -152,22 +160,35 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">Token</span>
+                <span className="text-tertiary-text">{t("select_token")}</span>
               )}
             </SelectButton>
+          </div>
+          <div className="md:w-[300px] w-full">
+            <SearchInput
+              placeholder={t("pools_search_placeholder")}
+              className="bg-primary-bg"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+              }}
+            />
           </div>
         </div>
         <PoolsTable
           filter={{
             token0Address: tokenA?.wrapped.address0,
             token1Address: tokenB?.wrapped.address0,
+            searchString: searchQuery,
           }}
         />
       </div>
       <PickTokenDialog
+        prevToken={selectedToken}
         handlePick={handlePick}
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
+        simpleForm={true}
       />
     </Container>
   );

@@ -105,7 +105,7 @@ export default function Footer() {
               ) : null}
               <div className="w-1.5 h-1.5 rounded-full bg-green" />
 
-              <div className="whitespace-nowrap text-14 opacity-0 pointer-events-none px-5 py-4 absolute group-hocus:opacity-100 duration-200 bottom-9 rounded-3 right-0 bg-primary-bg border border-secondary-border before:w-2.5 before:h-2.5 before:-bottom-[6px] before:bg-primary-bg before:absolute before:right-9 before:rotate-45 before:border-secondary-border before:border-r before:border-b">
+              <div className="z-[1000] whitespace-nowrap text-14 opacity-0 pointer-events-none px-5 py-4 absolute group-hocus:opacity-100 duration-200 bottom-9 rounded-3 right-0 bg-primary-bg border border-secondary-border before:w-2.5 before:h-2.5 before:-bottom-[6px] before:bg-primary-bg before:absolute before:right-9 before:rotate-45 before:border-secondary-border before:border-r before:border-b">
                 <p>{t("most_recent_block")}</p>
                 <p>{t("prices_update_on_every_block")}</p>
               </div>
@@ -116,7 +116,7 @@ export default function Footer() {
       <footer className="before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:top-0 before:left-0 pb-[56px] md:pb-0">
         <Container>
           <div className="flex justify-between py-3 px-5 items-center flex-col-reverse lg:flex-row gap-3">
-            <span className="text-12 text-secondary-text">
+            <span className="text-12 text-secondary-text max-md:mb-3">
               © {new Date(Date.now()).getFullYear()} DEX223
             </span>
             <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 lg:gap-3 w-full lg:w-auto">

@@ -74,41 +74,35 @@ export default function Drawer({
   const descriptionId = useId();
 
   return (
-    <>
-      <FloatingPortal>
-        <div {...handlers}>
-          {isMounted && (
-            <FloatingOverlay
-              className="drawer-overlay"
-              style={{ ...transitionStyles }}
-              lockScroll
-            />
-          )}
-          {isMountedDrawer && (
-            <FloatingFocusManager context={context}>
-              <div
-                className={clsx(
-                  "drawer-container bg-primary-bg",
-                  placement === "left" && "h-full",
-                  placement === "bottom" && "w-full max-h-[80vh]",
-                )}
-                ref={refs.setFloating}
-                aria-labelledby={headingId}
-                aria-describedby={descriptionId}
-                {...getFloatingProps()}
-                style={{
-                  ...transitionStylesDrawer,
-                  top: placement === "left" ? 0 : "unset",
-                  bottom: placement === "bottom" ? 0 : "unset",
-                  ...(placement === "left" ? { width: "auto" } : {}),
-                }}
-              >
-                {children}
-              </div>
-            </FloatingFocusManager>
-          )}
-        </div>
-      </FloatingPortal>
-    </>
+    <FloatingPortal>
+      <div {...handlers}>
+        {isMounted && (
+          <FloatingOverlay className="drawer-overlay" style={{ ...transitionStyles }} lockScroll />
+        )}
+        {isMountedDrawer && (
+          <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
+            <div
+              className={clsx(
+                "drawer-container bg-primary-bg rounded-t-5",
+                placement === "left" && "h-full",
+                placement === "bottom" && "w-full max-h-[100vh]",
+              )}
+              ref={refs.setFloating}
+              aria-labelledby={headingId}
+              aria-describedby={descriptionId}
+              {...getFloatingProps()}
+              style={{
+                ...transitionStylesDrawer,
+                top: placement === "left" ? 0 : "unset",
+                bottom: placement === "bottom" ? 0 : "unset",
+                ...(placement === "left" ? { width: "auto" } : {}),
+              }}
+            >
+              {children}
+            </div>
+          </FloatingFocusManager>
+        )}
+      </div>
+    </FloatingPortal>
   );
 }

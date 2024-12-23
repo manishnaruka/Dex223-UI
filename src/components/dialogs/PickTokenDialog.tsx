@@ -3,11 +3,12 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import { Address } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { SearchInput } from "@/components/atoms/Input";
+import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -16,6 +17,7 @@ import IconButton from "@/components/buttons/IconButton";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
+import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
@@ -27,6 +29,8 @@ interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handlePick: (token: Currency) => void;
+  simpleForm?: boolean;
+  prevToken?: Currency | null;
 }
 
 function FoundInOtherListMarker() {
@@ -36,6 +40,7 @@ function FoundInOtherListMarker() {
       renderTrigger={(ref, refProps) => {
         return (
           <div
+            onClick={(e) => e.stopPropagation()}
             className="rounded-full p-0.5 bg-primary-bg group-hocus:bg-tertiary-bg duration-200"
             ref={ref.setReference}
             {...refProps}
@@ -86,38 +91,81 @@ function TokenRow({
     <button
       role="button"
       onClick={() => handlePick(currency)}
-      className="px-10 hocus:bg-tertiary-bg duration-200 group pb-2 w-full text-left"
+      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:pl-10 md:pr-4 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
     >
-      <div className="grid grid-cols-[40px_1fr] gap-2">
-        <div className="flex items-center pt-3">
-          <Image width={40} height={40} src={currency?.logoURI || ""} alt="" />
+      <div className="grid grid-cols-[40px_1fr] gap-2 w-full">
+        <div className="flex items-center md:pt-3">
+          <Image
+            width={40}
+            height={40}
+            src={
+              currency?.logoURI !== "/tokens/placeholder.svg"
+                ? currency?.logoURI || ""
+                : "/images/tokens/placeholder.svg"
+            }
+            alt=""
+          />
         </div>
-        <div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span>{currency.name}</span>
-              <div className="flex relative items-center">
-                {scoreObj && (
-                  <>
-                    {scoreObj[0] < 20 && (
-                      <>
-                        {currency.isToken && currency.rate && (
-                          <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
-                        )}
-                      </>
-                    )}
-                    {scoreObj[1] && (
-                      <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
-                        <FoundInOtherListMarker />
-                      </div>
-                    )}
-                  </>
-                )}
+        <div className="w-full">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center md:gap-x-2 flex-wrap">
+              <div className="flex items-center w-[120px] md:gap-2 md:w-[256px]">
+                <span className="whitespace-nowrap overflow-ellipsis overflow-hidden">
+                  {currency.name}
+                </span>
+                <div className="flex relative items-center">
+                  {scoreObj && (
+                    <>
+                      {scoreObj[0] < 20 && (
+                        <>
+                          {currency.isToken && currency.rate && (
+                            <TrustMarker rate={currency?.rate} totalScore={scoreObj[0]} />
+                          )}
+                        </>
+                      )}
+                      {scoreObj[1] && (
+                        <div className={scoreObj[0] < 20 ? "-ml-2.5" : ""}>
+                          <FoundInOtherListMarker />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
+
+              {isTokenPinned ? (
+                <span className="block w-full text-primary-text text-12 md:hidden">$0.00</span>
+              ) : (
+                <span className="w-full ">
+                  <span className="w-[100px] whitespace-nowrap overflow-hidden overflow-ellipsis block text-secondary-text text-12  md:hidden">
+                    {currency.symbol}
+                  </span>
+                </span>
+              )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-primary-text text-12">$0.00</span>
+            <div className="flex items-center gap-1">
+              <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
+              {currency.isToken ? (
+                <Tooltip
+                  text={`Token belongs to ${currency.lists?.length || 1} token lists`}
+                  renderTrigger={(ref, refProps) => {
+                    return (
+                      <span
+                        onClick={(e) => e.stopPropagation()}
+                        ref={ref.setReference}
+                        {...refProps}
+                        className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer w-10"
+                      >
+                        {currency.lists?.length || 1}
+                        <Svg className="text-tertiary-text" iconName="list" />
+                      </span>
+                    );
+                  }}
+                />
+              ) : (
+                <span className="block w-10" />
+              )}
               {currency.isToken ? (
                 <IconButton
                   iconName="details"
@@ -137,12 +185,13 @@ function TokenRow({
                     toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
                   }
                 }}
+                active={isTokenPinned}
               />
             </div>
           </div>
 
-          <div className="auto-cols-fr grid grid-flow-col gap-2">
-            {!isTokenPinned && (
+          <div className="auto-cols-fr grid-flow-col gap-2 hidden md:grid min-h-4">
+            {(!isTokenPinned || (!erc20Balance && !erc223Balance)) && (
               <span className="text-secondary-text text-12">{currency.symbol}</span>
             )}
             {erc20Balance && currency.isNative && (
@@ -172,25 +221,132 @@ function TokenRow({
           </div>
         </div>
       </div>
+
+      <div className="auto-cols-fr grid grid-flow-col gap-2 md:hidden mt-1">
+        {erc20Balance && currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="Native" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc20Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+        {erc20Balance && !currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc20Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+        {erc223Balance && !currency.isNative && (
+          <div className="flex items-center gap-1">
+            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc223Balance?.formatted)} {currency.symbol}
+            </span>
+          </div>
+        )}
+      </div>
     </button>
   );
 }
 
-export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props) {
+function TokenRowSimple({
+  currency,
+  handlePick,
+  setTokenForPortfolio,
+  isMobile,
+  prevToken,
+}: {
+  currency: Currency;
+  handlePick: (currency: Currency) => void;
+  setTokenForPortfolio: (currency: Currency) => void;
+  isMobile: boolean;
+  prevToken: Currency | null;
+}) {
+  return (
+    <div
+      role="button"
+      onClick={() => handlePick(currency)}
+      className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:pl-10 md:pr-7 bg-transparent hocus:bg-tertiary-bg duration-200 group py-1 md:py-2 w-full text-left"
+    >
+      <div className="grid md:grid-cols-[40px_1fr] grid-cols-[32px_1fr] gap-2 w-full">
+        <div className="flex items-center">
+          <Image
+            width={isMobile ? 32 : 40}
+            height={isMobile ? 32 : 40}
+            src={
+              currency?.logoURI !== "/tokens/placeholder.svg"
+                ? currency?.logoURI || ""
+                : "/images/tokens/placeholder.svg"
+            }
+            alt=""
+          />
+        </div>
+        <div className="w-full pl-1 md:pl-0">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center md:gap-x-2 flex-wrap">
+              <div className="flex items-center w-[120px] md:gap-2 md:w-[256px]">
+                <span className="whitespace-nowrap overflow-ellipsis overflow-hidden">
+                  {currency.name}
+                </span>
+              </div>
+
+              <span className="w-full ">
+                <span className="w-[100px] whitespace-nowrap overflow-hidden overflow-ellipsis block text-secondary-text text-12  md:text-14">
+                  {currency.symbol}
+                </span>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="block w-10" />
+              {prevToken && prevToken.name === currency.name && (
+                <Svg iconName="check" className="text-green mr-1.5" />
+              )}
+              {currency.isToken ? (
+                <IconButton
+                  iconName="details"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTokenForPortfolio(currency);
+                  }}
+                />
+              ) : (
+                <span className="block w-10" />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function PickTokenDialog({
+  isOpen,
+  setIsOpen,
+  handlePick,
+  simpleForm = false,
+  prevToken = null,
+}: Props) {
   const tokens = useTokens();
   const t = useTranslations("ManageTokens");
   const chainId = useCurrentChainId();
   const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();
 
   const pinnedTokens = useMemo(() => {
-    return tokens.filter((t) =>
-      pinnedTokensAddresses[chainId]?.includes(t.isNative ? "native" : t.address0),
+    const lookupMap: Map<"native" | Address, Currency> = new Map(
+      tokens.map((token) => [token.isNative ? "native" : token.address0, token]),
     );
+
+    return pinnedTokensAddresses[chainId].map((id) => lookupMap.get(id));
   }, [chainId, pinnedTokensAddresses, tokens]);
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
-  const [isEditActivated, setEditActivated] = useState<boolean>(true);
-  const { isOpen: isManageOpened, setIsOpen: setManageOpened } = useManageTokensDialogStore();
+  const [isEditActivated, setEditActivated] = useState<boolean>(false);
+  const { setIsOpen: setManageOpened } = useManageTokensDialogStore();
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -202,27 +358,15 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
   const [tokensSearchValue, setTokensSearchValue] = useState("");
 
   const [filteredTokens, isTokenFilterActive] = useMemo(() => {
-    return tokensSearchValue
-      ? [
-          tokens.filter(
-            (t) => t.name && t.name.toLowerCase().startsWith(tokensSearchValue.toLowerCase()),
-          ),
-          true,
-        ]
-      : [tokens, false];
+    return tokensSearchValue ? [filterTokens(tokensSearchValue, tokens), true] : [tokens, false];
   }, [tokens, tokensSearchValue]);
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
-  console.log("Pick token dialog");
-  console.log(tokens);
-  console.log(filteredTokens);
-  console.log(isTokenFilterActive);
-
   useEffect(() => {
-    if (!isMobile) {
+    if (!isMobile || !pinnedTokens.length) {
       setEditActivated(false);
     }
-  }, [isMobile]);
+  }, [isMobile, pinnedTokens.length]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
@@ -243,8 +387,10 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
 
           {Boolean(tokens.length) && (
             <>
-              <div className="w-full md:w-[600px]">
-                <div className="px-4 md:px-10 pb-3">
+              <div className="w-full md:w-[600px] max-h-[580px] h-[calc(100vh-60px)] flex flex-col">
+                <div
+                  className={clsx("card-spacing-x", (!pinnedTokens.length || simpleForm) && "pb-3")}
+                >
                   <SearchInput
                     value={tokensSearchValue}
                     onChange={(e) => setTokensSearchValue(e.target.value)}
@@ -252,105 +398,166 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick }: Props
                   />
                   <div
                     className={clsx(
-                      "flex flex-wrap gap-3 mt-3",
-                      !!pinnedTokens.length && "border-b border-secondary-border pb-3",
+                      "flex flex-wrap gap-3",
+                      !!pinnedTokens.length &&
+                        !simpleForm &&
+                        "border-b border-secondary-border pb-3 mt-3",
                     )}
                   >
-                    {pinnedTokens.map((pinnedToken) => {
-                      return (
-                        <div
-                          key={
-                            pinnedToken.isToken
-                              ? pinnedToken.address0
-                              : `native-${pinnedToken.wrapped.address0}`
-                          }
-                          className="group relative"
-                        >
-                          <button
-                            onClick={() => {
-                              if (isMobile && isEditActivated) {
+                    {!simpleForm &&
+                      pinnedTokens.map((pinnedToken) => {
+                        if (!pinnedToken) {
+                          return;
+                        }
+
+                        return (
+                          <div
+                            key={
+                              pinnedToken.isToken
+                                ? pinnedToken.address0
+                                : `native-${pinnedToken.wrapped.address0}`
+                            }
+                            className="group relative"
+                          >
+                            <button
+                              onClick={() => {
+                                if (isMobile && isEditActivated) {
+                                  toggleToken(
+                                    pinnedToken.isNative ? "native" : pinnedToken.address0,
+                                    pinnedToken.chainId,
+                                  );
+                                } else {
+                                  handlePick(pinnedToken);
+                                }
+                              }}
+                              className={clsx(
+                                isEditActivated
+                                  ? "bg-transparent border-secondary-border"
+                                  : "bg-tertiary-bg border-transparent",
+                                "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                                !isMobile && isEditActivated && "hocus:bg-transparent",
+                                !isMobile && !isEditActivated && "hocus:bg-green-bg",
+                              )}
+                            >
+                              <Image
+                                width={24}
+                                height={24}
+                                src={pinnedToken.logoURI || "/images/tokens/placeholder.svg"}
+                                alt=""
+                              />
+                              {pinnedToken.symbol}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 toggleToken(
                                   pinnedToken.isNative ? "native" : pinnedToken.address0,
                                   pinnedToken.chainId,
                                 );
-                              } else {
-                                handlePick(pinnedToken);
-                              }
-                            }}
-                            className="items-center justify-center px-4 duration-200 h-10 rounded-1 bg-tertiary-bg hocus:bg-green-bg flex gap-2"
-                          >
-                            <Image
-                              width={24}
-                              height={24}
-                              src={pinnedToken.logoURI || "/tokens/placeholder.svg"}
-                              alt=""
-                            />
-                            {pinnedToken.symbol}
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleToken(
-                                pinnedToken.isNative ? "native" : pinnedToken.address0,
-                                pinnedToken.chainId,
-                              );
-                            }}
-                            className={clsxMerge(
-                              "group-hocus:opacity-100 hocus:opacity-100 opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text hocus:text-primary-text -right-1 -top-1",
-                              isEditActivated && "opacity-100",
-                            )}
-                          >
-                            <Svg size={16} iconName="close" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                    {
+                              }}
+                              className={clsxMerge(
+                                "opacity-0 duration-200 flex absolute w-5 h-5 items-center justify-center bg-quaternary-bg rounded-full text-secondary-text  -right-1 -top-1",
+                                isEditActivated && "opacity-100",
+                                !isMobile &&
+                                  "group-hocus:opacity-100 hocus:opacity-100 hocus:text-primary-text",
+                              )}
+                            >
+                              <Svg size={16} iconName="close" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    {!!pinnedTokens.length && !simpleForm && (
                       <span className="md:hidden">
-                        <IconButton
+                        <button
+                          className={clsx(
+                            "w-10 h-10 rounded-2 flex items-center justify-center",
+                            isEditActivated ? "bg-green-bg-hover" : "bg-tertiary-bg",
+                          )}
                           onClick={() => {
                             setEditActivated(!isEditActivated);
                           }}
-                          iconName="edit"
-                        />
+                        >
+                          <Svg iconName="edit" size={20} />
+                        </button>
                       </span>
-                    }
+                    )}
                   </div>
                 </div>
-                {Boolean(filteredTokens.length) && (
-                  <div className="h-[420px] overflow-auto">
-                    {filteredTokens.map((token) => (
-                      <TokenRow
-                        setTokenForPortfolio={setTokenForPortfolio}
-                        handlePick={handlePick}
-                        key={token.isToken ? token.address0 : `native-${token.wrapped.address0}`}
-                        currency={token}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div
+                  className={clsxMerge(
+                    "flex-grow flex min-h-0",
+                    simpleForm && " overflow-hidden md:pb-5",
+                  )}
+                >
+                  {Boolean(filteredTokens.length) && (
+                    <ScrollbarContainer height="full">
+                      <div
+                        className={clsx(
+                          "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2",
+                          !!pinnedTokens.length && !simpleForm && "pt-3",
+                          simpleForm ? "pl-2 pr-3" : "pl-4 pr-4",
+                        )}
+                      >
+                        {simpleForm
+                          ? filteredTokens.map((token) => {
+                              // if (simpleForm)
+                              return (
+                                <TokenRowSimple
+                                  setTokenForPortfolio={setTokenForPortfolio}
+                                  handlePick={handlePick}
+                                  key={
+                                    token.isToken
+                                      ? token.address0
+                                      : `native-${token.wrapped.address0}`
+                                  }
+                                  currency={token}
+                                  isMobile={isMobile}
+                                  prevToken={prevToken}
+                                />
+                              );
+                            })
+                          : filteredTokens.map((token) => {
+                              return (
+                                <TokenRow
+                                  setTokenForPortfolio={setTokenForPortfolio}
+                                  handlePick={handlePick}
+                                  key={
+                                    token.isToken
+                                      ? token.address0
+                                      : `native-${token.wrapped.address0}`
+                                  }
+                                  currency={token}
+                                />
+                              );
+                            })}
+                      </div>
+                    </ScrollbarContainer>
+                  )}
+                </div>
+
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
-                  <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[420px] w-full md:w-[570px]">
-                    <EmptyStateIcon iconName="search" />
+                  <div className="flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180">
                     <span className="text-secondary-text">{t("token_not_found")}</span>
                   </div>
                 )}
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setManageOpened(true);
-                  }}
-                  className="w-full text-green hocus:text-green-hover rounded-b-5 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg hocus:shadow hocus:shadow-green/60 duration-200"
-                >
-                  Manage tokens
-                  <Svg iconName="edit" />
-                </button>
+                {!simpleForm && (
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setManageOpened(true);
+                    }}
+                    className="flex-shrink-0 w-full text-green hocus:text-green-hover rounded-b-0 md:rounded-b-5 border-t border-secondary-border md:border-t-0 flex items-center justify-center gap-2 h-[60px] bg-tertiary-bg hocus:bg-green-bg duration-200"
+                  >
+                    Manage tokens
+                    <Svg iconName="edit" />
+                  </button>
+                )}
               </div>
             </>
           )}
-          {Boolean(!tokens.length) && (
-            <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[520px] w-full md:w-[570px]">
-              <EmptyStateIcon iconName="tokens" />
+          {Boolean(!tokens.length) && ( //probably impossible scenario, handling in case user find a way to turn off all token lists or delete all tokens
+            <div className="flex items-center justify-center gap-2 flex-col h-full min-h-[520px] w-full md:w-[570px] bg-empty-no-tokens bg-right-top bg-no-repeat max-md:bg-size-180">
               <span className="text-secondary-text">{t("no_tokens_here")}</span>
             </div>
           )}

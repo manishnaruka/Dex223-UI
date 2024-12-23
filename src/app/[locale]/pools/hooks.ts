@@ -10,12 +10,11 @@ export const PoolsDataDocument = gql`
     $skip: Int!
     $first: Int!
     $orderDirection: OrderDirection
-    $token0: String
     $where: Pool_filter
   ) {
     pools(
       where: $where
-      orderBy: txCount
+      orderBy: totalValueLockedUSD
       orderDirection: $orderDirection
       first: $first
       skip: $skip
@@ -96,6 +95,7 @@ export function usePoolsData({
   filter?: {
     token0Address?: Address;
     token1Address?: Address;
+    searchString?: string;
   };
 }) {
   const apolloClient = chainToApolloClient[chainId];
@@ -105,10 +105,48 @@ export function usePoolsData({
       skip,
       first,
       orderDirection,
-      where: {
-        token0_: filter?.token0Address ? { id: filter.token0Address.toLowerCase() } : undefined,
-        token1_: filter?.token1Address ? { id: filter.token1Address.toLowerCase() } : undefined,
-      },
+      where: filter?.searchString
+        ? {
+            or: [
+              { token0_: { name_contains_nocase: filter.searchString } },
+              { token1_: { name_contains_nocase: filter.searchString } },
+              { token0_: { symbol_contains_nocase: filter.searchString } },
+              { token1_: { symbol_contains_nocase: filter.searchString } },
+              { id: filter.searchString.toLowerCase() },
+            ],
+          }
+        : {
+            or: [
+              {
+                and: [
+                  {
+                    token0_: filter?.token0Address
+                      ? { id: filter.token0Address.toLowerCase() }
+                      : undefined,
+                  },
+                  {
+                    token1_: filter?.token1Address
+                      ? { id: filter.token1Address.toLowerCase() }
+                      : undefined,
+                  },
+                ],
+              },
+              {
+                and: [
+                  {
+                    token0_: filter?.token1Address
+                      ? { id: filter.token1Address.toLowerCase() }
+                      : undefined,
+                  },
+                  {
+                    token1_: filter?.token0Address
+                      ? { id: filter.token0Address.toLowerCase() }
+                      : undefined,
+                  },
+                ],
+              },
+            ],
+          },
     },
     skip: !apolloClient,
     pollInterval: 30000,

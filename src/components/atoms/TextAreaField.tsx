@@ -1,16 +1,16 @@
-import clsx from "clsx";
 import { FieldProps } from "formik";
-import { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
+import { ReactNode, TextareaHTMLAttributes } from "react";
 
-import Input from "@/components/atoms/Input";
+import { InputSize } from "@/components/atoms/Input";
 import TextArea from "@/components/atoms/TextArea";
-import Tooltip from "@/components/atoms/Tooltip";
+import { HelperText, InputLabel } from "@/components/atoms/TextField";
 
 type Props = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   label: string;
   helperText?: ReactNode;
   field?: FieldProps;
   tooltipText?: string;
+  inputSize?: InputSize;
 } & (
     | {
         error?: string;
@@ -25,27 +25,14 @@ export default function TextAreaField({
   error,
   warning,
   tooltipText,
+  inputSize = InputSize.LARGE,
   ...props
 }: Props) {
   return (
     <div>
-      <p
-        className={clsx(
-          "text-16 font-bold mb-1 flex items-center gap-1",
-          props.disabled && "opacity-50",
-        )}
-      >
-        {label}
-        {tooltipText && <Tooltip iconSize={20} text={tooltipText} />}
-      </p>
+      <InputLabel inputSize={inputSize} label={label} tooltipText={tooltipText} />
       <TextArea isError={Boolean(error)} isWarning={Boolean(warning)} {...props} />
-      <div className="text-12 mt-0.5 h-4">
-        {!error && !warning && helperText && (
-          <span className="text-secondary-text">{helperText}</span>
-        )}
-        {error && <span className="text-red">{error}</span>}
-        {warning && <span className="text-orange">{error}</span>}
-      </div>
+      <HelperText helperText={helperText} error={error} warning={warning} />
     </div>
   );
 }

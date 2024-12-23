@@ -1,28 +1,94 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Address, formatUnits, getAbiItem } from "viem";
-import {
-  useAccount,
-  useBlockNumber,
-  usePublicClient,
-  useReadContract,
-  useWalletClient,
-} from "wagmi";
+import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
+import {
+  useWithdrawGasLimitStore,
+  useWithdrawGasSettings,
+} from "@/app/[locale]/add/stores/useRevokeGasSettings";
+import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
-import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
+import useDeepEffect from "@/hooks/useDeepEffect";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
 import {
-  GasFeeModel,
   RecentTransactionTitleTemplate,
   stringifyObject,
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
+import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { AllowanceStatus } from "./useAllowance";
 import useCurrentChainId from "./useCurrentChainId";
+
+const useWithdrawParams = ({
+  token,
+  contractAddress,
+  amountToWithdraw,
+}: {
+  token: Currency | undefined;
+  contractAddress: Address | undefined;
+  amountToWithdraw: bigint;
+}) => {
+  const { address } = useAccount();
+
+  return useMemo(() => {
+    if (!contractAddress || !token || !address || !(amountToWithdraw >= 0)) return {};
+
+    const params = {
+      account: address as Address,
+      abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
+      functionName: "withdraw" as "withdraw",
+      address: contractAddress,
+      args: [token.wrapped.address1 as Address, address as Address, amountToWithdraw] as [
+        Address,
+        Address,
+        bigint,
+      ],
+    };
+
+    return { params };
+  }, [token, address, contractAddress, amountToWithdraw]);
+};
+
+const WITHDRAW_DEFAULT_GAS_LIMIT = BigInt(50000);
+export function useWithdrawEstimatedGas({
+  token,
+  contractAddress,
+}: {
+  token: Currency | undefined;
+  contractAddress: Address | undefined;
+}) {
+  const { setEstimatedGas } = useWithdrawGasLimitStore();
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+  const { params } = useWithdrawParams({ token, contractAddress, amountToWithdraw: BigInt(0) });
+
+  useDeepEffect(() => {
+    IIFE(async () => {
+      if (!params || !address) {
+        setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
+        console.log("Can't estimate gas");
+        return;
+      }
+
+      try {
+        const estimated = await publicClient?.estimateContractGas(params as any);
+
+        if (estimated) {
+          setEstimatedGas(estimated + BigInt(10000));
+        } else {
+          setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
+        }
+      } catch (e) {
+        console.error(e);
+        setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
+      }
+    });
+  }, [publicClient, address, params]);
+}
 
 export default function useWithdraw({
   token,
@@ -31,7 +97,7 @@ export default function useWithdraw({
   token: Currency | undefined;
   contractAddress: Address | undefined;
 }) {
-  const [status, setStatus] = useState(AllowanceStatus.INITIAL);
+  const { status, setStatus } = useRevokeStatusStore();
 
   const { address } = useAccount();
   const chainId = useCurrentChainId();
@@ -52,11 +118,15 @@ export default function useWithdraw({
   });
   const amountToWithdraw = currentDeposit.data as bigint;
 
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
 
   useEffect(() => {
     currentDeposit.refetch();
   }, [currentDeposit, blockNumber]);
+
+  const { gasSettings, customGasLimit, gasModel } = useWithdrawGasSettings();
+  const { params } = useWithdrawParams({ token, contractAddress, amountToWithdraw });
+  const { setRefreshDepositsTrigger } = useRefreshDepositsDataStore();
 
   const writeTokenWithdraw = useCallback(
     async (customAmount?: bigint) => {
@@ -75,27 +145,18 @@ export default function useWithdraw({
 
       setStatus(AllowanceStatus.PENDING);
 
-      if (!token) return;
+      if (!token || !params) return;
       const amount = customAmount || amountToWithdraw;
       try {
-        const params = {
-          account: address as Address,
-          abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-          functionName: "withdraw" as "withdraw",
-          address: contractAddress,
-          args: [token.address1 as Address, address as Address, amount] as [
-            Address,
-            Address,
-            bigint,
-          ],
-        };
-
         const estimatedGas = await publicClient.estimateContractGas(params);
+        const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(10000); // set custom gas here if user changed it
 
         const { request } = await publicClient.simulateContract({
           ...params,
-          gas: estimatedGas + BigInt(30000),
+          ...gasSettings,
+          gas: gasToUse,
         });
+
         const hash = await walletClient.writeContract(request);
 
         const transaction = await publicClient.getTransaction({
@@ -110,10 +171,8 @@ export default function useWithdraw({
             nonce,
             chainId,
             gas: {
-              model: GasFeeModel.EIP1559,
-              gas: (estimatedGas + BigInt(30000)).toString(),
-              maxFeePerGas: undefined,
-              maxPriorityFeePerGas: undefined,
+              ...stringifyObject({ ...gasSettings, model: gasModel }),
+              gas: gasToUse.toString(),
             },
             params: {
               ...stringifyObject(params),
@@ -123,7 +182,7 @@ export default function useWithdraw({
               symbol: token.symbol!,
               template: RecentTransactionTitleTemplate.WITHDRAW,
               amount: formatUnits(amount, token.decimals),
-              logoURI: token?.logoURI || "/tokens/placeholder.svg",
+              logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
             },
           },
           address,
@@ -133,6 +192,7 @@ export default function useWithdraw({
           setStatus(AllowanceStatus.LOADING);
           await publicClient.waitForTransactionReceipt({ hash });
           setStatus(AllowanceStatus.SUCCESS);
+          setRefreshDepositsTrigger(true);
         }
       } catch (e) {
         console.log(e);
@@ -148,51 +208,19 @@ export default function useWithdraw({
       address,
       chainId,
       publicClient,
+      setStatus,
+      params,
+      customGasLimit,
+      gasSettings,
       addRecentTransaction,
+      gasModel,
+      setRefreshDepositsTrigger,
     ],
   );
-
-  const [estimatedGas, setEstimatedGas] = useState(null as null | bigint);
-  useEffect(() => {
-    IIFE(async () => {
-      if (
-        !amountToWithdraw ||
-        !contractAddress ||
-        !token ||
-        !walletClient ||
-        !address ||
-        !chainId ||
-        !publicClient
-      ) {
-        return;
-      }
-
-      const params = {
-        account: address as Address,
-        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        functionName: "withdraw" as "withdraw",
-        address: contractAddress,
-        args: [token.wrapped.address1 as Address, address as Address, amountToWithdraw] as [
-          Address,
-          Address,
-          bigint,
-        ],
-      };
-
-      try {
-        const estimatedGas = await publicClient.estimateContractGas(params);
-        setEstimatedGas(estimatedGas);
-      } catch (error) {
-        console.warn("🚀 ~ useWithdraw ~ estimatedGas ~ error:", error, "params:", params);
-        setEstimatedGas(null);
-      }
-    });
-  }, [amountToWithdraw, contractAddress, token, walletClient, address, chainId, publicClient]);
 
   return {
     withdrawStatus: status,
     withdrawHandler: writeTokenWithdraw,
-    estimatedGas,
     currentDeposit: currentDeposit.data as bigint,
   };
 }

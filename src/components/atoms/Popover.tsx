@@ -2,6 +2,7 @@ import { flip, shift } from "@floating-ui/core";
 import {
   autoUpdate,
   FloatingFocusManager,
+  FloatingPortal,
   offset,
   Placement,
   useClick,
@@ -34,7 +35,11 @@ export default function Popover({
   const { refs, floatingStyles, context } = useFloating({
     open: isOpened,
     onOpenChange: setIsOpened,
-    middleware: [offset(customOffset || 24), flip({ fallbackAxisSideDirection: "end" }), shift()],
+    middleware: [
+      offset(customOffset || 24),
+      flip({ fallbackAxisSideDirection: "end", mainAxis: false }),
+      shift(),
+    ],
     placement,
     whileElementsMounted: autoUpdate,
   });
@@ -56,15 +61,25 @@ export default function Popover({
     <>
       {React.cloneElement(trigger, { ...getReferenceProps, ref: refs.setReference })}
       {isMounted && (
-        <FloatingFocusManager context={context} modal={false}>
-          <div
-            ref={refs.setFloating}
-            style={{ ...floatingStyles, ...transitionStyles, ...customStyles, zIndex: 20 }}
-            {...getFloatingProps()}
-          >
-            {children}
-          </div>
-        </FloatingFocusManager>
+        <FloatingPortal>
+          <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
+            <div
+              ref={refs.setFloating}
+              style={{
+                ...floatingStyles,
+                ...transitionStyles,
+                ...customStyles,
+                zIndex: 99,
+                // top: y ?? 0,
+                // left: x ?? 0,
+                // position: strategy,
+              }}
+              {...getFloatingProps()}
+            >
+              {children}
+            </div>
+          </FloatingFocusManager>
+        </FloatingPortal>
       )}
     </>
   );

@@ -1,6 +1,6 @@
+import { findIndex } from "lodash";
 import uniqby from "lodash.uniqby";
 import { Address } from "viem";
-import { useAccount } from "wagmi";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -10,6 +10,8 @@ interface PortfolioStore {
     isActive: boolean;
     isConnectedWallet?: boolean;
   }[];
+  hasWallet: (address: Address) => void;
+  setShowFromSearch: (value: boolean) => void;
   addWallet: (address: Address) => void;
   removeWallet: (address: Address) => void;
   setIsWalletActive: (address: Address, isActive: boolean) => void;
@@ -18,14 +20,39 @@ interface PortfolioStore {
   setIsConnectedWalletActive: (isActive: boolean) => void;
   searchValue: string;
   setSearchValue: (value: string) => void;
+  isAllWalletActive: boolean;
+  hasSearchWallet: boolean;
+  showFromSearch: boolean;
 }
 
 const localStorageKey = "portfolio-state";
 
+const checkAllActive = (wallets: any[]) => {
+  let allActive = true;
+  for (let wallet of wallets) {
+    if (!wallet.isActive) {
+      allActive = false;
+      break;
+    }
+  }
+  return allActive;
+};
+
 export const usePortfolioStore = create<PortfolioStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       wallets: [],
+      setShowFromSearch: (value) =>
+        set(() => ({
+          showFromSearch: value,
+        })),
+      hasWallet: (address) =>
+        set((state) => {
+          const res = findIndex(state.wallets, function (o) {
+            return o.address.toString().toLowerCase() == address.toString().toLowerCase();
+          });
+          return { hasSearchWallet: res > -1 };
+        }),
       addWallet: (address) =>
         set((state) => ({
           wallets: uniqby([...state.wallets, { address, isActive: true }], "address"),
@@ -33,8 +60,8 @@ export const usePortfolioStore = create<PortfolioStore>()(
       removeWallet: (address) =>
         set((state) => ({ wallets: state.wallets.filter((wallet) => wallet.address !== address) })),
       setIsWalletActive: (address, isActive) =>
-        set((state) => ({
-          wallets: uniqby(
+        set((state) => {
+          const wallets = uniqby(
             state.wallets.map((wallet) => {
               if (wallet.address === address) {
                 return {
@@ -46,17 +73,23 @@ export const usePortfolioStore = create<PortfolioStore>()(
               }
             }),
             "address",
-          ),
-        })),
+          );
+
+          let allActive = checkAllActive(wallets);
+          return { wallets, isAllWalletActive: allActive && state.isConnectedWalletActive };
+        }),
       setAllWalletActive: () =>
         set((state) => {
+          const newVal = !state.isAllWalletActive;
+
           return {
-            isConnectedWalletActive: true,
+            isConnectedWalletActive: newVal,
+            isAllWalletActive: newVal,
             wallets: uniqby(
               state.wallets.map((wallet) => {
                 return {
                   ...wallet,
-                  isActive: true,
+                  isActive: newVal,
                 };
               }),
               "address",
@@ -64,10 +97,14 @@ export const usePortfolioStore = create<PortfolioStore>()(
           };
         }),
       isConnectedWalletActive: true,
+      hasSearchWallet: false,
+      isAllWalletActive: false,
+      showFromSearch: false,
       setIsConnectedWalletActive: (isActive) =>
-        set(() => ({
-          isConnectedWalletActive: isActive,
-        })),
+        set((state) => {
+          const iaAllActive = isActive ? checkAllActive(state.wallets) : false;
+          return { isConnectedWalletActive: isActive, isAllWalletActive: iaAllActive };
+        }),
       searchValue: "",
       setSearchValue: (value) =>
         set(() => ({
@@ -76,6 +113,7 @@ export const usePortfolioStore = create<PortfolioStore>()(
     }),
     {
       name: localStorageKey, // name of the item in the storage (must be unique)
+      // storage: typeof window !== "undefined" && window.localStorage ? localStorage : undefined,
     },
   ),
 );
@@ -93,7 +131,7 @@ interface PortfolioActiveTabStore {
   setActiveTab: (tab: ActiveTab) => void;
 }
 
-export const usePortfolioActiveTabStore = create<PortfolioActiveTabStore>((set, get) => ({
+export const usePortfolioActiveTabStore = create<PortfolioActiveTabStore>((set) => ({
   activeTab: ActiveTab.balances,
   setActiveTab: (tab) =>
     set(() => ({

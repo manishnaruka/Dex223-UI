@@ -11,8 +11,8 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
 import { IconName } from "@/config/types/IconName";
-import { Link, usePathname } from "@/navigation";
-
+import { clsxMerge } from "@/functions/clsxMerge";
+import { Link, usePathname } from "@/i18n/routing";
 export function MobileLink({
   href,
   iconName,
@@ -20,6 +20,8 @@ export function MobileLink({
   handleClose,
   isActive,
   disabled = false,
+  className = "",
+  handleClick,
 }: {
   href: string;
   iconName: IconName;
@@ -27,20 +29,63 @@ export function MobileLink({
   handleClose: () => void;
   isActive?: boolean;
   disabled?: boolean;
+  className?: string;
+  handleClick?: (e: any) => void;
 }) {
   return (
     <Link
-      onClick={handleClose}
+      onClick={(e) => {
+        if (handleClick) {
+          handleClick(e);
+        }
+
+        handleClose();
+      }}
       href={href}
-      className={clsx(
-        "flex items-center gap-2 py-3 px-4 hocus:text-green duration-200",
-        isActive && "bg-navigation-active-mobile text-green pointer-events-none",
+      className={clsxMerge(
+        "flex items-center gap-2 py-3 px-4 duration-200",
+        isActive ? "text-green pointer-events-none" : "hocus:bg-quaternary-bg text-secondary-text",
         disabled && "pointer-events-none opacity-50",
+        className,
       )}
     >
       <Svg iconName={iconName} />
       {title}
     </Link>
+  );
+}
+
+function NavigationExternalLink({ href, text }: { href: string; text: string }) {
+  return (
+    <a
+      target="_blank"
+      className={clsx(
+        "text-green hocus:text-green-hover duration-200 inline-block py-1",
+        href === "#" && "opacity-50 pointer-events-none",
+      )}
+      href={href}
+    >
+      {text}
+    </a>
+  );
+}
+
+function NavigationExternalLinksContainer({
+  title,
+  links,
+}: {
+  title: string;
+  links: { href: string; text: string }[];
+}) {
+  return (
+    <div className="text-primary-text">
+      <div className="text-tertiary-text">{title}</div>
+      <div className="flex flex-col">
+        {links.map((link) => {
+          return <NavigationExternalLink key={link.text} href={link.href} text={link.text} />;
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -77,7 +122,41 @@ const mobileLinks: {
   {
     href: "/token-listing",
     iconName: "listing",
-    title: "token",
+    title: "token_listing",
+  },
+];
+
+type SocialLink = {
+  title: any;
+  href: string;
+  icon: Extract<IconName, "telegram" | "x" | "discord">;
+};
+
+const socialLinks: SocialLink[] = [
+  {
+    title: "Announcements",
+    href: "https://t.me/Dex_223",
+    icon: "telegram",
+  },
+  {
+    title: "Discussions",
+    href: "https://t.me/Dex223_defi",
+    icon: "telegram",
+  },
+  {
+    title: "DEX223",
+    href: "https://x.com/Dex_223",
+    icon: "x",
+  },
+  {
+    title: "Dexaran",
+    href: "https://x.com/Dexaran",
+    icon: "x",
+  },
+  {
+    title: "Discord",
+    href: "https://discord.gg/t5bdeGC5Jk",
+    icon: "discord",
   },
 ];
 export default function MobileMenu() {
@@ -124,7 +203,7 @@ export default function MobileMenu() {
               <button
                 onClick={() => setMoreOpened(!moreOpened)}
                 className={clsx(
-                  "flex w-full items-center justify-between py-3 px-4 hocus:text-green duration-200",
+                  "flex w-full items-center justify-between py-3 px-4 hocus:text-green duration-200 text-secondary-text",
                   moreOpened && "bg-navigation-active-mobile text-green",
                 )}
               >
@@ -138,67 +217,87 @@ export default function MobileMenu() {
                 />
               </button>
               <Collapse open={moreOpened}>
-                <div className="flex flex-col py-4 px-5 bg-primary-bg rounded-2 shadow-popover shadow-black/70 gap-5">
-                  <div className="flex flex-col text-16 text-primary-text gap-2">
-                    <div className="text-secondary-text">{t("token")}</div>
-                    <div className="opacity-50 pointer-events-none">{t("token_statistics")}</div>
-                    <div className="opacity-50 pointer-events-none">{t("token_lists")}</div>
-                  </div>
-                  <div className="flex flex-col text-16 text-primary-text gap-2">
-                    <div className="text-secondary-text">{t("social_media")}</div>
-                    <a className="hocus:text-green duration-200" href="https://t.me/Dex223_Defi">
-                      {t("social_telegram_discussions")}
-                    </a>
-                    <a className="hocus:text-green duration-200" href="https://t.me/Dex_223">
-                      {t("social_telegram_announcements")}
-                    </a>
-                    <a className="hocus:text-green duration-200" href="https://x.com/Dex_223">
-                      {t("social_x_account")}
-                    </a>
-                    <a
-                      className="hocus:text-green duration-200"
-                      href="https://discord.gg/t5bdeGC5Jk"
-                    >
-                      {t("social_discord")}
-                    </a>
-                    <a className="hocus:text-green duration-200" href="https://x.com/Dexaran">
-                      {t("social_dex_x_account")}
-                    </a>
-                  </div>
-                  <div className="flex flex-col text-16 text-primary-text gap-2">
-                    <div className="text-secondary-text">{t("useful_links")}</div>
+                <div className="py-2 border-b border-secondary-border">
+                  <MobileLink
+                    href="#"
+                    iconName="list"
+                    title="Token lists"
+                    handleClose={() => setMobileMenuOpened(false)}
+                    className="pr-5"
+                    disabled
+                  />
+                  <MobileLink
+                    href="/blog"
+                    iconName="blog"
+                    title="Blog"
+                    handleClose={() => setMobileMenuOpened(false)}
+                    className="pr-5"
+                  />
+                  <MobileLink
+                    disabled
+                    href="/statistics"
+                    iconName="statistics"
+                    title="Statistics"
+                    handleClose={() => setMobileMenuOpened(false)}
+                    className="pr-5"
+                  />
+                  <MobileLink
+                    disabled
+                    href="#"
+                    iconName="guidelines"
+                    title="Guidelines"
+                    handleClose={() => setMobileMenuOpened(false)}
+                    className="pr-5"
+                  />
+                </div>
+                <div className="flex flex-col py-4 px-4 bg-primary-bg rounded-2 gap-3">
+                  <NavigationExternalLinksContainer
+                    title={t("useful_links")}
+                    links={[
+                      {
+                        href: "https://dexaran.github.io/token-converter/",
+                        text: t("useful_converter"),
+                      },
+                      {
+                        href: "https://dexaran.github.io/erc20-losses/",
+                        text: t("useful_losses_calculator"),
+                      },
+                      {
+                        href: "https://dexaran.github.io/erc223/",
+                        text: t("useful_front_page"),
+                      },
+                      {
+                        href: "https://github.com/Dalcor/dex-exchange",
+                        text: t("useful_page_source_codes"),
+                      },
+                    ]}
+                  />
 
-                    <a
-                      className="hocus:text-green duration-200"
-                      href="https://dexaran.github.io/token-converter/"
-                    >
-                      {t("useful_converter")}
-                    </a>
-                    <a
-                      className="hocus:text-green duration-200"
-                      href="https://dexaran.github.io/erc20-losses/"
-                    >
-                      {t("useful_losses_calculator")}
-                    </a>
-                    <a
-                      className="hocus:text-green duration-200"
-                      href="https://dexaran.github.io/erc223/"
-                    >
-                      {t("useful_front_page")}
-                    </a>
-                    <a
-                      className="hocus:text-green duration-200"
-                      href="https://github.com/Dalcor/dex-exchange"
-                    >
-                      {t("useful_page_source_codes")}
-                    </a>
-                  </div>
-                  <div className="flex flex-col text-16 text-primary-text gap-2">
-                    <div className="text-secondary-text">{t("partners")}</div>
-                    <a className="hocus:text-green duration-200" href="https://eossupport.io/">
-                      {t("partners_eos_support")}
-                    </a>
-                  </div>
+                  <NavigationExternalLinksContainer
+                    title={t("partners")}
+                    links={[
+                      {
+                        href: "https://eossupport.io/",
+                        text: t("partners_eos_support"),
+                      },
+                    ]}
+                  />
+                </div>
+                <div className="flex flex-col mt-2 pt-3 px-4 border-t border-secondary-border">
+                  <h4 className="text-tertiary-text">Social media</h4>
+
+                  {socialLinks.map((link) => {
+                    return (
+                      <a
+                        key={link.title}
+                        target="_blank"
+                        href={link.href}
+                        className="flex gap-2 items-center text-secondary-text py-1 hocus:text-primary-text duration-200"
+                      >
+                        <Svg iconName={link.icon} className="text-tertiary-text" /> {link.title}
+                      </a>
+                    );
+                  })}
                 </div>
               </Collapse>
             </div>

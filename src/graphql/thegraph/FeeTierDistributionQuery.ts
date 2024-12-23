@@ -2,6 +2,8 @@ import { ApolloError, useQuery } from "@apollo/client";
 import gql from "graphql-tag";
 import { useMemo } from "react";
 
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+
 import { FeeTierDistributionQuery } from "./__generated__/types-and-hooks";
 import { apolloClient } from "./apollo";
 
@@ -38,6 +40,8 @@ export default function useFeeTierDistributionQuery(
   token1: string | undefined,
   interval: number,
 ): { error?: ApolloError; isLoading: boolean; data: FeeTierDistributionQuery } {
+  const chainId = useCurrentChainId();
+
   const {
     data,
     loading: isLoading,
@@ -48,7 +52,7 @@ export default function useFeeTierDistributionQuery(
       token1: token1?.toLowerCase(),
     },
     pollInterval: interval,
-    client: apolloClient,
+    client: apolloClient(chainId),
   });
 
   return useMemo(

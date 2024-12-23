@@ -1,13 +1,7 @@
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatUnits, isAddress, parseUnits } from "viem";
-import {
-  useAccount,
-  useBlockNumber,
-  usePublicClient,
-  useReadContract,
-  useWalletClient,
-} from "wagmi";
+import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -25,6 +19,7 @@ import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
@@ -94,7 +89,7 @@ export default function MintTestTokensDialog() {
     },
   });
 
-  const { data: latestBlock } = useBlockNumber({ watch: true });
+  const { data: latestBlock } = useScopedBlockNumber({ watch: isOpen });
 
   useEffect(() => {
     refetch();
@@ -136,7 +131,7 @@ export default function MintTestTokensDialog() {
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
       <DialogHeader onClose={handleClose} title="Get test tokens" />
-      <div className="mx-auto pb-4 px-4 md:px-10 md:pb-10 rounded-2 bg-primary-bg md:w-[600px] w-full border border-transparent">
+      <div className="mx-auto card-spacing rounded-2 bg-primary-bg md:w-[600px] w-full border border-transparent">
         <InputLabel label="Token for mint" />
         <div className="flex flex-col gap-4 relative">
           <Popover
@@ -193,6 +188,7 @@ export default function MintTestTokensDialog() {
             onChange={(e) => setAmountToMint(e.target.value)}
             placeholder="Amount"
             internalText={tokenToMint?.symbol}
+            isNumeric
           />
 
           {isConnected ? (

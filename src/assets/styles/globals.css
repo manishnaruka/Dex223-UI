@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
+.card-spacing-x {
+  @apply px-4 sm:px-6 lg:px-10;
+}
+
+.card-spacing-b {
+  @apply pb-4 sm:pb-5 lg:pb-10
+}
+
+.card-spacing {
+  @apply card-spacing-x card-spacing-b;
+}
+
 :root {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 0, 0, 0;
@@ -11,8 +25,8 @@
   --wcm-color-overlay: #5A5A5A!important;
   --wcm-container-border-radius: 8px!important;
 
-  --sorting-arrow-up-fill: theme("colors.secondary-text");
-  --sorting-arrow-down-fill: theme("colors.secondary-text");
+  --sorting-arrow-up-fill: theme("colors.tertiary-text");
+  --sorting-arrow-down-fill: theme("colors.tertiary-text");
 
   --sorting-arrow-up-drop-shadow: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
   --sorting-arrow-down-drop-shadow: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
@@ -223,10 +237,10 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
 }
 
 .main-loader {
-  position: relative;
   height: 460px;
   width: 460px;
   border-radius: 50%;
+  transform-origin: center center;
   background: linear-gradient(45deg, transparent, transparent 40%, theme("colors.green"));
   animation: animate 1s linear infinite;
 }
@@ -268,11 +282,11 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
 
 @keyframes animate {
   0% {
-    transform: rotate(0deg);
+    transform: translate(-50%, -50%) rotate(0deg) ;
     filter: hue-rotate(0deg);
   }
   100% {
-    transform: rotate(360deg);
+    transform: translate(-50%, -50%) rotate(360deg) ;
     filter: hue-rotate(180deg);
   }
 }
@@ -290,4 +304,43 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
 
 [data-sonner-toast] {
   width: 100%;
+}
+
+.simplebar-scrollbar:before {
+  background: theme("colors.primary-border") !important;
+  width: 8px !important;
+}
+
+.simplebar-track.simplebar-horizontal {
+  height: 12px !important;
+}
+
+.simplebar-track.simplebar-vertical {
+  width: 12px !important;
+}
+
+@media screen and (max-width: 768px) {
+  .simplebar-scrollbar:before {
+    width: 4px !important;
+  }
+
+  .simplebar-track.simplebar-horizontal {
+    height: 8px !important;
+  }
+
+  .simplebar-track.simplebar-vertical {
+    width: 8px !important;
+  }
+}
+
+.simplebar-scrollbar.simplebar-visible:before {
+  opacity: 0.5!important;
+}
+
+.simplebar-scrollbar:hover:before {
+  opacity: 1!important;
+}
+
+[data-simplebar].simplebar-dragging .simplebar-scrollbar:before {
+  opacity: 1!important;
 }

@@ -3,12 +3,13 @@
 import { isZeroAddress } from "@ethereumjs/util";
 import clsx from "clsx";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { Address, formatEther, formatGwei, formatUnits, isAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 
-import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import ChooseAutoListingDialog from "@/app/[locale]/token-listing/add/components/ChooseAutoListingDialog";
 import ChoosePaymentDialog from "@/app/[locale]/token-listing/add/components/ChoosePaymentDialog";
 import ConfirmListingDialog from "@/app/[locale]/token-listing/add/components/ConfirmListingDialog";
@@ -27,6 +28,7 @@ import {
 } from "@/app/[locale]/token-listing/add/stores/useListTokensGasSettings";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
+import { useTokenListingRecentTransactionsStore } from "@/app/[locale]/token-listing/add/stores/useTokenListingRecentTransactionsStore";
 import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
@@ -44,7 +46,6 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
-import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -53,7 +54,7 @@ import { useFees } from "@/hooks/useFees";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokens } from "@/hooks/useTokenLists";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { FeeAmount } from "@/sdk_hybrid/constants";
@@ -81,7 +82,12 @@ function OpenConfirmListTokenButton({
 
   if (!isConnected) {
     return (
-      <Button onClick={() => setWalletConnectOpened(true)} fullWidth>
+      <Button
+        size={ButtonSize.EXTRA_LARGE}
+        tabletSize={ButtonSize.LARGE}
+        onClick={() => setWalletConnectOpened(true)}
+        fullWidth
+      >
         {tWallet("connect_wallet")}
       </Button>
     );
@@ -89,7 +95,7 @@ function OpenConfirmListTokenButton({
 
   if (isLoadingList) {
     return (
-      <Button fullWidth isLoading>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
           <span>Processing list operation</span>
           <Preloader size={20} color="black" />
@@ -100,7 +106,7 @@ function OpenConfirmListTokenButton({
 
   if (isLoadingApprove) {
     return (
-      <Button fullWidth isLoading>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
           <span>{t("approving_in_progress")}</span>
           <Preloader size={20} color="black" />
@@ -111,7 +117,7 @@ function OpenConfirmListTokenButton({
 
   if (isPendingApprove || isPendingList) {
     return (
-      <Button fullWidth isLoading>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
           <span>{t("waiting_for_confirmation")}</span>
           <Preloader size={20} color="black" />
@@ -122,7 +128,7 @@ function OpenConfirmListTokenButton({
 
   if (!tokenA || !tokenB) {
     return (
-      <Button fullWidth disabled>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth disabled>
         {t("select_tokens")}
       </Button>
     );
@@ -130,7 +136,7 @@ function OpenConfirmListTokenButton({
 
   if (!isPoolExists) {
     return (
-      <Button fullWidth disabled>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth disabled>
         Pool doesn&apos;t exists
       </Button>
     );
@@ -138,14 +144,19 @@ function OpenConfirmListTokenButton({
 
   if (isBothTokensAlreadyInList) {
     return (
-      <Button fullWidth disabled>
+      <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth disabled>
         Both tokens are already listed
       </Button>
     );
   }
 
   return (
-    <Button onClick={() => setConfirmListTokenDialogOpened(true)} fullWidth>
+    <Button
+      size={ButtonSize.EXTRA_LARGE}
+      tabletSize={ButtonSize.LARGE}
+      onClick={() => setConfirmListTokenDialogOpened(true)}
+      fullWidth
+    >
       List token
     </Button>
   );
@@ -160,11 +171,14 @@ export default function ListTokenPage() {
   useAutoListingSearchParams();
   const t = useTranslations("Swap");
 
+  const params = useSearchParams();
   const router = useRouter();
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
-    useSwapRecentTransactionsStore();
+    useTokenListingRecentTransactionsStore();
+
+  console.log(params);
 
   useRecentTransactionTracking();
   useListTokenEstimatedGas();
@@ -181,7 +195,14 @@ export default function ListTokenPage() {
     [pool],
   );
 
-  console.log(pool);
+  const destination = useMemo(() => {
+    const dest = params.get("dest");
+    if (dest && decodeURIComponent(dest).startsWith("/token-listing/contracts")) {
+      return decodeURIComponent(dest);
+    } else {
+      return `/token-listing/contracts`;
+    }
+  }, [params]);
 
   const [tokenAAddress, setTokenAAddress] = useState("");
   const [tokenBAddress, setTokenBAddress] = useState("");
@@ -198,7 +219,6 @@ export default function ListTokenPage() {
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useListTokensGasLimitStore();
 
-  console.log("Estimated:" + estimatedGas);
   const { isAdvanced, setIsAdvanced } = useListTokensGasModeStore();
 
   const handleChange = useCallback(
@@ -247,7 +267,7 @@ export default function ListTokenPage() {
           decimals,
           symbol,
           name,
-          "/tokens/placeholder.svg",
+          "/images/tokens/placeholder.svg",
         );
 
         setToken(_token);
@@ -321,6 +341,10 @@ export default function ListTokenPage() {
     }
   }, [sameTokensSelected, tokenBAddress]);
 
+  const locale = useLocale();
+
+  const isMobile = useMediaQuery({ query: "(max-width: 519px)" });
+
   return (
     <>
       <Container>
@@ -332,23 +356,22 @@ export default function ListTokenPage() {
               : "xl:grid-cols-[600px] xl:max-w-[600px] grid-areas-[right]",
           )}
         >
-          {showRecentTransactions && (
-            <div className="grid-in-[left] flex justify-center">
-              <div className="w-full sm:max-w-[600px] xl:max-w-full">
-                <RecentTransactions
-                  showRecentTransactions={showRecentTransactions}
-                  handleClose={() => setShowRecentTransactions(false)}
-                />
-              </div>
+          <div className="grid-in-[left] flex justify-center">
+            <div className="w-full sm:max-w-[600px] xl:max-w-full">
+              <RecentTransactions
+                showRecentTransactions={showRecentTransactions}
+                handleClose={() => setShowRecentTransactions(false)}
+                store={useTokenListingRecentTransactionsStore}
+              />
             </div>
-          )}
+          </div>
 
           <div className="flex justify-center grid-in-[right]">
             <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">
-              <div className="px-4 md:px-10 pt-2.5 pb-5 bg-primary-bg rounded-5">
-                <div className="flex justify-between items-center mb-2.5">
+              <div className="pt-2.5 card-spacing bg-primary-bg rounded-5">
+                <div className="flex justify-between items-center mb-2.5 -mx-3">
                   <IconButton
-                    onClick={() => router.back()}
+                    onClick={() => router.replace(destination)}
                     iconName="back"
                     buttonSize={IconButtonSize.LARGE}
                   />
@@ -393,12 +416,12 @@ export default function ListTokenPage() {
                             className="mr-1"
                             width={24}
                             height={24}
-                            src={tokenA?.logoURI || "/tokens/placeholder.svg"}
+                            src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                             alt=""
                           />
                         )}
                         {tokenA?.symbol || <span className="text-tertiary-text">Select token</span>}
-                        <Svg iconName="small-expand-arrow" />
+                        <Svg className="text-secondary-text" iconName="small-expand-arrow" />
                       </button>
                       <div
                         className={clsx(
@@ -439,12 +462,12 @@ export default function ListTokenPage() {
                             className="mr-1"
                             width={24}
                             height={24}
-                            src={tokenB?.logoURI || "/tokens/placeholder.svg"}
+                            src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                             alt=""
                           />
                         )}
                         {tokenB?.symbol || <span className="text-tertiary-text">Select token</span>}
-                        <Svg iconName="small-expand-arrow" />
+                        <Svg className="text-secondary-text" iconName="small-expand-arrow" />
                       </button>
                       <div
                         className={clsx(
@@ -466,7 +489,11 @@ export default function ListTokenPage() {
                       text={
                         <span>
                           There is no existing pool, so you cannot list the primary token. Please{" "}
-                          <a target="_blank" href="/add" className="text-green hocus:underline">
+                          <a
+                            target="_blank"
+                            href={`/${locale}/add?tokenA=${tokenA.wrapped.address0}&tokenB=${tokenB.wrapped.address0}`}
+                            className="text-green hocus:underline"
+                          >
                             create a pool
                           </a>{" "}
                           first.
@@ -486,7 +513,7 @@ export default function ListTokenPage() {
                     <SelectButton
                       fullWidth
                       size="medium"
-                      className="bg-secondary-bg justify-between pl-5"
+                      className="bg-tertiary-bg justify-between pl-5"
                       onClick={() => setAutoListingSelectOpened(true)}
                     >
                       {autoListing?.name || (
@@ -498,9 +525,11 @@ export default function ListTokenPage() {
                         !autoListing ? (
                           "Choose contract address you want to list"
                         ) : (
-                          <span className="flex items-center gap-2">
+                          <span className="flex items-center gap-1">
                             Contract address:{" "}
                             <ExternalTextLink
+                              className="text-12"
+                              arrowSize={16}
                               text={truncateMiddle(autoListing.id)}
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
@@ -549,7 +578,12 @@ export default function ListTokenPage() {
                               onClick={() => setPaymentDialogSelectOpened(true)}
                               className="flex items-center gap-2 bg-tertiary-bg"
                             >
-                              <Image src="/tokens/placeholder.svg" width={24} height={24} alt="" />
+                              <Image
+                                src="/images/tokens/placeholder.svg"
+                                width={24}
+                                height={24}
+                                alt=""
+                              />
                               {paymentToken?.token && isZeroAddress(paymentToken.token.address)
                                 ? "ETH"
                                 : paymentToken?.token.symbol}
@@ -573,7 +607,7 @@ export default function ListTokenPage() {
                               {formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18)}
                               <span className="flex items-center gap-2">
                                 <Image
-                                  src="/tokens/placeholder.svg"
+                                  src="/images/tokens/placeholder.svg"
                                   width={24}
                                   height={24}
                                   alt=""
@@ -598,8 +632,8 @@ export default function ListTokenPage() {
                   )}
                 </div>
 
-                <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3">
-                  <div className="flex items-center gap-8">
+                <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3 flex-col xs:flex-row">
+                  <div className="text-12 xs:text-14 flex items-center gap-8 justify-between xs:justify-start max-xs:w-full">
                     <p className="flex flex-col text-tertiary-text">
                       <span>Gas price:</span>
                       <span> {formatFloat(formatGwei(formattedGasPrice || BigInt(0)))} GWEI</span>
@@ -626,16 +660,16 @@ export default function ListTokenPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {gasPriceOption === GasOption.CUSTOM && (
-                      <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border">
-                        {t(gasOptionTitle[gasPriceOption])}
-                      </span>
-                    )}
+                  <div className="grid grid-cols-[auto_1fr] xs:flex xs:items-center gap-2 w-full xs:w-auto mt-2 xs:mt-0">
+                    <span className="flex items-center justify-center px-2 text-14 rounded-20 font-500 text-secondary-text border border-secondary-border max-xs:h-8">
+                      {t(gasOptionTitle[gasPriceOption])}
+                    </span>
                     <Button
                       colorScheme={ButtonColor.LIGHT_GREEN}
-                      size={ButtonSize.EXTRA_SMALL}
+                      size={isMobile ? ButtonSize.SMALL : ButtonSize.EXTRA_SMALL}
                       onClick={() => setIsOpenedFee(true)}
+                      fullWidth={isMobile}
+                      className="rounded-5"
                     >
                       Edit
                     </Button>

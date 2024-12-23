@@ -1,8 +1,8 @@
-import { ScaleLinear, select, zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from "d3";
+import { ScaleLinear, select, zoom, ZoomBehavior, ZoomTransform } from "d3";
 import { useTranslations } from "next-intl";
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 
-import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
+import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
 
 import { ZoomLevels } from "../../../hooks/types";
 
@@ -28,7 +28,6 @@ export default function Zoom({
   width,
   height,
   resetBrush,
-  showResetButton,
   zoomLevels,
 }: {
   svg: SVGElement | null;
@@ -37,13 +36,20 @@ export default function Zoom({
   width: number;
   height: number;
   resetBrush: () => void;
-  showResetButton: boolean;
   zoomLevels: ZoomLevels;
 }) {
-  const t = useTranslations("Liquidity");
   const zoomBehavior = useRef<ZoomBehavior<Element, unknown>>();
 
-  const [zoomIn, zoomOut, zoomInitial, zoomReset] = useMemo(
+  const {
+    triggerZoomIn,
+    triggerZoomOut,
+    triggerZoomInitial,
+    setZoomIn,
+    setZoomOut,
+    setZoomInitial,
+  } = useZoomStateStore();
+
+  const [zoomIn, zoomOut, zoomInitial] = useMemo(
     () => [
       () =>
         svg &&
@@ -63,16 +69,31 @@ export default function Zoom({
         select(svg as Element)
           .transition()
           .call(zoomBehavior.current.scaleTo, 0.5),
-      () =>
-        svg &&
-        zoomBehavior.current &&
-        select(svg as Element)
-          // .call(zoomBehavior.current.transform, zoomIdentity.translate(0, 0).scale(1))
-          .transition()
-          .call(zoomBehavior.current.scaleTo, 0.5),
     ],
     [svg],
   );
+
+  useEffect(() => {
+    if (triggerZoomIn) {
+      zoomIn();
+      setZoomIn(false);
+    }
+  }, [setZoomIn, triggerZoomIn, zoomIn]);
+
+  useEffect(() => {
+    if (triggerZoomOut) {
+      zoomOut();
+      setZoomOut(false);
+    }
+  }, [setZoomOut, triggerZoomOut, zoomOut]);
+
+  useEffect(() => {
+    if (triggerZoomInitial) {
+      resetBrush();
+      zoomInitial();
+      setZoomInitial(false);
+    }
+  }, [resetBrush, setZoomInitial, triggerZoomInitial, zoomInitial]);
 
   useEffect(() => {
     if (!svg) return;
@@ -105,19 +126,5 @@ export default function Zoom({
     zoomInitial();
   }, [zoomInitial, zoomLevels]);
 
-  return (
-    <div className="flex gap-2 justify-end items-center w-100">
-      <IconButton variant={IconButtonVariant.CONTROL} iconName="zoom-in" onClick={zoomIn} />
-      <IconButton variant={IconButtonVariant.CONTROL} iconName="zoom-out" onClick={zoomOut} />
-      <div
-        onClick={() => {
-          resetBrush();
-          zoomReset();
-        }}
-        className="cursor-pointer rounded-2 hocus:bg-green-bg bg-transparent duration-200 text-primary-text px-3 py-1"
-      >
-        {t("refresh")}
-      </div>
-    </div>
-  );
+  return <></>;
 }

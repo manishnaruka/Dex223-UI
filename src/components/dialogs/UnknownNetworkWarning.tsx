@@ -16,18 +16,18 @@ export default function UnknownNetworkWarning() {
   return (
     <>
       {isOpened && (
-        <div className="z-[1000] fixed w-full bg-orange-bg border-orange border-t shadow-notification shadow-orange-hover/30 bottom-0">
+        <div className="z-[1000] fixed w-full bg-orange-bg border-orange border-t shadow-notification shadow-orange-hover/30 bottom-12 md:bottom-0">
           <Container>
-            <div className="min-h-[80px] py-4 flex justify-between items-center px-5">
-              <div className="flex gap-3 items-center">
-                <Svg className="text-orange flex-shrink-0" iconName="change-network" />
+            <div className="min-h-[80px] py-4 flex flex-col md:flex-row justify-between md:items-center items-start px-5">
+              <div className="flex gap-3 items-center text-14 text-secondary-text md:text-16">
+                <Svg className="text-orange flex-shrink-0" iconName="reset" />
                 {title}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 w-full md:w-auto pl-8 md:pl-0 pt-1.5 md:pt-0">
                 <Button
                   onClick={() => switchChain({ chainId: DexChainId.SEPOLIA })}
                   size={ButtonSize.SMALL}
-                  variant={ButtonVariant.OUTLINED}
+                  className="rounded-2 md:rounded-2 xl:rounded-2 w-full md:w-auto"
                 >
                   Change network
                 </Button>

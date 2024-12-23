@@ -6,6 +6,7 @@ import { isAddress } from "viem";
 
 import Checkbox from "@/components/atoms/Checkbox";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import { InputSize } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonSize } from "@/components/buttons/Button";
@@ -16,7 +17,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import addToast from "@/other/toast";
 import { Token } from "@/sdk_hybrid/entities/token";
 
-const query = gql`
+const query = gql(`
   query AutoListings($address: String!) {
     autoListings(where: { id: $address }) {
       id
@@ -37,7 +38,7 @@ const query = gql`
       }
     }
   }
-`;
+`);
 
 interface Props {
   setContent: (content: ManageTokensDialogContent) => void;
@@ -77,6 +78,7 @@ export default function ImportListWithContract({ setContent }: Props) {
   return (
     <div className="flex flex-col flex-grow">
       <TextField
+        size={InputSize.LARGE}
         variant="search"
         label="Import token list from contract"
         type="text"
@@ -89,10 +91,9 @@ export default function ImportListWithContract({ setContent }: Props) {
       />
 
       {!addressToImport && (
-        <div className="flex-grow flex justify-center items-center flex-col gap-2">
-          <EmptyStateIcon iconName="autolisting" />
+        <div className="flex-grow flex justify-center items-center flex-col gap-2 bg-empty-import-list bg-no-repeat bg-right-top max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
           <p className="text-secondary-text text-center">
-            To import a list through a contract, enter contract address in correct format{" "}
+            To import a list through a contract, enter contract address in correct format
           </p>
         </div>
       )}
@@ -124,7 +125,7 @@ export default function ImportListWithContract({ setContent }: Props) {
                 className="w-12 h-12"
                 width={48}
                 height={48}
-                src="/token-list-placeholder.svg"
+                src="/images/token-list-placeholder.svg"
                 alt=""
               />
               <div className="flex flex-col text-16">
@@ -166,7 +167,7 @@ export default function ImportListWithContract({ setContent }: Props) {
                   autoListingContract: queryRes.id.toLowerCase(),
                   lastUpdated: queryRes.lastUpdated,
                   list: {
-                    logoURI: "/token-list-placeholder.svg",
+                    logoURI: "/images/token-list-placeholder.svg",
                     name:
                       queryRes.name === "unknown"
                         ? `Autolisting ${queryRes.id.toLowerCase().slice(0, 6)}...${queryRes.id.toLowerCase().slice(-6)}`
@@ -184,7 +185,7 @@ export default function ImportListWithContract({ setContent }: Props) {
                         +token.decimals,
                         token.symbol,
                         token.name,
-                        "/tokens/placeholder.svg",
+                        "/images/tokens/placeholder.svg",
                       );
                     }),
                   },

@@ -6,13 +6,13 @@ import {
   encodeAbiParameters,
   encodeFunctionData,
   encodePacked,
+  formatUnits,
   getAbiItem,
   parseUnits,
 } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
-import { useTrade } from "@/app/[locale]/swap/libs/trading";
-import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
+import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
   useSwapGasLimitStore,
@@ -25,16 +25,18 @@ import {
   useSwapStatusStore,
 } from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
+import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
-import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import { getGasSettings } from "@/functions/gasSettings";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
+import addToast from "@/other/toast";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
 import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
@@ -90,6 +92,9 @@ export function useSwapParams() {
   });
 
   const { trade, isLoading: isLoadingTrade } = useTrade();
+
+  console.log("TRADE");
+  console.log(trade);
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
@@ -159,7 +164,7 @@ export function useSwapParams() {
       if (tokenB.isNative) {
         const encodedSwapParams = encodeFunctionData({
           abi: ROUTER_ABI,
-          functionName: "exactInput",
+          functionName: "exactInput" as "exactInput",
           args: [
             {
               path: encodePath(tokenA.address0, tokenB.wrapped.address0, FeeAmount.MEDIUM),
@@ -173,14 +178,14 @@ export function useSwapParams() {
         });
         const encodedUnwrapParams = encodeFunctionData({
           abi: ROUTER_ABI,
-          functionName: "unwrapWETH9",
+          functionName: "unwrapWETH9" as const,
           args: [minimumAmountOut, address],
         });
 
         return {
           address: ROUTER_ADDRESS[chainId],
           abi: ROUTER_ABI,
-          functionName: "multicall",
+          functionName: "multicall" as "multicall",
           args: [[encodedSwapParams, encodedUnwrapParams]],
         };
       } else {
@@ -192,7 +197,7 @@ export function useSwapParams() {
       return {
         address: getTokenAddressForStandard(tokenA, tokenAStandard),
         abi: ERC223_ABI,
-        functionName: "transfer",
+        functionName: "transfer" as "transfer",
         args: [
           poolAddress.poolAddress,
           parseUnits(typedValue, tokenA.decimals), // amountSpecified
@@ -312,7 +317,6 @@ export default function useSwap() {
     setApproveHash,
     setErrorType,
   } = useSwapStatusStore();
-  const { isOpen: confirmDialogOpened } = useConfirmSwapDialogStore();
 
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
 
@@ -336,18 +340,16 @@ export default function useSwap() {
 
   const { swapParams } = useSwapParams();
 
-  useEffect(() => {
-    if (
-      (swapStatus === SwapStatus.SUCCESS ||
-        swapStatus === SwapStatus.ERROR ||
-        swapStatus === SwapStatus.APPROVE_ERROR) &&
-      !confirmDialogOpened
-    ) {
-      setTimeout(() => {
-        setSwapStatus(SwapStatus.INITIAL);
-      }, 400);
-    }
-  }, [confirmDialogOpened, setSwapStatus, swapStatus]);
+  const gasSettings = useMemo(() => {
+    return getGasSettings({
+      baseFee,
+      chainId,
+      gasPrice,
+      priorityFee,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, priorityFee, gasPriceOption, gasPriceSettings]);
 
   const handleSwap = useCallback(
     async (amountToApprove: string) => {
@@ -359,7 +361,10 @@ export default function useSwap() {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
         setSwapStatus(SwapStatus.PENDING_APPROVE);
-        const result = await approveA(parseUnits(amountToApprove, tokenA?.decimals ?? 18));
+        const result = await approveA({
+          customAmount: parseUnits(amountToApprove, tokenA?.decimals ?? 18),
+          customGasSettings: gasSettings,
+        });
 
         if (!result?.success) {
           setSwapStatus(SwapStatus.INITIAL);
@@ -411,43 +416,6 @@ export default function useSwap() {
 
       let hash;
 
-      let gasPriceFormatted = {};
-
-      if (gasPriceOption !== GasOption.CUSTOM) {
-        const multiplier = baseFeeMultipliers[chainId][gasPriceOption];
-        switch (gasPriceSettings.model) {
-          case GasFeeModel.EIP1559:
-            if (priorityFee && baseFee) {
-              gasPriceFormatted = {
-                maxPriorityFeePerGas: (priorityFee * multiplier) / SCALING_FACTOR,
-                maxFeePerGas: (baseFee * multiplier) / SCALING_FACTOR,
-              };
-            }
-            break;
-
-          case GasFeeModel.LEGACY:
-            if (gasPrice) {
-              gasPriceFormatted = {
-                gasPrice: (gasPrice * multiplier) / SCALING_FACTOR,
-              };
-            }
-            break;
-        }
-      } else {
-        switch (gasPriceSettings.model) {
-          case GasFeeModel.EIP1559:
-            gasPriceFormatted = {
-              maxPriorityFeePerGas: gasPriceSettings.maxPriorityFeePerGas,
-              maxFeePerGas: gasPriceSettings.maxFeePerGas,
-            };
-            break;
-
-          case GasFeeModel.LEGACY:
-            gasPriceFormatted = { gasPrice: gasPriceSettings.gasPrice };
-            break;
-        }
-      }
-
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
@@ -456,15 +424,26 @@ export default function useSwap() {
 
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
 
-        const { request } = await publicClient.simulateContract({
-          ...swapParams,
-          account: address,
-          ...gasPriceFormatted,
-          gas: gasToUse,
-        } as any);
+        let _request;
+        try {
+          const { request } = await publicClient.simulateContract({
+            ...swapParams,
+            account: address,
+            ...gasSettings,
+            gas: gasToUse,
+          } as any);
+          _request = request;
+        } catch (e) {
+          _request = {
+            ...swapParams,
+            ...gasSettings,
+            gas: gasToUse,
+            account: undefined,
+          } as any;
+        }
 
         hash = await walletClient.writeContract({
-          ...request,
+          ..._request,
           account: undefined,
         });
 
@@ -472,60 +451,80 @@ export default function useSwap() {
 
         if (hash) {
           setSwapHash(hash);
-          const transaction = await publicClient.getTransaction({
-            hash,
-          });
+          let transaction = null;
+          const maxRetries = 10;
+          const delay = 1000; // 2 seconds
 
-          const nonce = transaction.nonce;
-          setSwapStatus(SwapStatus.LOADING);
-          addRecentTransaction(
-            {
-              hash,
-              nonce,
-              chainId,
-              gas: {
-                ...stringifyObject({ ...gasPriceFormatted, model: gasPriceSettings.model }),
-                // gas: gasLimit.toString(),
-              },
-              params: {
-                ...stringifyObject(swapParams),
-                abi: [getAbiItem({ name: "exactInputSingle", abi: ROUTER_ABI })],
-              },
-              title: {
-                symbol0: tokenA.symbol!,
-                symbol1: tokenB.symbol!,
-                template: RecentTransactionTitleTemplate.SWAP,
-                amount0: typedValue,
-                amount1: output.toString(),
-                logoURI0: tokenA?.logoURI || "/tokens/placeholder.svg",
-                logoURI1: tokenB?.logoURI || "/tokens/placeholder.svg",
-              },
-            },
-            address,
-          );
+          for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+              transaction = await publicClient.getTransaction({ hash });
+              if (transaction) {
+                console.log(transaction);
+                const nonce = transaction.nonce;
+                setSwapStatus(SwapStatus.LOADING);
+                addRecentTransaction(
+                  {
+                    hash,
+                    nonce,
+                    chainId,
+                    gas: {
+                      ...stringifyObject({ ...gasSettings, model: gasPriceSettings.model }),
+                      gas: gasToUse.toString(),
+                    },
+                    params: {
+                      ...stringifyObject(swapParams),
+                      abi: [
+                        getAbiItem({
+                          name: swapParams.functionName,
+                          abi: swapParams.abi,
+                          args: swapParams.args as any,
+                        }),
+                      ],
+                    },
+                    title: {
+                      symbol0: tokenA.symbol!,
+                      symbol1: tokenB.symbol!,
+                      template: RecentTransactionTitleTemplate.SWAP,
+                      amount0: typedValue,
+                      amount1: output.toString(),
+                      logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
+                      logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
+                    },
+                  },
+                  address,
+                );
 
-          const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
-          updateAllowance();
-          if (receipt.status === "success") {
-            setSwapStatus(SwapStatus.SUCCESS);
-          }
+                const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
+                updateAllowance();
+                if (receipt.status === "success") {
+                  setSwapStatus(SwapStatus.SUCCESS);
+                }
 
-          if (receipt.status === "reverted") {
-            setSwapStatus(SwapStatus.ERROR);
+                if (receipt.status === "reverted") {
+                  setSwapStatus(SwapStatus.ERROR);
 
-            const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
+                  const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
 
-            if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
-              setErrorType(SwapError.OUT_OF_GAS);
-            } else {
-              setErrorType(SwapError.UNKNOWN);
+                  if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
+                    setErrorType(SwapError.OUT_OF_GAS);
+                  } else {
+                    setErrorType(SwapError.UNKNOWN);
+                  }
+                }
+                break;
+              }
+            } catch (err) {
+              console.log(`Attempt ${attempt + 1}: Transaction not found yet.`);
             }
+            await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
           }
         } else {
           setSwapStatus(SwapStatus.INITIAL);
         }
       } catch (e) {
         console.log(e);
+        addToast("Error while executing contract", "error");
+        closeConfirmInWalletAlert();
         setSwapStatus(SwapStatus.INITIAL);
       }
     },
@@ -533,17 +532,13 @@ export default function useSwap() {
       addRecentTransaction,
       address,
       approveA,
-      baseFee,
       chainId,
       closeConfirmInWalletAlert,
       customGasLimit,
-      gasPrice,
-      gasPriceOption,
       gasPriceSettings,
       isAllowedA,
       openConfirmInWalletAlert,
       output,
-      priorityFee,
       publicClient,
       setApproveHash,
       setErrorType,
@@ -558,6 +553,7 @@ export default function useSwap() {
       typedValue,
       updateAllowance,
       walletClient,
+      gasSettings,
     ],
   );
 

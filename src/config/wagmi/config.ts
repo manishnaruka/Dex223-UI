@@ -1,8 +1,9 @@
 import { fallback, http, webSocket } from "viem";
-import { bscTestnet, eos } from "viem/chains";
+import { bscTestnet } from "viem/chains";
 import { createConfig, createStorage, parseCookie } from "wagmi";
 import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connectors";
 
+import { eos } from "@/config/chains/eos";
 import { sepolia } from "@/config/chains/sepolia";
 
 const cookieStorage = {

@@ -113,6 +113,10 @@ export const Brush = ({
 
   const previousBrushExtent = usePrevious(brushExtent);
 
+  const beforebrushstarted = useCallback((event: D3BrushEvent<unknown>) => {
+    // do nothing
+  }, []);
+
   const brushed = useCallback(
     (event: D3BrushEvent<unknown>) => {
       const { type, selection, mode } = event;
@@ -167,7 +171,20 @@ export const Brush = ({
       .attr("stroke", "none")
       .attr("fill-opacity", "0.1")
       .attr("fill", `url(#${id}-gradient-selection)`);
-  }, [brushExtent, brushed, id, innerHeight, innerWidth, interactive, previousBrushExtent, xScale]);
+
+    // NOTE: not the best, but it works without errors - to prevent resetting interval (selection)
+    select(".overlay").datum({ type: "none" }).on("mousedown touchstart", beforebrushstarted);
+  }, [
+    beforebrushstarted,
+    brushExtent,
+    brushed,
+    id,
+    innerHeight,
+    innerWidth,
+    interactive,
+    previousBrushExtent,
+    xScale,
+  ]);
 
   // respond to xScale changes only
   useEffect(() => {
@@ -208,9 +225,13 @@ export const Brush = ({
       <>
         <defs>
           <linearGradient id={`${id}-gradient-selection`} x1="0%" y1="100%" x2="100%" y2="100%">
-            <stop stopColor={westHandleColor} />
-            <stop stopColor={eastHandleColor} offset="1" />
+            <stop stopColor="rgba(125, 164, 145, 1)" /> {/* Light green with some transparency */}
+            <stop stopColor="rgba(125, 164, 145, 1)" offset="1" />{" "}
+            {/* Darker green with some transparency */}
           </linearGradient>
+          {/*<stop stopColor={westHandleColor} />*/}
+          {/*<stop stopColor={eastHandleColor} offset="1" />*/}
+          {/*</linearGradient>*/}
 
           {/* clips at exactly the svg area */}
           <clipPath id={`${id}-brush-clip`}>

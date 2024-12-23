@@ -44,11 +44,9 @@ export const getGasSettings = ({
           maxPriorityFeePerGas: gasPriceSettings.maxPriorityFeePerGas,
           maxFeePerGas: gasPriceSettings.maxFeePerGas,
         };
-        break;
 
       case GasFeeModel.LEGACY:
         return { gasPrice: gasPriceSettings.gasPrice };
-        break;
     }
   }
 };

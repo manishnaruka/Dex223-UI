@@ -53,17 +53,24 @@ function MobileStandardOption({
             className={clsx(
               "flex flex-col",
               standard === active ? "text-secondary-text" : "text-tertiary-text",
-              standard === Standard.ERC223 && "items-end",
+              standard === Standard.ERC223 ? "items-end" : "items-start",
             )}
           >
             {t("balance")}{" "}
             <span
               className={clsx(
-                "whitespace-nowrap",
+                "w-full table table-fixed",
                 standard === active ? "text-primary-text" : "text-tertiary-text",
               )}
             >
-              {balance || "0.0"} {symbol}
+              <span
+                className={clsx(
+                  "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
+                  standard === Standard.ERC223 ? "text-right" : "text-left",
+                )}
+              >
+                {balance || "0.0"} {symbol}
+              </span>
             </span>
           </span>
         )}
@@ -131,17 +138,20 @@ function StandardOption({
         ) : (
           <span
             className={clsx(
-              "block",
+              "w-[calc(100%-55px)] table table-fixed",
               standard === active ? "text-secondary-text" : "text-tertiary-text",
             )}
           >
-            {t("balance")}{" "}
             <span
               className={clsx(
-                "whitespace-nowrap",
+                "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
                 standard === active ? "text-primary-text" : "text-tertiary-text",
+                standard === Standard.ERC223 ? "text-right" : "text-left",
               )}
             >
+              <span className={standard === active ? "text-secondary-text" : "text-tertiary-text"}>
+                {t("balance")}
+              </span>{" "}
               {balance || "0.0"} {symbol}
             </span>
           </span>
@@ -150,11 +160,11 @@ function StandardOption({
       {gas && (
         <div
           className={clsx(
-            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center text-tertiary-text",
+            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center text-tertiary-text w-fit",
             standard === Standard.ERC20 &&
               "bg-gradient-to-r from-primary-bg to-secondary-bg rounded-bl-2",
             standard === Standard.ERC223 &&
-              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end",
+              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end ml-auto",
           )}
         >
           {gas}
@@ -215,6 +225,7 @@ export default function TokenInput({
       <div className="flex items-center mb-5 justify-between">
         <div>
           <NumericFormat
+            allowedDecimalSeparators={[","]}
             decimalScale={token?.decimals}
             inputMode="decimal"
             placeholder="0.0"
@@ -229,7 +240,7 @@ export default function TokenInput({
             }}
             allowNegative={false}
           />
-          <span className="text-12 block -mt-1 text-secondary-text">$0.00</span>
+          <span className="text-12 block -mt-1 text-tertiary-text">$0.00</span>
           <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
         <SelectButton
@@ -239,7 +250,7 @@ export default function TokenInput({
           size="large"
         >
           {token ? (
-            <span className="flex gap-2 items-center pr-2">
+            <span className="flex gap-2 items-center">
               <Image
                 className="flex-shrink-0"
                 src={token?.logoURI || ""}
@@ -247,10 +258,12 @@ export default function TokenInput({
                 width={32}
                 height={32}
               />
-              <span>{token.symbol}</span>
+              <span className="max-w-[100px] md:max-w-[150px] overflow-ellipsis overflow-hidden whitespace-nowrap">
+                {token.symbol}
+              </span>
             </span>
           ) : (
-            <span className="whitespace-nowrap text-tertiary-text">{t("select_token")}</span>
+            <span className="whitespace-nowrap text-tertiary-text pl-2">{t("select_token")}</span>
           )}
         </SelectButton>
       </div>
