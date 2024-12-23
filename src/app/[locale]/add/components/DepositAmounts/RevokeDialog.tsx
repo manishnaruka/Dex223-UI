@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits, parseUnits } from "viem";
+import { useAccount } from "wagmi";
 
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import Alert from "@/components/atoms/Alert";
@@ -12,6 +13,7 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -20,6 +22,7 @@ import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Standard } from "@/sdk_hybrid/standard";
+import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
@@ -30,10 +33,6 @@ import {
   useRevokeGasPriceStore,
   useWithdrawGasLimitStore,
 } from "../../stores/useRevokeGasSettings";
-import { AddLiquidityApproveStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
-import { useAccount } from "wagmi";
-import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
-import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 
 export const RevokeDialog = () => {
   const { status } = useRevokeStatusStore();

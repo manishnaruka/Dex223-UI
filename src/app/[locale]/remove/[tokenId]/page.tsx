@@ -61,8 +61,6 @@ import {
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
 import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
-import { AddLiquidityStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
-import { useCollectFeesStatusStore } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesStatusStore";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {

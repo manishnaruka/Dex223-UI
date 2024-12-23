@@ -4,24 +4,23 @@ import React, { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useMediaQuery } from "react-responsive";
 import { formatEther, formatUnits, parseUnits } from "viem";
+import { useAccount } from "wagmi";
 
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Standard } from "@/sdk_hybrid/standard";
+import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
 import { ApproveTransaction } from "../../hooks/useLiquidityApprove";
 import { AddLiquidityApproveStatus } from "../../stores/useAddLiquidityStatusStore";
-import { RemoveLiquidityStatus } from "@/app/[locale]/remove/[tokenId]/stores/useRemoveLiquidityStatusStore";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
-import { useAccount } from "wagmi";
-import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
-import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 
 export const TransactionItem = ({
   transaction,
