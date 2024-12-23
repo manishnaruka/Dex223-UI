@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits, parseUnits } from "viem";
 
@@ -11,7 +11,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -30,6 +30,10 @@ import {
   useRevokeGasPriceStore,
   useWithdrawGasLimitStore,
 } from "../../stores/useRevokeGasSettings";
+import { AddLiquidityApproveStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
+import { useAccount } from "wagmi";
+import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 
 export const RevokeDialog = () => {
   const { status } = useRevokeStatusStore();
@@ -49,18 +53,22 @@ export const RevokeDialog = () => {
     return parseUnits(localValue, token?.decimals);
   }, [localValue, token]);
 
-  const { withdrawHandler, currentDeposit } = useWithdraw({
+  const { withdrawHandler, currentDeposit, withdrawHash } = useWithdraw({
     token: token,
     contractAddress: contractAddress,
   });
-  const { revokeHandler: rHandler, currentAllowance: revokeAllowance } = useRevoke({
+  const {
+    revokeHandler: rHandler,
+    currentAllowance: revokeAllowance,
+    revokeHash,
+  } = useRevoke({
     token: token,
     contractAddress: contractAddress,
   });
 
   const currentAllowance =
     standard === Standard.ERC20 ? revokeAllowance || BigInt(0) : currentDeposit;
-
+  const currentHash = standard === Standard.ERC20 ? revokeHash : withdrawHash;
   const revokeHandler = standard === Standard.ERC20 ? rHandler : withdrawHandler;
 
   const [isError, setIsError] = useState(false);
@@ -81,6 +89,21 @@ export const RevokeDialog = () => {
     setEstimatedGas: wSetEstimatedGas,
     setCustomGasLimit: wSetCustomGasLimit,
   } = useWithdrawGasLimitStore();
+
+  const { address: accountAddress } = useAccount();
+  const { transactions } = useRecentTransactionsStore();
+  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
+
+  const recentTransaction = useMemo(() => {
+    if (currentHash && accountAddress) {
+      const txs = transactions[accountAddress];
+      for (let tx of txs) {
+        if (tx.hash === currentHash) {
+          return tx;
+        }
+      }
+    }
+  }, [accountAddress, currentHash, transactions]);
 
   const { isAdvanced, setIsAdvanced } = useRevokeGasModeStore();
 
@@ -124,6 +147,26 @@ export const RevokeDialog = () => {
                 <Badge color="green" text={standard} className="text-nowrap mr-auto" />
               </div>
               <div className="flex items-center gap-2 justify-end ml-2 ">
+                {/* Speed Up button */}
+                {recentTransaction && status === AllowanceStatus.LOADING && (
+                  <Button
+                    className="relative hidden md:block"
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                    variant={ButtonVariant.CONTAINED}
+                    size={ButtonSize.EXTRA_SMALL}
+                    onClick={() => handleSpeedUp(recentTransaction)}
+                  >
+                    {recentTransaction.replacement === "repriced" && (
+                      <span className="absolute -top-1.5 right-0.5 text-green">
+                        <Svg size={16} iconName="speed-up" />
+                      </span>
+                    )}
+                    <span className="text-12 font-medium pb-[3px] pt-[1px] flex items-center flex-row text-nowrap">
+                      {t("speed_up")}
+                    </span>
+                  </Button>
+                )}
+
                 {status === AllowanceStatus.PENDING && (
                   <>
                     <Preloader type="linear" />
@@ -138,6 +181,27 @@ export const RevokeDialog = () => {
                 )}
               </div>
             </div>
+
+            {/* Speed Up button - on Mobile */}
+            {recentTransaction && status === AllowanceStatus.LOADING && (
+              <Button
+                className="relative md:hidden rounded-5"
+                fullWidth
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                variant={ButtonVariant.CONTAINED}
+                size={ButtonSize.SMALL}
+                onClick={() => handleSpeedUp(recentTransaction)}
+              >
+                {recentTransaction.replacement === "repriced" && (
+                  <span className="absolute -top-2 right-4 text-green">
+                    <Svg size={20} iconName="speed-up" />
+                  </span>
+                )}
+                <span className="text-14 font-medium pb-[5px] pt-[5px] flex items-center flex-row text-nowrap">
+                  {t("speed_up")}
+                </span>
+              </Button>
+            )}
 
             {standard === "ERC-20" ? (
               <div className="mt-2">

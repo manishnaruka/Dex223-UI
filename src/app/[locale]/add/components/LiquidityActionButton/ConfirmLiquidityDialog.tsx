@@ -1,8 +1,10 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { formatEther, formatGwei } from "viem";
+import { useAccount } from "wagmi";
 
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import Alert from "@/components/atoms/Alert";
@@ -13,8 +15,9 @@ import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
@@ -27,6 +30,7 @@ import { DexChainId } from "@/sdk_hybrid/chains";
 import { Standard } from "@/sdk_hybrid/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
+import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
 import { useAddLiquidity, useAddLiquidityEstimatedGas } from "../../hooks/useAddLiquidity";
 import {
@@ -313,6 +317,10 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
   const { liquidityHash, status } = useAddLiquidityStatusStore();
   const { updateAllowance } = useLiquidityApprove();
   const { gasPriceOption } = useAddLiquidityGasPriceStore();
+  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
+  const { transactions } = useRecentTransactionsStore();
+  const { address: accountAddress } = useAccount();
+  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
 
   const { parsedAmounts, position, noLiquidity } = useV3DerivedMintInfo({
     tokenA,
@@ -321,14 +329,25 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
     price,
   });
 
+  const transaction = useMemo(() => {
+    if (liquidityHash && accountAddress) {
+      const txs = transactions[accountAddress];
+      for (let tx of txs) {
+        if (tx.hash === liquidityHash) {
+          return tx;
+        }
+      }
+    }
+  }, [accountAddress, liquidityHash, transactions]);
+
   // Gas price
   const gasPrice = useAddLiquidityGasPrice();
 
   const buttonText = increase
-    ? "Add liquidity"
+    ? t("add_liquidity_title")
     : noLiquidity
-      ? "Create Pool & Mint liquidity"
-      : "Mint liquidity";
+      ? t("create_pool_mint")
+      : t("mint_liquidity");
   const { inRange } = usePositionRangeStatus({ position });
 
   const { minPriceString, maxPriceString, currentPriceString } = usePositionPrices({
@@ -378,19 +397,29 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
           >
             <div className="flex md:flex-nowrap items-start gap-2 w-full">
               {/* Token Logos */}
-              <div className="flex items-start relative min-w-[50px] h-[34px]">
-                <div className="absolute left-0 top-0 w-[34px] h-[34px] items-start justify-center">
-                  <Image width={32} height={32} src={tokenA.logoURI as any} alt="" />
+              <div className="flex items-start relative md:min-w-[50px] md:h-[34px] min-w-[38px] h-[26px]">
+                <div className="absolute left-0 top-0 md:w-[34px] md:h-[34px] w-[26px] h-[26px] items-start justify-center">
+                  <Image
+                    width={isMobile ? 24 : 32}
+                    height={isMobile ? 24 : 32}
+                    src={tokenA.logoURI as any}
+                    alt=""
+                  />
                 </div>
-                <div className="w-[34px] h-[34px] absolute left-[16px] top-0 bg-tertiary-bg rounded-full items-start">
-                  <Image width={32} height={32} src={tokenB.logoURI as any} alt="" />
+                <div className="md:w-[34px] md:h-[34px] w-[26px] h-[26px] absolute md:left-[16px] left-[12px] top-0 bg-tertiary-bg rounded-full items-start">
+                  <Image
+                    width={isMobile ? 24 : 32}
+                    height={isMobile ? 24 : 32}
+                    src={tokenB.logoURI as any}
+                    alt=""
+                  />
                 </div>
               </div>
 
               {/* Text and Badge */}
               <div
                 className={clsxMerge(
-                  "flex gap-x-2 mt-0.5 md:flex-row",
+                  "flex gap-x-2 md:mt-0.5 -mt-0.5 md:flex-row",
                   isLongDoubleName && "w-full flex-col",
                 )}
               >
@@ -410,9 +439,29 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
               </div>
             </div>
 
-            <div className="flex items-start gap-2 justify-end mr-1">
+            <div className="flex items-start gap-2 justify-end mr-1 mb-3 md:mb-0">
+              {/* Speed Up button */}
+              {transaction && status === AddLiquidityStatus.MINT_LOADING && (
+                <Button
+                  className="relative hidden md:block mt-1"
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  variant={ButtonVariant.CONTAINED}
+                  size={ButtonSize.EXTRA_SMALL}
+                  onClick={() => handleSpeedUp(transaction)}
+                >
+                  {transaction.replacement === "repriced" && (
+                    <span className="absolute -top-1.5 right-0.5 text-green">
+                      <Svg size={16} iconName="speed-up" />
+                    </span>
+                  )}
+                  <span className="text-12 font-medium pb-[3px] pt-[1px] flex items-center flex-row text-nowrap">
+                    {t("speed_up")}
+                  </span>
+                </Button>
+              )}
+
               {liquidityHash && status !== AddLiquidityStatus.MINT_PENDING && (
-                <div className="items-center flex flex-row gap-2 -mt-1">
+                <div className="items-center md:mt-0 max-h-8 flex flex-row gap-2 -mt-1">
                   <a
                     target="_blank"
                     href={getExplorerLink(ExplorerLinkType.TRANSACTION, liquidityHash, chainId)}
@@ -422,7 +471,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                 </div>
               )}
               {status === AddLiquidityStatus.MINT_PENDING && (
-                <div className="items-center flex flex-row gap-2 mt-1.5">
+                <div className="items-center flex flex-row gap-2 mt-0.5 md:mt-1.5">
                   <Preloader type="linear" />
                   <span className="text-secondary-text text-14 text-nowrap">
                     {t("status_pending")}
@@ -430,17 +479,39 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                 </div>
               )}
               {status === AddLiquidityStatus.MINT_LOADING && (
-                <div className="items-center flex flex-row gap-2 mt-1.5">
+                <div className="items-center flex flex-row gap-2 mt-0.5 md:mt-1.5">
                   <Preloader size={20} />
                 </div>
               )}
               {status === AddLiquidityStatus.SUCCESS && (
-                <div className="items-center flex flex-row gap-2 mt-1.5">
+                <div className="items-center flex flex-row gap-2 mt-0.5 md:mt-1.5">
                   <Svg className="text-green" iconName="done" size={20} />
                 </div>
               )}
             </div>
           </div>
+
+          {/* Speed Up button - on Mobile */}
+          {transaction && status === AddLiquidityStatus.MINT_LOADING && (
+            <Button
+              className="relative md:hidden rounded-5 mt-1"
+              fullWidth
+              colorScheme={ButtonColor.LIGHT_GREEN}
+              variant={ButtonVariant.CONTAINED}
+              size={ButtonSize.SMALL}
+              onClick={() => handleSpeedUp(transaction)}
+            >
+              {transaction.replacement === "repriced" && (
+                <span className="absolute -top-2 right-4 text-green">
+                  <Svg size={20} iconName="speed-up" />
+                </span>
+              )}
+              <span className="text-14 font-medium pb-[5px] pt-[5px] flex items-center flex-row text-nowrap">
+                {t("speed_up")}
+              </span>
+            </Button>
+          )}
+
           {/* Amounts */}
           <div className="flex flex-col rounded-3 bg-tertiary-bg p-5 mt-4">
             <div className={clsxMerge("flex gap-3", isLongName && "md:flex-row flex-col")}>

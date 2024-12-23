@@ -20,7 +20,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
@@ -43,7 +43,10 @@ import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracki
 import { Link, useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
+import {
+  RecentTransactionTitleTemplate,
+  useRecentTransactionsStore,
+} from "@/stores/useRecentTransactionsStore";
 
 import PositionLiquidityCard from "../../pool/[tokenId]/components/PositionLiquidityCard";
 import { RemoveLiquidityGasSettings } from "./components/RemoveLiquidityGasSettings";
@@ -58,6 +61,9 @@ import {
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
 import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
+import { AddLiquidityStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
+import { useCollectFeesStatusStore } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesStatusStore";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
@@ -146,6 +152,21 @@ export default function DecreaseLiquidityPage({
 
   const [isFocused, setIsFocused] = useState(false);
   const divRef = useRef(null);
+
+  const { address: accountAddress } = useAccount();
+  const { transactions } = useRecentTransactionsStore();
+  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
+
+  const transaction = useMemo(() => {
+    if (hash && accountAddress) {
+      const txs = transactions[accountAddress];
+      for (let tx of txs) {
+        if (tx.hash === hash) {
+          return tx;
+        }
+      }
+    }
+  }, [accountAddress, hash, transactions]);
 
   useEffect(() => {
     if (refreshDepositsTrigger) {
@@ -461,15 +482,37 @@ export default function DecreaseLiquidityPage({
                 <span className="text-16 lg:text-18 items-center font-bold text-secondary-text">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
               </div>
             </div>
-            <div className="flex items-start gap-2 mt-1 justify-end">
-              {hash && (
-                <a
-                  className="flex items-center -mt-2 justify-center"
-                  target="_blank"
-                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
+            <div className="flex items-start gap-2 md:gap-4 mt-1 justify-end">
+              {/* Speed Up button */}
+              {transaction && status === RemoveLiquidityStatus.LOADING && (
+                <Button
+                  className="mt-1 relative"
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  variant={ButtonVariant.CONTAINED}
+                  size={ButtonSize.EXTRA_SMALL}
+                  onClick={() => handleSpeedUp(transaction)}
                 >
-                  <IconButton iconName="forward" />
-                </a>
+                  {transaction.replacement === "repriced" && (
+                    <span className="absolute -top-1.5 right-0.5 text-green">
+                      <Svg size={16} iconName="speed-up" />
+                    </span>
+                  )}
+                  <span className="text-12 font-medium pb-[3px] pt-[1px] flex items-center flex-row text-nowrap">
+                    {t("speed_up")}
+                  </span>
+                </Button>
+              )}
+
+              {hash && (
+                <div className="items-center md:mt-0 max-h-8 flex flex-row gap-2 -mt-1">
+                  <a
+                    className="flex items-center -mt-2 justify-center"
+                    target="_blank"
+                    href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
+                  >
+                    <IconButton iconName="forward" />
+                  </a>
+                </div>
               )}
 
               <div className="flex items-start">
@@ -501,6 +544,28 @@ export default function DecreaseLiquidityPage({
               </div>
             </div>
           </div>
+
+          {/* Speed Up button - on Mobile */}
+          {transaction && status === RemoveLiquidityStatus.LOADING && (
+            <Button
+              className="relative md:hidden rounded-5 mt-1"
+              fullWidth
+              colorScheme={ButtonColor.LIGHT_GREEN}
+              variant={ButtonVariant.CONTAINED}
+              size={ButtonSize.SMALL}
+              onClick={() => handleSpeedUp(transaction)}
+            >
+              {transaction.replacement === "repriced" && (
+                <span className="absolute -top-2 right-4 text-green">
+                  <Svg size={20} iconName="speed-up" />
+                </span>
+              )}
+              <span className="text-14 font-medium pb-[5px] pt-[5px] flex items-center flex-row text-nowrap">
+                {t("speed_up")}
+              </span>
+            </Button>
+          )}
+
           <div className="py-5">
             <div className="grid gap-3">
               <RemoveLiquidityRow

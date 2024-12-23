@@ -25,7 +25,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isRepriced?: boolean;
 }
 
-function RecentTransactionActionButton({
+export function RecentTransactionActionButton({
   color = "primary",
   children,
   isRepriced,
