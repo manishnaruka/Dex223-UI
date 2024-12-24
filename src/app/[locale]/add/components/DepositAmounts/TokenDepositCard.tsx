@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits } from "viem";
-import { useAccount, useBalance, useBlockNumber } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
@@ -14,6 +14,7 @@ import truncateMiddle from "@/functions/truncateMiddle";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -381,7 +382,7 @@ export default function TokenDepositCard({
 
   const { address } = useAccount();
 
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
   const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
     address: currency ? address : undefined,
     token: currency && !currency.isNative ? currency.address0 : undefined,

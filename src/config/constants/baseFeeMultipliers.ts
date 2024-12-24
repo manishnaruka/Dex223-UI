@@ -12,15 +12,10 @@ export const baseFeeMultipliers: Record<DexChainId, Record<GasOptionWithoutCusto
     [GasOption.CHEAP]: BigInt(120),
     [GasOption.FAST]: BigInt(200),
   },
+  [DexChainId.EOS]: {
+    [GasOption.CHEAP]: BigInt(120),
+    [GasOption.FAST]: BigInt(200),
+  },
 };
 
 export const SCALING_FACTOR = BigInt(100);
-
-export const eip1559SupportMap: Record<DexChainId, boolean> = {
-  [DexChainId.SEPOLIA]: true,
-  [DexChainId.BSC_TESTNET]: false,
-};
-
-export function isEip1559Supported(chainId: DexChainId) {
-  return eip1559SupportMap[chainId];
-}

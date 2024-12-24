@@ -214,8 +214,18 @@ export default function ListTokenPage() {
 
   const { isLoadingList, isLoadingApprove, isPendingApprove, isPendingList } = useListTokenStatus();
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useListTokensGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useListTokensGasPriceStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
+
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useListTokensGasLimitStore();
 

@@ -94,11 +94,18 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
   }, [poolTokens]);
   const poolAddresses = useComputePoolAddressesDex(poolAddressesParams);
 
+  console.log(poolAddresses);
+  console.log(chainId);
+
+  const _apolloClient = useMemo(() => {
+    return apolloClient(chainId);
+  }, [chainId]);
+
   const { data, loading } = useQuery(query, {
     variables: {
       addresses: poolAddresses.map((p) => p?.address?.toLowerCase()),
     },
-    client: apolloClient,
+    client: _apolloClient,
   });
 
   const ticksMap = useMemo(() => {
@@ -172,6 +179,17 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
 
       const liquidity = liquidityData[index].result as bigint;
       try {
+        const ticks =
+          poolAddresses?.[index]?.address && ticksMap
+            ? ticksMap[poolAddresses[index]!.address!.toLowerCase()]?.sort(
+                (a, b) => a.index - b.index,
+              )
+            : undefined;
+
+        if (!ticks) {
+          return;
+        }
+
         const newPool = new Pool(
           token0,
           token1,
@@ -179,11 +197,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
           sqrtPriceX96.toString(),
           liquidity.toString(),
           tick,
-          poolAddresses?.[index]?.address && ticksMap
-            ? ticksMap[poolAddresses[index]!.address!.toLowerCase()]?.sort(
-                (a, b) => a.index - b.index,
-              )
-            : undefined,
+          ticks,
         );
         addPool(key, newPool);
         return [PoolState.EXISTS, newPool];

@@ -114,6 +114,7 @@ interface RecentTransactions {
   addRecentTransaction: (
     transaction: Omit<IRecentTransaction, "status" | "id">,
     accountAddress: Address,
+    status?: RecentTransactionStatus,
   ) => void;
   updateTransactionStatus: (id: string, status: RecentTransactionStatus, account: string) => void;
   updateTransactionHash: (
@@ -156,14 +157,18 @@ export const useRecentTransactionsStore = create<RecentTransactions>()(
   persist(
     (set) => ({
       transactions: {},
-      addRecentTransaction: (transaction, accountAddress) =>
+      addRecentTransaction: (
+        transaction,
+        accountAddress,
+        status = RecentTransactionStatus.PENDING,
+      ) =>
         set((state) => {
           const updatedTransactions = { ...state.transactions };
           const accountTransactions = updatedTransactions[accountAddress] || [];
 
           const newTransaction = {
             ...transaction,
-            status: RecentTransactionStatus.PENDING,
+            status,
             id: transaction.hash,
           };
 

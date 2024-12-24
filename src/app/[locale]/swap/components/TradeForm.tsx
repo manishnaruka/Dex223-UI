@@ -312,8 +312,13 @@ export default function TradeForm() {
     refetchBBalance();
   }, [blockNumber, refetchABalance, refetchBBalance]);
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useSwapGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useSwapGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useSwapGasLimitStore();
   const { isAdvanced, setIsAdvanced } = useSwapGasModeStore();
@@ -323,9 +328,17 @@ export default function TradeForm() {
   const { setIsOpen: setConfirmSwapDialogOpen } = useConfirmSwapDialogStore();
   const { baseFee, priorityFee, gasPrice } = useFees();
 
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
+
   const computedGasSpending = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
       return formatFloat(formatGwei(gasPriceSettings.gasPrice));
+    }
+
+    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPrice) {
+      return formatFloat(formatGwei(gasPrice));
     }
 
     if (
@@ -351,7 +364,7 @@ export default function TradeForm() {
     }
 
     return undefined;
-  }, [baseFee, gasPriceOption, gasPriceSettings, priorityFee]);
+  }, [baseFee, gasPrice, gasPriceOption, gasPriceSettings, priorityFee]);
 
   const computedGasSpendingETH = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {

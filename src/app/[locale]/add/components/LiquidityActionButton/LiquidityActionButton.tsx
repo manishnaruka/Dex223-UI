@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo } from "react";
-import { useAccount, useBalance, useBlockNumber } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 
 import Preloader from "@/components/atoms/Preloader";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
@@ -8,6 +8,7 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke from "@/hooks/useRevoke";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useWithdraw from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
@@ -101,7 +102,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
     price,
   });
 
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
   const chainId = useCurrentChainId();
 
   const { currentAllowance: currentAllowanceA } = useRevoke({

@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatUnits, getAbiItem } from "viem";
-import {
-  useAccount,
-  useBlockNumber,
-  usePublicClient,
-  useReadContract,
-  useWalletClient,
-} from "wagmi";
+import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
 import {
   useWithdrawGasLimitStore,
@@ -14,8 +8,10 @@ import {
 } from "@/app/[locale]/add/stores/useRevokeGasSettings";
 import { useRefreshDepositsDataStore } from "@/app/[locale]/portfolio/components/stores/useRefreshTableStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useDeepEffect from "@/hooks/useDeepEffect";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import {
@@ -124,7 +120,7 @@ export default function useWithdraw({
   });
   const amountToWithdraw = currentDeposit.data as bigint;
 
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
 
   useEffect(() => {
     currentDeposit.refetch();
@@ -164,8 +160,10 @@ export default function useWithdraw({
         });
 
         const hash = await walletClient.writeContract(request);
-        const transaction = await publicClient.getTransaction({
+
+        const transaction = await getTransactionWithRetries({
           hash,
+          publicClient,
         });
         setHash(hash);
 

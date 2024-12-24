@@ -1,13 +1,15 @@
 import JSBI from "jsbi";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { Abi, Address, encodeFunctionData, formatUnits, getAbiItem, parseUnits } from "viem";
-import { useAccount, useBlockNumber, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
@@ -260,7 +262,7 @@ export function useAddLiquidityEstimatedGas({
 
   const { setEstimatedGas } = useEstimatedGasStore();
   const publicClient = usePublicClient();
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
 
   useDeepEffect(() => {
     IIFE(async () => {
@@ -346,8 +348,9 @@ export const useAddLiquidity = ({
 
         setLiquidityHash(hash);
 
-        const transaction = await publicClient.getTransaction({
+        const transaction = await getTransactionWithRetries({
           hash,
+          publicClient,
         });
 
         const nonce = transaction.nonce;

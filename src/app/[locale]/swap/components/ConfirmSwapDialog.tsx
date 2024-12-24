@@ -425,6 +425,8 @@ export default function ConfirmSwapDialog() {
 
   const { trade } = useTrade();
 
+  console.log(trade);
+
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);

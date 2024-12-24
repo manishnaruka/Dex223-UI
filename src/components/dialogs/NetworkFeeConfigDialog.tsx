@@ -16,11 +16,8 @@ import GasLimitField from "@/components/gas-settings/GasLimitField";
 import GasOptionRadioButton from "@/components/gas-settings/GasOptionRadioButton";
 import useNetworkFeeGasValidation from "@/components/gas-settings/hooks/useNetworkFeeGasValidation";
 import LegacyField from "@/components/gas-settings/LegacyField";
-import {
-  baseFeeMultipliers,
-  isEip1559Supported,
-  SCALING_FACTOR,
-} from "@/config/constants/baseFeeMultipliers";
+import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import { isEip1559Supported } from "@/config/constants/eip1559";
 import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";

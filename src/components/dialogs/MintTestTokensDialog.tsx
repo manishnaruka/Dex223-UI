@@ -1,13 +1,7 @@
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatUnits, isAddress, parseUnits } from "viem";
-import {
-  useAccount,
-  useBlockNumber,
-  usePublicClient,
-  useReadContract,
-  useWalletClient,
-} from "wagmi";
+import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -25,6 +19,7 @@ import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
@@ -94,7 +89,7 @@ export default function MintTestTokensDialog() {
     },
   });
 
-  const { data: latestBlock } = useBlockNumber({ watch: isOpen });
+  const { data: latestBlock } = useScopedBlockNumber({ watch: isOpen });
 
   useEffect(() => {
     refetch();

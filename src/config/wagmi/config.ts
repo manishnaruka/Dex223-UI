@@ -3,6 +3,7 @@ import { bscTestnet } from "viem/chains";
 import { createConfig, createStorage, parseCookie } from "wagmi";
 import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connectors";
 
+import { eos } from "@/config/chains/eos";
 import { sepolia } from "@/config/chains/sepolia";
 
 const cookieStorage = {
@@ -26,6 +27,7 @@ export const config = createConfig({
     // callisto,
     sepolia,
     bscTestnet,
+    eos,
   ],
   connectors: [
     walletConnect({
@@ -60,5 +62,6 @@ export const config = createConfig({
       http(),
     ]),
     [bscTestnet.id]: http(),
+    [eos.id]: http(),
   },
 });

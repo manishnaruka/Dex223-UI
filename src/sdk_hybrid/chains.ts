@@ -3,6 +3,7 @@ export enum DexChainId {
   SEPOLIA = 11155111,
   // CALLISTO = 820,
   BSC_TESTNET = 97,
+  EOS = 17777,
 }
 
 const getEnumValues = <T extends { [key: string]: any }>(enumObj: T): Array<T[keyof T]> => {

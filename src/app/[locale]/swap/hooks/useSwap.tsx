@@ -6,6 +6,7 @@ import {
   encodeAbiParameters,
   encodeFunctionData,
   encodePacked,
+  formatUnits,
   getAbiItem,
   parseUnits,
 } from "viem";
@@ -24,10 +25,12 @@ import {
   useSwapStatusStore,
 } from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
+import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
 import { getGasSettings } from "@/functions/gasSettings";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -449,59 +452,59 @@ export default function useSwap() {
 
         if (hash) {
           setSwapHash(hash);
-          const transaction = await publicClient.getTransaction({
-            hash,
-          });
 
-          const nonce = transaction.nonce;
-          setSwapStatus(SwapStatus.LOADING);
-          addRecentTransaction(
-            {
-              hash,
-              nonce,
-              chainId,
-              gas: {
-                ...stringifyObject({ ...gasSettings, model: gasPriceSettings.model }),
-                gas: gasToUse.toString(),
+          const transaction = await getTransactionWithRetries({ hash, publicClient });
+          if (transaction) {
+            const nonce = transaction.nonce;
+            setSwapStatus(SwapStatus.LOADING);
+            addRecentTransaction(
+              {
+                hash,
+                nonce,
+                chainId,
+                gas: {
+                  ...stringifyObject({ ...gasSettings, model: gasPriceSettings.model }),
+                  gas: gasToUse.toString(),
+                },
+                params: {
+                  ...stringifyObject(swapParams),
+                  abi: [
+                    getAbiItem({
+                      name: swapParams.functionName,
+                      abi: swapParams.abi,
+                      args: swapParams.args as any,
+                    }),
+                  ],
+                },
+                title: {
+                  symbol0: tokenA.symbol!,
+                  symbol1: tokenB.symbol!,
+                  template: RecentTransactionTitleTemplate.SWAP,
+                  amount0: typedValue,
+                  amount1: output.toString(),
+                  logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
+                  logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
+                },
               },
-              params: {
-                ...stringifyObject(swapParams),
-                abi: [
-                  getAbiItem({
-                    name: swapParams.functionName,
-                    abi: swapParams.abi,
-                    args: swapParams.args as any,
-                  }),
-                ],
-              },
-              title: {
-                symbol0: tokenA.symbol!,
-                symbol1: tokenB.symbol!,
-                template: RecentTransactionTitleTemplate.SWAP,
-                amount0: typedValue,
-                amount1: output.toString(),
-                logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
-                logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
-              },
-            },
-            address,
-          );
+              address,
+            );
 
-          const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
-          updateAllowance();
-          if (receipt.status === "success") {
-            setSwapStatus(SwapStatus.SUCCESS);
-          }
+            const receipt = await publicClient.waitForTransactionReceipt({ hash }); //TODO: add try catch
+            updateAllowance();
+            if (receipt.status === "success") {
+              setSwapStatus(SwapStatus.SUCCESS);
+            }
 
-          if (receipt.status === "reverted") {
-            setSwapStatus(SwapStatus.ERROR);
+            if (receipt.status === "reverted") {
+              setSwapStatus(SwapStatus.ERROR);
 
-            const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
+              const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
 
-            if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
-              setErrorType(SwapError.OUT_OF_GAS);
-            } else {
-              setErrorType(SwapError.UNKNOWN);
+              if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
+                setErrorType(SwapError.OUT_OF_GAS);
+              } else {
+                setErrorType(SwapError.UNKNOWN);
+              }
             }
           }
         } else {
