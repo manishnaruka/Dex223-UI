@@ -7,15 +7,14 @@ import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
 import { Locale, routing } from "@/i18n/routing";
 interface Props {
-  params: {
+  params: Promise<{
     locale: Locale;
-  };
+  }>;
 }
 
-export default async function RootLayout({
-  children,
-  params: { locale },
-}: PropsWithChildren<Props>) {
+export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
+  const locale = (await params).locale;
+
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }

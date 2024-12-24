@@ -20,16 +20,15 @@ const golos_text = Golos_Text({
 });
 
 interface Props {
-  params: {
+  params: Promise<{
     locale: "es" | "en" | "zh";
-  };
+  }>;
 }
 
-export default async function RootLayout({
-  children,
-  params: { locale },
-}: PropsWithChildren<Props>) {
+export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
   const initialState = cookieToInitialState(config, (await headers()).get("cookie"));
+
+  const locale = (await params).locale;
 
   return (
     <html suppressHydrationWarning lang={locale}>
