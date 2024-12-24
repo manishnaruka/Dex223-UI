@@ -40,6 +40,7 @@ export const config = createConfig({
     metaMask({
       dappMetadata: {
         name: "dex223.io",
+        url: "https://app.dex223.io",
       },
       useDeeplink: true,
     }),
