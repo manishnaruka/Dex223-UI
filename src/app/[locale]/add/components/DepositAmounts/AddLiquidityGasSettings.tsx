@@ -9,7 +9,6 @@ import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog"
 import { formatFloat } from "@/functions/formatFloat";
 import { getChainSymbol } from "@/functions/getChainSymbol";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 
 import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
