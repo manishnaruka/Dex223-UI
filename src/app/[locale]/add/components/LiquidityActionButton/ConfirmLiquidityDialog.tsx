@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { formatEther, formatGwei } from "viem";
 import { useAccount } from "wagmi";
@@ -92,7 +92,11 @@ const ApproveDialog = () => {
   const chainSymbol = getChainSymbol(chainId);
   const gasPrice = useAddLiquidityGasPrice();
 
-  const { gasPriceOption } = useAddLiquidityGasPriceStore();
+  const { gasPriceOption, updateDefaultState } = useAddLiquidityGasPriceStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
 
   const {
     handleApprove,

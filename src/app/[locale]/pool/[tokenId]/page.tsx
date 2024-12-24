@@ -97,10 +97,19 @@ export default function PoolPage({
   });
 
   const { isAdvanced, setIsAdvanced } = useCollectFeesGasModeStore();
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useCollectFeesGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useCollectFeesGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useCollectFeesGasLimitStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
 
   const gasPrice: bigint | undefined = useCollectFeesGasPrice();
   const isMobile = useMediaQuery({ query: "(max-width: 640px)" });

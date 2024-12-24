@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -77,8 +77,13 @@ export const RevokeDialog = () => {
     setIsError(!(!valueBigInt || valueBigInt <= currentAllowance));
   };
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useRevokeGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useRevokeGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useRevokeGasLimitStore();
 
@@ -109,6 +114,10 @@ export const RevokeDialog = () => {
   const gasPrice: bigint | undefined = useRevokeGasPrice();
 
   const chainId = useCurrentChainId();
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
+
   useRevokeEstimatedGas({
     token: token,
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],

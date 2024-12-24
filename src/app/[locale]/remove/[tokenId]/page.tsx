@@ -31,6 +31,7 @@ import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -61,7 +62,6 @@ import {
   useRemoveLiquidityStatusStore,
 } from "./stores/useRemoveLiquidityStatusStore";
 import { useRemoveLiquidityStore } from "./stores/useRemoveLiquidityStore";
-import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 
 const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; amount: string }) => {
   return (
@@ -118,10 +118,19 @@ export default function DecreaseLiquidityPage({
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useRemoveRecentTransactionsStore();
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useRemoveLiquidityGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useRemoveLiquidityGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useRemoveLiquidityGasLimitStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
 
   const { isAdvanced, setIsAdvanced } = useRemoveLiquidityGasModeStore();
 
