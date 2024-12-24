@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
 import { useLiquidityAmountsStore } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
@@ -9,7 +9,6 @@ import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog"
 import { formatFloat } from "@/functions/formatFloat";
 import { getChainSymbol } from "@/functions/getChainSymbol";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 
 import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
@@ -25,10 +24,19 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
   const chainId = useCurrentChainId();
   const [isOpenedFee, setIsOpenedFee] = useState(false);
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useAddLiquidityGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useAddLiquidityGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useAddLiquidityGasLimitStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
 
   const { isAdvanced, setIsAdvanced } = useAddLiquidityGasModeStore();
 

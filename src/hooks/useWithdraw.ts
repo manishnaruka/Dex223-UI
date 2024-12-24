@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address, formatUnits, getAbiItem } from "viem";
 import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
@@ -102,6 +102,7 @@ export default function useWithdraw({
 
   const { address } = useAccount();
   const chainId = useCurrentChainId();
+  const [hash, setHash] = useState<string | undefined>(undefined);
 
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -164,6 +165,7 @@ export default function useWithdraw({
           hash,
           publicClient,
         });
+        setHash(hash);
 
         const nonce = transaction.nonce;
 
@@ -221,6 +223,7 @@ export default function useWithdraw({
   );
 
   return {
+    withdrawHash: hash,
     withdrawStatus: status,
     withdrawHandler: writeTokenWithdraw,
     currentDeposit: currentDeposit.data as bigint,

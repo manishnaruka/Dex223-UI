@@ -1,19 +1,23 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useMediaQuery } from "react-responsive";
 import { formatEther, formatUnits, parseUnits } from "viem";
+import { useAccount } from "wagmi";
 
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Standard } from "@/sdk_hybrid/standard";
+import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
 import { ApproveTransaction } from "../../hooks/useLiquidityApprove";
 import { AddLiquidityApproveStatus } from "../../stores/useAddLiquidityStatusStore";
@@ -53,6 +57,21 @@ export const TransactionItem = ({
     if (!transaction) return BigInt(0);
     return parseUnits(localValue, transaction.token.decimals);
   }, [localValue, transaction]);
+
+  const { address: accountAddress } = useAccount();
+  const { transactions } = useRecentTransactionsStore();
+  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
+
+  const recentTransaction = useMemo(() => {
+    if (transaction?.hash && accountAddress) {
+      const txs = transactions[accountAddress];
+      for (let tx of txs) {
+        if (tx.hash === transaction?.hash) {
+          return tx;
+        }
+      }
+    }
+  }, [accountAddress, transaction?.hash, transactions]);
 
   const updateValue = (value: string) => {
     if (!transaction?.token) return;
@@ -97,6 +116,26 @@ export const TransactionItem = ({
           </div>
 
           <div className="flex items-center gap-2 justify-end">
+            {/* Speed Up button */}
+            {recentTransaction && status === AddLiquidityApproveStatus.LOADING && (
+              <Button
+                className="md:mt-2 relative hidden md:block"
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                variant={ButtonVariant.CONTAINED}
+                size={ButtonSize.EXTRA_SMALL}
+                onClick={() => handleSpeedUp(recentTransaction)}
+              >
+                {recentTransaction.replacement === "repriced" && (
+                  <span className="absolute -top-1.5 right-0.5 text-green">
+                    <Svg size={16} iconName="speed-up" />
+                  </span>
+                )}
+                <span className="text-12 font-medium pb-[3px] pt-[1px] flex items-center flex-row text-nowrap">
+                  {t("speed_up")}
+                </span>
+              </Button>
+            )}
+
             {localValueBigInt !== amount &&
               !disabled &&
               ![
@@ -116,12 +155,14 @@ export const TransactionItem = ({
               )}
 
             {hash && (
-              <a
-                target="_blank"
-                href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
-              >
-                <IconButton iconName="forward" />
-              </a>
+              <div className="max-h-8 flex items-start">
+                <a
+                  target="_blank"
+                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
+                >
+                  <IconButton iconName="forward" />
+                </a>
+              </div>
             )}
 
             {status === AddLiquidityApproveStatus.PENDING && (
@@ -133,14 +174,40 @@ export const TransactionItem = ({
               </span>
             )}
             {status === AddLiquidityApproveStatus.LOADING ? (
-              <Preloader size={20} />
+              <div className="flex mt-2 items-center">
+                <Preloader size={20} />
+              </div>
             ) : (
               (isAllowed || status === AddLiquidityApproveStatus.SUCCESS) && (
-                <Svg className="text-green" iconName="done" size={20} />
+                <div className="flex mt-2 items-center">
+                  <Svg className="text-green" iconName="done" size={20} />
+                </div>
               )
             )}
           </div>
         </div>
+
+        {/* Speed Up button - on Mobile */}
+        {recentTransaction && status === AddLiquidityApproveStatus.LOADING && (
+          <Button
+            className="relative md:hidden rounded-5"
+            fullWidth
+            colorScheme={ButtonColor.LIGHT_GREEN}
+            variant={ButtonVariant.CONTAINED}
+            size={ButtonSize.SMALL}
+            onClick={() => handleSpeedUp(recentTransaction)}
+          >
+            {recentTransaction.replacement === "repriced" && (
+              <span className="absolute -top-2 right-4 text-green">
+                <Svg size={20} iconName="speed-up" />
+              </span>
+            )}
+            <span className="text-14 font-medium pb-[5px] pt-[5px] flex items-center flex-row text-nowrap">
+              {t("speed_up")}
+            </span>
+          </Button>
+        )}
+
         <div
           className={clsxMerge(
             "flex justify-between px-5 py-3 -mb-1 rounded-3 mt-2 border border-transparent",

@@ -3,9 +3,10 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
@@ -27,12 +28,13 @@ import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
@@ -50,7 +52,10 @@ import { useRouter } from "@/i18n/routing";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
-import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
+import {
+  RecentTransactionTitleTemplate,
+  useRecentTransactionsStore,
+} from "@/stores/useRecentTransactionsStore";
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
@@ -92,10 +97,19 @@ export default function PoolPage({
   });
 
   const { isAdvanced, setIsAdvanced } = useCollectFeesGasModeStore();
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useCollectFeesGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useCollectFeesGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useCollectFeesGasLimitStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
 
   const gasPrice: bigint | undefined = useCollectFeesGasPrice();
   const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
@@ -127,6 +141,22 @@ export default function PoolPage({
     position,
     showFirst,
   });
+
+  const { address: accountAddress } = useAccount();
+  const { transactions } = useRecentTransactionsStore();
+  const { hash: liquidityHash } = useCollectFeesStatusStore();
+  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
+
+  const transaction = useMemo(() => {
+    if (liquidityHash && accountAddress) {
+      const txs = transactions[accountAddress];
+      for (let tx of txs) {
+        if (tx.hash === liquidityHash) {
+          return tx;
+        }
+      }
+    }
+  }, [accountAddress, liquidityHash, transactions]);
 
   const handleClose = () => {
     reset();
@@ -396,18 +426,28 @@ export default function PoolPage({
             <DialogHeader onClose={handleClose} title={t("claim_fees_title")} />
             <div className="flex-grow card-spacing-x md:w-[570px] overflow-y-auto md:overflow-y-hidden">
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center relative w-10 lg:w-12 h-[24px] lg:h-[34px]">
-                    <div className="flex absolute left-0 top-0 w-[24px] h-[24px] lg:w-[34px] lg:h-[34px] rounded-full items-center justify-center">
-                      <Image width={32} height={32} src={token0?.logoURI as any} alt="" />
+                <div className="flex items-center md:gap-2 gap-1">
+                  <div className="flex items-start relative md:min-w-[50px] md:h-[34px] min-w-[38px] h-[26px]">
+                    <div className="absolute left-0 top-0 md:w-[34px] md:h-[34px] w-[26px] h-[26px] items-start justify-center">
+                      <Image
+                        width={isMobile ? 24 : 32}
+                        height={isMobile ? 24 : 32}
+                        src={token0.logoURI as any}
+                        alt=""
+                      />
                     </div>
-                    <div className="w-[24px] h-[24px] lg:w-[34px] lg:h-[34px] flex absolute right-0 top-0 bg-tertiary-bg rounded-full items-center justify-center">
-                      <Image width={32} height={32} src={token1?.logoURI as any} alt="" />
+                    <div className="md:w-[34px] md:h-[34px] w-[26px] h-[26px] absolute md:left-[16px] left-[12px] top-0 bg-tertiary-bg rounded-full items-start">
+                      <Image
+                        width={isMobile ? 24 : 32}
+                        height={isMobile ? 24 : 32}
+                        src={token1.logoURI as any}
+                        alt=""
+                      />
                     </div>
                   </div>
-                  <span className="text-16 lg:text-18 font-bold text-secondary-text">{`${token0?.symbol} and ${token1?.symbol}`}</span>
+                  <span className="text-16 lg:text-18 -mt-0.5 md:mt-0 font-bold text-secondary-text">{`${token0?.symbol} and ${token1?.symbol}`}</span>
                 </div>
-                <div className="flex items-center gap-2 justify-end">
+                <div className="flex items-center gap-4 justify-end">
                   {hash && (
                     <a
                       target="_blank"
@@ -417,21 +457,79 @@ export default function PoolPage({
                     </a>
                   )}
 
-                  {status === CollectFeesStatus.PENDING && (
+                  {/* Speed Up button */}
+                  {transaction && status === CollectFeesStatus.LOADING && (
+                    <Button
+                      className="relative hidden md:block"
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                      variant={ButtonVariant.CONTAINED}
+                      size={ButtonSize.EXTRA_SMALL}
+                      onClick={() => handleSpeedUp(transaction)}
+                    >
+                      {transaction.replacement === "repriced" && (
+                        <span className="absolute -top-1.5 right-0.5 text-green">
+                          <Svg size={16} iconName="speed-up" />
+                        </span>
+                      )}
+                      <span className="text-12 font-medium pb-[3px] pt-[1px] flex items-center flex-row text-nowrap">
+                        {t("speed_up")}
+                      </span>
+                    </Button>
+                  )}
+
+                  {status === CollectFeesStatus.PENDING && !isMobile && (
                     <>
                       <Preloader type="linear" />
                       <span className="text-secondary-text text-14">Proceed in your wallet</span>
                     </>
                   )}
-                  {status === CollectFeesStatus.LOADING && <Preloader size={20} />}
+                  {status === CollectFeesStatus.LOADING && (
+                    <div className="-mt-0.5 md:mt-0">
+                      {" "}
+                      <Preloader size={20} />
+                    </div>
+                  )}
                   {status === CollectFeesStatus.SUCCESS && (
-                    <Svg className="text-green" iconName="done" size={20} />
+                    <div className="-mt-0.5 md:mt-0">
+                      <Svg className="text-green" iconName="done" size={20} />
+                    </div>
                   )}
                   {status === CollectFeesStatus.ERROR && (
-                    <Svg className="text-red-light" iconName="warning" size={24} />
+                    <div className="-mt-0.5 md:mt-0">
+                      <Svg className="text-red-light" iconName="warning" size={24} />
+                    </div>
                   )}
                 </div>
               </div>
+
+              {status === CollectFeesStatus.PENDING && isMobile && (
+                <div className="flex flex-nowrap gap-2 mt-2 items-center">
+                  <Preloader type="linear" />
+                  <span className="text-secondary-text text-14">Proceed in your wallet</span>
+                </div>
+              )}
+
+              {/* Speed Up button - on Mobile */}
+              {transaction && status === CollectFeesStatus.LOADING && (
+                <Button
+                  className="relative md:hidden rounded-5 mt-3"
+                  fullWidth
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  variant={ButtonVariant.CONTAINED}
+                  size={ButtonSize.SMALL}
+                  onClick={() => handleSpeedUp(transaction)}
+                >
+                  {transaction.replacement === "repriced" && (
+                    <span className="absolute -top-2 right-4 text-green">
+                      <Svg size={20} iconName="speed-up" />
+                    </span>
+                  )}
+                  <span className="text-14 font-medium pb-[5px] pt-[5px] flex items-center flex-row text-nowrap">
+                    {t("speed_up")}
+                  </span>
+                </Button>
+              )}
+
               {/* Standard A */}
               <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
                 <div

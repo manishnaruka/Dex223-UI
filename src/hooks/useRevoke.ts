@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Abi, Address, formatUnits, getAbiItem } from "viem";
 import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
@@ -103,6 +103,7 @@ export default function useRevoke({
   const chainId = useCurrentChainId();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
+  const [hash, setHash] = useState<string | undefined>(undefined);
 
   const { addRecentTransaction } = useRecentTransactionsStore();
 
@@ -166,6 +167,8 @@ export default function useRevoke({
         publicClient,
       });
 
+      setHash(hash);
+
       const nonce = transaction.nonce;
 
       addRecentTransaction(
@@ -195,7 +198,6 @@ export default function useRevoke({
         setStatus(AllowanceStatus.LOADING);
         await publicClient.waitForTransactionReceipt({ hash });
         setStatus(AllowanceStatus.SUCCESS);
-        console.log("revoke status SUCCESS");
         setRefreshDepositsTrigger(true);
       }
     } catch (e) {
@@ -225,6 +227,7 @@ export default function useRevoke({
   // }
 
   return {
+    revokeHash: hash,
     revokeStatus: status,
     revokeHandler: writeTokenRevoke,
     currentAllowance: currentAllowanceData,

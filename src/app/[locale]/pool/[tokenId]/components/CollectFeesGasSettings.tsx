@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
 import {
@@ -28,8 +28,18 @@ export const CollectFeesGasSettings = () => {
 
   const [isOpenedFee, setIsOpenedFee] = useState(false);
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useCollectFeesGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useCollectFeesGasPriceStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
+
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useCollectFeesGasLimitStore();
 
