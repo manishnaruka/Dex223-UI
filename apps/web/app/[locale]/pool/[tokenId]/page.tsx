@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { formatUnits } from "viem";
 
@@ -58,9 +58,9 @@ import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesSto
 export default function PoolPage({
   params,
 }: {
-  params: {
+  params: Promise<{
     tokenId: string;
-  };
+  }>;
 }) {
   useRecentTransactionTracking();
   useCollectFeesEstimatedGas();
@@ -78,7 +78,7 @@ export default function PoolPage({
   //TODO: make centralize function instead of boolean useState value to control invert
   const [showFirst, setShowFirst] = useState(true);
 
-  const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(params.tokenId));
+  const { position: positionInfo, loading } = usePositionFromTokenId(BigInt(use(params).tokenId));
   let position = usePositionFromPositionInfo(positionInfo);
 
   const token0 = position?.pool.token0;
@@ -195,12 +195,12 @@ export default function PoolPage({
             <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
             <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
             <ExternalTextLink
-              text={params.tokenId}
+              text={use(params).tokenId}
               className="text-12 lg:text-16"
               arrowSize={isMobile ? 16 : 24}
               href={getExplorerLink(
                 ExplorerLinkType.TOKEN,
-                `${NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]}?a=${params.tokenId}`,
+                `${NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]}?a=${use(params).tokenId}`,
                 chainId,
               )}
             />
@@ -219,7 +219,7 @@ export default function PoolPage({
         <div className="flex flex-col lg:grid lg:grid-cols-2 items-center gap-2 lg:gap-3 mb-4 lg:mb-5">
           <Button
             size={ButtonSize.MEDIUM}
-            onClick={() => router.push(`/increase/${params.tokenId}`)}
+            onClick={() => router.push(`/increase/${use(params).tokenId}`)}
             colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >
@@ -227,7 +227,7 @@ export default function PoolPage({
           </Button>
           <Button
             size={ButtonSize.MEDIUM}
-            onClick={() => router.push(`/remove/${params.tokenId}`)}
+            onClick={() => router.push(`/remove/${use(params).tokenId}`)}
             colorScheme={ButtonColor.LIGHT_GREEN}
             fullWidth
           >

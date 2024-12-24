@@ -21,6 +21,7 @@ import useCurrentChainId from "./useCurrentChainId";
 const depositeGasLimitMap: Record<DexChainId, { base: bigint; additional: bigint }> = {
   [DexChainId.SEPOLIA]: { base: BigInt(100000), additional: BigInt(10000) },
   [DexChainId.BSC_TESTNET]: { base: BigInt(100000), additional: BigInt(10000) },
+  [DexChainId.EOS]: { base: BigInt(100000), additional: BigInt(10000) },
 };
 
 const defaultDepositeValue = BigInt(100000);

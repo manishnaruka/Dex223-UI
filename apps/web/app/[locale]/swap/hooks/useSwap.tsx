@@ -1,12 +1,11 @@
 import JSBI from "jsbi";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import {
   Address,
   encodeAbiParameters,
   encodeFunctionData,
   encodePacked,
-  formatUnits,
   getAbiItem,
   parseUnits,
 } from "viem";

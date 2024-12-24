@@ -2,7 +2,7 @@
 
 import { isZeroAddress } from "@ethereumjs/util";
 import Image from "next/image";
-import React, { HTMLAttributes, ReactNode, useMemo, useState } from "react";
+import React, { HTMLAttributes, ReactNode, use, useMemo, useState } from "react";
 import { Address, formatUnits, isAddress } from "viem";
 import { useReadContract } from "wagmi";
 
@@ -205,16 +205,16 @@ function TokenSymbolButton({ tokenToPay }: { tokenToPay: SingleAddressToken }) {
 export default function AutoListingContractDetails({
   params,
 }: {
-  params: {
+  params: Promise<{
     address: Address;
-  };
+  }>;
 }) {
   const tokenLists = useTokenLists();
 
   const [searchValue, setSearchValue] = useState("");
   const { handleOpen } = useTokenPortfolioDialogStore();
 
-  const listingContract = useAutoListingContract(params.address);
+  const listingContract = useAutoListingContract(use(params).address);
 
   const tokens = useMemo(() => {
     if (!listingContract) {
@@ -269,7 +269,7 @@ export default function AutoListingContractDetails({
             <h1 className="text-24 xl:text-40 font-medium">Listing contract details</h1>
             <Link
               className="hidden xl:block"
-              href={`/token-listing/add/?autoListingContract=${params.address}&dest=${encodeURIComponent(`/token-listing/contracts/${params.address}`)}`}
+              href={`/token-listing/add/?autoListingContract=${use(params).address}&dest=${encodeURIComponent(`/token-listing/contracts/${use(params).address}`)}`}
             >
               <Button>List token(s)</Button>
             </Link>
@@ -289,10 +289,13 @@ export default function AutoListingContractDetails({
               value={
                 <span className="flex items-center">
                   <ExternalTextLink
-                    text={truncateMiddle(params.address, { charsFromEnd: 3, charsFromStart: 3 })}
+                    text={truncateMiddle(use(params).address, {
+                      charsFromEnd: 3,
+                      charsFromStart: 3,
+                    })}
                     href="#"
                   />{" "}
-                  <IconButton variant={IconButtonVariant.COPY} text={params.address} />{" "}
+                  <IconButton variant={IconButtonVariant.COPY} text={use(params).address} />{" "}
                 </span>
               }
               className="grid-in-[second] xl:grid-in-[third] justify-between flex-row items-center xl:flex-col xl:items-start"
@@ -315,7 +318,7 @@ export default function AutoListingContractDetails({
           </div>
           <Link
             className="block w-full xl:hidden mb-6"
-            href={`/token-listing/add/?autoListingContract=${params.address}`}
+            href={`/token-listing/add/?autoListingContract=${use(params).address}`}
           >
             <Button fullWidth>List token(s)</Button>
           </Link>

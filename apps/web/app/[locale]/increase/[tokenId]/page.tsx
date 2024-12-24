@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
@@ -45,9 +45,9 @@ import { useV3DerivedMintInfo } from "../../add/hooks/useV3DerivedMintInfo";
 export default function IncreaseLiquidityPage({
   params,
 }: {
-  params: {
+  params: Promise<{
     tokenId: string;
-  };
+  }>;
 }) {
   useRecentTransactionTracking();
   const t = useTranslations("Liquidity");
@@ -62,7 +62,7 @@ export default function IncreaseLiquidityPage({
 
   const [showFirst, setShowFirst] = useState(true);
 
-  const { position: positionInfo } = usePositionFromTokenId(BigInt(params.tokenId));
+  const { position: positionInfo } = usePositionFromTokenId(BigInt(use(params).tokenId));
   const existedPosition = usePositionFromPositionInfo(positionInfo);
 
   // TODO: tokens already sorted, rename tokenA\B -> token0\1
@@ -122,7 +122,7 @@ export default function IncreaseLiquidityPage({
         <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
           <div className="w-[96px] md:w-[104px]">
             <IconButton
-              onClick={() => router.push(`/pool/${params.tokenId}`)}
+              onClick={() => router.push(`/pool/${use(params).tokenId}`)}
               buttonSize={IconButtonSize.LARGE}
               variant={IconButtonVariant.BACK}
               // iconName="back"
@@ -270,7 +270,7 @@ export default function IncreaseLiquidityPage({
         </div>
       </div>
       <RevokeDialog />
-      <ConfirmLiquidityDialog increase tokenId={params.tokenId} />
+      <ConfirmLiquidityDialog increase tokenId={use(params).tokenId} />
     </Container>
   );
 }

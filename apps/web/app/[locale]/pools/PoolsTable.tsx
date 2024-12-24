@@ -1,3 +1,4 @@
+import { SortingType } from "blog/components/buttons/IconButton";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -22,12 +23,6 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/i18n/routing";
 
 import { usePoolsData } from "./hooks";
-
-export enum SortingType {
-  NONE,
-  ASCENDING,
-  DESCENDING,
-}
 
 const GQLSorting: { [index: number]: "asc" | "desc" | undefined } = {
   [SortingType.NONE]: undefined,

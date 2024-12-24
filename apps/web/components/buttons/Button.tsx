@@ -1,4 +1,3 @@
-import clsx from "clsx/lite";
 import { ButtonHTMLAttributes } from "react";
 
 import Svg from "@/components/atoms/Svg";

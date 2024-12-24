@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React from "react";
+import { use } from "react";
 
 import Container from "@/components/atoms/Container";
 import Preloader from "@/components/atoms/Preloader";
@@ -28,12 +28,12 @@ import { usePoolData } from "../../hooks";
 export default function ExplorePoolPage({
   params,
 }: {
-  params: {
+  params: Promise<{
     chainId: string;
     poolAddress: string;
-  };
+  }>;
 }) {
-  const { chainId, poolAddress } = params;
+  const { chainId, poolAddress } = use(params);
   const router = useRouter();
   const t = useTranslations("Liquidity");
   const tn = useTranslations("Navigation");

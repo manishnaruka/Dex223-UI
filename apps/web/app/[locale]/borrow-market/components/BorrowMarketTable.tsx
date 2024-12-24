@@ -2,11 +2,12 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useCallback, useState } from "react";
 
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
   IconSize,
+  SortingType,
 } from "@/components/buttons/IconButton";
 
 export function HeaderItem({

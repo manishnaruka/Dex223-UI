@@ -2,12 +2,16 @@ import { useTranslations } from "next-intl";
 import { ButtonHTMLAttributes, useCallback, useEffect, useState } from "react";
 import { MouseEvent } from "react";
 
-import { SortingType } from "@/app/[locale]/borrow-market/components/BorrowMarketTable";
 import Svg from "@/components/atoms/Svg";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { copyToClipboard } from "@/functions/copyToClipboard";
 import addToast from "@/other/toast";
+export enum SortingType {
+  NONE,
+  ASCENDING,
+  DESCENDING,
+}
 export enum IconSize {
   SMALL = 20,
   REGULAR = 24,

@@ -4,7 +4,7 @@ import clsx from "clsx";
 import JSBI from "jsbi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, use, useEffect, useMemo, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
 
@@ -81,17 +81,17 @@ const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; am
 export default function DecreaseLiquidityPage({
   params,
 }: {
-  params: {
+  params: Promise<{
     tokenId: string;
-  };
+  }>;
 }) {
   useRecentTransactionTracking();
   useRemoveLiquidityEstimatedGas();
 
   const [isOpen, setIsOpen] = useState(false);
   const tokenId = useMemo(() => {
-    return BigInt(params.tokenId);
-  }, [params.tokenId]);
+    return BigInt(use(params).tokenId);
+  }, [params]);
 
   const router = useRouter();
   const { isConnected } = useAccount();
@@ -216,7 +216,7 @@ export default function DecreaseLiquidityPage({
           <div className="lg:w-[600px] bg-primary-bg mx-auto mt-[40px] mb-4 lg:mb-5 px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
             <div className="grid grid-cols-3 py-1.5 -mx-3">
               <IconButton
-                onClick={() => router.push(`/pool/${params.tokenId}`)}
+                onClick={() => router.push(`/pool/${use(params).tokenId}`)}
                 buttonSize={IconButtonSize.LARGE}
                 variant={IconButtonVariant.BACK}
                 iconSize={IconSize.LARGE}
@@ -585,7 +585,7 @@ export default function DecreaseLiquidityPage({
                 text={
                   <span>
                     {t("removed_liquidity_message")}:{" "}
-                    <Link href={`/pool/${params.tokenId}`}>
+                    <Link href={`/pool/${use(params).tokenId}`}>
                       <span className="text-green duration-200 hocus:text-green-hover underline">
                         {t("claim_tokens")}
                       </span>

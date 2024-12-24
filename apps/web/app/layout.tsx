@@ -29,7 +29,7 @@ export default async function RootLayout({
   children,
   params: { locale },
 }: PropsWithChildren<Props>) {
-  const initialState = cookieToInitialState(config, headers().get("cookie"));
+  const initialState = cookieToInitialState(config, (await headers()).get("cookie"));
 
   return (
     <html suppressHydrationWarning lang={locale}>
