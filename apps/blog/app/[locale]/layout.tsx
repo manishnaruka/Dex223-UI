@@ -28,7 +28,7 @@ export default async function RootLayout({ children, params }: PropsWithChildren
       <Providers messages={messages} locale={locale}>
         <div className="grid h-[100svh] grid-rows-layout">
           <Header />
-          <div>{children}</div>
+          <div className="pb-4 lg:pb-[80px]">{children}</div>
           <Footer />
         </div>
       </Providers>
