@@ -169,7 +169,7 @@ export default function PoolPage({
     setStatus(CollectFeesStatus.INITIAL);
   };
 
-  if (!token0 || !token1) return <div>{t("error_tokens_undefined")}</div>;
+  // if (!token0 || !token1) return <div>{t("error_tokens_undefined")}</div>;
 
   const token0FeeFormatted = formatFloat(formatUnits(fees[0] || BigInt(0), token0?.decimals || 18));
   const token1FeeFormatted = formatFloat(formatUnits(fees[1] || BigInt(0), token1?.decimals || 18));
@@ -634,7 +634,7 @@ export default function PoolPage({
                       <Image
                         width={isMobile ? 24 : 32}
                         height={isMobile ? 24 : 32}
-                        src={token0.logoURI as any}
+                        src={token0?.logoURI as any}
                         alt=""
                       />
                     </div>
@@ -642,7 +642,7 @@ export default function PoolPage({
                       <Image
                         width={isMobile ? 24 : 32}
                         height={isMobile ? 24 : 32}
-                        src={token1.logoURI as any}
+                        src={token1?.logoURI as any}
                         alt=""
                       />
                     </div>
