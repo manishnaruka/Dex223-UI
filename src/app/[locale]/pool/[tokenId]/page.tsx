@@ -1,9 +1,11 @@
 "use client";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import { useMediaQuery } from "react-responsive";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -96,6 +98,8 @@ export default function PoolPage({
     tier: fee,
   });
 
+  const isLoading = loading || poolAddressLoading;
+
   const { isAdvanced, setIsAdvanced } = useCollectFeesGasModeStore();
   const {
     gasPriceOption,
@@ -165,14 +169,7 @@ export default function PoolPage({
     setStatus(CollectFeesStatus.INITIAL);
   };
 
-  if (loading || poolAddressLoading) {
-    return (
-      <div className="flex justify-center items-center h-full min-h-[550px]">
-        <Preloader type="awaiting" size={48} />
-      </div>
-    );
-  }
-  if (!token0 || !token1) return <div>Error: Token A or B undefined</div>;
+  if (!token0 || !token1) return <div>{t("error_tokens_undefined")}</div>;
 
   const token0FeeFormatted = formatFloat(formatUnits(fees[0] || BigInt(0), token0?.decimals || 18));
   const token1FeeFormatted = formatFloat(formatUnits(fees[1] || BigInt(0), token1?.decimals || 18));
@@ -180,224 +177,427 @@ export default function PoolPage({
   return (
     <Container>
       <div className="w-full md:w-[800px] md:mx-auto md:mt-[40px] mb-5 bg-primary-bg px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
-        <div className="flex justify-between items-center py-1.5 -mx-3">
-          <IconButton
-            buttonSize={IconButtonSize.LARGE}
-            variant={IconButtonVariant.BACK}
-            // iconName="back"
-            onClick={() => router.push("/pools/positions")}
-          />
-          <h2 className="text-18 lg:text-20 font-bold">{t("liquidity_position")}</h2>
-          <IconButton
-            buttonSize={IconButtonSize.LARGE}
-            iconName="recent-transactions"
-            onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-            active={showRecentTransactions}
-          />
-        </div>
-
-        <div className="w-full flex flex-col mb-4 lg:mb-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <div>
-              <TokensPair tokenA={token0} tokenB={token1} />
-            </div>
-            <div className="flex flex-wrap items-center gap-2 md:-mt-0.5">
-              {position && (
-                <Badge
-                  percentage={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
-                  variant={BadgeVariant.PERCENTAGE}
-                />
-              )}
-              <RangeBadge
-                status={
-                  removed
-                    ? PositionRangeStatus.CLOSED
-                    : inRange
-                      ? PositionRangeStatus.IN_RANGE
-                      : PositionRangeStatus.OUT_OF_RANGE
-                }
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
-          <div className="flex items-center gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg">
-            <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
-            <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
-            <ExternalTextLink
-              text={params.tokenId}
-              className="text-12 lg:text-16"
-              arrowSize={isMobile ? 16 : 24}
-              href={getExplorerLink(
-                ExplorerLinkType.TOKEN,
-                `${NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]}?a=${params.tokenId}`,
-                chainId,
-              )}
+        <SkeletonTheme
+          baseColor="#272727"
+          highlightColor="#1D1E1E"
+          borderRadius="20px"
+          enableAnimation={false}
+          // duration={5}
+        >
+          <div className="flex justify-between items-center py-1.5 -mx-3">
+            <IconButton
+              buttonSize={IconButtonSize.LARGE}
+              variant={IconButtonVariant.BACK}
+              // iconName="back"
+              onClick={() => router.push("/pools/positions")}
+            />
+            <h2 className="text-18 lg:text-20 font-bold">{t("liquidity_position")}</h2>
+            <IconButton
+              buttonSize={IconButtonSize.LARGE}
+              iconName="recent-transactions"
+              onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+              active={showRecentTransactions}
             />
           </div>
-          <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
-            <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
-            <span className="text-tertiary-text text-12 lg:text-16">{t("min_tick")}:</span>
-            <span className="text-12 text-secondary-text lg:text-16">{position?.tickLower}</span>
-          </div>
-          <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
-            <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
-            <span className="text-tertiary-text text-12 lg:text-16">{t("max_tick")}:</span>
-            <span className="text-12 text-secondary-text lg:text-16">{position?.tickUpper}</span>
-          </div>
-        </div>
-        <div className="flex flex-col lg:grid lg:grid-cols-2 items-center gap-2 lg:gap-3 mb-4 lg:mb-5">
-          <Button
-            size={ButtonSize.MEDIUM}
-            onClick={() => router.push(`/increase/${params.tokenId}`)}
-            colorScheme={ButtonColor.LIGHT_GREEN}
-            fullWidth
-          >
-            {t("increase_liquidity")}
-          </Button>
-          <Button
-            size={ButtonSize.MEDIUM}
-            onClick={() => router.push(`/remove/${params.tokenId}`)}
-            colorScheme={ButtonColor.LIGHT_GREEN}
-            fullWidth
-          >
-            {tr("remove_liquidity_title")}
-          </Button>
-        </div>
 
-        <div className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
-          <div>
-            <h3 className="text-12 lg:text-14 text-secondary-text">{t("liquidity")}</h3>
-            <p className="text-16 lg:text-20 font-bold mb-3">$0.00</p>
-            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
-              <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
-                <PositionLiquidityCard
-                  token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
-                  amount={position?.amount0.toSignificant() || "Loading..."}
-                  percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
-                />
+          {/* Tokens Pair line */}
+          <div className="w-full flex flex-col mb-4 lg:mb-5">
+            {isLoading ? (
+              <div className="flex-nowrap flex flex-row h-[32px] gap-2 items-center">
+                <div className="flex relative flex-row h-[32px] w-[50px]">
+                  <div className=" absolute left-0 ">
+                    <Skeleton circle={true} width={32} height={32} />
+                  </div>
+                  <div className="absolute left-[18px]">
+                    <Skeleton circle={true} width={32} height={32} />
+                  </div>
+                </div>
+                <div className="flex items-center mt-[7px]">
+                  <Skeleton width={138} height={18} />
+                </div>
+                <div className="flex items-center mt-[4px]">
+                  <Skeleton width={46} height={24} />
+                </div>
+                <div className="flex items-center mt-2">
+                  <Skeleton width={91} height={16} />
+                </div>
               </div>
-              <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
-                <PositionLiquidityCard
-                  token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
-                  amount={position?.amount1.toSignificant() || "Loading..."}
-                  percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
-                />
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                <div>
+                  <TokensPair tokenA={token0} tokenB={token1} />
+                </div>
+                <div className="flex flex-wrap items-center gap-2 md:-mt-0.5">
+                  {position && (
+                    <Badge
+                      percentage={`${FEE_AMOUNT_DETAIL[position.pool.fee].label}%`}
+                      variant={BadgeVariant.PERCENTAGE}
+                    />
+                  )}
+                  <RangeBadge
+                    status={
+                      removed
+                        ? PositionRangeStatus.CLOSED
+                        : inRange
+                          ? PositionRangeStatus.IN_RANGE
+                          : PositionRangeStatus.OUT_OF_RANGE
+                    }
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        </div>
-        <div className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
-          <div>
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-12 lg:text-14 text-secondary-text">{t("unclaimed_fees")}</h3>
-                <p className="text-16 lg:text-20 font-bold mb-3 text-green">$0.00</p>
+
+          {/* NFT badges line */}
+          <SkeletonTheme
+            baseColor="#1D1E1E"
+            highlightColor="#272727"
+            borderRadius="20px"
+            enableAnimation={false}
+            // duration={5}
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
+                {[...Array(3)].map((row, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center w-[200px] h-[40px] gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg"
+                  >
+                    <Skeleton width={85} height={16} />
+                    <Skeleton width={85} height={16} />
+                  </div>
+                ))}
               </div>
+            ) : (
+              <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
+                <div className="flex items-center gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg">
+                  <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
+                  <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
+                  <ExternalTextLink
+                    text={params.tokenId}
+                    className="text-12 lg:text-16"
+                    arrowSize={isMobile ? 16 : 24}
+                    href={getExplorerLink(
+                      ExplorerLinkType.TOKEN,
+                      `${NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId]}?a=${params.tokenId}`,
+                      chainId,
+                    )}
+                  />
+                </div>
+                <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
+                  <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
+                  <span className="text-tertiary-text text-12 lg:text-16">{t("min_tick")}:</span>
+                  <span className="text-12 text-secondary-text lg:text-16">
+                    {position?.tickLower}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
+                  <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
+                  <span className="text-tertiary-text text-12 lg:text-16">{t("max_tick")}:</span>
+                  <span className="text-12 text-secondary-text lg:text-16">
+                    {position?.tickUpper}
+                  </span>
+                </div>
+              </div>
+            )}
+          </SkeletonTheme>
+
+          {/* Liquidity buttons line */}
+          {isLoading ? (
+            <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
+              {[...Array(2)].map((row, index) => (
+                <div
+                  key={index}
+                  className="flex items-center w-[354px] h-[40px] gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg"
+                ></div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col lg:grid lg:grid-cols-2 items-center gap-2 lg:gap-3 mb-4 lg:mb-5">
               <Button
-                onClick={() => setIsOpen(true)}
                 size={ButtonSize.MEDIUM}
-                mobileSize={ButtonSize.SMALL}
-                disabled={!fees[0] && !fees[1]}
+                onClick={() => router.push(`/increase/${params.tokenId}`)}
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                fullWidth
               >
-                {t("collect_fees_title")}
+                {t("increase_liquidity")}
+              </Button>
+              <Button
+                size={ButtonSize.MEDIUM}
+                onClick={() => router.push(`/remove/${params.tokenId}`)}
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                fullWidth
+              >
+                {tr("remove_liquidity_title")}
               </Button>
             </div>
+          )}
 
-            <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
-              <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
-                <PositionLiquidityCard
-                  token={token0}
-                  standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
-                  amount={token0FeeFormatted}
+          {/* Liquidity Info block */}
+          {isLoading ? (
+            <>
+              {[...Array(2)].map((row, index) => (
+                <div key={index} className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
+                  <div>
+                    <SkeletonTheme
+                      baseColor="#1D1E1E"
+                      highlightColor="#272727"
+                      borderRadius="20px"
+                      enableAnimation={false}
+                      // duration={5}
+                    >
+                      <Skeleton width={66} height={14} />
+                      <Skeleton width={80} height={20} />
+                    </SkeletonTheme>
+                    <div className="lg:p-5 grid gap-2 rounded-3 bg-primary-bg mt-4">
+                      {[...Array(2)].map((row, indexi) => (
+                        <div key={indexi} className="flex flex-row gap-2 items-center">
+                          <Skeleton circle width={24} height={24} />
+                          <div className="flex flex-row gap-2 mt-[2px] w-full">
+                            <Skeleton width={44} height={20} />
+                            <Skeleton width={60} height={20} />
+                            <Skeleton width={66} height={20} />
+                            <div className="flex ml-auto">
+                              <Skeleton width={90} height={20} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
+              <div>
+                <h3 className="text-12 lg:text-14 text-secondary-text">{t("liquidity")}</h3>
+                <p className="text-16 lg:text-20 font-bold mb-3">$0.00</p>
+                <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
+                  <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
+                    <PositionLiquidityCard
+                      token={token0}
+                      standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      amount={position?.amount0.toSignificant() || "Loading..."}
+                      percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
+                    />
+                  </div>
+                  <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
+                    <PositionLiquidityCard
+                      token={token1}
+                      standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      amount={position?.amount1.toSignificant() || "Loading..."}
+                      percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Unclaimed Fees block */}
+          {!isLoading && (
+            <div className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
+              <div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-12 lg:text-14 text-secondary-text">
+                      {t("unclaimed_fees")}
+                    </h3>
+                    <p className="text-16 lg:text-20 font-bold mb-3 text-green">$0.00</p>
+                  </div>
+                  <Button
+                    onClick={() => setIsOpen(true)}
+                    size={ButtonSize.MEDIUM}
+                    mobileSize={ButtonSize.SMALL}
+                    disabled={!fees[0] && !fees[1]}
+                  >
+                    {t("collect_fees_title")}
+                  </Button>
+                </div>
+
+                <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
+                  <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
+                    <PositionLiquidityCard
+                      token={token0}
+                      standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      amount={token0FeeFormatted}
+                    />
+                  </div>
+                  <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
+                    <PositionLiquidityCard
+                      token={token1}
+                      standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      amount={token1FeeFormatted}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Selected range block */}
+          <div>
+            {isLoading ? (
+              <div className="flex justify-between items-center mb-3 w-full">
+                <div className="flex items-center gap-2 mt-2">
+                  <Skeleton width={110} height={16} />
+                  <Skeleton width={91} height={16} />
+                </div>
+                <div className="flex ml-auto">
+                  <SkeletonTheme
+                    baseColor="#272727"
+                    highlightColor="#1D1E1E"
+                    borderRadius="8px"
+                    enableAnimation={false}
+                    // duration={5}
+                  >
+                    <Skeleton width={126} height={32} />
+                  </SkeletonTheme>
+                </div>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-14 lg:text-16 font-bold text-secondary-text">
+                    Selected Range
+                  </span>
+                  <RangeBadge
+                    status={
+                      removed
+                        ? PositionRangeStatus.CLOSED
+                        : inRange
+                          ? PositionRangeStatus.IN_RANGE
+                          : PositionRangeStatus.OUT_OF_RANGE
+                    }
+                  />
+                </div>
+                <div className="flex gap-0.5 bg-secondary-bg rounded-2 p-0.5">
+                  <button
+                    onClick={() => setShowFirst(true)}
+                    className={clsx(
+                      "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
+                      showFirst
+                        ? "bg-green-bg border-green text-primary-text"
+                        : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    )}
+                  >
+                    {truncateMiddle(token0?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
+                  </button>
+                  <button
+                    onClick={() => setShowFirst(false)}
+                    className={clsx(
+                      "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
+                      !showFirst
+                        ? "bg-green-bg border-green text-primary-text"
+                        : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                    )}
+                  >
+                    {truncateMiddle(token1?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {isLoading ? (
+              <div className="flex flex-row gap-2.5 rounded-2 w-full mb-6">
+                <SkeletonTheme
+                  baseColor="#1D1E1E"
+                  highlightColor="#272727"
+                  borderRadius="20px"
+                  enableAnimation={false}
+                  // duration={5}
+                >
+                  <div className="flex flex-col rounded-3  w-[350px] h-[156px] items-center justify-center bg-tertiary-bg ">
+                    <Skeleton width={62} height={14} />
+
+                    <div className="-mt-0.5 mb-0.5">
+                      <Skeleton width={140} height={18} />
+                    </div>
+                    <Skeleton width={81} height={14} />
+                    <div className="flex-col flex mt-4 items-center">
+                      <Skeleton width={310} height={14} />
+                      <Skeleton width={180} height={14} />
+                    </div>
+                  </div>
+                  <div className="relative bg-primary-bg ">
+                    <div className="flex-shrink-0 bg-primary-bg w-[50px] h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                      {/*<Skeleton circle width={48} height={48} />*/}
+                    </div>
+                  </div>
+                  <div className="flex flex-col rounded-3  w-[350px] h-[156px] items-center justify-center bg-tertiary-bg ">
+                    <Skeleton width={62} height={14} />
+
+                    <div className="-mt-0.5 mb-0.5">
+                      <Skeleton width={140} height={18} />
+                    </div>
+                    <Skeleton width={81} height={14} />
+                    <div className="flex-col flex mt-4 items-center">
+                      <Skeleton width={310} height={14} />
+                      <Skeleton width={180} height={14} />
+                    </div>
+                  </div>
+                </SkeletonTheme>
+              </div>
+            ) : (
+              <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_20px_1fr] mb-2 lg:mb-5">
+                <PositionPriceRangeCard
+                  showFirst={showFirst}
+                  token0={token0}
+                  token1={token1}
+                  price={minPriceString}
+                />
+                <div className="relative">
+                  <div className="bg-primary-bg w-12 h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <Svg iconName="double-arrow" />
+                  </div>
+                </div>
+                <PositionPriceRangeCard
+                  showFirst={showFirst}
+                  token0={token0}
+                  token1={token1}
+                  price={maxPriceString}
+                  isMax
                 />
               </div>
-              <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
-                <PositionLiquidityCard
-                  token={token1}
-                  standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
-                  amount={token1FeeFormatted}
-                />
+            )}
+
+            {isLoading ? (
+              <div className="rounded-3 overflow-hidden">
+                <SkeletonTheme
+                  baseColor="#1D1E1E"
+                  highlightColor="#272727"
+                  borderRadius="20px"
+                  enableAnimation={false}
+                  // duration={5}
+                >
+                  <div className="bg-tertiary-bg flex items-center justify-center flex-col py-2 lg:py-3">
+                    <Skeleton width={62} height={14} />
+                    <div className="-mt-0.5 mb-0.5">
+                      <Skeleton width={140} height={18} />
+                    </div>
+                    <Skeleton width={81} height={14} />
+                  </div>
+                </SkeletonTheme>
               </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-14 lg:text-16 font-bold text-secondary-text">
-                Selected Range
-              </span>
-              <RangeBadge
-                status={
-                  removed
-                    ? PositionRangeStatus.CLOSED
-                    : inRange
-                      ? PositionRangeStatus.IN_RANGE
-                      : PositionRangeStatus.OUT_OF_RANGE
-                }
-              />
-            </div>
-            <div className="flex gap-0.5 bg-secondary-bg rounded-2 p-0.5">
-              <button
-                onClick={() => setShowFirst(true)}
-                className={clsx(
-                  "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
-                  showFirst
-                    ? "bg-green-bg border-green text-primary-text"
-                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
-                )}
-              >
-                {truncateMiddle(token0?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
-              </button>
-              <button
-                onClick={() => setShowFirst(false)}
-                className={clsx(
-                  "text-12 h-7 rounded-1 min-w-[60px] px-3 border duration-200",
-                  !showFirst
-                    ? "bg-green-bg border-green text-primary-text"
-                    : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
-                )}
-              >
-                {truncateMiddle(token1?.symbol || "", { charsFromStart: 4, charsFromEnd: 4 })}
-              </button>
-            </div>
-          </div>
-          <div className="grid grid-cols-[1fr_8px_1fr] lg:grid-cols-[1fr_20px_1fr] mb-2 lg:mb-5">
-            <PositionPriceRangeCard
-              showFirst={showFirst}
-              token0={token0}
-              token1={token1}
-              price={minPriceString}
-            />
-            <div className="relative">
-              <div className="bg-primary-bg w-12 h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                <Svg iconName="double-arrow" />
+            ) : (
+              <div className="rounded-3 overflow-hidden">
+                <div className="bg-tertiary-bg flex items-center justify-center flex-col py-2 lg:py-3">
+                  <div className="text-12 lg:text-14 text-secondary-text">{t("current_price")}</div>
+                  <div className="text-16 lg:text-18">{currentPriceString}</div>
+                  <div className="text-12 lg:text-14 text-tertiary-text">
+                    {showFirst
+                      ? `${token0?.symbol} per ${token1?.symbol}`
+                      : `${token1?.symbol} per ${token0?.symbol}`}
+                  </div>
+                </div>
               </div>
-            </div>
-            <PositionPriceRangeCard
-              showFirst={showFirst}
-              token0={token0}
-              token1={token1}
-              price={maxPriceString}
-              isMax
-            />
+            )}
           </div>
-          <div className="rounded-3 overflow-hidden">
-            <div className="bg-tertiary-bg flex items-center justify-center flex-col py-2 lg:py-3">
-              <div className="text-12 lg:text-14 text-secondary-text">{t("current_price")}</div>
-              <div className="text-16 lg:text-18">{currentPriceString}</div>
-              <div className="text-12 lg:text-14 text-tertiary-text">
-                {showFirst
-                  ? `${token0?.symbol} per ${token1?.symbol}`
-                  : `${token1?.symbol} per ${token0?.symbol}`}
-              </div>
-            </div>
-          </div>
-        </div>
+        </SkeletonTheme>
       </div>
+
+      {/* Tokens Info & Recent transactions block */}
       <div className="lg:w-[800px] mx-auto lg:mb-[40px] gap-5 flex flex-col">
         <SelectedTokensInfo tokenA={token0} tokenB={token1} />
         <RecentTransactions
@@ -411,6 +611,8 @@ export default function PoolPage({
           store={usePoolRecentTransactionsStore}
         />
       </div>
+
+      {/* Collect / claim Fee dialog */}
       <div>
         <DrawerDialog
           isOpen={isOpen}

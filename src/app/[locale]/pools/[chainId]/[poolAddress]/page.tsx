@@ -19,6 +19,7 @@ import IconButton, {
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
+import { clsxMerge } from "@/functions/clsxMerge";
 import { formatNumberKilos } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { renderShortAddress } from "@/functions/renderAddress";
@@ -26,7 +27,6 @@ import { useTokens } from "@/hooks/useTokenLists";
 import { Link, useRouter } from "@/i18n/routing";
 
 import { usePoolData } from "../../hooks";
-import { clsxMerge } from "@/functions/clsxMerge";
 
 export default function ExplorePoolPage({
   params,
@@ -47,15 +47,6 @@ export default function ExplorePoolPage({
     chainId,
     poolAddress,
   } as any);
-
-  // if (!data?.pool || loading)
-  //   return (
-  //     <Container>
-  //       <div className="flex justify-center items-center w-full h-[70dvh]">
-  //         <Preloader type="awaiting" size={48} />
-  //       </div>
-  //     </Container>
-  //   );
 
   const { pool } = data || { pool: undefined };
   const tokenA = tokens.find((t) => t.wrapped.address0.toLowerCase() === pool?.token0?.id);
@@ -111,7 +102,7 @@ export default function ExplorePoolPage({
                   <Badge
                     className="mt-1 md:mt-0"
                     variant={BadgeVariant.PERCENTAGE}
-                    percentage={`${(FEE_AMOUNT_DETAIL as any)[pool?.feeTier as any].label}%`}
+                    percentage={`${(FEE_AMOUNT_DETAIL as any)[pool?.feeTier as any]?.label}%`}
                   />
                 </div>
               )}
@@ -268,39 +259,22 @@ export default function ExplorePoolPage({
           {/* Last line:  TVL | 24H Volume | 24H Fees */}
           {loading ? (
             <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-3 mt-4 md:h-[94px]">
-              <div className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] px-5 pb-[10px] pt-3.5 w-full">
-                <div className="mt-1">
-                  <Skeleton width={60} height={16} />
-                </div>
-                <div className="flex flex-row gap-2 items-center">
-                  <Skeleton width={120} height={24} />
+              {[...Array(3)].map((row, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] px-5 pb-[10px] pt-3.5 w-full"
+                >
                   <div className="mt-1">
-                    <Skeleton width={40} height={16} />
+                    <Skeleton width={60} height={16} />
+                  </div>
+                  <div className="flex flex-row gap-2 items-center">
+                    <Skeleton width={120} height={24} />
+                    <div className="mt-1">
+                      <Skeleton width={40} height={16} />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] px-5 pb-[10px] pt-3.5 w-full">
-                <div className="mt-1">
-                  <Skeleton width={60} height={16} />
-                </div>
-                <div className="flex flex-row gap-2 items-center">
-                  <Skeleton width={120} height={24} />
-                  <div className="mt-1">
-                    <Skeleton width={40} height={16} />
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] px-5 pb-[10px] pt-3.5 w-full">
-                <div className="mt-1">
-                  <Skeleton width={60} height={16} />
-                </div>
-                <div className="flex flex-row gap-2 items-center">
-                  <Skeleton width={120} height={24} />
-                  <div className="mt-1">
-                    <Skeleton width={40} height={16} />
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           ) : (
             <div className="flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-3 mt-4 md:h-[94px]">
