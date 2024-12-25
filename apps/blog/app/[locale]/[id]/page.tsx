@@ -5,7 +5,7 @@ import { PropsWithChildren } from "react";
 import { PostDetails } from "@/app/[locale]/types/Post";
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
-import { Link, locales } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 
 // export const dynamic = "force-static";
 // export async function generateStaticParams() {
