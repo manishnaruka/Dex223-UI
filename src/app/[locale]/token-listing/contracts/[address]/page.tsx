@@ -30,6 +30,7 @@ import { Link } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Token } from "@/sdk_hybrid/entities/token";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 interface TokenListInfoCardProps extends HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -210,6 +211,7 @@ export default function AutoListingContractDetails({
   };
 }) {
   const tokenLists = useTokenLists();
+  const chainId = useCurrentChainId();
 
   const [searchValue, setSearchValue] = useState("");
   const { handleOpen } = useTokenPortfolioDialogStore();
@@ -460,7 +462,7 @@ export default function AutoListingContractDetails({
                                 href={getExplorerLink(
                                   ExplorerLinkType.ADDRESS,
                                   token.address0,
-                                  DexChainId.SEPOLIA,
+                                  chainId,
                                 )}
                               />{" "}
                               <IconButton
@@ -484,7 +486,7 @@ export default function AutoListingContractDetails({
                                 href={getExplorerLink(
                                   ExplorerLinkType.ADDRESS,
                                   token.address1,
-                                  DexChainId.SEPOLIA,
+                                  chainId,
                                 )}
                               />{" "}
                               <IconButton
@@ -537,7 +539,7 @@ export default function AutoListingContractDetails({
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
                                 token.address0,
-                                DexChainId.SEPOLIA,
+                                chainId,
                               )}
                             />{" "}
                             <IconButton variant={IconButtonVariant.COPY} text={token.address0} />
@@ -549,7 +551,7 @@ export default function AutoListingContractDetails({
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
                                 token.address1,
-                                DexChainId.SEPOLIA,
+                                chainId,
                               )}
                             />{" "}
                             <IconButton variant={IconButtonVariant.COPY} text={token.address1} />

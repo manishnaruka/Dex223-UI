@@ -544,7 +544,7 @@ export default function ListTokenPage() {
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
                                 autoListing.id,
-                                DexChainId.SEPOLIA,
+                                chainId,
                               )}
                             />
                           </span>

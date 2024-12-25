@@ -17,6 +17,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterAutoListings } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Link } from "@/i18n/routing";
 import { DexChainId } from "@/sdk_hybrid/chains";
 
@@ -24,6 +25,7 @@ export default function TokenListingPage() {
   const [searchValue, setSearchValue] = useState("");
 
   const autoListings = useAutoListingContracts();
+  const chainId = useCurrentChainId();
 
   const filteredAutoListings = useMemo(() => {
     if (!autoListings) {
@@ -139,11 +141,7 @@ export default function TokenListingPage() {
                         textClassname="w-[13ch]"
                         onClick={(e) => e.stopPropagation()}
                         text={truncateMiddle(autoListing.id)}
-                        href={getExplorerLink(
-                          ExplorerLinkType.ADDRESS,
-                          autoListing.id,
-                          DexChainId.SEPOLIA,
-                        )}
+                        href={getExplorerLink(ExplorerLinkType.ADDRESS, autoListing.id, chainId)}
                       />
                     </div>
                     <div className="flex-grow grid grid-cols-2 gap-2">
@@ -250,11 +248,7 @@ export default function TokenListingPage() {
                           onClick={(e) => e.stopPropagation()}
                           color="green"
                           text={truncateMiddle(autoListing.id)}
-                          href={getExplorerLink(
-                            ExplorerLinkType.ADDRESS,
-                            autoListing.id,
-                            DexChainId.SEPOLIA,
-                          )}
+                          href={getExplorerLink(ExplorerLinkType.ADDRESS, autoListing.id, chainId)}
                         />
                       </div>
                       <div className="h-[56px] z-10 relative flex items-center pr-2.5 mr-2.5 rounded-r-3 group-hocus:bg-tertiary-bg duration-200">

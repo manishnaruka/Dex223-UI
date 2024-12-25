@@ -698,6 +698,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
     price,
   });
   const t = useTranslations("Liquidity");
+  const chainId = useCurrentChainId();
 
   return (
     <>
@@ -782,11 +783,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
             {liquidityHash && (
               <a
                 target="_blank"
-                href={getExplorerLink(
-                  ExplorerLinkType.TRANSACTION,
-                  liquidityHash,
-                  DexChainId.SEPOLIA,
-                )}
+                href={getExplorerLink(ExplorerLinkType.TRANSACTION, liquidityHash, chainId)}
               >
                 <IconButton iconName="forward" />
               </a>

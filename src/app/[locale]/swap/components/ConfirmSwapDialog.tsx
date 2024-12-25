@@ -63,6 +63,7 @@ function ApproveRow({
   hash?: Address | undefined;
 }) {
   const t = useTranslations("Swap");
+  const chainId = useCurrentChainId();
 
   return (
     <div
@@ -93,10 +94,7 @@ function ApproveRow({
       </div>
       <div className="flex items-center gap-2 justify-end">
         {hash && (
-          <a
-            target="_blank"
-            href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, DexChainId.SEPOLIA)}
-          >
+          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
             <IconButton iconName="forward" />
           </a>
         )}
@@ -132,6 +130,7 @@ function SwapRow({
   hash?: Address | undefined;
 }) {
   const t = useTranslations("Swap");
+  const chainId = useCurrentChainId();
 
   return (
     <div className="grid grid-cols-[32px_1fr_1fr] gap-2 h-10">
@@ -167,10 +166,7 @@ function SwapRow({
       </div>
       <div className="flex items-center gap-2 justify-end">
         {hash && (
-          <a
-            target="_blank"
-            href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, DexChainId.SEPOLIA)}
-          >
+          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
             <IconButton iconName="forward" />
           </a>
         )}
