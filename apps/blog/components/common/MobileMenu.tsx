@@ -97,32 +97,32 @@ const mobileLinks: {
   title: any;
 }[] = [
   {
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/swap`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/swap`,
     iconName: "swap",
     title: "swap",
   },
   {
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/margin-trading`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/margin-trading`,
     iconName: "margin-trading",
     title: "margin_trading",
   },
   {
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/pools`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/pools`,
     iconName: "pools",
     title: "pools",
   },
   {
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/borrow`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/borrow`,
     iconName: "borrow",
     title: "borrow_lend",
   },
   {
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/portfolio`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/portfolio`,
     iconName: "portfolio",
     title: "portfolio",
   },
   {
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/token-listing`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/token-listing`,
     iconName: "listing",
     title: "token_listing",
   },

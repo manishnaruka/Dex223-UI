@@ -60,7 +60,7 @@ const menuItems: Array<
       <div className="flex flex-col py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
         <MobileLink
           isActive={pathname === "/swap"}
-          href={`${process.env.NEXT_PUBLIC_APP_URL}/swap`}
+          href={`${process.env.NEXT_PUBLIC_DAPP_URL}/swap`}
           iconName="swap"
           title={t("swap")}
           handleClose={handleClose}
@@ -69,7 +69,7 @@ const menuItems: Array<
         <MobileLink
           disabled
           isActive={pathname === "/margin-trading"}
-          href={`${process.env.NEXT_PUBLIC_APP_URL}/margin-trading`}
+          href={`${process.env.NEXT_PUBLIC_DAPP_URL}/margin-trading`}
           iconName="margin-trading"
           title={t("margin_trading")}
           handleClose={handleClose}
@@ -81,22 +81,22 @@ const menuItems: Array<
   },
   {
     label: "pools",
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/pools`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/pools`,
     flag: "/pools",
   },
   {
     label: "borrow_lend",
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/#`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/#`,
     flag: "/#",
   },
   {
     label: "portfolio",
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/portfolio`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/portfolio`,
     flag: "/portfolio",
   },
   {
     label: "token_listing",
-    href: `${process.env.NEXT_PUBLIC_APP_URL}/token-listing`,
+    href: `${process.env.NEXT_PUBLIC_DAPP_URL}/token-listing`,
     flag: "/token-listing",
   },
 ];
