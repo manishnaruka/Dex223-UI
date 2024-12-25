@@ -9,6 +9,7 @@ import Svg from "@/components/atoms/Svg";
 import { MobileLink } from "@/components/common/MobileMenu";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
 import { IconName } from "@/config/types/IconName";
+import { useRouter } from "@/i18n/routing";
 import { usePathname } from "@/i18n/routing";
 
 function NavigationExternalLink({ href, text }: { href: string; text: string }) {
@@ -51,7 +52,7 @@ const menuItems: Array<
       submenu: (handleClose: () => void, t: any, pathname?: string) => ReactNode;
       activeFlags: string[];
     }
-  | { label: any; href: string }
+  | { label: any; href: string; flag: string }
 > = [
   {
     label: "trade",
@@ -59,7 +60,7 @@ const menuItems: Array<
       <div className="flex flex-col py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
         <MobileLink
           isActive={pathname === "/swap"}
-          href="/swap"
+          href={`${process.env.NEXT_PUBLIC_APP_URL}/swap`}
           iconName="swap"
           title={t("swap")}
           handleClose={handleClose}
@@ -68,7 +69,7 @@ const menuItems: Array<
         <MobileLink
           disabled
           isActive={pathname === "/margin-trading"}
-          href="/margin-trading"
+          href={`${process.env.NEXT_PUBLIC_APP_URL}/margin-trading`}
           iconName="margin-trading"
           title={t("margin_trading")}
           handleClose={handleClose}
@@ -80,19 +81,23 @@ const menuItems: Array<
   },
   {
     label: "pools",
-    href: "/pools",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/pools`,
+    flag: "/pools",
   },
   {
     label: "borrow_lend",
-    href: "#",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/#`,
+    flag: "/#",
   },
   {
     label: "portfolio",
-    href: "/portfolio",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/portfolio`,
+    flag: "/portfolio",
   },
   {
     label: "token_listing",
-    href: "/token-listing",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/token-listing`,
+    flag: "/token-listing",
   },
 ];
 
@@ -134,17 +139,13 @@ function NavigationMoreDropdown() {
   const [isSubmenuOpened, setSubmenuOpened] = useState(false);
   const t = useTranslations("Navigation");
 
+  const router = useRouter();
   const pathname = usePathname();
 
   const { setIsOpen } = useFeedbackDialogStore();
 
   const active = useMemo(() => {
-    return (
-      pathname.includes("/blog") ||
-      pathname.includes("/statistics") ||
-      pathname.includes("/token-lists") ||
-      pathname.includes("/guidelines")
-    );
+    return true;
   }, [pathname]);
 
   const isSmallScreen = useMediaQuery({ query: "(max-width: 1280px)" });
@@ -195,9 +196,13 @@ function NavigationMoreDropdown() {
               disabled
             />
             <MobileLink
-              href="/blog"
+              href="#"
               iconName="blog"
               title="Blog"
+              handleClick={(e) => {
+                e.preventDefault();
+                router.push("/");
+              }}
               handleClose={() => setSubmenuOpened(false)}
               className="pr-5"
             />
@@ -310,6 +315,7 @@ export default function Navigation() {
               title={t(menuItem.label)}
               href={menuItem.href}
               active={pathname.includes(menuItem.href)}
+              flag={menuItem.flag}
             />
           </li>
         );

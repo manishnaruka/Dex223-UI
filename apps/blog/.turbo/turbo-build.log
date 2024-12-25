@@ -1,21 +1,38 @@
 [?9001h[?1004h[?25l[2J[m[H]0;C:\WINDOWS\system32\cmd.exe [?25h[K[1myarn run v1.22.22
 [22m[2m$ next build[22m[K
    [38;2;173;127;168m[1m▲ Next.js 15.1.2
-[m
- [37m[1m [m Creating an optimized production build ...
+[?25l[m   - Environments: .env[6;1H[?25h [37m[1m [m Creating an optimized production build ...
+(node:9312) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
  [32m[1m✓[m Compiled successfully
- [37m[1m [m Linting and checking validity of types  [36m.[?25l[m[K[162C [37m[1m [m Linting and checking validity of types  [36m..[m[K[162C [37m[1m [m Linting and checking validity of types  [36m...[m[K[162C [37m[1m [m Linting and checking validity of types  [36m.[m[K[162C [37m[1m [m Linting and checking validity of types  [36m..[m[K[162C [37m[1m [m Linting and checking validity of types  [36m...[m[K[162C [37m[1m [m Linting and checking validity of types  [36m.[m[K[162C [37m[1m [m Linting and checking validity of types  [36m..[m[K[162C [37m[1m [m Linting and checking validity of types  [36m...[m[K[162C [37m[1m [m Linting and checking validity of types  [36m.[m[K[162C [37m[1m [m Linting and checking validity of types  [36m..[m[K[162C [37m[1m [m Linting and checking validity of types  [36m...[m[K[162C [37m[1m [m Linting and checking validity of types  [36m.[mnode:internal/process/per_thread:223
-      throw new ErrnoException(err, 'kill');
-      ^
+ [37m[1m [m Linting and checking validity of types  [36m.[?25l[m[K[221C [37m[1m [m Linting and checking validity of types  [36m..[m[K[221C [37m[1m [m Linting and checking validity of types  [36m...[m[K[221C [37m[1m [m Linting and checking validity of types  [36m.[m[K[221C [37m[1m [m Linting and checking validity of types  [36m..[m[K[221C [37m[1m [m Linting and checking validity of types  [36m...[m[K[221C [37m[1m [m Linting and checking validity of types  [36m.[m[K[221C [37m[1m [m Linting and checking validity of types  [36m..[m[K[221C [37m[1m [m Linting and checking validity of types  [36m...[m[K[221C [37m[1m [m Linting and checking validity of types  [36m.[m[K[221C[36m
+./app/[locale]/page.tsx[33m
+145[m:[33m29  [1mWarning[m: React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.  [90m[1mreact-hooks/exhaustive-deps[?25h[m
 
-Error: kill ENOSYS[144C
-[90m    at process.kill (node:internal/process/per_thread:223:13)[101C[m
-    at process.listener (C:\Users\vrper\AppData\Roaming\npm\node_modules\[4myarn[24m\lib\cli.js:76945:15)[K[64C
-[90m    at process.emit (node:events:524:28) [m{[K[120C
-  errno: [33m-4054[m,[K[147C
-  code: [32m'ENOSYS'[m,[K[145C
-  syscall: [32m'kill'[K[145C[m
-}[161C
-[162C
-Node.js v22.12.0[146C[?9001l[?1004l
-[?25h
+[36m./components/common/Navigation.tsx[m
+[33m149[m:[33m6  [1mWarning[m: React Hook useMemo has an unnecessary dependency: 'pathname'. Either exclude it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[m[K
+
+[36minfo  [m- Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules[K
+ [36m.[K[?25l[219C[m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m [32m[1m✓[m Linting and checking validity of types[K[?25h
+ [37m[1m [m Collecting page data  [36m.[K[?25l[195C[m[K[221C [37m[1m [m Collecting page data  [36m..[m[K[221C [37m[1m [m Collecting page data  [36m...[m[K[221C [37m[1m [m Collecting page data  [36m.[m [32m[1m✓[m Collecting page data[K[?25h
+[?25l [37m[1m [m Generating static pages (0/4)  [36m[    ][m[K[221C [37m[1m [m Generating static pages (0/4)  [36m[=   ][m [37m[1m [m Generating static pages (2/4)  [36m[==  ][K[181C[m[K[221C [32m[1m✓[m Generating static pages (4/4)[?25h
+ [37m[1m [m Finalizing page optimization  [36m. [37m[1m [m Collecting build traces  [36m.[K[?25l[158C[m [32m[1m✓[m Collecting build traces[K[?25h
+ [32m[1m✓[m Finalizing page optimization[K
+
+[4mRoute (app)[24m[30X[4m[30CSize[24m     [4mFirst Load JS[24m
+┌ ○ /_not-found                          981 B[37m[1m[11C106 kB[m[K
+├ ƒ /[locale]                            4.2 kB[37m[1m[10C177 kB[m[K
+├ ƒ /[locale]/[id]                       1.66 kB[37m[1m[9C115 kB[m[K
+└ ○ /sitemap.xml                         0 B[37m[1m[16C0 B[m[K
++ First Load JS shared by all[37m[1m[12C105 kB[m[K
+  ├ chunks/855-541d0b81f9bd6476.js       50.3 kB
+  ├ chunks/87c73c54-e930d6a3723bec3d.js  52.9 kB
+  └ other shared chunks (total)          1.98 kB
+
+
+ƒ Middleware[37m[1m[29C86.2 kB[m[K
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[KDone in 13.14s.[?9001l[?1004l

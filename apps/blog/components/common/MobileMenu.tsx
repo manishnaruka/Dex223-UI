@@ -7,12 +7,13 @@ import Collapse from "@/components/atoms/Collapse";
 import Drawer from "@/components/atoms/Drawer";
 import LocaleSwitcher from "@/components/atoms/LocaleSwitcher";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { Link, usePathname } from "@/i18n/routing";
+
 export function MobileLink({
   href,
   iconName,
@@ -33,7 +34,7 @@ export function MobileLink({
   handleClick?: (e: any) => void;
 }) {
   return (
-    <Link
+    <a
       onClick={(e) => {
         if (handleClick) {
           handleClick(e);
@@ -41,6 +42,7 @@ export function MobileLink({
 
         handleClose();
       }}
+      target="_blank"
       href={href}
       className={clsxMerge(
         "flex items-center gap-2 py-3 px-4 duration-200",
@@ -51,7 +53,7 @@ export function MobileLink({
     >
       <Svg iconName={iconName} />
       {title}
-    </Link>
+    </a>
   );
 }
 
@@ -95,32 +97,32 @@ const mobileLinks: {
   title: any;
 }[] = [
   {
-    href: "/swap",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/swap`,
     iconName: "swap",
     title: "swap",
   },
   {
-    href: "/margin-trading",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/margin-trading`,
     iconName: "margin-trading",
     title: "margin_trading",
   },
   {
-    href: "/pools",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/pools`,
     iconName: "pools",
     title: "pools",
   },
   {
-    href: "/borrow",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/borrow`,
     iconName: "borrow",
     title: "borrow_lend",
   },
   {
-    href: "/portfolio",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/portfolio`,
     iconName: "portfolio",
     title: "portfolio",
   },
   {
-    href: "/token-listing",
+    href: `${process.env.NEXT_PUBLIC_APP_URL}/token-listing`,
     iconName: "listing",
     title: "token_listing",
   },

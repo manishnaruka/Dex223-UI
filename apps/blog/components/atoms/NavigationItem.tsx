@@ -4,29 +4,30 @@ import { ReactNode, useState } from "react";
 
 import Popover from "@/components/atoms/Popover";
 import Svg from "@/components/atoms/Svg";
-import IconButton from "@/components/buttons/IconButton";
 import { Link, usePathname } from "@/i18n/routing";
 
 interface Props {
   href: string;
   title: string;
+  flag: string;
   active?: boolean;
 }
-export default function NavigationItem({ href, title, active }: Props) {
+export default function NavigationItem({ href, title, active, flag }: Props) {
   return (
-    <Link
+    <a
+      target="_blank"
       className={clsx(
         "px-3 py-5 duration-200 inline-flex",
         active
           ? "bg-navigation-active text-green shadow-green/60 text-shadow"
           : "hocus:bg-navigation-hover hocus:text-green hocus:shadow-green/60 hocus:text-shadow text-secondary-text",
-        !["/swap", "/pools", "/token-listing", "/portfolio"].includes(href) &&
+        !["/swap", "/pools", "/token-listing", "/portfolio"].includes(flag) &&
           "opacity-50 pointer-events-none",
       )}
       href={href}
     >
       {title}
-    </Link>
+    </a>
   );
 }
 
