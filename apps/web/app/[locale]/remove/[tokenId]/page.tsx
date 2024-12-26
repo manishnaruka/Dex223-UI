@@ -4,7 +4,7 @@ import clsx from "clsx";
 import JSBI from "jsbi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { ChangeEvent, use, useEffect, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
 
@@ -20,7 +20,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
@@ -31,6 +31,7 @@ import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
+import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -43,7 +44,10 @@ import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracki
 import { Link, useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
+import {
+  RecentTransactionTitleTemplate,
+  useRecentTransactionsStore,
+} from "@/stores/useRecentTransactionsStore";
 
 import PositionLiquidityCard from "../../pool/[tokenId]/components/PositionLiquidityCard";
 import { RemoveLiquidityGasSettings } from "./components/RemoveLiquidityGasSettings";
@@ -79,19 +83,19 @@ const RemoveLiquidityRow = ({ token, amount }: { token: Currency | undefined; am
 };
 
 export default function DecreaseLiquidityPage({
-  params,
-}: {
-  params: Promise<{
+                                                params,
+                                              }: {
+  params: {
     tokenId: string;
-  }>;
+  };
 }) {
   useRecentTransactionTracking();
   useRemoveLiquidityEstimatedGas();
 
   const [isOpen, setIsOpen] = useState(false);
   const tokenId = useMemo(() => {
-    return BigInt(use(params).tokenId);
-  }, [params]);
+    return BigInt(params.tokenId);
+  }, [params.tokenId]);
 
   const router = useRouter();
   const { isConnected } = useAccount();
@@ -114,10 +118,19 @@ export default function DecreaseLiquidityPage({
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useRemoveRecentTransactionsStore();
 
-  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
-    useRemoveLiquidityGasPriceStore();
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useRemoveLiquidityGasPriceStore();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useRemoveLiquidityGasLimitStore();
+
+  useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
 
   const { isAdvanced, setIsAdvanced } = useRemoveLiquidityGasModeStore();
 
@@ -146,6 +159,21 @@ export default function DecreaseLiquidityPage({
 
   const [isFocused, setIsFocused] = useState(false);
   const divRef = useRef(null);
+
+  const { address: accountAddress } = useAccount();
+  const { transactions } = useRecentTransactionsStore();
+  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
+
+  const transaction = useMemo(() => {
+    if (hash && accountAddress) {
+      const txs = transactions[accountAddress];
+      for (let tx of txs) {
+        if (tx.hash === hash) {
+          return tx;
+        }
+      }
+    }
+  }, [accountAddress, hash, transactions]);
 
   useEffect(() => {
     if (refreshDepositsTrigger) {
@@ -216,7 +244,7 @@ export default function DecreaseLiquidityPage({
           <div className="lg:w-[600px] bg-primary-bg mx-auto mt-[40px] mb-4 lg:mb-5 px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
             <div className="grid grid-cols-3 py-1.5 -mx-3">
               <IconButton
-                onClick={() => router.push(`/pool/${use(params).tokenId}`)}
+                onClick={() => router.push(`/pool/${params.tokenId}`)}
                 buttonSize={IconButtonSize.LARGE}
                 variant={IconButtonVariant.BACK}
                 iconSize={IconSize.LARGE}
@@ -383,13 +411,15 @@ export default function DecreaseLiquidityPage({
               ) : position && tokenA && tokenB ? (
                 [RemoveLiquidityStatus.LOADING, RemoveLiquidityStatus.PENDING].includes(status) ? (
                   <>
-                    <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
-                      <Preloader size={20} color="green" type="circular" />
-                      <span className="mr-auto items-center text-14 text-primary-text">
-                        {t("remove_liquidity_progress")}
-                      </span>
+                    <div className="flex w-full mt-4 md:mt-0 md:pl-6 pl-4 md:pr-6 pr-4 md:min-h-12 min-h-[76px] md:flex-row flex-col bg-tertiary-bg gap-2 mb-4 rounded-3 items-center md:justify-between">
+                      <div className="flex gap-2 flex-nowrap mr-auto items-center md:mt-0 mt-3 mb-1 md:mb-0">
+                        <Preloader size={20} color="green" type="circular" />
+                        <span className="mr-auto items-center text-14 text-primary-text">
+                          {t("remove_liquidity_progress")}
+                        </span>
+                      </div>
                       <Button
-                        className="ml-auto mr-3"
+                        className="md:ml-auto md:mr-3 w-full md:w-auto"
                         variant={ButtonVariant.CONTAINED}
                         size={ButtonSize.EXTRA_SMALL}
                         onClick={() => {
@@ -461,15 +491,37 @@ export default function DecreaseLiquidityPage({
                 <span className="text-16 lg:text-18 items-center font-bold text-secondary-text">{`${tokenA.symbol} and ${tokenB.symbol}`}</span>
               </div>
             </div>
-            <div className="flex items-start gap-2 mt-1 justify-end">
-              {hash && (
-                <a
-                  className="flex items-center -mt-2 justify-center"
-                  target="_blank"
-                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
+            <div className="flex items-start gap-2 md:gap-4 mt-1 justify-end">
+              {/* Speed Up button */}
+              {transaction && status === RemoveLiquidityStatus.LOADING && (
+                <Button
+                  className="mt-1 relative"
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  variant={ButtonVariant.CONTAINED}
+                  size={ButtonSize.EXTRA_SMALL}
+                  onClick={() => handleSpeedUp(transaction)}
                 >
-                  <IconButton iconName="forward" />
-                </a>
+                  {transaction.replacement === "repriced" && (
+                    <span className="absolute -top-1.5 right-0.5 text-green">
+                      <Svg size={16} iconName="speed-up" />
+                    </span>
+                  )}
+                  <span className="text-12 font-medium pb-[3px] pt-[1px] flex items-center flex-row text-nowrap">
+                    {t("speed_up")}
+                  </span>
+                </Button>
+              )}
+
+              {hash && (
+                <div className="items-center md:mt-0 max-h-8 flex flex-row gap-2 -mt-1">
+                  <a
+                    className="flex items-center -mt-2 justify-center"
+                    target="_blank"
+                    href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
+                  >
+                    <IconButton iconName="forward" />
+                  </a>
+                </div>
               )}
 
               <div className="flex items-start">
@@ -501,6 +553,28 @@ export default function DecreaseLiquidityPage({
               </div>
             </div>
           </div>
+
+          {/* Speed Up button - on Mobile */}
+          {transaction && status === RemoveLiquidityStatus.LOADING && (
+            <Button
+              className="relative md:hidden rounded-5 mt-1"
+              fullWidth
+              colorScheme={ButtonColor.LIGHT_GREEN}
+              variant={ButtonVariant.CONTAINED}
+              size={ButtonSize.SMALL}
+              onClick={() => handleSpeedUp(transaction)}
+            >
+              {transaction.replacement === "repriced" && (
+                <span className="absolute -top-2 right-4 text-green">
+                  <Svg size={20} iconName="speed-up" />
+                </span>
+              )}
+              <span className="text-14 font-medium pb-[5px] pt-[5px] flex items-center flex-row text-nowrap">
+                {t("speed_up")}
+              </span>
+            </Button>
+          )}
+
           <div className="py-5">
             <div className="grid gap-3">
               <RemoveLiquidityRow
@@ -585,7 +659,7 @@ export default function DecreaseLiquidityPage({
                 text={
                   <span>
                     {t("removed_liquidity_message")}:{" "}
-                    <Link href={`/pool/${use(params).tokenId}`}>
+                    <Link href={`/pool/${params.tokenId}`}>
                       <span className="text-green duration-200 hocus:text-green-hover underline">
                         {t("claim_tokens")}
                       </span>
