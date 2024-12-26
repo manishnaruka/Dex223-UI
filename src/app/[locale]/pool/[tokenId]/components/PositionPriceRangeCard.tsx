@@ -21,7 +21,6 @@ export default function PositionPriceRangeCard({
   className?: string;
 }) {
   const t = useTranslations("Liquidity");
-  // TODO check if correct
   const symbol = useMemo(() => {
     if (isMax) {
       return showFirst ? token0?.symbol : token1?.symbol;

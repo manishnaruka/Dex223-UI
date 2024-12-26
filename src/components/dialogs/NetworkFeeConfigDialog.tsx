@@ -132,7 +132,7 @@ function NetworkFeeDialogContent({
 
   const handleApply = useCallback(
     (args: HandleApplyArgs) => {
-      if (!baseFee || !priorityFee || !gasPrice) {
+      if ((!baseFee || !priorityFee) && !gasPrice) {
         return;
       }
 
@@ -202,7 +202,8 @@ function NetworkFeeDialogContent({
         handleApply({ option: values.gasPriceOption });
       } else {
         // Gas Option CUSTOM
-        if (values.gasPriceModel === GasFeeModel.EIP1559 || !isAdvanced) {
+        if (values.gasPriceModel === GasFeeModel.EIP1559) {
+          //  || !isAdvanced   // TODO why it is here?
           handleApply({
             option: GasOption.CUSTOM,
             gasSettings: {
@@ -256,7 +257,7 @@ function NetworkFeeDialogContent({
 
   const getGasPriceGwei = useCallback(
     (_gasOption: GasOption) => {
-      if (_gasOption === GasOption.CUSTOM && baseFee) {
+      if (_gasOption === GasOption.CUSTOM && (baseFee || gasPrice)) {
         if (values.gasPriceModel === GasFeeModel.LEGACY) {
           return parseGwei(values.gasPrice);
         }
@@ -266,13 +267,19 @@ function NetworkFeeDialogContent({
         }
       }
 
-      if (_gasOption !== GasOption.CUSTOM && baseFee) {
-        return (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR;
+      if (_gasOption !== GasOption.CUSTOM && (baseFee || gasPrice)) {
+        if (baseFee) {
+          return (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR;
+        }
+
+        if (gasPrice) {
+          return (gasPrice * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR;
+        }
       }
 
       return BigInt(0);
     },
-    [baseFee, chainId, values.gasPrice, values.gasPriceModel, values.maxFeePerGas],
+    [baseFee, chainId, gasPrice, values.gasPrice, values.gasPriceModel, values.maxFeePerGas],
   );
 
   return (
