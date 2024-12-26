@@ -9,6 +9,7 @@ import { useMediaQuery } from "react-responsive";
 import { Address, isAddress } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
 
+import { Deposited } from "@/app/[locale]/portfolio/components/Deposited";
 import Checkbox from "@/components/atoms/Checkbox";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -36,7 +37,6 @@ import { usePortfolioSearchParams } from "@/hooks/usePortfolioSearchParams";
 import addToast from "@/other/toast";
 
 import { Balances } from "./components/Balances";
-import { Deposited } from "./components/Deposited";
 import { LendingOrders } from "./components/LendingOrders";
 import { LiquidityPositions } from "./components/LiquidityPositions";
 import { MarginPositions } from "./components/MarginPositions";

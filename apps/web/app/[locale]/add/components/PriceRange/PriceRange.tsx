@@ -215,11 +215,7 @@ export const PriceRange = ({
         value={
           ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER]
             ? "0"
-<<<<<<< HEAD:src/app/[locale]/add/components/PriceRange/PriceRange.tsx
-            : leftPrice?.toSignificant(8) ?? "0"
-=======
             : (leftPrice?.toSignificant(8) ?? "0")
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/web/app/[locale]/add/components/PriceRange/PriceRange.tsx
         }
         onUserInput={setLeftRangeTypedValue}
         title={t("low_price")}
@@ -234,11 +230,7 @@ export const PriceRange = ({
         value={
           ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER]
             ? "∞"
-<<<<<<< HEAD:src/app/[locale]/add/components/PriceRange/PriceRange.tsx
-            : rightPrice?.toSignificant(8) ?? "0"
-=======
             : (rightPrice?.toSignificant(8) ?? "0")
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/web/app/[locale]/add/components/PriceRange/PriceRange.tsx
         }
         onUserInput={setRightRangeTypedValue}
         decrement={isSorted ? getDecrementUpper : getIncrementLower}

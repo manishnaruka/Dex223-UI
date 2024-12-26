@@ -1,11 +1,14 @@
+import "react-loading-skeleton/dist/skeleton.css";
+
 import { SortingType } from "blog/components/buttons/IconButton";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import { Address } from "viem";
 
-import Preloader from "@/components/atoms/Preloader";
+// import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
@@ -71,12 +74,14 @@ const PoolsTableDesktop = ({
   sorting,
   handleSort,
   openPoolHandler,
+  isLoading = false,
 }: {
   tableData: any[];
   currentPage: number;
   sorting: SortingType;
   handleSort: () => any;
   openPoolHandler: (id: Address) => any;
+  isLoading?: boolean;
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
@@ -95,79 +100,119 @@ const PoolsTableDesktop = ({
         7 day volume
       </div>
 
-      {tableData.map((o: any, index: number) => {
-        return (
-          <React.Fragment key={o.id || index}>
-            <div
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              onClick={() => openPoolHandler(o.id)}
-              className={`h-[56px] cursor-pointer flex items-center rounded-l-4 justify-center text-secondary-text ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
-            >
-              {(currentPage - 1) * PAGE_SIZE + index + 1}
-            </div>
-            <div
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              onClick={() => openPoolHandler(o.id)}
-              className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
-            >
-              <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
-              <Image
-                src="/images/tokens/placeholder.svg"
-                width={24}
-                height={24}
-                alt=""
-                className="-ml-3 bg-primary-bg rounded-full"
-              />
-              <span className="ml-3 mr-2">{`${truncateMiddle(o.token0.symbol, {
-                charsFromStart: 4,
-                charsFromEnd: 3,
-              })}/${truncateMiddle(o.token1.symbol, {
-                charsFromStart: 4,
-                charsFromEnd: 3,
-              })}`}</span>
-              <Badge
-                variant={BadgeVariant.PERCENTAGE}
-                percentage={`${(FEE_AMOUNT_DETAIL as any)[o.feeTier as any].label}%`}
-              />
-              {hoveredRow === index && <Svg iconName="next" className="ml-1 text-green" />}
-            </div>
-            <div
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              onClick={() => openPoolHandler(o.id)}
-              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
-            >
-              {formatNumberKilos(o.txCount, { significantDigits: 0 })}
-            </div>
-            <div
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              onClick={() => openPoolHandler(o.id)}
-              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
-            >
-              ${formatNumberKilos(o.totalValueLockedUSD)}
-            </div>
-            <div
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              onClick={() => openPoolHandler(o.id)}
-              className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
-            >
-              ${formatNumberKilos(parseFloat(o.poolDayData?.[0]?.volumeUSD) || 0)}
-            </div>
-            <div
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              onClick={() => openPoolHandler(o.id)}
-              className={`h-[56px] cursor-pointer flex justify-end items-center pr-4 rounded-r-4 text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
-            >
-              {/* TODO still no way to get 7 day value */}${formatFloat(0)}
-            </div>
-          </React.Fragment>
-        );
-      })}
+      {isLoading
+        ? [...Array(10)].map((row, index) => (
+            <React.Fragment key={index}>
+              <SkeletonTheme
+                baseColor="#2E2F2F"
+                highlightColor="#272727"
+                borderRadius="0.5rem"
+                duration={5}
+              >
+                <div className="h-[56px] flex justify-center items-center">
+                  <Skeleton width={40} height={16} />
+                </div>
+                <div className="flex-nowrap flex flex-row h-[56px] gap-2 items-center">
+                  <div className="flex relative flex-row h-[56px] w-[40px]">
+                    <SkeletonTheme baseColor="#272727" highlightColor="#2E2F2F" duration={5}>
+                      <div className=" absolute left-0 top-3">
+                        <Skeleton enableAnimation={true} circle={true} width={24} height={24} />
+                      </div>
+                      <div className="absolute left-[12px] top-3">
+                        <Skeleton enableAnimation={true} circle={true} width={24} height={24} />
+                      </div>
+                    </SkeletonTheme>
+                  </div>
+                  <Skeleton enableAnimation={true} width={236} height={16} />
+                </div>
+                <div className="h-[56px] flex justify-end items-center">
+                  <Skeleton enableAnimation={true} width={44} height={16} />
+                </div>
+                <div className="h-[56px] flex justify-end items-center pr-1">
+                  <Skeleton enableAnimation={true} width={54} height={16} />
+                </div>
+                <div className="h-[56px] flex justify-end items-center">
+                  <Skeleton enableAnimation={true} width={68} height={16} />
+                </div>
+                <div className="h-[56px] flex justify-end items-center pr-4">
+                  <Skeleton enableAnimation={true} width={60} height={16} />
+                </div>
+              </SkeletonTheme>
+            </React.Fragment>
+          ))
+        : tableData.map((o: any, index: number) => {
+            return (
+              <React.Fragment key={o.id || index}>
+                <div
+                  onMouseEnter={() => setHoveredRow(index)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => openPoolHandler(o.id)}
+                  className={`h-[56px] cursor-pointer flex items-center rounded-l-4 justify-center text-secondary-text ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                >
+                  {(currentPage - 1) * PAGE_SIZE + index + 1}
+                </div>
+                <div
+                  onMouseEnter={() => setHoveredRow(index)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => openPoolHandler(o.id)}
+                  className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                >
+                  <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
+                  <Image
+                    src="/images/tokens/placeholder.svg"
+                    width={24}
+                    height={24}
+                    alt=""
+                    className="-ml-3 bg-primary-bg rounded-full"
+                  />
+                  <span className="ml-3 mr-2">{`${truncateMiddle(o.token0.symbol, {
+                    charsFromStart: 4,
+                    charsFromEnd: 3,
+                  })}/${truncateMiddle(o.token1.symbol, {
+                    charsFromStart: 4,
+                    charsFromEnd: 3,
+                  })}`}</span>
+                  <Badge
+                    variant={BadgeVariant.PERCENTAGE}
+                    percentage={`${(FEE_AMOUNT_DETAIL as any)[o.feeTier as any].label}%`}
+                  />
+                  {hoveredRow === index && <Svg iconName="next" className="ml-1 text-green" />}
+                </div>
+                <div
+                  onMouseEnter={() => setHoveredRow(index)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => openPoolHandler(o.id)}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                >
+                  {formatNumberKilos(o.txCount, { significantDigits: 0 })}
+                </div>
+                <div
+                  onMouseEnter={() => setHoveredRow(index)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => openPoolHandler(o.id)}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                >
+                  ${formatNumberKilos(o.totalValueLockedUSD)}
+                </div>
+                <div
+                  onMouseEnter={() => setHoveredRow(index)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => openPoolHandler(o.id)}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                >
+                  ${formatNumberKilos(parseFloat(o.poolDayData?.[0]?.volumeUSD) || 0)}
+                </div>
+                <div
+                  onMouseEnter={() => setHoveredRow(index)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => openPoolHandler(o.id)}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center pr-4 rounded-r-4 text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                >
+                  {/* TODO still no way to get 7 day value */}${formatFloat(0)}
+                </div>
+              </React.Fragment>
+            );
+          })}
     </div>
   );
 };
@@ -356,39 +401,41 @@ export default function PoolsTable({
   return (
     <>
       <div className="min-h-[640px] mb-5 w-full">
-        {loading ? (
-          <div className="flex justify-center items-center h-full min-h-[550px]">
-            <Preloader type="awaiting" size={48} />
-          </div>
-        ) : (
-          <>
-            {pools.length > 0 ? (
-              <>
-                <PoolsTableDesktop
-                  tableData={currentTableData}
-                  sorting={sorting}
-                  currentPage={currentPage}
-                  handleSort={handleSort}
-                  openPoolHandler={openPoolHandler}
-                />
-                <PoolsTableMobile
-                  tableData={currentTableData}
-                  sorting={sorting}
-                  currentPage={currentPage}
-                  handleSort={handleSort}
-                  openPoolHandler={openPoolHandler}
-                />
-              </>
-            ) : (
-              <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 bg-empty-not-found-pools bg-right-top bg-no-repeat max-md:bg-size-180">
-                <p className="text-secondary-text">{t("pools_not_found")}</p>
-              </div>
-            )}
-          </>
-        )}
+        {/*{loading ? (*/}
+        {/*  <div className="flex justify-center items-center h-full min-h-[550px]">*/}
+        {/*    <Preloader type="awaiting" size={48} />*/}
+        {/*  </div>*/}
+        {/*) : (*/}
+        <>
+          {pools.length > 0 ? (
+            <>
+              <PoolsTableDesktop
+                isLoading={loading}
+                tableData={currentTableData}
+                sorting={sorting}
+                currentPage={currentPage}
+                handleSort={handleSort}
+                openPoolHandler={openPoolHandler}
+              />
+              <PoolsTableMobile
+                tableData={currentTableData}
+                sorting={sorting}
+                currentPage={currentPage}
+                handleSort={handleSort}
+                openPoolHandler={openPoolHandler}
+              />
+            </>
+          ) : (
+            <div className="min-h-[340px] bg-primary-bg flex items-center justify-center w-full rounded-5 bg-empty-not-found-pools bg-right-top bg-no-repeat max-md:bg-size-180">
+              <p className="text-secondary-text">{t("pools_not_found")}</p>
+            </div>
+          )}
+        </>
+        {/*)}*/}
       </div>
 
       <Pagination
+        isLoading={loading}
         className="pagination-bar"
         currentPage={currentPage}
         totalCount={pools.length}

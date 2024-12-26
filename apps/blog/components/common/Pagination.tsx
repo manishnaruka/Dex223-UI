@@ -1,4 +1,8 @@
+import "react-loading-skeleton/dist/skeleton.css";
+
 import clsx from "clsx";
+import React from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 import Svg from "@/components/atoms/Svg";
 import { clsxMerge } from "@/functions/clsxMerge";
@@ -11,6 +15,7 @@ interface Props {
   currentPage: number;
   pageSize: number;
   className?: string;
+  isLoading?: boolean;
 }
 export default function Pagination({
   onPageChange,
@@ -19,6 +24,7 @@ export default function Pagination({
   currentPage,
   pageSize,
   className,
+  isLoading = false,
 }: Props) {
   const paginationRange = usePagination({
     currentPage,
@@ -26,6 +32,28 @@ export default function Pagination({
     siblingCount,
     pageSize,
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center flex-row gap-5 justify-center">
+        <SkeletonTheme
+          baseColor="#1D1E1E"
+          highlightColor="#272727"
+          borderRadius="0.5rem"
+          enableAnimation={false}
+          // duration={5}
+        >
+          <Skeleton width={24} height={16} />
+          <Skeleton circle width={48} height={48} />
+          <Skeleton width={24} height={16} />
+          <Skeleton width={24} height={16} />
+          <Skeleton width={24} height={16} />
+          <Skeleton width={24} height={16} />
+          <Skeleton width={24} height={16} />
+        </SkeletonTheme>
+      </div>
+    );
+  }
 
   // If there are less than 2 times in pagination range we shall not render the component
   if (!paginationRange || currentPage === 0 || paginationRange.length < 2) {

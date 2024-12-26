@@ -2,11 +2,7 @@
 
 import { isZeroAddress } from "@ethereumjs/util";
 import Image from "next/image";
-<<<<<<< HEAD:src/app/[locale]/token-listing/contracts/[address]/page.tsx
-import React, { HTMLAttributes, ReactNode, useMemo, useState } from "react";
-=======
 import React, { HTMLAttributes, ReactNode, use, useMemo, useState } from "react";
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/web/app/[locale]/token-listing/contracts/[address]/page.tsx
 import { Address, formatUnits, isAddress } from "viem";
 import { useReadContract } from "wagmi";
 
@@ -29,10 +25,10 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
 import { Token } from "@/sdk_hybrid/entities/token";
 
 interface TokenListInfoCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -214,6 +210,7 @@ export default function AutoListingContractDetails({
   }>;
 }) {
   const tokenLists = useTokenLists();
+  const chainId = useCurrentChainId();
 
   const [searchValue, setSearchValue] = useState("");
   const { handleOpen } = useTokenPortfolioDialogStore();
@@ -467,7 +464,7 @@ export default function AutoListingContractDetails({
                                 href={getExplorerLink(
                                   ExplorerLinkType.ADDRESS,
                                   token.address0,
-                                  DexChainId.SEPOLIA,
+                                  chainId,
                                 )}
                               />{" "}
                               <IconButton
@@ -491,7 +488,7 @@ export default function AutoListingContractDetails({
                                 href={getExplorerLink(
                                   ExplorerLinkType.ADDRESS,
                                   token.address1,
-                                  DexChainId.SEPOLIA,
+                                  chainId,
                                 )}
                               />{" "}
                               <IconButton
@@ -544,7 +541,7 @@ export default function AutoListingContractDetails({
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
                                 token.address0,
-                                DexChainId.SEPOLIA,
+                                chainId,
                               )}
                             />{" "}
                             <IconButton variant={IconButtonVariant.COPY} text={token.address0} />
@@ -556,7 +553,7 @@ export default function AutoListingContractDetails({
                               href={getExplorerLink(
                                 ExplorerLinkType.ADDRESS,
                                 token.address1,
-                                DexChainId.SEPOLIA,
+                                chainId,
                               )}
                             />{" "}
                             <IconButton variant={IconButtonVariant.COPY} text={token.address1} />

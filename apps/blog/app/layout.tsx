@@ -3,16 +3,10 @@ import "../assets/styles/globals.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import clsx from "clsx";
 import { Golos_Text } from "next/font/google";
-<<<<<<< HEAD:src/app/layout.tsx
-import { headers } from "next/headers";
 import Script from "next/script";
-=======
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/blog/app/layout.tsx
 import { PropsWithChildren } from "react";
 
 import Providers from "@/app/providers";
-
-const isProd = process.env.NODE_ENV === "production";
 
 const isProd = process.env.NODE_ENV === "production";
 

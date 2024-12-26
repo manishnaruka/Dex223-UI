@@ -2,11 +2,7 @@
 
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-<<<<<<< HEAD:src/app/[locale]/increase/[tokenId]/page.tsx
-import React, { useEffect, useMemo, useState } from "react";
-=======
 import React, { use, useEffect, useMemo, useState } from "react";
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/web/app/[locale]/increase/[tokenId]/page.tsx
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
@@ -66,11 +62,7 @@ export default function IncreaseLiquidityPage({
 
   const [showFirst, setShowFirst] = useState(true);
 
-<<<<<<< HEAD:src/app/[locale]/increase/[tokenId]/page.tsx
-  const { position: positionInfo } = usePositionFromTokenId(BigInt(params.tokenId));
-=======
   const { position: positionInfo } = usePositionFromTokenId(BigInt(use(params).tokenId));
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/web/app/[locale]/increase/[tokenId]/page.tsx
   const existedPosition = usePositionFromPositionInfo(positionInfo);
 
   // TODO: tokens already sorted, rename tokenA\B -> token0\1
@@ -278,11 +270,8 @@ export default function IncreaseLiquidityPage({
         </div>
       </div>
       <RevokeDialog />
-<<<<<<< HEAD:src/app/[locale]/increase/[tokenId]/page.tsx
-      <ConfirmLiquidityDialog increase tokenId={params.tokenId} />
-=======
+
       <ConfirmLiquidityDialog increase tokenId={use(params).tokenId} />
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/web/app/[locale]/increase/[tokenId]/page.tsx
     </Container>
   );
 }

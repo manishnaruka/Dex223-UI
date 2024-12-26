@@ -4,10 +4,6 @@ import { ReactNode, useState } from "react";
 
 import Popover from "@/components/atoms/Popover";
 import Svg from "@/components/atoms/Svg";
-<<<<<<< HEAD:src/components/atoms/NavigationItem.tsx
-import IconButton from "@/components/buttons/IconButton";
-=======
->>>>>>> 7fd4a53ec6c645e446246dc346612120c7273989:apps/blog/components/atoms/NavigationItem.tsx
 import { Link, usePathname } from "@/i18n/routing";
 
 interface Props {
