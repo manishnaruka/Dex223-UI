@@ -204,22 +204,30 @@ export default function PoolPage({
           {/* Tokens Pair line */}
           <div className="w-full flex flex-col mb-4 lg:mb-5">
             {isLoading ? (
-              <div className="flex-nowrap flex flex-row h-[32px] gap-2 items-center">
-                <div className="flex relative flex-row h-[32px] w-[50px]">
+              <div className="flex-nowrap flex flex-row md:h-[32px] h-6 gap-2 items-center">
+                <div className="flex relative flex-row md:h-[32px] h-6 md:w-[50px] w-[37px]">
                   <div className=" absolute left-0 ">
-                    <Skeleton circle={true} width={32} height={32} />
+                    <Skeleton
+                      circle={true}
+                      width={isMobile ? 24 : 32}
+                      height={isMobile ? 24 : 32}
+                    />
                   </div>
-                  <div className="absolute left-[18px]">
-                    <Skeleton circle={true} width={32} height={32} />
+                  <div className="absolute md:left-[18px] left-[13px]">
+                    <Skeleton
+                      circle={true}
+                      width={isMobile ? 24 : 32}
+                      height={isMobile ? 24 : 32}
+                    />
                   </div>
                 </div>
                 <div className="flex items-center mt-[7px]">
-                  <Skeleton width={138} height={18} />
+                  <Skeleton width={138} height={isMobile ? 16 : 18} />
                 </div>
-                <div className="flex items-center mt-[4px]">
-                  <Skeleton width={46} height={24} />
+                <div className="flex items-center md:mt-1 mt-[3px]">
+                  <Skeleton width={isMobile ? 35 : 46} height={isMobile ? 20 : 24} />
                 </div>
-                <div className="flex items-center mt-2">
+                <div className="md:flex items-center mt-2 md:box hidden">
                   <Skeleton width={91} height={16} />
                 </div>
               </div>
@@ -262,10 +270,10 @@ export default function PoolPage({
                 {[...Array(3)].map((row, index) => (
                   <div
                     key={index}
-                    className="flex items-center w-[200px] h-[40px] gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg"
+                    className="flex items-center md:w-[200px] w-[160px] md:h-[40px] h-[32px] gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg"
                   >
-                    <Skeleton width={85} height={16} />
-                    <Skeleton width={85} height={16} />
+                    <Skeleton width={isMobile ? 66 : 85} height={isMobile ? 12 : 16} />
+                    <Skeleton width={isMobile ? 66 : 85} height={isMobile ? 12 : 16} />
                   </div>
                 ))}
               </div>
@@ -309,7 +317,7 @@ export default function PoolPage({
               {[...Array(2)].map((row, index) => (
                 <div
                   key={index}
-                  className="flex items-center w-[354px] h-[40px] gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg"
+                  className="flex items-center md:w-[354px] w-full h-[40px] gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg"
                 ></div>
               ))}
             </div>
@@ -340,31 +348,55 @@ export default function PoolPage({
               {[...Array(2)].map((row, index) => (
                 <div key={index} className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
                   <div>
-                    <SkeletonTheme
-                      baseColor="#1D1E1E"
-                      highlightColor="#272727"
-                      borderRadius="20px"
-                      enableAnimation={false}
-                      // duration={5}
-                    >
-                      <Skeleton width={66} height={14} />
-                      <Skeleton width={80} height={20} />
-                    </SkeletonTheme>
-                    <div className="lg:p-5 grid gap-2 rounded-3 bg-primary-bg mt-4">
-                      {[...Array(2)].map((row, indexi) => (
-                        <div key={indexi} className="flex flex-row gap-2 items-center">
-                          <Skeleton circle width={24} height={24} />
-                          <div className="flex flex-row gap-2 mt-[2px] w-full">
-                            <Skeleton width={44} height={20} />
-                            <Skeleton width={60} height={20} />
-                            <Skeleton width={66} height={20} />
-                            <div className="flex ml-auto">
-                              <Skeleton width={90} height={20} />
+                    <div className="mb-3 md:mb-0">
+                      <SkeletonTheme
+                        baseColor="#1D1E1E"
+                        highlightColor="#272727"
+                        borderRadius="20px"
+                        enableAnimation={false}
+                        // duration={5}
+                      >
+                        <Skeleton width={66} height={isMobile ? 12 : 14} />
+                        <Skeleton width={80} height={isMobile ? 16 : 20} />
+                      </SkeletonTheme>
+                    </div>
+                    {isMobile ? (
+                      <>
+                        {[...Array(2)].map((row, indexi) => (
+                          <div
+                            key={indexi}
+                            className="flex gap-1 rounded-3 bg-primary-bg pt-3 pb-3 mt-2 flex-col items-center justify-center"
+                          >
+                            <div className="flex gap-2 items-center justify-center w-auto">
+                              <Skeleton circle width={16} height={16} />
+                              <div className="flex flex-row gap-2 mt-[2px] w-full">
+                                <Skeleton width={44} height={14} />
+                                <Skeleton width={60} height={14} />
+                              </div>
+                            </div>
+                            <div className="flex justify-center w-auto items-center">
+                              <Skeleton width={90} height={16} />
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="lg:p-5 grid gap-2 rounded-3 bg-primary-bg mt-4">
+                        {[...Array(2)].map((row, indexi) => (
+                          <div key={indexi} className="flex flex-row gap-2 items-center">
+                            <Skeleton circle width={24} height={24} />
+                            <div className="flex flex-row gap-2 mt-[2px] w-full">
+                              <Skeleton width={44} height={20} />
+                              <Skeleton width={60} height={20} />
+                              <Skeleton width={66} height={20} />
+                              <div className="flex ml-auto">
+                                <Skeleton width={90} height={20} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -441,9 +473,11 @@ export default function PoolPage({
           <div>
             {isLoading ? (
               <div className="flex justify-between items-center mb-3 w-full">
-                <div className="flex items-center gap-2 mt-2">
-                  <Skeleton width={110} height={16} />
-                  <Skeleton width={91} height={16} />
+                <div className="flex items-center gap-2 md:mt-2 mt-1">
+                  <div className="mt-0.5 md:mt-0">
+                    <Skeleton width={isMobile ? 108 : 110} height={isMobile ? 14 : 16} />
+                  </div>
+                  <Skeleton width={isMobile ? 68 : 91} height={isMobile ? 12 : 16} />
                 </div>
                 <div className="flex ml-auto">
                   <SkeletonTheme
@@ -501,7 +535,7 @@ export default function PoolPage({
             )}
 
             {isLoading ? (
-              <div className="flex flex-row gap-2.5 rounded-2 w-full mb-6">
+              <div className="flex flex-row md:gap-2.5 gap-1.5 rounded-2 w-full mb-3 md:mb-6">
                 <SkeletonTheme
                   baseColor="#1D1E1E"
                   highlightColor="#272727"
@@ -509,33 +543,51 @@ export default function PoolPage({
                   enableAnimation={false}
                   // duration={5}
                 >
-                  <div className="flex flex-col rounded-3  w-[350px] h-[156px] items-center justify-center bg-tertiary-bg ">
-                    <Skeleton width={62} height={14} />
-
-                    <div className="-mt-0.5 mb-0.5">
-                      <Skeleton width={140} height={18} />
+                  <div className="flex flex-col rounded-3 py-3 md:py-0  md:w-[350px] w-full h-[136px] md:h-[156px] items-center justify-center bg-tertiary-bg ">
+                    <Skeleton width={62} height={isMobile ? 12 : 14} />
+                    <div className="-mt-0.5 md:mb-0.5">
+                      <Skeleton width={140} height={isMobile ? 16 : 18} />
                     </div>
-                    <Skeleton width={81} height={14} />
-                    <div className="flex-col flex mt-4 items-center">
-                      <Skeleton width={310} height={14} />
-                      <Skeleton width={180} height={14} />
+                    <div className="md:-mt-0 -mt-0.5">
+                      <Skeleton width={81} height={isMobile ? 12 : 14} />
+                    </div>
+                    <div className="flex-col flex md:mt-4 mt-0 items-center">
+                      <div className="md:hidden mt-1">
+                        <Skeleton width={81} height={12} />
+                      </div>
+                      <div className="md:mt-0 -mt-1.5">
+                        <Skeleton width={isMobile ? 144 : 310} height={isMobile ? 12 : 14} />
+                      </div>
+                      <div className="md:-mt-0 -mt-1.5">
+                        <Skeleton width={isMobile ? 81 : 180} height={isMobile ? 12 : 14} />
+                      </div>
                     </div>
                   </div>
+
                   <div className="relative bg-primary-bg ">
-                    <div className="flex-shrink-0 bg-primary-bg w-[50px] h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <div className="flex-shrink-0 bg-primary-bg w-10 md:w-[50px] h-10 md:h-12 rounded-full text-tertiary-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                       {/*<Skeleton circle width={48} height={48} />*/}
                     </div>
                   </div>
-                  <div className="flex flex-col rounded-3  w-[350px] h-[156px] items-center justify-center bg-tertiary-bg ">
-                    <Skeleton width={62} height={14} />
 
-                    <div className="-mt-0.5 mb-0.5">
-                      <Skeleton width={140} height={18} />
+                  <div className="flex flex-col rounded-3 py-3 md:py-0  md:w-[350px] w-full h-[136px] md:h-[156px] items-center justify-center bg-tertiary-bg ">
+                    <Skeleton width={62} height={isMobile ? 12 : 14} />
+                    <div className="-mt-0.5 md:mb-0.5">
+                      <Skeleton width={140} height={isMobile ? 16 : 18} />
                     </div>
-                    <Skeleton width={81} height={14} />
-                    <div className="flex-col flex mt-4 items-center">
-                      <Skeleton width={310} height={14} />
-                      <Skeleton width={180} height={14} />
+                    <div className="md:-mt-0 -mt-0.5">
+                      <Skeleton width={81} height={isMobile ? 12 : 14} />
+                    </div>
+                    <div className="flex-col flex md:mt-4 mt-0 items-center">
+                      <div className="md:hidden mt-1">
+                        <Skeleton width={81} height={12} />
+                      </div>
+                      <div className="md:mt-0 -mt-1.5">
+                        <Skeleton width={isMobile ? 144 : 310} height={isMobile ? 12 : 14} />
+                      </div>
+                      <div className="md:-mt-0 -mt-1.5">
+                        <Skeleton width={isMobile ? 81 : 180} height={isMobile ? 12 : 14} />
+                      </div>
                     </div>
                   </div>
                 </SkeletonTheme>
@@ -572,12 +624,14 @@ export default function PoolPage({
                   enableAnimation={false}
                   // duration={5}
                 >
-                  <div className="bg-tertiary-bg flex items-center justify-center flex-col py-2 lg:py-3">
-                    <Skeleton width={62} height={14} />
-                    <div className="-mt-0.5 mb-0.5">
-                      <Skeleton width={140} height={18} />
+                  <div className="bg-tertiary-bg flex items-center justify-center flex-col py-1 lg:py-3">
+                    <Skeleton width={62} height={isMobile ? 12 : 14} />
+                    <div className="md:-mt-0.5 -mt-1 md:mb-0.5">
+                      <Skeleton width={140} height={isMobile ? 16 : 18} />
                     </div>
-                    <Skeleton width={81} height={14} />
+                    <div className="-mt-0.5 md:mt-0">
+                      <Skeleton width={81} height={isMobile ? 12 : 14} />
+                    </div>
                   </div>
                 </SkeletonTheme>
               </div>

@@ -25,6 +25,8 @@ export const PoolsDataDocument = gql`
       id
       totalValueLockedUSD
       totalValueLockedETH
+      totalValueLockedToken0
+      totalValueLockedToken1
       volumeUSD
       token1 {
         id
@@ -56,6 +58,8 @@ export const PoolDataDocument = gql`
       id
       totalValueLockedUSD
       totalValueLockedETH
+      totalValueLockedToken0
+      totalValueLockedToken1
       volumeUSD
       feesUSD
       token1 {

@@ -9,12 +9,19 @@ interface PoolsStore {
   };
   addPool: (key: string, pool: Pool) => void;
   getPool: (key: string) => Pool | undefined;
+  poolUpdates: Map<string, Date>;
 }
 
 export const usePoolsStore = create<PoolsStore>((set, get) => ({
   pools: {},
-  addPool: (key, pool) => set({ pools: { ...get().pools, [key]: pool } }),
+  addPool: (key, pool) =>
+    set(() => {
+      const newPoolUpdates = new Map(get().poolUpdates);
+      newPoolUpdates.set(key, new Date());
+      return { poolUpdates: newPoolUpdates, pools: { ...get().pools, [key]: pool } };
+    }),
   getPool: (key) => get().pools[key],
+  poolUpdates: new Map(),
 }));
 
 type PoolAddress = {

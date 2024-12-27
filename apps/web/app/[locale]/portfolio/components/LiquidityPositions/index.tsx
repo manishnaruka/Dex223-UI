@@ -1,11 +1,13 @@
 "use client";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 import { SearchInput } from "@/components/atoms/Input";
-import Preloader from "@/components/atoms/Preloader";
+// import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonSize } from "@/components/buttons/Button";
@@ -22,7 +24,10 @@ export const LiquidityPositions = () => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
 
+  // const loading = true;
   const { loading, positions: walletsPositions } = useActiveWalletsPositions();
+
+  console.dir(walletsPositions);
 
   const currentTableData: WalletPositions[] = searchValue
     ? walletsPositions
@@ -45,13 +50,34 @@ export const LiquidityPositions = () => {
       <div className="mt-5 flex gap-5">
         <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
           <div className="flex flex-col ">
-            <div className="flex items-center gap-1 z-10">
-              <span className="text-14 lg:text-16 text-secondary-text">
-                {t("provided_liq_balance")}
-              </span>
-              <Tooltip iconSize={20} text="Info text" />
-            </div>
-            <span className="text-24 lg:text-32 font-medium">$ —</span>
+            {loading ? (
+              <>
+                <SkeletonTheme
+                  baseColor="#2A3A45"
+                  highlightColor="#2E2F2F"
+                  borderRadius="20px"
+                  enableAnimation={false}
+                  // duration={5}
+                >
+                  <div className="flex items-center gap-1 z-10 mt-0.5">
+                    <Skeleton width={240} height={16} />
+                  </div>
+                  <div className="flex items-center gap-1 z-10 mt-1.5 mb-1">
+                    <Skeleton width={140} height={32} />
+                  </div>
+                </SkeletonTheme>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-1 z-10">
+                  <span className="text-14 lg:text-16 text-secondary-text">
+                    {t("provided_liq_balance")}
+                  </span>
+                  <Tooltip iconSize={20} text="Info text" />
+                </div>
+                <span className="text-24 lg:text-32 font-medium">$ —</span>
+              </>
+            )}
             <Image
               src="/images/liq-pos-bar.svg"
               alt="Side Icon"
@@ -63,37 +89,68 @@ export const LiquidityPositions = () => {
         </div>
       </div>
 
-      <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
-        <h1 className="text-18 lg:text-32 font-medium">{t("liquidity_title")}</h1>
-        <div className="flex flex-col lg:flex-row gap-3">
-          <Link href="/pools/positions" className="w-full lg:w-auto">
-            <Button fullWidth mobileSize={ButtonSize.MEDIUM}>
-              <span className="flex items-center gap-2 w-max">
-                {t("liquidity_title")}
-                <Svg iconName="forward" />
-              </span>
-            </Button>
-          </Link>
-
-          {currentTableData.length > 0 && (
-            <SearchInput
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder={t("liquidity_search_placeholder")}
-              className="h-10 md:h-12 bg-primary-bg lg:w-[480px]"
-            />
-          )}
+      {loading ? (
+        <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-4">
+          <SkeletonTheme
+            baseColor="#272727"
+            highlightColor="#2E2F2F"
+            borderRadius="0.5rem"
+            enableAnimation={false}
+            // duration={5}
+          >
+            <div className="mr-auto mt-2">
+              <SkeletonTheme
+                baseColor="#272727"
+                highlightColor="#2E2F2F"
+                borderRadius="20px"
+                enableAnimation={false}
+                // duration={5}
+              >
+                <Skeleton width={285} height={32} />
+              </SkeletonTheme>
+            </div>
+            <div>
+              <Skeleton width={219} height={48} />
+            </div>
+            <div>
+              <Skeleton width={480} height={48} />
+            </div>
+          </SkeletonTheme>
         </div>
-      </div>
+      ) : (
+        <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-2 lg:gap-0">
+          <h1 className="text-18 lg:text-32 font-medium">{t("liquidity_title")}</h1>
+          <div className="flex flex-col lg:flex-row gap-3">
+            <Link href="/pools/positions" className="w-full lg:w-auto">
+              <Button fullWidth mobileSize={ButtonSize.MEDIUM}>
+                <span className="flex items-center gap-2 w-max">
+                  {t("liquidity_title")}
+                  <Svg iconName="forward" />
+                </span>
+              </Button>
+            </Link>
+
+            {currentTableData.length > 0 && (
+              <SearchInput
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder={t("liquidity_search_placeholder")}
+                className="h-10 md:h-12 bg-primary-bg lg:w-[480px]"
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mt-5 min-h-[340px] w-full">
-        {loading ? (
-          <div className="flex justify-center items-center h-full min-h-[550px]">
-            <Preloader type="awaiting" size={48} />
-          </div>
-        ) : currentTableData.length ? (
+        {/*{loading ? (*/}
+        {/*  <div className="flex justify-center items-center h-full min-h-[550px]">*/}
+        {/*    <Preloader type="awaiting" size={48} />*/}
+        {/*  </div>*/}
+        {/*) : */}
+        {currentTableData.length || loading ? (
           <>
-            <LiquidityPositionsDesktopTable tableData={currentTableData} />
+            <LiquidityPositionsDesktopTable tableData={currentTableData} isLoading={loading} />
             <LiquidityPositionsMobileTable tableData={currentTableData} />
           </>
         ) : Boolean(searchValue) ? (

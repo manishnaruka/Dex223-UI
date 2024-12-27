@@ -1,8 +1,10 @@
 "use client";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import clsx from "clsx";
 import Image from "next/image";
 import React from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import {
@@ -55,24 +57,98 @@ const PositionTableItemDesktop = ({ positionInfo }: { positionInfo: PositionInfo
   );
 };
 
-export const LiquidityPositionsDesktopTable = ({ tableData }: { tableData: WalletPositions[] }) => {
+export const LiquidityPositionsDesktopTable = ({
+  tableData,
+  isLoading = false,
+}: {
+  tableData: WalletPositions[];
+  isLoading: boolean;
+}) => {
   return (
     <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
-      <div className="text-tertiary-text pl-5 h-[60px] flex items-center">ID</div>
-      <div className="text-tertiary-text h-[60px] flex items-center gap-2">Amount tokens</div>
-      <div className="text-tertiary-text h-[60px] flex items-center">Amount, $</div>
-      <div className="text-tertiary-text h-[60px] flex items-center">Unclaimed fees</div>
-      <div className="text-tertiary-text pr-5 h-[60px] flex items-center">Status</div>
+      {isLoading ? (
+        <React.Fragment>
+          <SkeletonTheme
+            baseColor="#1D1E1E"
+            highlightColor="#2E2F2F"
+            borderRadius="0.5rem"
+            enableAnimation={false}
+            // duration={5}
+          >
+            <div className="text-tertiary-text pl-5 h-[60px] flex items-center">
+              <Skeleton circle width={16} height={16} />
+            </div>
+            <div className="text-tertiary-text h-[60px] flex items-center gap-2">
+              <Skeleton width={117} height={16} />
+            </div>
+            <div className="text-tertiary-text h-[60px] flex items-center">
+              <Skeleton width={80} height={16} />
+            </div>
+            <div className="text-tertiary-text h-[60px] flex items-center">
+              <Skeleton width={119} height={16} />
+            </div>
+            <div className="text-tertiary-text pr-5 h-[60px] flex items-center mb-2">
+              <Skeleton width={50} height={16} />
+            </div>
+          </SkeletonTheme>
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          <div className="text-tertiary-text pl-5 h-[60px] flex items-center">ID</div>
+          <div className="text-tertiary-text h-[60px] flex items-center gap-2">Amount tokens</div>
+          <div className="text-tertiary-text h-[60px] flex items-center">Amount, $</div>
+          <div className="text-tertiary-text h-[60px] flex items-center">Unclaimed fees</div>
+          <div className="text-tertiary-text pr-5 h-[60px] flex items-center mb-2">Status</div>
+        </React.Fragment>
+      )}
 
-      {tableData?.map(({ positions }, index: number) => {
-        return (
-          <React.Fragment key={index}>
-            {positions.map((position) => (
-              <PositionTableItemDesktop key={position.tokenId} positionInfo={position} />
-            ))}
-          </React.Fragment>
-        );
-      })}
+      {isLoading
+        ? [...Array(3)].map((row, index) => (
+            <React.Fragment key={index}>
+              <SkeletonTheme
+                baseColor="#272727"
+                highlightColor="#2E2F2F"
+                borderRadius="0.5rem"
+                enableAnimation={false}
+                // duration={5}
+              >
+                <div className="ml-3 h-[56px] flex justify-start items-center">
+                  <Skeleton width={84} height={16} />
+                </div>
+                <div className="flex flex-row gap-2">
+                  <div className="flex relative flex-row h-[56px] w-[40px]">
+                    <div className=" absolute left-0 top-3">
+                      <Skeleton circle={true} width={24} height={24} />
+                    </div>
+                    <div className="absolute left-[12px] top-3">
+                      <Skeleton circle={true} width={24} height={24} />
+                    </div>
+                  </div>
+                  <div className="h-[56px] flex justify-center items-center">
+                    <Skeleton width={180} height={16} />
+                  </div>
+                </div>
+                <div className="h-[56px] flex justify-start items-center">
+                  <Skeleton width={60} height={16} />
+                </div>
+                <div className="h-[56px] flex justify-start items-center">
+                  <Skeleton width={60} height={16} />
+                </div>
+                <div className="h-[56px] flex justify-start items-center">
+                  <Skeleton width={92} height={16} />
+                </div>
+              </SkeletonTheme>
+            </React.Fragment>
+          ))
+        : tableData?.map(({ positions }, index: number) => {
+            return (
+              <React.Fragment key={index}>
+                {positions.map((position) => (
+                  <PositionTableItemDesktop key={position.tokenId} positionInfo={position} />
+                ))}
+              </React.Fragment>
+            );
+          })}
     </div>
   );
 };

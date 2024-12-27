@@ -61,7 +61,13 @@ export const config = createConfig({
       http("https://rpc.ankr.com/eth_sepolia"),
       http(),
     ]),
-    [bscTestnet.id]: http(),
-    [eos.id]: http(),
+    [bscTestnet.id]: fallback([
+      // webSocket("wss://bsc-testnet-rpc.publicnode.com"),
+      http("https://data-seed-prebsc-1-s1.bnbchain.org:8545"),
+      http("https://bsc-testnet.public.blastapi.io"),
+      http("https://bsc-testnet-rpc.publicnode.com"),
+      http(),
+    ]),
+    [eos.id]: http("https://api.evm.eosnetwork.com"),
   },
 });

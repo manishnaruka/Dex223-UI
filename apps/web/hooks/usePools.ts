@@ -14,7 +14,7 @@ import {
   getPoolAddressKey,
   useComputePoolAddressesDex,
 } from "@/sdk_hybrid/utils/computePoolAddress";
-import { usePoolsStore } from "@/stores/usePoolsStore";
+import { usePoolAddresses, usePoolsStore } from "@/stores/usePoolsStore";
 
 import useDeepEffect from "./useDeepEffect";
 import useDeepMemo from "./useDeepMemo";
@@ -54,7 +54,8 @@ const query = gql`
 `;
 
 export const usePools = (poolsParams: PoolsParams): PoolsResult => {
-  const { pools, addPool } = usePoolsStore();
+  const { pools, addPool, poolUpdates } = usePoolsStore();
+  const { addresses } = usePoolAddresses();
   const chainId = useCurrentChainId();
 
   const poolTokens: ({ token0: Currency; token1: Currency; tier: FeeAmount } | undefined)[] =
@@ -94,18 +95,44 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
   }, [poolTokens]);
   const poolAddresses = useComputePoolAddressesDex(poolAddressesParams);
 
-  console.log(poolAddresses);
-  console.log(chainId);
+  // query only pools that are not in the store or were updated more than 1 minute ago
+  const addressesToUpdate = useMemo(() => {
+    const currentDate = new Date(Date.now() - 60000);
+    const array: any[] = [];
+
+    poolTokens.forEach((tokens) => {
+      if (tokens) {
+        const { token0, token1, tier } = tokens;
+        const key = getPoolAddressKey({
+          addressTokenA: token0.wrapped.address0,
+          addressTokenB: token1.wrapped.address0,
+          chainId,
+          tier,
+        });
+
+        const address = addresses[key];
+        // const newAddress = address?.address?.toLowerCase();
+        if (address && address?.address) {
+          if (!poolUpdates.has(key) || (poolUpdates.get(key) || 0) < currentDate) {
+            array.push(address);
+          }
+        }
+      }
+    });
+    return array;
+  }, [addresses, chainId, poolTokens, poolUpdates]);
 
   const _apolloClient = useMemo(() => {
     return apolloClient(chainId);
   }, [chainId]);
 
-  const { data, loading } = useQuery(query, {
+  const { data } = useQuery(query, {
     variables: {
-      addresses: poolAddresses.map((p) => p?.address?.toLowerCase()),
+      addresses: addressesToUpdate.map((p) => p?.address?.toLowerCase()),
     },
     client: _apolloClient,
+    // fetchPolicy: "cache-first", // Used for first execution
+    // nextFetchPolicy: "cache-first", // Used for subsequent executions
   });
 
   const ticksMap = useMemo(() => {
@@ -174,8 +201,12 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
         tier,
       });
 
-      const existedPool = pools[key];
-      if (existedPool) return;
+      // const existedPool = pools[key];
+      // if (existedPool) return;
+      if (!addressesToUpdate.length) {
+        // console.log("no addresses to update");
+        return;
+      }
 
       const liquidity = liquidityData[index].result as bigint;
       try {
@@ -199,6 +230,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
           tick,
           ticks,
         );
+        // console.log("adding pool:", key);
         addPool(key, newPool);
         return [PoolState.EXISTS, newPool];
       } catch (error) {

@@ -61,6 +61,7 @@ export default function IncreaseLiquidityPage({
   const router = useRouter();
 
   const [showFirst, setShowFirst] = useState(true);
+  const [localParams] = useState(use(params));
 
   const { position: positionInfo } = usePositionFromTokenId(BigInt(use(params).tokenId));
   const existedPosition = usePositionFromPositionInfo(positionInfo);
@@ -122,7 +123,8 @@ export default function IncreaseLiquidityPage({
         <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
           <div className="w-[96px] md:w-[104px]">
             <IconButton
-              onClick={() => router.push(`/pool/${use(params).tokenId}`)}
+              // onClick={() => router.push(`/pool/${use(params).tokenId}`)}
+              onClick={() => router.push(`/pool/${localParams.tokenId}`)}
               buttonSize={IconButtonSize.LARGE}
               variant={IconButtonVariant.BACK}
               // iconName="back"

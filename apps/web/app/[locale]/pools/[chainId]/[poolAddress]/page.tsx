@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import React from "react";
 import { use } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { useMediaQuery } from "react-responsive";
 
 import Container from "@/components/atoms/Container";
 // import Preloader from "@/components/atoms/Preloader";
@@ -41,21 +42,23 @@ export default function ExplorePoolPage({
   const router = useRouter();
   const t = useTranslations("Liquidity");
   const tn = useTranslations("Navigation");
+  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
 
   const tokens = useTokens();
-  // const loading = false;
+  // const loading = true;
   const { data, loading } = usePoolData({
     chainId,
     poolAddress,
   } as any);
 
   const { pool } = data || { pool: undefined };
+
   const tokenA = tokens.find((t) => t.wrapped.address0.toLowerCase() === pool?.token0?.id);
   const tokenB = tokens.find((t) => t.wrapped.address0.toLowerCase() === pool?.token1?.id);
 
   const valuePercent =
-    (Number(pool?.token0?.totalValueLocked) * 100) /
-    (Number(pool?.token0?.totalValueLocked) + Number(pool?.token1?.totalValueLocked));
+    (Number(pool?.totalValueLockedToken0) * 100) /
+    (Number(pool?.totalValueLockedToken0) + Number(pool?.totalValueLockedToken1)); // token0?.totalValueLocked
 
   return (
     <Container>
@@ -81,7 +84,7 @@ export default function ExplorePoolPage({
           <div className="bg-tertiary-bg rounded-[12px] p-4 lg:p-5">
             <div className="flex flex-col lg:flex-row gap-2 lg:items-center">
               {loading ? (
-                <div className="flex-nowrap flex flex-row gap-2 items-center mb-1">
+                <div className="md:flex-nowrap flex-wrap flex flex-row gap-2 items-center md:mb-1">
                   <div className="flex relative flex-row h-[32px] w-[50px]">
                     <div className=" absolute left-0 ">
                       <Skeleton circle={true} width={32} height={32} />
@@ -91,7 +94,7 @@ export default function ExplorePoolPage({
                     </div>
                   </div>
                   <div className="flex items-center mt-1">
-                    <Skeleton width={180} height={18} />
+                    <Skeleton width={isMobile ? 146 : 180} height={18} />
                   </div>
                   <div className="flex items-center">
                     <Skeleton width={153} height={24} />
@@ -145,15 +148,29 @@ export default function ExplorePoolPage({
                 )}
                 <div className="flex justify-between">
                   {loading ? (
-                    <div className="flex gap-2 items-center">
-                      <Skeleton width={40} height={16} />
-                      <Skeleton circle width={24} height={24} />
-                      <Skeleton width={60} height={16} />
-                    </div>
+                    <>
+                      {isMobile ? (
+                        <div className="flex gap-2 items-center -mt-2">
+                          <Skeleton circle width={32} height={32} />
+                          <div className="flex flex-col mt-1">
+                            <Skeleton width={56} height={14} />
+                            <div className="-mt-2">
+                              <Skeleton width={32} height={12} />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 items-center">
+                          <Skeleton width={40} height={16} />
+                          <Skeleton circle width={24} height={24} />
+                          <Skeleton width={60} height={16} />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="flex gap-2 items-center">
                       <span className="text-12 lg:text-16 font-bold text-primary-text">
-                        {formatNumberKilos(pool?.token0?.totalValueLocked)}
+                        {formatNumberKilos(pool?.totalValueLockedToken0)}
                       </span>
                       <Image
                         src="/images/tokens/placeholder.svg"
@@ -170,15 +187,29 @@ export default function ExplorePoolPage({
                     </div>
                   )}
                   {loading ? (
-                    <div className="flex gap-2 items-center">
-                      <Skeleton width={40} height={16} />
-                      <Skeleton circle width={24} height={24} />
-                      <Skeleton width={60} height={16} />
-                    </div>
+                    <>
+                      {isMobile ? (
+                        <div className="flex gap-2 items-center -mt-2">
+                          <Skeleton circle width={32} height={32} />
+                          <div className="flex flex-col mt-1">
+                            <Skeleton width={56} height={14} />
+                            <div className="-mt-2">
+                              <Skeleton width={32} height={12} />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 items-center">
+                          <Skeleton width={40} height={16} />
+                          <Skeleton circle width={24} height={24} />
+                          <Skeleton width={60} height={16} />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="flex gap-2 items-center">
                       <span className="text-12 lg:text-16 font-bold text-primary-text">
-                        {formatNumberKilos(pool?.token1?.totalValueLocked)}
+                        {formatNumberKilos(pool?.totalValueLockedToken1)}
                       </span>
                       <Image
                         src="/images/tokens/placeholder.svg"
@@ -200,11 +231,12 @@ export default function ExplorePoolPage({
                   className={clsxMerge(
                     "bg-green h-2 w-full rounded-[20px] overflow-hidden",
                     loading && "bg-tertiary-bg",
+                    isMobile && "-mt-2",
                   )}
                 >
                   {!loading && (
                     <div
-                      className="bg-purple h-2"
+                      className="bg-purple h-2 "
                       style={{
                         width:
                           valuePercent < 1 ? `1%` : valuePercent > 99 ? `99%` : `${valuePercent}%`,
@@ -225,9 +257,9 @@ export default function ExplorePoolPage({
               enableAnimation={false}
               // duration={5}
             >
-              <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 mt-4 lg:mt-3">
-                <Skeleton width={354} height={60} />
-                <Skeleton width={354} height={60} />
+              <div className="flex flex-col lg:flex-row gap-1 lg:gap-3 mt-4 lg:mt-3">
+                <Skeleton width={isMobile ? undefined : 354} height={isMobile ? 48 : 60} />
+                <Skeleton width={isMobile ? undefined : 354} height={isMobile ? 48 : 60} />
               </div>
             </SkeletonTheme>
           ) : (
@@ -265,13 +297,13 @@ export default function ExplorePoolPage({
                   key={index}
                   className="flex flex-col gap-1 bg-tertiary-bg rounded-[12px] px-5 pb-[10px] pt-3.5 w-full"
                 >
-                  <div className="mt-1">
-                    <Skeleton width={60} height={16} />
+                  <div className="md:mt-1">
+                    <Skeleton width={60} height={isMobile ? 14 : 16} />
                   </div>
-                  <div className="flex flex-row gap-2 items-center">
-                    <Skeleton width={120} height={24} />
-                    <div className="mt-1">
-                      <Skeleton width={40} height={16} />
+                  <div className="flex flex-row gap-2 items-center md:mt-0 -mt-2">
+                    <Skeleton width={120} height={isMobile ? 20 : 24} />
+                    <div className="md:mt-1 mt-1.5">
+                      <Skeleton width={40} height={isMobile ? 14 : 16} />
                     </div>
                   </div>
                 </div>
