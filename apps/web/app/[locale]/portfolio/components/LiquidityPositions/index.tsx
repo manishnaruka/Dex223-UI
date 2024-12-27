@@ -27,6 +27,8 @@ export const LiquidityPositions = () => {
   // const loading = true;
   const { loading, positions: walletsPositions } = useActiveWalletsPositions();
 
+  console.dir(walletsPositions);
+
   const currentTableData: WalletPositions[] = searchValue
     ? walletsPositions
         .map((value) => {

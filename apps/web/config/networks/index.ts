@@ -15,7 +15,7 @@ export const networks: Array<{
   {
     chainId: DexChainId.BSC_TESTNET,
     name: "BSC Testnet",
-    symbol: "BNB",
+    symbol: "tBNB",
     logo: "/images/chains/bsc.svg",
   },
   {

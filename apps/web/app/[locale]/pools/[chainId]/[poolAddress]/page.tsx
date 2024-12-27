@@ -52,12 +52,13 @@ export default function ExplorePoolPage({
   } as any);
 
   const { pool } = data || { pool: undefined };
+
   const tokenA = tokens.find((t) => t.wrapped.address0.toLowerCase() === pool?.token0?.id);
   const tokenB = tokens.find((t) => t.wrapped.address0.toLowerCase() === pool?.token1?.id);
 
   const valuePercent =
-    (Number(pool?.token0?.totalValueLocked) * 100) /
-    (Number(pool?.token0?.totalValueLocked) + Number(pool?.token1?.totalValueLocked));
+    (Number(pool?.totalValueLockedToken0) * 100) /
+    (Number(pool?.totalValueLockedToken0) + Number(pool?.totalValueLockedToken1)); // token0?.totalValueLocked
 
   return (
     <Container>
@@ -169,7 +170,7 @@ export default function ExplorePoolPage({
                   ) : (
                     <div className="flex gap-2 items-center">
                       <span className="text-12 lg:text-16 font-bold text-primary-text">
-                        {formatNumberKilos(pool?.token0?.totalValueLocked)}
+                        {formatNumberKilos(pool?.totalValueLockedToken0)}
                       </span>
                       <Image
                         src="/images/tokens/placeholder.svg"
@@ -208,7 +209,7 @@ export default function ExplorePoolPage({
                   ) : (
                     <div className="flex gap-2 items-center">
                       <span className="text-12 lg:text-16 font-bold text-primary-text">
-                        {formatNumberKilos(pool?.token1?.totalValueLocked)}
+                        {formatNumberKilos(pool?.totalValueLockedToken1)}
                       </span>
                       <Image
                         src="/images/tokens/placeholder.svg"
