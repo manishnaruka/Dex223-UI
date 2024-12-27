@@ -100,7 +100,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
     const currentDate = new Date(Date.now() - 60000);
     const array: any[] = [];
 
-    poolTokens.forEach((tokens, index) => {
+    poolTokens.forEach((tokens) => {
       if (tokens) {
         const { token0, token1, tier } = tokens;
         const key = getPoolAddressKey({
@@ -126,7 +126,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
     return apolloClient(chainId);
   }, [chainId]);
 
-  const { data, loading } = useQuery(query, {
+  const { data } = useQuery(query, {
     variables: {
       addresses: addressesToUpdate.map((p) => p?.address?.toLowerCase()),
     },

@@ -61,7 +61,7 @@ export default function IncreaseLiquidityPage({
   const router = useRouter();
 
   const [showFirst, setShowFirst] = useState(true);
-  const [localParams, setParams] = useState(use(params));
+  const [localParams] = useState(use(params));
 
   const { position: positionInfo } = usePositionFromTokenId(BigInt(use(params).tokenId));
   const existedPosition = usePositionFromPositionInfo(positionInfo);
