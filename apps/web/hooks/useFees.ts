@@ -23,9 +23,6 @@ export function useFees() {
   useEffect(() => {
     refetchLegacy();
     refetchEIP1559();
-    // console.log(chainId);
-    // console.dir(estimatedFeesPerGasLegacy);
-    // console.dir(estimatedFeesPerGasEIP1559);
   }, [blockNumber, refetchLegacy, refetchEIP1559]);
 
   return {
