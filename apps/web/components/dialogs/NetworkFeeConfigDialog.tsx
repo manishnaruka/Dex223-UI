@@ -204,30 +204,30 @@ function NetworkFeeDialogContent({
         // Gas Option CUSTOM
         if (values.gasPriceModel === GasFeeModel.EIP1559) {
           //  || !isAdvanced   // TODO why it is here?
-          if (!isAdvanced) {
+          // if (!isAdvanced) {
+          handleApply({
+            option: GasOption.CUSTOM,
+            gasSettings: {
+              model: GasFeeModel.EIP1559,
+              maxFeePerGas: parseGwei(values.maxFeePerGas),
+              maxPriorityFeePerGas: parseGwei(values.maxPriorityFeePerGas),
+            },
+            gasLimit: BigInt(values.gasLimit),
+          });
+          // }
+        } else {
+          // if (!isAdvanced) {
+          if (values.gasPriceModel === GasFeeModel.LEGACY) {
             handleApply({
               option: GasOption.CUSTOM,
               gasSettings: {
-                model: GasFeeModel.EIP1559,
-                maxFeePerGas: parseGwei(values.maxFeePerGas),
-                maxPriorityFeePerGas: parseGwei(values.maxPriorityFeePerGas),
+                model: GasFeeModel.LEGACY,
+                gasPrice: parseGwei(values.gasPrice),
               },
               gasLimit: BigInt(values.gasLimit),
             });
           }
-        } else {
-          if (!isAdvanced) {
-            if (values.gasPriceModel === GasFeeModel.LEGACY) {
-              handleApply({
-                option: GasOption.CUSTOM,
-                gasSettings: {
-                  model: GasFeeModel.LEGACY,
-                  gasPrice: parseGwei(values.gasPrice),
-                },
-                gasLimit: BigInt(values.gasLimit),
-              });
-            }
-          }
+          // }
         }
 
         if (isAdvanced) {
