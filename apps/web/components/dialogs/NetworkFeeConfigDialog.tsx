@@ -204,25 +204,29 @@ function NetworkFeeDialogContent({
         // Gas Option CUSTOM
         if (values.gasPriceModel === GasFeeModel.EIP1559) {
           //  || !isAdvanced   // TODO why it is here?
-          handleApply({
-            option: GasOption.CUSTOM,
-            gasSettings: {
-              model: GasFeeModel.EIP1559,
-              maxFeePerGas: parseGwei(values.maxFeePerGas),
-              maxPriorityFeePerGas: parseGwei(values.maxPriorityFeePerGas),
-            },
-            gasLimit: BigInt(values.gasLimit),
-          });
-        } else {
-          if (values.gasPriceModel === GasFeeModel.LEGACY) {
+          if (!isAdvanced) {
             handleApply({
               option: GasOption.CUSTOM,
               gasSettings: {
-                model: GasFeeModel.LEGACY,
-                gasPrice: parseGwei(values.gasPrice),
+                model: GasFeeModel.EIP1559,
+                maxFeePerGas: parseGwei(values.maxFeePerGas),
+                maxPriorityFeePerGas: parseGwei(values.maxPriorityFeePerGas),
               },
               gasLimit: BigInt(values.gasLimit),
             });
+          }
+        } else {
+          if (!isAdvanced) {
+            if (values.gasPriceModel === GasFeeModel.LEGACY) {
+              handleApply({
+                option: GasOption.CUSTOM,
+                gasSettings: {
+                  model: GasFeeModel.LEGACY,
+                  gasPrice: parseGwei(values.gasPrice),
+                },
+                gasLimit: BigInt(values.gasLimit),
+              });
+            }
           }
         }
 
@@ -268,7 +272,7 @@ function NetworkFeeDialogContent({
       }
 
       if (_gasOption !== GasOption.CUSTOM && (baseFee || gasPrice)) {
-        if (baseFee) {
+        if (values.gasPriceModel === GasFeeModel.EIP1559 && baseFee) {
           return (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR;
         }
 

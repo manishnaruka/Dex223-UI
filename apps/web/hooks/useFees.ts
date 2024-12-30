@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAccount, useEstimateFeesPerGas } from "wagmi";
 
+import { config } from "@/config/wagmi/config";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 
 export function useFees() {
@@ -11,6 +12,7 @@ export function useFees() {
     type: "eip1559",
     scopeKey: `${chainId}-eip1559`,
   });
+  // @ts-ignore
   const { data: estimatedFeesPerGasLegacy, refetch: refetchLegacy } = useEstimateFeesPerGas({
     chainId,
     type: "legacy",
@@ -22,6 +24,9 @@ export function useFees() {
   useEffect(() => {
     refetchLegacy();
     refetchEIP1559();
+    // console.log(chainId);
+    // console.dir(estimatedFeesPerGasLegacy);
+    // console.dir(estimatedFeesPerGasEIP1559);
   }, [blockNumber, refetchLegacy, refetchEIP1559]);
 
   return {
