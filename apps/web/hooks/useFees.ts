@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useAccount, useEstimateFeesPerGas } from "wagmi";
 
-import { config } from "@/config/wagmi/config";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 
 export function useFees() {
