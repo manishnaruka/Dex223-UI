@@ -63,9 +63,11 @@ export const config = createConfig({
     ]),
     [bscTestnet.id]: fallback([
       // webSocket("wss://bsc-testnet-rpc.publicnode.com"),
-      http("https://data-seed-prebsc-1-s1.bnbchain.org:8545"),
+      http("https://api.zan.top/bsc-testnet"),
+      http("https://endpoints.omniatech.io/v1/bsc/testnet/public"),
       http("https://bsc-testnet.public.blastapi.io"),
       http("https://bsc-testnet-rpc.publicnode.com"),
+      http("https://data-seed-prebsc-1-s1.bnbchain.org:8545"),
       http(),
     ]),
     [eos.id]: http("https://api.evm.eosnetwork.com"),

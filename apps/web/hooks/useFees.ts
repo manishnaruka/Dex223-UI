@@ -11,6 +11,7 @@ export function useFees() {
     type: "eip1559",
     scopeKey: `${chainId}-eip1559`,
   });
+  // @ts-ignore
   const { data: estimatedFeesPerGasLegacy, refetch: refetchLegacy } = useEstimateFeesPerGas({
     chainId,
     type: "legacy",
