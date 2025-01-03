@@ -204,6 +204,7 @@ function NetworkFeeDialogContent({
         // Gas Option CUSTOM
         if (values.gasPriceModel === GasFeeModel.EIP1559) {
           //  || !isAdvanced   // TODO why it is here?
+          // if (!isAdvanced) {
           handleApply({
             option: GasOption.CUSTOM,
             gasSettings: {
@@ -213,7 +214,9 @@ function NetworkFeeDialogContent({
             },
             gasLimit: BigInt(values.gasLimit),
           });
+          // }
         } else {
+          // if (!isAdvanced) {
           if (values.gasPriceModel === GasFeeModel.LEGACY) {
             handleApply({
               option: GasOption.CUSTOM,
@@ -224,6 +227,7 @@ function NetworkFeeDialogContent({
               gasLimit: BigInt(values.gasLimit),
             });
           }
+          // }
         }
 
         if (isAdvanced) {
@@ -268,7 +272,7 @@ function NetworkFeeDialogContent({
       }
 
       if (_gasOption !== GasOption.CUSTOM && (baseFee || gasPrice)) {
-        if (baseFee) {
+        if (values.gasPriceModel === GasFeeModel.EIP1559 && baseFee) {
           return (baseFee * baseFeeMultipliers[chainId][_gasOption]) / SCALING_FACTOR;
         }
 
