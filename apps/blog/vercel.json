@@ -1,8 +1,0 @@
-{
-  "name": "blog",
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_APP": "blog"
-    }
-  }
-}
