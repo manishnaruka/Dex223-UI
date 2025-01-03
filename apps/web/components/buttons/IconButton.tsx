@@ -125,17 +125,30 @@ function CopyIconButton(_props: CopyIconButtonProps) {
   }, [t, text]);
 
   return (
-    <IconButtonFrame
-      iconName={isCopied ? "done" : "copy"}
-      onClick={handleCopy}
-      buttonSize={buttonSize || IconButtonSize.SMALL}
-      className={clsxMerge(
-        "hocus:text-green duration-200 text-tertiary-text",
-        className,
-        isCopied && "text-green",
-      )}
-      {...props}
-    />
+    <div className="relative">
+      <IconButtonFrame
+        iconName={"done"}
+        onClick={handleCopy}
+        buttonSize={buttonSize || IconButtonSize.SMALL}
+        className={clsxMerge(
+          "hocus:text-green duration-200 text-tertiary-text absolute text-green pointer-events-none",
+          className,
+          isCopied ? "opacity-100" : "opacity-0",
+        )}
+        {...props}
+      />
+      <IconButtonFrame
+        iconName={"copy"}
+        onClick={handleCopy}
+        buttonSize={buttonSize || IconButtonSize.SMALL}
+        className={clsxMerge(
+          "hocus:text-green duration-200 text-tertiary-text ",
+          className,
+          isCopied ? "opacity-0" : "opacity-100",
+        )}
+        {...props}
+      />
+    </div>
   );
 }
 export default function IconButton(_props: Props) {

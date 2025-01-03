@@ -160,7 +160,7 @@ function TokenSymbolButton({ tokenToPay }: { tokenToPay: SingleAddressToken }) {
   return (
     <>
       <button
-        className="rounded-2 bg-quaternary-bg py-1 flex items-center justify-center"
+        className="rounded-2 bg-quaternary-bg py-1 flex items-center justify-center hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200"
         onClick={() =>
           handleOpen(
             new Token(
