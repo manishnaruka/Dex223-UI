@@ -38,7 +38,7 @@ import Svg from "@/components/atoms/Svg";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
@@ -382,6 +382,7 @@ export default function ListTokenPage() {
                   <IconButton
                     onClick={() => router.replace(destination)}
                     iconName="back"
+                    variant={IconButtonVariant.BACK}
                     buttonSize={IconButtonSize.LARGE}
                   />
                   <h3 className="font-bold text-20">List tokens</h3>

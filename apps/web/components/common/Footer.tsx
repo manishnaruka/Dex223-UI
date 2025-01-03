@@ -50,10 +50,10 @@ function FooterLink({ href, title, icon }: SocialLink) {
       <a
         target="_blank"
         href={href}
-        className="lg:w-auto flex gap-2 bg-primary-bg rounded-5 py-2 pr-4 pl-5 hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center"
+        className="lg:w-auto text-12 lg:text-16 flex gap-2 bg-primary-bg rounded-5 lg:py-2 lg:pr-4 lg:pl-5 p-2 hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center items-center"
       >
         {t(title)}
-        <Svg iconName={icon} />
+        <Svg className="!w-4 !h-4 lg:!w-6 lg:!h-6" iconName={icon} />
       </a>
     </>
   );
@@ -78,7 +78,7 @@ export default function Footer() {
     <>
       <div>
         <Container>
-          <div className="py-5 px-5 flex justify-end items-center gap-2">
+          <div className="py-5 px-5 flex justify-end items-center gap-2 max-lg:hidden">
             <div className="flex items-center gap-1 text-12 text-secondary-text">
               <Svg size={16} className="text-tertiary-text" iconName="gas" />
               <span>
@@ -113,13 +113,13 @@ export default function Footer() {
           </div>
         </Container>
       </div>
-      <footer className="before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:top-0 before:left-0 pb-[56px] md:pb-0">
+      <footer className="before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:top-0 before:left-0 pb-[64px] md:pb-0">
         <Container>
-          <div className="flex justify-between py-3 px-5 items-center flex-col-reverse lg:flex-row gap-3">
-            <span className="text-12 text-secondary-text max-md:mb-3">
+          <div className="flex justify-between py-3 px-5 items-center flex-col-reverse sm:flex-row gap-3">
+            <span className="text-12 text-secondary-text">
               © {new Date(Date.now()).getFullYear()} DEX223
             </span>
-            <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 lg:gap-3 w-full lg:w-auto">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {socialLinks.map((socialLink) => {
                 return <FooterLink key={socialLink.title} {...socialLink} />;
               })}

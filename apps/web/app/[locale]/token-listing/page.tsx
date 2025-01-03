@@ -86,9 +86,9 @@ export default function TokenListingPage() {
                   You can list a token to any auto-listing contract. Users may enable or disable
                   auto-listing contracts in their interface at any time. Your token will be
                   displayed to a user if it is present in at least one of the listing contracts or
-                  token lists currently enabled in the user&quot;s interface. The user will also see
+                  token lists currently enabled in the user&apos;s interface. The user will also see
                   a number of token lists that your token is present in therefore if your token is
-                  present in multiple token lists enabled in the user&quot;s interface then your
+                  present in multiple token lists enabled in the user&apos;s interface then your
                   token will gain higher trust. Listing contracts may have different listing
                   criteria, some require payment to be made and others may be free.
                 </span>

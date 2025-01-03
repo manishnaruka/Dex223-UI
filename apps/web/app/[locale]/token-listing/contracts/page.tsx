@@ -58,7 +58,7 @@ export default function TokenListingPage() {
             <h1 className="font-medium  text-24 lg:text-40">Auto-listing contracts</h1>
             <div className="w-full md:w-[480px]">
               <SearchInput
-                className="bg-tertiary-bg max-sm:h-10"
+                className="bg-tertiary-bg max-sm:h-10 max-sm:rounded-2 max-sm:pl-4"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Search name or paste contract"
@@ -131,10 +131,10 @@ export default function TokenListingPage() {
                           </span>
                         ))
                       ) : (
-                        <span className="text-secondary-text">Free</span>
+                        <span className="text-secondary-text px-2">Free</span>
                       )}
                     </div>
-                    <div className="flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-4 text-14">
+                    <div className="flex justify-between pl-4 pr-2 py-2 sm:py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-4 text-14">
                       <span className="text-secondary-text">Contract link</span>
                       <ExternalTextLink
                         textClassname="w-[13ch]"

@@ -271,9 +271,13 @@ function NavigationMoreDropdown() {
                   key={link.title}
                   target="_blank"
                   href={link.href}
-                  className="flex gap-2 items-center text-secondary-text py-1 hocus:text-primary-text duration-200"
+                  className="flex gap-2 items-center text-secondary-text py-1 hocus:text-primary-text duration-200 group"
                 >
-                  <Svg className="text-tertiary-text" iconName={link.icon} /> {link.title}
+                  <Svg
+                    className="text-tertiary-text group-hocus:text-secondary-text duration-200"
+                    iconName={link.icon}
+                  />{" "}
+                  {link.title}
                 </a>
               );
             })}

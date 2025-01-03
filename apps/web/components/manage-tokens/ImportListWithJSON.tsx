@@ -140,9 +140,9 @@ export default function ImportListWithJSON({ setContent }: Props) {
         </div>
         <p className="overflow-hidden overflow-ellipsis whitespace-nowrap min-w-[200px] max-w-[300px] text-right">
           {tokenListFile?.name ? (
-            <span className="flex items-center gap-1">
-              <Svg className="text-tertiary-text" iconName="file" />
-              {tokenListFile?.name}
+            <span className="flex items-center justify-end gap-1 overflow-hidden">
+              <Svg className="text-tertiary-text flex-shrink-0" iconName="file" />
+              <span className="truncate">{tokenListFile?.name}</span>
             </span>
           ) : (
             <span className="text-tertiary-text">{t("select_json_file")}</span>
@@ -186,7 +186,7 @@ export default function ImportListWithJSON({ setContent }: Props) {
             </svg>
 
             {tokenListFile ? (
-              <span className="text-primary-text">{tokenListFile.name}</span>
+              <span className="text-primary-text truncate w-[300px]">{tokenListFile.name}</span>
             ) : (
               t("import_files_or_drag_and_drop")
             )}

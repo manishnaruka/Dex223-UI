@@ -11,6 +11,7 @@ export default function ScrollbarContainer({
   children,
   height,
   scrollableNodeProps,
+  style = {},
   ...props
 }: PropsWithChildren<Props>) {
   return (
@@ -24,9 +25,11 @@ export default function ScrollbarContainer({
               flex: 1,
               display: "flex",
               flexDirection: "column",
+              ...style,
             }
-          : { height: `${height}px` }
+          : { height: `${height}px`, ...style }
       }
+      {...props}
     >
       {children}
     </SimpleBar>

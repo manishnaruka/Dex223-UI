@@ -48,7 +48,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
   return (
     <>
       <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
-      <div className="md:px-10 px-4 md:w-[600px] w-full">
+      <div className="card-spacing-x md:w-[600px] w-full">
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
             <Image src={wallets.metamask.image} alt="" width={48} height={48} />

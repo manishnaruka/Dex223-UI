@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Address, formatUnits, isAddress, parseUnits } from "viem";
 import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
@@ -7,6 +7,7 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Popover from "@/components/atoms/Popover";
 import Preloader from "@/components/atoms/Preloader";
+import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
@@ -27,6 +28,11 @@ import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
 export default function MintTestTokensDialog() {
   const { isOpen, handleOpen, handleClose } = useMintTestTokensDialogStore();
   const tokens = useTokens();
+  const withoutWrapped = useMemo(() => {
+    return tokens.filter((token) => token.isToken);
+  }, [tokens]);
+
+  console.log(withoutWrapped);
   const { isOpened: isOpenedWallet, setIsOpened: setOpenedWallet } =
     useConnectWalletDialogStateStore();
   const [isPopoverOpened, setPopoverOpened] = useState(false);
@@ -43,22 +49,22 @@ export default function MintTestTokensDialog() {
 
   const { data: walletClient } = useWalletClient();
 
-  const [tokenToMint, setTokenToMint] = useState(tokens[0]);
+  const [tokenToMint, setTokenToMint] = useState(withoutWrapped[0]);
 
   useEffect(() => {
-    if (tokens.length && !tokenToMint) {
-      setTokenToMint(tokens[0]);
+    if (withoutWrapped.length && !tokenToMint) {
+      setTokenToMint(withoutWrapped[0]);
     }
-  }, [tokenToMint, tokens]);
+  }, [tokenToMint, withoutWrapped]);
 
   const { data: isAddress1Wrapper } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: "isWrapper",
     address: CONVERTER_ADDRESS[chainId],
-    args: [tokenToMint.wrapped.address1],
+    args: [tokenToMint?.wrapped.address1],
     chainId,
     query: {
-      enabled: tokenToMint.isToken,
+      enabled: tokenToMint?.isToken,
     },
   });
 
@@ -66,10 +72,10 @@ export default function MintTestTokensDialog() {
     abi: TOKEN_CONVERTER_ABI,
     functionName: "getERC223OriginFor",
     address: CONVERTER_ADDRESS[chainId],
-    args: [tokenToMint.wrapped.address0],
+    args: [tokenToMint?.wrapped.address0],
     chainId,
     query: {
-      enabled: tokenToMint.isToken && !isAddress1Wrapper,
+      enabled: tokenToMint?.isToken && !isAddress1Wrapper,
     },
   });
 
@@ -81,7 +87,6 @@ export default function MintTestTokensDialog() {
     abi: ERC20_ABI,
     functionName: "balanceOf",
     address: mintErc223 ? tokenToMint?.wrapped.address1 : tokenToMint?.wrapped.address0,
-    // address: tokenToMint.wrapped.address0,
     chainId,
     args: [address as Address],
     query: {
@@ -94,6 +99,7 @@ export default function MintTestTokensDialog() {
   useEffect(() => {
     refetch();
   }, [latestBlock, refetch]);
+
   const handleMint = useCallback(() => {
     if (!tokenToMint || !walletClient || !publicClient) {
       addToast("Not correct data", "error");
@@ -110,7 +116,6 @@ export default function MintTestTokensDialog() {
         const hash = await walletClient.writeContract({
           abi: ERC223_ABI,
           address: mintErc223 ? tokenToMint?.wrapped.address1 : tokenToMint?.wrapped.address0,
-          // address: tokenToMint.wrapped.address0,
           functionName: "mint",
           args: [address, parseUnits(amountToMint, tokenToMint.decimals)],
         });
@@ -126,7 +131,9 @@ export default function MintTestTokensDialog() {
         setIsPending(false);
       }
     });
-  }, [connector, tokenToMint, walletClient, publicClient, address, mintErc223, amountToMint]);
+  }, [tokenToMint, walletClient, publicClient, address, mintErc223, amountToMint]);
+
+  const ref = useRef<HTMLButtonElement | null>(null);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
@@ -135,13 +142,13 @@ export default function MintTestTokensDialog() {
         <InputLabel label="Token for mint" />
         <div className="flex flex-col gap-4 relative">
           <Popover
+            placement="bottom-start"
             customOffset={5}
             isOpened={isPopoverOpened}
             setIsOpened={setPopoverOpened}
-            placement="bottom-end"
-            customStyles={{ width: "100%" }}
             trigger={
               <SelectButton
+                ref={ref}
                 onClick={() => setPopoverOpened(!isPopoverOpened)}
                 fullWidth
                 size="large"
@@ -155,8 +162,12 @@ export default function MintTestTokensDialog() {
               </SelectButton>
             }
           >
-            <div className="py-1 grid gap-1 bg-tertiary-bg rounded-3 w-full h-[172px] md:h-[200px] overflow-scroll">
-              {tokens.map((token) => {
+            <ScrollbarContainer
+              height={172}
+              className="bg-tertiary-bg rounded-3 py-1"
+              style={{ width: ref.current?.getBoundingClientRect().width || 328 }}
+            >
+              {withoutWrapped.map((token) => {
                 return (
                   <button
                     key={token.wrapped.address0}
@@ -164,20 +175,24 @@ export default function MintTestTokensDialog() {
                       setTokenToMint(token);
                       setPopoverOpened(false);
                     }}
-                    className="flex items-center gap-3 bg-tertiary-bg-bg hocus:bg-quaternary-bg duration-300 w-full min-w-[250px] px-5 h-10 md:h-12 justify-between"
+                    className="flex w-full items-center gap-3 bg-tertiary-bg-bg hocus:bg-quaternary-bg duration-300 min-w-[250px] px-5 h-10 md:h-12 justify-between"
                   >
                     <span
-                      className={token.equals(tokenToMint) ? "text-green" : "text-secondary-text"}
+                      className={
+                        tokenToMint && token?.equals(tokenToMint)
+                          ? "text-green"
+                          : "text-secondary-text"
+                      }
                     >
                       {token.symbol}
                     </span>
-                    {token.equals(tokenToMint) && (
+                    {tokenToMint && token?.equals(tokenToMint) && (
                       <Svg iconName="check" className="text-green" size={20} />
                     )}
                   </button>
                 );
               })}
-            </div>
+            </ScrollbarContainer>
           </Popover>
 
           <TextField
