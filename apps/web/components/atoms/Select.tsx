@@ -1,4 +1,3 @@
-import { Button } from "@acme/ui/button";
 import { flip } from "@floating-ui/core";
 import {
   autoUpdate,
@@ -83,7 +82,6 @@ export default function Select({
 
   return (
     <div className="relative w-full">
-      <Button>UI Button</Button>
       {/* Trigger Button */}
       <button
         {...getReferenceProps()}

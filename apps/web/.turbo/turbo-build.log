@@ -4,96 +4,90 @@
 [m
  [37m[1m [m Creating an optimized production build ...
  [32m[1m✓[m Compiled successfully
- [37m[1m [m Linting and checking validity of types  [36m.[?25l[m[K[221C [37m[1m [m Linting and checking validity of types  [36m..[m[K[221C [37m[1m [m Linting and checking validity of types  [36m...[m[K[221C [37m[1m [m Linting and checking validity of types  [36m.[m[K[221C [37m[1m [m Linting and checking validity of types  [36m..[m[K[221C [37m[1m [m Linting and checking validity of types  [36m...[m[K[221C [37m[1m [m Linting and checking validity of types  [36m.[m[K[221C[36m
+ [37m[1m [m Linting and checking validity of types  [36m.[?25l[m[K[272C [37m[1m [m Linting and checking validity of types  [36m..[m[K[272C [37m[1m [m Linting and checking validity of types  [36m...[m[K[272C [37m[1m [m Linting and checking validity of types  [36m.[m[K[272C [37m[1m [m Linting and checking validity of types  [36m..[m[K[272C [37m[1m [m Linting and checking validity of types  [36m...[m[K[272C[36m
 ./app/[locale]/add/hooks/useLiquidityApprove.tsx[33m
 296[m:[33m5  [1mWarning[m: React Hook useCallback has a missing dependency: 'handleApprove1'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[36m[22m[11;1H./app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity.ts[33m
-207[m:[33m6  [1mWarning[m: React Hook useCallback has a missing dependency: 'setRefreshDepositsTrigger'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[?25h[m
-
-[36m./components/dialogs/MintTestTokensDialog.tsx[m
-[33m129[m:[33m6  [1mWarning[m: React Hook useCallback has an unnecessary dependency: 'connector'. Either exclude it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[m[K
-
-[36m./components/manage-tokens/ImportListWithContract.tsx[m
-[33m124[m:[33m15  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. Se
-[11;221Hee: https://nextjs.org/docs/messages/no-img-element  [90m[1m@next/next/no-img-element[m[K
-
-[36m./components/manage-tokens/ImportListWithJSON.tsx[m
-[33m201[m:[33m15  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. Se
-[11;221Hee: https://nextjs.org/docs/messages/no-img-element  [90m[1m@next/next/no-img-element[m[K
+207[m:[33m6  [1mWarning[m: React Hook useCallback has a missing dependency: 'setRefreshDepositsTrigger'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[36m[22m[14;1H./components/manage-tokens/ImportListWithContract.tsx[33m
+124[m:[33m15  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  [90m[1m@next/next/no-img-element[36m[22m[18;1H./components/manage-tokens/ImportListWithJSON.tsx[?25h[m
+[33m201[m:[33m15  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+[17;272H 
+ [90m[1m@next/next/no-img-element[m[K
 
 [36m./components/manage-tokens/ImportListWithURL.tsx[m
-[33m97[m:[33m15  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See
-[11;221He: https://nextjs.org/docs/messages/no-img-element  [90m[1m@next/next/no-img-element[m[K
+[33m97[m:[33m15  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  
+[17;272H [90m[1m@next/next/no-img-element[22m[K[m
 
 [36m./components/manage-tokens/ImportToken.tsx[m
-[33m245[m:[33m19  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. Se
-[11;221Hee: https://nextjs.org/docs/messages/no-img-element  [90m[1m@next/next/no-img-element[m[K
+[33m245[m:[33m19  [1mWarning[m: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element 
+[17;272H 
+ [90m[1m@next/next/no-img-element[m[K
 
 [36minfo  [m- Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules[K
- [36m.[K[?25l[219C[m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m [36m...[K[217C[m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [36m. [m[K[221C [36m.. [m[K[221C [36m... [m[K[221C [32m[1m✓[m Linting and checking validity of types [?25h
- [37m[1m [m Collecting page data  [36m.[K[?25l[195C[m[K[221C [37m[1m [m Collecting page data  [36m..[m[K[221C [37m[1m [m Collecting page data  [36m...[m[K[221C [37m[1m [m Collecting page data  [36m.[m(node:25152) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
-(Use `node --trace-deprecation ...` to show where the warning was created)[147C
-[221C [37m[1m [m Collecting page data  [36m..[K[194C[m[K[221C [32m[1m✓[m Collecting page data    [?25h
-(node:24040) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+ [36m.[K[?25l[270C[m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m [36m..[K[269C[m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m [36m..[K[269C[m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [36m. [m[K[272C [36m.. [m[K[272C [36m... [m[K[272C [32m[1m✓[m Linting and checking validity of types [?25h
+ [37m[1m [m Collecting page data  [36m.[K[?25l[246C[m[K[272C [37m[1m [m Collecting page data  [36m..[m[K[272C [37m[1m [m Collecting page data  [36m...[m[K[272C [37m[1m [m Collecting page data  [36m.[m[K[272C [37m[1m [m Collecting page data  [36m..[m(node:15596) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)[198C
+[272C [32m[1m✓[m Collecting page data[K[?25h
+(node:28016) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23468) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:9768) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23560) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:24656) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23684) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:14860) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:24024) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:36168) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:22896) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:34228) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:24132) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:36608) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23784) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:8328) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23352) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:15296) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23720) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:30792) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:22668) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:2892) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23440) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:2652) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23912) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:23096) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:584) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:10872) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:23860) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:17636) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:22904) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:21600) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[?25l [37m[1m [m Generating static pages (0/4)  [36m[    ][m[K[221C [37m[1m [m Generating static pages (0/4)  [36m[=   ][m[K[221C [37m[1m [m Generating static pages (0/4)  [36m[==  ][m[K[221C(node:24648) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.[?25h
+[?25l [37m[1m [m Generating static pages (0/4)  [36m[    ][m[K[272C [37m[1m [m Generating static pages (0/4)  [36m[=   ][m[K[272C [37m[1m [m Generating static pages (0/4)  [36m[==  ][m[K[272C(node:23464) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.[?25h
 (Use `node --trace-deprecation ...` to show where the warning was created)
  [32m[1m✓[m Generating static pages (4/4)
-[?25l [37m[1m [m Finalizing page optimization  [36m. [37m[1m [m Collecting build traces  [36m.[m[K[221C [37m[1m [m Collecting build traces  [36m..[K[191C[m[K[221C [37m[1m [m Collecting build traces  [36m...[K[190C[m[K[221C [37m[1m [m Collecting build traces  [36m.[K[192C[m[K[221C [37m[1m [m Collecting build traces  [36m..[K[191C[m[K[221C [37m[1m [m Collecting build traces  [36m...[K[190C[m[K[221C [37m[1m [m Collecting build traces  [36m.[K[192C[m[K[221C [37m[1m [m Collecting build traces  [36m..[K[191C[m[K[221C [37m[1m [m Collecting build traces  [36m...[K[190C[m[K[221C [37m[1m [m Collecting build traces  [36m.[K[192C[m[K[221C [37m[1m [m Collecting build traces  [36m..[K[191C[m[K[221C [37m[1m [m Collecting build traces  [36m...[K[190C[m[K[221C [37m[1m [m Collecting build traces  [36m.[K[192C[m[K[221C [37m[1m [m Collecting build traces  [36m..[K[191C[m[K[221C [32m[1m✓[m Collecting build traces    [?25h
+[?25l [37m[1m [m Finalizing page optimization  [36m. [37m[1m [m Collecting build traces  [36m.[m[K[272C [37m[1m [m Collecting build traces  [36m..[K[242C[m[K[272C [37m[1m [m Collecting build traces  [36m...[K[241C[m[K[272C [37m[1m [m Collecting build traces  [36m.[K[243C[m[K[272C [37m[1m [m Collecting build traces  [36m..[K[242C[m[K[272C [37m[1m [m Collecting build traces  [36m...[K[241C[m[K[272C [37m[1m [m Collecting build traces  [36m.[K[243C[m[K[272C [37m[1m [m Collecting build traces  [36m..[K[242C[m[K[272C [37m[1m [m Collecting build traces  [36m...[K[241C[m[K[272C [37m[1m [m Collecting build traces  [36m.[K[243C[m[K[272C [37m[1m [m Collecting build traces  [36m..[K[242C[m[K[272C [32m[1m✓[m Collecting build traces    [?25h
  [32m[1m✓[m Finalizing page optimization[K
 
 [4mRoute (app)[24m[38X[4m[38CSize[24m     [4mFirst Load JS[24m[K
 ┌ ƒ /_not-found                                  989 B[37m[1m[11C107 kB[m[K
 ├ ƒ /[locale]                                    156 B[37m[1m[11C106 kB[m[K
-├ ƒ /[locale]/add                                37.8 kB[37m[1m[9C520 kB[m[K
-├ ƒ /[locale]/borrow-market                      13 kB[37m[1m[11C186 kB[m[K
-├ ƒ /[locale]/increase/[tokenId]                 3.47 kB[37m[1m[9C472 kB[m[K
-├ ƒ /[locale]/pool/[tokenId]                     11.8 kB[37m[1m[9C451 kB[m[K
-├ ƒ /[locale]/pools                              9.04 kB[37m[1m[9C342 kB[m[K
-├ ƒ /[locale]/pools/[chainId]/[poolAddress]      4.86 kB[37m[1m[9C289 kB[m[K
-├ ƒ /[locale]/pools/positions                    8.82 kB[37m[1m[9C354 kB[m[K
-├ ƒ /[locale]/portfolio                          29.7 kB[37m[1m[9C469 kB[m[K
-├ ƒ /[locale]/remove/[tokenId]                   10.4 kB[37m[1m[9C450 kB[m[K
-├ ƒ /[locale]/requests                           261 B[37m[1m[11C106 kB[m[K
-├ ƒ /[locale]/swap                               24.6 kB[37m[1m[9C472 kB[m[K
-├ ƒ /[locale]/token-listing                      2.94 kB[37m[1m[9C129 kB[m[K
-├ ƒ /[locale]/token-listing/add                  17.3 kB[37m[1m[9C563 kB[m[K
-├ ƒ /[locale]/token-listing/contracts            8.84 kB[37m[1m[9C220 kB[m[K
-├ ƒ /[locale]/token-listing/contracts/[address]  7.39 kB[37m[1m[9C413 kB[m[K
+├ ƒ /[locale]/add                                41.3 kB[37m[1m[9C521 kB[m[K
+├ ƒ /[locale]/borrow-market                      16.9 kB[37m[1m[9C186 kB[m[K
+├ ƒ /[locale]/increase/[tokenId]                 5.08 kB[37m[1m[9C474 kB[m[K
+├ ƒ /[locale]/pool/[tokenId]                     11.5 kB[37m[1m[9C454 kB[m[K
+├ ƒ /[locale]/pools                              9.85 kB[37m[1m[9C344 kB[m[K
+├ ƒ /[locale]/pools/[chainId]/[poolAddress]      8.18 kB[37m[1m[9C293 kB[m[K
+├ ƒ /[locale]/pools/positions                    8.83 kB[37m[1m[9C354 kB[m[K
+├ ƒ /[locale]/portfolio                          28.8 kB[37m[1m[9C472 kB[m[K
+├ ƒ /[locale]/remove/[tokenId]                   11.8 kB[37m[1m[9C452 kB[m[K
+├ ƒ /[locale]/requests                           1.99 kB[37m[1m[9C169 kB[m[K
+├ ƒ /[locale]/swap                               19.9 kB[37m[1m[9C474 kB[m[K
+├ ƒ /[locale]/token-listing                      2.93 kB[37m[1m[9C129 kB[m[K
+├ ƒ /[locale]/token-listing/add                  12.6 kB[37m[1m[9C566 kB[m[K
+├ ƒ /[locale]/token-listing/contracts            8.93 kB[37m[1m[9C220 kB[m[K
+├ ƒ /[locale]/token-listing/contracts/[address]  7.41 kB[37m[1m[9C414 kB[m[K
 └ ○ /sitemap.xml                                 0 B[37m[1m[16C0 B[m[K
 + First Load JS shared by all[37m[1m[20C106 kB[m[K
   ├ chunks/2855-3880840d76510b8a.js              50.6 kB
   ├ chunks/87c73c54-72e651dd73722bfa.js          53 kB
-  └ other shared chunks (total)                  2.38 kB
+  └ other shared chunks (total)                  2.39 kB
 
 
 ƒ Middleware[37m[1m[37C86.2 kB[m[K
@@ -101,5 +95,5 @@
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
 
-[KDone in 34.00s.
+[KDone in 26.11s.
 [?9001l[?1004l
