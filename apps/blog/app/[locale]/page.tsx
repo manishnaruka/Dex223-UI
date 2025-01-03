@@ -15,12 +15,13 @@ import { IIFE } from "@/functions/iife";
 const contents: ContentType[] = ["video", "vide_and_content", "content"];
 
 import PostsContent from "@/app/[locale]/components/PostsContent";
+import Select from "@/components/atoms/Select";
 
 const INITAL_LOAD = 10;
 const POSTS_LIMIT = 6;
 
 function useAllTags() {
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
     IIFE(async () => {
@@ -29,7 +30,9 @@ function useAllTags() {
       const _tags = await tagsRes.json();
 
       if (_tags) {
-        setTags(_tags);
+        const allCategoriesTag = { label: "All Categories", value: "all" };
+
+        setTags([allCategoriesTag, ..._tags.map((_tag: string) => ({ label: _tag, value: _tag }))]);
       }
     });
   }, []);
@@ -60,7 +63,7 @@ async function getPosts({
     url.searchParams.set("search", search);
   }
 
-  if (tags) {
+  if (tags && tags !== "all") {
     url.searchParams.set("tags", tags);
   }
 
@@ -196,7 +199,7 @@ const filterMap: Record<ContentType, string> = {
 
 export default function BlogPage() {
   const [searchValue, setSearchValue] = useState("");
-  const [tag, setTag] = useState("");
+  const [tag, setTag] = useState("all");
   const [contentType, setContentType] = useState<ContentType>("vide_and_content");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -209,97 +212,23 @@ export default function BlogPage() {
 
   const tags = useAllTags();
 
-  const [isOpened, setIsOpened] = useState(false);
-  const [isOpenedContentType, setIsOpenedContentType] = useState(false);
-
   return (
     <Container className="px-4">
       <div className="flex items-center justify-between pb-6 pt-4 md:py-10 flex-wrap max-lg:flex-col max-lg:items-start gap-2">
         <h1 className="text-24 md:text-40">Blog</h1>
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 max-lg:flex-col-reverse max-lg:w-full">
           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 max-md:grid-cols-1 max-lg:grid-cols-2 max-lg:grid max-lg:w-full">
-            <Popover
-              placement="bottom"
-              isOpened={isOpenedContentType}
-              setIsOpened={setIsOpenedContentType}
-              trigger={
-                <SelectButton
-                  onClick={() => setIsOpenedContentType(!isOpenedContentType)}
-                  className="flex-shrink-0 h-10 md:h-12 justify-between max-lg:w-full"
-                >
-                  {filterMap[contentType]}
-                </SelectButton>
-              }
-            >
-              <div className="w-full py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
-                <ul>
-                  {contents.map((content) => {
-                    return (
-                      <li className="w-full min-w-[200px]" key={content}>
-                        <SelectOption
-                          onClick={() => {
-                            setContentType(content);
-                            setIsOpenedContentType(false);
-                            setIsLoading(true);
-                          }}
-                          isActive={contentType === content}
-                        >
-                          {filterMap[content]}
-                        </SelectOption>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </Popover>
+            <Select
+              options={Object.keys(filterMap).map((key) => ({
+                label: filterMap[key as ContentType],
+                value: key,
+              }))}
+              value={contentType}
+              onChange={(contentType) => setContentType(contentType as ContentType)}
+              extendWidth
+            />
 
-            <Popover
-              placement="bottom"
-              isOpened={isOpened}
-              setIsOpened={setIsOpened}
-              trigger={
-                <SelectButton
-                  className={clsx("px-3 flex-shrink-0 h-10 md:h-12 max-lg:w-full justify-between")}
-                  isOpen={isOpened}
-                  onClick={() => setIsOpened(!isOpened)}
-                >
-                  {!!tag ? tag : "All categories"}
-                </SelectButton>
-              }
-            >
-              <div className="w-full py-1 bg-primary-bg rounded-2 shadow-popover shadow-black/70">
-                <ul>
-                  <li className="min-w-[200px]">
-                    <SelectOption
-                      onClick={() => {
-                        setTag("");
-                        setIsOpened(false);
-                        setIsLoading(true);
-                      }}
-                      isActive={tag === ""}
-                    >
-                      All categories
-                    </SelectOption>
-                  </li>
-                  {tags.map((_tag) => {
-                    return (
-                      <li className="min-w-[200px]" key={_tag}>
-                        <SelectOption
-                          onClick={() => {
-                            setTag(_tag);
-                            setIsOpened(false);
-                            setIsLoading(true);
-                          }}
-                          isActive={tag === _tag}
-                        >
-                          {_tag}
-                        </SelectOption>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </Popover>
+            <Select options={tags} value={tag} onChange={(tag) => setTag(tag)} extendWidth />
           </div>
 
           <div className="max-lg:w-full lg:w-[386px]">

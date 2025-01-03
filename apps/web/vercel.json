@@ -1,0 +1,8 @@
+{
+  "name": "web",
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_APP": "web"
+    }
+  }
+}

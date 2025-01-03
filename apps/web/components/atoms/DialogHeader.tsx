@@ -34,7 +34,9 @@ export default function DialogHeader({
     <div
       {...handlers}
       className={clsxMerge(
-        onBack || titlePosition === "center" ? "px-1 md:px-6" : "md:pr-6 px-4 md:pl-10",
+        onBack || titlePosition === "center"
+          ? "px-1 md:px-6"
+          : "lg:pr-6 pl-4 pr-2 sm:pr-4 sm:pl-6 lg:pl-10",
         className,
       )}
     >

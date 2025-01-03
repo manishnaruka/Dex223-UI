@@ -104,7 +104,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
   );
 
 type CopyIconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
-  Omit<FrameProps, "iconName"> & { text: string };
+  Omit<FrameProps, "iconName"> & { text: string; isTouchDevice?: boolean };
 
 function CopyIconButton(_props: CopyIconButtonProps) {
   const t = useTranslations("Toast");
@@ -131,7 +131,7 @@ function CopyIconButton(_props: CopyIconButtonProps) {
         onClick={handleCopy}
         buttonSize={buttonSize || IconButtonSize.SMALL}
         className={clsxMerge(
-          "hocus:text-green duration-200 text-tertiary-text absolute text-green pointer-events-none",
+          "duration-200 text-tertiary-text absolute text-green pointer-events-none",
           className,
           isCopied ? "opacity-100" : "opacity-0",
         )}
@@ -142,9 +142,10 @@ function CopyIconButton(_props: CopyIconButtonProps) {
         onClick={handleCopy}
         buttonSize={buttonSize || IconButtonSize.SMALL}
         className={clsxMerge(
-          "hocus:text-green duration-200 text-tertiary-text ",
+          "duration-200 text-tertiary-text ",
           className,
           isCopied ? "opacity-0" : "opacity-100",
+          !_props.isTouchDevice && "hocus:text-green",
         )}
         {...props}
       />
@@ -272,7 +273,7 @@ export default function IconButton(_props: Props) {
       );
     }
     case IconButtonVariant.COPY: {
-      return <CopyIconButton {..._props} />;
+      return <CopyIconButton isTouchDevice={isTouchDevice} {..._props} />;
     }
   }
 }
