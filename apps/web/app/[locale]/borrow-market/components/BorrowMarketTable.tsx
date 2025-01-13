@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { useCallback, useState } from "react";
+import React from "react";
 
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, {
@@ -207,9 +208,9 @@ export default function BorrowMarketTable() {
       </div>
       <div className=" h-[60px] flex items-center">Action</div>
 
-      {testData.map((o) => {
+      {testData.map((o, index) => {
         return (
-          <>
+          <React.Fragment key={index}>
             <div className=" pl-3 h-[56px] flex items-center gap-2">
               <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
               <span>
@@ -231,7 +232,7 @@ export default function BorrowMarketTable() {
                 Borrow
               </Button>
             </div>
-          </>
+          </React.Fragment>
         );
       })}
     </div>

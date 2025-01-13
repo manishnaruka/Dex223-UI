@@ -32,6 +32,10 @@
   --sorting-arrow-down-drop-shadow: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
 }
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   background: theme("colors.global-bg");
   color: theme("colors.primary-text");

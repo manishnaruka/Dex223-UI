@@ -14,7 +14,7 @@ function Tabs({ children, defaultTab = 0, activeTab = 0, setActiveTab = null }: 
 
   return (
     <div>
-      <ul className="flex rounded-3 w-full p-1 gap-1">
+      <ul className="inline-flex rounded-3 bg-primary-bg p-1 gap-1">
         {children.map((item, index) => (
           <TabTitle
             key={index}

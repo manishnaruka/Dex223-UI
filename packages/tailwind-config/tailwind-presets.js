@@ -92,11 +92,16 @@ const config = {
         //cards
         "gradient-card-blue-light-fill": "linear-gradient(90deg, #1E2022 0%, #445259 100%)",
         "gradient-card-green-light-fill": "linear-gradient(90deg, #1F2020 0%, #3C4B4A 100%)",
+        "gradient-card-yellow-light-fill": "linear-gradient(90deg, #2B271F 0%, #57533C 100%)",
+        "gradient-card-red-light-fill": "linear-gradient(90deg, #302121 0%, #5A3939 100%)",
 
         "gradient-card-blue-dark-fill": "linear-gradient(78.4deg, #21272C 4.02%, #5C6369 111.77%)",
         "gradient-card-green-dark-fill": "linear-gradient(78.4deg, #212C26 4.02%, #667471 111.77%)",
         "gradient-card-purple-dark-fill":
           "linear-gradient(78.4deg, #2C2636 4.02%, #51477D 111.77%)",
+
+        "gradient-card-yellow-light-border": "linear-gradient(251.06deg, #827551 11.76%, #4C483C 59.71%)",
+        "gradient-card-red-light-border": "linear-gradient(80.17deg, #443535 2.55%, #5A3939 90.3%)",
 
         "gradient-card-blue-dark-border":
           "linear-gradient(251.06deg, #627985 11.76%, #2A3A45 59.71%)",
@@ -106,6 +111,9 @@ const config = {
           "linear-gradient(251.06deg, #7E71AD 11.76%, #3D354D 59.71%)",
 
         "gradient-card-account": "linear-gradient(90deg, #1F2020 0%, #3C4B4A 100%);",
+        "gradient-progress-bar-green": "linear-gradient(263.17deg, #596662 8.02%, #28332D 95.29%)",
+        "gradient-progress-bar-yellow": "linear-gradient(263.17deg, #968B5F 8.02%, #3C3426 95.29%)",
+        "gradient-progress-bar-red": "linear-gradient(263.17deg, #965F5F 8.02%, #3C2626 95.29%)",
 
         "table-gradient": "linear-gradient(to bottom, #2E2F2F 60px, #1D1E1E 60px, #1D1E1E 100%)",
       },
@@ -187,6 +195,7 @@ const config = {
       "green-bg": "#3C4C4A",
       "red-bg": "#443535",
       "orange-bg": "#4A4237",
+      "yellow-bg": "#4C483C",
       "blue-bg": "#2A3A45",
       "purple-bg": "#3C3D4C",
 
@@ -202,11 +211,13 @@ const config = {
       "green-hover-icon": "#A5E7E6",
       "red-light-hover": "#F6B4B4",
       "red-hover": "#DA5D57",
+      "red-bg-hover": "#655050",
       "purple-hover": "#A5AEE7",
       "purple-bg-hover": "#56586F",
       "purple-hover-icon": "#B8C4FF",
       "blue-hover": "#96B5C4",
       "orange-hover": "#B89158",
+      "yellow-bg-hover": "#6C634F",
 
       "primary-text": "#D1DEDF",
       "secondary-text": "#A2AAA9",
@@ -246,6 +257,7 @@ const config = {
       "0": "0px",
       "1": "4px",
       "2": "8px",
+      "2.5": "10px",
       "3": "12px",
       "4": "16px",
       "5": "20px",
