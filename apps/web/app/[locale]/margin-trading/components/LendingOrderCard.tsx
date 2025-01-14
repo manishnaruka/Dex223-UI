@@ -101,29 +101,96 @@ export default function LendingOrderCard() {
           </div>
         </div>
       </div>
-      <div className="grid gap-5 grid-cols-[100px_1fr]">
-        <div></div>
+      <div className="grid gap-5 grid-cols-[80px_1fr]">
+        <div
+          className={clsx(
+            "relative -top-[68px]",
+            "before:w-1 before:absolute before:bg-green-bg before:left-0 before:h-full before:top-[68px]",
+          )}
+        >
+          <svg
+            width="80"
+            height="112"
+            viewBox="0 0 80 112"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
+              fill="#3C4C4A"
+            />
+          </svg>
+        </div>
         <LendingPositionCard
           totalBalance={2}
           expectedBalance={10}
           liquidationFee={2}
           liquidationCost={10}
         />
-        <div></div>
+        <div
+          className={clsx(
+            "relative -top-[68px]",
+            "before:w-1 before:absolute before:bg-green-bg before:left-0 before:h-full before:top-[68px]",
+          )}
+        >
+          <svg
+            width="80"
+            height="112"
+            viewBox="0 0 80 112"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
+              fill="#3C4C4A"
+            />
+          </svg>
+        </div>
         <LendingPositionCard
           totalBalance={2}
           expectedBalance={10}
           liquidationFee={2}
           liquidationCost={10}
         />
-        <div></div>
+        <div
+          className={clsx(
+            "relative -top-[68px]",
+            "before:w-1 before:absolute before:bg-green-bg before:left-0 before:h-full before:top-[68px]",
+          )}
+        >
+          <svg
+            width="80"
+            height="112"
+            viewBox="0 0 80 112"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
+              fill="#3C4C4A"
+            />
+          </svg>
+        </div>
         <LendingPositionCard
           totalBalance={12}
           expectedBalance={10}
           liquidationFee={12}
           liquidationCost={10}
         />
-        <div></div>
+        <div className={clsx("relative -top-[68px]")}>
+          <svg
+            width="80"
+            height="112"
+            viewBox="0 0 80 112"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
+              fill="#3C4C4A"
+            />
+          </svg>
+        </div>
         <LendingPositionCard
           totalBalance={12}
           expectedBalance={10}
