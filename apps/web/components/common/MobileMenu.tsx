@@ -29,6 +29,7 @@ export function MobileLink({
   className = "",
   handleClick,
   isMenu = false,
+  isExternal = false,
 }: {
   href: string;
   iconName: IconName;
@@ -39,7 +40,35 @@ export function MobileLink({
   className?: string;
   handleClick?: (e: any) => void;
   isMenu?: boolean;
+  isExternal?: boolean;
 }) {
+  if (isExternal) {
+    return (
+      <a
+        target="_blank"
+        onClick={(e) => {
+          if (handleClick) {
+            handleClick(e);
+          }
+
+          handleClose();
+        }}
+        href={href}
+        className={clsxMerge(
+          "flex items-center gap-2 py-3 px-4 duration-200",
+          !isActive && "hocus:bg-quaternary-bg text-secondary-text",
+          isActive && !isMenu && "text-green pointer-events-none",
+          isActive && isMenu && "bg-navigation-active-mobile text-green pointer-events-none",
+          disabled && "pointer-events-none opacity-50",
+          className,
+        )}
+      >
+        <Svg iconName={iconName} />
+        {title}
+      </a>
+    );
+  }
+
   return (
     <Link
       onClick={(e) => {
@@ -252,6 +281,7 @@ export default function MobileMenu() {
                     disabled
                   />
                   <MobileLink
+                    isExternal
                     href="https://blog.dex223.io/"
                     iconName="blog"
                     title="Blog"

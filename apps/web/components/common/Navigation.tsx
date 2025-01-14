@@ -195,7 +195,8 @@ function NavigationMoreDropdown() {
               disabled
             />
             <MobileLink
-              href="/blog"
+              isExternal
+              href="https://blog.dex223.io/"
               iconName="blog"
               title="Blog"
               handleClose={() => setSubmenuOpened(false)}
