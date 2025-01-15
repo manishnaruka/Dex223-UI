@@ -8,7 +8,9 @@ const config = {
     "../../apps/web/app/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/web/components/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/blog/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}"
+    "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../apps/exchange/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../apps/exchange/components/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
     extend: {
