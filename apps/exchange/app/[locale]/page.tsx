@@ -1,10 +1,11 @@
 "use client";
 
+import Button from "@repo/ui/button";
+
 import Container from "@/components/atoms/Container";
 import Switch from "@/components/atoms/Switch";
 import TextField from "@/components/atoms/TextField";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button from "@/components/buttons/Button";
 import SwapButton from "@/components/buttons/SwapButton";
 import TokenInput from "@/components/common/TokenInput";
 import Tab from "@/components/tabs/Tab";
@@ -46,7 +47,7 @@ export default function ExchangePage() {
                   <Tooltip text="Tooltip text" />
                 </span>
               </div>
-              <div className="mb-3 ">
+              <div className="mb-3">
                 <TextField label="The recepient's Ethereum wallet address" placeholder="0x..." />
               </div>
 
