@@ -1,0 +1,10 @@
+[?9001h[?1004h[?25l[2J[m[H]0;C:\WINDOWS\system32\cmd.exe [?25h[K[1myarn run v1.22.22
+[22m[2m$ next build[22m[K
+   [38;2;173;127;168m[1m▲ Next.js 15.1.2
+[?25l[m   - Environments: .env[6;1H[?25h [37m[1m [m Creating an optimized production build ...
+[?25l[31mFailed to compile.[9;1H[?25h[?25l[m./app/[locale]/page.tsx[31m[1m
+Module not found[m: Can't resolve '[32m@repo/ui/button[m'[12;1Hhttps://nextjs.org/docs/messages/module-not-found[14;1H[?25h
+> Build failed because of webpack errors
+[K[31merror [mCommand failed with exit code 1.
+[94minfo [mVisit [1mhttps://yarnpkg.com/en/docs/cli/run[22m for documentation about this command.[K
+[?9001l[?1004l
