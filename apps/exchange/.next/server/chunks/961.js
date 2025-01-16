@@ -1,1 +1,0 @@
-"use strict";exports.id=961,exports.ids=[961],exports.modules={2961:o=>{o.exports=JSON.parse('{"Trade":{"trade":"交易","swap":"交易cio","margin-trading":"Margin tradingio","portfolio":"Portfolioio","lending-and-borrowing":"Borrow/Lendio","pools":"Poolsio","token-listing":"Token listingio","lib":"Libio"}}')}};
