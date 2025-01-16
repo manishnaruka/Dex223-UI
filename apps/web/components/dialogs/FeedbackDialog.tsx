@@ -160,7 +160,7 @@ export default function FeedbackDialog() {
               ) => {
                 setSubmitting(true);
                 try {
-                  const data = await fetch("https://api.dex223.io/v1/main/feedback", {
+                  const data = await fetch("https://api.dex223.io/v1/core/api/feedback", {
                     method: "POST",
                     body: JSON.stringify({
                       message: values.description,
