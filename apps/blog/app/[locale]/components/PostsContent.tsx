@@ -28,11 +28,6 @@ export default function PostsContent({
     return !searchValue && contentType === "vide_and_content" && tag === "all";
   }, [searchValue, contentType, tag]);
 
-  console.log(showLatestNews);
-  console.log(searchValue);
-  console.log(contentType);
-  console.log(tag);
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[300px]">

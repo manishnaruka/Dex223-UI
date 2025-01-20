@@ -53,6 +53,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         "tr",
         "tbody",
         "thead",
+        "img",
+        "q",
       ], // Add 'iframe' to the allowed tags
       ALLOWED_ATTR: [
         "src",
