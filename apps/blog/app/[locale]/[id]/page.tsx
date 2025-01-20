@@ -97,7 +97,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
               return (
                 <div
                   key={tag}
-                  className="rounded-2 border border-secondary-border text-secondary-text py-2 px-3 h-8 md:h-10 text-14 md:text-16 "
+                  className="rounded-2 border border-secondary-border text-secondary-text flex items-center px-3 h-8 md:h-10 text-14 md:text-16 "
                 >
                   {tag}
                 </div>
