@@ -92,19 +92,19 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             Back to blog
           </Link>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             {post.tags?.map((tag: string | undefined) => {
               return (
                 <div
                   key={tag}
-                  className="rounded-2 border border-secondary-border text-secondary-text py-2 px-3"
+                  className="rounded-2 border border-secondary-border text-secondary-text py-2 px-3 h-8 md:h-10 text-14 md:text-16 "
                 >
                   {tag}
                 </div>
               );
             })}
 
-            <div className="bg-tertiary-bg flex gap-1 items-center h-8 md:h-10 text-12 md:text-16 px-4 rounded-2">
+            <div className="flex-shrink-0 bg-tertiary-bg flex gap-1 items-center h-8 md:h-10 text-12 md:text-16 px-4 rounded-2">
               <Svg
                 className="text-tertiary-text !w-4 !h-4 md:!w-5 md:!h-5"
                 iconName="date"
@@ -123,14 +123,14 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {post.author && (
-              <div className="bg-tertiary-bg flex gap-1 items-center py-2 px-4 rounded-2">
+              <div className="bg-tertiary-bg flex gap-1 items-center py-2 px-4 h-8 md:h-10 text-12 md:text-16 rounded-2">
                 <Svg
                   className="text-tertiary-text !w-4 !h-4 md:!w-5 md:!h-5"
                   iconName="author"
                   size={20}
                 />
                 <span className="text-tertiary-text">Author:</span>
-                <span className="text-secondary-text">{post.author.email}</span>
+                <span className="text-secondary-text">{post.author.username}</span>
               </div>
             )}
           </div>

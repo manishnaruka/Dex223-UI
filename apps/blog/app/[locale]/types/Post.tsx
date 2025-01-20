@@ -36,7 +36,7 @@ export type PostDetails = {
     alt: string;
   };
   tags: string[];
-  author: null | { name: string; email: string; id: string };
+  author: null | { username: string; email: string; id: string };
   createdAt: string;
   updatedAt: string;
   links: [
