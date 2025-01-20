@@ -56,7 +56,7 @@ async function getPosts({
   contentType: ContentType;
 }) {
   const url = new URL(
-    `https://api.dex223.io/v1/core/api/blog/list?lang=en&page=${page}&limit=${limit}&skip=${skip}`,
+    `https://api.dex223.io/v1/core/api/blog/list?lang=en&order_by=-created_at&page=${page}&limit=${limit}&skip=${skip}`,
   );
 
   if (search) {

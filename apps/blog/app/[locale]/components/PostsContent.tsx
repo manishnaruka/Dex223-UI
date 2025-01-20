@@ -25,8 +25,13 @@ export default function PostsContent({
   isAllLoaded: boolean;
 }) {
   const showLatestNews = useMemo(() => {
-    return !searchValue && contentType === "vide_and_content" && !tag;
+    return !searchValue && contentType === "vide_and_content" && tag === "all";
   }, [searchValue, contentType, tag]);
+
+  console.log(showLatestNews);
+  console.log(searchValue);
+  console.log(contentType);
+  console.log(tag);
 
   if (isLoading) {
     return (

@@ -9,6 +9,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "dev:web": "cd apps/web && npm run dev",
+    "dev:blog": "cd apps/blog && npm run dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.${ts,tsx,md}\""
   },
