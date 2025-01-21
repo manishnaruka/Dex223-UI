@@ -11,7 +11,7 @@ export default function ExternalConverterLink() {
   return (
     <a
       target="_blank"
-      href="https://gorbatiukcom.github.io/token-converter/"
+      href="https://dexaran.github.io/token-converter"
       className="flex items-center gap-1 pl-3 pr-3 md:pl-4 md:pr-5 justify-between rounded-2 bg-primary-bg border-l-4 border-l-green py-3 hocus:bg-green-bg duration-200 group text-secondary-text hocus:text-primary-text"
     >
       <div className="flex items-center gap-1 text-14 md:text-16">
