@@ -280,7 +280,10 @@ export default function PoolPage({
             ) : (
               <div className="flex items-center gap-2 lg:gap-3 mb-4 lg:mb-5 flex-wrap">
                 <div className="flex items-center gap-1 px-3 justify-between py-2 rounded-2 bg-tertiary-bg">
-                  <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
+                  <Tooltip
+                    text="Each liquidity position is represented by a NFT. This is the identifier of the token associated with this position"
+                    iconSize={isMobile ? 16 : 24}
+                  />
                   <span className="text-tertiary-text text-12 lg:text-16">NFT ID:</span>
                   <ExternalTextLink
                     text={tokenId}
@@ -294,14 +297,20 @@ export default function PoolPage({
                   />
                 </div>
                 <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
-                  <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
+                  <Tooltip
+                    text="This value is used within internal calculations of the pool and determines the lower boundary of the price for your position."
+                    iconSize={isMobile ? 16 : 24}
+                  />
                   <span className="text-tertiary-text text-12 lg:text-16">{t("min_tick")}:</span>
                   <span className="text-12 text-secondary-text lg:text-16">
                     {position?.tickLower}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 px-3 py-2 rounded-2 bg-tertiary-bg">
-                  <Tooltip text="Tooltip text" iconSize={isMobile ? 16 : 24} />
+                  <Tooltip
+                    text="This value is used within internal calculations of the pool and determines the upper boundary of the price for your position"
+                    iconSize={isMobile ? 16 : 24}
+                  />
                   <span className="text-tertiary-text text-12 lg:text-16">{t("max_tick")}:</span>
                   <span className="text-12 text-secondary-text lg:text-16">
                     {position?.tickUpper}

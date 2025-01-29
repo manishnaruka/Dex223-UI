@@ -73,7 +73,7 @@ export const LiquidityPositions = () => {
                   <span className="text-14 lg:text-16 text-secondary-text">
                     {t("provided_liq_balance")}
                   </span>
-                  <Tooltip iconSize={20} text="Info text" />
+                  <Tooltip iconSize={20} text="TODO_TOOLTIP_TEXT" />
                 </div>
                 <span className="text-24 lg:text-32 font-medium">$ —</span>
               </>

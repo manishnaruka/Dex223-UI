@@ -609,7 +609,10 @@ export default function ConfirmListingDialog() {
           )}
           {autoListing && !autoListing.isFree && paymentToken && (
             <div className="mb-5">
-              <InputLabel label="Payment for listing" tooltipText="Tooltip text" />
+              <InputLabel
+                label="Payment for listing"
+                tooltipText="This amount will be delivered to the auto-listing contract. Different auto-listing contracts may require different payment thresholds. Make sure you are complying with the settings of the auto-listing contract you are going to list your token to."
+              />
               <div className="h-12 rounded-2  w-full bg-tertiary-bg text-primary-text flex justify-between items-center px-5">
                 {formatUnits(
                   paymentToken.price * BigInt(tokensToList.length),
@@ -644,7 +647,11 @@ export default function ConfirmListingDialog() {
                   )}
                 >
                   <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                    <Tooltip text={"Tooltip_text"} />
+                    <Tooltip
+                      text={
+                        " In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
+                      }
+                    />
                     <span>Approve amount</span>
                   </div>
                   <div className="flex items-center gap-2 flex-grow justify-end">

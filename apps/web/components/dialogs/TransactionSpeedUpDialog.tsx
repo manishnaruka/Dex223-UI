@@ -83,6 +83,17 @@ function pickLargerBigInt(a: bigint, b: bigint) {
   return a > b ? a : b;
 }
 
+const tooltipTextMap: Record<SpeedUpOption, string> = {
+  [SpeedUpOption.AUTO_INCREASE]:
+    "GAS values will be increased by 10% compared to the values currently specified for the pending transaction you are trying to speed up.",
+  [SpeedUpOption.CHEAP]:
+    "GAS values will be set to minimize the fee you are going to pay. It might result in the transaction being pending for longer before confirming.",
+  [SpeedUpOption.FAST]:
+    "GAS values will be set to minimize the amount of time your transaction will take to confirm. It might result in higher gas fee payment.",
+  [SpeedUpOption.CUSTOM]:
+    "With custom transaction configuration you can set the gas values manually.",
+};
+
 export default function TransactionSpeedUpDialog() {
   const { transaction, isOpen, handleClose, replacement } = useTransactionSpeedUpDialogStore();
   const chainId = useCurrentChainId();
@@ -356,7 +367,7 @@ export default function TransactionSpeedUpDialog() {
                     gasPriceGWEI={`${formatFloat(formatGwei(getGasPriceGwei(_speedUpOption)))} GWEI`}
                     gasPriceCurrency={`${formatFloat(formatEther(getGasPriceGwei(_speedUpOption) * BigInt(transaction.gas.gas)))} ${nativeCurrency.symbol}`}
                     gasPriceUSD={`~$0.00`}
-                    tooltipText={"Tooltip text"}
+                    tooltipText={tooltipTextMap[_speedUpOption]}
                     title={speedUpOptionTitle[_speedUpOption]}
                     iconName={speedUpOptionIcon[_speedUpOption]}
                     isActive={values.speedUpOption === _speedUpOption}

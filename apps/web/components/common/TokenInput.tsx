@@ -375,7 +375,10 @@ export default function TokenInput({
           >
             <div className="flex items-center gap-1 cursor-default">
               <Badge color="green" text="Native" />
-              <Tooltip iconSize={16} text="Native token tooltip" />
+              <Tooltip
+                iconSize={16}
+                text="Native currency of the network you are using (e.g. ETH on Ethereum). On most networks gas fees are paid with native currency."
+              />
             </div>
 
             <span className={clsx("block text-primary-text")}>

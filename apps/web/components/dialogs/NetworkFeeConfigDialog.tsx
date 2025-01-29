@@ -83,6 +83,14 @@ type HandleApplyArgs =
   | { option: GasOption.FAST }
   | { option: GasOption.CUSTOM; gasSettings: GasSettings; gasLimit: bigint };
 
+const tooltipTextMap: Record<GasOption, string> = {
+  [GasOption.CHEAP]:
+    "GAS values will be set to minimize the fee you are going to pay. It might result in the transaction being pending for longer before confirming.",
+  [GasOption.CUSTOM]: "With custom transaction configuration you can set the gas values manually.",
+  [GasOption.FAST]:
+    "GAS values will be set to minimize the amount of time your transaction will take to confirm. It might result in higher gas fee payment.",
+};
+
 function NetworkFeeDialogContent({
   isAdvanced,
   setIsOpen,
@@ -296,7 +304,7 @@ function NetworkFeeDialogContent({
               gasPriceGWEI={`${formatFloat(formatGwei(getGasPriceGwei(_gasOption)))} GWEI`}
               gasPriceCurrency={`${formatFloat(formatEther(getGasPriceGwei(_gasOption) * estimatedGas))} ${nativeCurrency.symbol}`}
               gasPriceUSD={"~$0.00"}
-              tooltipText={"Tooltip text"}
+              tooltipText={tooltipTextMap[_gasOption]}
               title={gasOptionTitle[_gasOption]}
               iconName={gasOptionIcon[_gasOption]}
               customContent={
@@ -410,7 +418,8 @@ function NetworkFeeDialogContent({
                                     "text-secondary-text",
                                 )}
                               >
-                                EIP-1559 <Tooltip text="WOOTLAMN" />
+                                EIP-1559
+                                <Tooltip text="There are two types of transactions: EIP-1559 and legacy. The type of transaction affects the formula for gas payments calculation. EIP-1559 transactions are recommended for networks and wallets that have it supported." />
                               </span>
                               <span
                                 className={clsx(
@@ -440,7 +449,8 @@ function NetworkFeeDialogContent({
                                     "text-secondary-text",
                                 )}
                               >
-                                Legacy <Tooltip text="WOOTLAMN" />
+                                Legacy{" "}
+                                <Tooltip text="There are two types of transactions: EIP-1559 and legacy. The type of transaction affects the formula for gas payments calculation. Legacy transactions allow you to determine the exact gasPrice you are going to pay. EIP-1559 transactions are recommended for networks that support it." />
                               </span>
                               <span
                                 className={clsx(

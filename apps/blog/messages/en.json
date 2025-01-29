@@ -110,7 +110,7 @@
     "import_token_list_from_URL": "Import token list from URL",
     "https_or_ipfs_placeholder": "https:// or ipfs://",
     "adding_list_warning": "By adding this list you are implicitly trusting that the data is correct. Anyone can create a list, including creating fake versions of existing lists and lists that claim to represent projects that do not have one.",
-    "i_understand": "I understand the risks",
+    "i_understand": "I understand",
     "import_with_URL": "Import with URL",
     "import_with_JSON": "Import with JSON",
     "list_imported": "List imported",

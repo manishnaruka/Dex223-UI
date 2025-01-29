@@ -273,7 +273,7 @@ function SwapSettingsDialogContent() {
         <div className="mt-3">
           <Alert
             type="warning"
-            text="Slippage tolerance above 1% could lead to an unfavorable rate. It’s recommended to use the auto setting."
+            text="Slippage tolerance above 1% could result in an unfavorable exchange rate. It’s recommended to use the auto setting unless you know what you’re doing."
           />
         </div>
       )}

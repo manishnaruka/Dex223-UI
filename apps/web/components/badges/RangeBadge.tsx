@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 
 import Svg from "@/components/atoms/Svg";
+import Tooltip from "@/components/atoms/Tooltip";
 
 export enum PositionRangeStatus {
   IN_RANGE = "in-range",
@@ -39,14 +40,23 @@ const textColorMap: Record<PositionRangeStatus, string> = {
 };
 export default function RangeBadge({ status }: Props) {
   return (
-    <div
-      className={clsx(
-        "rounded-5 py-1 flex items-center gap-1 font-medium text-12 md:text-16 text-nowrap",
-        textColorMap[status],
-      )}
-    >
-      {textMap[status]}
-      {iconsMap[status]}
-    </div>
+    <Tooltip
+      text="Provided liquidity earns you dividends only when it is within the current price range of the pool"
+      renderTrigger={(ref, refProps) => {
+        return (
+          <div
+            ref={ref.setReference}
+            {...refProps}
+            className={clsx(
+              "rounded-5 py-1 flex items-center gap-1 font-medium text-12 md:text-16 text-nowrap",
+              textColorMap[status],
+            )}
+          >
+            {textMap[status]}
+            {iconsMap[status]}
+          </div>
+        );
+      }}
+    />
   );
 }

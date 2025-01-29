@@ -101,12 +101,16 @@ export default function SwapDetails({
           <SwapDetailsRow
             title={"Gas price"}
             value={`${gasPrice} GWEI`}
-            tooltipText={"Gas price tooltip"}
+            tooltipText={
+              "Network fee is calculated as tx gas quantity * gas price. If the gas price value of your transaction will be lower than the gas price value on the network then your transaction will not confirm until the network gas prices will drop."
+            }
           />
           <SwapDetailsRow
             title={"Network fee"}
             value={`${networkFee} ${nativeCurrency.symbol}`}
-            tooltipText={"Network fee tooltip"}
+            tooltipText={
+              "Network fee is paid to the network operators to include your transaction in a block. It does not depend on Dex223 team. Network fee is calculated as tx gas quantity * tx gas price."
+            }
           />
           <SwapDetailsRow
             title={t("minimum_received")}

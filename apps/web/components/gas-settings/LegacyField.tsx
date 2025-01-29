@@ -55,7 +55,10 @@ export default function LegacyField({
         label="Gas price"
         name="gasPrice"
         id="gasPrice"
-        tooltipText="Gas price tooltip"
+        tooltipText=" The amount of fee that you are going to pay with legacy transaction is calculated as gasPrice * gasUsed.
+
+Your transaction will not confirm until your gasPrice is higher or equal to the gas price of the network in the last block.
+"
         value={value}
         onChange={onChange}
         onBlur={onBlur}

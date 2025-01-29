@@ -70,7 +70,10 @@ export default function EIP1559Fields({
           label="Max fee"
           name="maxFeePerGas"
           id="maxFeePerGas"
-          tooltipText="Max fee tooltip"
+          tooltipText="The amount of fee that you are going to pay is calculated as (baseFee + priorityFee) * gasUsed.
+Base fee is determined by the network load. Priority fee is determined by the sender of the transaction. Gas requirement is determined by the type of action your transaction performs.
+
+Max fee sets the upper bound of the payment that you allow your transaction to consume in total. The transaction will not confirm until the base fee in the network is small enough to allow your transaction to submit without exceeding max fee."
           value={maxFeePerGas}
           onChange={(e) => {
             handleChange(e);
@@ -107,7 +110,8 @@ export default function EIP1559Fields({
           label="Priority fee"
           name="maxPriorityFeePerGas"
           id="maxPriorityFeePerGas"
-          tooltipText="Max priority tooltip"
+          tooltipText="The amount of fee that you are going to pay is calculated as (baseFee + priorityFee) * gasUsed.
+Higher priority fee may reduce the amount of time needed for your transaction to submit if the network load is sufficiently low to satisfy the max fee criteria."
           value={maxPriorityFeePerGas}
           onChange={(e) => {
             handleChange(e);

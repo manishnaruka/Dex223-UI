@@ -91,7 +91,10 @@ export const Deposited = () => {
           <div className="flex flex-col ">
             <div className="flex items-center gap-1 z-10">
               <span className="text-14 lg:text-16 text-secondary-text">Approved</span>
-              <Tooltip iconSize={20} text="Info text" />
+              <Tooltip
+                iconSize={20}
+                text="In order to deposit ERC-20 tokens to contracts you need to “authorize” the contract to withdraw the token from your balance. Approval determines how much tokens on your balance a contract can move on your behalf."
+              />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
             <Image
@@ -108,7 +111,10 @@ export const Deposited = () => {
           <div className="flex flex-col ">
             <div className="flex items-center gap-1 z-10">
               <span className="text-14 lg:text-16 text-secondary-text">Deposited to contract</span>
-              <Tooltip iconSize={20} text="Info text" />
+              <Tooltip
+                iconSize={20}
+                text="ERC-223 tokens must be deposited to the contract first in order to allow you to make operations with them. This amount shows how much of your tokens are already in the contract."
+              />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
             <Image

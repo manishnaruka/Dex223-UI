@@ -333,7 +333,7 @@ export default function AutoListingContractDetails({
                   <h3 className="text-secondary-text ">
                     {listingContract.tokensToPay.length} tokens available to pay for listing
                   </h3>
-                  <Tooltip text="Avalialbe tooltip" />
+                  <Tooltip text="You can only pay for the listing in one of the specified accepted assets." />
                 </div>
                 <div className="flex flex-col sm:grid sm:grid-cols-[minmax(224px,1fr)_minmax(224px,1fr)] md:grid-cols-[minmax(224px,1fr)_minmax(224px,1fr)_minmax(224px,1fr)] xl:grid-cols-[minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)_minmax(284px,1fr)] gap-x-2 gap-y-3">
                   {listingContract.tokensToPay.map((tokenToPay, index) => {

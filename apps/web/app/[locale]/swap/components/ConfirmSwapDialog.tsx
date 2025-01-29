@@ -672,7 +672,11 @@ export default function ConfirmSwapDialog() {
                   <div className="sm:items-center sm:justify-between sm:gap-5 flex-grow flex flex-col gap-1 sm:flex-row">
                     <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap sm:flex-row-reverse">
                       <span>Approve amount</span>
-                      <Tooltip text={"Tooltip_text"} />
+                      <Tooltip
+                        text={
+                          "In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
+                        }
+                      />
                     </div>
 
                     {!isEditApproveActive ? (

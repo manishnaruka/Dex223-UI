@@ -213,7 +213,17 @@ export const RevokeDialog = () => {
 
             {standard === "ERC-20" ? (
               <div className="mt-2">
-                <Alert type="info" text={<span>Info text</span>} />
+                <Alert
+                  type="info"
+                  text={
+                    <span>
+                      You are about to revoke a token approval. This will reset the amount of tokens
+                      that the DEX contract can operate on your behalf for the current wallet. Make
+                      sure that you have removed this permissions for contracts you are not planning
+                      to interact with as this will protect your wallet from possible attacks.
+                    </span>
+                  }
+                />
               </div>
             ) : (
               <>

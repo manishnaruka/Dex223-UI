@@ -557,7 +557,10 @@ export default function ListTokenPage() {
                     <>
                       {autoListing?.tokensToPay.length > 1 ? (
                         <div>
-                          <InputLabel label="Payment for listing" />
+                          <InputLabel
+                            label="Payment for listing"
+                            tooltipText="This amount will be delivered to the auto-listing contract. Different auto-listing contracts may require different payment thresholds. Make sure you are complying with the settings of the auto-listing contract you are going to list your token to."
+                          />
                           <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center pl-5 pr-1">
                             {paymentToken
                               ? formatUnits(
@@ -611,7 +614,10 @@ export default function ListTokenPage() {
                         </div>
                       ) : (
                         <div>
-                          <InputLabel label="Payment for listing" />
+                          <InputLabel
+                            label="Payment for listing"
+                            tooltipText="This amount will be delivered to the auto-listing contract. Different auto-listing contracts may require different payment thresholds. Make sure you are complying with the settings of the auto-listing contract you are going to list your token to."
+                          />
                           {paymentToken && (
                             <div className="h-12 rounded-2 border w-full border-secondary-border text-primary-text flex justify-between items-center px-5">
                               {formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18)}
