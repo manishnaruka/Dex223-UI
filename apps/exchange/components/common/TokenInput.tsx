@@ -81,13 +81,13 @@ export default function TokenInput({
             <span className="flex gap-2 items-center">
               <Image
                 className="flex-shrink-0"
-                src={token?.logoURI || ""}
+                src={token?.image || ""}
                 alt="Ethereum"
                 width={32}
                 height={32}
               />
               <span className="max-w-[100px] md:max-w-[150px] overflow-ellipsis overflow-hidden whitespace-nowrap">
-                {token.symbol}
+                {token.name}
               </span>
             </span>
           ) : (

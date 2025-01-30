@@ -6,7 +6,7 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
 import Tooltip from "@/components/atoms/Tooltip";
-import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import { db } from "@/db/db";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
