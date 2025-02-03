@@ -3,6 +3,8 @@ import type { MetadataRoute } from "next";
 type Frequency = "yearly" | "monthly";
 const BASE_URL = "https://blog.dex223.io";
 
+export const revalidate = 86400;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const allRoutes = [
     {
@@ -34,7 +36,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return allRoutes;
 }
-
-const hourToSeconds = 3600;
-
-export const revalidate = hourToSeconds * 24;
