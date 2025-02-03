@@ -34,3 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return allRoutes;
 }
+
+const hourToSeconds = 3600;
+
+export const revalidate = hourToSeconds * 24;
