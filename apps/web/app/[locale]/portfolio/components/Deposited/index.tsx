@@ -93,7 +93,7 @@ export const Deposited = () => {
               <span className="text-14 lg:text-16 text-secondary-text">Approved</span>
               <Tooltip
                 iconSize={20}
-                text="In order to deposit ERC-20 tokens to contracts you need to “authorize” the contract to withdraw the token from your balance. Approval determines how much tokens on your balance a contract can move on your behalf."
+                text="Amount of approvals issued to Dex223 smart-contracts. Approval grants the contract permission to manipulate the tokens on your wallets balance. It is recommended to revoke unnecessary approvals so that to protect your funds from unauthorized access."
               />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
@@ -113,7 +113,7 @@ export const Deposited = () => {
               <span className="text-14 lg:text-16 text-secondary-text">Deposited to contract</span>
               <Tooltip
                 iconSize={20}
-                text="ERC-223 tokens must be deposited to the contract first in order to allow you to make operations with them. This amount shows how much of your tokens are already in the contract."
+                text="Sum of all assets stored in different Dex223 smart-contracts. This option is provided for you to track the 'stuck' tokens that you can withdraw from system contracts."
               />
             </div>
             <span className="text-24 lg:text-32 font-medium">$ —</span>
