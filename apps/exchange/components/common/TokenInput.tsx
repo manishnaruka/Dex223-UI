@@ -11,30 +11,19 @@ export default function TokenInput({
   token,
   value,
   onInputChange,
-  balance0,
-  balance1,
   label,
   readOnly = false,
-  isHalf = false,
-  isMax = false,
-  setHalf,
-  setMax,
+  minAmount,
+  setMinAmount,
 }: {
   handleClick: () => void;
   token: any | undefined;
   value: string;
   onInputChange: (value: string) => void;
-  balance0: string | undefined;
-  balance1: string | undefined;
   label: string;
-
+  minAmount?: string;
+  setMinAmount?: () => void;
   readOnly?: boolean;
-  isHalf?: boolean;
-  isMax?: boolean;
-  setHalf?: () => void;
-  setMax?: () => void;
-  gasERC20?: string;
-  gasERC223?: string;
 }) {
   const t = useTranslations("Swap");
 
@@ -42,10 +31,13 @@ export default function TokenInput({
     <div className="p-5 bg-secondary-bg rounded-3 relative">
       <div className="flex justify-between items-center mb-5 h-[22px]">
         <span className="text-14 block text-secondary-text">{label}</span>
-        {setMax && setHalf && (
+        {minAmount && (
           <div className="flex items-center gap-2">
-            <InputButton onClick={setHalf} isActive={isHalf} text="Half" />
-            <InputButton onClick={setMax} isActive={isMax} text="Max" />
+            <InputButton
+              isActive={false}
+              onClick={setMinAmount}
+              text={`Min amount: ${minAmount}`}
+            />
           </div>
         )}
       </div>
@@ -68,7 +60,6 @@ export default function TokenInput({
             }}
             allowNegative={false}
           />
-          <span className="text-12 block -mt-1 text-tertiary-text">$0.00</span>
           <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
         <SelectButton
