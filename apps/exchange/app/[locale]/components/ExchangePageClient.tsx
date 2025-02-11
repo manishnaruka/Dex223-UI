@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import CountdownTimer from "@/app/[locale]/components/Countdown";
 import PickTokenDialog from "@/app/[locale]/components/PickTokenDialog";
+import { useFilteredTokens } from "@/app/[locale]/hooks/useFilteredTokens";
 import { useMinAmount } from "@/app/[locale]/hooks/useMinAmount";
 import { useOutputAmount } from "@/app/[locale]/hooks/useOutputAmount";
 import { ExchangeToken } from "@/app/[locale]/types";
@@ -14,6 +15,7 @@ import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DetailsRow from "@/components/atoms/DetailsRow";
 import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import Skeleton from "@/components/atoms/Skeleton";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Tooltip from "@/components/atoms/Tooltip";
@@ -28,7 +30,6 @@ import { clsxMerge } from "@/functions/clsxMerge";
 import { IIFE } from "@/functions/iife";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useDeepEffect from "@/hooks/useDeepEffect";
-import useDeepMemo from "@/hooks/useDeepMemo";
 import addToast from "@/other/toast";
 
 const cryptoExchangeStatuses = ["waiting", "confirming", "exchanging", "sending"] as const;
@@ -121,6 +122,10 @@ export default function ExchangePageClient({ tokens }: { tokens: ExchangeToken[]
 
   const [tokenA, setTokenA] = useState<ExchangeToken | undefined>(tokenMap.get("btc"));
   const [tokenB, setTokenB] = useState<ExchangeToken | undefined>(tokenMap.get("eth"));
+
+  const [tokenAFiat, setTokenAFiat] = useState<ExchangeToken | undefined>(tokenMap.get("usd"));
+  const [tokenBFiat, setTokenBFiat] = useState<ExchangeToken | undefined>(tokenMap.get("btc"));
+
   const [isFixed, setIsFixed] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -128,8 +133,12 @@ export default function ExchangePageClient({ tokens }: { tokens: ExchangeToken[]
 
   const [exchangeStatus, setExchangeStatus] = useState<ExtendedCryptoExchangeStatus>("waiting");
 
-  const [tokensFrom, setTokensFrom] = useState<any[]>([...tokens]);
-  const [tokensTo, setTokensTo] = useState<any[]>([...tokens]);
+  const { availableTokens: tokensFrom, loading: tokensFromLoading } = useFilteredTokens(
+    tokens,
+    tokenB,
+  );
+  const { availableTokens: tokensTo, loading: tokensToLoading } = useFilteredTokens(tokens, tokenA);
+  const { fiatTokens } = useFilteredTokens(tokens);
 
   const [exchange, setExchange] = useState<any>();
 
@@ -153,31 +162,23 @@ export default function ExchangePageClient({ tokens }: { tokens: ExchangeToken[]
     error: minAmountError,
   } = useMinAmount(tokenA, tokenB, isFixed);
 
-  // useEffect(() => {
-  //   if (!tokenA) {
-  //     return;
-  //   }
-  //
-  //   IIFE(async () => {
-  //     const res = await fetch(
-  //       `${window.location.origin}/api/simpleswap/get-pairs?fixed=${isFixed}&symbol=${tokenA.symbol}`,
-  //     );
-  //     const data = await res.json();
-  //
-  //     if (data) {
-  //       console.log(data);
-  //       const dataSet = new Set(data);
-  //       setTokensTo(tokensFrom.filter((token) => dataSet.has(token.symbol)));
-  //     }
-  //   });
-  // }, [isFixed, tokenA, tokenB?.symbol, tokensFrom]);
-
   const handleChange = useCallback(
     (token: any) => {
       if (pickTokenContext === "tokenA") {
         setTokenA(token);
       } else {
         setTokenB(token);
+      }
+    },
+    [pickTokenContext],
+  );
+
+  const handleChangeFiat = useCallback(
+    (token: any) => {
+      if (pickTokenContext === "tokenA") {
+        setTokenAFiat(token);
+      } else {
+        setTokenBFiat(token);
       }
     },
     [pickTokenContext],
@@ -253,7 +254,12 @@ export default function ExchangePageClient({ tokens }: { tokens: ExchangeToken[]
                     {exchange.id}
                     <IconButton variant={IconButtonVariant.COPY} text={exchange.id} />
                   </div>
-                  <a className="flex items-center justify-center w-10 h-10" href="#"></a>
+                  <a
+                    className="flex items-center justify-center w-10 h-10 text-tertiary-text"
+                    href="#"
+                  >
+                    <Svg iconName="support" />
+                  </a>
                 </div>
 
                 <div className="px-10 pb-10 pt-8 rounded-5 bg-primary-bg flex flex-col gap-5">
@@ -476,6 +482,7 @@ export default function ExchangePageClient({ tokens }: { tokens: ExchangeToken[]
                   }}
                   label="You send"
                   minAmount={minAmount || undefined}
+                  minAmountLoading={isLoadingMinAmount}
                   setMinAmount={() => setInputAmount(minAmount || "")}
                 />
                 <div className="relative h-8 z-10">
@@ -528,6 +535,7 @@ export default function ExchangePageClient({ tokens }: { tokens: ExchangeToken[]
                     setIsOpen(true);
                     setPickTokenContext("tokenB");
                   }}
+                  isLoadingAmount={isLoadingOutputAmount}
                   readOnly
                   token={tokenB}
                   value={outputAmount || ""}
@@ -543,21 +551,139 @@ export default function ExchangePageClient({ tokens }: { tokens: ExchangeToken[]
                   />
                 </div>
 
-                <Button onClick={() => handleCreateExchange()} fullWidth>
+                <Button
+                  disabled={
+                    !recipient ||
+                    isLoadingMinAmount ||
+                    isLoadingOutputAmount ||
+                    !outputAmount ||
+                    !minAmount
+                  }
+                  onClick={() => handleCreateExchange()}
+                  fullWidth
+                >
                   Create an exchange
                 </Button>
               </div>
             )}
+
+            <PickTokenDialog
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              handlePick={handleChange}
+              tokens={pickTokenContext === "tokenA" ? tokensFrom : tokensTo}
+              tokensLoading={pickTokenContext === "tokenA" ? tokensFromLoading : tokensToLoading}
+            />
           </Tab>
-          <Tab title="Buy/Sell Crypto">Buy/sell crypto</Tab>
+          <Tab title="Buy/Sell Crypto">
+            <div className="mt-5 bg-primary-bg px-10 pb-10 rounded-5">
+              <h1 className="py-3.5 text-20 font-bold">Crypto exchange</h1>
+              <TokenInput
+                handleClick={() => {
+                  setIsOpen(true);
+                  setPickTokenContext("tokenA");
+                }}
+                token={tokenAFiat}
+                value={inputAmount}
+                onInputChange={(value) => {
+                  setInputAmount(value);
+                }}
+                label="You send"
+                minAmount={minAmount || undefined}
+                minAmountLoading={isLoadingMinAmount}
+                setMinAmount={() => setInputAmount(minAmount || "")}
+              />
+              <div className="relative h-8 z-10">
+                <div className="absolute left-5 flex gap-1 items-center h-full top-0">
+                  <button
+                    onClick={() => setIsFixed(!isFixed)}
+                    className="group flex items-center gap-1"
+                  >
+                    <span
+                      className={clsx(
+                        "rounded-full w-6 h-6 flex items-center justify-center relative duration-200 before:duration-200 before:absolute before:h-[calc(100%_+_8px)] before:left-1/2 before:w-px  before:-translate-x-1/2 z-30 before:z-20",
+                        isFixed
+                          ? "group-hover:before:bg-green-hover group-hover:bg-green-hover before:bg-green bg-green"
+                          : "group-hover:before:bg-green-bg group-hover:bg-green-bg before:bg-secondary-bg bg-secondary-bg ",
+                      )}
+                    >
+                      {isFixed ? (
+                        <Svg className="z-40 text-secondary-bg" size={16} iconName="lock" />
+                      ) : (
+                        <Svg
+                          className="duration-200 z-40 text-tertiary-text group-hover:text-primary-text"
+                          size={16}
+                          iconName="floating"
+                        />
+                      )}
+                    </span>
+                    <span
+                      className={clsx(
+                        "text-12 ",
+                        isFixed ? "text-primary-text" : "text-tertiary-text",
+                      )}
+                    >
+                      {isFixed ? "Fixed rate" : "Floating rate"}
+                    </span>
+                  </button>
+
+                  <Tooltip iconSize={16} text="Tooltip floating rate" />
+                </div>
+
+                <SwapButton
+                  onClick={() => {
+                    setTokenB(tokenA);
+                    setTokenA(tokenB);
+                    setInputAmount(outputAmount || "");
+                  }}
+                />
+              </div>
+              <TokenInput
+                handleClick={() => {
+                  setIsOpen(true);
+                  setPickTokenContext("tokenB");
+                }}
+                isLoadingAmount={isLoadingOutputAmount}
+                readOnly
+                token={tokenBFiat}
+                value={outputAmount || ""}
+                onInputChange={() => {}}
+                label="You send"
+              />
+              <div className="my-3 ">
+                <TextField
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  label="The recepient's wallet address"
+                  placeholder="0x..."
+                />
+              </div>
+
+              <Button
+                disabled={
+                  !recipient ||
+                  isLoadingMinAmount ||
+                  isLoadingOutputAmount ||
+                  !outputAmount ||
+                  !minAmount
+                }
+                onClick={() => handleCreateExchange()}
+                fullWidth
+              >
+                Create an exchange
+              </Button>
+            </div>
+
+            <PickTokenDialog
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              handlePick={handleChangeFiat}
+              tokens={pickTokenContext === "tokenA" ? fiatTokens : tokensTo}
+              tokensLoading={pickTokenContext === "tokenA" ? false : tokensToLoading}
+            />
+          </Tab>
         </Tabs>
       </div>
-      <PickTokenDialog
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        handlePick={handleChange}
-        tokens={pickTokenContext === "tokenA" ? tokensFrom : tokensTo}
-      />
     </Container>
   );
 }

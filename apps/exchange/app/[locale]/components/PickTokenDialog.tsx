@@ -7,19 +7,28 @@ import SimpleBar from "simplebar-react";
 import ManageTokenItem from "web/components/manage-tokens/ManageTokenItem";
 import { Currency } from "web/sdk_hybrid/entities/currency";
 
+import { ExchangeToken } from "@/app/[locale]/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
+import Preloader from "@/components/atoms/Preloader";
 import { IIFE } from "@/functions/iife";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handlePick: (token: Currency) => void;
-  tokens: any[];
+  tokens: ExchangeToken[];
+  tokensLoading?: boolean;
 }
 
-export default function PickTokenDialog({ isOpen, setIsOpen, handlePick, tokens }: Props) {
+export default function PickTokenDialog({
+  isOpen,
+  setIsOpen,
+  handlePick,
+  tokens,
+  tokensLoading = false,
+}: Props) {
   const parentRef = React.useRef(null);
   const [searchValue, setSearchValue] = useState("");
 
@@ -53,48 +62,56 @@ export default function PickTokenDialog({ isOpen, setIsOpen, handlePick, tokens 
       </div>
       <div className="w-full md:w-[600px] h-[580px] flex flex-col">
         <div className="flex flex-col flex-grow card-spacing-x">
-          <div style={{ flex: "1 1 auto" }} className="pb-[1px] -mr-3 md:-mr-8">
-            {Boolean(tokens.length) && (
-              <SimpleBar
-                scrollableNodeProps={{
-                  ref: parentRef,
-                }}
-                className="pr-3 md:pr-8 pt-3"
-                style={{ height: 580 }}
-                autoHide={false}
-              >
-                <div
-                  style={{
-                    paddingTop,
-                    paddingBottom,
+          {tokensLoading && (
+            <div className="flex items-center justify-center flex-grow flex-shrink-0">
+              <Preloader size={36} />
+            </div>
+          )}
+
+          {!tokensLoading && tokens.length && (
+            <div style={{ flex: "1 1 auto" }} className="pb-[1px] -mr-3 md:-mr-8">
+              {Boolean(tokens.length) && (
+                <SimpleBar
+                  scrollableNodeProps={{
+                    ref: parentRef,
                   }}
+                  className="pr-3 md:pr-8 pt-3"
+                  style={{ height: 580 }}
+                  autoHide={false}
                 >
-                  {items.map((item) => (
-                    <button
-                      className="w-full block"
-                      onClick={() => {
-                        handlePick(filteredTokens[item.index]);
-                        setIsOpen(false);
-                      }}
-                      key={item.key}
-                      data-index={item.index}
-                      ref={virtualizer.measureElement}
-                    >
-                      <div className="flex items-center gap-2 h-12">
-                        <Image
-                          src={filteredTokens[item.index].image}
-                          alt={""}
-                          width={32}
-                          height={32}
-                        />
-                        {filteredTokens[item.index].name} ({filteredTokens[item.index].network})
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </SimpleBar>
-            )}
-          </div>
+                  <div
+                    style={{
+                      paddingTop,
+                      paddingBottom,
+                    }}
+                  >
+                    {items.map((item) => (
+                      <button
+                        className="w-full block"
+                        onClick={() => {
+                          handlePick(filteredTokens[item.index]);
+                          setIsOpen(false);
+                        }}
+                        key={item.key}
+                        data-index={item.index}
+                        ref={virtualizer.measureElement}
+                      >
+                        <div className="flex items-center gap-2 h-12">
+                          <Image
+                            src={filteredTokens[item.index].image}
+                            alt={""}
+                            width={32}
+                            height={32}
+                          />
+                          {filteredTokens[item.index].name} ({filteredTokens[item.index].network})
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </SimpleBar>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </DrawerDialog>
