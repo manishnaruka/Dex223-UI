@@ -5,6 +5,7 @@ import { useFilteredTokens } from "@/app/[locale]/hooks/useFilteredTokens";
 import { useMinAmount } from "@/app/[locale]/hooks/useMinAmount";
 import { useOutputAmount } from "@/app/[locale]/hooks/useOutputAmount";
 import { ExchangeToken } from "@/app/[locale]/types";
+import { usePathname, useRouter } from "@/i18n/routing";
 import addToast from "@/other/toast";
 
 const defaultCryptoExchangeValues = {
@@ -25,6 +26,9 @@ export default function FiatExchangeForm({
   tokens: ExchangeToken[];
   setExchange: (exchange: any) => void;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [tokenA, setTokenA] = useState<ExchangeToken | undefined>(
     tokenMap.get(defaultCryptoExchangeValues.tokenA),
   );
@@ -51,6 +55,15 @@ export default function FiatExchangeForm({
   } = useOutputAmount(tokenA, tokenB, inputAmount, isFixed);
 
   const { availableTokens: tokensTo, loading: tokensToLoading } = useFilteredTokens(tokens, tokenA);
+
+  const addQueryParam = useCallback(
+    (exchangeId: string) => {
+      const params = new URLSearchParams();
+      params.set("exchangeId", exchangeId);
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router],
+  );
 
   const handleCreateExchange = useCallback(async () => {
     if (!tokenA || !tokenB) {
@@ -80,6 +93,7 @@ export default function FiatExchangeForm({
       const data = await res.json();
       if (data) {
         setExchange(data);
+        addQueryParam(data.id);
       }
     }
   }, [inputAmount, isFixed, recipient, setExchange, tokenA, tokenB]);

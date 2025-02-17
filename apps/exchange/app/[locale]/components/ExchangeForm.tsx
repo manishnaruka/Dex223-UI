@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import PickTokenDialog from "@/app/[locale]/components/PickTokenDialog";
 import { OutputAmountError } from "@/app/[locale]/hooks/useOutputAmount";
@@ -76,6 +76,20 @@ export default function ExchangeForm({
   );
 
   const [addressError, setAddressError] = useState("");
+
+  useEffect(() => {
+    const regexString = tokenB?.validation_address;
+
+    if (regexString) {
+      const regex = new RegExp(regexString);
+
+      if (!regex.test(recipient)) {
+        setAddressError(`Invalid wallet address for ${tokenB?.network.toUpperCase()} network`);
+      } else {
+        setAddressError("");
+      }
+    }
+  }, [recipient, tokenB?.network, tokenB?.validation_address]);
 
   return (
     <>
@@ -157,20 +171,6 @@ export default function ExchangeForm({
             value={recipient}
             onChange={(e) => {
               setRecipient(e.target.value);
-
-              const regexString = tokenB?.validation_address;
-
-              if (regexString) {
-                const regex = new RegExp(regexString);
-
-                if (!regex.test(e.target.value)) {
-                  setAddressError(
-                    `Invalid wallet address for ${tokenB?.network.toUpperCase()} network`,
-                  );
-                } else {
-                  setAddressError("");
-                }
-              }
             }}
             error={addressError}
             label="The recepient's wallet address"
