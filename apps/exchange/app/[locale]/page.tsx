@@ -11,6 +11,8 @@ export default async function ExchangePage({
     ? `https://${process.env.VERCEL_URL}`
     : "http://127.0.0.1:3002";
 
+  console.log(baseUrl);
+
   const res = await fetch(`${baseUrl}/api/simpleswap/get-all-currencies`, {
     next: { revalidate: 60 },
   });
