@@ -17,6 +17,8 @@ export default async function ExchangePage({
     next: { revalidate: 60 },
   });
 
+  console.log(res);
+
   if (!res.ok) {
     console.error("Failed to fetch initial tokens");
     throw new Error("Failed to fetch initial tokens");
