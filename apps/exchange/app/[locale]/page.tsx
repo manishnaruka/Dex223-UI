@@ -5,21 +5,12 @@ export default async function ExchangePage({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://127.0.0.1:3002";
-
-  console.log(baseUrl);
-
   const res = await fetch(
     `https://api.simpleswap.io/get_all_currencies?api_key=${process.env.SIMPLE_SWAP_API_KEY}`,
     {
       next: { revalidate: 60 },
     },
   );
-
-  console.log(res);
-  console.log(process.env.SIMPLE_SWAP_API_KEY);
 
   if (!res.ok) {
     console.error("Failed to fetch initial tokens");
@@ -35,7 +26,7 @@ export default async function ExchangePage({
 
   try {
     const resExchange = await fetch(
-      `${baseUrl}/api/simpleswap/get-exchange?exchangeId=${exchangeId}`,
+      `https://api.simpleswap.io/get_exchange?id=${exchangeId}?api_key=${process.env.SIMPLE_SWAP_API_KEY}`,
     );
 
     if (resExchange.ok) {
