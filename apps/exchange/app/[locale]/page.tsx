@@ -5,12 +5,9 @@ export default async function ExchangePage({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_INTERNAL_API_URL}/simpleswap/get-all-currencies`,
-    {
-      next: { revalidate: 60 },
-    },
-  );
+  const res = await fetch(`/simpleswap/get-all-currencies`, {
+    next: { revalidate: 60 },
+  });
 
   if (!res.ok) {
     console.error("Failed to fetch initial tokens");
@@ -25,9 +22,7 @@ export default async function ExchangePage({
   let dataExchange;
 
   try {
-    const resExchange = await fetch(
-      `${process.env.NEXT_PUBLIC_INTERNAL_API_URL}/simpleswap/get-exchange?exchangeId=${exchangeId}`,
-    );
+    const resExchange = await fetch(`/simpleswap/get-exchange?exchangeId=${exchangeId}`);
 
     if (resExchange.ok) {
       dataExchange = await resExchange.json();
