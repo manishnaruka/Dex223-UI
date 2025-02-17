@@ -1,4 +1,4 @@
-import plugin from 'tailwindcss/plugin';
+// import plugin from 'tailwindcss/plugin';
 
 const emptyImagePath = "/images/empty-large";
 
@@ -8,7 +8,9 @@ const config = {
     "../../apps/web/app/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/web/components/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/blog/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}"
+    "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../apps/exchange/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../apps/exchange/components/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
     extend: {
@@ -150,8 +152,13 @@ const config = {
           "75%": { opacity: "1" },
           "100%": { opacity: "0.3" },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
+        shimmer: 'shimmer 1.5s infinite',
         orbit: "orbit ease-in-out 1.5s infinite",
         swap: "swap ease-in-out 0.5s",
         list: "list ease-in-out 2s",
@@ -279,25 +286,25 @@ const config = {
     },
   },
   plugins: [
-    require("@tailwindcss/container-queries"),
-    require("@savvywombat/tailwindcss-grid-areas"),
-    require("tailwind-scrollbar")({ preferredStrategy: "pseudoelements", nocompatible: true }),
-    plugin(function ({ addVariant, e }) {
-      addVariant("hocus", ["&:hover", "&:focus-visible"]);
-      addVariant("group-hocus", [".group:hover &", ".group:focus-visible &"]);
-      addVariant("peer-hocus", [".peer:hover ~ &", ".peer:focus-visible ~ &"]);
-    }),
-    function ({ addUtilities }) {
-      const newUtilities = {
-        ".text-shadow": {
-          textShadow: "0px 0px 8px var(--tw-shadow-color)",
-        },
-      };
-
-      addUtilities(newUtilities, ["responsive", "hover"]);
-    },
-    require("@tailwindcss/typography"),
-    require("@tailwindcss/aspect-ratio"),
+  //   require("@tailwindcss/container-queries"),
+  //   require("@savvywombat/tailwindcss-grid-areas"),
+  //   require("tailwind-scrollbar")({ preferredStrategy: "pseudoelements", nocompatible: true }),
+  //   plugin(function ({ addVariant, e }) {
+  //     addVariant("hocus", ["&:hover", "&:focus-visible"]);
+  //     addVariant("group-hocus", [".group:hover &", ".group:focus-visible &"]);
+  //     addVariant("peer-hocus", [".peer:hover ~ &", ".peer:focus-visible ~ &"]);
+  //   }),
+  //   function ({ addUtilities }) {
+  //     const newUtilities = {
+  //       ".text-shadow": {
+  //         textShadow: "0px 0px 8px var(--tw-shadow-color)",
+  //       },
+  //     };
+  //
+  //     addUtilities(newUtilities, ["responsive", "hover"]);
+  //   },
+  //   require("@tailwindcss/typography"),
+  //   require("@tailwindcss/aspect-ratio"),
   ],
 };
 export default config;
