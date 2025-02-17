@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-type Frequency = "yearly" | "monthly";
+type Frequency = "daily" | "yearly" | "monthly";
 const BASE_URL = "https://blog.dex223.io";
 
 export const revalidate = 86400;
@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${BASE_URL}/en`,
       lastModified: new Date(),
-      changeFrequency: "yearly" as Frequency,
+      changeFrequency: "daily" as Frequency,
       priority: 1,
     },
   ];
