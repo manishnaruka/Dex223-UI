@@ -7,8 +7,8 @@ export default async function ExchangePage({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
     : "http://127.0.0.1:3002";
 
   const res = await fetch(`${baseUrl}/api/simpleswap/get-all-currencies`, {
