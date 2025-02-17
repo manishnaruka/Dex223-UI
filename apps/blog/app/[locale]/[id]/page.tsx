@@ -36,6 +36,12 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const sanitizedData = () => ({
     __html: DOMPurify.sanitize(post.content, {
       ALLOWED_TAGS: [
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
         "iframe",
         "p",
         "b",
@@ -55,6 +61,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         "thead",
         "img",
         "q",
+        "strong",
+        "blockquote",
       ], // Add 'iframe' to the allowed tags
       ALLOWED_ATTR: [
         "src",
@@ -155,7 +163,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         </Container>
       )}
       <PostContainer>
-        <div className="prose first:prose-th:pl-5 first:prose-td:pl-5 prose-table:rounded-5 prose-table:overflow-hidden prose-td:bg-primary-bg prose-tr:border-secondary-border prose-th:bg-quaternary-bg [&>p]:prose-li:my-2 text-primary-text prose-li:my-2 prose-li:text-secondary-text prose-li:marker:text-secondary-text hover:prose-a:text-green-hover prose-a:duration-200 prose-a:cursor-pointer prose-lg max-lg:prose-base prose-p:text-secondary-text prose-strong:text-inherit max-w-none prose-a:text-green prose-headings::text-primary-text  prose-a:font-normal">
+        <div className="prose prose-headings:text-primary-text first:prose-th:pl-5 first:prose-td:pl-5 prose-table:rounded-5 prose-table:overflow-hidden prose-td:bg-primary-bg prose-tr:border-secondary-border prose-th:bg-quaternary-bg [&>p]:prose-li:my-2 text-primary-text prose-li:my-2 prose-li:text-secondary-text prose-li:marker:text-secondary-text hover:prose-a:text-green-hover prose-a:duration-200 prose-a:cursor-pointer prose-lg max-lg:prose-base prose-p:text-secondary-text prose-strong:text-inherit max-w-none prose-a:text-green prose-headings::text-primary-text  prose-a:font-normal">
           <div dangerouslySetInnerHTML={sanitizedData()} />
         </div>
       </PostContainer>
