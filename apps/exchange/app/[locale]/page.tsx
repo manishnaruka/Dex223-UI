@@ -1,5 +1,3 @@
-import { headers } from "next/headers";
-
 import ExchangePageClient from "@/app/[locale]/components/ExchangePageClient";
 
 export default async function ExchangePage({
@@ -13,11 +11,15 @@ export default async function ExchangePage({
 
   console.log(baseUrl);
 
-  const res = await fetch(`${baseUrl}/api/simpleswap/get-all-currencies`, {
-    next: { revalidate: 60 },
-  });
+  const res = await fetch(
+    `https://api.simpleswap.io/get_all_currencies?api_key=${process.env.SIMPLE_SWAP_API_KEY}`,
+    {
+      next: { revalidate: 60 },
+    },
+  );
 
   console.log(res);
+  console.log(process.env.SIMPLE_SWAP_API_KEY);
 
   if (!res.ok) {
     console.error("Failed to fetch initial tokens");
