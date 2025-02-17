@@ -26,7 +26,7 @@ export default async function ExchangePage({
 
   try {
     const resExchange = await fetch(
-      `https://api.simpleswap.io/get_exchange?id=${exchangeId}?api_key=${process.env.SIMPLE_SWAP_API_KEY}`,
+      `https://api.simpleswap.io/get_exchange?id=${exchangeId}&api_key=${process.env.SIMPLE_SWAP_API_KEY}`,
     );
 
     if (resExchange.ok) {
