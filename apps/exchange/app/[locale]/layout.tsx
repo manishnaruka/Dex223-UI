@@ -11,6 +11,7 @@ interface Props {
     locale: Locale;
   }>;
 }
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
   const { locale } = await params;
@@ -28,7 +29,9 @@ export default async function RootLayout({ children, params }: PropsWithChildren
       <Providers messages={messages} locale={locale}>
         <div className="grid h-[100svh] grid-rows-layout">
           <Header />
-          <div className="pb-4 lg:pb-[80px]">{children}</div>
+          <div className="pb-4 lg:pb-[80px]">
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </div>
           <Footer />
         </div>
       </Providers>

@@ -6,6 +6,7 @@ interface Token {
 
 interface UseMinAmountResult {
   minAmount: string | null; // The minimum amount or null if unavailable
+  maxAmount: string | null; // The minimum amount or null if unavailable
   loading: boolean; // Whether the request is in progress
   error: string | null; // Error message if the request fails
 }
@@ -16,6 +17,7 @@ export function useMinAmount(
   isFixed: boolean,
 ): UseMinAmountResult {
   const [minAmount, setMinAmount] = useState<string | null>(null);
+  const [maxAmount, setMaxAmount] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,8 +49,15 @@ export function useMinAmount(
           setMinAmount(null); // Handle case where pair does not exist
           setError("Pair does not exist");
         }
+
+        if (data && data.max) {
+          setMaxAmount(data.max);
+        } else {
+          setMinAmount(null); // Handle case where pair does not exist
+        }
       } catch (err) {
         setMinAmount(null);
+        setMaxAmount(null);
         setError(err instanceof Error ? err.message : "Unknown error occurred");
       } finally {
         setLoading(false);
@@ -58,5 +67,5 @@ export function useMinAmount(
     fetchMinAmount();
   }, [tokenA, tokenB, isFixed]);
 
-  return { minAmount, loading, error };
+  return { minAmount, maxAmount, loading, error };
 }

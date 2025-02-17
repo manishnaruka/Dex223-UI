@@ -10,6 +10,17 @@ import SelectButton from "@/components/atoms/SelectButton";
 import Skeleton from "@/components/atoms/Skeleton";
 import InputButton from "@/components/buttons/InputButton";
 
+function ceilWithDynamicPrecision(minAmount: number): number {
+  if (minAmount < 0.001) {
+    const exponential = minAmount.toExponential();
+    const decimalPlaces = parseInt(exponential.split("e-")[1], 10) + 1;
+    const factor = Math.pow(10, decimalPlaces);
+    return Math.ceil(minAmount * factor) / factor;
+  } else {
+    return Math.ceil(minAmount * 1000) / 1000;
+  }
+}
+
 export default function TokenInput({
   handleClick,
   token,
@@ -18,8 +29,8 @@ export default function TokenInput({
   label,
   readOnly = false,
   minAmount,
+  maxAmount,
   minAmountLoading = false,
-  setMinAmount,
   isLoadingAmount = false,
 }: {
   handleClick: () => void;
@@ -28,8 +39,8 @@ export default function TokenInput({
   onInputChange: (value: string) => void;
   label: string;
   minAmount?: string;
+  maxAmount?: string;
   minAmountLoading?: boolean;
-  setMinAmount?: () => void;
   readOnly?: boolean;
   isLoadingAmount?: boolean;
 }) {
@@ -39,20 +50,37 @@ export default function TokenInput({
     <div className="p-5 bg-secondary-bg rounded-3 relative">
       <div className="flex justify-between items-center mb-5 h-[22px]">
         <span className="text-14 block text-secondary-text">{label}</span>
-        {minAmount && !minAmountLoading && (
-          <div className="flex items-center gap-1 text-12">
-            <button
-              className="text-green hover:text-green-hover duration-200"
-              onClick={setMinAmount}
-            >
-              Min amount
-            </button>
-            <span className="text-tertiary-text">
-              {Math.ceil(+minAmount * 1000) / 1000} {token?.symbol.toUpperCase()}
-            </span>
-          </div>
+        {((minAmount && +value < +minAmount) || (maxAmount && +value > +maxAmount)) && (
+          <>
+            {minAmount && +value < +minAmount && !minAmountLoading && (
+              <div className="flex items-center gap-1 text-12">
+                <button
+                  className="text-green hover:text-green-hover duration-200"
+                  onClick={() => onInputChange(minAmount)}
+                >
+                  Min amount
+                </button>
+                <span className="text-tertiary-text">
+                  {ceilWithDynamicPrecision(+minAmount)} {token?.symbol.toUpperCase()}
+                </span>
+              </div>
+            )}
+            {maxAmount && +value > +maxAmount && !minAmountLoading && (
+              <div className="flex items-center gap-1 text-12">
+                <button
+                  className="text-green hover:text-green-hover duration-200"
+                  onClick={() => onInputChange(maxAmount)}
+                >
+                  Max amount
+                </button>
+                <span className="text-tertiary-text">
+                  {ceilWithDynamicPrecision(+maxAmount)} {token?.symbol.toUpperCase()}
+                </span>
+              </div>
+            )}
+            {minAmountLoading && <Skeleton className="w-[150px] h-4" />}
+          </>
         )}
-        {minAmountLoading && <Skeleton className="w-[150px] h-4" />}
       </div>
 
       <div className="flex items-center mb-5 justify-between">
@@ -76,7 +104,14 @@ export default function TokenInput({
               allowNegative={false}
             />
           )}
-          <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
+          <div
+            className={clsx(
+              "duration-200 rounded-3 pointer-events-none absolute w-full h-full border top-0 left-0",
+              (minAmount && +value < +minAmount) || (maxAmount && +value > +maxAmount)
+                ? "shadow-red/60 border-red-light shadow"
+                : "border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green",
+            )}
+          />
         </div>
         <SelectButton
           className="flex-shrink-0"

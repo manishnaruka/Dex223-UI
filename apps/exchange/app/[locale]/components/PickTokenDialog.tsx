@@ -61,7 +61,7 @@ export default function PickTokenDialog({
         />
       </div>
       <div className="w-full md:w-[600px] h-[580px] flex flex-col">
-        <div className="flex flex-col flex-grow card-spacing-x">
+        <div className="flex flex-col flex-grow ">
           {tokensLoading && (
             <div className="flex items-center justify-center flex-grow flex-shrink-0">
               <Preloader size={36} />
@@ -69,13 +69,13 @@ export default function PickTokenDialog({
           )}
 
           {!tokensLoading && tokens.length && (
-            <div style={{ flex: "1 1 auto" }} className="pb-[1px] -mr-3 md:-mr-8">
+            <div style={{ flex: "1 1 auto" }} className="pb-[1px]">
               {Boolean(tokens.length) && (
                 <SimpleBar
                   scrollableNodeProps={{
                     ref: parentRef,
                   }}
-                  className="pr-3 md:pr-8 pt-3"
+                  className="pt-3"
                   style={{ height: 580 }}
                   autoHide={false}
                 >
@@ -87,7 +87,7 @@ export default function PickTokenDialog({
                   >
                     {items.map((item) => (
                       <button
-                        className="w-full block"
+                        className="pl-4 sm:pl-6 lg:pl-10 w-[calc(100%_-_14px)] block duration-200 hover:bg-tertiary-bg"
                         onClick={() => {
                           handlePick(filteredTokens[item.index]);
                           setIsOpen(false);
@@ -103,7 +103,9 @@ export default function PickTokenDialog({
                             width={32}
                             height={32}
                           />
-                          {filteredTokens[item.index].name} ({filteredTokens[item.index].network})
+                          {filteredTokens[item.index].name}{" "}
+                          {!filteredTokens[item.index].isFiat &&
+                            `(${filteredTokens[item.index].network})`}
                         </div>
                       </button>
                     ))}

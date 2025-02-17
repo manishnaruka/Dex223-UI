@@ -20,7 +20,6 @@ function Tabs({
 }: Props) {
   const [selectedTab, setSelectedTab] = useState(defaultTab || 0);
 
-  console.log(fullWidth);
   return (
     <div>
       <ul

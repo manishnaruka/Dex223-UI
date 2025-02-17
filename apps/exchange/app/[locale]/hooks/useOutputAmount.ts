@@ -4,10 +4,16 @@ interface Token {
   symbol: string;
 }
 
+export enum OutputAmountError {
+  NOT_FOUND,
+  OUT_OF_RANGE,
+  UNKNOWN,
+}
+
 interface UseOutputAmountResult {
   outputAmount: string | null; // The calculated output amount
   loading: boolean; // Whether the request is in progress
-  error: string | null; // Error message if the request fails
+  error: OutputAmountError | null; // Error message if the request fails
 }
 
 export function useOutputAmount(
@@ -18,7 +24,7 @@ export function useOutputAmount(
 ): UseOutputAmountResult {
   const [outputAmount, setOutputAmount] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<OutputAmountError | null>(null);
 
   useEffect(() => {
     if (
@@ -43,20 +49,22 @@ export function useOutputAmount(
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch output amount");
+          if (response.status === 404) {
+            setOutputAmount(null);
+            setError(OutputAmountError.NOT_FOUND);
+          }
+          return;
         }
 
         const data = await response.json();
 
         if (typeof data === "string") {
           setOutputAmount(data);
-        } else {
-          setOutputAmount(null);
-          setError("Invalid response from server");
+          setError(null);
         }
       } catch (err) {
         setOutputAmount(null);
-        setError(err instanceof Error ? err.message : "Unknown error occurred");
+        setError(OutputAmountError.UNKNOWN);
       } finally {
         setLoading(false);
       }
