@@ -5,7 +5,7 @@ export default async function ExchangePage({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const res = await fetch(`/simpleswap/get-all-currencies`, {
+  const res = await fetch(`/api/simpleswap/get-all-currencies`, {
     next: { revalidate: 60 },
   });
 
@@ -22,7 +22,7 @@ export default async function ExchangePage({
   let dataExchange;
 
   try {
-    const resExchange = await fetch(`/simpleswap/get-exchange?exchangeId=${exchangeId}`);
+    const resExchange = await fetch(`/api/simpleswap/get-exchange?exchangeId=${exchangeId}`);
 
     if (resExchange.ok) {
       dataExchange = await resExchange.json();
