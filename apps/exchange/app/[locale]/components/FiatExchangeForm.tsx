@@ -100,6 +100,7 @@ export default function FiatExchangeForm({
       minAmount={minAmount}
       maxAmount={maxAmount}
       outputAmount={outputAmount}
+      outputAmountError={outputAmountError}
       isLoadingOutputAmount={isLoadingOutputAmount}
       setRecipient={setRecipient}
       tokensFrom={fiatTokens.filter((t) => allowedFiats.has(t.symbol))}

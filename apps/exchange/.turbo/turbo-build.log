@@ -1,0 +1,29 @@
+[?9001h[?1004h[?25l[2J[m[H]0;C:\WINDOWS\system32\cmd.exe [?25h[K[1myarn run v1.22.22
+[22m[K[2m$ next build
+[22m   [38;2;173;127;168m[1m▲ Next.js 15.1.2
+[?25l[m   - Environments: .env.local[6;1H[?25h [37m[1m [m Creating an optimized production build ...
+(node:33652) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [32m[1m✓[m Compiled successfully
+ [37m[1m [m Linting and checking validity of types  [36m.[?25l[m[K[126C [37m[1m [m Linting and checking validity of types  [36m..[m[K[126C [37m[1m [m Linting and checking validity of types  [36m...[m[K[126C [37m[1m [m Linting and checking validity of types  [36m.[m[K[126C [37m[1m [m Linting and checking validity of types  [36m..[m[K[126C [37m[1m [m Linting and checking validity of types  [36m...[m[K[126C [37m[1m [m Linting and checking validity of types  [36m.[m[K[126C [37m[1m [m Linting and checking validity of types  [36m..[m[K[126C [37m[1m [m Linting and checking validity of types  [36m...[m[K[126C [37m[1m [m Linting and checking validity of types  [36m.[m[K[126C [37m[1m [m Linting and checking validity of types  [36m..[m[K[126C [37m[1m [m Linting and checking validity of types  [36m...[m[K[126C[?25h
+[36m./components/common/Navigation.tsx[m
+[33m149[m:[33m6  [1mWarning[m: React Hook useMemo has an unnecessary dependency: 'pathname'. Either exclude it or remove the dependency array
+[7;126Hy.  [90m[1mreact-hooks/exhaustive-deps[m[K
+
+[36minfo  [m- Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-
+[7;126H-rules
+ [36m.[K[?25l[124C[m[K[126C [36m.. [m[K[126C [36m... [m[K[126C [36m. [m[K[126C [36m.. [m[K[126C [36m... [m[31mFailed to compile.[m
+[31m[126C[m
+[36m../web/components/manage-tokens/ManageTokenItem.tsx[m:[33m11[m:[33m20[K[69C[m
+[31m[1mType error[m: Cannot find module '@/db/db' or its corresponding type declarations.[K[46C
+[126C
+   [90m9 | [36mimport [33mButton, [m{ [33mButtonColor [m} [36mfrom [32m"@/components/buttons/Button"[33m;[K[53C[m
+  [90m10 | [36mimport [33mIconButton, [m{ [33mIconButtonVariant [m} [36mfrom [32m"@/components/buttons/IconButton"[33m;[K[39C[m
+[31m[1m>[90m[22m 11 | [36mimport [m{ db } [36mfrom [32m"@/db/db"[33m;[K[90C[m
+     [90m|[20X[31m[1m[20C^[m[K[99C
+  [90m12 | [36mimport [museCurrentChainId [36mfrom [32m"@/hooks/useCurrentChainId"[33m;[K[61C[m
+  [90m13 | [36mimport [m{ useTokenLists } [36mfrom [32m"@/hooks/useTokenLists"[33m;[K[65C[m
+  [90m14 | [36mimport [maddToast [36mfrom [32m"@/other/toast"[33m;[K[82C[m
+[126C[?25h[K[31merror [mCommand failed with exit code 1.
+[94minfo [mVisit [1mhttps://yarnpkg.com/en/docs/cli/run[22m for documentation about this command.[K
+[?9001l[?1004l
