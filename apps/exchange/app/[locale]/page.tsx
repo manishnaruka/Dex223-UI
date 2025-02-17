@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+
 import ExchangePageClient from "@/app/[locale]/components/ExchangePageClient";
 
 export default async function ExchangePage({
@@ -5,7 +7,11 @@ export default async function ExchangePage({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const res = await fetch(`/api/simpleswap/get-all-currencies`, {
+  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    : "http://127.0.0.1:3002";
+
+  const res = await fetch(`${baseUrl}/api/simpleswap/get-all-currencies`, {
     next: { revalidate: 60 },
   });
 
@@ -22,7 +28,9 @@ export default async function ExchangePage({
   let dataExchange;
 
   try {
-    const resExchange = await fetch(`/api/simpleswap/get-exchange?exchangeId=${exchangeId}`);
+    const resExchange = await fetch(
+      `${baseUrl}/api/simpleswap/get-exchange?exchangeId=${exchangeId}`,
+    );
 
     if (resExchange.ok) {
       dataExchange = await resExchange.json();
