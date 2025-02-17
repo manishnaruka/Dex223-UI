@@ -7,15 +7,6 @@ import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
 import { Link } from "@/i18n/routing";
 
-// export const dynamic = "force-static";
-// export async function generateStaticParams() {
-//   const res = await fetch("https://api.dex223.io/v1/core/api/blog/list/ids");
-//
-//   const allIds: string[] = await res.json();
-//
-//   return allIds.flatMap((value) => locales.map((locale) => ({ id: value, lang: locale })));
-// }
-
 function PostContainer({ children }: PropsWithChildren<{}>) {
   return <div className="w-full max-w-[728px] mx-auto px-4">{children}</div>;
 }
@@ -24,46 +15,132 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const res = await fetch(`https://api.dex223.io/v1/core/api/blog/detail/${id}`);
   const post: PostDetails = await res.json();
 
-  DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  DOMPurify.addHook("afterSanitizeAttributes", (node: Element) => {
+    // Restrict iframe sources
     if (node.tagName === "IFRAME") {
       const src = node.getAttribute("src") || "";
       if (!src.startsWith("https://www.youtube.com/embed/")) {
-        node.remove(); // Remove iframe if it's not from YouTube
+        node.remove();
+      } else {
+        node.setAttribute("sandbox", "allow-same-origin allow-scripts allow-popups");
+        node.setAttribute("referrerpolicy", "no-referrer");
       }
+    }
+
+    // Restrict style properties
+    if (node.hasAttribute("style")) {
+      const safeProperties = [
+        "color",
+        "background-color",
+        "text-align",
+        "font-weight",
+        "font-style",
+        "text-decoration",
+      ];
+
+      const style = node
+        .getAttribute("style")
+        ?.split(";")
+        .map((rule) => rule.trim())
+        .filter((rule) => {
+          const [property] = rule.split(":").map((s) => s.trim());
+          return safeProperties.includes(property);
+        })
+        .join(";");
+      if (style) {
+        node.setAttribute("style", style);
+      }
+    }
+
+    // Secure external links
+    if (node.tagName === "A" && node.getAttribute("target") === "_blank") {
+      node.setAttribute("rel", "noopener noreferrer");
     }
   });
 
   const sanitizedData = () => ({
     __html: DOMPurify.sanitize(post.content, {
       ALLOWED_TAGS: [
+        "b",
+        "strong",
+        "i",
+        "em",
+        "u",
+        "s",
+        "strike",
+        "del",
+        "mark",
+        "sup",
+        "sub",
+        "small",
+        "code",
+        "pre",
+        "kbd",
+        "var",
+        "samp",
         "h1",
         "h2",
         "h3",
         "h4",
         "h5",
         "h6",
-        "iframe",
         "p",
-        "b",
-        "i",
-        "u",
-        "a",
+        "br",
+        "hr",
         "div",
         "span",
-        "th",
-        "td",
-        "li",
         "ul",
         "ol",
-        "table",
-        "tr",
-        "tbody",
-        "thead",
+        "li",
+        "dl",
+        "dt",
+        "dd",
+        "a",
         "img",
-        "q",
-        "strong",
+        "figure",
+        "figcaption",
+        "video",
+        "audio",
+        "source",
+        "iframe",
+        "table",
+        "thead",
+        "tbody",
+        "tfoot",
+        "tr",
+        "td",
+        "th",
+        "caption",
+        "colgroup",
+        "col",
+        "form",
+        "input",
+        "textarea",
+        "button",
+        "select",
+        "option",
+        "label",
+        "fieldset",
+        "legend",
+        "article",
+        "section",
+        "aside",
+        "nav",
         "blockquote",
-      ], // Add 'iframe' to the allowed tags
+        "cite",
+        "q",
+        "address",
+        "time",
+        "abbr",
+        "dfn",
+        "details",
+        "summary",
+        "progress",
+        "meter",
+        "ruby",
+        "rt",
+        "rp",
+      ],
       ALLOWED_ATTR: [
         "src",
         "width",
@@ -71,17 +148,20 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         "allow",
         "allowfullscreen",
         "frameborder",
-        "style",
         "href",
         "target",
-      ], // Allow necessary iframe attributes
+        "alt",
+        "title",
+        "rel",
+        "controls",
+        "autoplay",
+        "style",
+      ],
     }).replace(
-      /<iframe([\s\S]*?)<\/iframe>/g,
+      /<iframe([\s\S]*?)<\/iframe>/gi,
       '<div class="aspect-w-16 aspect-h-9"><iframe$1</iframe></div>',
     ),
   });
-
-  console.log(post);
 
   if (!post) {
     return (
