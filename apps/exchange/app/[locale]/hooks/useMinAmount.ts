@@ -53,7 +53,7 @@ export function useMinAmount(
         if (data && data.max) {
           setMaxAmount(data.max);
         } else {
-          setMinAmount(null); // Handle case where pair does not exist
+          setMaxAmount(null); // Handle case where pair does not exist
         }
       } catch (err) {
         setMinAmount(null);
