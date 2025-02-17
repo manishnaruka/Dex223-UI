@@ -83,7 +83,7 @@ export default function ExchangeForm({
     if (regexString) {
       const regex = new RegExp(regexString);
 
-      if (!regex.test(recipient)) {
+      if (!!recipient && !regex.test(recipient)) {
         setAddressError(`Invalid wallet address for ${tokenB?.network.toUpperCase()} network`);
       } else {
         setAddressError("");
