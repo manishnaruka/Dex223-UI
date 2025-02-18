@@ -1,7 +1,7 @@
 import { InputHTMLAttributes } from "react";
 
 import { clsxMerge } from "../functions/clsxMerge";
-import CheckIcon from "../icons/СheckIcon";
+import CheckIcon from "../icons/CheckIcon";
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   checked: boolean;
