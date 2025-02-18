@@ -1,6 +1,4 @@
-import presets from "../../packages/tailwind-config/tailwind-presets";
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  presets: [presets],
+  presets: [require("@repo/tailwind-config/tailwind-presets")],
 };

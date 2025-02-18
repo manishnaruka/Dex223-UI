@@ -1,0 +1,22 @@
+{
+  "name": "@repo/ui",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "exports": {
+    "./button": {
+      "types": "./src/components/Button.tsx",
+      "default": "./dist/components/Button.js"
+    },
+    "./gradient-card": {
+      "types": "./src/card.tsx",
+      "default": "./dist/card.js"
+    }
+  },
+  "devDependencies": {
+    "clsx": "^2.1.1"
+  }
+}

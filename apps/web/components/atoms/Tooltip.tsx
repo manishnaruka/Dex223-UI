@@ -17,7 +17,7 @@ import {
   useTransitionStyles,
   VirtualElement,
 } from "@floating-ui/react";
-import React, { HTMLProps, LegacyRef, ReactNode, RefObject, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 import Svg from "@/components/atoms/Svg";
 
