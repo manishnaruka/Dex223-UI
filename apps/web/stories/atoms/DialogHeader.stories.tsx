@@ -1,8 +1,8 @@
+import Switch from "@repo/ui/switch";
 import { useArgs } from "@storybook/client-api";
 import type { Meta, StoryObj } from "@storybook/react";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
-import Switch from "@/components/atoms/Switch";
 
 const meta = {
   title: "Atoms/Dialog Header",

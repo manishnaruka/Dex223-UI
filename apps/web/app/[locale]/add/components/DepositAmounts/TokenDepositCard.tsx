@@ -1,3 +1,4 @@
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -6,7 +7,6 @@ import { NumericFormat } from "react-number-format";
 import { formatUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
 
-import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
 import InputButton from "@/components/buttons/InputButton";
 import { formatFloat } from "@/functions/formatFloat";

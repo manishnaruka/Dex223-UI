@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import Checkbox from "@repo/ui/checkbox";
+import ExternalTextLink from "@repo/ui/external-text-link";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -10,12 +12,10 @@ import { Address, isAddress } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
 
 import { Deposited } from "@/app/[locale]/portfolio/components/Deposited";
-import Checkbox from "@/components/atoms/Checkbox";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Input, { SearchInput } from "@/components/atoms/Input";
 import Popover from "@/components/atoms/Popover";
 import SelectButton from "@/components/atoms/SelectButton";

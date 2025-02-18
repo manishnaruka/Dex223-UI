@@ -1,10 +1,10 @@
+import { CheckboxButton } from "@repo/ui/checkbox";
 import { Form, Formik, FormikHelpers } from "formik";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import * as Yup from "yup";
 
-import { CheckboxButton } from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { InputSize } from "@/components/atoms/Input";

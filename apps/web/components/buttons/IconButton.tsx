@@ -7,6 +7,7 @@ import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { copyToClipboard } from "@/functions/copyToClipboard";
 import addToast from "@/other/toast";
+
 export enum SortingType {
   NONE,
   ASCENDING,

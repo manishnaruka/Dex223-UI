@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, ReactNode } from "react";
 
-import { clsxMerge } from "./clsxMerge";
+import { clsxMerge } from "../functions/clsxMerge";
 
 export const enum ButtonVariant {
   CONTAINED = "contained",

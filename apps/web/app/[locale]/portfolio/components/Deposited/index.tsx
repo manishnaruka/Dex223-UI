@@ -1,5 +1,7 @@
 "use client";
 
+import Preloader from "@repo/ui/preloader";
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -9,8 +11,6 @@ import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/Revok
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
-import Preloader from "@/components/atoms/Preloader";
-import Tooltip from "@/components/atoms/Tooltip";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Token } from "@/sdk_hybrid/entities/token";

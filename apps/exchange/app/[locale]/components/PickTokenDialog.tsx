@@ -1,5 +1,6 @@
 import "simplebar-react/dist/simplebar.min.css";
 
+import Preloader from "@repo/ui/preloader";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
@@ -9,7 +10,6 @@ import { ExchangeToken } from "@/app/[locale]/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
-import Preloader from "@/components/atoms/Preloader";
 
 interface Props {
   isOpen: boolean;

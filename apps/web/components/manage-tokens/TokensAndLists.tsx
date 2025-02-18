@@ -1,15 +1,14 @@
+import Checkbox from "@repo/ui/checkbox";
+import Tooltip from "@repo/ui/tooltip";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AutoSizer, List } from "react-virtualized";
+import React, { useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
 
-import Checkbox from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import { SearchInput } from "@/components/atoms/Input";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import TabButton from "@/components/buttons/TabButton";
 import ManageTokenItem from "@/components/manage-tokens/ManageTokenItem";

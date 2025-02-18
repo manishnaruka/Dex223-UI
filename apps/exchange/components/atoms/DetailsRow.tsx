@@ -1,6 +1,5 @@
+import Tooltip from "@repo/ui/tooltip";
 import React, { ReactNode } from "react";
-
-import Tooltip from "@/components/atoms/Tooltip";
 
 export default function DetailsRow({
   title,

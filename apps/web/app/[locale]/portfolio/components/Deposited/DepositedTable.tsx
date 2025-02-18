@@ -1,5 +1,7 @@
 "use client";
 
+import ExternalTextLink from "@repo/ui/external-text-link";
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -9,8 +11,6 @@ import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import { TableData } from "@/app/[locale]/portfolio/components/Deposited/DepositedWithdrawTable";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
-import Preloader from "@/components/atoms/Preloader";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatNumber } from "@/functions/formatFloat";

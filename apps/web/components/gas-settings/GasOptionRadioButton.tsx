@@ -1,8 +1,8 @@
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import React, { ReactNode } from "react";
 
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import { IconName } from "@/config/types/IconName";
 
 interface Props {

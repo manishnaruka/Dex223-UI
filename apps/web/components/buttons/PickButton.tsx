@@ -1,8 +1,8 @@
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
 import { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
-import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {

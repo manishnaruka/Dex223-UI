@@ -1,7 +1,7 @@
+import Alert from "@repo/ui/alert";
 import { useTranslations } from "next-intl";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import Alert from "@/components/atoms/Alert";
 import { FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Price } from "@/sdk_hybrid/entities/fractions/price";

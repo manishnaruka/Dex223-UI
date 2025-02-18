@@ -1,8 +1,8 @@
+import Tooltip from "@repo/ui/tooltip";
 import { useTranslations } from "next-intl";
 import { Address } from "viem";
 
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { DexChainId } from "@/sdk_hybrid/chains";
 import { Standard } from "@/sdk_hybrid/standard";

@@ -3,20 +3,23 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc"
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
   },
   "exports": {
-    "./button": {
-      "types": "./src/components/Button.tsx",
-      "default": "./dist/components/Button.js"
-    },
-    "./gradient-card": {
-      "types": "./src/card.tsx",
-      "default": "./dist/card.js"
-    }
+    "./alert": "./src/components/Alert.tsx",
+    "./checkbox": "./src/components/Checkbox.tsx",
+    "./preloader": "./src/components/Preloader.tsx",
+    "./external-text-link": "./src/components/ExternalTextLink.tsx",
+    "./switch": "./src/components/Switch.tsx",
+    "./tooltip": "./src/components/Tooltip.tsx",
+    "./gradient-card": "./src/components/GradientCard.tsx",
+    "./skeleton": "./src/components/Skeleton.tsx"
   },
   "devDependencies": {
     "clsx": "^2.1.1"
+  },
+  "dependencies": {
+    "@floating-ui/react": "^0.27.4"
   }
 }

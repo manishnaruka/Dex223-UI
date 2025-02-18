@@ -1,7 +1,6 @@
+import Switch from "@repo/ui/switch";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-
-import Switch from "@/components/atoms/Switch";
 
 export const PriceRangeHeader = ({
   isFullRange,

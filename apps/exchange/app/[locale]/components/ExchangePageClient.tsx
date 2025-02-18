@@ -1,5 +1,7 @@
 "use client";
 
+import Alert from "@repo/ui/alert";
+import ExternalTextLink from "@repo/ui/external-text-link";
 import clsx from "clsx";
 import Image from "next/image";
 import { parseAsBoolean, useQueryState } from "nuqs";
@@ -15,10 +17,8 @@ import {
   ExchangeToken,
   TrackedExchangeStatus,
 } from "@/app/[locale]/types";
-import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DetailsRow from "@/components/atoms/DetailsRow";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Svg from "@/components/atoms/Svg";
 import Button from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";

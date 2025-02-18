@@ -1,14 +1,14 @@
+import Alert from "@repo/ui/alert";
+import Switch from "@repo/ui/switch";
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useFormik } from "formik";
 import debounce from "lodash.debounce";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, formatGwei, parseGwei } from "viem";
 
-import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Switch from "@/components/atoms/Switch";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import ConfigureAutomatically from "@/components/gas-settings/ConfigureAutomatically";
 import EIP1559Fields from "@/components/gas-settings/EIP1559Fields";

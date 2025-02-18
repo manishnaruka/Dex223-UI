@@ -1,6 +1,8 @@
 "use client";
 
 import { isZeroAddress } from "@ethereumjs/util";
+import ExternalTextLink from "@repo/ui/external-text-link";
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import React, { HTMLAttributes, ReactNode, use, useMemo, useState } from "react";
 import { Address, formatUnits, isAddress } from "viem";
@@ -9,10 +11,8 @@ import { useReadContract } from "wagmi";
 import { SingleAddressToken } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import Container from "@/components/atoms/Container";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";

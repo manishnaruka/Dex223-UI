@@ -1,12 +1,12 @@
 "use client";
 
+import Preloader from "@repo/ui/preloader";
 import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import Container from "@/components/atoms/Container";
-import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
