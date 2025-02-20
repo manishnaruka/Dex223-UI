@@ -5,6 +5,7 @@ import Image from "next/image";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import QRCode from "qrcode";
 import { useEffect, useMemo, useState } from "react";
+import { formatFloat } from "web/functions/formatFloat";
 
 import CountdownTimer from "@/app/[locale]/components/Countdown";
 import CryptoExchangeForm from "@/app/[locale]/components/CryptoExchangeForm";
@@ -184,6 +185,8 @@ export default function ExchangePageClient({
 
   console.log(fiatExchange);
 
+  console.log(exchange);
+
   return (
     <Container className="px-4">
       <div className="mx-auto w-[600px]">
@@ -214,11 +217,13 @@ export default function ExchangePageClient({
 
                   <h2 className="font-bold text-20 text-center">
                     <div className={clsx("flex items-center justify-center")}>
-                      Сontinue on our partner&apos;s website
+                      Continue on our partner&apos;s website
                     </div>
                   </h2>
 
-                  {exchange.valid_until && <CountdownTimer validUntil={exchange.valid_until} />}
+                  {exchange.valid_until && exchange.status === "waiting" && (
+                    <CountdownTimer validUntil={exchange.valid_until} />
+                  )}
                   {exchange.status === "finished" && (
                     <div className="flex justify-center items-center gap-2 mt-1">
                       <div className="flex items-center gap-2">
@@ -322,8 +327,10 @@ export default function ExchangePageClient({
                     </div>
                   </h2>
 
-                  {exchange.valid_until && <CountdownTimer validUntil={exchange.valid_until} />}
-                  {exchange.status === "finished" && (
+                  {exchange.valid_until && exchange.status === ExchangeStatus.WAITING && (
+                    <CountdownTimer validUntil={exchange.valid_until} />
+                  )}
+                  {exchange.status === "finished" && inputAmount && outputAmount && (
                     <div className="flex justify-center items-center gap-2 mt-1">
                       <div className="flex items-center gap-2">
                         <Image
@@ -333,7 +340,7 @@ export default function ExchangePageClient({
                           alt={""}
                         />
                         <span className="font-medium">
-                          {inputAmount} {tokenA?.symbol}{" "}
+                          {formatFloat(inputAmount)} {tokenA?.symbol}{" "}
                         </span>
                       </div>
                       <Svg className="text-tertiary-text" iconName="next" />
@@ -341,11 +348,11 @@ export default function ExchangePageClient({
                         <Image
                           width={24}
                           height={24}
-                          src={tokenA?.image || "/images/tokens/placeholder.svg"}
+                          src={tokenB?.image || "/images/tokens/placeholder.svg"}
                           alt={""}
                         />
                         <span className="font-medium">
-                          {inputAmount} {tokenA?.symbol}{" "}
+                          {formatFloat(outputAmount)} {tokenB?.symbol?.toUpperCase()}
                         </span>
                       </div>
                     </div>
@@ -495,22 +502,29 @@ export default function ExchangePageClient({
                         }
                         tooltipText={""}
                       />
-                      <DetailsRow
-                        title="Hash in"
-                        value={
-                          <div className="flex items-center gap-1">
-                            <ExternalTextLink
-                              text={truncateMiddle(tx_from || "", {
-                                charsFromEnd: 3,
-                                charsFromStart: 4,
-                              })}
-                              href={"#"}
-                            />
-                            <IconButton variant={IconButtonVariant.COPY} text={tx_to || ""} />
-                          </div>
-                        }
-                        tooltipText={""}
-                      />
+                      {exchange.tx_to && tokenB && (
+                        <DetailsRow
+                          title="Hash in"
+                          value={
+                            <div className="flex items-center gap-1">
+                              <ExternalTextLink
+                                text={truncateMiddle(tx_to || "", {
+                                  charsFromEnd: 3,
+                                  charsFromStart: 4,
+                                })}
+                                href={
+                                  exchange.currencies[tokenB.symbol].tx_explorer?.replace(
+                                    /{}/,
+                                    exchange.tx_to,
+                                  ) || "#"
+                                }
+                              />
+                              <IconButton variant={IconButtonVariant.COPY} text={tx_to || ""} />
+                            </div>
+                          }
+                          tooltipText={""}
+                        />
+                      )}
                     </>
                   )}
                 </div>
