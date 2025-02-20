@@ -5,7 +5,6 @@ import Image from "next/image";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import QRCode from "qrcode";
 import { useEffect, useMemo, useState } from "react";
-import { formatFloat } from "web/functions/formatFloat";
 
 import CountdownTimer from "@/app/[locale]/components/Countdown";
 import CryptoExchangeForm from "@/app/[locale]/components/CryptoExchangeForm";
@@ -27,6 +26,7 @@ import Tab from "@/components/tabs/Tab";
 import Tabs from "@/components/tabs/Tabs";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { Link } from "@/i18n/routing";
