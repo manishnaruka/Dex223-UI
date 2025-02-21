@@ -37,6 +37,7 @@ import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
+import addToast from "@/other/toast";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
@@ -59,7 +60,7 @@ function OpenConfirmDialogButton({
   const t = useTranslations("Swap");
   const { isConnected } = useAccount();
 
-  const { tokenA, tokenB } = useSwapTokensStore();
+  const { tokenA, tokenB, tokenBStandard } = useSwapTokensStore();
   const { typedValue } = useSwapAmountsStore();
   const { setIsOpen: setConfirmSwapDialogOpen } = useConfirmSwapDialogStore();
 
@@ -124,6 +125,14 @@ function OpenConfirmDialogButton({
     return (
       <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("enter_amount")}
+      </Button>
+    );
+  }
+
+  if (tokenA.equals(tokenB)) {
+    return (
+      <Button fullWidth onClick={() => addToast("Convertor haven't beed implemented yet", "info")}>
+        Convert {tokenA.wrapped.symbol} to {tokenBStandard}
       </Button>
     );
   }
@@ -263,22 +272,31 @@ export default function TradeForm() {
   const handlePick = useCallback(
     (token: Currency) => {
       if (currentlyPicking === "tokenA") {
-        if (token === tokenB) {
-          setTokenB(tokenA);
-          setTokenBStandard(tokenAStandard);
-        }
-
         setTokenA(token);
-        setTokenAStandard(Standard.ERC20);
+
+        if (token.wrapped.address0 === tokenB?.wrapped.address0) {
+          if (tokenBStandard === Standard.ERC20) {
+            setTokenAStandard(Standard.ERC223);
+          } else {
+            setTokenAStandard(Standard.ERC20);
+          }
+        } else {
+          setTokenAStandard(Standard.ERC20);
+        }
       }
 
       if (currentlyPicking === "tokenB") {
-        if (token === tokenA) {
-          setTokenA(tokenB);
-          setTokenAStandard(tokenBStandard);
-        }
         setTokenB(token);
-        setTokenBStandard(Standard.ERC20);
+
+        if (token.wrapped.address0 === tokenA?.wrapped.address0) {
+          if (tokenAStandard === Standard.ERC20) {
+            setTokenBStandard(Standard.ERC223);
+          } else {
+            setTokenBStandard(Standard.ERC20);
+          }
+        } else {
+          setTokenBStandard(Standard.ERC20);
+        }
       }
 
       setIsOpenedTokenPick(false);
@@ -414,7 +432,6 @@ export default function TradeForm() {
           />
           <IconButton
             buttonSize={IconButtonSize.LARGE}
-            // disabled
             iconName="gas-edit"
             onClick={() => setIsOpenedFee(true)}
           />
@@ -444,6 +461,7 @@ export default function TradeForm() {
         gasERC20={gasERC20}
         gasERC223={gasERC223}
         token={tokenA}
+        isEqualTokens={!!tokenA && !!tokenB && tokenA.wrapped.address0 === tokenB.wrapped.address0}
         balance0={tokenA0Balance ? formatFloat(tokenA0Balance.formatted) : "0.0"}
         balance1={tokenA1Balance ? formatFloat(tokenA1Balance.formatted) : "0.0"}
         setMax={
@@ -517,7 +535,9 @@ export default function TradeForm() {
         }
         label={t("you_pay")}
         standard={tokenAStandard}
+        otherStandard={tokenBStandard}
         setStandard={setTokenAStandard}
+        setOtherStandard={setTokenBStandard}
       />
       <div className="relative h-3 z-10">
         <SwapButton
@@ -546,7 +566,10 @@ export default function TradeForm() {
         balance1={tokenB1Balance ? formatFloat(tokenB1Balance.formatted) : "0.0"}
         label={t("you_receive")}
         standard={tokenBStandard}
+        otherStandard={tokenAStandard}
         setStandard={setTokenBStandard}
+        setOtherStandard={setTokenAStandard}
+        isEqualTokens={!!tokenA && !!tokenB && tokenA.wrapped.address0 === tokenB.wrapped.address0}
       />
 
       {tokenA && tokenB && typedValue ? (

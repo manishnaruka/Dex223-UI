@@ -257,7 +257,7 @@ function NavigationMoreDropdown() {
               title={t("partners")}
               links={[
                 {
-                  href: "https://eossupport.io/",
+                  href: "https://blockzhub.io/",
                   text: t("partners_eos_support"),
                 },
               ]}
