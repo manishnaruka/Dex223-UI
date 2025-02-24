@@ -2,11 +2,12 @@ import "../assets/styles/globals.css";
 
 import { GoogleAnalytics } from "@next/third-parties/google";
 import clsx from "clsx";
+import dynamic from "next/dynamic";
 import { Golos_Text } from "next/font/google";
 import { PropsWithChildren } from "react";
 
 import Providers from "@/app/providers";
-import SEOAgent from "@/components/common/SEOAgent";
+const SEOAgent = dynamic(() => import("@/components/common/SEOAgent"), { ssr: false });
 
 const isProd = process.env.NODE_ENV === "production";
 
