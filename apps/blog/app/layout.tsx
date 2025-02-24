@@ -2,12 +2,13 @@ import "../assets/styles/globals.css";
 
 import { GoogleAnalytics } from "@next/third-parties/google";
 import clsx from "clsx";
-import dynamic from "next/dynamic";
 import { Golos_Text } from "next/font/google";
+import Script from "next/script";
 import { PropsWithChildren } from "react";
 
 import Providers from "@/app/providers";
-const SEOAgent = dynamic(() => import("@/components/common/SEOAgent"), { ssr: false });
+import ClientOnly from "@/components/common/ClientOnly";
+import SEOAgent from "@/components/common/SEOAgent";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -28,7 +29,13 @@ export default async function RootLayout({ children, params }: PropsWithChildren
   const locale = (await params).locale;
   return (
     <html suppressHydrationWarning lang={locale}>
-      <head>{isProd ? <SEOAgent /> : null}</head>
+      <head>
+        {isProd ? (
+          <ClientOnly>
+            <SEOAgent />
+          </ClientOnly>
+        ) : null}
+      </head>
 
       <body className={clsx(golos_text.className)}>
         <Providers>{children}</Providers>
