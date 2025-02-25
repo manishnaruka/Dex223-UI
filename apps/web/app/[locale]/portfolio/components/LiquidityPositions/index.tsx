@@ -1,15 +1,14 @@
 "use client";
 import "react-loading-skeleton/dist/skeleton.css";
 
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 import { SearchInput } from "@/components/atoms/Input";
-// import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonSize } from "@/components/buttons/Button";
 import { Link } from "@/i18n/routing";
 

@@ -1,3 +1,4 @@
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -5,7 +6,6 @@ import { useMemo } from "react";
 import { NumericFormat } from "react-number-format";
 
 import SelectButton from "@/components/atoms/SelectButton";
-import Tooltip from "@/components/atoms/Tooltip";
 import Badge from "@/components/badges/Badge";
 import InputButton from "@/components/buttons/InputButton";
 import { clsxMerge } from "@/functions/clsxMerge";

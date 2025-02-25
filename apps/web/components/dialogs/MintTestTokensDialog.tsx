@@ -1,3 +1,4 @@
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Address, formatUnits, isAddress, parseUnits } from "viem";
@@ -6,7 +7,6 @@ import { useAccount, usePublicClient, useReadContract, useWalletClient } from "w
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Popover from "@/components/atoms/Popover";
-import Preloader from "@/components/atoms/Preloader";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";

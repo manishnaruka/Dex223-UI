@@ -1,9 +1,9 @@
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { InputHTMLAttributes, ReactNode } from "react";
 import { NumericFormat } from "react-number-format";
 
 import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
-import Tooltip from "@/components/atoms/Tooltip";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;

@@ -1,3 +1,5 @@
+import Alert from "@repo/ui/alert";
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
@@ -6,10 +8,8 @@ import { formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
-import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";

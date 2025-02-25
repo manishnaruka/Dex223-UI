@@ -1,14 +1,14 @@
 "use client";
 
+import Preloader from "@repo/ui/preloader";
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 
 import { SearchInput } from "@/components/atoms/Input";
-import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import addToast from "@/other/toast";
 

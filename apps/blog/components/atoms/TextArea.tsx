@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { FieldProps } from "formik";
 import { TextareaHTMLAttributes } from "react";
 
 interface Props extends TextareaHTMLAttributes<HTMLTextAreaElement> {

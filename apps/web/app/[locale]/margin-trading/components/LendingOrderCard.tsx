@@ -1,3 +1,4 @@
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Link from "next/link";
 
@@ -5,7 +6,6 @@ import MarginPositionCard, {
   LendingPositionCard,
 } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 
 function MarginPositionInfoCard() {

@@ -1,9 +1,9 @@
+import Alert from "@repo/ui/alert";
+import Checkbox from "@repo/ui/checkbox";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from "react";
 
-import Alert from "@/components/atoms/Alert";
-import Checkbox from "@/components/atoms/Checkbox";
 import Svg from "@/components/atoms/Svg";
 import { HelperText } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";

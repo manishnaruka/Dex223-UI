@@ -1,9 +1,9 @@
+import Preloader from "@repo/ui/preloader";
 import React, { useMemo } from "react";
 
 import LatestPosts from "@/app/[locale]/components/LatestPosts";
 import Posts from "@/app/[locale]/components/Posts";
 import { ContentType, Post } from "@/app/[locale]/types/Post";
-import Preloader from "@/components/atoms/Preloader";
 
 export default function PostsContent({
   posts,
@@ -25,7 +25,7 @@ export default function PostsContent({
   isAllLoaded: boolean;
 }) {
   const showLatestNews = useMemo(() => {
-    return !searchValue && contentType === "vide_and_content" && !tag;
+    return !searchValue && contentType === "vide_and_content" && tag === "all";
   }, [searchValue, contentType, tag]);
 
   if (isLoading) {

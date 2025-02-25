@@ -1,3 +1,4 @@
+import Preloader from "@repo/ui/preloader";
 import { Formik } from "formik";
 import { useTranslations } from "next-intl";
 import { ChangeEvent, useRef, useState } from "react";
@@ -5,7 +6,6 @@ import { useConnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Preloader from "@/components/atoms/Preloader";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import {

@@ -1,3 +1,5 @@
+import Alert from "@repo/ui/alert";
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, {
@@ -15,12 +17,10 @@ import {
   useSwapSettingsStore,
   values,
 } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
-import Alert from "@/components/atoms/Alert";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import TextButton from "@/components/buttons/TextButton";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";

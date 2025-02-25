@@ -1,10 +1,10 @@
+import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Link from "next/link";
 import { ReactNode, useMemo } from "react";
 
-import GradientCard, { CardGradient } from "@/components/atoms/GradientCard";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 
 enum DangerStatus {

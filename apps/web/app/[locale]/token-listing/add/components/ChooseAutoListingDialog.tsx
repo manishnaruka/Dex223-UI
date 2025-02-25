@@ -1,3 +1,4 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import { useLocale } from "next-intl";
 import React, { useMemo, useState } from "react";
 
@@ -7,7 +8,6 @@ import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/st
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";

@@ -7,8 +7,11 @@
   "license": "MIT",
   "scripts": {
     "build": "turbo build",
+    "build:exchange": "cd apps/exchange && npm run build",
     "dev": "turbo dev",
     "dev:web": "cd apps/web && npm run dev",
+    "dev:blog": "cd apps/blog && npm run dev",
+    "dev:exchange": "cd apps/exchange && npm run dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.${ts,tsx,md}\""
   },

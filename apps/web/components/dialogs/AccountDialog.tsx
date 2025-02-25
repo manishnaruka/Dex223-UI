@@ -1,3 +1,4 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
@@ -6,7 +7,6 @@ import { useAccount, useDisconnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Popover from "@/components/atoms/Popover";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import SelectButton from "@/components/atoms/SelectButton";

@@ -1,6 +1,5 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 
 const meta = {
   title: "Atoms/External Text Link",

@@ -1,10 +1,10 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import Svg from "@/components/atoms/Svg";
 import TokenListLogo, { TokenListLogoType } from "@/components/atoms/TokenListLogo";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";

@@ -1,15 +1,15 @@
 "use client";
+import ExternalTextLink from "@repo/ui/external-text-link";
+import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import Link from "next/link";
 import SimpleBar from "simplebar-react";
 
 import Container from "@/components/atoms/Container";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
-import GradientCard, { CardGradient } from "@/components/atoms/GradientCard";
 import { SearchInput } from "@/components/atoms/Input";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 
 function MarginPositionInfoCard() {

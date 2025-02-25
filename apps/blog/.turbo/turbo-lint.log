@@ -1,9 +1,0 @@
-[?9001h[?1004h[?25l[2J[m[H]0;C:\WINDOWS\system32\cmd.exe [?25h[K[1myarn run v1.22.22
-[22m[2m$ eslint -c .eslintrc.json --ext .js,.jsx,.ts,.tsx ./ --quiet --fix[22m[K
-[?25l=============[5;1HWARNING: You are currently running a version of TypeScript which is not officially supported by @typescript-eslint/typescript-estree.[8;1HYou may find that it works just fine, or you may not.[10;1HSUPPORTED TYPESCRIPT VERSIONS: >=4.3.5 <5.4.0[12;1HYOUR TYPESCRIPT VERSION: 5.7.2[?25h
-
-Please only submit bug reports when using the officially supported version.
-
-=============
-[KDone in 2.55s.
-[?9001l[?1004l

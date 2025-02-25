@@ -1,8 +1,6 @@
 import clsx from "clsx";
 import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
 
-import styles from "./Collapse.module.scss";
-
 interface Props {
   open: boolean;
 }

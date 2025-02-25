@@ -8,7 +8,9 @@ const config = {
     "../../apps/web/app/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/web/components/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/blog/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}"
+    "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../apps/exchange/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../apps/exchange/components/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
     extend: {
@@ -150,8 +152,13 @@ const config = {
           "75%": { opacity: "1" },
           "100%": { opacity: "0.3" },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
+        shimmer: 'shimmer 1.5s infinite',
         orbit: "orbit ease-in-out 1.5s infinite",
         swap: "swap ease-in-out 0.5s",
         list: "list ease-in-out 2s",

@@ -1,8 +1,8 @@
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 
 import Svg from "@/components/atoms/Svg";
 import TokenAddressWithStandard from "@/components/atoms/TokenAddressWithStandard";
-import Tooltip from "@/components/atoms/Tooltip";
 import TrustBadge from "@/components/badges/TrustBadge";
 import IconButton from "@/components/buttons/IconButton";
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";

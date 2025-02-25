@@ -2,8 +2,6 @@ import { useArgs } from "@storybook/client-api";
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
-import Checkbox from "@/components/atoms/Checkbox";
-import Svg from "@/components/atoms/Svg";
 import PickButton from "@/components/buttons/PickButton";
 
 const meta = {

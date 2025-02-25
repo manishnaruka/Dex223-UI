@@ -1,3 +1,5 @@
+import Preloader from "@repo/ui/preloader";
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -18,8 +20,6 @@ import {
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
-import Preloader from "@/components/atoms/Preloader";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";

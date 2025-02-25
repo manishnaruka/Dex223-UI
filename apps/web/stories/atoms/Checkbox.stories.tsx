@@ -1,7 +1,6 @@
+import Checkbox from "@repo/ui/checkbox";
 import { useArgs } from "@storybook/client-api";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import Checkbox from "@/components/atoms/Checkbox";
 
 const meta = {
   title: "Atoms/Checkbox",

@@ -1,6 +1,5 @@
+import Preloader from "@repo/ui/preloader";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import Preloader from "@/components/atoms/Preloader";
 
 const meta = {
   title: "Atoms/Preloader",

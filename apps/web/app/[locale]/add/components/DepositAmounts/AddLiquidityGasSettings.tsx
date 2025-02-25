@@ -1,9 +1,9 @@
+import Tooltip from "@repo/ui/tooltip";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
 import { useLiquidityAmountsStore } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { formatFloat } from "@/functions/formatFloat";
