@@ -18,15 +18,21 @@ function MobileStandardOption({
   symbol,
   standard,
   active,
+  other,
   setIsActive,
+  setOther,
   token,
+  isEqualTokens,
 }: {
   balance: string | undefined;
   symbol: string | undefined;
   standard: Standard;
   active: Standard;
+  other: Standard;
+  setOther: (standard: Standard) => void;
   setIsActive: (isActive: Standard) => void;
   token: Token | undefined;
+  isEqualTokens?: boolean;
 }) {
   const t = useTranslations("Swap");
   const isActive = useMemo(() => {
@@ -36,7 +42,17 @@ function MobileStandardOption({
   return (
     <div className="flex flex-col">
       <button
-        onClick={() => setIsActive(standard)}
+        onClick={() => {
+          setIsActive(standard);
+
+          if (other === standard && isEqualTokens) {
+            if (standard === Standard.ERC20) {
+              setOther(Standard.ERC223);
+            } else {
+              setOther(Standard.ERC20);
+            }
+          }
+        }}
         className={clsxMerge(
           "*:z-10 pt-10 flex flex-col gap-1 px-3 pb-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
           isActive ? "before:opacity-100" : "before:opacity-0 hocus:before:opacity-100",
@@ -84,17 +100,23 @@ function StandardOption({
   symbol,
   standard,
   active,
+  other,
   setIsActive,
+  setOther,
   token,
   gas,
+  isEqualTokens,
 }: {
   balance: string | undefined;
   symbol: string | undefined;
   standard: Standard;
   active: Standard;
+  other: Standard;
   setIsActive: (isActive: Standard) => void;
+  setOther: (standard: Standard) => void;
   token: Token | undefined;
   gas?: string;
+  isEqualTokens?: boolean;
 }) {
   const t = useTranslations("Swap");
   const isActive = useMemo(() => {
@@ -104,7 +126,17 @@ function StandardOption({
   return (
     <div className="flex flex-col">
       <button
-        onClick={() => setIsActive(standard)}
+        onClick={() => {
+          setIsActive(standard);
+
+          if (other === standard && isEqualTokens) {
+            if (standard === Standard.ERC20) {
+              setOther(Standard.ERC223);
+            } else {
+              setOther(Standard.ERC20);
+            }
+          }
+        }}
         className={clsxMerge(
           "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
           isActive ? "before:opacity-100" : "before:opacity-0 hocus:before:opacity-100",
@@ -182,7 +214,9 @@ export default function TokenInput({
   balance1,
   label,
   setStandard,
+  setOtherStandard,
   standard,
+  otherStandard,
   readOnly = false,
   isHalf = false,
   isMax = false,
@@ -190,6 +224,7 @@ export default function TokenInput({
   setMax,
   gasERC20,
   gasERC223,
+  isEqualTokens,
 }: {
   handleClick: () => void;
   token: Currency | undefined;
@@ -199,7 +234,9 @@ export default function TokenInput({
   balance1: string | undefined;
   label: string;
   standard: Standard;
+  otherStandard: Standard;
   setStandard: (standard: Standard) => void;
+  setOtherStandard: (standard: Standard) => void;
   readOnly?: boolean;
   isHalf?: boolean;
   isMax?: boolean;
@@ -207,6 +244,7 @@ export default function TokenInput({
   setMax?: () => void;
   gasERC20?: string;
   gasERC223?: string;
+  isEqualTokens?: boolean;
 }) {
   const t = useTranslations("Swap");
 
@@ -274,10 +312,13 @@ export default function TokenInput({
             <MobileStandardOption
               token={token}
               setIsActive={setStandard}
+              setOther={setOtherStandard}
               active={standard}
+              other={otherStandard}
               standard={Standard.ERC20}
               symbol={token?.symbol}
               balance={balance0}
+              isEqualTokens={isEqualTokens}
             />
             <div
               className={clsxMerge(
@@ -308,21 +349,27 @@ export default function TokenInput({
             <MobileStandardOption
               token={token}
               setIsActive={setStandard}
+              setOther={setOtherStandard}
               active={standard}
+              other={otherStandard}
               standard={Standard.ERC223}
               symbol={token?.symbol}
               balance={balance1}
+              isEqualTokens={isEqualTokens}
             />
           </div>
           <div className="hidden md:grid md:grid-cols-2 gap-1 md:gap-3 relative">
             <StandardOption
               token={token}
               setIsActive={setStandard}
+              setOther={setOtherStandard}
               active={standard}
+              other={otherStandard}
               standard={Standard.ERC20}
               symbol={token?.symbol}
               balance={balance0}
               gas={gasERC20}
+              isEqualTokens={isEqualTokens}
             />
             <div
               className={clsxMerge(
@@ -352,11 +399,14 @@ export default function TokenInput({
             <StandardOption
               token={token}
               setIsActive={setStandard}
+              setOther={setOtherStandard}
               active={standard}
+              other={otherStandard}
               standard={Standard.ERC223}
               symbol={token?.symbol}
               balance={balance1}
               gas={gasERC223}
+              isEqualTokens={isEqualTokens}
             />
           </div>
         </>
