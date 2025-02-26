@@ -31,13 +31,12 @@ export default function Posts({ posts }: { posts: Post[] }) {
                 className="rounded-t-5  object-cover"
                 src={post.thumbnail.link}
                 layout="fill"
-                // objectFit="cover"
                 alt={post.thumbnail.alt}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
             <div className="px-5 pt-4 pb-6 flex flex-col gap-1 bg-primary-bg md:flex-grow rounded-b-5 group-hocus:bg-tertiary-bg duration-200 cursor-pointer">
-              <h3 className="font-medium line-clamp-2 md:text-24 group-hocus:text-green duration-200">
+              <h3 className="font-medium line-clamp-2 md:text-20 group-hocus:text-green duration-200">
                 {post.title}
               </h3>
               <p className="line-clamp-3 text-secondary-text max-md:text-14">{post.description}</p>

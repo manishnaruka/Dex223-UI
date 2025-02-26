@@ -58,9 +58,12 @@ export default function SwapPage() {
           </div>
 
           <div className="flex justify-center grid-in-[right]">
-            <div className="flex flex-col gap-5 w-full sm:max-w-[600px] xl:max-w-full">
-              <TwoVersionsInfo />
-              <ExternalConverterLink />
+            <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
+              <div className="flex flex-col gap-2 lg:gap-3">
+                <TwoVersionsInfo />
+                <ExternalConverterLink />
+              </div>
+
               <TradeForm />
               <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
             </div>

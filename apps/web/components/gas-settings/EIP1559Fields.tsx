@@ -92,7 +92,7 @@ Max fee sets the upper bound of the payment that you allow your transaction to c
 
                   // setUnsavedMaxFeePerGas( || BigInt(0));
                 }}
-                className="text-green"
+                className="text-green duration-200 hocus:text-green-hover"
               >
                 {helperButtonText}
               </button>{" "}
@@ -128,7 +128,7 @@ Higher priority fee may reduce the amount of time needed for your transaction to
                     setMaxPriorityFeePerGasValue(formatGwei(currentMaxPriorityFeePerGas));
                   }
                 }}
-                className="text-green"
+                className="text-green duration-200 hocus:text-green-hover"
               >
                 {helperButtonText}
               </button>{" "}

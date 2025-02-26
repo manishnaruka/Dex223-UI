@@ -398,7 +398,7 @@ export default function PickTokenDialog({
                   />
                   <div
                     className={clsx(
-                      "flex flex-wrap gap-3",
+                      "flex flex-wrap gap-2 md:gap-3",
                       !!pinnedTokens.length &&
                         !simpleForm &&
                         "border-b border-secondary-border pb-3 mt-3",
@@ -434,7 +434,7 @@ export default function PickTokenDialog({
                                 isEditActivated
                                   ? "bg-transparent border-secondary-border"
                                   : "bg-tertiary-bg border-transparent",
-                                "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                                "items-center border justify-center px-4 duration-200 h-10 rounded-2 flex gap-2",
                                 !isMobile && isEditActivated && "hocus:bg-transparent",
                                 !isMobile && !isEditActivated && "hocus:bg-green-bg",
                               )}

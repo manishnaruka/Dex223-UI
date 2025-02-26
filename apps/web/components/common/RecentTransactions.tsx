@@ -134,7 +134,7 @@ export default function RecentTransactions({
           <div className="card-spacing pt-2.5 pb-5 bg-primary-bg rounded-5">
             <div className="flex justify-between items-center mb-2.5">
               <h3 className="font-bold text-20">{t("transactions")}</h3>
-              <div className="flex items-center">
+              <div className="flex items-center relative -right-3">
                 <IconButton variant={IconButtonVariant.CLOSE} handleClose={handleClose} />
               </div>
             </div>

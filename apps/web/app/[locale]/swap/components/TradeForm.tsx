@@ -444,7 +444,7 @@ export default function TradeForm() {
               onClick={() => setIsOpen(true)}
             />
             {computed.isModified && (
-              <div className="absolute w-2 h-2 right-[13px] top-[13px] bg-primary-bg flex items-center justify-center rounded-full">
+              <div className="absolute w-2 h-2 right-[13px] top-[13px] bg-primary-bg flex items-center z-10 justify-center rounded-full">
                 <div className="w-1 h-1 bg-red-light rounded-full" />
               </div>
             )}
@@ -539,7 +539,7 @@ export default function TradeForm() {
         setStandard={setTokenAStandard}
         setOtherStandard={setTokenBStandard}
       />
-      <div className="relative h-3 z-10">
+      <div className="relative h-4 md:h-5 z-10">
         <SwapButton
           onClick={() => {
             setTokenB(tokenA);
@@ -639,7 +639,7 @@ export default function TradeForm() {
           )}
         </div>
       ) : (
-        <div className="h-5" />
+        <div className="h-4 md:h-5" />
       )}
 
       {(isLoadingSwap || isPendingSwap || isPendingApprove || isLoadingApprove) && (

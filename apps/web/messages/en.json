@@ -27,7 +27,7 @@
   },
   "RecentTransactions": {
     "transactions": "Transactions",
-    "transactions_will_be_displayed_here": "All transactions will be displayed here.",
+    "transactions_will_be_displayed_here": "All transactions will be displayed here",
     "clear_all": "Clear all",
     "total_transactions": "Total transactions:",
     "approve_title": "Approve {symbol}",
@@ -351,7 +351,8 @@
     "discussions": "Discussions",
     "announcements": "Announcements",
     "x": "DEX223",
-    "discord": "Discord"
+    "discord": "Discord",
+    "blog": "Blog"
   },
   "Feedback": {
     "feedback": "Feedback",

@@ -111,7 +111,7 @@ export default function Select({
               width: extendWidth ? ref.current?.offsetWidth : undefined,
             }}
             className={clsx(
-              "absolute z-10 border border-secondary-border bg-tertiary-bg overflow-hidden rounded-3 py-1",
+              "absolute z-20 border border-secondary-border bg-tertiary-bg overflow-hidden rounded-3 py-1",
               extendWidth && "w-full",
             )}
             {...getFloatingProps()}

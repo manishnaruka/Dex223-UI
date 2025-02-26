@@ -502,7 +502,7 @@ export default function ListTokenPage() {
                           <a
                             target="_blank"
                             href={`/${locale}/add?tokenA=${tokenA.wrapped.address0}&tokenB=${tokenB.wrapped.address0}`}
-                            className="text-green hocus:underline"
+                            className="text-green underline hocus:text-green-hover duration-200"
                           >
                             create a pool
                           </a>{" "}

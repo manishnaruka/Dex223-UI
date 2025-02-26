@@ -13,7 +13,7 @@ import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { filterAutoListings, filterTokenLists } from "@/functions/searchTokens";
+import { filterAutoListings } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 
@@ -45,7 +45,7 @@ export default function ChooseAutoListingDialog() {
         onClose={() => setAutoListingSelectOpened(false)}
         title="Select auto-listing contract"
       />
-      <div className="card-spacing">
+      <div className="card-spacing-x mb-3">
         <SearchInput
           value={searchValue}
           onChange={(e) => {
