@@ -1,6 +1,6 @@
 import { HTMLAttributes } from "react";
 
-import { clsxMerge } from "@/functions/clsxMerge";
+import { clsxMerge } from "../functions/clsxMerge";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   shape?: "rect" | "circle";
@@ -11,7 +11,7 @@ export default function Skeleton({ shape = "rect", animationDuration = "1.5s", c
   return (
     <div
       className={clsxMerge(
-        "bg-primary-bg relative overflow-hidden before:animate-shimmer before:absolute before:top-0 before:left-[-100%] before:w-[200%] before:h-full before:bg-gradient-to-r before:from-transparent before:via-quaternary-bg before:to-transparent",
+        "ui-bg-primary-bg ui-relative ui-overflow-hidden before:ui-animate-shimmer before:ui-absolute before:ui-top-0 before:ui-left-[-100%] before:ui-w-[200%] before:ui-h-full before:ui-bg-gradient-to-r before:ui-from-transparent before:ui-via-quaternary-bg before:ui-to-transparent",
         shape === "rect" ? "rounded-20" : "rounded-full",
         className,
       )}

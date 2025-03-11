@@ -16,6 +16,10 @@ export interface ExchangeToken {
   isFiat: boolean; // Indicates if the currency is fiat
 }
 
+export interface FiatToken {
+  symbol: string;
+}
+
 export interface CurrencyDetails {
   name: string;
   symbol: string;

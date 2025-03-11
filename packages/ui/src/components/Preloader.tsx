@@ -23,54 +23,54 @@ export default function Preloader({
       return (
         <div
           style={{ width: size, height: size }}
-          className="flex items-center justify-center relative"
+          className="ui-flex ui-items-center ui-justify-center ui-relative"
         >
           <div
             style={{ borderWidth: size > 50 ? 4 : 2 }}
             className={clsx(
-              "rounded-full border-4 border-transparent top-0 left-0 w-full h-full bg-transparent animate-spin",
-              color === "green" && "border-t-green border-l-green border-r-green",
+              "ui-rounded-full ui-border-4 ui-border-transparent ui-top-0 ui-left-0 ui-w-full ui-h-full ui-bg-transparent ui-animate-spin",
+              color === "green" && "ui-border-t-green ui-border-l-green ui-border-r-green",
               color === "black" &&
-                "border-t-secondary-bg border-l-secondary-bg border-r-secondary-bg",
+                "ui-border-t-secondary-bg ui-border-l-secondary-bg ui-border-r-secondary-bg",
             )}
           />
         </div>
       );
     case "linear":
       return (
-        <div className="flex items-center gap-[5px]" style={{ height: size }}>
+        <div className="ui-flex ui-items-center ui-gap-[5px]" style={{ height: size }}>
           <span
             className={clsx(
-              "block rounded-full animate-flicker1 bg-green",
-              smallDots ? "w-[6px] h-[6px]" : "w-2 h-2 ",
+              "ui-block ui-rounded-full ui-animate-flicker1 ui-bg-green",
+              smallDots ? "ui-w-[6px] ui-h-[6px]" : "ui-w-2 ui-h-2 ",
             )}
           />
           <span
             className={clsx(
-              "block rounded-full animate-flicker2 bg-green",
-              smallDots ? "w-[6px] h-[6px]" : "w-2 h-2 ",
+              "ui-block ui-rounded-full ui-animate-flicker2 ui-bg-green",
+              smallDots ? "ui-w-[6px] ui-h-[6px]" : "ui-w-2 ui-h-2 ",
             )}
           />
           <span
             className={clsx(
-              "block rounded-full animate-flicker3 bg-green",
-              smallDots ? "w-[6px] h-[6px]" : "w-2 h-2 ",
+              "ui-block ui-rounded-full ui-animate-flicker3 ui-bg-green",
+              smallDots ? "ui-w-[6px] ui-h-[6px]" : "ui-w-2 ui-h-2 ",
             )}
           />
         </div>
       );
     case "awaiting":
       return (
-        <div className="flex items-center justify-center" style={{ width: size, height: size }}>
+        <div className="ui-flex ui-items-center ui-justify-center" style={{ width: size, height: size }}>
           <div
             style={{ width: internalSize, height: internalSize }}
-            className={`rotate-45 relative`}
+            className={`ui-rotate-45 ui-relative`}
           >
             {[0, 1, 2, 3, 4].map((v) => {
               return (
                 <div
                   key={v}
-                  className="absolute animate-orbit w-full h-full"
+                  className="ui-absolute ui-animate-orbit ui-w-full ui-h-full"
                   style={{ animationDelay: `${v * 100}ms`, opacity: 1 - 0.2 * (v + 1), zIndex: v }}
                 >
                   <div
@@ -79,7 +79,7 @@ export default function Preloader({
                       height: internalSize / 5,
                       boxShadow: `0px 0px ${internalSize / 2.5}px 2px #3ae374`,
                     }}
-                    className="absolute top-0 left-0 shadow-orbit w-[10px] h-[10px] bg-green rounded-full"
+                    className="ui-absolute ui-top-0 ui-left-0 ui-shadow-orbit ui-w-[10px] ui-h-[10px] ui-bg-green ui-rounded-full"
                   />
                 </div>
               );

@@ -25,13 +25,13 @@ export default function ExternalTextLink({
       target="_blank"
       href={href}
       className={clsxMerge(
-        "flex items-center duration-200",
-        color === "green" ? "text-green hocus:text-green-hover" : "text-white hocus:text-green",
+        "ui-flex ui-items-center ui-duration-200",
+        color === "green" ? "ui-text-green hocus:ui-text-green-hover" : "ui-text-white hocus:ui-text-green",
         className,
       )}
     >
       <span className={textClassname}>{text}</span>
-      <ForwardIcon className="flex-shrink-0" size={arrowSize} />
+      <ForwardIcon className="ui-flex-shrink-0" size={arrowSize} />
     </a>
   );
 }

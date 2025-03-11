@@ -24,7 +24,7 @@ export default function Checkbox({
       <input
         id={id}
         className={clsxMerge(
-          "appearance-none peer shrink-0 w-6 h-6 border border-secondary-border bg-secondary-bg rounded-2 hocus:border-green hocus:bg-primary-bg checked:hocus:shadow checked:hocus:shadow-green/60 checked:bg-green checked:hocus:bg-green checked:border-green checked:hocus:border-green cursor-pointer relative duration-200",
+          "ui-appearance-none peer ui-shrink-0 ui-w-6 ui-h-6 ui-border ui-border-secondary-border ui-bg-secondary-bg ui-rounded-2 hocus:ui-border-green hocus:ui-bg-primary-bg checked:ui-hocus:shadow checked:ui-hocus:shadow-green/60 checked:ui-bg-green checked:hocus:ui-bg-green checked:ui-border-green checked:hocus:ui-border-green ui-cursor-pointer ui-relative ui-duration-200",
           className,
         )}
         type="checkbox"
@@ -32,12 +32,12 @@ export default function Checkbox({
         checked={checked}
       />
       {label ? (
-        <label className={clsxMerge("pl-2 cursor-pointer", labelClassName)} htmlFor={id}>
+        <label className={clsxMerge("ui-pl-2 ui-cursor-pointer", labelClassName)} htmlFor={id}>
           {label}
         </label>
       ) : null}
       <CheckIcon
-        className="duration-200 absolute opacity-0 peer-checked:opacity-100 text-secondary-bg pointer-events-none"
+        className="ui-duration-200 ui-absolute ui-opacity-0 peer-checked:ui-opacity-100 ui-text-secondary-bg ui-pointer-events-none"
       />
     </div>
   );

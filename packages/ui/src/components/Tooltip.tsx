@@ -81,7 +81,7 @@ export default function Tooltip({ text, iconSize = 24, renderTrigger, customOffs
         renderTrigger(refs, getReferenceProps())
       ) : (
         <span
-          className="cursor-pointer text-tertiary-text pointer-events-auto"
+          className="ui-cursor-pointer ui-text-tertiary-text ui-pointer-events-auto"
           ref={refs.setReference}
           {...getReferenceProps()}
           onClick={(e) => e.stopPropagation()}
@@ -92,7 +92,7 @@ export default function Tooltip({ text, iconSize = 24, renderTrigger, customOffs
       <FloatingPortal>
         {isMounted && (
           <div
-            className="py-2 px-5 bg-quaternary-bg border border-secondary-border rounded-2 max-w-[400px] relative z-[100] text-14 text-secondary-text"
+            className="ui-py-2 ui-px-5 ui-bg-quaternary-bg ui-border ui-border-secondary-border ui-rounded-2 ui-max-w-[400px] ui-relative ui-z-[100] ui-text-14 ui-text-secondary-text"
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
             {...getFloatingProps()}

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import PickTokenDialog from "@/app/[locale]/components/PickTokenDialog";
 import { OutputAmountError } from "@/app/[locale]/hooks/useOutputAmount";
-import { ExchangeToken } from "@/app/[locale]/types";
+import { ExchangeToken, FiatToken } from "@/app/[locale]/types";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Button from "@/components/buttons/Button";
@@ -14,7 +14,7 @@ import TokenInput from "@/components/common/TokenInput";
 
 interface Props {
   recipient: string;
-  tokensFrom: ExchangeToken[];
+  tokensFrom: ExchangeToken[] | FiatToken[];
   tokensTo: ExchangeToken[];
   tokenA: ExchangeToken | undefined;
   tokenB: ExchangeToken | undefined;

@@ -15,11 +15,11 @@ interface Props {
 }
 
 const iconsMap: Record<AlertType, ReactNode> = {
-  success: <SuccessIcon className="flex-shrink-0" />,
-  info: <InfoIcon className=" flex-shrink-0" />,
-  error: <WarningIcon className=" flex-shrink-0" />,
-  warning: <WarningIcon className=" flex-shrink-0" />,
-  "info-border": <InfoIcon className=" flex-shrink-0"/>,
+  success: <SuccessIcon className="ui-flex-shrink-0" />,
+  info: <InfoIcon className="ui-flex-shrink-0" />,
+  error: <WarningIcon className="ui-flex-shrink-0" />,
+  warning: <WarningIcon className="ui-flex-shrink-0" />,
+  "info-border": <InfoIcon className="ui-flex-shrink-0"/>,
 };
 
 export default function Alert({ text, type = "success", withIcon = true }: Props) {
@@ -27,42 +27,42 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
     <div
       className={clsxMerge(
         `
-        relative
-        flex
-        outline
-        rounded-2
-        outline-1
-        gap-2
-        px-4
-        md:px-5
-        py-2
-        overflow-hidden
-        group
-        text-14
-        text-secondary-text
+        ui-relative
+        ui-flex
+        ui-outline
+        ui-rounded-2
+        ui-outline-1
+        ui-gap-2
+        ui-px-4
+        ui-md:px-5
+        ui-py-2
+        ui-overflow-hidden
+        ui-group
+        ui-text-14
+        ui-text-secondary-text
         `,
-        type === "success" && "outline-green bg-green-bg ",
-        type === "error" && "outline-red-light bg-red-bg",
-        type === "warning" && "outline-orange bg-orange-bg ",
-        type === "info" && "outline-blue bg-blue-bg",
-        type === "info-border" && "border-l-4 border-l-blue outline-0 bg-primary-bg pl-4",
+        type === "success" && "ui-outline-green ui-bg-green-bg ",
+        type === "error" && "ui-outline-red-light ui-bg-red-bg",
+        type === "warning" && "ui-outline-orange ui-bg-orange-bg ",
+        type === "info" && "ui-outline-blue ui-bg-blue-bg",
+        type === "info-border" && "ui-border-l-4 ui-border-l-blue ui-outline-0 ui-bg-primary-bg ui-pl-4",
       )}
     >
       {withIcon && (
         <div
           className={clsx(
-            "flex justify-center flex-shrink-0 items-stretch",
-            type === "success" && "text-green",
-            type === "error" && "text-red-light",
-            type === "warning" && "text-orange",
-            type === "info" && "text-blue",
-            type === "info-border" && "text-blue",
+            "ui-flex ui-justify-center ui-flex-shrink-0 ui-items-stretch",
+            type === "success" && "ui-text-green",
+            type === "error" && "ui-text-red-light",
+            type === "warning" && "ui-text-orange",
+            type === "info" && "ui-text-blue",
+            type === "info-border" && "ui-text-blue",
           )}
         >
           {iconsMap[type]}
         </div>
       )}
-      <div className="flex items-center">{text}</div>
+      <div className="ui-flex ui-items-center">{text}</div>
     </div>
   );
 }

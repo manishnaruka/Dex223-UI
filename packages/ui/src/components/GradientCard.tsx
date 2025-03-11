@@ -13,17 +13,17 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 }
 
 const gradientBackgroundMap: Record<CardGradient, string> = {
-  [CardGradient.BLUE_LIGHT]: "bg-gradient-card-blue-light-fill",
-  [CardGradient.GREEN_LIGHT]: "bg-gradient-card-green-light-fill",
-  [CardGradient.RED_LIGHT]: "bg-gradient-card-red-light-fill",
-  [CardGradient.YELLOW_LIGHT]: "bg-gradient-card-yellow-light-fill",
+  [CardGradient.BLUE_LIGHT]: "ui-bg-gradient-card-blue-light-fill",
+  [CardGradient.GREEN_LIGHT]: "ui-bg-gradient-card-green-light-fill",
+  [CardGradient.RED_LIGHT]: "ui-bg-gradient-card-red-light-fill",
+  [CardGradient.YELLOW_LIGHT]: "ui-bg-gradient-card-yellow-light-fill",
 };
 
 const gradientBorderMap: Record<CardGradient, string> = {
-  [CardGradient.BLUE_LIGHT]: "before:bg-gradient-card-blue-dark-border",
-  [CardGradient.GREEN_LIGHT]: "before:bg-gradient-card-green-dark-border",
-  [CardGradient.RED_LIGHT]: "before:bg-gradient-card-red-light-border",
-  [CardGradient.YELLOW_LIGHT]: "before:bg-gradient-card-yellow-light-border",
+  [CardGradient.BLUE_LIGHT]: "before:ui-bg-gradient-card-blue-dark-border",
+  [CardGradient.GREEN_LIGHT]: "before:ui-bg-gradient-card-green-dark-border",
+  [CardGradient.RED_LIGHT]: "before:ui-bg-gradient-card-red-light-border",
+  [CardGradient.YELLOW_LIGHT]: "before:ui-bg-gradient-card-yellow-light-border",
 };
 
 export default function GradientCard({
@@ -35,12 +35,12 @@ export default function GradientCard({
   return (
     <div
       className={clsx(
-        "relative before:w-[calc(100%_+_2px)] before:h-[calc(100%_+_2px)] before:-top-px before:-left-px before:rounded-3 before:absolute",
+        "ui-relative before:ui-w-[calc(100%_+_2px)] before:ui-h-[calc(100%_+_2px)] before:-ui-top-px before:-ui-left-px before:ui-rounded-3 before:ui-absolute",
         gradientBorderMap[gradient],
       )}
     >
       <div
-        className={clsx("relative rounded-3", gradientBackgroundMap[gradient], className)}
+        className={clsx("ui-relative ui-rounded-3", gradientBackgroundMap[gradient], className)}
         {...props}
       >
         {children}

@@ -10,9 +10,9 @@ interface Props {
 
 export default function Switch({ checked, handleChange, small = false, disabled = false }: Props) {
   return (
-    <label className={clsx("relative inline-block w-12 h-6")}>
+    <label className={clsx("ui-relative ui-inline-block ui-w-12 ui-h-6")}>
       <input
-        className="peer appearance-none"
+        className="peer ui-appearance-none"
         disabled={disabled}
         checked={checked}
         onChange={handleChange}
@@ -21,36 +21,36 @@ export default function Switch({ checked, handleChange, small = false, disabled 
       <span
         className={clsx(
           `
-          bg-secondary-bg
-                      absolute
-                      cursor-pointer
-                      w-full
-                      h-full
-                      top-0
-                      bottom-0
-                      right-0
-                      left-0
-                      duration-200
-                      peer-checked:border-green
-                      peer-checked:bg-green-bg
-                      peer-checked:hocus:shadow
-                      peer-checked:hocus:shadow-green/60
-                      border-primary-border
-                      border
-                      rounded-5
-                      peer-hocus:before:bg-green
-                      peer-hocus:border-green
-                      peer-checked:before:bg-green
-                      peer-checked:before:translate-x-6
-                      before:content-['']
-                      before:absolute
-                      before:top-[2px]
-                      before:left-[2px]
-                      before:h-[18px]
-                      before:w-[18px]
-                      before:bg-primary-border
-                      before:rounded-full
-                      before:duration-200
+          ui-bg-secondary-bg
+                      ui-absolute
+                      ui-cursor-pointer
+                      ui-w-full
+                      ui-h-full
+                      ui-top-0
+                      ui-bottom-0
+                      ui-right-0
+                      ui-left-0
+                      ui-duration-200
+                      peer-checked:ui-border-green
+                      peer-checked:ui-bg-green-bg
+                      peer-checked:hocus:ui-shadow
+                      peer-checked:hocus:ui-shadow-green/60
+                      ui-border-primary-border
+                      ui-border
+                      ui-rounded-5
+                      peer-hocus:before:ui-bg-green
+                      peer-hocus:ui-border-green
+                      peer-checked:before:ui-bg-green
+                      peer-checked:before:ui-translate-x-6
+                      before:ui-content-['']
+                      before:ui-absolute
+                      before:ui-top-[2px]
+                      before:ui-left-[2px]
+                      before:ui-h-[18px]
+                      before:ui-w-[18px]
+                      before:ui-bg-primary-border
+                      before:ui-rounded-full
+                      before:ui-duration-200
                   `,
         )}
       />
