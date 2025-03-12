@@ -8,7 +8,7 @@ import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
-import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
+import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
@@ -37,7 +37,6 @@ import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
-import addToast from "@/other/toast";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
@@ -59,6 +58,8 @@ function OpenConfirmDialogButton({
   const tWallet = useTranslations("Wallet");
   const t = useTranslations("Swap");
   const { isConnected } = useAccount();
+
+  const { handleSwap } = useSwap();
 
   const { tokenA, tokenB, tokenBStandard } = useSwapTokensStore();
   const { typedValue } = useSwapAmountsStore();
@@ -131,7 +132,7 @@ function OpenConfirmDialogButton({
 
   if (tokenA.equals(tokenB)) {
     return (
-      <Button fullWidth onClick={() => addToast("Convertor haven't beed implemented yet", "info")}>
+      <Button fullWidth onClick={() => handleSwap(typedValue)}>
         Convert {tokenA.wrapped.symbol} to {tokenBStandard}
       </Button>
     );
@@ -217,7 +218,15 @@ export default function TradeForm() {
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
-  }, [trade?.outputAmount]);
+  }, [tokenA, tokenB, trade?.outputAmount, typedValue]);
+
+  const dependentAmountValue = useMemo(() => {
+    if (tokenA && tokenB && tokenA.equals(tokenB)) {
+      return typedValue;
+    }
+
+    return dependentAmount?.toSignificant() || "";
+  }, [dependentAmount, tokenA, tokenB, typedValue]);
 
   const isConvertationRequired = useMemo(() => {
     if (erc20BalanceToken1 && tokenBStandard === Standard.ERC20) {
@@ -273,29 +282,41 @@ export default function TradeForm() {
     (token: Currency) => {
       if (currentlyPicking === "tokenA") {
         setTokenA(token);
+        setTokenAStandard(Standard.ERC20);
 
-        if (token.wrapped.address0 === tokenB?.wrapped.address0) {
-          if (tokenBStandard === Standard.ERC20) {
-            setTokenAStandard(Standard.ERC223);
-          } else {
-            setTokenAStandard(Standard.ERC20);
+        if (token.isNative || tokenB?.isNative) {
+          if (tokenB && tokenB.equals(token)) {
+            setTokenB(tokenA);
+            setTokenBStandard(tokenAStandard);
           }
         } else {
-          setTokenAStandard(Standard.ERC20);
+          if (token.address0 === tokenB?.address0) {
+            if (tokenBStandard === Standard.ERC20) {
+              setTokenAStandard(Standard.ERC223);
+            } else {
+              setTokenAStandard(Standard.ERC20);
+            }
+          }
         }
       }
 
       if (currentlyPicking === "tokenB") {
         setTokenB(token);
+        setTokenBStandard(Standard.ERC20);
 
-        if (token.wrapped.address0 === tokenA?.wrapped.address0) {
-          if (tokenAStandard === Standard.ERC20) {
-            setTokenBStandard(Standard.ERC223);
-          } else {
-            setTokenBStandard(Standard.ERC20);
+        if (token.isNative || tokenA?.isNative) {
+          if (tokenA && tokenA.equals(token)) {
+            setTokenA(tokenB);
+            setTokenAStandard(tokenBStandard);
           }
         } else {
-          setTokenBStandard(Standard.ERC20);
+          if (token.address0 === tokenA?.address0) {
+            if (tokenAStandard === Standard.ERC20) {
+              setTokenBStandard(Standard.ERC223);
+            } else {
+              setTokenBStandard(Standard.ERC20);
+            }
+          }
         }
       }
 
@@ -547,7 +568,7 @@ export default function TradeForm() {
             setTokenAStandard(tokenBStandard);
             setTokenBStandard(tokenAStandard);
             setTypedValue({
-              typedValue: dependentAmount?.toSignificant() || "",
+              typedValue: dependentAmountValue,
               field: Field.CURRENCY_A,
             });
           }}
@@ -555,7 +576,7 @@ export default function TradeForm() {
       </div>
       <TokenInput
         readOnly
-        value={dependentAmount?.toSignificant() || ""}
+        value={dependentAmountValue}
         onInputChange={(value) => null}
         handleClick={() => {
           setCurrentlyPicking("tokenB");

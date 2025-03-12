@@ -88,7 +88,7 @@ function TokenRow({
   }, [currency]);
 
   return (
-    <button
+    <div
       role="button"
       onClick={() => handlePick(currency)}
       className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:pl-10 md:pr-4 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
@@ -248,7 +248,7 @@ function TokenRow({
           </div>
         )}
       </div>
-    </button>
+    </div>
   );
 }
 

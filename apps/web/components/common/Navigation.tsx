@@ -66,14 +66,6 @@ const menuItems: Array<
           className="min-w-[238px]"
         />
         <MobileLink
-          isExternal
-          href="https://exchange.dex223.io"
-          iconName="crypto-exchange"
-          title={"Fiat"}
-          handleClose={handleClose}
-          className="min-w-[238px]"
-        />
-        <MobileLink
           disabled
           isActive={pathname === "/margin-trading"}
           href="/margin-trading"

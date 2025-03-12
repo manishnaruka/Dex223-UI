@@ -6,7 +6,6 @@ import {
   encodeAbiParameters,
   encodeFunctionData,
   encodePacked,
-  formatUnits,
   getAbiItem,
   parseUnits,
 } from "viem";
@@ -25,10 +24,10 @@ import {
   useSwapStatusStore,
 } from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
-import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
+import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { getGasSettings } from "@/functions/gasSettings";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
@@ -38,7 +37,7 @@ import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
-import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
+import { CONVERTER_ADDRESS, ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
 import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -48,10 +47,8 @@ import { ONE } from "@/sdk_hybrid/internalConstants";
 import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
 import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
 import { TickMath } from "@/sdk_hybrid/utils/tickMath";
-import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
-  GasFeeModel,
   RecentTransactionTitleTemplate,
   stringifyObject,
   useRecentTransactionsStore,
@@ -119,9 +116,7 @@ export function useSwapParams() {
       !tokenB ||
       !chainId ||
       !DEX_SUPPORTED_CHAINS.includes(chainId) ||
-      !poolAddress ||
       !typedValue ||
-      !trade ||
       !address
     ) {
       return null;
@@ -144,6 +139,38 @@ export function useSwapParams() {
       sqrtPriceLimitX96: BigInt(sqrtPriceLimitX96.toString()),
       prefer223Out: tokenBStandard === Standard.ERC223,
     };
+
+    if (tokenA.equals(tokenB)) {
+      if (tokenAStandard === Standard.ERC223) {
+        return {
+          address: getTokenAddressForStandard(tokenA, tokenAStandard),
+          abi: ERC223_ABI,
+          functionName: "transfer" as "transfer",
+          args: [
+            CONVERTER_ADDRESS[chainId as DexChainId],
+            parseUnits(typedValue, tokenA.decimals),
+            encodeFunctionData({
+              abi: TOKEN_CONVERTER_ABI,
+              functionName: "convertERC20" as "convertERC20",
+              args: [tokenA.wrapped.address0, parseUnits(typedValue, tokenA.decimals)],
+            }),
+          ],
+        };
+      }
+
+      if (tokenAStandard === Standard.ERC20) {
+        return {
+          address: CONVERTER_ADDRESS[chainId as DexChainId],
+          abi: TOKEN_CONVERTER_ABI,
+          functionName: "convertERC20" as "convertERC20",
+          args: [tokenA.wrapped.address0, parseUnits(typedValue, tokenA.decimals)],
+        };
+      }
+    }
+
+    if (!poolAddress || !trade) {
+      return null;
+    }
 
     if (tokenA.isNative) {
       return {
@@ -294,7 +321,7 @@ export function useSwapEstimatedGas() {
 export default function useSwap() {
   const t = useTranslations("Swap");
   const { data: walletClient } = useWalletClient();
-  const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
+  const { tokenA, tokenB, tokenAStandard, tokenBStandard } = useSwapTokensStore();
   const { trade } = useTrade();
   const { address } = useAccount();
   const publicClient = usePublicClient();
@@ -321,23 +348,35 @@ export default function useSwap() {
 
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
 
+  const isConversion = useMemo(() => {
+    return !!(tokenA && tokenB && tokenA.equals(tokenB));
+  }, [tokenA, tokenB]);
+
+  const contractAddress = useMemo(() => {
+    return isConversion ? CONVERTER_ADDRESS : ROUTER_ADDRESS;
+  }, [isConversion]);
+
   const {
     isAllowed: isAllowedA,
     writeTokenApprove: approveA,
     updateAllowance,
   } = useStoreAllowance({
     token: tokenA,
-    contractAddress: ROUTER_ADDRESS[chainId],
+    contractAddress: contractAddress[chainId],
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
   const output = useMemo(() => {
+    if (isConversion) {
+      return typedValue;
+    }
+
     if (!trade) {
       return "";
     }
 
     return (+trade.outputAmount.toSignificant() * (100 - slippage)) / 100;
-  }, [slippage, trade]);
+  }, [isConversion, slippage, trade, typedValue]);
 
   const { swapParams } = useSwapParams();
 
@@ -392,10 +431,9 @@ export default function useSwap() {
         !address ||
         !tokenA ||
         !tokenB ||
-        !trade ||
-        !output ||
-        !chainId ||
-        !swapParams
+        (!tokenA.equals(tokenB) && (!trade || !chainId)) ||
+        !swapParams ||
+        !output
         // !estimatedGas
       ) {
         console.log({
@@ -476,15 +514,23 @@ export default function useSwap() {
                     }),
                   ],
                 },
-                title: {
-                  symbol0: tokenA.symbol!,
-                  symbol1: tokenB.symbol!,
-                  template: RecentTransactionTitleTemplate.SWAP,
-                  amount0: typedValue,
-                  amount1: output.toString(),
-                  logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
-                  logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
-                },
+                title: isConversion
+                  ? {
+                      symbol: tokenA.symbol!,
+                      template: RecentTransactionTitleTemplate.CONVERT,
+                      amount: typedValue,
+                      logoURI: tokenA?.logoURI || "/images/tokens/placeholder.svg",
+                      standard: tokenBStandard,
+                    }
+                  : {
+                      symbol0: tokenA.symbol!,
+                      symbol1: tokenB.symbol!,
+                      template: RecentTransactionTitleTemplate.SWAP,
+                      amount0: typedValue,
+                      amount1: output.toString(),
+                      logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
+                      logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
+                    },
               },
               address,
             );
@@ -549,6 +595,7 @@ export default function useSwap() {
   return {
     handleSwap,
     isAllowedA: isAllowedA,
+    isConversion,
     handleApprove: () => null,
   };
 }

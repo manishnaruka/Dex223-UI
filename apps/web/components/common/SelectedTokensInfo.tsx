@@ -19,6 +19,14 @@ export default function SelectedTokensInfo({ tokenA, tokenB }: Props) {
     return null;
   }
 
+  if (tokenA && tokenB && tokenA.equals(tokenB)) {
+    return (
+      <div className="w-full bg-primary-bg p-4 sm:p-6 grid gap-3 rounded-5">
+        <SelectedTokenInfoItem token={tokenA} />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full bg-primary-bg p-4 sm:p-6 grid gap-3 rounded-5">
       {tokenA && <SelectedTokenInfoItem token={tokenA} />}

@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
 import { db } from "@/db/db";
+import { Standard } from "@/sdk_hybrid/standard";
 export enum RecentTransactionStatus {
   PENDING,
   SUCCESS,
@@ -22,6 +23,7 @@ export enum RecentTransactionTitleTemplate {
   WITHDRAW,
   LIST_SINGLE,
   LIST_DOUBLE,
+  CONVERT,
 }
 
 type CommonRecentTransaction = {
@@ -76,6 +78,9 @@ export type IRecentTransactionTitle =
   | ({
       template: RecentTransactionTitleTemplate.WITHDRAW;
     } & SingleTokenTransactionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CONVERT;
+    } & SingleTokenTransactionTitle & { standard: Standard })
   | ({
       template: RecentTransactionTitleTemplate.SWAP;
     } & TwoTokensTransactionTitle)

@@ -59,7 +59,7 @@ export const useSwapSearchParams = () => {
         const token = tokens.find(
           (t) => t.wrapped.address0.toLowerCase() === queryTokenB.toLowerCase(),
         );
-        if (token) {
+        if (token && queryTokenA !== queryTokenB) {
           setTokenB(token);
         }
       }
