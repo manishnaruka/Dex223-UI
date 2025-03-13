@@ -1,8 +1,10 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import { Address } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -11,6 +13,7 @@ import Popover from "@/components/atoms/Popover";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
+import Badge from "@/components/badges/Badge";
 import Button, { ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import TabButton from "@/components/buttons/TabButton";
@@ -21,7 +24,11 @@ import { copyToClipboard } from "@/functions/copyToClipboard";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
+import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Standard } from "@/sdk_hybrid/standard";
+import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
 function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: any) {
@@ -44,6 +51,17 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
     return [];
   }, [address, transactions]);
   const { connector } = useAccount();
+
+  const tokens = useTokens();
+  const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();
+
+  const pinnedTokens = useMemo(() => {
+    const lookupMap: Map<"native" | Address, Currency> = new Map(
+      tokens.map((token) => [token.isNative ? "native" : token.address0, token]),
+    );
+
+    return pinnedTokensAddresses[chainId].map((id) => lookupMap.get(id));
+  }, [chainId, pinnedTokensAddresses, tokens]);
 
   return (
     <>
@@ -101,9 +119,96 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
         </div>
 
         {activeTab == 0 && (
-          <div className="flex flex-col items-center justify-center h-[376px] overflow-auto gap-2 bg-empty-no-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
-            <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
-          </div>
+          <>
+            {pinnedTokens.length ? (
+              <div className="h-[376px] -mt-3 pt-3">
+                <button className="h-12 items-center w-full mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3">
+                  <span className="flex items-center gap-2 text-secondary-text">
+                    <Svg className="text-tertiary-text" iconName="pin-fill" />
+                    Manage pinned tokens
+                  </span>
+
+                  <Svg className="text-tertiary-text" iconName="forward" />
+                </button>
+                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={304}>
+                  <div className="flex flex-col gap-2 md:gap-3">
+                    {pinnedTokens.map((pinnedToken) => {
+                      if (!pinnedToken) {
+                        return;
+                      }
+
+                      return (
+                        <div
+                          key={pinnedToken.symbol}
+                          className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3"
+                        >
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <Image
+                                width={40}
+                                height={40}
+                                src={pinnedToken.logoURI || "/images/tokens/placeholder.svg"}
+                                alt=""
+                              />
+                              <div className="flex flex-col">
+                                <span>{pinnedToken.name}</span>
+                                <span className="text-secondary-text text-12">
+                                  2 {pinnedToken.symbol?.toUpperCase()}
+                                </span>
+                              </div>
+                            </div>
+                            <span>$0.00</span>
+                          </div>
+                          {pinnedToken.isToken ? (
+                            <div className="flex flex-col gap-1">
+                              <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-12 text-tertiary-text">Balance</span>
+                                  <span className="block min-w-[58px]">
+                                    <Badge className="w-fit" size="small" text={Standard.ERC20} />
+                                  </span>
+                                  <Tooltip iconSize={16} text="Tooltip text" />
+                                </div>
+
+                                <span className="text-secondary-text text-12">1.23 ETH</span>
+                              </div>
+                              <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-12 text-tertiary-text">Balance</span>
+                                  <span className="block min-w-[58px]">
+                                    <Badge className="w-fit" size="small" text={Standard.ERC223} />
+                                  </span>
+                                  <Tooltip iconSize={16} text="Tooltip text" />
+                                </div>
+
+                                <span className="text-secondary-text text-12">1.23 ETH</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-12 text-tertiary-text">Balance</span>
+                                <span className="block min-w-[58px]">
+                                  <Badge className="w-fit" size="small" text="Native" />
+                                </span>
+                                <Tooltip iconSize={16} text="Tooltip text" />
+                              </div>
+
+                              <span className="text-secondary-text text-12">1.23 ETH</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollbarContainer>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-[376px] overflow-auto gap-2 bg-empty-no-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+                <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
+              </div>
+            )}
+          </>
         )}
 
         {activeTab == 1 && (
