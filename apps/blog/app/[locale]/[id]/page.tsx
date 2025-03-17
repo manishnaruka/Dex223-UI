@@ -5,8 +5,8 @@ import { PropsWithChildren } from "react";
 import { PostDetails } from "@/app/[locale]/types/Post";
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
-import { Link } from "@/i18n/routing";
 import ScrollToTopButton from "@/components/buttons/ScrollToTopButton";
+import { Link } from "@/i18n/routing";
 
 function PostContainer({ children }: PropsWithChildren<{}>) {
   return <div className="w-full max-w-[728px] mx-auto px-4">{children}</div>;

@@ -8,8 +8,8 @@ import { ContentType, Post } from "@/app/[locale]/types/Post";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Select from "@/components/atoms/Select";
-import { IIFE } from "@/functions/iife";
 import ScrollToTopButton from "@/components/buttons/ScrollToTopButton";
+import { IIFE } from "@/functions/iife";
 
 const INITAL_LOAD = 10;
 const POSTS_LIMIT = 6;
@@ -223,7 +223,13 @@ export default function BlogPage() {
               extendWidth
             />
 
-            <Select optionsHeight={380} options={tags} value={tag} onChange={(tag) => setTag(tag)} extendWidth />
+            <Select
+              optionsHeight={380}
+              options={tags}
+              value={tag}
+              onChange={(tag) => setTag(tag)}
+              extendWidth
+            />
           </div>
 
           <div className="max-lg:w-full lg:w-[386px]">
