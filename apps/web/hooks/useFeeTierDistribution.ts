@@ -1,5 +1,6 @@
 import ms from "ms";
 import { useMemo } from "react";
+import { Address } from "viem";
 
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { FeeAmount } from "@/sdk_hybrid/constants";
@@ -20,17 +21,8 @@ interface FeeTierDistribution {
   distributions?: Record<FeeAmount, number | undefined>;
 }
 
-export function useFeeTierDistribution({
-  tokenA,
-  tokenB,
-}: {
-  tokenA?: Currency;
-  tokenB?: Currency;
-}): FeeTierDistribution {
-  const { isLoading, error, distributions } = usePoolTVL({
-    tokenA,
-    tokenB,
-  });
+export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): FeeTierDistribution {
+  const { isLoading, error, distributions } = usePoolTVL(tokenA, tokenB);
 
   // fetch all pool states to determine pool state
   const poolParams: PoolsParams = useMemo(
@@ -96,27 +88,30 @@ export function useFeeTierDistribution({
       largestUsageFeeTier: largestUsageFeeTier === -1 ? undefined : largestUsageFeeTier,
     };
   }, [
-    isLoading,
-    error,
     distributions,
-    poolStateVeryLow,
+    error,
+    isLoading,
+    poolStateHigh,
     poolStateLow,
     poolStateMedium,
-    poolStateHigh,
+    poolStateVeryLow,
   ]);
 }
 
-function usePoolTVL({ tokenA, tokenB }: { tokenA?: Currency; tokenB?: Currency }) {
+function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
   const { data: latestBlock } = useScopedBlockNumber({ watch: true });
-  // TODO
+
+  // Your fee tier distribution query with stable addresses
   const { isLoading, error, data } = useFeeTierDistributionQuery(
     tokenA?.wrapped.address0,
     tokenB?.wrapped.address0,
-    ms(`30s`),
+    30000,
   );
-
+  //
+  // console.log("WWW");
+  //
   const { asToken0, asToken1, _meta } = data ?? {};
-
+  //
   return useMemo(() => {
     if (!latestBlock || !_meta || !asToken0 || !asToken1) {
       return {
@@ -133,71 +128,45 @@ function usePoolTVL({ tokenA, tokenB }: { tokenA?: Currency; tokenB?: Currency }
       };
     }
 
-    const all = asToken0.concat(asToken1);
+    const all = [...asToken0, ...asToken1];
 
-    // sum tvl for tokenA and tokenB by fee tier
-    const tvlByFeeTier = all.reduce<{
-      [feeAmount: number]: [number | undefined, number | undefined];
-    }>(
+    const tvlByFeeTier = all.reduce<Record<FeeAmount, [number, number]>>(
       (acc, value) => {
-        acc[value.feeTier][0] = (acc[value.feeTier][0] ?? 0) + Number(value.totalValueLockedToken0);
-        acc[value.feeTier][1] = (acc[value.feeTier][1] ?? 0) + Number(value.totalValueLockedToken1);
+        const feeTier = value.feeTier as FeeAmount;
+        acc[feeTier][0] += Number(value.totalValueLockedToken0 ?? 0);
+        acc[feeTier][1] += Number(value.totalValueLockedToken1 ?? 0);
         return acc;
       },
       {
-        [FeeAmount.LOWEST]: [undefined, undefined],
-        [FeeAmount.LOW]: [undefined, undefined],
-        [FeeAmount.MEDIUM]: [undefined, undefined],
-        [FeeAmount.HIGH]: [undefined, undefined],
-      } as Record<FeeAmount, [number | undefined, number | undefined]>,
+        [FeeAmount.LOWEST]: [0, 0],
+        [FeeAmount.LOW]: [0, 0],
+        [FeeAmount.MEDIUM]: [0, 0],
+        [FeeAmount.HIGH]: [0, 0],
+      },
     );
 
-    // sum total tvl for token0 and token1
-    const [sumToken0Tvl, sumToken1Tvl] = Object.values(tvlByFeeTier).reduce(
-      (acc: [number, number], value) => {
-        acc[0] += value[0] ?? 0;
-        acc[1] += value[1] ?? 0;
+    const [sumToken0Tvl, sumToken1Tvl] = Object.values(tvlByFeeTier).reduce<[number, number]>(
+      (acc, [tv0, tv1]) => {
+        acc[0] += tv0;
+        acc[1] += tv1;
         return acc;
       },
       [0, 0],
     );
 
-    // returns undefined if both tvl0 and tvl1 are undefined (pool not created)
     const mean = (
-      tvl0: number | undefined,
+      tvl0: number,
       sumTvl0: number,
-      tvl1: number | undefined,
+      tvl1: number,
       sumTvl1: number,
-    ) =>
-      tvl0 === undefined && tvl1 === undefined
-        ? undefined
-        : ((tvl0 ?? 0) + (tvl1 ?? 0)) / (sumTvl0 + sumTvl1) || 0;
+    ): number | undefined =>
+      tvl0 === 0 && tvl1 === 0 ? undefined : (tvl0 + tvl1) / (sumTvl0 + sumTvl1 || 1); // prevent divide by zero
 
     const distributions: Record<FeeAmount, number | undefined> = {
-      [FeeAmount.LOWEST]: mean(
-        tvlByFeeTier[FeeAmount.LOWEST][0],
-        sumToken0Tvl,
-        tvlByFeeTier[FeeAmount.LOWEST][1],
-        sumToken1Tvl,
-      ),
-      [FeeAmount.LOW]: mean(
-        tvlByFeeTier[FeeAmount.LOW][0],
-        sumToken0Tvl,
-        tvlByFeeTier[FeeAmount.LOW][1],
-        sumToken1Tvl,
-      ),
-      [FeeAmount.MEDIUM]: mean(
-        tvlByFeeTier[FeeAmount.MEDIUM][0],
-        sumToken0Tvl,
-        tvlByFeeTier[FeeAmount.MEDIUM][1],
-        sumToken1Tvl,
-      ),
-      [FeeAmount.HIGH]: mean(
-        tvlByFeeTier[FeeAmount.HIGH][0],
-        sumToken0Tvl,
-        tvlByFeeTier[FeeAmount.HIGH][1],
-        sumToken1Tvl,
-      ),
+      [FeeAmount.LOWEST]: mean(...tvlByFeeTier[FeeAmount.LOWEST], sumToken0Tvl, sumToken1Tvl),
+      [FeeAmount.LOW]: mean(...tvlByFeeTier[FeeAmount.LOW], sumToken0Tvl, sumToken1Tvl),
+      [FeeAmount.MEDIUM]: mean(...tvlByFeeTier[FeeAmount.MEDIUM], sumToken0Tvl, sumToken1Tvl),
+      [FeeAmount.HIGH]: mean(...tvlByFeeTier[FeeAmount.HIGH], sumToken0Tvl, sumToken1Tvl),
     };
 
     return {

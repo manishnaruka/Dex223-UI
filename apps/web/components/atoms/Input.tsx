@@ -18,7 +18,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
 
 const inputSizeMap: Record<InputSize, string> = {
   [InputSize.DEFAULT]: "h-10 text-14 rounded-2",
-  [InputSize.LARGE]: "h-12 text-16 rounded-3",
+  [InputSize.LARGE]: "h-12 text-16 rounded-2 md:rounded-3",
 };
 
 const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
@@ -29,7 +29,7 @@ const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
     <input
       ref={ref}
       className={clsxMerge(
-        "duration-200 focus:outline-0 pl-5 placeholder:text-tertiary-text w-full bg-secondary-bg border text-primary-text",
+        "duration-200 focus:outline-0 pl-4 md:pl-5 placeholder:text-tertiary-text w-full bg-secondary-bg border text-primary-text",
         inputSizeMap[inputSize],
         !isError &&
           !isWarning &&

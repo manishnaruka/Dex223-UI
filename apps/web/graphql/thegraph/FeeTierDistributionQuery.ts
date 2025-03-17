@@ -39,8 +39,16 @@ export default function useFeeTierDistributionQuery(
   token0: string | undefined,
   token1: string | undefined,
   interval: number,
-): { error?: ApolloError; isLoading: boolean; data: FeeTierDistributionQuery } {
+): { error?: ApolloError; isLoading: boolean; data?: FeeTierDistributionQuery } {
   const chainId = useCurrentChainId();
+
+  const shouldSkip = useMemo(() => {
+    return !token0 || !token1 || !chainId;
+  }, [token0, token1, chainId]);
+
+  const _apolloClient = useMemo(() => {
+    return apolloClient(chainId);
+  }, [chainId]);
 
   const {
     data,
@@ -51,16 +59,17 @@ export default function useFeeTierDistributionQuery(
       token0: token0?.toLowerCase(),
       token1: token1?.toLowerCase(),
     },
-    pollInterval: interval,
-    client: apolloClient(chainId),
+    pollInterval: interval > 0 ? interval : undefined,
+    client: _apolloClient,
+    skip: shouldSkip,
   });
 
   return useMemo(
     () => ({
       error,
-      isLoading,
-      data,
+      isLoading: shouldSkip ? true : isLoading,
+      data: shouldSkip ? undefined : data,
     }),
-    [data, error, isLoading],
+    [data, error, isLoading, shouldSkip],
   );
 }

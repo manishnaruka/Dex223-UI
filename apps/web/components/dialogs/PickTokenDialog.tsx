@@ -540,7 +540,7 @@ export default function PickTokenDialog({
                 </div>
 
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
-                  <div className="flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180">
+                  <div className="flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180 -mt-3">
                     <span className="text-secondary-text">{t("token_not_found")}</span>
                   </div>
                 )}

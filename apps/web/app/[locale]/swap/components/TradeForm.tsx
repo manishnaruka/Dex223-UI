@@ -201,7 +201,7 @@ export default function TradeForm() {
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
-  const { setTypedValue, independentField, dependentField, typedValue } = useSwapAmountsStore();
+  const { setTypedValue, typedValue } = useSwapAmountsStore();
 
   const { isAllowed: isAllowedA } = useStoreAllowance({
     token: tokenA,

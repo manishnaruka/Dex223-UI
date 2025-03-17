@@ -84,16 +84,25 @@ function FeeAmountOption({
 export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisabled?: boolean }) {
   const t = useTranslations("Liquidity");
   const [isFeeOpened, setIsFeeOpened] = useState(false);
-  const { tier, setTier } = useLiquidityTierStore();
-  const { tokenA, tokenB } = useAddLiquidityTokensStore();
-  const { clearPriceRange } = useLiquidityPriceRangeStore();
-  const { setTypedValue } = useLiquidityAmountsStore();
-  const isDisabled = !tokenA || !tokenB || isAllDisabled;
+  const { tier, setTier } = useLiquidityTierStore((state) => ({
+    tier: state.tier,
+    setTier: state.setTier,
+  }));
+  const { tokenA, tokenB } = useAddLiquidityTokensStore((state) => ({
+    tokenA: state.tokenA,
+    tokenB: state.tokenB,
+  }));
+  const { clearPriceRange } = useLiquidityPriceRangeStore((state) => ({
+    clearPriceRange: state.clearPriceRange,
+  }));
+  const { setTypedValue } = useLiquidityAmountsStore((state) => ({
+    setTypedValue: state.setTypedValue,
+  }));
+  const isDisabled = useMemo(() => {
+    return !tokenA || !tokenB || isAllDisabled;
+  }, [tokenA, tokenB, isAllDisabled]);
 
-  const { distributions } = useFeeTierDistribution({
-    tokenA,
-    tokenB,
-  });
+  const { distributions } = useFeeTierDistribution(tokenA, tokenB);
 
   const poolParams: PoolsParams = useMemo(
     () => [

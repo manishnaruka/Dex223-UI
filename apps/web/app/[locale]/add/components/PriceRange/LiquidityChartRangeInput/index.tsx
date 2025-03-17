@@ -160,7 +160,7 @@ export default function LiquidityChartRangeInput({
   // const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
   // State to manage chart dimensions
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>(() => {
-    const isMobile = window ? window.innerWidth <= 768 : false;
+    const isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false;
     return isMobile ? { width: 252, height: 170 } : { width: 510, height: 312 };
   });
 
