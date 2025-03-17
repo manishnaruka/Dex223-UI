@@ -20,14 +20,12 @@ import TabButton from "@/components/buttons/TabButton";
 import RecentTransaction from "@/components/common/RecentTransaction";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { wallets } from "@/config/wallets";
-import { copyToClipboard } from "@/functions/copyToClipboard";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
-import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Standard } from "@/sdk_hybrid/standard";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
@@ -125,7 +123,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
   const { connector } = useAccount();
 
   const tokens = useTokens();
-  const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();
+  const { tokens: pinnedTokensAddresses } = usePinnedTokensStore();
 
   const pinnedTokens = useMemo(() => {
     const lookupMap: Map<"native" | Address, Currency> = new Map(
@@ -227,8 +225,25 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                 </ScrollbarContainer>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[376px] overflow-auto gap-2 bg-empty-no-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
-                <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
+              <div className="flex flex-col justify-center h-[376px] overflow-auto gap-2 bg-empty-no-pinned-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+                <button className="h-12 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group">
+                  <span className="flex items-center gap-2">
+                    <Svg
+                      className="text-tertiary-text group-hocus:text-green duration-200 "
+                      iconName="pin-fill"
+                    />
+                    Manage pinned tokens
+                  </span>
+                  <div className="relative before:opacity-0 before:duration-200 group-hocus:before:opacity-40 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[8px] before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2">
+                    <Svg
+                      className="text-tertiary-text group-hocus:text-green-hover-icon duration-200 "
+                      iconName="next"
+                    />
+                  </div>
+                </button>
+                <div className="flex-grow flex items-center justify-center">
+                  <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
+                </div>
               </div>
             )}
           </>

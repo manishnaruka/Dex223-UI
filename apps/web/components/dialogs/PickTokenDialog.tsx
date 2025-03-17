@@ -21,6 +21,7 @@ import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
+import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
@@ -183,6 +184,8 @@ function TokenRow({
                   e.stopPropagation();
                   if (pinnedTokens[currency.chainId]?.length < 8 || isTokenPinned) {
                     toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
+                  } else {
+                    addToast("Pinning limit reached: 8 tokens", "info");
                   }
                 }}
                 active={isTokenPinned}
