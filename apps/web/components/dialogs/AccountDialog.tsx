@@ -241,7 +241,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     />
                   </div>
                 </button>
-                <div className="flex-grow flex items-center justify-center">
+                <div className="flex-grow flex items-center justify-center relative -top-[60px]">
                   <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
                 </div>
               </div>

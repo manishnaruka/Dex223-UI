@@ -22,7 +22,7 @@ export default function LatestPosts({ posts }: { posts: [Post, Post, Post, Post]
   return (
     <div>
       <h2 className="text-20 md:text-32 mb-4 md:mb-5">Latest news</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[6fr_4fr] xl:grid-cols-[7fr_4fr] gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[6fr_4fr] xl:grid-cols-[7fr_4fr] gap-4 md:gap-5">
         <Link
           href={`/${latestPost.id}?slug=${latestPost.slug}`}
           className={clsx("flex flex-col cursor-pointer", !isTouchDevice && "group")}
@@ -40,7 +40,7 @@ export default function LatestPosts({ posts }: { posts: [Post, Post, Post, Post]
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 70vw"
             />
           </div>
-          <div className="px-5 pt-4 pb-6 flex flex-col gap-1 bg-primary-bg rounded-b-5 group-hocus:bg-tertiary-bg duration-200">
+          <div className="px-4 md:px-5 pt-4 pb-4 md:pb-6 flex flex-col gap-1 bg-primary-bg rounded-b-3 md:rounded-b-5 group-hocus:bg-tertiary-bg duration-200">
             <h3 className="font-medium md:line-clamp-3 lg:line-clamp-1 text-20 md:text-24 group-hocus:text-green duration-200">
               {latestPost.title}
             </h3>

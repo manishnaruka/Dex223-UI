@@ -94,7 +94,7 @@ export default function Select({
         ref={refs.setReference}
         onClick={() => setIsOpen((prev) => !prev)}
         className={clsx(
-          "duration-200 whitespace-nowrap border w-full rounded-3 h-12 pl-4 md:pl-5 flex  justify-between gap-3 items-center pr-3",
+          "duration-200 whitespace-nowrap border w-full rounded-2 md:rounded-3 h-10 md:h-12 pl-4 md:pl-5 flex  justify-between gap-3 items-center pr-3",
           isOpen
             ? "border-green bg-green-bg shadow shadow-green/60"
             : "border-primary-bg bg-primary-bg hocus:border-green-bg hocus:bg-green-bg",
