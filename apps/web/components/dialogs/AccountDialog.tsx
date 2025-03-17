@@ -21,15 +21,87 @@ import RecentTransaction from "@/components/common/RecentTransaction";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { wallets } from "@/config/wallets";
 import { copyToClipboard } from "@/functions/copyToClipboard";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Standard } from "@/sdk_hybrid/standard";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
+
+function PinnedTokenRow({ token }: { token: Currency }) {
+  const {
+    balance: { erc20Balance, erc223Balance },
+  } = useTokenBalances(token);
+
+  return (
+    <div key={token.symbol} className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Image
+            width={40}
+            height={40}
+            src={token.logoURI || "/images/tokens/placeholder.svg"}
+            alt=""
+          />
+          <div className="flex flex-col">
+            <span>{token.name}</span>
+            <span className="text-secondary-text text-12">2 {token.symbol?.toUpperCase()}</span>
+          </div>
+        </div>
+        <span>$0.00</span>
+      </div>
+      {token.isToken ? (
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
+            <div className="flex items-center gap-2">
+              <span className="text-12 text-tertiary-text">Balance</span>
+              <span className="block min-w-[58px]">
+                <Badge className="w-fit" size="small" text={Standard.ERC20} />
+              </span>
+              <Tooltip iconSize={16} text="Tooltip text" />
+            </div>
+
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc20Balance?.formatted || "0.0")} {token.symbol}
+            </span>
+          </div>
+          <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
+            <div className="flex items-center gap-2">
+              <span className="text-12 text-tertiary-text">Balance</span>
+              <span className="block min-w-[58px]">
+                <Badge className="w-fit" size="small" text={Standard.ERC223} />
+              </span>
+              <Tooltip iconSize={16} text="Tooltip text" />
+            </div>
+
+            <span className="text-secondary-text text-12">
+              {formatFloat(erc223Balance?.formatted || "0.0")} {token.symbol}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
+          <div className="flex items-center gap-2">
+            <span className="text-12 text-tertiary-text">Balance</span>
+            <span className="block min-w-[58px]">
+              <Badge className="w-fit" size="small" text="Native" />
+            </span>
+            <Tooltip iconSize={16} text="Tooltip text" />
+          </div>
+
+          <span className="text-secondary-text text-12">
+            {formatFloat(erc20Balance?.formatted || "0.0")} {token.symbol}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: any) {
   const tToast = useTranslations("Toast");
@@ -103,7 +175,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
           </div>
         </div>
         <div className="grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3 mb-3">
-          {[t("tokens"), t("transactions")].map((title, index) => {
+          {[t("pinned_tokens"), t("transactions")].map((title, index) => {
             return (
               <TabButton
                 key={title}
@@ -122,13 +194,20 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
           <>
             {pinnedTokens.length ? (
               <div className="h-[376px] -mt-3 pt-3">
-                <button className="h-12 items-center w-full mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3">
-                  <span className="flex items-center gap-2 text-secondary-text">
-                    <Svg className="text-tertiary-text" iconName="pin-fill" />
+                <button className="h-12 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group">
+                  <span className="flex items-center gap-2">
+                    <Svg
+                      className="text-tertiary-text group-hocus:text-green duration-200 "
+                      iconName="pin-fill"
+                    />
                     Manage pinned tokens
                   </span>
-
-                  <Svg className="text-tertiary-text" iconName="forward" />
+                  <div className="relative before:opacity-0 before:duration-200 group-hocus:before:opacity-40 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[8px] before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2">
+                    <Svg
+                      className="text-tertiary-text group-hocus:text-green-hover-icon duration-200 "
+                      iconName="forward"
+                    />
+                  </div>
                 </button>
                 <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={304}>
                   <div className="flex flex-col gap-2 md:gap-3">
@@ -138,66 +217,10 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                       }
 
                       return (
-                        <div
-                          key={pinnedToken.symbol}
-                          className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3"
-                        >
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                              <Image
-                                width={40}
-                                height={40}
-                                src={pinnedToken.logoURI || "/images/tokens/placeholder.svg"}
-                                alt=""
-                              />
-                              <div className="flex flex-col">
-                                <span>{pinnedToken.name}</span>
-                                <span className="text-secondary-text text-12">
-                                  2 {pinnedToken.symbol?.toUpperCase()}
-                                </span>
-                              </div>
-                            </div>
-                            <span>$0.00</span>
-                          </div>
-                          {pinnedToken.isToken ? (
-                            <div className="flex flex-col gap-1">
-                              <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-12 text-tertiary-text">Balance</span>
-                                  <span className="block min-w-[58px]">
-                                    <Badge className="w-fit" size="small" text={Standard.ERC20} />
-                                  </span>
-                                  <Tooltip iconSize={16} text="Tooltip text" />
-                                </div>
-
-                                <span className="text-secondary-text text-12">1.23 ETH</span>
-                              </div>
-                              <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-12 text-tertiary-text">Balance</span>
-                                  <span className="block min-w-[58px]">
-                                    <Badge className="w-fit" size="small" text={Standard.ERC223} />
-                                  </span>
-                                  <Tooltip iconSize={16} text="Tooltip text" />
-                                </div>
-
-                                <span className="text-secondary-text text-12">1.23 ETH</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-12 text-tertiary-text">Balance</span>
-                                <span className="block min-w-[58px]">
-                                  <Badge className="w-fit" size="small" text="Native" />
-                                </span>
-                                <Tooltip iconSize={16} text="Tooltip text" />
-                              </div>
-
-                              <span className="text-secondary-text text-12">1.23 ETH</span>
-                            </div>
-                          )}
-                        </div>
+                        <PinnedTokenRow
+                          key={pinnedToken.symbol + pinnedToken.wrapped.address0}
+                          token={pinnedToken}
+                        />
                       );
                     })}
                   </div>

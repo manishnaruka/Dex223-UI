@@ -90,6 +90,7 @@
     "disconnect": "Disconnect",
     "total_balance": "Total Balance",
     "tokens": "Tokens",
+    "pinned_tokens": "Pinned tokens",
     "transactions": "Transactions",
     "assets_will_be_displayed_here": "All assets will be displayed here."
   },

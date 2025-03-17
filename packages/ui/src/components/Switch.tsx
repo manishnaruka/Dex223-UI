@@ -12,7 +12,7 @@ export default function Switch({ checked, handleChange, small = false, disabled 
   return (
     <label className={clsx("ui-relative ui-inline-block ui-w-12 ui-h-6")}>
       <input
-        className="peer ui-appearance-none"
+        className="ui-peer ui-appearance-none"
         disabled={disabled}
         checked={checked}
         onChange={handleChange}

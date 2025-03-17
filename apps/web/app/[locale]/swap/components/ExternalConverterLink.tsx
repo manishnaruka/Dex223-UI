@@ -17,7 +17,7 @@ export default function ExternalConverterLink() {
       <div className="flex items-center gap-1 text-14 md:text-16">
         <Svg
           iconName="convert"
-          className="text-tertiary-text group-hocus:text-green mr-1 flex-shrink-0"
+          className="text-tertiary-text group-hocus:text-green mr-1 flex-shrink-0 duration-200 "
         />
         Convert your{" "}
         <ClientOnly>

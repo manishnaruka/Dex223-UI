@@ -24,7 +24,7 @@ export default function Checkbox({
       <input
         id={id}
         className={clsxMerge(
-          "ui-appearance-none peer ui-shrink-0 ui-w-6 ui-h-6 ui-border ui-border-secondary-border ui-bg-secondary-bg ui-rounded-2 hocus:ui-border-green hocus:ui-bg-primary-bg checked:ui-hocus:shadow checked:ui-hocus:shadow-green/60 checked:ui-bg-green checked:hocus:ui-bg-green checked:ui-border-green checked:hocus:ui-border-green ui-cursor-pointer ui-relative ui-duration-200",
+          "ui-appearance-none ui-peer ui-shrink-0 ui-w-6 ui-h-6 ui-border ui-border-secondary-border ui-bg-secondary-bg ui-rounded-2 hocus:ui-border-green hocus:ui-bg-primary-bg checked:ui-hocus:shadow checked:ui-hocus:shadow-green/60 checked:ui-bg-green checked:hocus:ui-bg-green checked:ui-border-green checked:hocus:ui-border-green ui-cursor-pointer ui-relative ui-duration-200",
           className,
         )}
         type="checkbox"
