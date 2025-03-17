@@ -31,7 +31,6 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         ui-flex
         ui-outline
         ui-rounded-2
-        ui-outline-1
         ui-gap-2
         ui-px-4
         ui-md:px-5
@@ -41,9 +40,9 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         ui-text-14
         ui-text-secondary-text
         `,
-        type === "success" && "ui-outline-green ui-bg-green-bg ",
-        type === "error" && "ui-outline-red-light ui-bg-red-bg",
-        type === "warning" && "ui-outline-orange ui-bg-orange-bg ",
+        type === "success" && "ui-outline-green ui-bg-green-bg ui-outline-1",
+        type === "error" && "ui-outline-red-light ui-bg-red-bg ui-outline-1",
+        type === "warning" && "ui-outline-orange ui-bg-orange-bg ui-outline-1",
         type === "info" && "ui-outline-blue ui-bg-blue-bg",
         type === "info-border" && "ui-border-l-4 ui-border-l-blue ui-outline-0 ui-bg-primary-bg ui-pl-4",
       )}
