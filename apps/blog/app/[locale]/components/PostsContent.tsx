@@ -1,9 +1,9 @@
+import Preloader from "@repo/ui/preloader";
 import React, { useMemo } from "react";
 
 import LatestPosts from "@/app/[locale]/components/LatestPosts";
 import Posts from "@/app/[locale]/components/Posts";
 import { ContentType, Post } from "@/app/[locale]/types/Post";
-import Preloader from "@/components/atoms/Preloader";
 
 export default function PostsContent({
   posts,

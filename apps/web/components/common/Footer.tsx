@@ -16,10 +16,15 @@ import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 type SocialLink = {
   title: any;
   href: string;
-  icon: Extract<IconName, "telegram" | "x" | "discord">;
+  icon: Extract<IconName, "telegram" | "x" | "discord" | "blog">;
 };
 
 const socialLinks: SocialLink[] = [
+  {
+    title: "blog",
+    href: "https://blog.dex223.io/",
+    icon: "blog",
+  },
   {
     title: "discussions",
     href: "https://t.me/Dex223_defi",
@@ -85,7 +90,7 @@ export default function Footer() {
                 {t("gas")}{" "}
                 <a
                   target="_blank"
-                  className="text-green"
+                  className="text-green duration-200 hocus:text-green-hover"
                   href={getExplorerLink(ExplorerLinkType.GAS_TRACKER, "", chainId)}
                 >
                   {gasData ? formatFloat(formatGwei(gasData)) : ""} GWEI
@@ -97,7 +102,7 @@ export default function Footer() {
               {blockNumber ? (
                 <a
                   target="_blank"
-                  className="text-green"
+                  className="text-green duration-200 hocus:text-green-hover"
                   href={getExplorerLink(ExplorerLinkType.BLOCK, blockNumber.toString(), chainId)}
                 >
                   {blockNumber.toString()}

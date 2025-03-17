@@ -1,6 +1,5 @@
+import Alert from "@repo/ui/alert";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import Alert from "../../components/atoms/Alert";
 
 const meta = {
   title: "Atoms/Alert",

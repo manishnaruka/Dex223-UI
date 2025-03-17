@@ -1,7 +1,6 @@
+import Switch from "@repo/ui/switch";
 import { useArgs } from "@storybook/client-api";
 import type { Meta, StoryObj } from "@storybook/react";
-
-import Switch from "@/components/atoms/Switch";
 
 const meta = {
   title: "Atoms/Switch",

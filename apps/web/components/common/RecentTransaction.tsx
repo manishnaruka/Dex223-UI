@@ -1,10 +1,10 @@
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
 import { AddLiquidityStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
-import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
@@ -101,6 +101,16 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           </span>
         </span>
       );
+    case RecentTransactionTitleTemplate.CONVERT:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="convert" />
+
+          <span className="font-medium inline text-16">
+            {t("conversion_title", { symbol: title.symbol })}
+          </span>
+        </span>
+      );
     case RecentTransactionTitleTemplate.SWAP:
       return (
         <span className="mr-1 text-0">
@@ -149,6 +159,7 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
     case RecentTransactionTitleTemplate.APPROVE:
     case RecentTransactionTitleTemplate.DEPOSIT:
     case RecentTransactionTitleTemplate.WITHDRAW:
+    case RecentTransactionTitleTemplate.CONVERT:
       return (
         <span className="text-14 text-secondary-text">
           {t("single_subtitle", {
@@ -188,6 +199,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.DEPOSIT:
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.LIST_SINGLE:
+    case RecentTransactionTitleTemplate.CONVERT:
       return (
         <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
           <Image width={36} height={36} src={title.logoURI} alt="" />

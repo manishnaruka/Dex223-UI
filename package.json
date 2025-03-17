@@ -7,9 +7,9 @@
   "license": "MIT",
   "scripts": {
     "build": "turbo build",
-    "build:web": "cd apps/exchange && npm run build",
+    "build:web": "cd apps/web && npm run build",
     "build:exchange": "cd apps/exchange && npm run build",
-    "build:blog": "cd apps/exchange && npm run build",
+    "build:blog": "cd apps/blog && npm run build",
     "dev": "turbo dev",
     "dev:web": "cd apps/web && npm run dev",
     "dev:blog": "cd apps/blog && npm run dev",

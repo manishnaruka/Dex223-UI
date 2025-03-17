@@ -4,7 +4,7 @@ import ExchangeForm from "@/app/[locale]/components/ExchangeForm";
 import { useFilteredTokens } from "@/app/[locale]/hooks/useFilteredTokens";
 import { useMinAmount } from "@/app/[locale]/hooks/useMinAmount";
 import { useOutputAmount } from "@/app/[locale]/hooks/useOutputAmount";
-import { ExchangeToken } from "@/app/[locale]/types";
+import { ExchangeToken, FiatToken } from "@/app/[locale]/types";
 import { usePathname, useRouter } from "@/i18n/routing";
 import addToast from "@/other/toast";
 
@@ -15,16 +15,16 @@ const defaultCryptoExchangeValues = {
   isFixed: false,
 };
 
-const allowedFiats = new Set(["usd", "gbp", "eur", "vnd", "zar", "jpy", "ngn", "mxn"]);
-
 export default function FiatExchangeForm({
   tokenMap,
   tokens,
   setExchange,
+  fiats,
 }: {
   tokenMap: Map<string, ExchangeToken>;
   tokens: ExchangeToken[];
   setExchange: (exchange: any) => void;
+  fiats: FiatToken[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -36,8 +36,6 @@ export default function FiatExchangeForm({
     tokenMap.get(defaultCryptoExchangeValues.tokenB),
   );
   const [isFixed, setIsFixed] = useState(defaultCryptoExchangeValues.isFixed);
-
-  const { fiatTokens } = useFilteredTokens(tokens);
 
   const [inputAmount, setInputAmount] = useState(defaultCryptoExchangeValues.amount);
   const [recipient, setRecipient] = useState("");
@@ -117,7 +115,7 @@ export default function FiatExchangeForm({
       outputAmountError={outputAmountError}
       isLoadingOutputAmount={isLoadingOutputAmount}
       setRecipient={setRecipient}
-      tokensFrom={fiatTokens.filter((t) => allowedFiats.has(t.symbol))}
+      tokensFrom={fiats}
       tokensTo={tokensTo}
       tokensFromLoading={false}
       tokensToLoading={tokensToLoading}

@@ -1,14 +1,11 @@
+import Skeleton from "@repo/ui/skeleton";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { NumericFormat } from "react-number-format";
-import { formatFloat } from "web/functions/formatFloat";
 
 import { ExchangeToken } from "@/app/[locale]/types";
-import Preloader from "@/components/atoms/Preloader";
 import SelectButton from "@/components/atoms/SelectButton";
-import Skeleton from "@/components/atoms/Skeleton";
-import InputButton from "@/components/buttons/InputButton";
 
 function ceilWithDynamicPrecision(minAmount: number): number {
   if (minAmount < 0.001) {

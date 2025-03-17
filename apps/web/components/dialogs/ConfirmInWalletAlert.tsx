@@ -1,5 +1,6 @@
+import Preloader from "@repo/ui/preloader";
+
 import Container from "@/components/atoms/Container";
-import Preloader from "@/components/atoms/Preloader";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 

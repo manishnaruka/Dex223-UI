@@ -1,5 +1,7 @@
 "use client";
 
+import Preloader from "@repo/ui/preloader";
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
@@ -8,8 +10,6 @@ import { formatUnits } from "viem";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
-import Preloader from "@/components/atoms/Preloader";
-import Tooltip from "@/components/atoms/Tooltip";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
 import usePositions from "@/hooks/usePositions";

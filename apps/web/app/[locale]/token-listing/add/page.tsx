@@ -1,6 +1,9 @@
 "use client";
 
 import { isZeroAddress } from "@ethereumjs/util";
+import Alert from "@repo/ui/alert";
+import ExternalTextLink from "@repo/ui/external-text-link";
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -29,10 +32,7 @@ import {
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import { useTokenListingRecentTransactionsStore } from "@/app/[locale]/token-listing/add/stores/useTokenListingRecentTransactionsStore";
-import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
-import Preloader from "@/components/atoms/Preloader";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
@@ -502,7 +502,7 @@ export default function ListTokenPage() {
                           <a
                             target="_blank"
                             href={`/${locale}/add?tokenA=${tokenA.wrapped.address0}&tokenB=${tokenB.wrapped.address0}`}
-                            className="text-green hocus:underline"
+                            className="text-green underline hocus:text-green-hover duration-200"
                           >
                             create a pool
                           </a>{" "}

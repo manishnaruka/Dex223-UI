@@ -3,7 +3,6 @@ import "../assets/styles/globals.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import clsx from "clsx";
 import { Golos_Text } from "next/font/google";
-import Script from "next/script";
 import { PropsWithChildren } from "react";
 
 import Providers from "@/app/providers";

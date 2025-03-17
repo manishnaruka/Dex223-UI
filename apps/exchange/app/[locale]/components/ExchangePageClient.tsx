@@ -1,5 +1,7 @@
 "use client";
 
+import Alert from "@repo/ui/alert";
+import ExternalTextLink from "@repo/ui/external-text-link";
 import clsx from "clsx";
 import Image from "next/image";
 import { parseAsBoolean, useQueryState } from "nuqs";
@@ -13,12 +15,12 @@ import {
   ExchangeData,
   ExchangeStatus,
   ExchangeToken,
+  FiatToken,
   TrackedExchangeStatus,
 } from "@/app/[locale]/types";
-import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DetailsRow from "@/components/atoms/DetailsRow";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
+import Select from "@/components/atoms/Select";
 import Svg from "@/components/atoms/Svg";
 import Button from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
@@ -115,9 +117,11 @@ function ExchangeStatusInfo({
 export default function ExchangePageClient({
   tokens,
   initialExchange,
+  countriesData,
 }: {
   tokens: ExchangeToken[];
   initialExchange?: ExchangeData;
+  countriesData: { id: string; subdivisions: string[]; payment_methods: any[] }[];
 }) {
   const tokenMap = useMemo(() => new Map(tokens.map((token) => [token.symbol, token])), [tokens]);
 
@@ -187,9 +191,20 @@ export default function ExchangePageClient({
 
   console.log(exchange);
 
+  const [country, setCountry] = useState(countriesData[0].id);
+
+  const [fiats, setFiats] = useState<FiatToken[]>([]);
+  const [tokensOut, setTokensOut] = useState<FiatToken[]>([]);
+
   return (
     <Container className="px-4">
       <div className="mx-auto w-[600px]">
+        Countries:
+        <Select
+          options={countriesData.map((d) => ({ label: d.id, value: d.id }))}
+          value={country}
+          onChange={(value) => setCountry(value)}
+        />
         {exchange ? (
           <>
             <div className="bg-primary-bg py-1 pl-5 pr-2 rounded-3 flex justify-between items-center my-5">
@@ -547,7 +562,12 @@ export default function ExchangePageClient({
               <CryptoExchangeForm tokens={tokens} tokenMap={tokenMap} setExchange={setExchange} />
             </Tab>
             <Tab title="Buy Crypto">
-              <FiatExchangeForm tokens={tokens} tokenMap={tokenMap} setExchange={setExchange} />
+              <FiatExchangeForm
+                fiats={fiats}
+                tokens={tokens}
+                tokenMap={tokenMap}
+                setExchange={setExchange}
+              />
             </Tab>
           </Tabs>
         )}

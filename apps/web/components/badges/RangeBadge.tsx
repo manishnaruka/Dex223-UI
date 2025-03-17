@@ -1,8 +1,8 @@
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { ReactNode } from "react";
 
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 
 export enum PositionRangeStatus {
   IN_RANGE = "in-range",

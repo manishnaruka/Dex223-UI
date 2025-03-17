@@ -49,6 +49,7 @@ const config = {
         "empty-no-margin-positions": `url('${emptyImagePath}/no-margin-positions.svg')`,
         "empty-no-positions": `url('${emptyImagePath}/no-positions.svg')`,
         "empty-no-tokens": `url('${emptyImagePath}/no-tokens.svg')`,
+        "empty-no-pinned-tokens": `url('${emptyImagePath}/no-pinned.svg')`,
         "empty-no-transactions": `url('${emptyImagePath}/no-transactions.svg')`,
         "empty-not-found-lending-order": `url('${emptyImagePath}/not-found-lending-order.svg')`,
         "empty-not-found-lending-position": `url('${emptyImagePath}/not-found-lending-position.svg')`,

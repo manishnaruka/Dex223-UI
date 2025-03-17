@@ -1,6 +1,6 @@
+import Checkbox from "@repo/ui/checkbox";
 import React, { PropsWithChildren } from "react";
 
-import Checkbox from "@/components/atoms/Checkbox";
 import Drawer from "@/components/atoms/Drawer";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";

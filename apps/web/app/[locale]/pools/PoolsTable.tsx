@@ -8,7 +8,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import { Address } from "viem";
 
-// import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
@@ -401,11 +400,6 @@ export default function PoolsTable({
   return (
     <>
       <div className="min-h-[640px] mb-5 w-full">
-        {/*{loading ? (*/}
-        {/*  <div className="flex justify-center items-center h-full min-h-[550px]">*/}
-        {/*    <Preloader type="awaiting" size={48} />*/}
-        {/*  </div>*/}
-        {/*) : (*/}
         <>
           {pools.length > 0 ? (
             <>

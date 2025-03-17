@@ -1,5 +1,7 @@
 "use client";
 
+import Alert from "@repo/ui/alert";
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import JSBI from "jsbi";
 import Image from "next/image";
@@ -13,11 +15,9 @@ import useRemoveLiquidity, {
   useRemoveLiquidityEstimatedGas,
 } from "@/app/[locale]/remove/[tokenId]/hooks/useRemoveLiquidity";
 import { useRemoveRecentTransactionsStore } from "@/app/[locale]/remove/[tokenId]/stores/useRemoveLiquidityRecentTransactionsStore";
-import Alert from "@/components/atoms/Alert";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";

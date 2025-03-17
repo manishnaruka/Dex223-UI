@@ -56,7 +56,7 @@ Setting a low Gas Limit may result in transaction failure if the amount of actio
               onClick={(e) => {
                 setFieldValue(estimatedGas ? estimatedGas.toString() : "100000");
               }}
-              className="text-green"
+              className="text-green duration-200 hocus:text-green-hover"
             >
               Estimated
             </button>{" "}

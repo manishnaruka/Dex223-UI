@@ -1,21 +1,14 @@
 "use client";
 
-import clsx from "clsx";
 import debounce from "lodash.debounce";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import PostsContent from "@/app/[locale]/components/PostsContent";
 import { ContentType, Post } from "@/app/[locale]/types/Post";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
-import Popover from "@/components/atoms/Popover";
-import SelectButton from "@/components/atoms/SelectButton";
-import SelectOption from "@/components/atoms/SelectOption";
-import { IIFE } from "@/functions/iife";
-
-const contents: ContentType[] = ["video", "vide_and_content", "content"];
-
-import PostsContent from "@/app/[locale]/components/PostsContent";
 import Select from "@/components/atoms/Select";
+import { IIFE } from "@/functions/iife";
 
 const INITAL_LOAD = 10;
 const POSTS_LIMIT = 6;

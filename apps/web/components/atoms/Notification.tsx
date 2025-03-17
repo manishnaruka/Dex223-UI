@@ -63,6 +63,16 @@ function NotificationTitle({
           <Badge color="green" text="ERC-223" />
         </div>
       );
+    case RecentTransactionTitleTemplate.CONVERT:
+      return (
+        <div className="flex items-center gap-1">
+          <span className="text-16 font-medium block mr-1">
+            {status === RecentTransactionStatus.SUCCESS
+              ? t("conversion_success_notification", { standard: title.standard })
+              : t("conversion_revert_notification")}
+          </span>
+        </div>
+      );
     case RecentTransactionTitleTemplate.SWAP:
       return (
         <div className="flex items-center gap-1">

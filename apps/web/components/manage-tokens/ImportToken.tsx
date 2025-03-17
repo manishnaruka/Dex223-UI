@@ -1,13 +1,13 @@
 import { isZeroAddress } from "@ethereumjs/util";
+import Checkbox from "@repo/ui/checkbox";
+import ExternalTextLink from "@repo/ui/external-text-link";
 import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { Address, isAddress } from "viem";
 import { useReadContract } from "wagmi";
 
-import Checkbox from "@/components/atoms/Checkbox";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import ExternalTextLink from "@/components/atoms/ExternalTextLink";
 import { InputSize } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";

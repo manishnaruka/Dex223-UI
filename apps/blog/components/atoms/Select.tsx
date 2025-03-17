@@ -97,7 +97,7 @@ export default function Select({
           "duration-200 whitespace-nowrap border w-full rounded-3 h-12 pl-4 md:pl-5 flex  justify-between gap-3 items-center pr-3",
           isOpen
             ? "border-green bg-green-bg shadow shadow-green/60"
-            : "border-tertiary-bg bg-tertiary-bg hocus:border-green-bg hocus:bg-green-bg",
+            : "border-primary-bg bg-primary-bg hocus:border-green-bg hocus:bg-green-bg",
         )}
       >
         {selectedOption?.label || placeholder}
@@ -117,7 +117,7 @@ export default function Select({
               minWidth: extendWidth ? ref.current?.offsetWidth : undefined,
             }}
             className={clsx(
-              "absolute z-10 border border-secondary-border bg-tertiary-bg overflow-hidden rounded-3",
+              "absolute z-20 border border-secondary-border bg-tertiary-bg overflow-hidden rounded-3",
               extendWidth && "min-w-full",
             )}
             {...getFloatingProps()}

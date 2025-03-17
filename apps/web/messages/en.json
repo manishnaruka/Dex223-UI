@@ -27,7 +27,7 @@
   },
   "RecentTransactions": {
     "transactions": "Transactions",
-    "transactions_will_be_displayed_here": "All transactions will be displayed here.",
+    "transactions_will_be_displayed_here": "All transactions will be displayed here",
     "clear_all": "Clear all",
     "total_transactions": "Total transactions:",
     "approve_title": "Approve {symbol}",
@@ -39,6 +39,9 @@
     "withdraw_title": "Withdraw {symbol}",
     "withdraw_success_notification": "{symbol} withdrawn",
     "withdraw_revert_notification": "Failed to withdraw {symbol}",
+    "conversion_title": "Conversion",
+    "conversion_success_notification": "Tokens converted to {standard}",
+    "conversion_revert_notification": "Conversion failed",
     "swap_title": "Swap",
     "swap_success_notification": "Swap successful",
     "swap_revert_notification": "Failed to swap",
@@ -85,10 +88,11 @@
     "unlock": "Unlock",
     "not_connected": "Not connected",
     "disconnect": "Disconnect",
-    "total_balance": "Total Balance",
+    "total_balance": "Pinned tokens balance",
     "tokens": "Tokens",
+    "pinned_tokens": "Pinned tokens",
     "transactions": "Transactions",
-    "assets_will_be_displayed_here": "All assets will be displayed here."
+    "assets_will_be_displayed_here": "Your pinned tokens will appear here"
   },
   "ManageTokens": {
     "manage_lists": "Manage lists",
@@ -351,7 +355,8 @@
     "discussions": "Discussions",
     "announcements": "Announcements",
     "x": "DEX223",
-    "discord": "Discord"
+    "discord": "Discord",
+    "blog": "Blog"
   },
   "Feedback": {
     "feedback": "Feedback",

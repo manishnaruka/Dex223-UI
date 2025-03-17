@@ -1,8 +1,8 @@
+import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 
 import Svg from "@/components/atoms/Svg";
 import TokenAddressWithStandard from "@/components/atoms/TokenAddressWithStandard";
-import Tooltip from "@/components/atoms/Tooltip";
 import TrustBadge from "@/components/badges/TrustBadge";
 import IconButton from "@/components/buttons/IconButton";
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";
@@ -17,6 +17,14 @@ interface Props {
 export default function SelectedTokensInfo({ tokenA, tokenB }: Props) {
   if (!tokenA && !tokenB) {
     return null;
+  }
+
+  if (tokenA && tokenB && tokenA.equals(tokenB)) {
+    return (
+      <div className="w-full bg-primary-bg p-4 sm:p-6 grid gap-3 rounded-5">
+        <SelectedTokenInfoItem token={tokenA} />
+      </div>
+    );
   }
 
   return (

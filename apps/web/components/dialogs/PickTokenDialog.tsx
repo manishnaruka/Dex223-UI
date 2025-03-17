@@ -1,3 +1,4 @@
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -10,7 +11,6 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import { Check, rateToScore, TrustMarker, TrustRateCheck } from "@/components/badges/TrustBadge";
 import IconButton from "@/components/buttons/IconButton";
@@ -21,6 +21,7 @@ import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
+import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
@@ -88,7 +89,7 @@ function TokenRow({
   }, [currency]);
 
   return (
-    <button
+    <div
       role="button"
       onClick={() => handlePick(currency)}
       className="rounded-2 flex items-center flex-wrap md:block md:rounded-0 pl-3 pr-1.5 md:pl-10 md:pr-4 bg-tertiary-bg md:bg-transparent hocus:bg-tertiary-bg duration-200 group pt-1.5 md:pt-0 pb-1.5 md:pb-2 w-full text-left"
@@ -183,6 +184,8 @@ function TokenRow({
                   e.stopPropagation();
                   if (pinnedTokens[currency.chainId]?.length < 8 || isTokenPinned) {
                     toggleToken(currency.isNative ? "native" : currency.address0, currency.chainId);
+                  } else {
+                    addToast("Pinning limit reached: 8 tokens", "info");
                   }
                 }}
                 active={isTokenPinned}
@@ -248,7 +251,7 @@ function TokenRow({
           </div>
         )}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -398,7 +401,7 @@ export default function PickTokenDialog({
                   />
                   <div
                     className={clsx(
-                      "flex flex-wrap gap-3",
+                      "flex flex-wrap gap-2 md:gap-3",
                       !!pinnedTokens.length &&
                         !simpleForm &&
                         "border-b border-secondary-border pb-3 mt-3",
@@ -434,7 +437,7 @@ export default function PickTokenDialog({
                                 isEditActivated
                                   ? "bg-transparent border-secondary-border"
                                   : "bg-tertiary-bg border-transparent",
-                                "items-center border justify-center px-4 duration-200 h-10 rounded-1  flex gap-2",
+                                "items-center border justify-center px-4 duration-200 h-10 rounded-2 flex gap-2",
                                 !isMobile && isEditActivated && "hocus:bg-transparent",
                                 !isMobile && !isEditActivated && "hocus:bg-green-bg",
                               )}

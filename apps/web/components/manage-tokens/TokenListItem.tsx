@@ -1,3 +1,4 @@
+import Switch from "@repo/ui/switch";
 import clsx from "clsx";
 import download from "downloadjs";
 import Image from "next/image";
@@ -9,7 +10,6 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Popover from "@/components/atoms/Popover";
 import Svg from "@/components/atoms/Svg";
-import Switch from "@/components/atoms/Switch";
 import TokenListLogo, { TokenListLogoType } from "@/components/atoms/TokenListLogo";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import { db, TokenList, TokenListId } from "@/db/db";

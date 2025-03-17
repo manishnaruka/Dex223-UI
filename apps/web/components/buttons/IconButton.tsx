@@ -7,6 +7,7 @@ import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { copyToClipboard } from "@/functions/copyToClipboard";
 import addToast from "@/other/toast";
+
 export enum SortingType {
   NONE,
   ASCENDING,
@@ -109,7 +110,7 @@ type CopyIconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
 function CopyIconButton(_props: CopyIconButtonProps) {
   const t = useTranslations("Toast");
   const [isCopied, setIsCopied] = useState(false);
-  const { text, buttonSize, className, ...props } = _props;
+  const { text, buttonSize, className, isTouchDevice, ...props } = _props;
 
   const handleCopy = useCallback(async () => {
     try {
@@ -145,7 +146,7 @@ function CopyIconButton(_props: CopyIconButtonProps) {
           "duration-200 text-tertiary-text ",
           className,
           isCopied ? "opacity-0" : "opacity-100",
-          !_props.isTouchDevice && "hocus:text-green",
+          !isTouchDevice && "hocus:text-green",
         )}
         {...props}
       />

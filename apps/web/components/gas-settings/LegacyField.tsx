@@ -71,7 +71,7 @@ Your transaction will not confirm until your gasPrice is higher or equal to the 
                   setFieldValue(formatGwei(gasPrice));
                 }
               }}
-              className="text-green"
+              className="text-green duration-200 hocus:text-green-hover"
             >
               Current
             </button>{" "}

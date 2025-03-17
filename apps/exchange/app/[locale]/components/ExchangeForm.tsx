@@ -1,20 +1,20 @@
+import Alert from "@repo/ui/alert";
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
 
 import PickTokenDialog from "@/app/[locale]/components/PickTokenDialog";
 import { OutputAmountError } from "@/app/[locale]/hooks/useOutputAmount";
-import { ExchangeToken } from "@/app/[locale]/types";
-import Alert from "@/components/atoms/Alert";
+import { ExchangeToken, FiatToken } from "@/app/[locale]/types";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
-import Tooltip from "@/components/atoms/Tooltip";
 import Button from "@/components/buttons/Button";
 import SwapButton from "@/components/buttons/SwapButton";
 import TokenInput from "@/components/common/TokenInput";
 
 interface Props {
   recipient: string;
-  tokensFrom: ExchangeToken[];
+  tokensFrom: ExchangeToken[] | FiatToken[];
   tokensTo: ExchangeToken[];
   tokenA: ExchangeToken | undefined;
   tokenB: ExchangeToken | undefined;

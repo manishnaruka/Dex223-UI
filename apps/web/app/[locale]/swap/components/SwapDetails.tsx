@@ -10,7 +10,6 @@ import { useSwapGasLimitStore } from "@/app/[locale]/swap/stores/useSwapGasSetti
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import Collapse from "@/components/atoms/Collapse";
 import Svg from "@/components/atoms/Svg";
-import Tooltip from "@/components/atoms/Tooltip";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Currency } from "@/sdk_hybrid/entities/currency";

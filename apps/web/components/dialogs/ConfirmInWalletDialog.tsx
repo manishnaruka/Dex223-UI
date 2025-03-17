@@ -1,5 +1,6 @@
+import Preloader from "@repo/ui/preloader";
+
 import Dialog from "@/components/atoms/Dialog";
-import Preloader from "@/components/atoms/Preloader";
 import { useConfirmInWalletDialogStore } from "@/stores/useConfirmInWalletDialogStore";
 
 export default function ConfirmInWalletDialog() {

@@ -1,21 +1,21 @@
 import "simplebar-react/dist/simplebar.min.css";
 
+import Preloader from "@repo/ui/preloader";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
 
-import { ExchangeToken } from "@/app/[locale]/types";
+import { ExchangeToken, FiatToken } from "@/app/[locale]/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
-import Preloader from "@/components/atoms/Preloader";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  handlePick: (token: ExchangeToken) => void;
-  tokens: ExchangeToken[];
+  handlePick: (token: ExchangeToken | FiatToken) => void;
+  tokens: ExchangeToken[] | FiatToken[];
   tokensLoading?: boolean;
 }
 
@@ -30,7 +30,11 @@ export default function PickTokenDialog({
   const [searchValue, setSearchValue] = useState("");
 
   const filteredTokens = useMemo(() => {
-    return tokens.filter((token) => token.name.toLowerCase().includes(searchValue.toLowerCase()));
+    return tokens.filter(
+      (token) =>
+        token.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        token.symbol?.toLowerCase().includes(searchValue.toLowerCase()),
+    );
   }, [searchValue, tokens]);
 
   const virtualizer = useVirtualizer({
@@ -93,17 +97,21 @@ export default function PickTokenDialog({
                         data-index={item.index}
                         ref={virtualizer.measureElement}
                       >
-                        <div className="flex items-center gap-2 h-12">
-                          <Image
-                            src={filteredTokens[item.index].image}
-                            alt={""}
-                            width={32}
-                            height={32}
-                          />
-                          {filteredTokens[item.index].name}{" "}
-                          {!filteredTokens[item.index].isFiat &&
-                            `(${filteredTokens[item.index].network})`}
-                        </div>
+                        {filteredTokens[item.index].symbol ? (
+                          filteredTokens[item.index].symbol
+                        ) : (
+                          <div className="flex items-center gap-2 h-12">
+                            <Image
+                              src={filteredTokens[item.index].image}
+                              alt={""}
+                              width={32}
+                              height={32}
+                            />
+                            {filteredTokens[item.index].name}{" "}
+                            {!filteredTokens[item.index].isFiat &&
+                              `(${filteredTokens[item.index].network})`}
+                          </div>
+                        )}
                       </button>
                     ))}
                   </div>

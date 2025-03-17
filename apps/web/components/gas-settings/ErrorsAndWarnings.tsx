@@ -1,6 +1,5 @@
+import Alert from "@repo/ui/alert";
 import React from "react";
-
-import Alert from "@/components/atoms/Alert";
 
 export default function ErrorsAndWarnings({
   errors,

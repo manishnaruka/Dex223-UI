@@ -1,3 +1,4 @@
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
@@ -5,7 +6,6 @@ import { NumericFormat } from "react-number-format";
 import { useMediaQuery } from "react-responsive";
 import { formatEther, formatUnits, parseUnits } from "viem";
 
-import Preloader from "@/components/atoms/Preloader";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";

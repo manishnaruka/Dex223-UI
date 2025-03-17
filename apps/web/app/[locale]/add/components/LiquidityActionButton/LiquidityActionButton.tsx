@@ -1,8 +1,8 @@
+import Preloader from "@repo/ui/preloader";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo } from "react";
 import { useAccount, useBalance } from "wagmi";
 
-import Preloader from "@/components/atoms/Preloader";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { AllowanceStatus } from "@/hooks/useAllowance";
