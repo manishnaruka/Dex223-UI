@@ -266,7 +266,6 @@ export default function FeedbackDialog() {
                       })}
                     </div>
                     <Button
-                      type="submit"
                       disabled={Boolean(errors.description && touched.description) || isSubmitting}
                       fullWidth
                       onClick={submitForm}

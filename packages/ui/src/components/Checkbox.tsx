@@ -47,12 +47,12 @@ export function CheckboxButton({ checked, handleChange, id, label }: Props) {
   return (
     <button
       type="button"
-      className="w-full p-3 rounded-3 hocus:bg-green-bg duration-200 bg-tertiary-bg group"
+      className="ui-w-full ui-p-3 ui-rounded-3 hocus:ui-bg-green-bg ui-duration-200 ui-bg-tertiary-bg ui-group"
       onClick={handleChange}
     >
       <Checkbox
         labelClassName="pointer-events-none"
-        className="group-hocus:border-green pointer-events-none"
+        className="group-hocus:ui-border-green ui-pointer-events-none"
         checked={checked}
         handleChange={handleChange}
         id={id}
