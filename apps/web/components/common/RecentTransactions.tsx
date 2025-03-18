@@ -47,7 +47,7 @@ export default function RecentTransactions({
 
   console.dir(transactions);
 
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
 
   const componentRef = useRef<HTMLDivElement>(null);
   const prevShowRecentTransactions = useRef(showRecentTransactions);
@@ -163,7 +163,9 @@ export default function RecentTransactions({
               ) : (
                 <div className="flex flex-col items-center justify-center min-h-[400px] gap-2 bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
                   <span className="text-secondary-text">
-                    {t("transactions_will_be_displayed_here")}
+                    {isConnected
+                      ? t("transactions_will_be_displayed_here")
+                      : "Connect wallet to see your transactions"}
                   </span>
                 </div>
               )}

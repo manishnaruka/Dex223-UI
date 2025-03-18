@@ -28,6 +28,7 @@ export const RemoveLiquidityGasSettings = ({
   isAdvanced,
   setIsAdvanced,
   gasPrice,
+  disabledEdit = false,
 }: {
   gasPriceOption: GasOption;
   gasPriceSettings: GasSettings;
@@ -40,6 +41,7 @@ export const RemoveLiquidityGasSettings = ({
   isAdvanced: boolean;
   setIsAdvanced: (isAdvanced: boolean) => void;
   gasPrice: bigint | undefined;
+  disabledEdit?: boolean;
 }) => {
   const chainId = useCurrentChainId();
   const t = useTranslations("GasSettings");
@@ -76,10 +78,11 @@ export const RemoveLiquidityGasSettings = ({
           {t(gasOptionTitle[gasPriceOption])}
         </span>
         <Button
-          className="w-full md:w-auto h-8 md:h-auto rounded-20 font-medium"
+          className="w-full md:w-auto h-8 md:h-auto rounded-20 font-medium disabled:bg-quaternary-bg"
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={isMobile ? ButtonSize.SMALL : ButtonSize.EXTRA_SMALL}
           onClick={() => setIsOpenedFee(true)}
+          disabled={disabledEdit}
         >
           {t("edit")}
         </Button>

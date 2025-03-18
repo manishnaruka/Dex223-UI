@@ -305,10 +305,6 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
   --sorting-arrow-down-drop-shadow: drop-shadow(0 0 2px theme("colors.green / 80%"));
 }
 
-[data-sonner-toast] {
-  width: 100%;
-}
-
 .simplebar-scrollbar:before {
   background: theme("colors.primary-border") !important;
   width: 8px !important;

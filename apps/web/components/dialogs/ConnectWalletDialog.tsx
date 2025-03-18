@@ -20,11 +20,11 @@ import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 
 function StepLabel({ step, label }: { step: string; label: string }) {
   return (
-    <div className="flex gap-5 items-center">
+    <div className="flex gap-3 items-center">
       <span className="w-10 h-10 text-18 rounded-full bg-tertiary-bg flex items-center justify-center">
         {step}
       </span>
-      <span className="text-18 font-bold">{label}</span>
+      <span className="text-18 text-secondary-text font-medium">{label}</span>
     </div>
   );
 }

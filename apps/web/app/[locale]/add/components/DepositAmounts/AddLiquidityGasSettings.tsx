@@ -92,7 +92,7 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
       </div>
       <div className="flex w-full md:w-1/8 items-center gap-2 mt-2 md:mt-0">
         <Button
-          className="w-full md:w-auto h-8 md:h-auto"
+          className="w-full md:w-auto h-8 md:h-auto disabled:bg-quaternary-bg"
           colorScheme={ButtonColor.LIGHT_GREEN}
           size={ButtonSize.EXTRA_SMALL}
           disabled={isFormDisabled || disabledGasSettings}

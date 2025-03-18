@@ -55,7 +55,7 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
   const { handleOpen } = useTokenPortfolioDialogStore();
 
   return (
-    <div className="bg-tertiary-bg py-2.5 px-5 @container relative z-20 rounded-3 ">
+    <div className="bg-tertiary-bg pt-2.5 pb-3.5 px-5 @container relative z-20 rounded-3">
       <div className="flex justify-between gap-x-4">
         <div className="flex items-center justify-between flex-wrap sm:flex-nowrap flex-grow gap-2">
           <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
         )}
       </div>
       {token.isToken && (
-        <div className="w-full mt-3">
+        <div className="w-full mt-2">
           <AddressPair token={token} />
         </div>
       )}

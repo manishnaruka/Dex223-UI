@@ -81,7 +81,7 @@ export default function PriceRangeInput({
   return (
     <div
       className={clsx(
-        "bg-secondary-bg rounded-3 p-5 flex justify-between items-center border hocus:shadow hocus:shadow-green/60",
+        "bg-secondary-bg rounded-3 p-5 flex justify-between items-center border hocus:shadow hocus:shadow-green/60 duration-200",
         isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
       )}
     >

@@ -24,8 +24,6 @@ export default function Toast({ text, type = "success", onDismiss }: Props) {
     <div
       className={clsx(
         `
-        min-w-[340px]
-        sm:min-w-[400px]
         relative
         flex
         justify-between
@@ -33,7 +31,8 @@ export default function Toast({ text, type = "success", onDismiss }: Props) {
         outline-1
         outline
         rounded-2
-        gap-2
+        gap-3
+        md:gap-5
         pl-4
         lg:pl-5
         overflow-hidden
@@ -42,6 +41,7 @@ export default function Toast({ text, type = "success", onDismiss }: Props) {
         lg:py-3
         pr-2
         lg:pr-3
+        max-md:text-14
         `,
         type === "success" && "outline-green bg-green-bg",
         type === "error" && "outline-red-light bg-red-bg",
@@ -49,7 +49,7 @@ export default function Toast({ text, type = "success", onDismiss }: Props) {
         type === "info" && "outline-blue bg-blue-bg",
       )}
     >
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-1 md:gap-2 items-center">
         <div
           className={clsx(
             "flex items-center justify-center flex-shrink-0",

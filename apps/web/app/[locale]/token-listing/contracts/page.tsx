@@ -82,7 +82,7 @@ export default function TokenListingPage() {
                     </div>
                     <div
                       className={clsxMerge(
-                        "flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-2 text-14",
+                        "flex justify-between pl-4 pr-2 py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-2 text-14 items-center",
                         !autoListing.isFree && "flex-grow w-full flex-wrap justify-start",
                       )}
                     >
@@ -134,7 +134,7 @@ export default function TokenListingPage() {
                         <span className="text-secondary-text px-2">Free</span>
                       )}
                     </div>
-                    <div className="flex justify-between pl-4 pr-2 py-2 sm:py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-4 text-14">
+                    <div className="flex justify-between pl-4 pr-2 py-2 sm:py-2.5 bg-tertiary-bg rounded-2 mt-2 mb-4 text-14 items-center">
                       <span className="text-secondary-text">Contract link</span>
                       <ExternalTextLink
                         textClassname="w-[13ch]"

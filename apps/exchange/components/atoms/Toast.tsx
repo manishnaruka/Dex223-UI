@@ -24,8 +24,6 @@ export default function Toast({ text, type = "success", onDismiss }: Props) {
     <div
       className={clsx(
         `
-        min-w-[340px]
-        sm:min-w-[400px]
         relative
         flex
         justify-between

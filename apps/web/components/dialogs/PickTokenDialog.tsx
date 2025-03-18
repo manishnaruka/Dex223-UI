@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Address } from "viem";
+import { useAccount } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -65,6 +66,8 @@ function TokenRow({
   handlePick: (currency: Currency) => void;
   setTokenForPortfolio: (currency: Currency) => void;
 }) {
+  const { isConnected } = useAccount();
+
   const { toggleToken, isTokenPinned, pinnedTokens } = usePinnedTokensStore((s) => ({
     toggleToken: s.toggleToken,
     pinnedTokens: s.tokens,
@@ -134,7 +137,7 @@ function TokenRow({
                 </div>
               </div>
 
-              {isTokenPinned ? (
+              {isTokenPinned && isConnected && (!!erc20Balance || !!erc223Balance) ? (
                 <span className="block w-full text-primary-text text-12 md:hidden">$0.00</span>
               ) : (
                 <span className="w-full ">
@@ -146,7 +149,9 @@ function TokenRow({
             </div>
 
             <div className="flex items-center gap-1">
-              <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
+              {isTokenPinned && isConnected && (!!erc20Balance || !!erc223Balance) && (
+                <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
+              )}
               {currency.isToken ? (
                 <Tooltip
                   text={`Token belongs to ${currency.lists?.length || 1} token lists`}
@@ -390,7 +395,7 @@ export default function PickTokenDialog({
 
           {Boolean(tokens.length) && (
             <>
-              <div className="w-full md:w-[600px] max-h-[580px] h-[calc(100vh-60px)] flex flex-col">
+              <div className="w-full sm:w-[600px] max-h-[580px] h-[calc(100vh-60px)] flex flex-col">
                 <div
                   className={clsx("card-spacing-x", (!pinnedTokens.length || simpleForm) && "pb-3")}
                 >

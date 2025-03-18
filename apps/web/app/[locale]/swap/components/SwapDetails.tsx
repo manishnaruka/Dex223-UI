@@ -7,9 +7,13 @@ import { TokenTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapDetailsStateStore } from "@/app/[locale]/swap/stores/useSwapDetailsStateStore";
 import { useSwapGasLimitStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
-import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
+import {
+  SlippageType,
+  useSwapSettingsStore,
+} from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import Collapse from "@/components/atoms/Collapse";
 import Svg from "@/components/atoms/Svg";
+import Badge from "@/components/badges/Badge";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Currency } from "@/sdk_hybrid/entities/currency";
@@ -39,8 +43,33 @@ export default function SwapDetails({
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
 
-  const { slippage, deadline: _deadline } = useSwapSettingsStore();
+  const { slippage, deadline: _deadline, slippageType } = useSwapSettingsStore();
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
+
+  const slippageValue = useMemo(() => {
+    if (slippageType === SlippageType.AUTO) {
+      return (
+        <span className="flex items-center gap-2">
+          <span className="flex items-center justify-center px-2 text-12 md:text-14 h-5 rounded-20 font-500 text-tertiary-text border border-secondary-border">
+            Auto
+          </span>
+          {slippage}%
+        </span>
+      );
+    }
+    if (slippageType === SlippageType.CUSTOM) {
+      return (
+        <span className="flex items-center gap-2">
+          <span className="flex items-center justify-center px-2 text-12 h-5 rounded-20 font-500 text-tertiary-text border border-secondary-border">
+            Custom
+          </span>
+          {slippage}%
+        </span>
+      );
+    }
+
+    return `${slippage}%`;
+  }, [slippage, slippageType]);
   return (
     <>
       <div
@@ -141,7 +170,7 @@ export default function SwapDetails({
           />
           <SwapDetailsRow
             title={t("maximum_slippage")}
-            value={`${slippage}%`}
+            value={slippageValue}
             tooltipText={t("maximum_slippage_tooltip")}
           />
           <SwapDetailsRow

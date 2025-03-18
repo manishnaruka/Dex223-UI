@@ -280,7 +280,7 @@ export default function DecreaseLiquidityPage({
               <div
                 ref={divRef}
                 className={clsx(
-                  "lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1 border hocus:shadow hocus:shadow-green/60",
+                  "lg:mb-5 mb-4 bg-secondary-bg rounded-3 p-1 border hocus:shadow hocus:shadow-green/60 duration-200",
                   isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
                 )}
                 onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused

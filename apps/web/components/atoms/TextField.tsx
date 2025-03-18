@@ -32,6 +32,8 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
         value?: string | number | null | undefined;
         type?: "tel" | "text" | "password";
         decimalScale?: number;
+        onValueChange?: (value: any) => void;
+        allowNegative?: boolean;
       }
   );
 

@@ -2,7 +2,7 @@ import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -10,7 +10,9 @@ import { useAccount } from "wagmi";
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
+import TextField from "@/components/atoms/TextField";
 import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
@@ -70,12 +72,33 @@ export const RevokeDialog = () => {
   const currentHash = standard === Standard.ERC20 ? revokeHash : withdrawHash;
   const revokeHandler = standard === Standard.ERC20 ? rHandler : withdrawHandler;
 
-  const [isError, setIsError] = useState(false);
-  const updateValue = (value: string) => {
-    setLocalValue(value);
-    const valueBigInt = token ? parseUnits(value, token.decimals) : undefined;
-    setIsError(!(!valueBigInt || valueBigInt <= currentAllowance));
-  };
+  const [error, setError] = useState("");
+  const updateValue = useCallback(
+    (value: string) => {
+      setLocalValue(value);
+      const valueBigInt = token ? parseUnits(value, token.decimals) : undefined;
+
+      if (!valueBigInt) {
+        if (standard === Standard.ERC20) {
+          setError("No value to revoke");
+          return;
+        }
+        setError("Enter amount to withdraw");
+
+        return;
+      }
+
+      if (valueBigInt > currentAllowance && standard === Standard.ERC223) {
+        setError(
+          `Max withdrawal amount ${formatUnits(currentAllowance, token?.decimals || 18)} ${token?.symbol}`,
+        );
+        return;
+      }
+
+      setError("");
+    },
+    [currentAllowance, standard, token],
+  );
 
   const {
     gasPriceOption,
@@ -227,51 +250,24 @@ export const RevokeDialog = () => {
               </div>
             ) : (
               <>
-                <div
-                  className={clsxMerge(
-                    "flex justify-between bg-secondary-bg px-5 py-3 rounded-3 mt-2 border ",
-                    inputDisabled
-                      ? "border border-secondary-border bg-primary-bg"
-                      : "hocus:shadow hocus:shadow-green/60 border-transparent",
-                    isFocused ? "border border-green shadow shadow-green/60" : "",
-                    isError
-                      ? "border border-red-light peer-hocus:border-red-light peer-hocus:shadow-red/60"
-                      : "",
-                  )}
-                >
-                  <NumericFormat
-                    allowedDecimalSeparators={[","]}
-                    decimalScale={token.decimals}
-                    inputMode="decimal"
-                    placeholder="0.0"
-                    className={clsx(
-                      "bg-transparent text-primary-text outline-0 border-0 w-full peer ",
-                    )}
-                    type="text"
-                    disabled={inputDisabled}
-                    value={
-                      typeof localValue === "undefined"
-                        ? formatUnits(currentAllowance || BigInt(0), token.decimals)
-                        : localValue
-                    }
-                    onValueChange={(values) => {
-                      updateValue(values.value);
-                    }}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    allowNegative={false}
-                  />
-                  <span className="text-tertiary-text min-w-max">
-                    {t("amount", { symbol: token.symbol })}
-                  </span>
-                </div>
-                {isError ? (
-                  <span className="text-12 mt-2 text-red-light">
-                    {t("must_be_value", {
-                      val: `${formatUnits(currentAllowance, token.decimals)} ${token.symbol}`,
-                    })}
-                  </span>
-                ) : null}
+                <TextField
+                  label=""
+                  value={
+                    typeof localValue === "undefined"
+                      ? formatUnits(currentAllowance || BigInt(0), token.decimals)
+                      : localValue
+                  }
+                  onValueChange={(values) => {
+                    updateValue(values.value);
+                  }}
+                  isNumeric
+                  disabled={inputDisabled}
+                  decimalScale={token.decimals}
+                  placeholder="0.0"
+                  internalText={t("amount", { symbol: token.symbol })}
+                  allowNegative={false}
+                  error={error}
+                />
               </>
             )}
 
@@ -290,11 +286,12 @@ export const RevokeDialog = () => {
                 isAdvanced={isAdvanced}
                 setIsAdvanced={setIsAdvanced}
                 gasPrice={gasPrice}
+                disabledEdit={status !== AllowanceStatus.INITIAL}
               />
             </div>
 
-            <div className="mb-4 mt-4">
-              {isError ? (
+            <div className="mt-4">
+              {!!error ? (
                 <Button fullWidth disabled>
                   <span className="flex items-center gap-2">Enter correct values</span>
                 </Button>

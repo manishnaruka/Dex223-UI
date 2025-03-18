@@ -124,7 +124,7 @@ function InputTotalAmount({
   return (
     <div
       className={clsx(
-        "bg-secondary-bg p-4 lg:p-5 pb-3 lg:pb-4 rounded-3 border hocus:shadow hocus:shadow-green/60",
+        "bg-secondary-bg p-4 lg:p-5 pb-3 lg:pb-4 rounded-3 border hocus:shadow hocus:shadow-green/60 duration-200",
         isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
       )}
     >
@@ -253,7 +253,7 @@ function InputStandardAmount({
       </div>
       <div
         className={clsx(
-          "bg-secondary-bg px-4 lg:px-5 pt-2 lg:pt-3 pb-3 lg:pb-4 w-full rounded-2 border hocus:shadow hocus:shadow-green/60",
+          "bg-secondary-bg px-4 lg:px-5 pt-2 lg:pt-3 pb-3 lg:pb-4 w-full rounded-2 border hocus:shadow hocus:shadow-green/60 duration-200",
           isFocused ? "border border-green shadow shadow-green/60" : "border-transparent",
         )}
       >

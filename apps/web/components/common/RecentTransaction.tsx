@@ -273,51 +273,53 @@ export default function RecentTransaction({
     >
       <div
         className={clsxMerge(
-          "w-full grid grid-cols-[1fr_auto]",
+          "w-full",
           isWaitingForProceeding && "flex flex-col sm:grid sm:grid-cols-[1fr_auto]",
         )}
       >
         <div className="flex gap-2">
           <RecentTransactionLogo title={transaction.title} />
-          <div className="flex flex-col mt-0.5">
-            <RecentTransactionTitle title={transaction.title} />
+          <div className="mt-0.5 flex-grow">
+            <div className="flex justify-between">
+              <RecentTransactionTitle title={transaction.title} />
+              <div className="flex gap-3">
+                {!isWaitingForProceeding ? (
+                  <>
+                    {transaction.replacement === "cancelled" && (
+                      <span className="@[420px]:flex hidden gap-1 text-red-light">
+                        Cancelled
+                        <Svg iconName="cancel" />
+                      </span>
+                    )}
+                    <a
+                      className="relative w-10 h-6 flex items-center justify-center"
+                      target="_blank"
+                      href={getExplorerLink(
+                        ExplorerLinkType.TRANSACTION,
+                        transaction.hash,
+                        transaction.chainId,
+                      )}
+                    >
+                      <IconButton iconName="forward" />
+                    </a>
+                    <span className="flex-shrink-0">
+                      <RecentTransactionStatusIcon
+                        replacement={transaction.replacement}
+                        status={transaction.status}
+                      />
+                    </span>
+                  </>
+                ) : (
+                  <div className="flex gap-2 justify-end">
+                    <Preloader size={20} type="linear" />
+                    <span className="text-secondary-text text-14">Proceed in your wallet</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <RecentTransactionSubTitle title={transaction.title} />
           </div>
-        </div>
-
-        <div className="flex gap-3">
-          {!isWaitingForProceeding ? (
-            <>
-              {transaction.replacement === "cancelled" && (
-                <span className="@[420px]:flex hidden gap-1 text-red-light">
-                  Cancelled
-                  <Svg iconName="cancel" />
-                </span>
-              )}
-              <a
-                className="relative -top-2"
-                target="_blank"
-                href={getExplorerLink(
-                  ExplorerLinkType.TRANSACTION,
-                  transaction.hash,
-                  transaction.chainId,
-                )}
-              >
-                <IconButton iconName="forward" />
-              </a>
-              <span className="flex-shrink-0">
-                <RecentTransactionStatusIcon
-                  replacement={transaction.replacement}
-                  status={transaction.status}
-                />
-              </span>
-            </>
-          ) : (
-            <div className="flex gap-2 justify-end">
-              <Preloader size={20} type="linear" />
-              <span className="text-secondary-text text-14">Proceed in your wallet</span>
-            </div>
-          )}
         </div>
       </div>
 
