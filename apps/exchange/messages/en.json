@@ -79,7 +79,7 @@
     "wrong_password": "Wrong password",
     "import_wallet_with_JSON": "Import wallet with JSON file",
     "browse": "Browse...",
-    "select_keystore_file": "Select keystore file",
+    "select_keystore_file": "Select keystore JSON file",
     "keystore_password": "Keystore password",
     "helper_text": "Helper text",
     "unlock": "Unlock",

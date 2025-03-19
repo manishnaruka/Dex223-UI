@@ -46,11 +46,13 @@ import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
 import { Standard } from "@/sdk_hybrid/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
+//TODO: refactor approve rows
 function ApproveRow({
   logoURI = "",
   isPending = false,
   isLoading = false,
   isSuccess = false,
+  isSuccessSwap = false,
   isReverted = false,
   hash,
 }: {
@@ -58,6 +60,7 @@ function ApproveRow({
   isLoading?: boolean;
   isPending?: boolean;
   isSuccess?: boolean;
+  isSuccessSwap?: boolean;
   isReverted?: boolean;
   hash?: Address | undefined;
 }) {
@@ -82,11 +85,16 @@ function ApproveRow({
       </div>
 
       <div className="flex flex-col justify-center">
-        <span className={isSuccess ? "text-secondary-text text-14" : "text-14"}>
-          {isSuccess && t("approved")}
+        <span
+          className={clsx(
+            isSuccess ? "text-secondary-text text-14" : "text-14",
+            isSuccessSwap && "text-primary-text",
+          )}
+        >
+          {(isSuccess || isSuccessSwap) && t("approved")}
           {isPending && "Confirm in your wallet"}
           {isLoading && "Approving"}
-          {!isSuccess && !isPending && !isReverted && !isLoading && "Approve"}
+          {!isSuccess && !isPending && !isReverted && !isLoading && !isSuccessSwap && "Approve"}
           {isReverted && "Approve failed"}
         </span>
         {!isSuccess && <span className="text-green text-12">{t("why_do_i_have_to_approve")}</span>}
@@ -312,7 +320,7 @@ function SwapActionButton({
     return (
       <Rows>
         {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
-          <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
+          <ApproveRow hash={approveHash} isSuccessSwap logoURI={tokenA.logoURI} />
         )}
         <SwapRow hash={swapHash} isSettled isSuccess />
       </Rows>
@@ -590,7 +598,7 @@ export default function ConfirmSwapDialog() {
                 <span>
                   {tokenA?.symbol} {typedValue}
                 </span>
-                <Svg iconName="next" />
+                <Svg className="text-tertiary-text" iconName="next" />
                 <Image
                   src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
                   alt=""

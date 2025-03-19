@@ -69,7 +69,7 @@ export default function TokenListingPage() {
 
         {(!searchValue || (searchValue && !!filteredAutoListings.length)) && (
           <>
-            <div className="grid grid-cols-1 xl:hidden px-4 gap-4">
+            <div className="grid grid-cols-1 xl:hidden px-4 gap-4 pb-4">
               {filteredAutoListings.map((autoListing) => {
                 return (
                   <div

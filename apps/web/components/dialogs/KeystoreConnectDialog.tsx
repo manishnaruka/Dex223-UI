@@ -6,6 +6,7 @@ import { useConnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
 import {
@@ -89,7 +90,7 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
       <div className="min-w-[440px]">
         <DialogHeader onClose={() => setIsOpen(false)} title={t("import_wallet_with_JSON")} />
 
-        <div className="p-10">
+        <div className="card-spacing-x card-spacing-b">
           <Formik
             initialValues={{ name: "jared" }}
             onSubmit={(values, actions) => {
@@ -104,7 +105,7 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
                   style={{ display: "none" }}
                   ref={fileInput}
                 />
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-5 bg-tertiary-bg p-5">
                   <div className="w-[120px]">
                     <Button
                       type="button"
@@ -118,15 +119,20 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
                       {t("browse")}
                     </Button>
                   </div>
-                  <p className="overflow-hidden overflow-ellipsis whitespace-nowrap w-[200px]">
+                  <p className="overflow-hidden overflow-ellipsis whitespace-nowrap w-[200px] text-right">
                     {selectedFile?.name ? (
-                      `${selectedFile?.name}`
+                      <span className="flex items-center gap-1">
+                        <Svg className="text-tertiary-text flex-shrink-0" iconName="file" />
+                        <span className="overflow-hidden overflow-ellipsis whitespace-nowrap max-w-[172px] text-right">
+                          {selectedFile?.name}
+                        </span>
+                      </span>
                     ) : (
                       <span className="text-secondary-text">{t("select_keystore_file")}</span>
                     )}
                   </p>
                 </div>
-                <div className="text-red text-12 pb-4 pt-1 h-10">{fileError && fileError}</div>
+                <div className="text-red text-12 mb-4 mt-0.5 h-4">{fileError && fileError}</div>
                 <div>
                   <TextField
                     disabled={!selectedFile || Boolean(fileError)}

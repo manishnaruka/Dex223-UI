@@ -41,7 +41,9 @@ export default function GasOptionRadioButton({
       <div
         className={clsx(
           "flex justify-between px-5 items-center min-h-12 md:min-h-[60px] duration-200",
-          !!customContent ? "border-primary-bg rounded-t-3" : "border-primary-bg rounded-3",
+          !!customContent
+            ? "border-primary-bg rounded-t-3 border-b"
+            : "border-primary-bg rounded-3",
           !isActive && "group-hocus:bg-green-bg",
           disabled && "opacity-50",
         )}

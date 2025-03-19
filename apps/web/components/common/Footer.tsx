@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { formatGwei } from "viem";
@@ -55,7 +56,10 @@ function FooterLink({ href, title, icon }: SocialLink) {
       <a
         target="_blank"
         href={href}
-        className="lg:w-auto text-12 lg:text-16 flex gap-2 bg-primary-bg rounded-5 lg:py-2 lg:pr-4 lg:pl-5 p-2 hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center items-center"
+        className={clsx(
+          "lg:w-auto text-12 lg:text-16 flex gap-2 bg-primary-bg rounded-5 lg:py-2 lg:pr-4 lg:pl-5 p-2 hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center items-center",
+          title === "blog" && "max-md:col-span-2",
+        )}
       >
         {t(title)}
         <Svg className="!w-4 !h-4 lg:!w-6 lg:!h-6" iconName={icon} />
@@ -120,7 +124,7 @@ export default function Footer() {
       </div>
       <footer className="before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:top-0 before:left-0 pb-[64px] md:pb-0">
         <Container>
-          <div className="flex justify-between py-3 px-5 items-center flex-col-reverse sm:flex-row gap-3">
+          <div className="flex justify-between pt-4 pb-3 px-5 items-center flex-col-reverse sm:flex-row gap-3">
             <span className="text-12 text-secondary-text">
               © {new Date(Date.now()).getFullYear()} DEX223
             </span>

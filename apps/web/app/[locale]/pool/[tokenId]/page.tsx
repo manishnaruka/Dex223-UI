@@ -453,6 +453,7 @@ export default function PoolPage({
                     size={ButtonSize.MEDIUM}
                     mobileSize={ButtonSize.SMALL}
                     disabled={!fees[0] && !fees[1]}
+                    className="disabled:bg-quaternary-bg"
                   >
                     {t("collect_fees_title")}
                   </Button>
