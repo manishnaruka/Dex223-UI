@@ -172,8 +172,14 @@ export const getPositionInfos = async ({
   };
 };
 
-export const useActiveWalletsPositions = () => {
-  const { activeAddresses } = useActiveAddresses();
+export const useActiveWalletsPositions = ({
+  searchValue,
+  setSearchValue,
+}: {
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+}) => {
+  const { activeAddresses } = useActiveAddresses({ searchValue, setSearchValue });
   const chainId = useCurrentChainId();
   const { positions, setAllPositions } = useWalletsPosotions();
   const [isLoading, setIsLoading] = useState(false);

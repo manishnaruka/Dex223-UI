@@ -37,7 +37,13 @@ const filterTable = ({
   return !!token.symbol?.toLowerCase().includes(searchValue.toLowerCase());
 };
 
-export const Balances = () => {
+export const Balances = ({
+  addressSearch,
+  setAddressSearch,
+}: {
+  addressSearch: string;
+  setAddressSearch: (value: string) => void;
+}) => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
@@ -49,7 +55,10 @@ export const Balances = () => {
   const loading = false;
 
   const { positions } = usePositions();
-  const { tokenBalances, activeAddresses } = useActiveWalletBalances();
+  const { tokenBalances, activeAddresses } = useActiveWalletBalances({
+    searchValue: addressSearch,
+    setSearchValue: setAddressSearch,
+  });
 
   const currentTableData = tokenBalances
     .filter((value) => filterTable({ searchValue, value }))

@@ -99,9 +99,15 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
   );
 };
 
-const WalletSearchInput = ({ onAdd }: { onAdd?: () => void }) => {
-  const { searchValue, setSearchValue } = useActiveAddresses();
-
+const WalletSearchInput = ({
+  onAdd,
+  searchValue,
+  setSearchValue,
+}: {
+  onAdd?: () => void;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+}) => {
   const t = useTranslations("Portfolio");
 
   const error =
@@ -166,7 +172,15 @@ const PopoverTitles: { [key in ManageWalletsPopoverContent]: string } = {
   manage: "Manage wallets",
 };
 
-const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean) => void }) => {
+const ManageWalletsContent = ({
+  setIsOpened,
+  searchValue,
+  setSearchValue,
+}: {
+  setIsOpened: (isOpened: boolean) => void;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+}) => {
   const tWallet = useTranslations("Wallet");
   const t = useTranslations("Portfolio");
   const { isConnected } = useAccount();
@@ -179,11 +193,10 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
     isAllWalletActive,
     showFromSearch,
     setShowFromSearch,
-    setSearchValue,
-    searchValue,
     addWallet,
     hasSearchWallet,
   } = usePortfolioStore();
+
   const { wallets, setIsWalletActive } = usePortfolioWallets();
   const [content, setContent] = useState<ManageWalletsPopoverContent>(
     wallets.length || showFromSearch ? "list" : "add",
@@ -463,7 +476,13 @@ const ManageWalletsContent = ({ setIsOpened }: { setIsOpened: (isOpened: boolean
   );
 };
 
-const ManageWallets = () => {
+const ManageWallets = ({
+  searchValue,
+  setSearchValue,
+}: {
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+}) => {
   const [isOpened, setIsOpened] = useState(false);
   const { wallets } = usePortfolioWallets();
   const _isMobile = useMediaQuery({ query: "(max-width: 767px)" });
@@ -506,7 +525,11 @@ const ManageWallets = () => {
         <>
           {trigger}
           <Drawer placement="bottom" isOpen={isOpened} setIsOpen={setIsOpened}>
-            <ManageWalletsContent setIsOpened={setIsOpened} />
+            <ManageWalletsContent
+              searchValue={searchValue}
+              setSearchValue={setSearchValue}
+              setIsOpened={setIsOpened}
+            />
           </Drawer>
         </>
       ) : (
@@ -517,7 +540,11 @@ const ManageWallets = () => {
           trigger={trigger}
         >
           <div className="bg-primary-bg rounded-5 border border-secondary-border overflow-hidden shadow-popover shadow-black/70">
-            <ManageWalletsContent setIsOpened={setIsOpened} />
+            <ManageWalletsContent
+              searchValue={searchValue}
+              setSearchValue={setSearchValue}
+              setIsOpened={setIsOpened}
+            />
           </div>
         </Popover>
       )}
@@ -533,9 +560,10 @@ export function Portfolio() {
   const isMobile = useMediaQuery({ query: "(max-width: 600px)" });
 
   const { activeTab, setActiveTab } = usePortfolioActiveTabStore();
-  const { showFromSearch, hasSearchWallet, addWallet, searchValue, setSearchValue } =
-    usePortfolioStore();
-  const { activeAddresses } = useActiveAddresses();
+  const { showFromSearch, hasSearchWallet, addWallet } = usePortfolioStore();
+  const [searchValue, setSearchValue] = useState("");
+
+  const { activeAddresses } = useActiveAddresses({ searchValue, setSearchValue });
 
   const handleAddWallet = useCallback(() => {
     addWallet(searchValue as Address);
@@ -549,8 +577,8 @@ export function Portfolio() {
         <div className="flex flex-col lg:flex-row w-full justify-between gap-3 lg:gap-0">
           <h1 className="text-24 lg:text-40 font-medium">{t("title")}</h1>
           <div className="flex flex-col lg:flex-row gap-y-2 lg:gap-x-3">
-            <ManageWallets />
-            <WalletSearchInput />
+            <ManageWallets searchValue={searchValue} setSearchValue={setSearchValue} />
+            <WalletSearchInput searchValue={searchValue} setSearchValue={setSearchValue} />
           </div>
         </div>
         <div className="flex flex-wrap rounded-3 pt-4 lg:py-5 bg-primary-bg">
@@ -664,15 +692,15 @@ export function Portfolio() {
           </TabButton>
         </div>
         {activeTab === ActiveTab.balances ? (
-          <Balances />
+          <Balances addressSearch={searchValue} setAddressSearch={setSearchValue} />
         ) : activeTab === ActiveTab.margin ? (
           <MarginPositions />
         ) : activeTab === ActiveTab.lending ? (
           <LendingOrders />
         ) : activeTab === ActiveTab.liquidity ? (
-          <LiquidityPositions />
+          <LiquidityPositions addressSearch={searchValue} setAddressSearch={setSearchValue} />
         ) : activeTab === ActiveTab.deposited ? (
-          <Deposited />
+          <Deposited addressSearch={searchValue} setAddressSearch={setSearchValue} />
         ) : null}
       </div>
     </Container>

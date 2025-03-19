@@ -229,7 +229,7 @@ const PoolsTableItemMobile = ({
 }) => {
   return (
     <React.Fragment key={index}>
-      <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
+      <div className="flex flex-col bg-primary-bg pt-3 px-4 pb-4 rounded-3 gap-3">
         <div className="flex justify-between gap-2">
           <div className="flex flex-row items-start gap-x-2 text-16">
             <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
@@ -251,30 +251,33 @@ const PoolsTableItemMobile = ({
           </div>
           <span className="text-secondary-text items-baseline whitespace-nowrap font-normal">{`# ${index}`}</span>
         </div>
-        <div className="flex justify-between gap-x-2">
-          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-14 text-tertiary-text">Transactions</span>
-            <span className="text-14 text-secondary-text">{formatNumberKilos(pool.txCount)}</span>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between gap-x-2">
+            <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+              <span className="text-14 text-tertiary-text">Transactions</span>
+              <span className="text-14 text-secondary-text">{formatNumberKilos(pool.txCount)}</span>
+            </div>
+            <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+              <span className="text-14 text-tertiary-text">TVL</span>
+              <span className="text-14 text-secondary-text">{`$${formatNumberKilos(pool.totalValueLockedUSD)}`}</span>
+            </div>
+            {/*<div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">*/}
+            {/*  <span className="text-12 text-secondary-text">Turnover</span>*/}
+            {/*  <span className="text-12">{`— %`}</span>*/}
+            {/*</div>*/}
           </div>
-          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-14 text-tertiary-text">TVL</span>
-            <span className="text-14 text-secondary-text">{`$${formatNumberKilos(pool.totalValueLockedUSD)}`}</span>
+          <div className="flex justify-between gap-x-2 pb-1">
+            <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+              <span className="text-14 text-tertiary-text">1 day volume</span>
+              <span className="text-14 text-secondary-text">{`$${formatNumberKilos(pool.poolDayData?.[0]?.volumeUSD || 0)}`}</span>
+            </div>
+            <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
+              <span className="text-14 text-tertiary-text">7 day volume</span>
+              <span className="text-14 text-secondary-text">{`$${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
+            </div>
           </div>
-          {/*<div className="flex w-full flex-col items-start gap-1 bg-tertiary-bg rounded-2 px-4 py-[10px]">*/}
-          {/*  <span className="text-12 text-secondary-text">Turnover</span>*/}
-          {/*  <span className="text-12">{`— %`}</span>*/}
-          {/*</div>*/}
         </div>
-        <div className="flex justify-between gap-x-2 pb-1">
-          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-14 text-tertiary-text">1 day volume</span>
-            <span className="text-14 text-secondary-text">{`$${formatNumberKilos(pool.poolDayData?.[0]?.volumeUSD || 0)}`}</span>
-          </div>
-          <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
-            <span className="text-14 text-tertiary-text">7 day volume</span>
-            <span className="text-14 text-secondary-text">{`$${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
-          </div>
-        </div>
+
         <Button
           variant={ButtonVariant.CONTAINED}
           colorScheme={ButtonColor.LIGHT_GREEN}
@@ -304,7 +307,7 @@ const PoolsTableMobile = ({
   return (
     <>
       <div
-        className="flex mb-4 gap-2 text-secondary-text flex-row cursor-pointer md:hidden"
+        className="flex mb-4 gap-2 text-secondary-text flex-row cursor-pointer lg:hidden"
         onClick={handleSort}
       >
         <span className={sorting === SortingType.NONE ? "text-secondary-text" : "text-green"}>

@@ -57,8 +57,14 @@ const getWalletBalances = async (addressToCheck: Address, tokens: Token[]) => {
   return walletBalances;
 };
 
-export const useActiveWalletBalances = () => {
-  const { activeAddresses } = useActiveAddresses();
+export const useActiveWalletBalances = ({
+  searchValue,
+  setSearchValue,
+}: {
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+}) => {
+  const { activeAddresses } = useActiveAddresses({ searchValue, setSearchValue });
   const tokens = useTokens();
   const { balances, setWalletBalances, setAllBalances } = useWalletsBalances();
 

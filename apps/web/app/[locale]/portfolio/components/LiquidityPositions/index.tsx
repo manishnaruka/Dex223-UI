@@ -19,14 +19,21 @@ import {
   LiquidityPositionsMobileTable,
 } from "./LiquidityPositionsTabe";
 
-export const LiquidityPositions = () => {
+export const LiquidityPositions = ({
+  addressSearch,
+  setAddressSearch,
+}: {
+  addressSearch: string;
+  setAddressSearch: (value: string) => void;
+}) => {
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
 
   // const loading = true;
-  const { loading, positions: walletsPositions } = useActiveWalletsPositions();
-
-  console.dir(walletsPositions);
+  const { loading, positions: walletsPositions } = useActiveWalletsPositions({
+    searchValue: addressSearch,
+    setSearchValue: setAddressSearch,
+  });
 
   const currentTableData: WalletPositions[] = searchValue
     ? walletsPositions

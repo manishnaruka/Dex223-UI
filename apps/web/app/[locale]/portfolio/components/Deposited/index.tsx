@@ -35,7 +35,13 @@ const filterTable = ({
   return !!token.symbol?.toLowerCase().includes(searchValue.toLowerCase());
 };
 
-export const Deposited = () => {
+export const Deposited = ({
+  addressSearch,
+  setAddressSearch,
+}: {
+  addressSearch: string;
+  setAddressSearch: (value: string) => void;
+}) => {
   useRecentTransactionTracking();
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
@@ -47,7 +53,10 @@ export const Deposited = () => {
     setTokenForPortfolio(null);
   };
   const [isWithdrawDetailsOpened, setIsWithdrawDetailsOpened] = useState(false);
-  const { isLoading, deposites } = useActiveWalletsDeposites();
+  const { isLoading, deposites } = useActiveWalletsDeposites({
+    searchValue: addressSearch,
+    setSearchValue: setAddressSearch,
+  });
 
   const currentTableData: TableData = [];
 

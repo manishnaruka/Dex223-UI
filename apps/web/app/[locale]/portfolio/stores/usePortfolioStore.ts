@@ -18,11 +18,14 @@ interface PortfolioStore {
   setAllWalletActive: () => void;
   isConnectedWalletActive: boolean;
   setIsConnectedWalletActive: (isActive: boolean) => void;
-  searchValue: string;
-  setSearchValue: (value: string) => void;
   isAllWalletActive: boolean;
   hasSearchWallet: boolean;
   showFromSearch: boolean;
+}
+
+interface PortfolioSearchStore {
+  searchValue: string;
+  setSearchValue: (value: string) => void;
 }
 
 const localStorageKey = "portfolio-state";
@@ -37,6 +40,14 @@ const checkAllActive = (wallets: any[]) => {
   }
   return allActive;
 };
+
+export const usePortfolioSearchStore = create<PortfolioSearchStore>((set, get) => ({
+  searchValue: "",
+  setSearchValue: (value) =>
+    set(() => ({
+      searchValue: value,
+    })),
+}));
 
 export const usePortfolioStore = create<PortfolioStore>()(
   persist(
@@ -105,11 +116,6 @@ export const usePortfolioStore = create<PortfolioStore>()(
           const iaAllActive = isActive ? checkAllActive(state.wallets) : false;
           return { isConnectedWalletActive: isActive, isAllWalletActive: iaAllActive };
         }),
-      searchValue: "",
-      setSearchValue: (value) =>
-        set(() => ({
-          searchValue: value,
-        })),
     }),
     {
       name: localStorageKey, // name of the item in the storage (must be unique)

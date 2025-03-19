@@ -90,9 +90,15 @@ const getWalletDeposites = async (
   return walletDeposites;
 };
 
-export const useActiveWalletsDeposites = () => {
+export const useActiveWalletsDeposites = ({
+  searchValue,
+  setSearchValue,
+}: {
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+}) => {
   const { isLoading, setIsLoading } = useWalletDepositsLoadingStore();
-  const { activeAddresses } = useActiveAddresses();
+  const { activeAddresses } = useActiveAddresses({ searchValue, setSearchValue });
   const tokens = useTokens();
   const { deposites, setAllDeposites } = useWalletsDeposites();
   const chainId = useCurrentChainId();
