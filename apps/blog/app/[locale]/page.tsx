@@ -8,6 +8,7 @@ import { ContentType, Post } from "@/app/[locale]/types/Post";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Select from "@/components/atoms/Select";
+import ScrollToTopButton from "@/components/buttons/ScrollToTopButton";
 import { IIFE } from "@/functions/iife";
 
 const INITAL_LOAD = 10;
@@ -212,6 +213,7 @@ export default function BlogPage() {
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 max-lg:flex-col-reverse max-lg:w-full">
           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 max-md:grid-cols-1 max-lg:grid-cols-2 max-lg:grid max-lg:w-full">
             <Select
+              optionsHeight={380}
               options={Object.keys(filterMap).map((key) => ({
                 label: filterMap[key as ContentType],
                 value: key,
@@ -221,12 +223,18 @@ export default function BlogPage() {
               extendWidth
             />
 
-            <Select options={tags} value={tag} onChange={(tag) => setTag(tag)} extendWidth />
+            <Select
+              optionsHeight={380}
+              options={tags}
+              value={tag}
+              onChange={(tag) => setTag(tag)}
+              extendWidth
+            />
           </div>
 
           <div className="max-lg:w-full lg:w-[386px]">
             <SearchInput
-              className="bg-primary-bg h-10 md:h-12"
+              className="bg-primary-bg rounded-2 md:rounded-3 h-10 md:h-12"
               placeholder="Search article or video"
               value={searchValue}
               onChange={(e) => {
@@ -247,6 +255,7 @@ export default function BlogPage() {
         isLoadingMore={isLoadingMore}
         isAllLoaded={isAllLoaded}
       />
+      <ScrollToTopButton />
     </Container>
   );
 }

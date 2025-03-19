@@ -5,6 +5,7 @@ import { PropsWithChildren } from "react";
 import { PostDetails } from "@/app/[locale]/types/Post";
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
+import ScrollToTopButton from "@/components/buttons/ScrollToTopButton";
 import { Link } from "@/i18n/routing";
 
 function PostContainer({ children }: PropsWithChildren<{}>) {
@@ -229,24 +230,23 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         <h1 className="mb-2 md:mb-5 text-24 md:text-32">{post.title}</h1>
         <p className="text-16 md:text-20 mb-8 md:mb-[60px]">{post.description}</p>
       </PostContainer>
-      {!post.links?.[0]?.link && (
-        <Container>
-          <div className="w-full relative min-h-[203px] md:min-h-[400px] mb-8 md:mb-[60px]">
-            <Image
-              className="xl:rounded-3"
-              objectFit="cover"
-              layout="fill"
-              src={post.thumbnail?.link}
-              alt={post.thumbnail?.alt}
-            />
-          </div>
-        </Container>
-      )}
+      <Container>
+        <div className="w-full relative min-h-[203px] md:min-h-[400px] mb-8 md:mb-[60px]">
+          <Image
+            className="xl:rounded-3"
+            objectFit="cover"
+            layout="fill"
+            src={post.thumbnail?.link || ""}
+            alt={post.thumbnail?.alt || ""}
+          />
+        </div>
+      </Container>
       <PostContainer>
-        <div className="prose prose-headings:text-primary-text first:prose-th:pl-5 last:prose-th:pr-4 first:prose-td:pl-5 prose-table:rounded-5 prose-table:overflow-hidden prose-td:bg-primary-bg prose-tr:border-secondary-border prose-th:bg-quaternary-bg [&>p]:prose-li:my-2 text-primary-text prose-li:my-2 prose-li:text-secondary-text prose-li:marker:text-secondary-text hover:prose-a:text-green-hover prose-a:duration-200 prose-a:cursor-pointer prose-lg max-lg:prose-base prose-p:text-secondary-text prose-strong:text-inherit max-w-none prose-a:text-green prose-headings::text-primary-text  prose-a:font-normal">
+        <div className="prose last:prose-th:pr-4 last:prose-td:pr-4 prose-th:align-top prose-th:py-2 prose-headings:text-primary-text first:prose-th:pl-5 first:prose-td:pl-5 prose-table:rounded-5 prose-table:overflow-hidden prose-td:bg-primary-bg prose-tr:border-secondary-border prose-th:bg-quaternary-bg [&>p]:prose-li:my-2 text-primary-text prose-li:my-2 prose-li:text-secondary-text prose-li:marker:text-secondary-text hover:prose-a:text-green-hover prose-a:duration-200 prose-a:cursor-pointer prose-lg max-lg:prose-base prose-p:text-secondary-text prose-strong:text-inherit max-w-none prose-a:text-green prose-headings::text-primary-text  prose-a:font-normal">
           <div dangerouslySetInnerHTML={sanitizedData()} />
         </div>
       </PostContainer>
+      <ScrollToTopButton />
     </>
   );
 }

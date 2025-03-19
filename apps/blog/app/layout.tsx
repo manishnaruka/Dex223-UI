@@ -1,4 +1,5 @@
 import "../assets/styles/globals.css";
+import "@repo/ui/styles.css";
 
 import { GoogleAnalytics } from "@next/third-parties/google";
 import clsx from "clsx";

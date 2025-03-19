@@ -29,7 +29,7 @@ const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
     <input
       ref={ref}
       className={clsxMerge(
-        "duration-200 focus:outline-0 pl-5 placeholder:text-tertiary-text w-full bg-secondary-bg border text-primary-text",
+        "duration-200 focus:outline-0 pl-4 md:pl-5 placeholder:text-tertiary-text w-full bg-secondary-bg border text-primary-text",
         inputSizeMap[inputSize],
         !isError &&
           !isWarning &&

@@ -196,7 +196,12 @@ export default function MobileMenu() {
                     title={t(title)}
                     handleClose={() => setMobileMenuOpened(false)}
                     isActive={pathname.includes(href)}
-                    disabled={!["/swap", "/pools", "/portfolio", "/token-listing"].includes(href)}
+                    disabled={
+                      !href.includes("/swap") &&
+                      !href.includes("/pools") &&
+                      !href.includes("/portfolio") &&
+                      !href.includes("/token-listing")
+                    }
                   />
                 );
               }),

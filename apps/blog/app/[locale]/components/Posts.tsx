@@ -16,7 +16,7 @@ export default function Posts({ posts }: { posts: Post[] }) {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 ">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
       {posts.map((post) => {
         return (
           <Link
@@ -35,7 +35,7 @@ export default function Posts({ posts }: { posts: Post[] }) {
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
-            <div className="px-5 pt-4 pb-6 flex flex-col gap-1 bg-primary-bg md:flex-grow rounded-b-5 group-hocus:bg-tertiary-bg duration-200 cursor-pointer">
+            <div className="px-4 md:px-5 pt-4 pb-4 md:pb-6 flex flex-col gap-1 bg-primary-bg md:flex-grow rounded-b-3 md:rounded-b-5 group-hocus:bg-tertiary-bg duration-200 cursor-pointer">
               <h3 className="font-medium line-clamp-2 md:text-20 group-hocus:text-green duration-200">
                 {post.title}
               </h3>

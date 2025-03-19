@@ -25,7 +25,7 @@ export default function ScrollbarContainer({
               display: "flex",
               flexDirection: "column",
             }
-          : { height: `${height}px` }
+          : { maxHeight: `${height}px` }
       }
     >
       {children}
