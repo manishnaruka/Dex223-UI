@@ -23,6 +23,7 @@ const CHAIN_SUBGRAPH_URL: Record<DexChainId, string> = {
   //   "https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax?source=uniswap",
   // [ChainId.BASE]:
   //   "https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest?source=uniswap",
+  [DexChainId.MAINNET]: "",
   [DexChainId.SEPOLIA]: "https://api.studio.thegraph.com/query/56540/dex223-v1-sepolia/1.0.82",
   // [DexChainId.CALLISTO]: "",
   [DexChainId.BSC_TESTNET]: "https://api.studio.thegraph.com/query/56540/dex223-v1-chapel/1.0.82",
@@ -51,10 +52,10 @@ export function apolloClient(chainId: DexChainId) {
 }
 
 export const chainToApolloClient: Record<DexChainId, ApolloClient<NormalizedCacheObject>> = {
-  // [ChainId.MAINNET]: new ApolloClient({
-  //   cache: new InMemoryCache(),
-  //   uri: CHAIN_SUBGRAPH_URL[ChainId.MAINNET],
-  // }),
+  [DexChainId.MAINNET]: new ApolloClient({
+    cache: new InMemoryCache(),
+    uri: CHAIN_SUBGRAPH_URL[DexChainId.MAINNET],
+  }),
   // [ChainId.ARBITRUM_ONE]: new ApolloClient({
   //   cache: new InMemoryCache(),
   //   uri: CHAIN_SUBGRAPH_URL[ChainId.ARBITRUM_ONE],

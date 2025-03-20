@@ -5,6 +5,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_hybrid/chains";
 
 const autoListingUrlMap: Record<DexChainId, string> = {
+  [DexChainId.MAINNET]: "",
   [DexChainId.SEPOLIA]:
     "https://api.studio.thegraph.com/query/56540/dex223-auto-listing-sepolia/version/latest/",
   [DexChainId.BSC_TESTNET]:
