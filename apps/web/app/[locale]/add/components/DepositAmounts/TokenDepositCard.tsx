@@ -419,12 +419,18 @@ export default function TokenDepositCard({
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
 
+  console.log("++++++_______++++++++");
+  console.log(formattedValue);
+  console.log(token1Balance);
+  console.log(currentDeposit);
+  console.log("_______________________");
+
   const isMax: boolean = useMemo(() => {
     return tokenStandardRatio === 0
-      ? formattedValue !== "0" &&
+      ? Boolean(formattedValue) &&
           formatFloat(formatUnits(token0Balance?.value || BigInt(0), currency?.decimals || 18)) ===
             formattedValue
-      : formattedValue !== "0" &&
+      : Boolean(formattedValue) &&
           formatFloat(
             formatUnits(
               (token1Balance?.value || BigInt(0)) + currentDeposit,

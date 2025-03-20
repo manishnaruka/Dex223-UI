@@ -1,7 +1,5 @@
 import { DexChainId } from "@/sdk_hybrid/chains";
 
-console.log(process.env.NEXT_PUBLIC_ENV);
-
 export const networks: Array<{
   chainId: DexChainId;
   name: string;
