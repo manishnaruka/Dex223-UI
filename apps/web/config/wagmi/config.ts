@@ -23,7 +23,8 @@ const cookieStorage = {
 };
 
 export const config = createConfig({
-  chains: [mainnet, sepolia, bscTestnet, eos],
+  chains:
+    process.env.NEXT_PUBLIC_ENV === "production" ? [mainnet] : [mainnet, sepolia, bscTestnet, eos],
   connectors: [
     walletConnect({
       projectId: "0af4613ea1c747c660416c4a7a114616",
@@ -49,6 +50,7 @@ export const config = createConfig({
   }),
   multiInjectedProviderDiscovery: false, // to avoid connecting to io.metamask and other injected connectors
   transports: {
+    [mainnet.id]: http(),
     [sepolia.id]: fallback([
       webSocket("wss://eth-sepolia.g.alchemy.com/v2/kvidqVpyVu4aivBEb55XXIzCHDqMm7CO"),
       http("https://sepolia.infura.io/v3/6689c099b8d542589b1842e30dbc2027"),
@@ -56,7 +58,6 @@ export const config = createConfig({
       http("https://rpc.ankr.com/eth_sepolia"),
       http(),
     ]),
-    [mainnet.id]: http(),
     [bscTestnet.id]: fallback([
       // webSocket("wss://bsc-testnet-rpc.publicnode.com"),
       http("https://api.zan.top/bsc-testnet"),

@@ -45,7 +45,7 @@ export const POOL_INIT_CODE_HASH: Record<DexChainId, Address> = {
 };
 
 export const CORE_AUTO_LISTING_ADDRESS: Record<DexChainId, Address> = {
-  [DexChainId.MAINNET]: "0x39491101f7d46e9f0c3217d2eb91c016f761ad59",
+  [DexChainId.MAINNET]: "0x6a5ff6c7b1ea8e9b9e40da3b162468b61e40584f",
   [DexChainId.SEPOLIA]: "0x4C82Def7222525a02c271E8958E7ac37043806e9",
   [DexChainId.BSC_TESTNET]: "0xD9EAC1C424554499322FECCb673fC62Ea92cF810",
   [DexChainId.EOS]: "0x39491101f7d46e9f0c3217d2eb91c016f761ad59",
