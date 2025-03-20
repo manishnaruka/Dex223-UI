@@ -5,7 +5,16 @@ import { Token } from "./token";
 /**
  * Known WETH9 implementation addresses, used in our implementation of Ether#wrapped
  */
+
 export const wrappedTokens: Record<DexChainId, Token> = {
+  [DexChainId.MAINNET]: new Token(
+    DexChainId.MAINNET,
+    "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "0x2b29C021e1c6942536C2FEe9B143B5DAD6c67BA4",
+    18,
+    "WETH",
+    "Wrapped Ether",
+  ),
   [DexChainId.SEPOLIA]: new Token(
     DexChainId.SEPOLIA,
     "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",

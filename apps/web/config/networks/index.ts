@@ -7,6 +7,12 @@ export const networks: Array<{
   logo: string;
 }> = [
   {
+    chainId: DexChainId.MAINNET,
+    name: "Ethereum",
+    symbol: "ETH",
+    logo: "/images/chains/ethereum.svg",
+  },
+  {
     chainId: DexChainId.SEPOLIA,
     name: "Sepolia",
     symbol: "SEP",

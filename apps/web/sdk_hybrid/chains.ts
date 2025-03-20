@@ -1,5 +1,5 @@
 export enum DexChainId {
-  // MAINNET = 1,
+  MAINNET = 1,
   SEPOLIA = 11155111,
   // CALLISTO = 820,
   BSC_TESTNET = 97,

@@ -1,5 +1,5 @@
 import { fallback, http, webSocket } from "viem";
-import { bscTestnet } from "viem/chains";
+import { bscTestnet, mainnet } from "viem/chains";
 import { createConfig, createStorage, parseCookie } from "wagmi";
 import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connectors";
 
@@ -23,12 +23,7 @@ const cookieStorage = {
 };
 
 export const config = createConfig({
-  chains: [
-    // callisto,
-    sepolia,
-    bscTestnet,
-    eos,
-  ],
+  chains: [mainnet, sepolia, bscTestnet, eos],
   connectors: [
     walletConnect({
       projectId: "0af4613ea1c747c660416c4a7a114616",
@@ -61,6 +56,7 @@ export const config = createConfig({
       http("https://rpc.ankr.com/eth_sepolia"),
       http(),
     ]),
+    [mainnet.id]: http(),
     [bscTestnet.id]: fallback([
       // webSocket("wss://bsc-testnet-rpc.publicnode.com"),
       http("https://api.zan.top/bsc-testnet"),

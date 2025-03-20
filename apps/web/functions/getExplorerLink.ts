@@ -9,8 +9,8 @@ export enum ExplorerLinkType {
 }
 
 const explorerMap: Record<DexChainId, string> = {
+  [DexChainId.MAINNET]: "https://etherscan.io",
   [DexChainId.SEPOLIA]: "https://sepolia.etherscan.io",
-  // [DexChainId.CALLISTO]: "https://explorer.callisto.network",
   [DexChainId.BSC_TESTNET]: "https://testnet.bscscan.com",
   [DexChainId.EOS]: "https://explorer.evm.eosnetwork.com/",
 };
@@ -32,6 +32,7 @@ export default function getExplorerLink(
       switch (chainId) {
         case DexChainId.BSC_TESTNET:
         case DexChainId.SEPOLIA:
+        case DexChainId.MAINNET:
           return `${explorerMap[chainId]}/gastracker`;
         case DexChainId.EOS:
           return `${explorerMap[chainId]}`;

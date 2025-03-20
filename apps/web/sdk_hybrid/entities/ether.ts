@@ -12,6 +12,11 @@ import { wrappedTokens } from "./weth9";
  */
 
 const nativeCurrenciesMap: Record<DexChainId, { symbol: string; name: string; logoURI: string }> = {
+  [DexChainId.MAINNET]: {
+    symbol: "ETH",
+    name: "Ethereum",
+    logoURI: "/images/coins/ETH.svg",
+  },
   [DexChainId.SEPOLIA]: {
     symbol: "sepETH",
     name: "Sepolia ETH",
