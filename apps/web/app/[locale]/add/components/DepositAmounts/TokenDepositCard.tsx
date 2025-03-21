@@ -419,12 +419,6 @@ export default function TokenDepositCard({
     contractAddress: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
   });
 
-  console.log("++++++_______++++++++");
-  console.log(formattedValue);
-  console.log(token1Balance);
-  console.log(currentDeposit);
-  console.log("_______________________");
-
   const isMax: boolean = useMemo(() => {
     return tokenStandardRatio === 0
       ? Boolean(formattedValue) &&

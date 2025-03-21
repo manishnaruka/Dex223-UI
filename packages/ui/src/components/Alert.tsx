@@ -43,7 +43,7 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         type === "success" && "ui-outline-green ui-bg-green-bg ui-outline-1",
         type === "error" && "ui-outline-red-light ui-bg-red-bg ui-outline-1",
         type === "warning" && "ui-outline-orange ui-bg-orange-bg ui-outline-1",
-        type === "info" && "ui-outline-blue ui-bg-blue-bg",
+        type === "info" && "ui-outline-blue ui-bg-blue-bg ui-outline-1",
         type === "info-border" && "ui-border-l-4 ui-border-l-blue ui-outline-0 ui-bg-primary-bg ui-pl-4",
       )}
     >
