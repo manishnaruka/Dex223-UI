@@ -30,8 +30,8 @@ export const LendingOrders = () => {
   const currentTableData = [] as any[];
   return (
     <>
-      <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+      <div className="mt-5 grid lg:grid-cols-2 gap-5">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-3 lg:px-5 lg:py-6 w-full relative overflow-hidden">
           <div className="flex flex-col z-20">
             <div className="flex items-center gap-1">
               <span className="text-14 lg:text-16 text-secondary-text">{t("lending_balance")}</span>

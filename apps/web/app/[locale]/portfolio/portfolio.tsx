@@ -71,7 +71,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
   }, [addWallet, onAdd, tokenAddressToImport, error]);
   return (
     <>
-      <div className={clsx("relative w-full", !error && "mb-5")}>
+      <div className={clsx("relative w-full")}>
         <Input
           className={clsxMerge("pr-12")}
           value={tokenAddressToImport}
@@ -94,7 +94,7 @@ const AddWalletInput = ({ onAdd }: { onAdd?: () => void }) => {
           />
         </div>
       </div>
-      {error && <p className="text-12 text-red-light">{error}</p>}
+      <p className="min-h-4 text-12 text-red-light">{error ? error : ""}</p>
     </>
   );
 };
@@ -259,7 +259,7 @@ const ManageWalletsContent = ({
       />
       <div className="flex flex-col pb-5 border-t border-secondary-border">
         {content === "add" ? (
-          <div className="flex flex-col pt-5 px-5">
+          <div className="flex flex-col pt-5 px-4 md:px-5">
             <AddWalletInput onAdd={() => setContent("list")} />
             {!isConnected && (
               <>
@@ -285,7 +285,7 @@ const ManageWalletsContent = ({
               <>
                 <div
                   className={clsx(
-                    "flex flex-col justify-between text-secondary-text text-18 px-5",
+                    "flex flex-col justify-between text-secondary-text text-18 px-4 md:px-5",
                     wallets.length > 0 && "mb-4",
                   )}
                 >
@@ -338,14 +338,14 @@ const ManageWalletsContent = ({
                 {wallets.length > 0 && (
                   <>
                     <div className="flex-shrink-0 w-full h-[1px] bg-quaternary-bg my-2" />
-                    <div className="flex justify-between text-secondary-text text-18 px-5">
+                    <div className="flex justify-between text-secondary-text text-18 px-4 md:px-5">
                       <span className="py-2 text-tertiary-text">{t("my_wallets")}</span>
                     </div>
                   </>
                 )}
               </>
             ) : (
-              <div className="flex justify-between text-secondary-text text-16 font-medium px-5">
+              <div className="flex justify-between text-secondary-text text-16 font-medium px-4 md:px-5">
                 <span
                   className="py-2 cursor-pointer hocus:text-green-hover"
                   onClick={() => setAllWalletActive()}
@@ -362,7 +362,7 @@ const ManageWalletsContent = ({
                 </span>
               </div>
             )}
-            <div className="flex flex-col gap-3 px-5 max-h-[380px] overflow-auto">
+            <div className="flex flex-col gap-2 md:gap-3 px-4 md:px-5 overflow-auto">
               {wallets.map(({ address, isActive }) => (
                 <div
                   key={address}
@@ -402,7 +402,7 @@ const ManageWalletsContent = ({
                 </div>
               ))}
             </div>
-            <div className="flex w-full px-5 pt-5 mt-5 border-t border-secondary-border">
+            <div className="flex w-full px-4 md:px-5 pt-5 mt-5 border-t border-secondary-border">
               <Button
                 fullWidth
                 onClick={() => {
@@ -627,7 +627,12 @@ export function Portfolio() {
                 <Button
                   colorScheme={ButtonColor.LIGHT_GREEN}
                   size={ButtonSize.MEDIUM}
-                  onClick={() => (hasSearchWallet ? handleAddWallet() : {})}
+                  onClick={() => {
+                    console.log(hasSearchWallet);
+                    if (!hasSearchWallet) {
+                      handleAddWallet();
+                    }
+                  }}
                   disabled={hasSearchWallet}
                 >
                   <div className="flex items-center gap-2  text-nowrap">

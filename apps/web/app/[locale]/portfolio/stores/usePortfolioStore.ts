@@ -41,14 +41,6 @@ const checkAllActive = (wallets: any[]) => {
   return allActive;
 };
 
-export const usePortfolioSearchStore = create<PortfolioSearchStore>((set, get) => ({
-  searchValue: "",
-  setSearchValue: (value) =>
-    set(() => ({
-      searchValue: value,
-    })),
-}));
-
 export const usePortfolioStore = create<PortfolioStore>()(
   persist(
     (set) => ({

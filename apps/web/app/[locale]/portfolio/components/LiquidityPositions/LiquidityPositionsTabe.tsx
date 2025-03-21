@@ -6,12 +6,14 @@ import Image from "next/image";
 import React from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
+import Svg from "@/components/atoms/Svg";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import {
   PositionInfo,
   usePositionFromPositionInfo,
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
+import { Link } from "@/i18n/routing";
 
 import { WalletPositions } from "../../stores/useWalletsPosotions";
 
@@ -20,13 +22,24 @@ const PositionTableItemDesktop = ({ positionInfo }: { positionInfo: PositionInfo
   const { inRange, removed } = usePositionRangeStatus({ position });
 
   return (
-    <>
+    <Link className="group cursor-pointer contents" href={`/pool/${positionInfo.tokenId}`}>
       <div
-        className={clsx("h-[56px] flex items-center text-secondary-text gap-2 pl-5 rounded-l-3")}
+        className={clsx(
+          "h-[56px] group-hover:bg-quaternary-bg duration-200 flex items-center text-secondary-text gap-2.5 pl-5 rounded-l-3",
+        )}
       >
         <span>{`${positionInfo.tokenId}`}</span>
+
+        <Svg
+          iconName="next"
+          className="opacity-0 group-hover:opacity-100 text-green duration-200"
+        />
       </div>
-      <div className={clsx("h-[56px] flex items-center gap-2")}>
+      <div
+        className={clsx(
+          "h-[56px] group-hover:bg-quaternary-bg duration-200 flex items-center gap-2",
+        )}
+      >
         <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
         <Image
           src="/images/tokens/placeholder.svg"
@@ -40,9 +53,25 @@ const PositionTableItemDesktop = ({ positionInfo }: { positionInfo: PositionInfo
           ? `${position.amount0.toSignificant()} ${position.pool.token0.symbol}/${position.amount1.toSignificant()} ${position.pool.token1.symbol}`
           : "Loading..."}
       </div>
-      <div className={clsx("h-[56px] flex items-center text-secondary-text")}>$0.00</div>
-      <div className={clsx("h-[56px] flex items-center text-secondary-text")}>$0.00</div>
-      <div className={clsx("h-[56px] flex items-center pr-5 rounded-r-3")}>
+      <div
+        className={clsx(
+          "h-[56px] group-hover:bg-quaternary-bg duration-200 flex items-center text-secondary-text",
+        )}
+      >
+        $0.00
+      </div>
+      <div
+        className={clsx(
+          "h-[56px] group-hover:bg-quaternary-bg duration-200 flex items-center text-secondary-text",
+        )}
+      >
+        $0.00
+      </div>
+      <div
+        className={clsx(
+          "h-[56px] group-hover:bg-quaternary-bg duration-200 flex items-center pr-5 rounded-r-3",
+        )}
+      >
         <RangeBadge
           status={
             removed
@@ -53,7 +82,7 @@ const PositionTableItemDesktop = ({ positionInfo }: { positionInfo: PositionInfo
           }
         />
       </div>
-    </>
+    </Link>
   );
 };
 
@@ -65,7 +94,7 @@ export const LiquidityPositionsDesktopTable = ({
   isLoading: boolean;
 }) => {
   return (
-    <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2 relative">
+    <div className="hidden lg:grid px-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,1.33fr),_minmax(87px,2.67fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr),_minmax(50px,1.33fr)] pb-2.5 relative">
       {isLoading ? (
         <React.Fragment>
           <SkeletonTheme
@@ -98,7 +127,7 @@ export const LiquidityPositionsDesktopTable = ({
           <div className="text-tertiary-text h-[60px] flex items-center gap-2">Amount tokens</div>
           <div className="text-tertiary-text h-[60px] flex items-center">Amount, $</div>
           <div className="text-tertiary-text h-[60px] flex items-center">Unclaimed fees</div>
-          <div className="text-tertiary-text pr-5 h-[60px] flex items-center mb-2">Status</div>
+          <div className="text-tertiary-text pr-5 h-[60px] flex items-center mb-2.5">Status</div>
         </React.Fragment>
       )}
 
@@ -159,7 +188,10 @@ const PositionTableItemMobile = ({ positionInfo }: { positionInfo: PositionInfo 
 
   return (
     <>
-      <div className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2">
+      <Link
+        href={`/pools/${positionInfo.tokenId}`}
+        className="flex flex-col bg-primary-bg p-4 rounded-3 gap-2"
+      >
         <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-2 text-14">
             <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
@@ -199,7 +231,7 @@ const PositionTableItemMobile = ({ positionInfo }: { positionInfo: PositionInfo 
           <span className="text-14 text-secondary-text">Unclaimed fees:</span>
           <span className="text-14 font-medium">{`$ —`}</span>
         </div>
-      </div>
+      </Link>
     </>
   );
 };

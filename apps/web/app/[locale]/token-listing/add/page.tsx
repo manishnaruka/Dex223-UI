@@ -380,7 +380,7 @@ export default function ListTokenPage() {
               <div className="pt-2.5 card-spacing bg-primary-bg rounded-5">
                 <div className="flex justify-between items-center mb-2.5 -mx-3">
                   <IconButton
-                    onClick={() => router.replace(destination)}
+                    onClick={() => router.push(destination)}
                     iconName="back"
                     variant={IconButtonVariant.BACK}
                     buttonSize={IconButtonSize.LARGE}

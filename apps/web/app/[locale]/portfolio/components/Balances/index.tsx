@@ -73,7 +73,7 @@ export const Balances = ({
 
   return (
     <>
-      <div className="mt-5 flex flex-col lg:flex-row gap-5">
+      <div className="mt-5 grid lg:grid-cols-2 gap-5">
         {/* Wallet balance info box */}
         <div className="flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-6 w-full relative overflow-hidden">
           <div className="flex items-center gap-1 mb-auto">

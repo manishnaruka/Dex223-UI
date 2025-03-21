@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 import { Address, isAddress } from "viem";
 import { useAccount } from "wagmi";
 
-import { usePortfolioSearchStore, usePortfolioStore } from "./usePortfolioStore";
+import { usePortfolioStore } from "./usePortfolioStore";
 
 export const usePortfolioWallets = () => {
   const { address: connectedWalletAddress } = useAccount();

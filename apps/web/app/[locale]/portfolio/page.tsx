@@ -1,6 +1,5 @@
 import { Portfolio } from "./portfolio";
 
-const PortfolioPage = () => {
+export default function PortfolioPage() {
   return <Portfolio />;
-};
-export default PortfolioPage;
+}

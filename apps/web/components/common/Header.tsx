@@ -44,26 +44,28 @@ export default function Header() {
           </div>
         </Container>
       </header>
-      <div className="pt-2.5 md:pt-2 md:pb-2 pb-4 bg-gradient-to-r from-green-bg to-green-bg/0">
-        <Container className="flex h-full items-center px-5">
-          <div className="flex justify-between items-center w-full flex-wrap gap-2">
-            <div className="flex items-center gap-2 justify-between md:justify-start flex-grow">
-              Get test tokens for free
-              <Image src="/images/test-tokens.svg" alt="" width={92} height={48} />
+      {process.env.NEXT_PUBLIC_ENV === "development" && (
+        <div className="pt-2.5 md:pt-2 md:pb-2 pb-4 bg-gradient-to-r from-green-bg to-green-bg/0">
+          <Container className="flex h-full items-center px-5">
+            <div className="flex justify-between items-center w-full flex-wrap gap-2">
+              <div className="flex items-center gap-2 justify-between md:justify-start flex-grow">
+                Get test tokens for free
+                <Image src="/images/test-tokens.svg" alt="" width={92} height={48} />
+              </div>
+              <div className="w-full md:w-[168px]">
+                <Button
+                  fullWidth
+                  onClick={handleOpen}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  size={ButtonSize.MEDIUM}
+                >
+                  Get free tokens
+                </Button>
+              </div>
             </div>
-            <div className="w-full md:w-[168px]">
-              <Button
-                fullWidth
-                onClick={handleOpen}
-                colorScheme={ButtonColor.LIGHT_GREEN}
-                size={ButtonSize.MEDIUM}
-              >
-                Get free tokens
-              </Button>
-            </div>
-          </div>
-        </Container>
-      </div>
+          </Container>
+        </div>
+      )}
     </div>
   );
 }

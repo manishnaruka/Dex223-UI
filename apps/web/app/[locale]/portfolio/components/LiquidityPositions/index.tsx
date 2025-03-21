@@ -1,11 +1,12 @@
 "use client";
 import "react-loading-skeleton/dist/skeleton.css";
 
+import Skeleton from "@repo/ui/skeleton";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
-import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { SkeletonTheme } from "react-loading-skeleton";
 
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
@@ -53,8 +54,8 @@ export const LiquidityPositions = ({
 
   return (
     <>
-      <div className="mt-5 flex gap-5">
-        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-3 lg:px-5 lg:py-6 w-full lg:w-[50%] relative overflow-hidden">
+      <div className="mt-5 grid lg:grid-cols-2 gap-5">
+        <div className="flex items-center justify-between bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-3 lg:px-5 lg:py-6 w-full relative overflow-hidden">
           <div className="flex flex-col ">
             {loading ? (
               <>
@@ -66,10 +67,10 @@ export const LiquidityPositions = ({
                   // duration={5}
                 >
                   <div className="flex items-center gap-1 z-10 mt-0.5">
-                    <Skeleton width={240} height={16} />
+                    <Skeleton className="w-[240px] h-4" />
                   </div>
                   <div className="flex items-center gap-1 z-10 mt-1.5 mb-1">
-                    <Skeleton width={140} height={32} />
+                    <Skeleton className="w-[140px] h-8" />
                   </div>
                 </SkeletonTheme>
               </>
@@ -115,14 +116,14 @@ export const LiquidityPositions = ({
                 enableAnimation={false}
                 // duration={5}
               >
-                <Skeleton width={285} height={32} />
+                <Skeleton className="w-[285px] h-8" />
               </SkeletonTheme>
             </div>
             <div>
-              <Skeleton width={219} height={48} />
+              <Skeleton className="w-full md:w-[219px] h-12" />
             </div>
             <div>
-              <Skeleton width={480} height={48} />
+              <Skeleton className="w-full md:w-[480px] h-12" />
             </div>
           </SkeletonTheme>
         </div>
