@@ -50,7 +50,14 @@ export const config = createConfig({
   }),
   multiInjectedProviderDiscovery: false, // to avoid connecting to io.metamask and other injected connectors
   transports: {
-    [mainnet.id]: http(),
+    [mainnet.id]: fallback([
+      webSocket("wss://ethereum.callstaticrpc.com"),
+      webSocket("wss://ethereum-rpc.publicnode.com"),
+      http("https://ethereum-rpc.publicnode.com"),
+      http("https://eth.drpc.org"),
+      http("https://1rpc.io/eth"),
+      http(),
+    ]),
     [sepolia.id]: fallback([
       webSocket("wss://eth-sepolia.g.alchemy.com/v2/kvidqVpyVu4aivBEb55XXIzCHDqMm7CO"),
       http("https://sepolia.infura.io/v3/6689c099b8d542589b1842e30dbc2027"),

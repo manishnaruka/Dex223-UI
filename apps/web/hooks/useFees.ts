@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAccount, useEstimateFeesPerGas } from "wagmi";
 
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
@@ -25,9 +25,12 @@ export function useFees() {
     refetchEIP1559();
   }, [blockNumber, refetchLegacy, refetchEIP1559]);
 
-  return {
-    gasPrice: estimatedFeesPerGasLegacy?.gasPrice,
-    baseFee: estimatedFeesPerGasEIP1559?.maxFeePerGas,
-    priorityFee: estimatedFeesPerGasEIP1559?.maxPriorityFeePerGas,
-  };
+  return useMemo(
+    () => ({
+      gasPrice: estimatedFeesPerGasLegacy?.gasPrice,
+      baseFee: estimatedFeesPerGasEIP1559?.maxFeePerGas,
+      priorityFee: estimatedFeesPerGasEIP1559?.maxPriorityFeePerGas,
+    }),
+    [estimatedFeesPerGasEIP1559, estimatedFeesPerGasLegacy],
+  );
 }

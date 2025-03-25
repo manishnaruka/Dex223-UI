@@ -25,7 +25,7 @@ export enum AllowanceStatus {
 }
 
 const allowanceGasLimitMap: Record<DexChainId, { base: bigint; additional: bigint }> = {
-  [DexChainId.MAINNET]: { base: BigInt(46200), additional: BigInt(10000) },
+  [DexChainId.MAINNET]: { base: BigInt(50000), additional: BigInt(12000) },
   [DexChainId.SEPOLIA]: { base: BigInt(46200), additional: BigInt(10000) },
   [DexChainId.BSC_TESTNET]: { base: BigInt(46200), additional: BigInt(10000) },
   [DexChainId.EOS]: { base: BigInt(46200), additional: BigInt(10000) },
@@ -65,7 +65,7 @@ export function useStoreAllowance({
     address: token && token.isToken ? token.address0 : undefined,
     functionName: "allowance",
     args: [
-      //set ! to avoid ts errors, make sure it is not undefined with "enable" option
+      //set ! to avoid ts errors, make sure it is not undefined with "enabled" option
       address!,
       contractAddress!,
     ],
@@ -141,17 +141,23 @@ export function useStoreAllowance({
         args: [contractAddress!, amountToApprove!],
       };
 
+      // console.log({
+      //   ...params,
+      //   ...(customGasSettings || {}),
+      //   gas: gasLimit,
+      // });
+
       try {
-        const { request } = await publicClient.simulateContract({
-          ...params,
-          ...(customGasSettings || {}),
-          gas: gasLimit,
-        });
+        // const { request } = await publicClient.simulateContract({
+        //   ...params,
+        //   // ...(customGasSettings || {}),
+        //   // gas: gasLimit,
+        // });
 
         let hash;
 
         try {
-          hash = await walletClient.writeContract({ ...request, account: undefined });
+          hash = await walletClient.writeContract({ ...params, account: undefined });
         } catch (e) {
           console.log(e);
         }

@@ -185,16 +185,26 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
   ]);
 
   const isSufficientAllowanceA = useMemo(() => {
+    if (tokenA?.isNative) {
+      return true;
+    }
+
     return tokenAStandard === Standard.ERC20
       ? BigInt(currentAllowanceA || 0) >= amountToCheckA
       : BigInt(currentDepositA || 0) >= amountToCheckA;
-  }, [amountToCheckA, currentAllowanceA, currentDepositA, tokenAStandard]);
+  }, [amountToCheckA, currentAllowanceA, currentDepositA, tokenA?.isNative, tokenAStandard]);
+
+  console.log(`isSufficientAllowanceA: ${isSufficientAllowanceA}`);
 
   const isSufficientAllowanceB = useMemo(() => {
+    if (tokenB?.isNative) {
+      return true;
+    }
+
     return tokenBStandard === Standard.ERC20
       ? BigInt(currentAllowanceB || 0) >= amountToCheckB
       : BigInt(currentDepositB || 0) >= amountToCheckB;
-  }, [amountToCheckB, currentAllowanceB, currentDepositB, tokenBStandard]);
+  }, [amountToCheckB, currentAllowanceB, currentDepositB, tokenB?.isNative, tokenBStandard]);
 
   const isSufficientBalanceB = useMemo(() => {
     return tokenBStandard === Standard.ERC20
@@ -212,6 +222,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
     tokenB1Balance,
     tokenBStandard,
   ]);
+  console.log(`isSufficientAllowanceB: ${isSufficientAllowanceB}`);
 
   const isSufficientBalance = useMemo(() => {
     return isSufficientBalanceA && isSufficientBalanceB;
