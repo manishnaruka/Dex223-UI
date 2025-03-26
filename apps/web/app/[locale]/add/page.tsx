@@ -179,7 +179,7 @@ export default function AddPoolPage() {
 
   return (
     <Container>
-      <div className="md:w-[1200px] mx-auto my-4 md:my-[40px]">
+      <div className="md:max-w-[1200px] mx-auto my-4 md:my-[40px]">
         <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
           <div className="w-[48px] md:w-[104px]">
             <IconButton

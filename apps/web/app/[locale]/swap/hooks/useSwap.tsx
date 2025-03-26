@@ -83,6 +83,7 @@ export function useSwapParams() {
   const { slippage, deadline: _deadline } = useSwapSettingsStore();
   const deadline = useTransactionDeadline(_deadline);
 
+  //TODO: Choose one of existing pools for swap
   const poolAddress = useComputePoolAddressDex({
     tokenA,
     tokenB,
@@ -90,9 +91,6 @@ export function useSwapParams() {
   });
 
   const { trade, isLoading: isLoadingTrade } = useTrade();
-
-  console.log("TRADE");
-  console.log(trade);
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;

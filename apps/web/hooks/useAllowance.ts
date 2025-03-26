@@ -4,6 +4,7 @@ import { useAccount, usePublicClient, useReadContract, useWalletClient } from "w
 
 import { AddLiquidityApproveStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import { ERC20_ABI } from "@/config/abis/erc20";
+import { USDT_ADDRESS_ERC_20 } from "@/config/constants/usdt";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import addToast from "@/other/toast";
@@ -141,23 +142,25 @@ export function useStoreAllowance({
         args: [contractAddress!, amountToApprove!],
       };
 
-      // console.log({
-      //   ...params,
-      //   ...(customGasSettings || {}),
-      //   gas: gasLimit,
-      // });
-
       try {
-        // const { request } = await publicClient.simulateContract({
-        //   ...params,
-        //   // ...(customGasSettings || {}),
-        //   // gas: gasLimit,
-        // });
-
         let hash;
 
         try {
-          hash = await walletClient.writeContract({ ...params, account: undefined });
+          if (token.address0.toLowerCase() === USDT_ADDRESS_ERC_20.toLowerCase()) {
+            hash = await walletClient.writeContract({
+              ...params,
+              ...(customGasSettings || {}),
+              gas: gasLimit,
+              account: undefined,
+            });
+          } else {
+            const { request } = await publicClient.simulateContract({
+              ...params,
+              ...(customGasSettings || {}),
+              gas: gasLimit,
+            });
+            hash = await walletClient.writeContract({ ...request, account: undefined });
+          }
         } catch (e) {
           console.log(e);
         }
