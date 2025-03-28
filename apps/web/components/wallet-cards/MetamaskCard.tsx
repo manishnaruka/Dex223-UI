@@ -28,8 +28,6 @@ export default function MetamaskCard() {
 
   const pathname = usePathname();
 
-  console.log(pathname);
-
   if (isMobile && !isMetamaskMobile) {
     return (
       <a href={`https://metamask.app.link/dapp/${window.location.host || "test-app.dex223.io"}`}>

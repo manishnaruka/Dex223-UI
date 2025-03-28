@@ -198,13 +198,12 @@ export default function useRevoke({
         setStatus(AllowanceStatus.LOADING);
         await publicClient.waitForTransactionReceipt({ hash });
         setStatus(AllowanceStatus.SUCCESS);
-        console.log("revoke status SUCCESS");
         setRefreshDepositsTrigger(true);
       }
     } catch (e) {
       console.log(e);
       setStatus(AllowanceStatus.INITIAL);
-      addToast("Unexpected error, please contact support", "error");
+      addToast((e as any).toString(), "error");
     }
   }, [
     contractAddress,

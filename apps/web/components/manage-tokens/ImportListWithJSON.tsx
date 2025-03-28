@@ -98,7 +98,6 @@ export default function ImportListWithJSON({ setContent }: Props) {
 
   const handleDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    console.log(event.dataTransfer.files);
 
     setTokenListFile(event.dataTransfer.files[0]);
     if (event.dataTransfer.files[0].size > 2097152) {

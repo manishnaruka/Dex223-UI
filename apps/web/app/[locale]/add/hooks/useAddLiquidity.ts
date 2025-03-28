@@ -405,7 +405,7 @@ export const useAddLiquidity = ({
         }
       } catch (error) {
         console.error("useAddLiquidity ~ error:", error);
-        addToast("Unexpected error, please contact support", "error");
+        addToast((error as any).toString(), "error");
         setLiquidityStatus(AddLiquidityStatus.MINT);
       }
     },

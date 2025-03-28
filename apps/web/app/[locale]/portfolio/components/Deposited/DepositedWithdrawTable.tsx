@@ -56,7 +56,6 @@ const WithdrawTableItem = ({
   const [status, setStatus] = useState<boolean>(false);
 
   const isLoading = useMemo(() => {
-    console.log(revokeStatus);
     const going = [AllowanceStatus.PENDING, AllowanceStatus.LOADING].includes(revokeStatus);
     if (!going) setStatus(false);
     return going;

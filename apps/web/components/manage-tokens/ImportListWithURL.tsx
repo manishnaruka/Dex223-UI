@@ -47,7 +47,6 @@ export default function ImportListWithURL({ setContent }: Props) {
         //TODO: Check that all tokens in list from same chain
         const listChainId = data.tokens[0].chainId;
 
-        console.log(listChainId);
         if (data && listChainId) {
           setTokenListToImport({
             enabled: true,

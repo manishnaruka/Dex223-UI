@@ -211,7 +211,7 @@ export function useStoreAllowance({
         return { success: false as const };
       } catch (e) {
         console.log(e);
-        addToast("Unexpected error, please contact support", "error");
+        addToast((e as any).toString(), "error");
         return { success: false as const };
       }
     },

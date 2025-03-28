@@ -32,7 +32,6 @@ export default function MintTestTokensDialog() {
     return tokens.filter((token) => token.isToken);
   }, [tokens]);
 
-  console.log(withoutWrapped);
   const { isOpened: isOpenedWallet, setIsOpened: setOpenedWallet } =
     useConnectWalletDialogStateStore();
   const [isPopoverOpened, setPopoverOpened] = useState(false);

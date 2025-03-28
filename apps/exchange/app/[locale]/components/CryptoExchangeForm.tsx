@@ -91,7 +91,6 @@ export default function CryptoExchangeForm({
 
     setExchange(data);
     addQueryParam(data.id);
-    console.log(data);
   }, [addQueryParam, inputAmount, isFixed, recipient, setExchange, tokenA, tokenB]);
 
   return (

@@ -127,8 +127,6 @@ export default function ExchangePageClient({
 
   const [exchange, setExchange] = useState<ExchangeData | undefined>(initialExchange);
 
-  console.log(initialExchange);
-
   const [addressQRUrl, setAddressQRUrl] = useState("");
 
   useEffect(() => {

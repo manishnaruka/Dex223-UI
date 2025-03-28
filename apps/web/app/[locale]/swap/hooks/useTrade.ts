@@ -54,7 +54,6 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
         { maxHops: 1 },
       );
 
-      console.log(trades[0]);
       if (trades[0]) {
         setTrade(trades[0]);
       } else {

@@ -69,9 +69,6 @@ export default function FiatExchangeForm({
       return;
     }
 
-    console.log(tokenA);
-    console.log(tokenB);
-
     const res = await fetch(`/api/simpleswap/create-exchange`, {
       method: "POST",
       body: JSON.stringify({

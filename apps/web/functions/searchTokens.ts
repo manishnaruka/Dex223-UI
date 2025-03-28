@@ -37,7 +37,6 @@ export function filterTokens<T extends Currency>(searchStr: string, tokens: T[])
       ]),
     );
 
-    console.log(allParts);
     for (let i = 0; i < allParts.length; i++) {
       if (allParts[i].toLowerCase().startsWith(searchStr.toLowerCase())) {
         return true;
@@ -61,7 +60,6 @@ export function filterTokenLists(searchStr: string, lists: TokenList[]): TokenLi
       new Set<string>([...allPartsSet, ...generateOrderedSubsets(nameParts)]),
     );
 
-    console.log(allParts);
     if (!allParts.every((part) => !part.toLowerCase().startsWith(searchStr.toLowerCase()))) {
       return true;
     }

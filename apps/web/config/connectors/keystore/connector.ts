@@ -40,8 +40,6 @@ export function keystore({ pk }: KeystoreConnectorParameters) {
 
         connected = true;
 
-        console.log("onConnect");
-        console.log(accounts, currentChainId);
         return { accounts, chainId: currentChainId };
       } catch (e) {
         console.log(e);

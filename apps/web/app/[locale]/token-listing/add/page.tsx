@@ -177,8 +177,6 @@ export default function ListTokenPage() {
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useTokenListingRecentTransactionsStore();
 
-  console.log(params);
-
   useRecentTransactionTracking();
   useListTokenEstimatedGas();
 

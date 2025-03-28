@@ -46,8 +46,7 @@ import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStor
 function compareTokens(tokenA: Currency, tokenB: Currency) {
   const tokenAaddress = tokenA.isNative ? tokenA.wrapped.address0 : tokenA.address0;
   const tokenBaddress = tokenB.isNative ? tokenB.wrapped.address0 : tokenB.address0;
-  console.log(tokenA.name, tokenAaddress);
-  console.log(tokenB.name, tokenBaddress);
+
   return tokenAaddress.toString() > tokenBaddress.toString();
 }
 
@@ -72,7 +71,6 @@ export default function AddPoolPage() {
 
   const handlePick = useCallback(
     (token: Currency) => {
-      console.log("handlePick");
       if (currentlyPicking === "tokenA") {
         if (token === tokenB) {
           setIsOpenedTokenPick(false);
@@ -85,7 +83,6 @@ export default function AddPoolPage() {
         }
 
         if (res) {
-          console.log("swapping tokens in A");
           setBothTokens({ tokenA: tokenB, tokenB: token });
         } else {
           setTokenA(token);
@@ -104,7 +101,6 @@ export default function AddPoolPage() {
         }
 
         if (res) {
-          console.log("swapping tokens in B");
           setBothTokens({ tokenA: token, tokenB: tokenA });
         } else {
           setTokenB(token);

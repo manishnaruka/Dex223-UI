@@ -38,8 +38,6 @@ export default function ConnectWalletDialog() {
   const { chainToConnect, setChainToConnect } = useConnectWalletStore();
   const { switchChain } = useSwitchChain();
 
-  console.log(networks);
-
   return (
     <DrawerDialog isOpen={isOpenedWallet} setIsOpen={setOpenedWallet}>
       <div className="w-full md:w-[600px]">

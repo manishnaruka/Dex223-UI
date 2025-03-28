@@ -201,7 +201,7 @@ export default function useWithdraw({
       } catch (e) {
         console.log(e);
         setStatus(AllowanceStatus.INITIAL);
-        addToast("Unexpected error, please contact support", "error");
+        addToast((e as any).toString(), "error");
       }
     },
     [

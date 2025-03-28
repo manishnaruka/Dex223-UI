@@ -5,8 +5,6 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
-  console.log(body);
-
   try {
     const response = await fetch(API_URL, {
       headers: {

@@ -109,9 +109,8 @@ function formatItem(token: uniToken, address223: string): Token {
 async function getList(url: string): Promise<UniData> {
   try {
     const response = await fetch(url);
-    console.log(response);
     const data = await response.json();
-    console.log(data);
+
     await validate(data);
     return data;
   } catch (e) {
@@ -126,10 +125,9 @@ async function getList(url: string): Promise<UniData> {
  */
 export async function convertList(url: string): Promise<any> {
   const data = await getList(url);
-  console.log(data);
+
   const list = data.tokens;
 
-  console.log(list);
   if (list.length === 0) {
     console.error("No data found");
     return <DexData>{};

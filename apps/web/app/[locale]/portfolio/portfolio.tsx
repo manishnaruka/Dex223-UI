@@ -628,7 +628,6 @@ export function Portfolio() {
                   colorScheme={ButtonColor.LIGHT_GREEN}
                   size={ButtonSize.MEDIUM}
                   onClick={() => {
-                    console.log(hasSearchWallet);
                     if (!hasSearchWallet) {
                       handleAddWallet();
                     }

@@ -451,8 +451,6 @@ export default function useSwap() {
 
       let hash;
 
-      console.log(swapParams);
-
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
