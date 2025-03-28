@@ -204,8 +204,7 @@ function SwapActionButton({
   const t = useTranslations("Swap");
   const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
   const { typedValue } = useSwapAmountsStore();
-  const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
-  const { status: swapStatus } = useSwapStatusStore();
+  const { setIsOpen } = useConfirmSwapDialogStore();
 
   const { handleSwap } = useSwap();
 

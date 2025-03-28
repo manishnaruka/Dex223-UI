@@ -19,6 +19,7 @@ function filterPools(poolStates: PoolsResult): Pool[] {
     .filter((state): state is [PoolState, Pool] => state[1] !== null) // Type guard to remove null Pools
     .map(([, pool]) => pool); // Extract the Pool objects
 }
+
 export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
   const { tokenA, tokenB } = useSwapTokensStore();
 

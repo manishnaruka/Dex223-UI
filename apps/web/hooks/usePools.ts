@@ -201,8 +201,8 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
         tier,
       });
 
-      // const existedPool = pools[key];
-      // if (existedPool) return;
+      const existedPool = pools[key];
+      if (existedPool) return;
       if (!addressesToUpdate.length) {
         // console.log("no addresses to update");
         return;
@@ -231,7 +231,10 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
           ticks,
         );
         // console.log("adding pool:", key);
-        addPool(key, newPool);
+        const existedPool = pools[key];
+        if (!existedPool) {
+          addPool(key, newPool);
+        }
         return [PoolState.EXISTS, newPool];
       } catch (error) {
         console.error("Error when constructing the pool", error);

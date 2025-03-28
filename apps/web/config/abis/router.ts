@@ -118,7 +118,7 @@ export const ROUTER_ABI = [
       },
     ],
     name: "exactInputSingle",
-    outputs: [{ internalType: "uint256", name: "amountOut", type: "uint256" }],
+    outputs: [],
     stateMutability: "payable",
     type: "function",
   },

@@ -346,9 +346,7 @@ export default function useSwap() {
 
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
 
-  const isConversion = useMemo(() => {
-    return !!(tokenA && tokenB && tokenA.equals(tokenB));
-  }, [tokenA, tokenB]);
+  const isConversion = useMemo(() => tokenB && tokenA?.equals(tokenB), [tokenA, tokenB]);
 
   const contractAddress = useMemo(() => {
     return isConversion ? CONVERTER_ADDRESS : ROUTER_ADDRESS;
@@ -452,6 +450,8 @@ export default function useSwap() {
       openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
       let hash;
+
+      console.log(swapParams);
 
       try {
         const estimatedGas = await publicClient.estimateContractGas({
@@ -562,31 +562,32 @@ export default function useSwap() {
       }
     },
     [
-      addRecentTransaction,
-      address,
-      approveA,
-      chainId,
-      closeConfirmInWalletAlert,
-      customGasLimit,
-      gasPriceSettings,
-      isAllowedA,
-      openConfirmInWalletAlert,
-      output,
       publicClient,
-      setApproveHash,
-      setErrorType,
-      setSwapHash,
-      setSwapStatus,
-      swapParams,
-      t,
       tokenA,
+      isAllowedA,
       tokenAStandard,
+      walletClient,
+      address,
       tokenB,
       trade,
-      typedValue,
-      updateAllowance,
-      walletClient,
+      chainId,
+      swapParams,
+      output,
+      setSwapStatus,
+      openConfirmInWalletAlert,
+      t,
+      approveA,
       gasSettings,
+      closeConfirmInWalletAlert,
+      setApproveHash,
+      setSwapHash,
+      addRecentTransaction,
+      gasPriceSettings.model,
+      isConversion,
+      typedValue,
+      tokenBStandard,
+      updateAllowance,
+      setErrorType,
     ],
   );
 
