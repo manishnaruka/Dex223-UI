@@ -165,14 +165,18 @@ export function useStoreAllowance({
           console.log(e);
         }
 
+        console.log("Hash received");
         if (hash) {
           const transaction = await getTransactionWithRetries({ hash, publicClient });
 
+          console.log("Transaction retrieved");
           if (transaction) {
             const transaction = await publicClient.getTransaction({
               hash,
               blockTag: "pending" as any,
             });
+
+            console.log("Transaction #1 retrieved");
 
             const nonce = transaction.nonce;
 

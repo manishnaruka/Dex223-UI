@@ -25,7 +25,7 @@ export default function UnknownNetworkWarning() {
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto pl-8 md:pl-0 pt-1.5 md:pt-0">
                 <Button
-                  onClick={() => switchChain({ chainId: DexChainId.SEPOLIA })}
+                  onClick={() => switchChain({ chainId: DexChainId.MAINNET })}
                   size={ButtonSize.SMALL}
                   className="rounded-2 md:rounded-2 xl:rounded-2 w-full md:w-auto"
                 >

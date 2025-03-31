@@ -26,12 +26,7 @@ export const ERC20_ABI = [
       },
     ],
     name: "approve",
-    outputs: [
-      {
-        name: "",
-        type: "bool",
-      },
-    ],
+    outputs: [],
     payable: false,
     stateMutability: "nonpayable",
     type: "function",

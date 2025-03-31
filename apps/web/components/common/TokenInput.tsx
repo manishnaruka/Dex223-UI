@@ -389,7 +389,17 @@ export default function TokenInput({
                       !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
                       !token && "text-tertiary-text pointer-events-none",
                     )}
-                    onClick={() => setStandard(st)}
+                    onClick={() => {
+                      setStandard(st);
+
+                      if (otherStandard === st && isEqualTokens) {
+                        if (st === Standard.ERC20) {
+                          setOtherStandard(Standard.ERC223);
+                        } else {
+                          setOtherStandard(Standard.ERC20);
+                        }
+                      }
+                    }}
                   >
                     {st}
                   </button>

@@ -211,113 +211,11 @@ export const useLiquidityApprove = () => {
   const publicClient = usePublicClient();
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
 
-  const handleApprove0 = useCallback(
-    async ({
-      customAmountA,
-      customAmountB,
-    }: {
-      customAmountA?: bigint;
-      customAmountB?: bigint;
-    }) => {
-      const amountA = customAmountA || amountToCheckA;
-
-      if (!publicClient) {
-        return;
-      }
-
-      if (approve0Status !== AddLiquidityApproveStatus.SUCCESS) {
-        if (
-          tokenA?.isToken &&
-          tokenAStandard === Standard.ERC20 &&
-          (currentAllowanceA || BigInt(0)) < amountA
-        ) {
-          openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-
-          setApprove0Status(AddLiquidityApproveStatus.PENDING);
-          const result = await approveA({
-            customAmount: customAmountA,
-            customGasSettings: gasSettings,
-          });
-          if (!result?.success) {
-            setApprove0Status(AddLiquidityApproveStatus.ERROR);
-            closeConfirmInWalletAlert();
-          } else {
-            setApprove0Hash(result.hash);
-            setApprove0Status(AddLiquidityApproveStatus.LOADING);
-            closeConfirmInWalletAlert();
-
-            const approveReceipt = await publicClient.waitForTransactionReceipt({
-              hash: result.hash,
-            });
-
-            if (approveReceipt.status === "reverted") {
-              setApprove0Status(AddLiquidityApproveStatus.ERROR);
-            } else {
-              setApprove0Status(AddLiquidityApproveStatus.SUCCESS);
-            }
-          }
-        } else if (
-          tokenA?.isToken &&
-          tokenAStandard === Standard.ERC223 &&
-          (currentDepositA || BigInt(0)) < amountA
-        ) {
-          openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-
-          setDeposite0Status(AddLiquidityApproveStatus.PENDING);
-          const result = await depositA({
-            customAmount: customAmountA,
-            customGasSettings: gasSettings,
-          });
-          if (!result?.success) {
-            setDeposite0Status(AddLiquidityApproveStatus.ERROR);
-            closeConfirmInWalletAlert();
-          } else {
-            setDeposite0Hash(result.hash);
-            setDeposite0Status(AddLiquidityApproveStatus.LOADING);
-            closeConfirmInWalletAlert();
-
-            const depositeReceipt = await publicClient.waitForTransactionReceipt({
-              hash: result.hash,
-            });
-
-            if (depositeReceipt.status === "reverted") {
-              setDeposite0Status(AddLiquidityApproveStatus.ERROR);
-            } else {
-              setDeposite0Status(AddLiquidityApproveStatus.SUCCESS);
-            }
-          }
-        }
-      }
-
-      if (customAmountB || amountToCheckB) {
-        await handleApprove1({ customAmountB });
-      }
-    },
-    [
-      amountToCheckA,
-      publicClient,
-      approve0Status,
-      amountToCheckB,
-      tokenA?.isToken,
-      tokenAStandard,
-      currentAllowanceA,
-      currentDepositA,
-      openConfirmInWalletAlert,
-      t,
-      setApprove0Status,
-      approveA,
-      gasSettings,
-      closeConfirmInWalletAlert,
-      setApprove0Hash,
-      setDeposite0Status,
-      depositA,
-      setDeposite0Hash,
-    ],
-  );
   const handleApprove1 = useCallback(
     async ({ customAmountB }: { customAmountB?: bigint }) => {
       const amountB = customAmountB || amountToCheckB;
 
+      console.log("This shit is fired as well");
       if (!publicClient) {
         return;
       }
@@ -411,6 +309,114 @@ export const useLiquidityApprove = () => {
       setDeposite1Status,
       depositB,
       setDeposite1Hash,
+    ],
+  );
+
+  const handleApprove0 = useCallback(
+    async ({
+      customAmountA,
+      customAmountB,
+    }: {
+      customAmountA?: bigint;
+      customAmountB?: bigint;
+    }) => {
+      const amountA = customAmountA || amountToCheckA;
+
+      if (!publicClient) {
+        return;
+      }
+
+      if (approve0Status !== AddLiquidityApproveStatus.SUCCESS) {
+        if (
+          tokenA?.isToken &&
+          tokenAStandard === Standard.ERC20 &&
+          (currentAllowanceA || BigInt(0)) < amountA
+        ) {
+          openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
+
+          setApprove0Status(AddLiquidityApproveStatus.PENDING);
+          const result = await approveA({
+            customAmount: customAmountA,
+            customGasSettings: gasSettings,
+          });
+
+          console.log(result);
+          if (!result?.success) {
+            setApprove0Status(AddLiquidityApproveStatus.ERROR);
+            closeConfirmInWalletAlert();
+          } else {
+            setApprove0Hash(result.hash);
+            setApprove0Status(AddLiquidityApproveStatus.LOADING);
+            console.log("CLOSED");
+            closeConfirmInWalletAlert();
+
+            const approveReceipt = await publicClient.waitForTransactionReceipt({
+              hash: result.hash,
+            });
+
+            if (approveReceipt.status === "reverted") {
+              setApprove0Status(AddLiquidityApproveStatus.ERROR);
+            } else {
+              setApprove0Status(AddLiquidityApproveStatus.SUCCESS);
+            }
+          }
+        } else if (
+          tokenA?.isToken &&
+          tokenAStandard === Standard.ERC223 &&
+          (currentDepositA || BigInt(0)) < amountA
+        ) {
+          openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
+
+          setDeposite0Status(AddLiquidityApproveStatus.PENDING);
+          const result = await depositA({
+            customAmount: customAmountA,
+            customGasSettings: gasSettings,
+          });
+          if (!result?.success) {
+            setDeposite0Status(AddLiquidityApproveStatus.ERROR);
+            closeConfirmInWalletAlert();
+          } else {
+            setDeposite0Hash(result.hash);
+            setDeposite0Status(AddLiquidityApproveStatus.LOADING);
+            closeConfirmInWalletAlert();
+
+            const depositeReceipt = await publicClient.waitForTransactionReceipt({
+              hash: result.hash,
+            });
+
+            if (depositeReceipt.status === "reverted") {
+              setDeposite0Status(AddLiquidityApproveStatus.ERROR);
+            } else {
+              setDeposite0Status(AddLiquidityApproveStatus.SUCCESS);
+            }
+          }
+        }
+      }
+
+      if (customAmountB || amountToCheckB) {
+        await handleApprove1({ customAmountB });
+      }
+    },
+    [
+      amountToCheckA,
+      publicClient,
+      approve0Status,
+      amountToCheckB,
+      tokenA?.isToken,
+      tokenAStandard,
+      currentAllowanceA,
+      currentDepositA,
+      openConfirmInWalletAlert,
+      t,
+      setApprove0Status,
+      approveA,
+      gasSettings,
+      closeConfirmInWalletAlert,
+      setApprove0Hash,
+      setDeposite0Status,
+      depositA,
+      setDeposite0Hash,
+      handleApprove1,
     ],
   );
 

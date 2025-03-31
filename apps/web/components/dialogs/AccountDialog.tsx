@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -36,6 +36,18 @@ function PinnedTokenRow({ token }: { token: Currency }) {
     balance: { erc20Balance, erc223Balance },
   } = useTokenBalances(token);
 
+  const totalBalance = useMemo(() => {
+    if (token.isNative) {
+      return erc20Balance?.formatted || "0";
+    }
+
+    if (!token || !erc20Balance || !erc223Balance) {
+      return "0";
+    }
+
+    return formatFloat(formatUnits(erc20Balance?.value + erc223Balance.value, token.decimals));
+  }, [erc20Balance, erc223Balance, token]);
+
   return (
     <div key={token.symbol} className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3">
       <div className="flex justify-between items-center">
@@ -48,7 +60,9 @@ function PinnedTokenRow({ token }: { token: Currency }) {
           />
           <div className="flex flex-col">
             <span>{token.name}</span>
-            <span className="text-secondary-text text-12">2 {token.symbol?.toUpperCase()}</span>
+            <span className="text-secondary-text text-12">
+              {totalBalance} {token.symbol?.toUpperCase()}
+            </span>
           </div>
         </div>
         <span>$0.00</span>
