@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -22,6 +22,7 @@ import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
@@ -91,6 +92,28 @@ function TokenRow({
     return;
   }, [currency]);
 
+  const { price } = useUSDPrice(isTokenPinned ? currency.wrapped.address0 : undefined);
+
+  const totalBalance = useMemo(() => {
+    if (currency.isNative) {
+      return erc20Balance?.formatted || "0";
+    }
+
+    if (!currency || !erc20Balance || !erc223Balance) {
+      return "0";
+    }
+
+    return formatFloat(formatUnits(erc20Balance?.value + erc223Balance.value, currency.decimals));
+  }, [erc20Balance, erc223Balance, currency]);
+
+  const totalUSDBalance = useMemo(() => {
+    if (!isTokenPinned || !isConnected || !price || !totalBalance) {
+      return null;
+    }
+
+    return price * +totalBalance;
+  }, [isConnected, isTokenPinned, price, totalBalance]);
+
   return (
     <div
       role="button"
@@ -137,8 +160,10 @@ function TokenRow({
                 </div>
               </div>
 
-              {isTokenPinned && isConnected && (!!erc20Balance || !!erc223Balance) ? (
-                <span className="block w-full text-primary-text text-12 md:hidden">$0.00</span>
+              {totalUSDBalance ? (
+                <span className="block w-full text-primary-text text-12 md:hidden">
+                  ${formatFloat(totalUSDBalance)}
+                </span>
               ) : (
                 <span className="w-full ">
                   <span className="w-[100px] whitespace-nowrap overflow-hidden overflow-ellipsis block text-secondary-text text-12  md:hidden">
@@ -149,8 +174,10 @@ function TokenRow({
             </div>
 
             <div className="flex items-center gap-1">
-              {isTokenPinned && isConnected && (!!erc20Balance || !!erc223Balance) && (
-                <span className="text-primary-text text-12 hidden md:inline pr-2.5">$0.00</span>
+              {totalUSDBalance && (
+                <span className="text-primary-text text-12 hidden md:inline pr-2.5">
+                  ${formatFloat(totalUSDBalance)}
+                </span>
               )}
               {currency.isToken ? (
                 <Tooltip

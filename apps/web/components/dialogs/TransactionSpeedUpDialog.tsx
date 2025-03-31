@@ -27,7 +27,9 @@ import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
+import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
@@ -340,6 +342,7 @@ export default function TransactionSpeedUpDialog() {
 
     return "Speed up";
   }, [transaction, replacement]);
+  const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
 
   if (!transaction) {
     return null;
@@ -361,12 +364,20 @@ export default function TransactionSpeedUpDialog() {
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2 mt-5">
               {speedUpOptions.map((_speedUpOption) => {
+                const gasPriceETH = formatFloat(
+                  formatEther(getGasPriceGwei(_speedUpOption) * BigInt(transaction.gas.gas)),
+                );
+
+                const gasPriceUSD = price
+                  ? `~ $${formatFloat(price * +gasPriceETH)}`
+                  : "Uknkown price";
+
                 return (
                   <GasOptionRadioButton
                     key={_speedUpOption}
                     gasPriceGWEI={`${formatFloat(formatGwei(getGasPriceGwei(_speedUpOption)))} GWEI`}
-                    gasPriceCurrency={`${formatFloat(formatEther(getGasPriceGwei(_speedUpOption) * BigInt(transaction.gas.gas)))} ${nativeCurrency.symbol}`}
-                    gasPriceUSD={`~$0.00`}
+                    gasPriceCurrency={`${gasPriceETH} ${nativeCurrency.symbol}`}
+                    gasPriceUSD={gasPriceUSD}
                     tooltipText={tooltipTextMap[_speedUpOption]}
                     title={speedUpOptionTitle[_speedUpOption]}
                     iconName={speedUpOptionIcon[_speedUpOption]}

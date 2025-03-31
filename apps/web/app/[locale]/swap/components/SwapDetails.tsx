@@ -16,9 +16,11 @@ import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
+import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
 
 export default function SwapDetails({
   trade,
@@ -70,6 +72,10 @@ export default function SwapDetails({
 
     return `${slippage}%`;
   }, [slippage, slippageType]);
+
+  const { price: priceA } = useUSDPrice(tokenA.wrapped.address0);
+  const { price: priceB } = useUSDPrice(tokenB.wrapped.address0);
+
   return (
     <>
       <div
@@ -99,7 +105,10 @@ export default function SwapDetails({
               {isPriceInverted ? tokenA.symbol : tokenB.symbol}
             </span>{" "}
             <span className="whitespace-nowrap">
-              ($0.00){" "}
+              {isPriceInverted
+                ? priceA && `($${formatFloat(priceA)})`
+                : priceB && `($${formatFloat(priceB)})`}
+
               <span className="text-14 inline-flex items-center justify-center align-middle relative bottom-[1px]">
                 <Svg iconName="swap" size={16} />
               </span>

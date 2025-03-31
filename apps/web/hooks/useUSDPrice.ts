@@ -20,7 +20,7 @@ const query = gql(`
   }
 `);
 
-export const useUSDPrice = (tokenAddress: Address) => {
+export const useUSDPrice = (tokenAddress: Address | undefined) => {
   const { prices, loading, setPrice, setLoading } = useUSDPriceStore();
   const chainId = useCurrentChainId();
   const [error, setError] = useState<string | null>(null);
@@ -31,14 +31,24 @@ export const useUSDPrice = (tokenAddress: Address) => {
 
   // Fetch price if not available and not already loading
   useEffect(() => {
+    console.log("Fetch initialized");
     const fetchPrice = async () => {
-      if (loading[tokenAddress] || prices[tokenAddress] !== undefined) return;
+      console.log(loading);
+      console.log(prices);
+      console.log(tokenAddress);
+      if (!tokenAddress || loading[tokenAddress] || prices[tokenAddress] !== undefined) return;
 
+      console.log("Started loading");
       setLoading(tokenAddress, true);
       try {
-        const priceData = await getPrice({ variables: { address: tokenAddress } });
-        const price = priceData.data.token?.tokenDayData[0].priceUSD;
-        if (price) {
+        console.log("Loading price");
+        const priceData = await getPrice({ variables: { address: tokenAddress.toLowerCase() } });
+        console.log(priceData);
+
+        if (priceData.data.token) {
+          const price =
+            priceData.data.token?.tokenDayData[priceData.data.token?.tokenDayData.length - 1]
+              .priceUSD;
           setError(null);
           setPrice(tokenAddress, price);
         } else {
@@ -52,14 +62,19 @@ export const useUSDPrice = (tokenAddress: Address) => {
       }
     };
 
-    if (prices[tokenAddress] === undefined && !loading[tokenAddress] && !error) {
+    console.log(tokenAddress);
+    console.log(prices);
+    console.log(loading);
+    console.log(error);
+    if (tokenAddress && prices[tokenAddress] === undefined && !loading[tokenAddress] && !error) {
+      console.log("Check");
       fetchPrice();
     }
   }, [tokenAddress, prices, loading, setLoading, setPrice, getPrice, error, chainId]);
 
   return {
-    price: prices[tokenAddress],
-    isLoading: loading[tokenAddress] || prices[tokenAddress] === undefined,
+    price: tokenAddress ? prices[tokenAddress] : undefined,
+    isLoading: tokenAddress && (loading[tokenAddress] || prices[tokenAddress] === undefined),
     error,
   };
 };

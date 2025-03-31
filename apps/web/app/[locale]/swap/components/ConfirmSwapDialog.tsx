@@ -39,10 +39,12 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
+import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
 import { Standard } from "@/sdk_hybrid/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -527,6 +529,11 @@ export default function ConfirmSwapDialog() {
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
+  const { price: priceA } = useUSDPrice(tokenA?.wrapped.address0);
+  const { price: priceB } = useUSDPrice(tokenB?.wrapped.address0);
+
+  const { price: priceNative } = useUSDPrice(wrappedTokens[chainId]?.address0);
+
   return (
     <DrawerDialog
       isOpen={isOpen}
@@ -547,14 +554,14 @@ export default function ConfirmSwapDialog() {
               <ReadonlyTokenAmountCard
                 token={tokenA}
                 amount={typedValue}
-                amountUSD={"0.00"}
+                amountUSD={priceA ? formatFloat(priceA * +typedValue) : ""}
                 standard={tokenAStandard}
                 title={t("you_pay")}
               />
               <ReadonlyTokenAmountCard
                 token={tokenB}
                 amount={output}
-                amountUSD={"0.00"}
+                amountUSD={priceB ? formatFloat(priceB * +output) : ""}
                 standard={tokenBStandard}
                 title={t("you_receive")}
               />
@@ -617,7 +624,9 @@ export default function ConfirmSwapDialog() {
                     <span className="text-secondary-text mr-1 text-14">
                       {computedGasSpending} GWEI
                     </span>{" "}
-                    <span className="mr-1 text-14">~$0.00</span>
+                    <span className="mr-1 text-14">
+                      {priceNative && `~$${formatFloat(priceNative * +computedGasSpending)}`}
+                    </span>
                   </div>
                 }
                 tooltipText={t("network_fee_tooltip", {

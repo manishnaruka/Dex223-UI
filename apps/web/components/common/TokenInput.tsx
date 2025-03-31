@@ -9,6 +9,8 @@ import SelectButton from "@/components/atoms/SelectButton";
 import Badge from "@/components/badges/Badge";
 import InputButton from "@/components/buttons/InputButton";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { formatFloat } from "@/functions/formatFloat";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Token } from "@/sdk_hybrid/entities/token";
 import { Standard } from "@/sdk_hybrid/standard";
@@ -248,6 +250,8 @@ export default function TokenInput({
 }) {
   const t = useTranslations("Swap");
 
+  const { price, isLoading } = useUSDPrice(token?.wrapped.address0);
+
   return (
     <div className="p-5 bg-secondary-bg rounded-3 relative">
       <div className="flex justify-between items-center mb-5 h-[22px]">
@@ -278,7 +282,9 @@ export default function TokenInput({
             }}
             allowNegative={false}
           />
-          <span className="text-12 block -mt-1 text-tertiary-text">$0.00</span>
+          <span className="text-12 block -mt-1 text-tertiary-text">
+            ${price ? formatFloat(price * +value) : "0.00"}
+          </span>
           <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
         <SelectButton

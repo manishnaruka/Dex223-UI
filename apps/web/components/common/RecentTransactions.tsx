@@ -45,8 +45,6 @@ export default function RecentTransactions({
 
   const { transactions } = useRecentTransactionsStore();
 
-  console.dir(transactions);
-
   const { address, isConnected } = useAccount();
 
   const componentRef = useRef<HTMLDivElement>(null);

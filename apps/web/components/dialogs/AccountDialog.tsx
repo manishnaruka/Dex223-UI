@@ -26,6 +26,7 @@ import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { Standard } from "@/sdk_hybrid/standard";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
@@ -38,7 +39,10 @@ function PinnedTokenRow({ token }: { token: Currency }) {
 
   const totalBalance = useMemo(() => {
     if (token.isNative) {
-      return erc20Balance?.formatted || "0";
+      if (erc20Balance?.formatted) {
+        return formatFloat(erc20Balance.formatted);
+      }
+      return formatFloat("0");
     }
 
     if (!token || !erc20Balance || !erc223Balance) {
@@ -47,6 +51,8 @@ function PinnedTokenRow({ token }: { token: Currency }) {
 
     return formatFloat(formatUnits(erc20Balance?.value + erc223Balance.value, token.decimals));
   }, [erc20Balance, erc223Balance, token]);
+
+  const { price, isLoading } = useUSDPrice(token.wrapped.address0);
 
   return (
     <div key={token.symbol} className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3">
@@ -65,7 +71,7 @@ function PinnedTokenRow({ token }: { token: Currency }) {
             </span>
           </div>
         </div>
-        <span>$0.00</span>
+        <span>{price && `$${formatFloat(price * +totalBalance)}`}</span>
       </div>
       {token.isToken ? (
         <div className="flex flex-col gap-1">

@@ -4,7 +4,7 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useFormik } from "formik";
 import debounce from "lodash.debounce";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatEther, formatGwei, parseGwei } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -23,8 +23,10 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_hybrid/chains";
+import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
 import { GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -294,16 +296,21 @@ function NetworkFeeDialogContent({
     [baseFee, chainId, gasPrice, values.gasPrice, values.gasPriceModel, values.maxFeePerGas],
   );
 
+  const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
+
   return (
     <form className="max-md:h-[calc(100%-60px)]" onSubmit={handleSubmit}>
       <div className="max-md:h-[calc(100%-80px)] overflow-auto flex flex-col gap-2 card-spacing-x">
         {gasOptions.map((_gasOption) => {
+          const gasPriceETH = formatFloat(formatEther(getGasPriceGwei(_gasOption) * estimatedGas));
+
+          const gasPriceUSD = price ? `~ $${formatFloat(price * +gasPriceETH)}` : "Uknkown price";
           return (
             <GasOptionRadioButton
               key={_gasOption}
               gasPriceGWEI={`${formatFloat(formatGwei(getGasPriceGwei(_gasOption)))} GWEI`}
-              gasPriceCurrency={`${formatFloat(formatEther(getGasPriceGwei(_gasOption) * estimatedGas))} ${nativeCurrency.symbol}`}
-              gasPriceUSD={"~$0.00"}
+              gasPriceCurrency={`${gasPriceETH} ${nativeCurrency.symbol}`}
+              gasPriceUSD={gasPriceUSD}
               tooltipText={tooltipTextMap[_gasOption]}
               title={gasOptionTitle[_gasOption]}
               iconName={gasOptionIcon[_gasOption]}

@@ -37,9 +37,11 @@ import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Currency } from "@/sdk_hybrid/entities/currency";
 import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
+import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
 import { Standard } from "@/sdk_hybrid/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
@@ -439,6 +441,7 @@ export default function TradeForm() {
 
   const _isMobile = useMediaQuery({ query: "(max-width: 767px)" });
   const nativeCurrency = useNativeCurrency();
+  const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
 
   return (
     <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">
@@ -613,7 +616,11 @@ export default function TradeForm() {
                   <div className="text-secondary-text text-12 md:text-14 flex items-center ">
                     {t("network_fee")}
                   </div>
-                  <span className="mr-1 text-12 md:hidden">~$0.00</span>
+                  <span className="mr-1 text-12 md:hidden">
+                    {price && computedGasSpendingETH
+                      ? `$${formatFloat(+computedGasSpendingETH * price)}`
+                      : ""}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 max-sm:hidden">
                   <span className="text-secondary-text text-12 md:text-14 ">
@@ -627,7 +634,11 @@ export default function TradeForm() {
               </div>
 
               <div className="flex items-center gap-2 justify-between md:justify-end">
-                <span className="mr-1 text-14 max-md:hidden">~$0.00</span>
+                <span className="mr-1 text-14 max-md:hidden">
+                  {price && computedGasSpendingETH
+                    ? `$${formatFloat(+computedGasSpendingETH * price)}`
+                    : ""}
+                </span>
                 <span className="flex items-center justify-center px-2 text-12 md:text-14 h-5 rounded-20 font-500 text-tertiary-text border border-secondary-border">
                   {t(gasOptionTitle[gasPriceOption])}
                 </span>
