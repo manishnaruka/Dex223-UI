@@ -50,6 +50,7 @@ import {
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { useRouter } from "@/i18n/routing";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
 import { Standard } from "@/sdk_hybrid/standard";
@@ -174,6 +175,25 @@ export default function PoolPage({
 
   const token0FeeFormatted = formatFloat(formatUnits(fees[0] || BigInt(0), token0?.decimals || 18));
   const token1FeeFormatted = formatFloat(formatUnits(fees[1] || BigInt(0), token1?.decimals || 18));
+
+  const { price: priceA } = useUSDPrice(token0?.wrapped.address0);
+  const { price: priceB } = useUSDPrice(token1?.wrapped.address0);
+
+  const totalUSDLiquidity = useMemo(() => {
+    const tokenALiquidityUSD =
+      priceA && position?.amount0.toSignificant() ? +position?.amount0.toSignificant() * priceA : 0;
+    const tokenBLiquidityUSD =
+      priceB && position?.amount1.toSignificant() ? +position?.amount1.toSignificant() * priceB : 0;
+
+    return formatFloat(tokenALiquidityUSD + tokenBLiquidityUSD);
+  }, [position?.amount0, position?.amount1, priceA, priceB]);
+
+  const totalUSDFees = useMemo(() => {
+    const tokenAFeesUSD = priceA && token0FeeFormatted ? +token0FeeFormatted * priceA : 0;
+    const tokenBFeesUSD = priceB && token1FeeFormatted ? +token0FeeFormatted * priceB : 0;
+
+    return formatFloat(tokenAFeesUSD + tokenBFeesUSD);
+  }, [priceA, priceB, token0FeeFormatted, token1FeeFormatted]);
 
   return (
     <Container>
@@ -414,7 +434,7 @@ export default function PoolPage({
             <div className="p-4 lg:p-5 bg-tertiary-bg mb-4 lg:mb-5 rounded-3">
               <div>
                 <h3 className="text-12 lg:text-14 text-secondary-text">{t("liquidity")}</h3>
-                <p className="text-16 lg:text-20 font-bold mb-3">$0.00</p>
+                <p className="text-16 lg:text-20 font-bold mb-3">${totalUSDLiquidity}</p>
                 <div className="lg:p-5 grid gap-2 lg:gap-3 rounded-3 lg:bg-quaternary-bg">
                   <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                     <PositionLiquidityCard
@@ -446,7 +466,7 @@ export default function PoolPage({
                     <h3 className="text-12 lg:text-14 text-secondary-text">
                       {t("unclaimed_fees")}
                     </h3>
-                    <p className="text-16 lg:text-20 font-bold mb-3 text-green">$0.00</p>
+                    <p className="text-16 lg:text-20 font-bold mb-3 text-green">${totalUSDFees}</p>
                   </div>
                   <Button
                     onClick={() => setIsOpen(true)}
