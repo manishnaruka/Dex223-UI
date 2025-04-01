@@ -3,7 +3,7 @@ import { eosDefaultList } from "@/db/lists/eos-default-list";
 import { ethereumDefaultList } from "@/db/lists/ethereum-default-list";
 import { mainnetDefaultList } from "@/db/lists/mainnet-default-list";
 import { sepoliaDefaultList } from "@/db/lists/sepolia-default-list";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 export const defaultLists: Record<DexChainId, any> = {
   [DexChainId.MAINNET]: ethereumDefaultList,

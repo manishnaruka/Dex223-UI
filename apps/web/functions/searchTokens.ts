@@ -1,7 +1,7 @@
 import { AutoListing } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import { TokenList } from "@/db/db";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
 
 const generateOrderedSubsets = (arr: string[]): string[] => {
   const _arr: string[] = [];

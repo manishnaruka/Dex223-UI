@@ -6,8 +6,8 @@ import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePosit
 import { config } from "@/config/wagmi/config";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { PositionInfo } from "@/hooks/usePositions";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
 
 import { useActiveAddresses } from "./hooks";
 import { useWalletsPosotions } from "./useWalletsPosotions";

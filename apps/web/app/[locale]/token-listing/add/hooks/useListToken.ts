@@ -28,10 +28,10 @@ import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
+import { DexChainId } from "@/sdk_bi/chains";
+import { ADDRESS_ZERO, FeeAmount } from "@/sdk_bi/constants";
+import { Token } from "@/sdk_bi/entities/token";
+import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   GasFeeModel,

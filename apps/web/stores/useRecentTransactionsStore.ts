@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
 import { db } from "@/db/db";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Standard } from "@/sdk_bi/standard";
 export enum RecentTransactionStatus {
   PENDING,
   SUCCESS,

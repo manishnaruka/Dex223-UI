@@ -23,7 +23,7 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { usePositionPrices, usePositionRangeStatus } from "@/hooks/usePositions";
 import { Link } from "@/i18n/routing";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Standard } from "@/sdk_bi/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 

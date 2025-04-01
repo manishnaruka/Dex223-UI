@@ -6,9 +6,9 @@ import { ERC223_ABI } from "@/config/abis/erc223";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import addToast from "@/other/toast";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Currency } from "@/sdk_bi/entities/currency";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,
@@ -125,17 +125,19 @@ export function useStoreDeposit({
         ] as const,
       };
 
+      console.log(params);
+
       try {
-        const { request } = await publicClient.simulateContract({
-          ...params,
-          ...(customGasSettings || {}),
-          gas: gasLimit,
-        });
+        // const { request } = await publicClient.simulateContract({
+        //   ...params,
+        //   ...(customGasSettings || {}),
+        //   gas: gasLimit,
+        // });
 
         let hash;
 
         try {
-          hash = await walletClient.writeContract({ ...request, account: undefined });
+          hash = await walletClient.writeContract({ ...params, account: undefined });
         } catch (e) {
           console.log(e);
         }

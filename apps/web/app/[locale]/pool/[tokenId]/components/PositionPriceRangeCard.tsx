@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { formatNumber } from "@/functions/formatFloat";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 export default function PositionPriceRangeCard({
   price,

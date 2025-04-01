@@ -6,8 +6,8 @@ import {
   Field,
   useLiquidityAmountsStore,
 } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 
 import { AddLiquidityGasSettings } from "./AddLiquidityGasSettings";
 

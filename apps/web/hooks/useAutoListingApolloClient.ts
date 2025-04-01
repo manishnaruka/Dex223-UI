@@ -2,7 +2,7 @@ import { ApolloClient, ApolloLink, concat, HttpLink, InMemoryCache } from "@apol
 import { useMemo } from "react";
 
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 const autoListingUrlMap: Record<DexChainId, string> = {
   [DexChainId.MAINNET]:

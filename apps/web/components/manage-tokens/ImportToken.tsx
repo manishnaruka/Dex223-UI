@@ -24,8 +24,8 @@ import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
-import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
+import { Token } from "@/sdk_bi/entities/token";
 
 interface Props {
   setContent: (content: ManageTokensDialogContent) => void;

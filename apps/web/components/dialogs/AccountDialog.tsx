@@ -27,8 +27,8 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 

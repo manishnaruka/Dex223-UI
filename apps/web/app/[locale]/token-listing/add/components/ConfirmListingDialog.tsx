@@ -39,9 +39,9 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { ADDRESS_ZERO } from "@/sdk_hybrid/constants";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { DexChainId } from "@/sdk_bi/chains";
+import { ADDRESS_ZERO } from "@/sdk_bi/constants";
+import { Token } from "@/sdk_bi/entities/token";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 function ApproveRow({

@@ -6,9 +6,9 @@ import TokenAddressWithStandard from "@/components/atoms/TokenAddressWithStandar
 import TrustBadge from "@/components/badges/TrustBadge";
 import IconButton from "@/components/buttons/IconButton";
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 
 interface Props {
   tokenA: Currency | undefined;

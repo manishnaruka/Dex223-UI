@@ -18,7 +18,7 @@ import { db } from "@/db/db";
 import { filterTokenLists, filterTokens } from "@/functions/searchTokens";
 import { useTokenLists, useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 interface Props {

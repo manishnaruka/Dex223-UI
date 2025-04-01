@@ -1,4 +1,3 @@
-import JSBI from "jsbi";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import {
@@ -37,16 +36,16 @@ import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
-import { CONVERTER_ADDRESS, ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
-import { ADDRESS_ZERO, FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { ONE } from "@/sdk_hybrid/internalConstants";
-import { getTokenAddressForStandard, Standard } from "@/sdk_hybrid/standard";
-import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
-import { TickMath } from "@/sdk_hybrid/utils/tickMath";
+import { CONVERTER_ADDRESS, ROUTER_ADDRESS } from "@/sdk_bi/addresses";
+import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_bi/chains";
+import { ADDRESS_ZERO, FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { ONE } from "@/sdk_bi/internalConstants";
+import { getTokenAddressForStandard, Standard } from "@/sdk_bi/standard";
+import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
+import { TickMath } from "@/sdk_bi/utils/tickMath";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   RecentTransactionTitleTemplate,
@@ -83,14 +82,16 @@ export function useSwapParams() {
   const { slippage, deadline: _deadline } = useSwapSettingsStore();
   const deadline = useTransactionDeadline(_deadline);
 
-  //TODO: Choose one of existing pools for swap
+  const { trade, isLoading: isLoadingTrade } = useTrade();
+
+  console.log("TRADE");
+  console.log(trade);
+
   const poolAddress = useComputePoolAddressDex({
     tokenA,
     tokenB,
-    tier: FeeAmount.MEDIUM,
+    tier: trade?.swaps[0].route.pools[0].fee || FeeAmount.MEDIUM,
   });
-
-  const { trade, isLoading: isLoadingTrade } = useTrade();
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
@@ -123,13 +124,13 @@ export function useSwapParams() {
     const zeroForOne = tokenA.wrapped.address0 < tokenB.wrapped.address0;
 
     const sqrtPriceLimitX96 = zeroForOne
-      ? JSBI.add(TickMath.MIN_SQRT_RATIO, ONE)
-      : JSBI.subtract(TickMath.MAX_SQRT_RATIO, ONE);
+      ? TickMath.MIN_SQRT_RATIO + ONE
+      : TickMath.MAX_SQRT_RATIO - ONE;
 
     const routerParams = {
       tokenIn: tokenA.wrapped.address0,
       tokenOut: tokenB.wrapped.address0,
-      fee: FeeAmount.MEDIUM,
+      fee: trade?.swaps[0].route.pools[0].fee || FeeAmount.MEDIUM,
       recipient: address as Address,
       deadline,
       amountIn: parseUnits(typedValue, tokenA.decimals),
@@ -193,7 +194,11 @@ export function useSwapParams() {
           functionName: "exactInput" as "exactInput",
           args: [
             {
-              path: encodePath(tokenA.address0, tokenB.wrapped.address0, FeeAmount.MEDIUM),
+              path: encodePath(
+                tokenA.address0,
+                tokenB.wrapped.address0,
+                trade?.swaps[0].route.pools[0].fee || FeeAmount.MEDIUM,
+              ),
               deadline,
               recipient: ROUTER_ADDRESS[chainId],
               amountOutMinimum: BigInt(0),
@@ -245,7 +250,11 @@ export function useSwapParams() {
                 [
                   encodePacked(
                     ["address", "uint24", "address"],
-                    [tokenA.address0, FeeAmount.MEDIUM, tokenB.wrapped.address0],
+                    [
+                      tokenA.address0,
+                      trade?.swaps[0].route.pools[0].fee || FeeAmount.MEDIUM,
+                      tokenB.wrapped.address0,
+                    ],
                   ),
                   ADDRESS_ZERO,
                 ],
@@ -321,14 +330,14 @@ export default function useSwap() {
   const { data: walletClient } = useWalletClient();
   const { tokenA, tokenB, tokenAStandard, tokenBStandard } = useSwapTokensStore();
   const { trade } = useTrade();
+  console.log(trade);
   const { address } = useAccount();
   const publicClient = usePublicClient();
 
   const chainId = useCurrentChainId();
 
   const { customGasLimit } = useSwapGasLimitStore();
-  const { gasPriceOption, gasPriceSettings, setGasPriceSettings, setGasPriceOption } =
-    useSwapGasPriceStore();
+  const { gasPriceOption, gasPriceSettings } = useSwapGasPriceStore();
 
   const { baseFee, priorityFee, gasPrice } = useFees();
 
@@ -578,6 +587,7 @@ export default function useSwap() {
       gasSettings,
       closeConfirmInWalletAlert,
       setApproveHash,
+      customGasLimit,
       setSwapHash,
       addRecentTransaction,
       gasPriceSettings.model,

@@ -1,4 +1,3 @@
-import JSBI from "jsbi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
@@ -7,13 +6,13 @@ import { TickData, Ticks } from "@/graphql/thegraph/AllV3TicksQuery";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { PoolState, usePool } from "@/hooks/usePools";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { FeeAmount, TICK_SPACINGS } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Price } from "@/sdk_hybrid/entities/fractions/price";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
-import { tickToPrice } from "@/sdk_hybrid/utils/priceTickConversions";
+import { DexChainId } from "@/sdk_bi/chains";
+import { FeeAmount, TICK_SPACINGS } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { Token } from "@/sdk_bi/entities/token";
+import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
+import { tickToPrice } from "@/sdk_bi/utils/priceTickConversions";
 
 import { ChartEntry } from "./types";
 
@@ -43,7 +42,7 @@ export default function computeSurroundingTicks(
     const currentTickProcessed: TickProcessed = {
       liquidityActive: previousTickProcessed.liquidityActive,
       tick,
-      liquidityNet: JSBI.BigInt(sortedTickData[i].liquidityNet),
+      liquidityNet: BigInt(sortedTickData[i].liquidityNet),
       price0: sdkPrice.toFixed(PRICE_FIXED_DIGITS),
       sdkPrice,
     };
@@ -53,16 +52,12 @@ export default function computeSurroundingTicks(
     // it to the current processed tick we are building.
     // If we are iterating descending, we don't want to apply the net liquidity until the following tick.
     if (ascending) {
-      currentTickProcessed.liquidityActive = JSBI.add(
-        previousTickProcessed.liquidityActive,
-        JSBI.BigInt(sortedTickData[i].liquidityNet),
-      );
-    } else if (!ascending && JSBI.notEqual(previousTickProcessed.liquidityNet, JSBI.BigInt(0))) {
+      currentTickProcessed.liquidityActive =
+        previousTickProcessed.liquidityActive + BigInt(sortedTickData[i].liquidityNet);
+    } else if (!ascending && previousTickProcessed.liquidityNet !== BigInt(0)) {
       // We are iterating descending, so look at the previous tick and apply any net liquidity.
-      currentTickProcessed.liquidityActive = JSBI.subtract(
-        previousTickProcessed.liquidityActive,
-        previousTickProcessed.liquidityNet,
-      );
+      currentTickProcessed.liquidityActive =
+        previousTickProcessed.liquidityActive - previousTickProcessed.liquidityNet;
     }
 
     processedTicks.push(currentTickProcessed);
@@ -76,11 +71,10 @@ export default function computeSurroundingTicks(
   return processedTicks;
 }
 
-// Tick with fields parsed to JSBIs, and active liquidity computed.
 export interface TickProcessed {
   tick: number;
-  liquidityActive: JSBI;
-  liquidityNet: JSBI;
+  liquidityActive: bigint;
+  liquidityNet: bigint;
   price0: string;
   sdkPrice: Price<Token, Token>;
 }
@@ -176,8 +170,8 @@ export function usePoolActiveLiquidity(
   error: any;
   currentTick?: number;
   activeTick?: number;
-  liquidity?: JSBI;
-  sqrtPriceX96?: JSBI;
+  liquidity?: bigint;
+  sqrtPriceX96?: bigint;
   data?: TickProcessed[];
 } {
   const chainId = useCurrentChainId();
@@ -237,12 +231,10 @@ export function usePoolActiveLiquidity(
 
     const sdkPrice = tickToPrice(token0, token1, activeTick);
     const activeTickProcessed: TickProcessed = {
-      liquidityActive: JSBI.BigInt(pool[1]?.liquidity ?? 0),
+      liquidityActive: BigInt(pool[1]?.liquidity ?? 0),
       tick: activeTick,
       liquidityNet:
-        Number(ticks[pivot].tick) === activeTick
-          ? JSBI.BigInt(ticks[pivot].liquidityNet)
-          : JSBI.BigInt(0),
+        Number(ticks[pivot].tick) === activeTick ? BigInt(ticks[pivot].liquidityNet) : BigInt(0),
       price0: sdkPrice.toFixed(PRICE_FIXED_DIGITS),
       sdkPrice,
     };

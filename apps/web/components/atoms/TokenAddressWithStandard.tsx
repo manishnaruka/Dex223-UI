@@ -4,8 +4,8 @@ import { Address } from "viem";
 
 import Svg from "@/components/atoms/Svg";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Standard } from "@/sdk_hybrid/standard";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Standard } from "@/sdk_bi/standard";
 
 export default function TokenAddressWithStandard({
   tokenAddress,

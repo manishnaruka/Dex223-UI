@@ -8,9 +8,9 @@ import Svg from "@/components/atoms/Svg";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import { tryParseTick } from "@/functions/tryParseTick";
 import { usePool } from "@/hooks/usePools";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Price } from "@/sdk_hybrid/entities/fractions/price";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { Token } from "@/sdk_bi/entities/token";
 
 import { useRangeHopCallbacks } from "../../hooks/useRangeHopCallbacks";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";

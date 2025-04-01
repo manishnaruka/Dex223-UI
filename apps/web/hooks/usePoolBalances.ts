@@ -4,11 +4,11 @@ import { Address } from "viem";
 import { useAccount, useBalance } from "wagmi";
 
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
+import { DexChainId } from "@/sdk_bi/chains";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
+import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
 export const PoolDataDocument = gql`
   query PoolDataQuery($id: String) {
     pool(id: $id) {

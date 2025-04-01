@@ -5,7 +5,7 @@ import { Address } from "viem";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { config } from "@/config/wagmi/config";
 import { useTokens } from "@/hooks/useTokenLists";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 
 import { useActiveAddresses } from "./hooks";
 import { useWalletsBalances, WalletBalances } from "./useWalletsBalances";

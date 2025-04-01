@@ -16,8 +16,8 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 

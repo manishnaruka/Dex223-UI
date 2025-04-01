@@ -6,8 +6,8 @@ import { Address } from "viem";
 import { AutoListing } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import useAutoListingApolloClient from "@/hooks/useAutoListingApolloClient";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Token } from "@/sdk_bi/entities/token";
 
 const query = gql(`
   query AutoListings($first: Int!) {

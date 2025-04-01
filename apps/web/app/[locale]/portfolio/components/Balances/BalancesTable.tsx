@@ -7,7 +7,7 @@ import { useMediaQuery } from "react-responsive";
 
 import Badge from "@/components/badges/Badge";
 import { formatNumberKilos } from "@/functions/formatFloat";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 export const BalancesDesktopTable = ({
   tableData,

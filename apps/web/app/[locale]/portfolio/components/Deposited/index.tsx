@@ -13,7 +13,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 
 import { useActiveWalletsDeposites } from "../../stores/deposites.hooks";
 import { DesktopTable, MobileTable } from "./DepositedTable";

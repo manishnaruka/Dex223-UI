@@ -8,7 +8,7 @@ import ImportList from "@/components/manage-tokens/ImportList";
 import ImportToken from "@/components/manage-tokens/ImportToken";
 import TokensAndLists from "@/components/manage-tokens/TokensAndLists";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 export default function ManageTokensDialog() {

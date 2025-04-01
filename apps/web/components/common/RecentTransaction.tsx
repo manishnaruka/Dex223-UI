@@ -12,7 +12,7 @@ import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/us
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 import {
   IRecentTransaction,
   IRecentTransactionTitle,

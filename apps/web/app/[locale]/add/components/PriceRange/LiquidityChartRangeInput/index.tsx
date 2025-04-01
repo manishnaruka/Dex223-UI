@@ -2,10 +2,10 @@ import Alert from "@repo/ui/alert";
 import { useTranslations } from "next-intl";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Price } from "@/sdk_hybrid/entities/fractions/price";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { Token } from "@/sdk_bi/entities/token";
 
 import { ZOOM_LEVELS } from "../../../hooks/types";
 import { Chart } from "./Chart";

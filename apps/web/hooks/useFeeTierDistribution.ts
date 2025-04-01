@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import { Address } from "viem";
 
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 import useFeeTierDistributionQuery from "../graphql/thegraph/FeeTierDistributionQuery";
 import { PoolsParams, PoolState, usePools } from "./usePools";

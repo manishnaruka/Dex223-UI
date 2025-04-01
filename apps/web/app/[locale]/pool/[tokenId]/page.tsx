@@ -52,9 +52,9 @@ import {
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { useRouter } from "@/i18n/routing";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { Standard } from "@/sdk_hybrid/standard";
-import { useComputePoolAddressDex } from "@/sdk_hybrid/utils/computePoolAddress";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { Standard } from "@/sdk_bi/standard";
+import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
 import {
   RecentTransactionTitleTemplate,
   useRecentTransactionsStore,

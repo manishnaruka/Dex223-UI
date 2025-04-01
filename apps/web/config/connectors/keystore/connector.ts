@@ -11,7 +11,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 export type KeystoreConnectorParameters = {
   pk: Address;

@@ -1,4 +1,4 @@
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 
 export const sepoliaDefaultList = {
   version: {

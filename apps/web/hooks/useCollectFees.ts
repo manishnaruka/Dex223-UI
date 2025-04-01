@@ -18,11 +18,11 @@ import {
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,

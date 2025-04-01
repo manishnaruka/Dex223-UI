@@ -15,7 +15,7 @@ import { db } from "@/db/db";
 import useAutoListingApolloClient from "@/hooks/useAutoListingApolloClient";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import addToast from "@/other/toast";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 
 const query = gql(`
   query AutoListings($address: String!) {

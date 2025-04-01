@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 import { NumericalInput } from "./NumericalInput";
 

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Pool } from "@/sdk_hybrid/entities/pool";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Pool } from "@/sdk_bi/entities/pool";
 
 interface RemoveLiquidityStore {
   percentage: number;

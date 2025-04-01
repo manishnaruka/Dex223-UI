@@ -2,7 +2,7 @@ import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import { Address, encodeAbiParameters, getAddress, keccak256 } from "viem";
 
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 
 import { bytecodes } from "./converter";
 import schemaJson from "./tokenlist.schema.json";

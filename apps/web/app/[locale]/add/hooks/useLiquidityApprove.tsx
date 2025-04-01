@@ -7,10 +7,10 @@ import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useStoreDeposit } from "@/hooks/useDeposit";
 // import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Standard } from "@/sdk_hybrid/standard";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 
 import { Field, useTokensStandards } from "../stores/useAddLiquidityAmountsStore";

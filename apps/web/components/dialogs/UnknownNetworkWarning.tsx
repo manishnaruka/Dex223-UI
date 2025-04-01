@@ -5,7 +5,7 @@ import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { useUnknownNetworkWarningStore } from "@/components/dialogs/stores/useUnknownNetworkWarningStore";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 export default function UnknownNetworkWarning() {
   const t = useTranslations("ManageTokens");

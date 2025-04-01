@@ -13,7 +13,7 @@ import { IIFE } from "@/functions/iife";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,

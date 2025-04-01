@@ -38,11 +38,11 @@ import { usePoolBalances } from "@/hooks/usePoolBalances";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
-import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
-import { Standard } from "@/sdk_hybrid/standard";
+import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { wrappedTokens } from "@/sdk_bi/entities/weth9";
+import { Standard } from "@/sdk_bi/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -220,7 +220,7 @@ export default function TradeForm() {
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
-  }, [tokenA, tokenB, trade?.outputAmount, typedValue]);
+  }, [trade?.outputAmount]);
 
   const dependentAmountValue = useMemo(() => {
     if (tokenA && tokenB && tokenA.equals(tokenB)) {

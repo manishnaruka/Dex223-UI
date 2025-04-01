@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import Badge from "@/components/badges/Badge";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 export default function PositionLiquidityCard({
   token,

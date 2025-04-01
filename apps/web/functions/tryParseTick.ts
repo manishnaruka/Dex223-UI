@@ -1,15 +1,14 @@
-import JSBI from "jsbi";
 import { parseUnits } from "viem";
 
-import { FeeAmount, TICK_SPACINGS } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Price } from "@/sdk_hybrid/entities/fractions/price";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { encodeSqrtRatioX96 } from "@/sdk_hybrid/utils/encodeSqrtRatioX96";
-import { nearestUsableTick } from "@/sdk_hybrid/utils/nearestUsableTick";
-import { priceToClosestTick, tickToPrice } from "@/sdk_hybrid/utils/priceTickConversions";
-import { TickMath } from "@/sdk_hybrid/utils/tickMath";
+import { FeeAmount, TICK_SPACINGS } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { Token } from "@/sdk_bi/entities/token";
+import { encodeSqrtRatioX96 } from "@/sdk_bi/utils/encodeSqrtRatioX96";
+import { nearestUsableTick } from "@/sdk_bi/utils/nearestUsableTick";
+import { priceToClosestTick, tickToPrice } from "@/sdk_bi/utils/priceTickConversions";
+import { TickMath } from "@/sdk_bi/utils/tickMath";
 
 function tryParsePrice(baseToken?: Token, quoteToken?: Token, value?: string) {
   if (!baseToken || !quoteToken || !value) {
@@ -23,13 +22,13 @@ function tryParsePrice(baseToken?: Token, quoteToken?: Token, value?: string) {
   const [whole, fraction] = value.split(".");
 
   const decimals = fraction?.length ?? 0;
-  const withoutDecimals = JSBI.BigInt((whole ?? "") + (fraction ?? ""));
+  const withoutDecimals = BigInt((whole ?? "") + (fraction ?? ""));
 
   return new Price(
     baseToken,
     quoteToken,
-    JSBI.multiply(JSBI.BigInt(10 ** decimals), JSBI.BigInt(10 ** baseToken.decimals)),
-    JSBI.multiply(withoutDecimals, JSBI.BigInt(10 ** quoteToken.decimals)),
+    BigInt(10 ** decimals) * BigInt(10 ** baseToken.decimals),
+    withoutDecimals * BigInt(10 ** quoteToken.decimals),
   );
 }
 
@@ -54,9 +53,9 @@ export function tryParseTick(
   // check price is within min/max bounds, if outside return min/max
   const sqrtRatioX96 = encodeSqrtRatioX96(price.numerator, price.denominator);
 
-  if (JSBI.greaterThanOrEqual(sqrtRatioX96, TickMath.MAX_SQRT_RATIO)) {
+  if (sqrtRatioX96 >= TickMath.MAX_SQRT_RATIO) {
     tick = TickMath.MAX_TICK;
-  } else if (JSBI.lessThanOrEqual(sqrtRatioX96, TickMath.MIN_SQRT_RATIO)) {
+  } else if (sqrtRatioX96 <= TickMath.MIN_SQRT_RATIO) {
     tick = TickMath.MIN_TICK;
   } else {
     // this function is agnostic to the base, will always return the correct tick
@@ -103,7 +102,7 @@ export function tryParseCurrencyAmount<T extends Currency>(
       currency.decimals,
     ).toString();
     if (typedValueParsed !== "0") {
-      return CurrencyAmount.fromRawAmount(currency, JSBI.BigInt(typedValueParsed));
+      return CurrencyAmount.fromRawAmount(currency, BigInt(typedValueParsed));
     }
   } catch (error) {
     // fails if the user specifies too many decimal places of precision (or maybe exceed max uint?)

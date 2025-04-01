@@ -32,7 +32,7 @@ import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/i18n/routing";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";

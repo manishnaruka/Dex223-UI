@@ -10,11 +10,11 @@ import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { Position } from "@/sdk_hybrid/entities/position";
-import { toHex } from "@/sdk_hybrid/utils/calldata";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { Position } from "@/sdk_bi/entities/position";
+import { toHex } from "@/sdk_bi/utils/calldata";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,

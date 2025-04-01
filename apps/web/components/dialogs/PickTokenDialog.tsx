@@ -24,7 +24,7 @@ import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 

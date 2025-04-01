@@ -25,8 +25,8 @@ import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
+import { DexChainId } from "@/sdk_bi/chains";
+import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 

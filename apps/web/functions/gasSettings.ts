@@ -1,5 +1,5 @@
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 import { GasFeeModel, GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
 
 export const getGasSettings = ({

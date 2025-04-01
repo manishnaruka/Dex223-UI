@@ -55,10 +55,10 @@ import { PoolState, usePool } from "@/hooks/usePools";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useRouter } from "@/i18n/routing";
-import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
 import { GasFeeModel, GasOption } from "@/stores/factories/createGasPriceStore";
 
 function OpenConfirmListTokenButton({

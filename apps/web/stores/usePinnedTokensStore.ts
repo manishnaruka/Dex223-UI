@@ -2,7 +2,7 @@ import { Address } from "viem";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
+import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_bi/chains";
 
 interface PinnedTokensStore {
   tokens: Record<DexChainId, Array<Address | "native">>;

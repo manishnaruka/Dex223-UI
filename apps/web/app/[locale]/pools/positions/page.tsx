@@ -21,8 +21,8 @@ import usePositions, {
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
 import { useRouter } from "@/i18n/routing";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { NativeCoin } from "@/sdk_hybrid/entities/ether";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { NativeCoin } from "@/sdk_bi/entities/ether";
 
 type PositionInfo = {
   nonce: bigint;

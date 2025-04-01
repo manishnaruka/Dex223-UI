@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 interface AddLiquidityTokensStore {
   tokenA: Currency | undefined;

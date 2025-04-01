@@ -43,9 +43,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
    1. Networks
    2. Transports
 2. Add new network to src/config/networks/index.ts
-3. Modify DexChainId to src/sdk_hybrid/chains.ts
+3. Modify DexChainId to src/sdk_bi/chains.ts
    1. Add new chain to DexChainId enum with [chainId] as value
-4. Add contract addresses in src/sdk_hybrid/addresses.ts
+4. Add contract addresses in src/sdk_bi/addresses.ts
    1. CONVERTER_ADDRESS
    2. FACTORY_ADDRESS
    3. ROUTER_ADDRESS
@@ -54,8 +54,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
    6. POOL_INIT_CODE_HASH
    7. CORE_AUTOLISTING
    8. FREE_AUTOLISTING
-5. Add WETH9 token in src/sdk_hybrid/entities.ts
-6. Add native currency in src/sdk_hybrid/entities/ether.ts
+5. Add WETH9 token in src/sdk_bi/entities.ts
+6. Add native currency in src/sdk_bi/entities/ether.ts
 7. Add default tokenlist in src/db/lists/index.ts
 8. Add subrgaph url in src/graphql/thegraph/apollo.ts
 9. Add autolisting subgraph in src/hooks/useAutolistingAppoloClient.ts

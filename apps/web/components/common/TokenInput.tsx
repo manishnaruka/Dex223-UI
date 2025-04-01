@@ -11,9 +11,9 @@ import InputButton from "@/components/buttons/InputButton";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 
 function MobileStandardOption({
   balance,

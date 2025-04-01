@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useAccount, useBalance } from "wagmi";
 
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 export default function useTokenBalances(currency: Currency | undefined) {
   const { address } = useAccount();

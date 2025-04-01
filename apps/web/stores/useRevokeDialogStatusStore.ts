@@ -2,8 +2,8 @@ import { Address } from "viem";
 import { create } from "zustand";
 
 import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 
 type RevokeDialogStatusStore = {
   isOpenedRevokeDialog: boolean;

@@ -23,7 +23,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
-import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
+import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
 
 export default function MintTestTokensDialog() {
   const { isOpen, handleOpen, handleClose } = useMintTestTokensDialogStore();

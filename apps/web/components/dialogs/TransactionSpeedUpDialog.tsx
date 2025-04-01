@@ -29,7 +29,7 @@ import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
-import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
+import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {

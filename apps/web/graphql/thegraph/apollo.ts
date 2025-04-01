@@ -7,7 +7,7 @@ import {
   NormalizedCacheObject,
 } from "@apollo/client";
 
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 const CHAIN_SUBGRAPH_URL: Record<DexChainId, string> = {
   // [ChainId.MAINNET]: "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3?source=uniswap",

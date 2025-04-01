@@ -13,7 +13,7 @@ import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Standard } from "@/sdk_bi/standard";
 
 import { ApproveTransaction } from "../../hooks/useLiquidityApprove";
 import { AddLiquidityApproveStatus } from "../../stores/useAddLiquidityStatusStore";

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { FeeAmount } from "@/sdk_hybrid/constants";
+import { FeeAmount } from "@/sdk_bi/constants";
 
 interface LiquidityTierStore {
   tier: FeeAmount;

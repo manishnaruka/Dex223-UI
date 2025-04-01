@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
 import { usePathname } from "@/i18n/routing";
-import { FeeAmount } from "@/sdk_hybrid/constants";
+import { FeeAmount } from "@/sdk_bi/constants";
 
 import { useTokens } from "./useTokenLists";
 

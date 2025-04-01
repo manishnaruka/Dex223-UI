@@ -7,7 +7,7 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
-import { DEX_SUPPORTED_CHAINS } from "@/sdk_hybrid/chains";
+import { DEX_SUPPORTED_CHAINS } from "@/sdk_bi/chains";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { useNoTokenListsEnabledWarningStore } from "@/stores/useNoTokenListsEnabledWarningStore";
 

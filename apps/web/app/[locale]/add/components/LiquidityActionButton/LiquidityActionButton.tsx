@@ -10,9 +10,9 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke from "@/hooks/useRevoke";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useWithdraw from "@/hooks/useWithdraw";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Standard } from "@/sdk_hybrid/standard";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Standard } from "@/sdk_bi/standard";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 

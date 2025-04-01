@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 export const useSortedTokens = ({ tokenA, tokenB }: { tokenA?: Currency; tokenB?: Currency }) => {
   const [token0, token1] = useMemo(

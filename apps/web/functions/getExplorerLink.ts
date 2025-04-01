@@ -1,4 +1,4 @@
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 export enum ExplorerLinkType {
   ADDRESS,

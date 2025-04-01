@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import { isEip1559Supported } from "@/config/constants/eip1559";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 export enum GasFeeModel {
   EIP1559,

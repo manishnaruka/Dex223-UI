@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Address } from "viem";
 
 import TokenAddressWithStandard from "@/components/atoms/TokenAddressWithStandard";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Standard } from "@/sdk_hybrid/standard";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Standard } from "@/sdk_bi/standard";
 
 const meta = {
   title: "Atoms/Token Address With Standard",

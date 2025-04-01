@@ -13,7 +13,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
 import usePositions from "@/hooks/usePositions";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 import { useActiveWalletBalances } from "../../stores/balances.hooks";
 import { BalancesDesktopTable, BalancesMobileTable } from "./BalancesTable";

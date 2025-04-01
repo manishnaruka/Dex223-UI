@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
+import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_bi/chains";
 
 export type WalletName = "metamask" | "wc" | "coinbase" | "trustWallet" | "keystore" | "safe";
 

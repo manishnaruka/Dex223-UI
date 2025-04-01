@@ -16,12 +16,12 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 

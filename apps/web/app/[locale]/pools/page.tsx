@@ -11,7 +11,7 @@ import Svg from "@/components/atoms/Svg";
 import TabButton from "@/components/buttons/TabButton";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { useRouter } from "@/i18n/routing";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 import PoolsTable from "./PoolsTable";
 

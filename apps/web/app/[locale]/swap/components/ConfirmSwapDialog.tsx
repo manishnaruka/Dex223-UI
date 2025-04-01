@@ -40,12 +40,12 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
-import { ROUTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
-import { Standard } from "@/sdk_hybrid/standard";
+import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { wrappedTokens } from "@/sdk_bi/entities/weth9";
+import { Standard } from "@/sdk_bi/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 //TODO: refactor approve rows

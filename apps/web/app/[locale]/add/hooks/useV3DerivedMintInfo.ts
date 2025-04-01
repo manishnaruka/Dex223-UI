@@ -1,22 +1,21 @@
-import JSBI from "jsbi";
 import { useMemo } from "react";
 
 import { tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import { PoolState, usePool } from "@/hooks/usePools";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Price } from "@/sdk_hybrid/entities/fractions/price";
-import { Pool } from "@/sdk_hybrid/entities/pool";
-import { Position } from "@/sdk_hybrid/entities/position";
-import { encodeSqrtRatioX96 } from "@/sdk_hybrid/utils/encodeSqrtRatioX96";
-import { priceToClosestTick } from "@/sdk_hybrid/utils/priceTickConversions";
-import { TickMath } from "@/sdk_hybrid/utils/tickMath";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { Pool } from "@/sdk_bi/entities/pool";
+import { Position } from "@/sdk_bi/entities/position";
+import { encodeSqrtRatioX96 } from "@/sdk_bi/utils/encodeSqrtRatioX96";
+import { priceToClosestTick } from "@/sdk_bi/utils/priceTickConversions";
+import { TickMath } from "@/sdk_bi/utils/tickMath";
 
 import { Field, useLiquidityAmountsStore } from "../stores/useAddLiquidityAmountsStore";
 import { useLiquidityPriceRangeStore } from "../stores/useLiquidityPriceRangeStore";
 
-const BIG_INT_ZERO = JSBI.BigInt(0);
+const BIG_INT_ZERO = BigInt(0);
 
 export const useV3DerivedMintInfo = ({
   tokenA,
@@ -62,10 +61,7 @@ export const useV3DerivedMintInfo = ({
     return (
       price &&
       sqrtRatioX96 &&
-      !(
-        JSBI.greaterThanOrEqual(sqrtRatioX96, TickMath.MIN_SQRT_RATIO) &&
-        JSBI.lessThan(sqrtRatioX96, TickMath.MAX_SQRT_RATIO)
-      )
+      !(sqrtRatioX96 >= TickMath.MIN_SQRT_RATIO && sqrtRatioX96 < TickMath.MAX_SQRT_RATIO)
     );
   }, [price]);
 
@@ -74,7 +70,7 @@ export const useV3DerivedMintInfo = ({
     if (tokenA && tokenB && tier && price && !invalidPrice) {
       const currentTick = priceToClosestTick(price);
       const currentSqrt = TickMath.getSqrtRatioAtTick(currentTick);
-      return new Pool(tokenA, tokenB, tier, currentSqrt, JSBI.BigInt(0), currentTick, []);
+      return new Pool(tokenA, tokenB, tier, currentSqrt, BigInt(0), currentTick, []);
     } else {
       return undefined;
     }

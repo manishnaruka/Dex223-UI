@@ -8,8 +8,8 @@ import { USDT_ADDRESS_ERC_20 } from "@/config/constants/usdt";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import addToast from "@/other/toast";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Currency } from "@/sdk_bi/entities/currency";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,

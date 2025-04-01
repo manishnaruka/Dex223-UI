@@ -5,10 +5,10 @@ import { Address } from "viem";
 import { Check, OtherListCheck, Rate, TrustRateCheck } from "@/components/badges/TrustBadge";
 import { db, TokenList, TokenListId } from "@/db/db";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { NativeCoin } from "@/sdk_hybrid/entities/ether";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { NativeCoin } from "@/sdk_bi/entities/ether";
+import { Token } from "@/sdk_bi/entities/token";
 
 export async function fetchTokenList(url: string) {
   const data = await fetch(url);

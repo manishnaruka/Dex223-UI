@@ -3,7 +3,7 @@ import { useQuery } from "@apollo/client";
 import { Address } from "viem";
 
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 
 export const PoolsDataDocument = gql`
   query PoolsDataQuery(

@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { Address } from "viem";
 import { create } from "zustand";
 
-import { Pool } from "@/sdk_hybrid/entities/pool";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Pool } from "@/sdk_bi/entities/pool";
+import { Standard } from "@/sdk_bi/standard";
 
 interface CollectFeesStore {
   pool?: Pool;

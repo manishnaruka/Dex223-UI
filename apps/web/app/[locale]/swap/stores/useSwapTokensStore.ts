@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Standard } from "@/sdk_hybrid/standard";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
 
 interface SwapTokensStore {
   tokenA: Currency | undefined;

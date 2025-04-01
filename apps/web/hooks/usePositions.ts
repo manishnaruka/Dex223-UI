@@ -1,4 +1,3 @@
-import JSBI from "jsbi";
 import { useMemo, useRef } from "react";
 import { Address } from "viem";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
@@ -8,15 +7,15 @@ import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { useTokens } from "@/hooks/useTokenLists";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { CONVERTER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Price } from "@/sdk_hybrid/entities/fractions/price";
-import { Position } from "@/sdk_hybrid/entities/position";
-import { Token } from "@/sdk_hybrid/entities/token";
-import { Standard } from "@/sdk_hybrid/standard";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { Position } from "@/sdk_bi/entities/position";
+import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 
 import useCurrentChainId from "./useCurrentChainId";
 import { usePool } from "./usePools";
@@ -317,7 +316,7 @@ export function usePositionFromPositionInfo(positionDetails: PositionInfo) {
         pool: pool[1],
         tickLower: positionDetails.tickLower,
         tickUpper: positionDetails.tickUpper,
-        liquidity: JSBI.BigInt(positionDetails.liquidity.toString()),
+        liquidity: BigInt(positionDetails.liquidity.toString()),
       });
     }
   }, [pool, positionDetails]);
@@ -417,7 +416,7 @@ export function usePositionRangeStatus({ position }: { position: Position | unde
   const inRange: boolean =
     typeof below === "boolean" && typeof above === "boolean" ? !below && !above : false;
 
-  const removed = position ? JSBI.equal(position.liquidity, JSBI.BigInt(0)) : false;
+  const removed = position ? position.liquidity === BigInt(0) : false;
 
   return {
     inRange,

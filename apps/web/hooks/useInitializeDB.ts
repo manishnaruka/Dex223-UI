@@ -9,9 +9,9 @@ import { defaultLists } from "@/db/lists";
 import { IIFE } from "@/functions/iife";
 import useAutoListingApolloClient from "@/hooks/useAutoListingApolloClient";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { CORE_AUTO_LISTING_ADDRESS, FREE_AUTO_LISTING_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_hybrid/chains";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { CORE_AUTO_LISTING_ADDRESS, FREE_AUTO_LISTING_ADDRESS } from "@/sdk_bi/addresses";
+import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_bi/chains";
+import { Token } from "@/sdk_bi/entities/token";
 
 const updatingDefault: DexChainId[] = [];
 export default function useInitializeDB() {

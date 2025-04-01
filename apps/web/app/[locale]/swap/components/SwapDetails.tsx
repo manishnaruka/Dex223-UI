@@ -17,10 +17,10 @@ import Badge from "@/components/badges/Badge";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { wrappedTokens } from "@/sdk_hybrid/entities/weth9";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 
 export default function SwapDetails({
   trade,
@@ -106,8 +106,8 @@ export default function SwapDetails({
             </span>{" "}
             <span className="whitespace-nowrap">
               {isPriceInverted
-                ? priceA && `($${formatFloat(priceA)})`
-                : priceB && `($${formatFloat(priceB)})`}
+                ? priceB && `($${formatFloat(priceB)})`
+                : priceA && `($${formatFloat(priceA)})`}
 
               <span className="text-14 inline-flex items-center justify-center align-middle relative bottom-[1px]">
                 <Svg iconName="swap" size={16} />

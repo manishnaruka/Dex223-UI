@@ -8,8 +8,8 @@ import {
   PaymentMethod,
   usePaymentTokenStore,
 } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { DexChainId } from "@/sdk_bi/chains";
+import { Token } from "@/sdk_bi/entities/token";
 
 export type SingleAddressToken = {
   address: Address;

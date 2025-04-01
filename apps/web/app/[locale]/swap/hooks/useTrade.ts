@@ -5,11 +5,11 @@ import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsSt
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import { IIFE } from "@/functions/iife";
 import { PoolsResult, PoolState, usePools } from "@/hooks/usePools";
-import { FeeAmount, TradeType } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { CurrencyAmount } from "@/sdk_hybrid/entities/fractions/currencyAmount";
-import { Pool } from "@/sdk_hybrid/entities/pool";
-import { Trade } from "@/sdk_hybrid/entities/trade";
+import { FeeAmount, TradeType } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Pool } from "@/sdk_bi/entities/pool";
+import { Trade } from "@/sdk_bi/entities/trade";
 
 export type TokenTrade = Trade<Currency, Currency, TradeType>;
 const poolsFees = [FeeAmount.LOWEST, FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
@@ -53,7 +53,6 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
         tokenB,
         { maxHops: 1 },
       );
-
       if (trades[0]) {
         setTrade(trades[0]);
       } else {

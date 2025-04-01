@@ -12,8 +12,8 @@ import { db } from "@/db/db";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
 
 export default function ManageTokenItem({
   token,

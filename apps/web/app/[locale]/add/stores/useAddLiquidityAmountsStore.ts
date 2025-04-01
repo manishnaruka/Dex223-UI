@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { Standard } from "@/sdk_hybrid/standard";
+import { Standard } from "@/sdk_bi/standard";
 
 export enum Field {
   CURRENCY_A = "CURRENCY_A",

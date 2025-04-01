@@ -3,7 +3,6 @@
 import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
-import JSBI from "jsbi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { ChangeEvent, use, useEffect, useMemo, useRef, useState } from "react";
@@ -42,8 +41,8 @@ import {
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Link, useRouter } from "@/i18n/routing";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import {
   RecentTransactionTitleTemplate,
   useRecentTransactionsStore,
@@ -373,7 +372,7 @@ export default function DecreaseLiquidityPage({
                     amount={
                       position?.amount0
                         .multiply(new Percent(percentage))
-                        .divide(JSBI.BigInt(100))
+                        .divide(BigInt(100))
                         .toSignificant() || "Loading..."
                     }
                   />
@@ -383,7 +382,7 @@ export default function DecreaseLiquidityPage({
                     amount={
                       position?.amount1
                         .multiply(new Percent(percentage))
-                        .divide(JSBI.BigInt(100))
+                        .divide(BigInt(100))
                         .toSignificant() || "Loading..."
                     }
                   />
@@ -584,7 +583,7 @@ export default function DecreaseLiquidityPage({
                 amount={
                   position?.amount0
                     .multiply(new Percent(percentage))
-                    .divide(JSBI.BigInt(100))
+                    .divide(BigInt(100))
                     .toSignificant() || "Loading..."
                 }
               />
@@ -593,7 +592,7 @@ export default function DecreaseLiquidityPage({
                 amount={
                   position?.amount1
                     .multiply(new Percent(percentage))
-                    .divide(JSBI.BigInt(100))
+                    .divide(BigInt(100))
                     .toSignificant() || "Loading..."
                 }
               />

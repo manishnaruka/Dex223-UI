@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 
-import { Currency } from "@/sdk_hybrid/entities/currency";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 type TokensPairVariant = "medium-primary" | "bold-secondary";
 

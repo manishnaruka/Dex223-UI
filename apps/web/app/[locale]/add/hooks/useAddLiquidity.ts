@@ -1,4 +1,3 @@
-import JSBI from "jsbi";
 import { useCallback, useMemo } from "react";
 import { Abi, Address, encodeFunctionData, formatUnits, getAbiItem, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
@@ -12,12 +11,12 @@ import useDeepEffect from "@/hooks/useDeepEffect";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { DexChainId } from "@/sdk_hybrid/chains";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Percent } from "@/sdk_hybrid/entities/fractions/percent";
-import { Position } from "@/sdk_hybrid/entities/position";
-import { toHex } from "@/sdk_hybrid/utils/calldata";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { Position } from "@/sdk_bi/entities/position";
+import { toHex } from "@/sdk_bi/utils/calldata";
 import { EstimatedGasId, useEstimatedGasStore } from "@/stores/useEstimatedGasStore";
 import {
   GasFeeModel,
@@ -377,14 +376,8 @@ export const useAddLiquidity = ({
               template: RecentTransactionTitleTemplate.ADD,
               symbol0: position.pool.token0.symbol!,
               symbol1: position.pool.token1.symbol!,
-              amount0: formatUnits(
-                BigInt(JSBI.toNumber(position.mintAmounts.amount0)),
-                position.pool.token0.decimals,
-              ),
-              amount1: formatUnits(
-                BigInt(JSBI.toNumber(position.mintAmounts.amount1)),
-                position.pool.token1.decimals,
-              ),
+              amount0: formatUnits(position.mintAmounts.amount0, position.pool.token0.decimals),
+              amount1: formatUnits(position.mintAmounts.amount1, position.pool.token1.decimals),
               logoURI0: position.pool.token0?.logoURI || "/images/tokens/placeholder.svg",
               logoURI1: position.pool.token1?.logoURI || "/images/tokens/placeholder.svg",
             },

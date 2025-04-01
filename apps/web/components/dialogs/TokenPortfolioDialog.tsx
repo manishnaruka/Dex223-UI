@@ -17,7 +17,7 @@ import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTok
 import { TokenListId } from "@/db/db";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useTokenLists } from "@/hooks/useTokenLists";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { Token } from "@/sdk_bi/entities/token";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 function TokenListInfo({ listId }: { listId: TokenListId }) {

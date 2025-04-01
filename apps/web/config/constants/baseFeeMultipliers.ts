@@ -1,4 +1,4 @@
-import { DexChainId } from "@/sdk_hybrid/chains";
+import { DexChainId } from "@/sdk_bi/chains";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 
 type GasOptionWithoutCustom = Exclude<GasOption, GasOption.CUSTOM>;

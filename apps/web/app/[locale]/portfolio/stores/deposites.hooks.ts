@@ -9,8 +9,8 @@ import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePosit
 import { config } from "@/config/wagmi/config";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokens } from "@/hooks/useTokenLists";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_hybrid/addresses";
-import { Token } from "@/sdk_hybrid/entities/token";
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { Token } from "@/sdk_bi/entities/token";
 
 import { useActiveAddresses } from "./hooks";
 import { useWalletsDeposites, WalletDeposites } from "./useWalletsDeposites";

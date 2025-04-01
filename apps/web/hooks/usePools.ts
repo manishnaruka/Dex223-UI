@@ -6,14 +6,11 @@ import { useReadContracts } from "wagmi";
 import { POOL_STATE_ABI } from "@/config/abis/poolState";
 import { apolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { FeeAmount } from "@/sdk_hybrid/constants";
-import { Currency } from "@/sdk_hybrid/entities/currency";
-import { Pool } from "@/sdk_hybrid/entities/pool";
-import { Tick } from "@/sdk_hybrid/entities/tick";
-import {
-  getPoolAddressKey,
-  useComputePoolAddressesDex,
-} from "@/sdk_hybrid/utils/computePoolAddress";
+import { FeeAmount } from "@/sdk_bi/constants";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Pool } from "@/sdk_bi/entities/pool";
+import { Tick } from "@/sdk_bi/entities/tick";
+import { getPoolAddressKey, useComputePoolAddressesDex } from "@/sdk_bi/utils/computePoolAddress";
 import { usePoolAddresses, usePoolsStore } from "@/stores/usePoolsStore";
 
 import useDeepEffect from "./useDeepEffect";
