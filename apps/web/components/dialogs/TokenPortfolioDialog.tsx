@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
 import TokenListLogo, { TokenListLogoType } from "@/components/atoms/TokenListLogo";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -131,15 +132,17 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
       <p className="text-secondary-text card-spacing-x py-3">
         {t("found_in", { amount: token.lists?.length })}
       </p>
-      <div className="flex flex-col gap-3 card-spacing">
-        {token.lists?.map((listId) => {
-          return (
-            <div className="flex gap-3 items-center justify-between" key={listId}>
-              <TokenListInfo listId={listId} />
-            </div>
-          );
-        })}
-      </div>
+      <ScrollbarContainer height="full" className="max-h-[340px] overflow-y-auto -pr-1 mr-1">
+        <div className="flex flex-col gap-3 card-spacing">
+          {token.lists?.map((listId) => {
+            return (
+              <div className="flex gap-3 items-center justify-between flex-col" key={listId}>
+                <TokenListInfo listId={listId} />
+              </div>
+            );
+          })}
+        </div>
+      </ScrollbarContainer>
     </div>
   );
 }

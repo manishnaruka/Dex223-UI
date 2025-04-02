@@ -207,12 +207,15 @@ export default function DecreaseLiquidityPage({
       setPosition(position);
     }
   }, [position, storedPosition, setPosition]);
+
   useEffect(() => {
     setTokenA(tokenA);
   }, [tokenA, setTokenA]);
+
   useEffect(() => {
     setTokenB(tokenB);
   }, [tokenB, setTokenB]);
+
   useEffect(() => {
     reset();
     setTokenId(tokenId);

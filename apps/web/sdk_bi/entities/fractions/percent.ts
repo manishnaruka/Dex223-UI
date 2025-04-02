@@ -36,10 +36,11 @@ export class Percent extends Fraction {
 
   public toSignificant(
     significantDigits: number = 5,
+    format?: object,
     rounding: Rounding = Rounding.ROUND_DOWN,
   ): string {
     // Fixing method signature compatibility
-    return super.multiply(ONE_HUNDRED).toSignificant(significantDigits, rounding);
+    return super.multiply(ONE_HUNDRED).toSignificant(significantDigits, format, rounding);
   }
 
   public toFixed(decimalPlaces: number = 2, rounding: Rounding = Rounding.ROUND_DOWN): string {

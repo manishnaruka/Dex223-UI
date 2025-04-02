@@ -10,6 +10,7 @@ const nextConfig = {
     "@repo/ui"
   ],
   images: {
+    domains: ['ipfs.io', 'cloudflare-ipfs.com', 'gateway.pinata.cloud'],
     remotePatterns: [
       {
         protocol: 'https',

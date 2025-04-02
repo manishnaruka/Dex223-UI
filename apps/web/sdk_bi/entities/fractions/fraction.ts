@@ -126,6 +126,7 @@ export class Fraction {
 
   public toSignificant(
     significantDigits: number = 6,
+    format: object = { groupSeparator: "" },
     rounding: Rounding = Rounding.ROUND_DOWN,
   ): string {
     invariant(Number.isInteger(significantDigits), `${significantDigits} is not an integer.`);
@@ -135,7 +136,7 @@ export class Fraction {
     const quotient = new Decimal(this.numerator.toString())
       .div(this.denominator.toString())
       .toSignificantDigits(significantDigits);
-    return quotient.toFormat(quotient.decimalPlaces());
+    return quotient.toFormat(quotient.decimalPlaces(), format);
   }
 
   public toFixed(decimalPlaces: number = 18, rounding: Rounding = Rounding.ROUND_DOWN): string {

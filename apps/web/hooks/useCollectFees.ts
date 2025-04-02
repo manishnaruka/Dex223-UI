@@ -1,6 +1,12 @@
 import { useCallback, useMemo } from "react";
 import { encodeFunctionData, getAbiItem } from "viem";
-import { useAccount, usePublicClient, useSimulateContract, useWalletClient } from "wagmi";
+import {
+  useAccount,
+  usePublicClient,
+  useReadContract,
+  useSimulateContract,
+  useWalletClient,
+} from "wagmi";
 
 import {
   useCollectFeesGasLimitStore,
@@ -42,6 +48,20 @@ const useCollectFees = () => {
   const { address } = useAccount();
   const recipient = address || ZERO_ADDRESS;
   const { refreshKey } = useRefreshStore();
+
+  const { data } = useReadContract({
+    account: address,
+    address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
+    abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
+    functionName: "positions",
+    args: [tokenId!],
+    query: {
+      enabled: Boolean(tokenId),
+    },
+  });
+
+  console.log("WW");
+  console.log(data);
 
   const { data: collectResult } = useSimulateContract({
     address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
@@ -105,6 +125,11 @@ const useCollectFeesParams = () => {
         : pool.token1.wrapped.address1;
 
     if (nativeCoinAmount) {
+      console.log(collectArgs);
+      console.log(nativeCoinAmount.toString());
+      console.log(recipient);
+      console.log(tokenAddress);
+
       const encodedCoolectParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "collect" as const,
@@ -126,18 +151,16 @@ const useCollectFeesParams = () => {
         address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "multicall" as const,
-        args: [[encodedCoolectParams, encodedUnwrapParams, encodedSweepParams]] as const,
+        args: [[encodedCoolectParams, encodedUnwrapParams]] as const,
       };
     }
 
-    const params = {
+    return {
       address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
       abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
       functionName: "collect" as const,
       args: [collectArgs] as const,
     };
-
-    return params;
   }, [
     pool,
     chainId,
@@ -201,6 +224,8 @@ export function usePositionFees(): {
 
   const { collectFeesParams } = useCollectFeesParams();
 
+  console.log(collectFeesParams);
+
   const { gasSettings, customGasLimit, gasModel } = useCollectFeesGasSettings();
 
   const handleCollectFees = useCallback(async () => {
@@ -210,14 +235,12 @@ export function usePositionFees(): {
     }
     setStatus(CollectFeesStatus.PENDING);
 
-    const params = collectFeesParams;
-
     try {
-      const estimatedGas = await publicClient.estimateContractGas(params as any);
+      const estimatedGas = await publicClient.estimateContractGas(collectFeesParams as any);
       const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
 
       const { request } = await publicClient.simulateContract({
-        ...(params as any),
+        ...(collectFeesParams as any),
         ...gasSettings,
         gas: gasToUse,
       });
@@ -241,7 +264,7 @@ export function usePositionFees(): {
             gas: gasToUse.toString(),
           },
           params: {
-            ...stringifyObject(params),
+            ...stringifyObject(collectFeesParams),
             abi: [getAbiItem({ name: "collect", abi: NONFUNGIBLE_POSITION_MANAGER_ABI })],
           },
           title: {

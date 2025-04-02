@@ -329,6 +329,14 @@ export const useAddLiquidity = ({
         !chainId ||
         !addLiquidityParams
       ) {
+        console.log({
+          position,
+          publicClient,
+          walletClient,
+          accountAddress,
+          chainId,
+          addLiquidityParams,
+        });
         console.log("handleAddLiquidity: SOMESING UNDEFINED");
         return;
       }

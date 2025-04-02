@@ -92,9 +92,10 @@ export class Price<TBase extends Currency, TQuote extends Currency> extends Frac
   // Fixing method signature to match the base Fraction class
   public toSignificant(
     significantDigits: number = 6,
+    format?: object,
     rounding: Rounding = Rounding.ROUND_DOWN,
   ): string {
-    return this.adjustedForDecimals.toSignificant(significantDigits, rounding);
+    return this.adjustedForDecimals.toSignificant(significantDigits, format, rounding);
   }
 
   // Fixing method signature to match the base Fraction class

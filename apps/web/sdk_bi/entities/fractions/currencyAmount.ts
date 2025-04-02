@@ -77,10 +77,11 @@ export class CurrencyAmount<T extends Currency> extends Fraction {
 
   public toSignificant(
     significantDigits: number = 6,
+    format?: object,
     rounding: Rounding = Rounding.ROUND_DOWN,
   ): string {
     // Remove format parameter to match the base class signature
-    return super.divide(this.decimalScale).toSignificant(significantDigits, rounding);
+    return super.divide(this.decimalScale).toSignificant(significantDigits, format, rounding);
   }
 
   public toFixed(

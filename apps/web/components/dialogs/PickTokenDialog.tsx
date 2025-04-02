@@ -1,4 +1,5 @@
 import Tooltip from "@repo/ui/tooltip";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -174,11 +175,11 @@ function TokenRow({
             </div>
 
             <div className="flex items-center gap-1">
-              {totalUSDBalance && (
+              {totalUSDBalance ? (
                 <span className="text-primary-text text-12 hidden md:inline pr-2.5">
                   ${formatFloat(totalUSDBalance)}
                 </span>
-              )}
+              ) : null}
               {currency.isToken ? (
                 <Tooltip
                   text={`Token belongs to ${currency.lists?.length || 1} token lists`}
@@ -370,6 +371,7 @@ export default function PickTokenDialog({
   const t = useTranslations("ManageTokens");
   const chainId = useCurrentChainId();
   const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();
+  const parentRef = React.useRef(null);
 
   const pinnedTokens = useMemo(() => {
     const lookupMap: Map<"native" | Address, Currency> = new Map(
@@ -395,6 +397,20 @@ export default function PickTokenDialog({
   const [filteredTokens, isTokenFilterActive] = useMemo(() => {
     return tokensSearchValue ? [filterTokens(tokensSearchValue, tokens), true] : [tokens, false];
   }, [tokens, tokensSearchValue]);
+
+  const virtualizer = useVirtualizer({
+    count: filteredTokens.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 60,
+  });
+  const items = virtualizer.getVirtualItems();
+
+  const [paddingTop, paddingBottom] = useMemo(() => {
+    return items.length > 0
+      ? [items[0].start, Math.max(0, virtualizer.getTotalSize() - items[items.length - 1].end)]
+      : [0, 0];
+  }, [items, virtualizer]);
+
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
   useEffect(() => {
@@ -526,16 +542,26 @@ export default function PickTokenDialog({
                   )}
                 >
                   {Boolean(filteredTokens.length) && (
-                    <ScrollbarContainer height="full">
+                    <ScrollbarContainer
+                      scrollableNodeProps={{
+                        ref: parentRef,
+                      }}
+                      height="full"
+                    >
                       <div
                         className={clsx(
                           "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2",
                           !!pinnedTokens.length && !simpleForm && "pt-3",
                           simpleForm ? "pl-2 pr-3" : "pl-4 pr-4",
                         )}
+                        style={{
+                          paddingTop,
+                          paddingBottom,
+                        }}
                       >
                         {simpleForm
-                          ? filteredTokens.map((token) => {
+                          ? items.map((item) => {
+                              const token = filteredTokens[item.index];
                               // if (simpleForm)
                               return (
                                 <TokenRowSimple
@@ -552,7 +578,9 @@ export default function PickTokenDialog({
                                 />
                               );
                             })
-                          : filteredTokens.map((token) => {
+                          : items.map((item) => {
+                              const token = filteredTokens[item.index];
+
                               return (
                                 <TokenRow
                                   setTokenForPortfolio={setTokenForPortfolio}

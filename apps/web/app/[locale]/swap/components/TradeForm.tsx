@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
+import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
@@ -61,11 +62,10 @@ function OpenConfirmDialogButton({
   const t = useTranslations("Swap");
   const { isConnected } = useAccount();
 
-  const { handleSwap } = useSwap();
-
   const { tokenA, tokenB, tokenBStandard } = useSwapTokensStore();
   const { typedValue } = useSwapAmountsStore();
   const { setIsOpen: setConfirmSwapDialogOpen } = useConfirmSwapDialogStore();
+  const { setIsOpen: setConfirmConvertDialogOpen } = useConfirmConvertDialogStore();
 
   const { isLoadingSwap, isLoadingApprove, isPendingApprove, isPendingSwap } = useSwapStatus();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
@@ -134,7 +134,7 @@ function OpenConfirmDialogButton({
 
   if (tokenA.equals(tokenB)) {
     return (
-      <Button fullWidth onClick={() => handleSwap(typedValue)}>
+      <Button fullWidth onClick={() => setConfirmConvertDialogOpen(true)}>
         Convert {tokenA.wrapped.symbol} to {tokenBStandard}
       </Button>
     );

@@ -23,7 +23,10 @@ function getDefaultListCheckResult(
   const defaultTokenList = tokenLists.find((t) => t.id === `default-${chainId}`);
 
   const isTokenInDefaultList =
-    defaultTokenList && defaultTokenList.list.tokens.find((t) => t.address0 === token.address0);
+    defaultTokenList &&
+    defaultTokenList.list.tokens.find(
+      (t) => t.address0.toLowerCase() === token.address0.toLowerCase(),
+    );
   return {
     [Check.DEFAULT_LIST]: isTokenInDefaultList ? TrustRateCheck.TRUE : TrustRateCheck.FALSE,
   };
@@ -71,7 +74,7 @@ function getSameNameInDefaultListCheckResult(
 
   if (defaultTokenList) {
     const isDifferentTokenWithSameNameInDefaultList = defaultTokenList.list.tokens.find(
-      (t) => t.address0 !== token.address0 && t.name === token.name,
+      (t) => t.address0.toLowerCase() !== token.address0.toLowerCase() && t.name === token.name,
     );
 
     if (isDifferentTokenWithSameNameInDefaultList) {

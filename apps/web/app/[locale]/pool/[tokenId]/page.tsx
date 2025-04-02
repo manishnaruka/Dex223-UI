@@ -171,8 +171,6 @@ export default function PoolPage({
     setStatus(CollectFeesStatus.INITIAL);
   };
 
-  // if (!token0 || !token1) return <div>{t("error_tokens_undefined")}</div>;
-
   const token0FeeFormatted = formatFloat(formatUnits(fees[0] || BigInt(0), token0?.decimals || 18));
   const token1FeeFormatted = formatFloat(formatUnits(fees[1] || BigInt(0), token1?.decimals || 18));
 

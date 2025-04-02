@@ -12,6 +12,7 @@ import { useGasPrice } from "wagmi";
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
+import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
@@ -40,7 +41,7 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
-import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
+import { CONVERTER_ADDRESS, ROUTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
@@ -114,7 +115,7 @@ function ApproveRow({
           </>
         )}
         {isLoading && <Preloader size={20} />}
-        {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
+        {(isSuccess || isSuccessSwap) && <Svg className="text-green" iconName="done" size={20} />}
         {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
       </div>
     </div>
@@ -153,25 +154,21 @@ function SwapRow({
         >
           <Svg
             className={clsxMerge(
-              "rotate-90",
               isDisabled ? "text-tertiary-text" : "text-green",
               isReverted && "text-red-light",
             )}
-            iconName="swap"
+            iconName="convert"
           />
         </div>
       </div>
 
       <div className="flex flex-col justify-center">
         <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
-          {(isPending || (!isLoading && !isReverted && !isSuccess)) && t("confirm_swap")}
-          {isLoading && t("executing_swap")}
-          {isReverted && "Failed to confirm a swap"}
-          {isSuccess && "Executed swap"}
+          {(isPending || (!isLoading && !isReverted && !isSuccess)) && "Confirm conversion"}
+          {isLoading && "Conversion in progress"}
+          {isReverted && "Conversion failed"}
+          {isSuccess && "Conversion completed"}
         </span>
-        {(isPending || isLoading) && (
-          <span className="text-green text-12">{t("learn_more_about_swap")}</span>
-        )}
       </div>
       <div className="flex items-center gap-2 justify-end">
         {hash && (
@@ -196,7 +193,7 @@ function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
 
-function SwapActionButton({
+function ConvertActionButton({
   amountToApprove,
   isEditApproveActive,
 }: {
@@ -375,7 +372,7 @@ function SwapActionButton({
 
   return (
     <Button disabled={isEditApproveActive} onClick={() => handleSwap(amountToApprove)} fullWidth>
-      {t("confirm_swap")}
+      Confirm conversion
     </Button>
   );
 }
@@ -413,7 +410,7 @@ function ReadonlyTokenAmountCard({
   );
 }
 
-export default function ConfirmSwapDialog() {
+export default function ConfirmConvertDialog() {
   const t = useTranslations("Swap");
   const {
     tokenA,
@@ -425,21 +422,7 @@ export default function ConfirmSwapDialog() {
   const { typedValue, reset: resetAmounts } = useSwapAmountsStore();
   const chainId = useCurrentChainId();
 
-  const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
-
-  const { trade } = useTrade();
-
-  const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
-    return trade?.outputAmount;
-  }, [trade?.outputAmount]);
-
-  const output = useMemo(() => {
-    if (!trade) {
-      return "";
-    }
-
-    return trade.outputAmount.toSignificant();
-  }, [trade]);
+  const { isOpen, setIsOpen } = useConfirmConvertDialogStore();
 
   const { slippage, deadline: _deadline } = useSwapSettingsStore();
   const {
@@ -506,16 +489,17 @@ export default function ConfirmSwapDialog() {
 
     return "0.00";
   }, [baseFee, gasPriceSettings]);
+
   const isConversion = useMemo(() => tokenB && tokenA?.equals(tokenB), [tokenA, tokenB]);
 
   useEffect(() => {
-    if (isSuccessSwap && !isOpen && !isConversion) {
+    if (isSuccessSwap && !isOpen && isConversion) {
       resetAmounts();
     }
   }, [isSuccessSwap, resetAmounts, isOpen, isConversion]);
 
   useEffect(() => {
-    if ((isSuccessSwap || isRevertedSwap || isRevertedApprove) && !isOpen && !isConversion) {
+    if ((isSuccessSwap || isRevertedSwap || isRevertedApprove) && !isOpen && isConversion) {
       setTimeout(() => {
         setSwapStatus(SwapStatus.INITIAL);
       }, 400);
@@ -534,12 +518,11 @@ export default function ConfirmSwapDialog() {
 
   const { isAllowed: isAllowedA } = useStoreAllowance({
     token: tokenA,
-    contractAddress: ROUTER_ADDRESS[chainId],
+    contractAddress: CONVERTER_ADDRESS[chainId],
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
   const { price: priceA } = useUSDPrice(tokenA?.wrapped.address0);
-  const { price: priceB } = useUSDPrice(tokenB?.wrapped.address0);
 
   const { price: priceNative } = useUSDPrice(wrappedTokens[chainId]?.address0);
 
@@ -555,7 +538,7 @@ export default function ConfirmSwapDialog() {
           onClose={() => {
             setIsOpen(false);
           }}
-          title={t("review_swap")}
+          title={"Review conversion"}
         />
         <div className="card-spacing">
           {!isSettledSwap && !isRevertedApprove && (
@@ -565,12 +548,12 @@ export default function ConfirmSwapDialog() {
                 amount={typedValue}
                 amountUSD={priceA ? formatFloat(priceA * +typedValue) : ""}
                 standard={tokenAStandard}
-                title={t("you_pay")}
+                title={"You convert"}
               />
               <ReadonlyTokenAmountCard
                 token={tokenB}
-                amount={output}
-                amountUSD={priceB ? formatFloat(priceB * +output) : ""}
+                amount={typedValue}
+                amountUSD={priceA ? formatFloat(priceA * +typedValue) : ""}
                 standard={tokenBStandard}
                 title={t("you_receive")}
               />
@@ -593,15 +576,15 @@ export default function ConfirmSwapDialog() {
                 )}
               </div>
 
-              <div className="flex justify-center">
+              <div className="flex justify-center mb-1">
                 <span className="text-20 font-bold text-primary-text mb-1">
-                  {isRevertedSwap && t("swap_failed")}
-                  {isSuccessSwap && t("successful_swap")}
+                  {isRevertedSwap && "Conversion failed"}
+                  {isSuccessSwap && "Conversion completed"}
                   {isRevertedApprove && "Approve failed"}
                 </span>
               </div>
 
-              <div className="flex justify-center gap-2 items-center">
+              <div className="flex justify-center gap-2 mb-2">
                 <Image
                   src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
                   alt=""
@@ -611,16 +594,12 @@ export default function ConfirmSwapDialog() {
                 <span>
                   {tokenA?.symbol} {typedValue}
                 </span>
+              </div>
+
+              <div className="flex justify-center gap-2 items-center">
+                <Badge text={tokenAStandard} />
                 <Svg className="text-tertiary-text" iconName="next" />
-                <Image
-                  src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
-                  alt=""
-                  width={24}
-                  height={24}
-                />
-                <span>
-                  {tokenB?.symbol} {output}
-                </span>
+                <Badge text={tokenBStandard} />
               </div>
             </div>
           )}
@@ -642,39 +621,7 @@ export default function ConfirmSwapDialog() {
                   networkName: networks.find((n) => n.chainId === chainId)?.name,
                 })}
               />
-              <SwapDetailsRow
-                title={t("minimum_received")}
-                value={
-                  trade
-                    ?.minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
-                    .toSignificant() || "Loading..."
-                }
-                tooltipText={t("minimum_received_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("price_impact")}
-                value={trade ? `${formatFloat(trade.priceImpact.toSignificant())}%` : "Loading..."}
-                tooltipText={t("price_impact_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("trading_fee")}
-                value={
-                  typedValue && Boolean(+typedValue) && tokenA
-                    ? `${(+typedValue * 0.3) / 100} ${tokenA.symbol}`
-                    : "Loading..."
-                }
-                tooltipText={t("trading_fee_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("order_routing")}
-                value={t("direct_swap")}
-                tooltipText={t("route_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("maximum_slippage")}
-                value={`${slippage}%`}
-                tooltipText={t("maximum_slippage_tooltip")}
-              />
+
               <SwapDetailsRow
                 title={t("gas_limit")}
                 value={
@@ -764,7 +711,7 @@ export default function ConfirmSwapDialog() {
             </div>
           )}
           {isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}
-          <SwapActionButton
+          <ConvertActionButton
             isEditApproveActive={isEditApproveActive}
             amountToApprove={amountToApprove}
           />

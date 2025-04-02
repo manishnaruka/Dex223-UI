@@ -32,8 +32,6 @@ type UniData = {
   logoURI?: string;
 };
 
-const CONVERTER_ADDRESS = "0x044845FB22B4258d83a6c24b2fB061AFEba7e5b9";
-
 type dexToken = {
   chainId: number;
   symbol: string;
@@ -57,18 +55,20 @@ type DexData = {
   logoURI?: string;
 };
 
-async function validate(data: any) {
-  addFormats(ajv);
-  const validator = ajv.compile(schemaJson);
+addFormats(ajv);
+const validator = ajv.compile(schemaJson);
 
+async function validate(data: any) {
   const valid = validator(data);
 
   if (valid) {
     return valid;
   }
+
+  // Handle validation errors
   if (validator.errors) {
     throw validator.errors.map((error) => {
-      delete error.data;
+      delete error.data; // clean up data property if exists
       return error;
     });
   }
@@ -78,13 +78,18 @@ async function validate(data: any) {
  * Calculates wrapped token address. Off-chain version of "predictWrapperAddress" function in TokenConverter contract.
  * @param tokenAddress Source token address
  * @param isERC20 Is source token type = ERC20.
+ * @param converterAddress converter should be passed so function works for different chains.
  * @returns Wrapped token address.
  */
-export function predictWrapperAddress(tokenAddress: string, isERC20: boolean = true): string {
+export function predictWrapperAddress(
+  tokenAddress: string,
+  isERC20: boolean = true,
+  converterAddress: Address,
+): string {
   const _bytecode = isERC20 ? bytecode223 : bytecode20;
   const create2Inputs = [
     "0xff",
-    CONVERTER_ADDRESS,
+    converterAddress,
     keccak256(
       encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
     ),
@@ -111,9 +116,11 @@ async function getList(url: string): Promise<UniData> {
     const response = await fetch(url);
     const data = await response.json();
 
+    console.log(data);
     await validate(data);
     return data;
   } catch (e) {
+    console.log(e);
     return <UniData>{};
   }
 }
@@ -123,10 +130,11 @@ async function getList(url: string): Promise<UniData> {
  * @param url URL of token list
  * @returns Promise with formatted Dex223 token list.
  */
-export async function convertList(url: string): Promise<any> {
+export async function convertList(url: string, converterAddress: Address): Promise<any> {
   const data = await getList(url);
 
   const list = data.tokens;
+  console.log("list", list);
 
   if (list.length === 0) {
     console.error("No data found");
@@ -142,7 +150,7 @@ export async function convertList(url: string): Promise<any> {
 
   // console.time('parseList');
   for (let token of list) {
-    const erc223address = predictWrapperAddress(token.address, true);
+    const erc223address = predictWrapperAddress(token.address, true, converterAddress);
     const newItem = formatItem(token, erc223address);
     convertedList.tokens.push(newItem);
   }

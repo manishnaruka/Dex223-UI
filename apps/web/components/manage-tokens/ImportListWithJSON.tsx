@@ -2,13 +2,15 @@ import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import Svg from "@/components/atoms/Svg";
 import { HelperText } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { db, TokenList } from "@/db/db";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 
 interface Props {
@@ -18,6 +20,7 @@ export default function ImportListWithJSON({ setContent }: Props) {
   const t = useTranslations("ManageTokens");
 
   const [tokenListFile, setTokenListFile] = useState<File | undefined>();
+  const tokenLists = useTokenLists();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event?.target?.files?.[0];
@@ -114,6 +117,12 @@ export default function ImportListWithJSON({ setContent }: Props) {
 
   const [error, setError] = useState<string>("");
 
+  const alreadyImportedList = useMemo(() => {
+    return tokenLists?.find((tokenList) => {
+      return tokenList.list.name.toLowerCase() === tokenListFileContent?.list.name.toLowerCase();
+    });
+  }, [tokenListFileContent?.list.name, tokenLists]);
+
   return (
     <div className="flex flex-col flex-grow">
       <input
@@ -193,7 +202,52 @@ export default function ImportListWithJSON({ setContent }: Props) {
           <HelperText helperText={"Max 2MB, file type JSON"} error={error ? error : undefined} />
         </>
       )}
-      {tokenListFileContent && !error && (
+      {tokenListFileContent && !!alreadyImportedList && (
+        <>
+          <div className="flex-grow">
+            <div className="flex justify-between items-center py-2.5 mt-3 mb-3">
+              <div className="flex items-center gap-3">
+                <img
+                  className="w-12 h-12"
+                  width={48}
+                  height={48}
+                  src="/images/token-list-placeholder.svg"
+                  alt=""
+                />
+                <div className="flex flex-col text-16">
+                  <span className="text-primary-text">{alreadyImportedList.list.name}</span>
+                  <span className="text-secondary-text">
+                    {t("tokens_amount", { amount: alreadyImportedList.list.tokens.length })}
+                  </span>
+                </div>
+              </div>
+              {/*<a*/}
+              {/*  target="_blank"*/}
+              {/*  className={clsx(*/}
+              {/*    "flex items-center gap-2 py-2 duration-200",*/}
+              {/*    "text-green hocus:text-green-hover",*/}
+              {/*  )}*/}
+              {/*  href={getExplorerLink(ExplorerLinkType.ADDRESS, addressToImport, chainId)}*/}
+              {/*>*/}
+              {/*  {t("view_list")}*/}
+              {/*  <Svg iconName="next" />*/}
+              {/*</a>*/}
+            </div>
+
+            <Alert
+              text={
+                "This token list has already been imported. You cannot import a list with the same name twice."
+              }
+              type={"info"}
+            />
+          </div>
+          <Button fullWidth disabled size={ButtonSize.MEDIUM}>
+            List already imported
+          </Button>
+        </>
+      )}
+
+      {tokenListFileContent && !alreadyImportedList && !error && (
         <>
           <div className="flex-grow">
             <div className="flex items-center gap-3 py-2.5 mt-3 mb-3">

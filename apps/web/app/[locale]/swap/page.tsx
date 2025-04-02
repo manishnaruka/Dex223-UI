@@ -2,6 +2,7 @@
 import clsx from "clsx";
 import React, { useEffect } from "react";
 
+import ConfirmConvertDialog from "@/app/[locale]/swap/components/ConfirmConvertDialog";
 import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog";
 import ExternalConverterLink from "@/app/[locale]/swap/components/ExternalConverterLink";
 import TradeForm from "@/app/[locale]/swap/components/TradeForm";
@@ -71,6 +72,7 @@ export default function SwapPage() {
         </div>
 
         <ConfirmSwapDialog />
+        <ConfirmConvertDialog />
       </Container>
     </>
   );
