@@ -60,9 +60,6 @@ const useCollectFees = () => {
     },
   });
 
-  console.log("WW");
-  console.log(data);
-
   const { data: collectResult } = useSimulateContract({
     address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
     abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
@@ -125,11 +122,6 @@ const useCollectFeesParams = () => {
         : pool.token1.wrapped.address1;
 
     if (nativeCoinAmount) {
-      console.log(collectArgs);
-      console.log(nativeCoinAmount.toString());
-      console.log(recipient);
-      console.log(tokenAddress);
-
       const encodedCoolectParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "collect" as const,
@@ -140,11 +132,6 @@ const useCollectFeesParams = () => {
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "unwrapWETH9",
         args: [nativeCoinAmount, recipient],
-      });
-      const encodedSweepParams = encodeFunctionData({
-        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        functionName: "sweepToken",
-        args: [tokenAddress, nativeCoinAmount, recipient],
       });
 
       return {
