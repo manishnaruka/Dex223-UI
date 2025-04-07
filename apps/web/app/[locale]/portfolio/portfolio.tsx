@@ -209,7 +209,7 @@ const ManageWalletsContent = ({
     setShowFromSearch(false);
   }, [addWallet, searchValue, setSearchValue, setShowFromSearch]);
 
-  const popupBackHandler = useMemo(() => {
+  const popupBackHandler = useCallback(() => {
     if (content === "list") {
       return undefined;
     } else if (content === "manage") {

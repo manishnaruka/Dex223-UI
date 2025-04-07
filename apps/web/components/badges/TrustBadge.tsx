@@ -361,7 +361,7 @@ export default function TrustBadge({ rate, logoURI }: Props) {
           "rounded-5 py-1 flex items-center gap-1 pl-2 pr-1 cursor-pointer text-12",
           rateRange === "high" && "text-green bg-green-bg",
           rateRange === "medium" && "text-orange bg-orange-bg",
-          rateRange === "low" && "text-red bg-red-bg",
+          rateRange === "low" && "text-red-light bg-red-bg",
         )}
         ref={refs.setReference}
         {...getReferenceProps()}

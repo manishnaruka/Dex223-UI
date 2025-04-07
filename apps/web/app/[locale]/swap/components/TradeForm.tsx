@@ -442,6 +442,7 @@ export default function TradeForm() {
   const _isMobile = useMediaQuery({ query: "(max-width: 767px)" });
   const nativeCurrency = useNativeCurrency();
   const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
+  const { setIsOpen: setConfirmConvertDialogOpen } = useConfirmConvertDialogStore();
 
   return (
     <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">
@@ -687,11 +688,15 @@ export default function TradeForm() {
 
           <Button
             onClick={() => {
-              setConfirmSwapDialogOpen(true);
+              if (tokenB && tokenA?.equals(tokenB)) {
+                setConfirmConvertDialogOpen(true);
+              } else {
+                setConfirmSwapDialogOpen(true);
+              }
             }}
             size={ButtonSize.EXTRA_SMALL}
           >
-            {t("review_swap")}
+            {tokenB && tokenA?.equals(tokenB) ? "Review conversion" : t("review_swap")}
           </Button>
         </div>
       )}

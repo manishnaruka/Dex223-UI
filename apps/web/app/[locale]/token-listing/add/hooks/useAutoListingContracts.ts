@@ -9,9 +9,14 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Token } from "@/sdk_bi/entities/token";
 
+const AUTOLISTING_BLACKLIST = [
+  "0x6a5ff6c7b1ea8e9b9e40da3b162468b61e40584f",
+  "0x39491101f7d46E9f0c3217D2eB91C016F761aD59",
+];
+
 const query = gql(`
-  query AutoListings($first: Int!) {
-    autoListings(first: $first) {
+  query AutoListings($first: Int!, $blacklist: [String!]) {
+    autoListings(first: $first, where: {id_not_in: $blacklist}) {
       id
       owner
       name
@@ -109,6 +114,7 @@ export default function useAutoListingContracts(): AutoListing[] | undefined {
     client,
     variables: {
       first: 10,
+      blacklist: AUTOLISTING_BLACKLIST.map((v) => v.toLowerCase()),
     },
   });
 

@@ -684,10 +684,6 @@ export default function PoolPage({
       <div className="lg:w-[800px] mx-auto lg:mb-[40px] gap-5 flex flex-col">
         <SelectedTokensInfo tokenA={token0} tokenB={token1} />
         <RecentTransactions
-          filterFunction={[
-            RecentTransactionTitleTemplate.REMOVE,
-            RecentTransactionTitleTemplate.ADD,
-          ]}
           showRecentTransactions={showRecentTransactions}
           handleClose={() => setShowRecentTransactions(false)}
           pageSize={5}

@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Address, isAddress } from "viem";
 import { useAccount } from "wagmi";
 
@@ -58,18 +58,25 @@ export const useActiveAddresses = ({
     return Boolean(searchValue) && !isAddress(searchValue) ? t("enter_in_correct_format") : "";
   }, [searchValue, t]);
 
-  const activeAddresses = useMemo(() => {
+  const [activeAddresses, setActiveAddresses] = useState<Address[]>([]);
+
+  useEffect(() => {
     if (searchValue && !errorSearch) {
+      // Update `setShowFromSearch` based on `searchValue`
       if (setShowFromSearch) setShowFromSearch(true);
-      return [searchValue as Address];
+      setActiveAddresses([searchValue as Address]);
     } else {
+      // Update `setShowFromSearch` based on no search
       if (setShowFromSearch) setShowFromSearch(false);
-      return wallets.filter((ad) => ad.isActive).map((ad) => ad.address);
+      const activeWallets = wallets.filter((ad) => ad.isActive).map((ad) => ad.address);
+      setActiveAddresses(activeWallets);
     }
-  }, [searchValue, errorSearch, setShowFromSearch, wallets]);
+  }, [searchValue, errorSearch, wallets, setShowFromSearch]);
+
+  const memoizedActiveAddresses = useMemo(() => activeAddresses, [activeAddresses]);
 
   return {
-    activeAddresses,
+    activeAddresses: memoizedActiveAddresses,
     searchValue,
     setSearchValue,
     errorSearch,

@@ -19,6 +19,7 @@ import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/butt
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
+import { networks } from "@/config/networks";
 import { TokenListId } from "@/db/db";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
@@ -282,7 +283,7 @@ export default function AutoListingContractDetails({
             </div>
             <TokenListInfoCard
               title="Chain"
-              value="Sepolia"
+              value={networks.find((n) => n.chainId === chainId)?.name || "Unknown"}
               className="grid-in-[third] xl:grid-in-[second]"
             />
             <TokenListInfoCard

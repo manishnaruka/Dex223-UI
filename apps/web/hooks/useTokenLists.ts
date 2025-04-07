@@ -47,7 +47,9 @@ function getOtherListCheckResult(
     if (
       tokenList.list.tokens.find(
         (t) =>
-          t.address0 === token.address0 && t.address1 === token.address1 && t.name === token.name,
+          t.address0.toLowerCase() === token.address0.toLowerCase() &&
+          t.address1.toLowerCase() === token.address1.toLowerCase() &&
+          t.name?.toLowerCase() === token.name?.toLowerCase(),
       )
     ) {
       timesTokenFoundInAllLists++;
@@ -96,7 +98,9 @@ function getSameNameInOtherListsCheckResult(
   const defaultTokenList = tokenLists.find((t) => t.id === `default-${chainId}`);
   if (
     defaultTokenList?.list.tokens.find(
-      (t) => t.address0 === token.address0 && t.name === token.name,
+      (t) =>
+        t.address0.toLowerCase() === token.address0.toLowerCase() &&
+        t.name?.toLowerCase() === token.name?.toLowerCase(),
     )
   ) {
     return;
@@ -106,7 +110,7 @@ function getSameNameInOtherListsCheckResult(
 
   otherTokenLists.map((otherTokenList) => {
     const tokenWithSameAddress = otherTokenList.list.tokens.find(
-      (t) => t.address0 === token.address0,
+      (t) => t.address0.toLowerCase() === token.address0.toLowerCase(),
     );
     if (tokenWithSameAddress) {
       tokensWithSameAddress.push(tokenWithSameAddress);
@@ -114,7 +118,7 @@ function getSameNameInOtherListsCheckResult(
   });
 
   const isDifferentTokenWithSameNameInOtherList = tokensWithSameAddress.find(
-    (t) => t.name !== token.name,
+    (t) => t.name?.toLowerCase() !== token.name?.toLowerCase(),
   );
 
   if (isDifferentTokenWithSameNameInOtherList) {
@@ -212,7 +216,9 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
                 item.decimals,
                 item.symbol || "Unknown",
                 item.name || "Unknown",
-                item?.logoURI || "/images/tokens/placeholder.svg",
+                !map.has(lowercaseAddress)
+                  ? item?.logoURI || "/images/tokens/placeholder.svg"
+                  : map.get(lowercaseAddress)?.logoURI || "/images/tokens/placeholder.svg",
                 map.has(lowercaseAddress)
                   ? Array.from(new Set([...(map.get(lowercaseAddress)?.lists || []), id]))
                   : [id],

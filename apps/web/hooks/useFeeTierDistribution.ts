@@ -1,6 +1,4 @@
-import ms from "ms";
 import { useMemo } from "react";
-import { Address } from "viem";
 
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { FeeAmount } from "@/sdk_bi/constants";
@@ -101,17 +99,13 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
 function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
   const { data: latestBlock } = useScopedBlockNumber({ watch: true });
 
-  // Your fee tier distribution query with stable addresses
   const { isLoading, error, data } = useFeeTierDistributionQuery(
     tokenA?.wrapped.address0,
     tokenB?.wrapped.address0,
     30000,
   );
-  //
-  // console.log("WWW");
-  //
+
   const { asToken0, asToken1, _meta } = data ?? {};
-  //
   return useMemo(() => {
     if (!latestBlock || !_meta || !asToken0 || !asToken1) {
       return {
@@ -156,8 +150,8 @@ function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
 
     const mean = (
       tvl0: number,
-      sumTvl0: number,
       tvl1: number,
+      sumTvl0: number,
       sumTvl1: number,
     ): number | undefined =>
       tvl0 === 0 && tvl1 === 0 ? undefined : (tvl0 + tvl1) / (sumTvl0 + sumTvl1 || 1); // prevent divide by zero
