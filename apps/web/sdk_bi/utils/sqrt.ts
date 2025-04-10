@@ -1,6 +1,7 @@
 import invariant from "tiny-invariant";
 
 export const MAX_SAFE_INTEGER = BigInt(Number.MAX_SAFE_INTEGER);
+export const MAX_VALUE = BigInt(Number.MAX_VALUE);
 
 const ZERO = BigInt(0);
 const ONE = BigInt(1);

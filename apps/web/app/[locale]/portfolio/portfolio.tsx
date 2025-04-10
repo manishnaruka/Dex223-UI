@@ -424,7 +424,7 @@ const ManageWalletsContent = ({
               // onAdd={() => setContent("list")}
               />
             </div>
-            <div className="flex flex-col gap-3 px-5 max-h-[380px] overflow-auto">
+            <div className="flex flex-col gap-2 md:gap-3 px-4 md:px-5 max-h-[380px] overflow-auto">
               {wallets.map(({ address, isConnectedWallet }) => (
                 <div
                   key={address}

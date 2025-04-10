@@ -10,6 +10,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { MAX_SAFE_INTEGER, MAX_VALUE } from "@/sdk_bi/utils/sqrt";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,
@@ -101,6 +102,10 @@ export function useStoreAllowance({
     [publicClient, refetch],
   );
 
+  const isAllowed = useMemo(() => {
+    return Boolean(currentAllowanceData && amountToCheck && currentAllowanceData >= amountToCheck);
+  }, [amountToCheck, currentAllowanceData]);
+
   const writeTokenApprove = useCallback(
     async ({
       customAmount,
@@ -142,14 +147,36 @@ export function useStoreAllowance({
         args: [contractAddress!, amountToApprove!],
       };
 
+      // USDT can't rewrite existing allowance, so we have to manually revoke allowance
+      // to 0 before we can attach an allowance. This flag check if token can rewrite allowance,
+      // that in this case with USDT results to true
+      const isNotAvailableToRewriteAllowance =
+        token.address0.toLowerCase() === USDT_ADDRESS_ERC_20.toLowerCase();
+
+      if (!isAllowed && currentAllowanceData !== BigInt(0) && isNotAvailableToRewriteAllowance) {
+        const revokeParams = { ...params, args: [contractAddress, BigInt(0)] };
+
+        //we are calling the same approve with 0 as amount to approve
+        const hash = await walletClient.writeContract({
+          ...revokeParams,
+          ...(customGasSettings || {}),
+          gas: gasLimit,
+          account: undefined,
+        });
+
+        // we wait until first function is ready so we are sure that second one will write
+        await publicClient.waitForTransactionReceipt({ hash });
+      }
+
       try {
         let hash;
 
         try {
-          if (token.address0.toLowerCase() === USDT_ADDRESS_ERC_20.toLowerCase()) {
+          if (isNotAvailableToRewriteAllowance) {
             hash = await walletClient.writeContract({
               ...params,
               ...(customGasSettings || {}),
+              args: [contractAddress!, MAX_VALUE],
               gas: gasLimit,
               account: undefined,
             });
@@ -165,18 +192,14 @@ export function useStoreAllowance({
           console.log(e);
         }
 
-        console.log("Hash received");
         if (hash) {
           const transaction = await getTransactionWithRetries({ hash, publicClient });
 
-          console.log("Transaction retrieved");
           if (transaction) {
             const transaction = await publicClient.getTransaction({
               hash,
               blockTag: "pending" as any,
             });
-
-            console.log("Transaction #1 retrieved");
 
             const nonce = transaction.nonce;
 
@@ -227,6 +250,8 @@ export function useStoreAllowance({
       address,
       chainId,
       publicClient,
+      isAllowed,
+      currentAllowanceData,
       gasLimit,
       addRecentTransaction,
       waitAndReFetch,
@@ -234,9 +259,7 @@ export function useStoreAllowance({
   );
 
   return {
-    isAllowed: Boolean(
-      currentAllowanceData && amountToCheck && currentAllowanceData >= amountToCheck,
-    ),
+    isAllowed,
     writeTokenApprove,
     currentAllowance: currentAllowanceData,
     estimatedGas: allowanceGasLimitMap[chainId]?.base || defaultApproveValue,
