@@ -257,13 +257,13 @@ const ManageWalletsContent = ({
         }
         title={PopoverTitles[content]}
       />
-      <div className="flex flex-col pb-5 border-t border-secondary-border">
+      <div className="flex flex-col pb-4 md:pb-5 border-t border-secondary-border">
         {content === "add" ? (
           <div className="flex flex-col pt-5 px-4 md:px-5">
             <AddWalletInput onAdd={() => setContent("list")} />
             {!isConnected && (
               <>
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-3 mb-4 md:mb-5">
                   <div className="w-full h-[1px] bg-secondary-border" />
                   <span className="text-secondary-text">or</span>
                   <div className="w-full h-[1px] bg-secondary-border" />
@@ -402,7 +402,7 @@ const ManageWalletsContent = ({
                 </div>
               ))}
             </div>
-            <div className="flex w-full px-4 md:px-5 pt-5 mt-5 border-t border-secondary-border">
+            <div className="flex w-full px-4 md:px-5 pt-4 md:pt-5 mt-4 md:mt-5 border-t border-secondary-border">
               <Button
                 fullWidth
                 onClick={() => {
@@ -660,7 +660,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.balances}
             onClick={() => setActiveTab(ActiveTab.balances)}
           >
-            <span className="text-nowrap text-16 px-4">{t("balances_tab")}</span>
+            <span className="text-nowrap text-16">{t("balances_tab")}</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -668,7 +668,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.margin}
             onClick={() => setActiveTab(ActiveTab.margin)}
           >
-            <span className="text-nowrap px-4">{t("margin_title")}</span>
+            <span className="text-nowrap text-16">{t("margin_title")}</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -676,7 +676,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.lending}
             onClick={() => setActiveTab(ActiveTab.lending)}
           >
-            <span className="text-nowrap px-4">{t("lending_title")}</span>
+            <span className="text-nowrap text-16">{t("lending_title")}</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -684,7 +684,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.liquidity}
             onClick={() => setActiveTab(ActiveTab.liquidity)}
           >
-            <span className="text-nowrap px-4">{t("liquidity_title")}</span>
+            <span className="text-nowrap text-16">{t("liquidity_title")}</span>
           </TabButton>
           <TabButton
             inactiveBackground="bg-secondary-bg"
@@ -692,7 +692,7 @@ export function Portfolio() {
             active={activeTab === ActiveTab.deposited}
             onClick={() => setActiveTab(ActiveTab.deposited)}
           >
-            <span className="text-nowrap px-1">{t("approved_deposited")}</span>
+            <span className="text-nowrap text-16">{t("approved_deposited")}</span>
           </TabButton>
         </div>
         {activeTab === ActiveTab.balances ? (

@@ -210,7 +210,7 @@ export default function ImportListWithContract({ setContent }: Props) {
             <Button
               fullWidth
               disabled={!checkedUnderstand}
-              size={ButtonSize.MEDIUM}
+              size={ButtonSize.LARGE}
               onClick={async () => {
                 const queryRes = data?.autoListings?.[0];
                 if (!queryRes) {

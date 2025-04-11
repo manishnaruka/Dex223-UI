@@ -1,4 +1,5 @@
 import { isZeroAddress } from "@ethereumjs/util";
+import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import ExternalTextLink from "@repo/ui/external-text-link";
 import { useTranslations } from "next-intl";
@@ -256,6 +257,12 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     </span>
                   </div>
                 </div>
+                {alreadyImported && (
+                  <Alert
+                    type="info"
+                    text="This token has already been imported. You cannot import the same token twice."
+                  />
+                )}
                 {!alreadyImported && erc223AddressToImport && erc20AddressToImport && (
                   <>
                     <div className="mb-4 flex flex-col gap-4 pl-5 pr-3 pb-5 pt-4 bg-tertiary-bg rounded-3">
@@ -330,7 +337,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                 )}
                 <Button
                   fullWidth
-                  size={ButtonSize.MEDIUM}
+                  size={ButtonSize.LARGE}
                   disabled={!checkedUnderstand || alreadyImported}
                   onClick={async () => {
                     if (

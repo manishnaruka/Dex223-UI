@@ -141,7 +141,7 @@ export default function ImportListWithURL({ setContent }: Props) {
             />
             <Button
               fullWidth
-              size={ButtonSize.MEDIUM}
+              size={ButtonSize.LARGE}
               disabled={!checkedUnderstand}
               onClick={() => {
                 db.tokenLists.add(tokenListToImport);
@@ -195,7 +195,7 @@ export default function ImportListWithURL({ setContent }: Props) {
               type={"info"}
             />
           </div>
-          <Button fullWidth disabled size={ButtonSize.MEDIUM}>
+          <Button fullWidth disabled size={ButtonSize.LARGE}>
             List already imported
           </Button>
         </>

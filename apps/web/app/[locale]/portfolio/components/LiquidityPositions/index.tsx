@@ -158,7 +158,7 @@ export const LiquidityPositions = ({
         {/*    <Preloader type="awaiting" size={48} />*/}
         {/*  </div>*/}
         {/*) : */}
-        {currentTableData.length || loading ? (
+        {!!currentTableData.length || loading ? (
           <>
             <LiquidityPositionsDesktopTable tableData={currentTableData} isLoading={loading} />
             <LiquidityPositionsMobileTable tableData={currentTableData} />

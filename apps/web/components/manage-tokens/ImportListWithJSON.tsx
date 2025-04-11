@@ -241,7 +241,7 @@ export default function ImportListWithJSON({ setContent }: Props) {
               type={"info"}
             />
           </div>
-          <Button fullWidth disabled size={ButtonSize.MEDIUM}>
+          <Button fullWidth disabled size={ButtonSize.LARGE}>
             List already imported
           </Button>
         </>
