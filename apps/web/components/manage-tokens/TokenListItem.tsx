@@ -4,6 +4,7 @@ import download from "downloadjs";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import React from "react";
 import { scroller } from "react-scroll";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -152,7 +153,7 @@ export default function TokenListItem({
             <Popover
               placement="top"
               isOpened={isPopoverOpened}
-              setIsOpened={() => setPopoverOpened(!isPopoverOpened)}
+              setIsOpened={setPopoverOpened}
               customOffset={12}
               trigger={
                 <button
@@ -184,6 +185,7 @@ export default function TokenListItem({
                     });
 
                     download(blob, tokenList.list.name, "application/json");
+                    setPopoverOpened(false);
                   }}
                 />
 
@@ -217,53 +219,48 @@ export default function TokenListItem({
                           setDeleteOpened(true);
                         }}
                       />
-                      <DrawerDialog isOpen={deleteOpened} setIsOpen={setDeleteOpened}>
-                        <div className="w-full md:w-[600px]">
-                          <DialogHeader
-                            onClose={() => setDeleteOpened(false)}
-                            title={t("removing_list")}
-                          />
-                          <div className="px-4 pb-4 md:px-10 md:pb-10">
-                            <Image
-                              className="mx-auto mt-5 mb-2"
-                              src={tokenList.list.logoURI || ""}
-                              alt=""
-                              width={60}
-                              height={60}
-                            />
-                            <p className="mb-5 text-center">
-                              {t.rich("confirm_removing_list_text", {
-                                list: tokenList.list.name,
-                                bold: (chunks) => (
-                                  <b className="whitespace-nowrap">&quot;{chunks}&quot;</b>
-                                ),
-                              })}
-                            </p>
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button
-                                colorScheme={ButtonColor.LIGHT_GREEN}
-                                onClick={() => setDeleteOpened(false)}
-                              >
-                                {t("cancel")}
-                              </Button>
-                              <Button
-                                colorScheme={ButtonColor.RED}
-                                onClick={() => {
-                                  db.tokenLists.delete(tokenList.id);
-                                  setDeleteOpened(false);
-                                }}
-                              >
-                                {t("confirm_removing")}
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </DrawerDialog>
                     </>
                   )}
               </div>
             </Popover>
           </div>
+          <DrawerDialog isOpen={deleteOpened} setIsOpen={setDeleteOpened}>
+            <div className="w-full md:w-[600px]">
+              <DialogHeader onClose={() => setDeleteOpened(false)} title={t("removing_list")} />
+              <div className="px-4 pb-4 md:px-10 md:pb-10">
+                <Image
+                  className="mx-auto mt-5 mb-2"
+                  src={tokenList.list.logoURI || ""}
+                  alt=""
+                  width={60}
+                  height={60}
+                />
+                <p className="mb-5 text-center">
+                  {t.rich("confirm_removing_list_text", {
+                    list: (chunks) => tokenList.list.name,
+                    bold: (chunks) => <b className="whitespace-nowrap">{chunks}</b>,
+                  })}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                    onClick={() => setDeleteOpened(false)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    colorScheme={ButtonColor.RED}
+                    onClick={() => {
+                      db.tokenLists.delete(tokenList.id);
+                      setDeleteOpened(false);
+                    }}
+                  >
+                    {t("confirm_removing")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DrawerDialog>
         </div>
       </div>
       <div className="flex items-center">

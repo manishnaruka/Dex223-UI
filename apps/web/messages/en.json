@@ -126,7 +126,7 @@
     "import_token_warning": " Import tokens with caution, as including fake versions of existing tokens is possible. Make sure that the imported token is compatible with Dex223. You can always verify the token data via public blockchain explorers to avoid potential mistakes and/or scams.",
     "removing_list": "Removing list",
     "removing_custom_token": "Removing custom token",
-    "confirm_removing_list_text": "Please confirm that you would like to remove the <bold>“{list}”</bold> list",
+    "confirm_removing_list_text": "Please confirm that you would like to remove the <bold>«<list></list>»</bold> list",
     "confirm_removing_token_text": "Confirm that you would like to remove the <bold>“{token}”</bold> custom token.",
     "confirm_removing": "Confirm removing",
     "cancel": "Cancel",

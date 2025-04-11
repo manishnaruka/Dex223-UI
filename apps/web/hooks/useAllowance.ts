@@ -165,7 +165,7 @@ export function useStoreAllowance({
         });
 
         // we wait until first function is ready so we are sure that second one will write
-        await publicClient.waitForTransactionReceipt({ hash });
+        // await publicClient.waitForTransactionReceipt({ hash });
       }
 
       try {
@@ -176,7 +176,7 @@ export function useStoreAllowance({
             hash = await walletClient.writeContract({
               ...params,
               ...(customGasSettings || {}),
-              args: [contractAddress!, MAX_VALUE],
+              args: [contractAddress!, MAX_SAFE_INTEGER],
               gas: gasLimit,
               account: undefined,
             });
