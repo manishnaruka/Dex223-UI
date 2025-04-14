@@ -257,13 +257,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     </span>
                   </div>
                 </div>
-                {alreadyImported && (
-                  <Alert
-                    type="info"
-                    text="This token has already been imported. You cannot import the same token twice."
-                  />
-                )}
-                {!alreadyImported && erc223AddressToImport && erc20AddressToImport && (
+                {erc223AddressToImport && erc20AddressToImport && (
                   <>
                     <div className="mb-4 flex flex-col gap-4 pl-5 pr-3 pb-5 pt-4 bg-tertiary-bg rounded-3">
                       <div className="grid grid-cols-[1fr_auto_32px] gap-y-1">
@@ -316,13 +310,16 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                         )}
                       </div>
                     </div>
-                    <div className="px-5 py-3 flex gap-2 rounded-1 border border-orange bg-orange-bg">
-                      <Svg className="text-orange shrink-0" iconName="warning" />
-                      <p className="text-16 text-secondary-text flex-grow">
-                        {t("import_token_warning")}
-                      </p>
-                    </div>
                   </>
+                )}
+
+                {alreadyImported ? (
+                  <Alert
+                    type="info"
+                    text="This token has already been imported. You cannot import the same token twice."
+                  />
+                ) : (
+                  <Alert text={t("import_token_warning")} type="warning" />
                 )}
               </div>
 
