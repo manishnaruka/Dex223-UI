@@ -25,14 +25,14 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
   // fetch all pool states to determine pool state
   const poolParams: PoolsParams = useMemo(
     () => [
-      { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOWEST },
+      // { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOWEST },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOW },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.HIGH },
     ],
     [tokenA, tokenB],
   );
-  const [poolStateVeryLow, poolStateLow, poolStateMedium, poolStateHigh] = usePools(poolParams);
+  const [poolStateLow, poolStateMedium, poolStateHigh] = usePools(poolParams);
 
   return useMemo(() => {
     if (isLoading || error || !distributions) {
@@ -55,15 +55,15 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
       !isLoading &&
       !error &&
       distributions &&
-      poolStateVeryLow[0] !== PoolState.LOADING &&
+      // poolStateVeryLow[0] !== PoolState.LOADING &&
       poolStateLow[0] !== PoolState.LOADING &&
       poolStateMedium[0] !== PoolState.LOADING &&
       poolStateHigh[0] !== PoolState.LOADING
         ? {
-            [FeeAmount.LOWEST]:
-              poolStateVeryLow[0] === PoolState.EXISTS
-                ? (distributions[FeeAmount.LOWEST] ?? 0) * 100
-                : undefined,
+            // [FeeAmount.LOWEST]:
+            //   poolStateVeryLow[0] === PoolState.EXISTS
+            //     ? (distributions[FeeAmount.LOWEST] ?? 0) * 100
+            //     : undefined,
             [FeeAmount.LOW]:
               poolStateLow[0] === PoolState.EXISTS
                 ? (distributions[FeeAmount.LOW] ?? 0) * 100
@@ -92,7 +92,7 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
     poolStateHigh,
     poolStateLow,
     poolStateMedium,
-    poolStateVeryLow,
+    // poolStateVeryLow,
   ]);
 }
 
@@ -132,7 +132,7 @@ function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
         return acc;
       },
       {
-        [FeeAmount.LOWEST]: [0, 0],
+        // [FeeAmount.LOWEST]: [0, 0],
         [FeeAmount.LOW]: [0, 0],
         [FeeAmount.MEDIUM]: [0, 0],
         [FeeAmount.HIGH]: [0, 0],
@@ -157,7 +157,7 @@ function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
       tvl0 === 0 && tvl1 === 0 ? undefined : (tvl0 + tvl1) / (sumTvl0 + sumTvl1 || 1); // prevent divide by zero
 
     const distributions: Record<FeeAmount, number | undefined> = {
-      [FeeAmount.LOWEST]: mean(...tvlByFeeTier[FeeAmount.LOWEST], sumToken0Tvl, sumToken1Tvl),
+      // [FeeAmount.LOWEST]: mean(...tvlByFeeTier[FeeAmount.LOWEST], sumToken0Tvl, sumToken1Tvl),
       [FeeAmount.LOW]: mean(...tvlByFeeTier[FeeAmount.LOW], sumToken0Tvl, sumToken1Tvl),
       [FeeAmount.MEDIUM]: mean(...tvlByFeeTier[FeeAmount.MEDIUM], sumToken0Tvl, sumToken1Tvl),
       [FeeAmount.HIGH]: mean(...tvlByFeeTier[FeeAmount.HIGH], sumToken0Tvl, sumToken1Tvl),

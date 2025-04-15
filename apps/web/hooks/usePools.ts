@@ -5,6 +5,7 @@ import { useReadContracts } from "wagmi";
 
 import { POOL_STATE_ABI } from "@/config/abis/poolState";
 import { apolloClient } from "@/graphql/thegraph/apollo";
+import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
@@ -92,6 +93,8 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
   }, [poolTokens]);
   const poolAddresses = useComputePoolAddressesDex(poolAddressesParams);
 
+  console.log(poolTokens);
+  console.log(addresses);
   // query only pools that are not in the store or were updated more than 1 minute ago
   const addressesToUpdate = useMemo(() => {
     const currentDate = new Date(Date.now() - 60000);
@@ -109,7 +112,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
 
         const address = addresses[key];
         // const newAddress = address?.address?.toLowerCase();
-        if (address && address?.address) {
+        if (address && address?.address && address.address !== ZERO_ADDRESS) {
           if (!poolUpdates.has(key) || (poolUpdates.get(key) || 0) < currentDate) {
             array.push(address);
           }
@@ -118,6 +121,8 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
     });
     return array;
   }, [addresses, chainId, poolTokens, poolUpdates]);
+
+  console.log(addressesToUpdate);
 
   const _apolloClient = useMemo(() => {
     return apolloClient(chainId);
@@ -128,6 +133,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
       addresses: addressesToUpdate.map((p) => p?.address?.toLowerCase()),
     },
     client: _apolloClient,
+    skip: addressesToUpdate.length === 0,
     // fetchPolicy: "cache-first", // Used for first execution
     // nextFetchPolicy: "cache-first", // Used for subsequent executions
   });

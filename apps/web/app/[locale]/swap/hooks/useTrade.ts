@@ -12,7 +12,7 @@ import { Pool } from "@/sdk_bi/entities/pool";
 import { Trade } from "@/sdk_bi/entities/trade";
 
 export type TokenTrade = Trade<Currency, Currency, TradeType>;
-const poolsFees = [FeeAmount.LOWEST, FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
+const poolsFees = [FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
 
 function filterPools(poolStates: PoolsResult): Pool[] {
   return poolStates
