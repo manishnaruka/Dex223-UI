@@ -378,7 +378,7 @@ export default function PickTokenDialog({
       tokens.map((token) => [token.isNative ? "native" : token.address0, token]),
     );
 
-    return pinnedTokensAddresses[chainId].map((id) => lookupMap.get(id));
+    return pinnedTokensAddresses[chainId]?.map((id) => lookupMap.get(id)) || [];
   }, [chainId, pinnedTokensAddresses, tokens]);
 
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
