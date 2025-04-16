@@ -51,6 +51,13 @@ const query = gql`
   }
 `;
 
+// export function useCachedPools(poolsParams: PoolsParams): PoolsResult {
+//
+//   const
+//
+//   return {}
+// }
+
 export const usePools = (poolsParams: PoolsParams): PoolsResult => {
   const { pools, addPool, poolUpdates } = usePoolsStore();
   const { addresses } = usePoolAddresses();
