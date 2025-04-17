@@ -4,9 +4,10 @@ import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { formatUnits } from "viem";
 
+import { useActiveWalletsDeposites } from "@/app/[locale]/portfolio/stores/deposites.hooks";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
@@ -45,6 +46,7 @@ export const Balances = ({
   setAddressSearch: (value: string) => void;
 }) => {
   const t = useTranslations("Portfolio");
+  const tMT = useTranslations("ManageTokens");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
   const isTokenInfoOpened = Boolean(tokenForPortfolio);
@@ -60,6 +62,13 @@ export const Balances = ({
     setSearchValue: setAddressSearch,
   });
 
+  const { isLoading, deposites } = useActiveWalletsDeposites({
+    searchValue: addressSearch,
+    setSearchValue: setAddressSearch,
+  });
+
+  console.log(deposites);
+
   const currentTableData = tokenBalances
     .filter((value) => filterTable({ searchValue, value }))
     .map(({ token, amountERC20, amountERC223, amountFiat }) => ({
@@ -70,6 +79,16 @@ export const Balances = ({
       amountFiat: amountFiat,
       token,
     })) as any[];
+
+  const depositTokensCount = useMemo(() => {
+    let depositCount = 0;
+    for (const walletDeposites of deposites) {
+      for (const deposite of walletDeposites.deposites) {
+        if (deposite.deposited) depositCount += 1;
+      }
+    }
+    return depositCount;
+  }, [deposites]);
 
   return (
     <>
@@ -154,7 +173,7 @@ export const Balances = ({
           </div>
           <span className="text-18 lg:text-24 font-medium">$ —</span>
           <span className="px-2 py-[2px] border border-secondary-border text-tertiary-text text-14 rounded-1 w-max">
-            {`${currentTableData?.length ? currentTableData.length : "—"} ${t("tokens_suffix")}`}
+            {tMT("tokens_amount", { amount: depositTokensCount })}
           </span>
         </div>
       </div>

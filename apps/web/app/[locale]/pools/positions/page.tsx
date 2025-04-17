@@ -89,10 +89,10 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
       </div>
       <div className="hidden md:flex gap-2 items-center">
         <span className="text-secondary-text">Min:</span> {formatNumber(minTokenAPerTokenB)}{" "}
-        {tokenA?.symbol} per {tokenB?.symbol}
+        {tokenA?.symbol} / {tokenB?.symbol}
         <Svg iconName="double-arrow" className="text-tertiary-text" />
         <span className="text-secondary-text">Max:</span> {formatNumber(maxTokenAPerTokenB)}{" "}
-        {tokenA?.symbol} per {tokenB?.symbol}
+        {tokenA?.symbol} / {tokenB?.symbol}
       </div>
       <div className="flex md:hidden gap-2 items-center">
         <Svg iconName="double-arrow" className="rotate-90 text-tertiary-text" size={32} />
@@ -100,11 +100,11 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
           <div>
             {" "}
             <span className="text-secondary-text">Min:</span> {formatNumber(minTokenAPerTokenB)}{" "}
-            {tokenA?.symbol} per {tokenB?.symbol}
+            {tokenA?.symbol} / {tokenB?.symbol}
           </div>
           <div>
             <span className="text-secondary-text">Max:</span> {formatNumber(maxTokenAPerTokenB)}{" "}
-            {tokenA?.symbol} per {tokenB?.symbol}
+            {tokenA?.symbol} / {tokenB?.symbol}
           </div>
         </div>
       </div>

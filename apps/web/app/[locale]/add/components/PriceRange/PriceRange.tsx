@@ -267,7 +267,7 @@ export const PriceRange = ({
             />
             <div className="flex justify-between text-12 text-tertiary-text">
               <span>{`${t("token_starting_price", { symbol: tokenA?.symbol })}:`}</span>
-              <span>{`${formattedPrice} ${tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}`}</span>
+              <span>{`${formattedPrice} ${tokenA ? `${tokenB?.symbol} = 1 ${tokenA?.symbol}` : ""}`}</span>
             </div>
           </div>
         </>
@@ -276,7 +276,7 @@ export const PriceRange = ({
           <div className="flex w-full flex-row mt-1">
             <CurrentPrice
               price={formattedPrice}
-              description={tokenA ? `${tokenB?.symbol} per ${tokenA?.symbol}` : ""}
+              description={tokenA ? `${tokenB?.symbol} = 1 ${tokenA?.symbol}` : ""}
             />
             <div className="ml-auto flex-col mt-1">
               <div

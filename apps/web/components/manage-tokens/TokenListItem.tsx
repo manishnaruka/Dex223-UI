@@ -58,7 +58,7 @@ function ListPopoverOption(props: Props) {
     case ListActionOption.REMOVE:
       return (
         <button
-          className={clsx(commonClassName, "text-red hocus:text-red-hover")}
+          className={clsx(commonClassName, "text-red-light hocus:text-red-light-hover")}
           onClick={() => props.handleRemove()}
         >
           {t("remove")}
@@ -164,7 +164,7 @@ export default function TokenListItem({
                 </button>
               }
             >
-              <div className="flex flex-col gap-1 px-5 py-3 border-secondary-border border bg-primary-bg rounded-1 shadow-popover shadow-black/70">
+              <div className="flex flex-col gap-1 px-5 py-3 border-secondary-border border bg-primary-bg rounded-3 shadow-popover shadow-black/70">
                 <ListPopoverOption
                   variant={ListActionOption.VIEW}
                   href={
@@ -174,7 +174,9 @@ export default function TokenListItem({
                           tokenList.autoListingContract,
                           tokenList.chainId,
                         )
-                      : "#"
+                      : tokenList.id === `default-${chainId}`
+                        ? "https://github.com/EthereumCommonwealth/Dex223-listings"
+                        : "#"
                   }
                 />
                 <ListPopoverOption
@@ -253,6 +255,7 @@ export default function TokenListItem({
                     onClick={() => {
                       db.tokenLists.delete(tokenList.id);
                       setDeleteOpened(false);
+                      addToast("Tokenlist successfully deleted");
                     }}
                   >
                     {t("confirm_removing")}

@@ -430,7 +430,12 @@ export default function PickTokenDialog({
             }}
             title={tokenForPortfolio.name || "Unknown"}
           />
-          {tokenForPortfolio.isToken && <TokenPortfolioDialogContent token={tokenForPortfolio} />}
+          {tokenForPortfolio.isToken && (
+            <TokenPortfolioDialogContent
+              onManageListAction={() => setIsOpen(false)}
+              token={tokenForPortfolio}
+            />
+          )}
         </>
       ) : (
         <>

@@ -8,9 +8,10 @@ import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
+import Button from "@/components/buttons/Button";
 import TabButton from "@/components/buttons/TabButton";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_bi/entities/currency";
 
 import PoolsTable from "./PoolsTable";
@@ -77,6 +78,7 @@ export default function PoolsPage() {
           </div>
           <div className="flex w-full lg:w-auto gap-2 items-center ml-auto">
             <SelectButton
+              className="pl-4 md:pl-5"
               fullWidth
               onClick={() => {
                 setCurrentlyPicking("tokenA");
@@ -116,12 +118,13 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">{t("select_token")}</span>
+                <span className="text-tertiary-text">{"Token"}</span>
               )}
             </SelectButton>
             <span>—</span>
             <SelectButton
               fullWidth
+              className="pl-4 md:pl-5"
               onClick={() => {
                 setCurrentlyPicking("tokenB");
                 setIsOpenedTokenPick(true);
@@ -160,19 +163,28 @@ export default function PoolsPage() {
                   />
                 </span>
               ) : (
-                <span className="text-tertiary-text">{t("select_token")}</span>
+                <span className="text-tertiary-text">{"Token"}</span>
               )}
             </SelectButton>
           </div>
-          <div className="md:w-[300px] w-full">
-            <SearchInput
-              placeholder={t("pools_search_placeholder")}
-              className="bg-primary-bg"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-              }}
-            />
+          <div className="flex max-md:flex-col max-lg:w-full max-lg:flex-grow items-center gap-2">
+            <div className="max-md:w-full max-lg:flex-grow min-w-[300px]">
+              <SearchInput
+                placeholder={t("pools_search_placeholder")}
+                className="bg-primary-bg"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                }}
+              />
+            </div>
+            <div className="max-md:w-full flex-grow md:flex-grow-0">
+              <Link href="/add">
+                <Button fullWidth endIcon="add">
+                  <span className="whitespace-nowrap">New pool</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
         <PoolsTable

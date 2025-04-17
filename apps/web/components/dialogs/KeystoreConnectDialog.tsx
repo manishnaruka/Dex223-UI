@@ -105,7 +105,7 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
                   style={{ display: "none" }}
                   ref={fileInput}
                 />
-                <div className="flex items-center justify-between rounded-5 bg-tertiary-bg p-5">
+                <div className="flex items-center justify-between rounded-3 bg-tertiary-bg p-5">
                   <div className="w-[120px]">
                     <Button
                       type="button"
