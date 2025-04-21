@@ -1,11 +1,12 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { Address, encodeAbiParameters, getAddress, keccak256 } from "viem";
+import { Address, encodeAbiParameters, encodePacked, getAddress, keccak256 } from "viem";
 
 import { Token } from "@/sdk_bi/entities/token";
 
 import { bytecodes } from "./converter";
 import schemaJson from "./tokenlist.schema.json";
+
 const ajv = new Ajv({ allErrors: true, verbose: true });
 
 const { bytecode20, bytecode223 } = bytecodes;
