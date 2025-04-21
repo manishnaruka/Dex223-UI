@@ -24,14 +24,14 @@ export const ROUTER_ADDRESS: Record<DexChainId, Address> = {
 };
 
 export const NONFUNGIBLE_POSITION_MANAGER_ADDRESS: Record<DexChainId, Address> = {
-  [DexChainId.MAINNET]: "0xedd183a3b4da4dbd210cd51d9ec83bf11c37fc0e",
+  [DexChainId.MAINNET]: "0xca666abfdf2d31a3f4efff8ced7c6504389e51ba",
   [DexChainId.SEPOLIA]: "0xca14c48716F199cf8BCc67Cd98d04e52ca224097",
   [DexChainId.BSC_TESTNET]: "0x9cCF60dDE926FB2579209bb0D6C00C8Cc873A458",
   [DexChainId.EOS]: "0xcB53086f8D8532CD2253A02052314D07ec8D5B76",
 };
 
 export const POOL_INIT_CODE_HASH: Record<DexChainId, Address> = {
-  [DexChainId.MAINNET]: "0xc5708c352a4f3da8cf196988f642d0810ade3ef42e92afc68fc49cd6f9ee3ecd",
+  [DexChainId.MAINNET]: "0xcaa18af2f32aa83067a3bf5052fe7f4e6025a374579f128fd30bff2c48511b61",
   [DexChainId.SEPOLIA]: "0xc5708c352a4f3da8cf196988f642d0810ade3ef42e92afc68fc49cd6f9ee3ecd",
   [DexChainId.BSC_TESTNET]: "0xf0d7ddf29422ea801b9317d66d14a1055d17fd476a9da81c3c985fb2d8e49281",
   [DexChainId.EOS]: "0xf0d7ddf29422ea801b9317d66d14a1055d17fd476a9da81c3c985fb2d8e49281",

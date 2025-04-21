@@ -130,11 +130,15 @@ export function useAddLiquidityParams({
         args: createParams,
       });
 
+      console.log(createParams);
+
       const encodedMintParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "mint",
         args: [mintParams],
       });
+
+      console.log(mintParams);
 
       const params: {
         address: Address;

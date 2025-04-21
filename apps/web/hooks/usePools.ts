@@ -100,8 +100,6 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
   }, [poolTokens]);
   const poolAddresses = useComputePoolAddressesDex(poolAddressesParams);
 
-  console.log(poolTokens);
-  console.log(addresses);
   // query only pools that are not in the store or were updated more than 1 minute ago
   const addressesToUpdate = useMemo(() => {
     const currentDate = new Date(Date.now() - 60000);
@@ -119,7 +117,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
 
         const address = addresses[key];
         // const newAddress = address?.address?.toLowerCase();
-        if (address && address?.address && address.address !== ZERO_ADDRESS) {
+        if (address && address?.address) {
           if (!poolUpdates.has(key) || (poolUpdates.get(key) || 0) < currentDate) {
             array.push(address);
           }
@@ -128,8 +126,6 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
     });
     return array;
   }, [addresses, chainId, poolTokens, poolUpdates]);
-
-  console.log(addressesToUpdate);
 
   const _apolloClient = useMemo(() => {
     return apolloClient(chainId);
@@ -211,8 +207,8 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
         tier,
       });
 
-      const existedPool = pools[key];
-      if (existedPool) return;
+      // const existedPool = pools[key];
+      // if (existedPool) return;
       if (!addressesToUpdate.length) {
         // console.log("no addresses to update");
         return;
