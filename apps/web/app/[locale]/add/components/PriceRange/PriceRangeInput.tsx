@@ -43,16 +43,18 @@ export default function PriceRangeInput({
   // animation if parent value updates local value
   // const [pulsing, setPulsing] = useState<boolean>(false);
 
-  // const handleOnFocus = () => {
-  //   setUseLocalValue(true);
-  //   setActive(true);
-  // };
+  const [isFocused, setIsFocused] = useState(false);
 
-  // const handleOnBlur = useCallback(() => {
-  //   setUseLocalValue(false);
-  //   setActive(false);
-  //   onUserInput(localValue); // trigger update on parent value
-  // }, [localValue, onUserInput]);
+  const handleOnFocus = () => {
+    setIsFocused(true);
+    setUseLocalValue(true);
+  };
+
+  const handleOnBlur = useCallback(() => {
+    setIsFocused(false);
+    setUseLocalValue(false);
+    onUserInput(localValue); // trigger update on parent value
+  }, [localValue, onUserInput]);
 
   // for button clicks
   const handleDecrement = useCallback(() => {
@@ -67,16 +69,9 @@ export default function PriceRangeInput({
 
   useEffect(() => {
     if (localValue !== value && !useLocalValue) {
-      setTimeout(() => {
-        setLocalValue(value); // reset local value to match parent
-        // setPulsing(true); // trigger animation
-        setTimeout(function () {
-          // setPulsing(false);
-        }, 1800);
-      }, 0);
+      setLocalValue(value); // reset local value to match parent
     }
   }, [localValue, useLocalValue, value]);
-  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <div
@@ -94,8 +89,8 @@ export default function PriceRangeInput({
           }}
           prependSymbol={prependSymbol}
           maxDecimals={maxDecimals}
-          onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
-          onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
+          onFocus={handleOnFocus} // Set focus state when NumericFormat is focused
+          onBlur={handleOnBlur} // Remove focus state when NumericFormat loses focus
         />
         <span className="text-12 text-tertiary-text">
           {tokenA && tokenB
