@@ -1,17 +1,23 @@
 import { useQuery } from "@apollo/client";
 import gql from "graphql-tag";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useReadContracts } from "wagmi";
 
 import { POOL_STATE_ABI } from "@/config/abis/poolState";
 import { apolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useFetchPoolData } from "@/hooks/useFetchPoolsData";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Pool } from "@/sdk_bi/entities/pool";
 import { Tick } from "@/sdk_bi/entities/tick";
 import { getPoolAddressKey, useComputePoolAddressesDex } from "@/sdk_bi/utils/computePoolAddress";
-import { usePoolAddresses, usePoolsStore } from "@/stores/usePoolsStore";
+import {
+  _usePoolsStore,
+  PoolRecord,
+  usePoolAddresses,
+  usePoolsStore,
+} from "@/stores/usePoolsStore";
 
 import useDeepEffect from "./useDeepEffect";
 import useDeepMemo from "./useDeepMemo";
@@ -21,6 +27,7 @@ export enum PoolState {
   NOT_EXISTS,
   EXISTS,
   INVALID,
+  IDLE,
 }
 
 export type PoolParams = {
@@ -49,6 +56,105 @@ const query = gql`
     }
   }
 `;
+
+export function useStorePools(poolsParams: PoolsParams): PoolResult {
+  const { pools, addPool, setStatus } = _usePoolsStore();
+  const chainId = useCurrentChainId();
+  const { addresses } = usePoolAddresses();
+
+  const fetchPoolData = useFetchPoolData(chainId);
+
+  const poolKeys = useMemo(() => {
+    if (!chainId) return [];
+    return poolsParams.map(({ currencyA, currencyB, tier }) => {
+      if (!currencyA || !currencyB || !tier) return undefined;
+      if (currencyA.wrapped.equals(currencyB.wrapped)) return undefined;
+      const token0 = currencyA.wrapped.sortsBefore(currencyB.wrapped) ? currencyA : currencyB;
+      const token1 = currencyA.wrapped.sortsBefore(currencyB.wrapped) ? currencyB : currencyA;
+      return getPoolAddressKey({
+        addressTokenA: token0.wrapped.address0,
+        addressTokenB: token1.wrapped.address0,
+        chainId,
+        tier,
+      });
+    });
+  }, [poolsParams, chainId]);
+
+  const poolTokens: ({ token0: Currency; token1: Currency; tier: FeeAmount } | undefined)[] =
+    useMemo(() => {
+      if (!chainId) return [...Array(poolsParams.length)];
+
+      return poolsParams.map(({ currencyA, currencyB, tier }) => {
+        if (!currencyA || !currencyB || !tier) {
+          return undefined;
+        }
+        const tokenA = currencyA;
+        const tokenB = currencyB;
+        if (tokenA.wrapped.equals(tokenB.wrapped)) return undefined;
+        return {
+          token0: tokenA.wrapped.sortsBefore(tokenB.wrapped) ? tokenA : tokenB,
+          token1: tokenA.wrapped.sortsBefore(tokenB.wrapped) ? tokenB : tokenA,
+          tier,
+        };
+      });
+    }, [chainId, poolsParams]);
+
+  useEffect(() => {
+    poolKeys.forEach((key, index) => {
+      if (!key || !addresses[index]) return;
+      const poolRecord = pools[key];
+
+      const shouldFetch =
+        !poolRecord ||
+        poolRecord.status === PoolState.IDLE ||
+        (poolRecord.lastUpdated && poolRecord.lastUpdated < Date.now() - 60000);
+
+      if (shouldFetch && poolRecord?.status !== PoolState.LOADING) {
+        setStatus(key, PoolState.LOADING);
+
+        const { token0, token1, tier } = poolTokens[index];
+        const address = addresses[index].address;
+
+        fetchPoolData(key, address, token0, token1, tier)
+          .then((pool) => {
+            if (pool) {
+              setStatus(key, PoolState.EXISTS, pool);
+            } else {
+              setStatus(key, PoolState.NOT_EXISTS);
+            }
+          })
+          .catch((err) => {
+            setStatus(key, PoolState.INVALID, undefined, err.message);
+          });
+      }
+    });
+  }, [poolKeys, pools, setStatus, fetchPoolData, poolTokens, addresses]);
+
+  // Provide the result to the hook consumer:
+  return useMemo(() => {
+    return poolKeys.map((key) => {
+      if (!key) return [PoolState.INVALID, null];
+
+      const poolRecord = pools[key];
+      if (!poolRecord) return [PoolState.NOT_EXISTS, null];
+
+      switch (poolRecord.status) {
+        case PoolState.EXISTS:
+          return [PoolState.EXISTS, poolRecord.data ?? null];
+        case PoolState.NOT_EXISTS:
+          return [PoolState.NOT_EXISTS, null];
+        case PoolState.INVALID:
+          return [PoolState.INVALID, null];
+        case PoolState.LOADING:
+          return [PoolState.LOADING, null];
+        case PoolState.IDLE:
+          return [PoolState.IDLE, null];
+        default:
+          return [PoolState.LOADING, null]; // Fallback just in case
+      }
+    });
+  }, [poolKeys, pools]);
+}
 
 export const usePools = (poolsParams: PoolsParams): PoolsResult => {
   const { pools, addPool, poolUpdates } = usePoolsStore();
@@ -90,6 +196,7 @@ export const usePools = (poolsParams: PoolsParams): PoolsResult => {
       };
     });
   }, [poolTokens]);
+
   const poolAddresses = useComputePoolAddressesDex(poolAddressesParams);
 
   // query only pools that are not in the store or were updated more than 1 minute ago
