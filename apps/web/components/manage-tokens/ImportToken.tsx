@@ -15,6 +15,7 @@ import TextField from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
+import { predictWrapperAddress } from "@/components/manage-tokens/scripts/convertTokenList";
 import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
@@ -22,6 +23,7 @@ import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { db } from "@/db/db";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
+import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
@@ -82,6 +84,16 @@ export default function ImportToken({ setContent, handleClose }: Props) {
       enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
     },
   });
+
+  console.log(
+    predictWrapperAddress(
+      tokenAddressToImport && isAddress(tokenAddressToImport)
+        ? tokenAddressToImport
+        : "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      true,
+      CONVERTER_ADDRESS[chainId],
+    ),
+  );
 
   const { data: tokenSymbol } = useReadContract({
     abi: ERC20_ABI,

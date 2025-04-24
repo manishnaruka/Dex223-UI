@@ -1,7 +1,7 @@
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -77,8 +77,8 @@ export default function ManageTokenItem({
                     />
                     <p className="mb-5 text-center">
                       {t.rich("confirm_removing_token_text", {
-                        token: token.name,
-                        bold: (chunks) => <b className="whitespace-nowrap">&quot;{chunks}&quot;</b>,
+                        token: (chunks) => token.name,
+                        bold: (chunks) => <b className="whitespace-nowrap">{chunks}</b>,
                       })}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
@@ -99,6 +99,7 @@ export default function ManageTokenItem({
                                 (t) => t.address0 !== token.wrapped.address0,
                               ),
                             });
+                            addToast("Custom token successfully deleted");
                           }
                           setDeleteOpened(false);
                         }}

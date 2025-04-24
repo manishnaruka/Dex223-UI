@@ -150,7 +150,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
       tokens.map((token) => [token.isNative ? "native" : token.address0, token]),
     );
 
-    return pinnedTokensAddresses[chainId].map((id) => lookupMap.get(id));
+    return pinnedTokensAddresses[chainId]?.map((id) => lookupMap.get(id)) || [];
   }, [chainId, pinnedTokensAddresses, tokens]);
 
   return (

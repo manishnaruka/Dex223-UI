@@ -21,7 +21,13 @@ import { useTokenLists } from "@/hooks/useTokenLists";
 import { Token } from "@/sdk_bi/entities/token";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
-function TokenListInfo({ listId }: { listId: TokenListId }) {
+function TokenListInfo({
+  listId,
+  onManageListAction,
+}: {
+  listId: TokenListId;
+  onManageListAction?: () => void;
+}) {
   const t = useTranslations("ManageTokens");
   const tokenLists = useTokenLists();
 
@@ -31,6 +37,7 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
   const { isOpen, setIsOpen, setActiveTab, activeTab, content, setScrollTo, setContent } =
     useManageTokensDialogStore();
   const { handleClose } = useTokenPortfolioDialogStore();
+
   return (
     <div className="flex justify-between w-full flex-col xs:flex-row bg-tertiary-bg rounded-3 xs:bg-transparent pb-1.5 pt-2 pl-4 xs:p-0">
       <div className="flex gap-2 md:gap-3 items-center">
@@ -60,6 +67,10 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
       </div>
       <button
         onClick={() => {
+          if (onManageListAction) {
+            onManageListAction();
+          }
+
           setIsOpen(true);
           setActiveTab(0);
           setContent("default");
@@ -84,7 +95,13 @@ function TokenListInfo({ listId }: { listId: TokenListId }) {
   );
 }
 
-export function TokenPortfolioDialogContent({ token }: { token: Token }) {
+export function TokenPortfolioDialogContent({
+  token,
+  onManageListAction,
+}: {
+  token: Token;
+  onManageListAction?: () => void;
+}) {
   const t = useTranslations("ManageTokens");
 
   return (
@@ -137,7 +154,7 @@ export function TokenPortfolioDialogContent({ token }: { token: Token }) {
           {token.lists?.map((listId) => {
             return (
               <div className="flex gap-3 items-center justify-between flex-col" key={listId}>
-                <TokenListInfo listId={listId} />
+                <TokenListInfo onManageListAction={onManageListAction} listId={listId} />
               </div>
             );
           })}

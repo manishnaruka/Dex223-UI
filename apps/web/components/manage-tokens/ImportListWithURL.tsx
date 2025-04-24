@@ -69,7 +69,7 @@ export default function ImportListWithURL({ setContent }: Props) {
         console.log(e);
       }
     });
-  }, [tokenListAddressToImport]);
+  }, [chainId, tokenListAddressToImport]);
 
   const error = useMemo(() => {
     if (tokenListAddressToImport && !isValidUrl(tokenListAddressToImport)) {

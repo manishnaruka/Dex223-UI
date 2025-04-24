@@ -212,7 +212,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                 {onlyCustom ? (
                   <>{t("custom_tokens_amount", { amount: tokens.length })}</>
                 ) : (
-                  tokens.length
+                  <>{t("tokens_amount", { amount: tokens.length })}</>
                 )}
               </div>
               <div>

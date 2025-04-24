@@ -9,10 +9,10 @@ export const FEE_AMOUNT_DETAIL: Record<
     description: string;
   }
 > = {
-  [FeeAmount.LOWEST]: {
-    label: "0.01",
-    description: "tier_100_description",
-  },
+  // [FeeAmount.LOWEST]: {
+  //   label: "0.01",
+  //   description: "tier_100_description",
+  // },
   [FeeAmount.LOW]: {
     label: "0.05",
     description: "tier_500_description",

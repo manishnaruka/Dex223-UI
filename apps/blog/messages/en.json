@@ -329,7 +329,7 @@
     "full_range": "Full range",
     "low_price": "Low price",
     "high_price": "High price",
-    "price_per": "{symbol0} per {symbol1}",
+    "price_per": "{symbol0} = 1 {symbol1}",
     "current_price": "Current price",
     "price_chart_no_data": "There is no liquidity data.",
     "price_chart_data_not_available": "Liquidity data not available.",

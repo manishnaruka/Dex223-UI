@@ -4,7 +4,7 @@ import { parseUnits } from "viem";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import { IIFE } from "@/functions/iife";
-import { PoolsResult, PoolState, usePools } from "@/hooks/usePools";
+import { PoolsResult, PoolState, usePools, useStorePools } from "@/hooks/usePools";
 import { FeeAmount, TradeType } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
@@ -12,7 +12,7 @@ import { Pool } from "@/sdk_bi/entities/pool";
 import { Trade } from "@/sdk_bi/entities/trade";
 
 export type TokenTrade = Trade<Currency, Currency, TradeType>;
-const poolsFees = [FeeAmount.LOWEST, FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
+const poolsFees = [FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
 
 function filterPools(poolStates: PoolsResult): Pool[] {
   return poolStates
@@ -24,7 +24,7 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
   const { tokenA, tokenB } = useSwapTokensStore();
 
   const { typedValue } = useSwapAmountsStore();
-  const pools = usePools(
+  const pools = useStorePools(
     poolsFees.map((feeAmount) => {
       return {
         currencyA: tokenA,

@@ -13,7 +13,7 @@ import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import { FEE_AMOUNT_DETAIL, FEE_TIERS } from "@/config/constants/liquidityFee";
 import { useFeeTierDistribution } from "@/hooks/useFeeTierDistribution";
-import { PoolsParams, PoolState, usePools } from "@/hooks/usePools";
+import { PoolsParams, PoolState, usePools, useStorePools } from "@/hooks/usePools";
 import { FeeAmount } from "@/sdk_bi/constants";
 
 import { useLiquidityPriceRangeStore } from "../stores/useLiquidityPriceRangeStore";
@@ -106,7 +106,7 @@ export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisa
 
   const poolParams: PoolsParams = useMemo(
     () => [
-      { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOWEST },
+      // { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOWEST },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOW },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.HIGH },
@@ -115,7 +115,7 @@ export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisa
   );
 
   // get pool data on-chain for latest states
-  const pools = usePools(poolParams);
+  const pools = useStorePools(poolParams);
 
   const poolsByFeeTier: Record<FeeAmount, PoolState> = useMemo(
     () =>
@@ -129,7 +129,7 @@ export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisa
         },
         {
           // default all states to NOT_EXISTS
-          [FeeAmount.LOWEST]: PoolState.NOT_EXISTS,
+          // [FeeAmount.LOWEST]: PoolState.NOT_EXISTS,
           [FeeAmount.LOW]: PoolState.NOT_EXISTS,
           [FeeAmount.MEDIUM]: PoolState.NOT_EXISTS,
           [FeeAmount.HIGH]: PoolState.NOT_EXISTS,
