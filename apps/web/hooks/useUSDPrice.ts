@@ -35,7 +35,7 @@ export const useUSDPrice = (tokenAddress: Address | undefined) => {
     const fetchPrice = async () => {
       console.log(loading);
       console.log(prices);
-      console.log(tokenAddress);
+      console.log(tokenAddress?.toLowerCase());
       if (!tokenAddress || loading[tokenAddress] || prices[tokenAddress] !== undefined) return;
 
       console.log("Started loading");

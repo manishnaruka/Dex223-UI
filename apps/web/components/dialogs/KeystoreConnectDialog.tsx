@@ -132,7 +132,9 @@ export default function KeystoreConnectDialog({ isOpen, setIsOpen }: Props) {
                     )}
                   </p>
                 </div>
-                <div className="text-red text-12 mb-4 mt-0.5 h-4">{fileError && fileError}</div>
+                <div className="text-red-light text-12 mb-4 mt-0.5 h-4">
+                  {fileError && fileError}
+                </div>
                 <div>
                   <TextField
                     disabled={!selectedFile || Boolean(fileError)}

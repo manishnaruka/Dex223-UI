@@ -189,6 +189,12 @@ export function useTokenLists(onlyCustom: boolean = false) {
   }, [tokenLists]);
 }
 
+function formatIPFS(logoURI: string | undefined) {
+  return logoURI?.startsWith("ipfs://")
+    ? logoURI?.replace("ipfs://", "https://ipfs.io/ipfs/")
+    : logoURI;
+}
+
 export function useTokens(onlyCustom: boolean = false): Currency[] {
   const tokenLists = useTokenLists(onlyCustom);
   const chainId = useCurrentChainId();
@@ -198,55 +204,50 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
 
     if (tokenLists && tokenLists.length >= 1) {
       const inspect = (...arrays: TokenList[]) => {
-        // const duplicates = [];
-        const map = new Map<Address, Token>();
+        const map = new Map<Address, { token: Token; logoSourceId: TokenListId }>();
+
+        const mainListId = `default-${chainId}`; // Assuming the first list is the main one
 
         const fill = (array: Token[], id: TokenListId) =>
           array.forEach((item) => {
             const lowercaseAddress = item.address0.toLowerCase() as Address;
-
             const rate = getTokenRate(item, tokenLists, item.chainId);
+            const existing = map.get(lowercaseAddress);
 
-            map.set(
-              lowercaseAddress,
-              new Token(
+            const isFromMain = id === mainListId;
+            const shouldOverwriteLogo =
+              !existing || (isFromMain && existing.logoSourceId !== mainListId);
+            const logoURI = shouldOverwriteLogo
+              ? formatIPFS(item?.logoURI) || "/images/tokens/placeholder.svg"
+              : formatIPFS(existing?.token.logoURI) || "/images/tokens/placeholder.svg";
+
+            map.set(lowercaseAddress, {
+              token: new Token(
                 item.chainId,
                 item.address0,
                 item.address1,
                 item.decimals,
                 item.symbol || "Unknown",
                 item.name || "Unknown",
-                !map.has(lowercaseAddress)
-                  ? item?.logoURI || "/images/tokens/placeholder.svg"
-                  : map.get(lowercaseAddress)?.logoURI || "/images/tokens/placeholder.svg",
-                map.has(lowercaseAddress)
-                  ? Array.from(new Set([...(map.get(lowercaseAddress)?.lists || []), id]))
-                  : [id],
+                logoURI,
+                existing ? Array.from(new Set([...(existing.token.lists || []), id])) : [id],
                 rate,
               ),
-            );
+              logoSourceId: shouldOverwriteLogo ? id : existing.logoSourceId,
+            });
           });
 
         arrays.forEach((array) => fill(array.list.tokens, array.id || -1));
 
-        return [...map.values()].sort(function (a, b) {
-          if (a.lists && b.lists) {
-            return b.lists.length - a.lists.length;
-          }
-
-          return 0;
-        });
+        return [...map.values()]
+          .map((entry) => entry.token)
+          .sort((a, b) => (b.lists?.length || 0) - (a.lists?.length || 0));
       };
 
       const tokensArrays = tokenLists.filter((list) => list.enabled);
-
       const _t = inspect(...tokensArrays);
 
-      if (onlyCustom) {
-        return _t;
-      }
-
-      return [native, ..._t];
+      return onlyCustom ? _t : [native, ..._t];
     }
 
     const tokens =
@@ -255,10 +256,6 @@ export function useTokens(onlyCustom: boolean = false): Currency[] {
         .map((l) => l.list.tokens)
         .flat() || [];
 
-    if (onlyCustom) {
-      return tokens;
-    }
-
-    return [native, ...tokens];
+    return onlyCustom ? tokens : [native, ...tokens];
   }, [chainId, onlyCustom, tokenLists]);
 }

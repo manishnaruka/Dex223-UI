@@ -466,7 +466,7 @@ export function TrustMarker({ rate, logoURI, totalScore }: TrustMarkerProps) {
         className={clsx(
           "rounded-full p-0.5 flex items-center gap-1 cursor-pointer text-12 ",
           rateRange === "medium" && "text-orange bg-orange-bg",
-          rateRange === "low" && "text-red bg-red-bg",
+          rateRange === "low" && "text-red-light bg-red-bg",
         )}
       >
         <Svg size={20} iconName="warning-outline" />

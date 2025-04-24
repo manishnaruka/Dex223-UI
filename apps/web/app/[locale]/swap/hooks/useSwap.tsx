@@ -461,10 +461,12 @@ export default function useSwap() {
       let hash;
 
       try {
-        const estimatedGas = await publicClient.estimateContractGas({
-          account: address,
-          ...swapParams,
-        } as any);
+        // const estimatedGas = await publicClient.estimateContractGas({
+        //   account: address,
+        //   ...swapParams,
+        // } as any);
+
+        const estimatedGas = 200000n;
 
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
 

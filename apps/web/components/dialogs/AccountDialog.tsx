@@ -2,7 +2,7 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Address, formatUnits } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
@@ -32,7 +32,13 @@ import { Standard } from "@/sdk_bi/standard";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
-function PinnedTokenRow({ token }: { token: Currency }) {
+function PinnedTokenRow({
+  token,
+  onPriceUpdate,
+}: {
+  token: Currency;
+  onPriceUpdate: (address: Address, price: number) => void;
+}) {
   const {
     balance: { erc20Balance, erc223Balance },
   } = useTokenBalances(token);
@@ -44,15 +50,24 @@ function PinnedTokenRow({ token }: { token: Currency }) {
       }
       return formatFloat("0");
     }
+    console.log(erc20Balance);
+    console.log(erc223Balance);
 
-    if (!token || !erc20Balance || !erc223Balance) {
-      return "0";
-    }
+    const _erc20Balance = erc20Balance?.value || 0n;
+    const _erc223Balance = erc223Balance?.value || 0n;
 
-    return formatFloat(formatUnits(erc20Balance?.value + erc223Balance.value, token.decimals));
+    return formatFloat(formatUnits(_erc20Balance + _erc223Balance, token.decimals));
   }, [erc20Balance, erc223Balance, token]);
 
   const { price, isLoading } = useUSDPrice(token.wrapped.address0);
+
+  useEffect(() => {
+    if (!isLoading && price) {
+      onPriceUpdate(token.wrapped.address0, price * +totalBalance);
+    }
+  }, [price, totalBalance, isLoading, token, onPriceUpdate]);
+
+  console.log(price);
 
   return (
     <div key={token.symbol} className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3">
@@ -153,6 +168,21 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
     return pinnedTokensAddresses[chainId]?.map((id) => lookupMap.get(id)) || [];
   }, [chainId, pinnedTokensAddresses, tokens]);
 
+  const [childPrices, setChildPrices] = useState({});
+
+  const handleChildPriceUpdate = useCallback((tokenAddress: Address, price: number) => {
+    setChildPrices((prev) => ({
+      ...prev,
+      [tokenAddress]: price,
+    }));
+  }, []);
+
+  const totalUSD = useMemo(() => {
+    return formatFloat(
+      Object.values(childPrices).reduce((sum: number, price) => sum + Number(price || 0), 0),
+    );
+  }, [childPrices]);
+
   return (
     <>
       <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
@@ -188,7 +218,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
           <div className="relative mb-5 px-5 py-6 grid gap-3 z-10">
             <div>
               <div className="text-16 text-secondary-text">{t("total_balance")}</div>
-              <div className="text-32 text-primary-text font-medium">$0.00</div>
+              <div className="text-32 text-primary-text font-medium">${totalUSD}</div>
             </div>
           </div>
         </div>
@@ -238,6 +268,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                         <PinnedTokenRow
                           key={pinnedToken.symbol + pinnedToken.wrapped.address0}
                           token={pinnedToken}
+                          onPriceUpdate={handleChildPriceUpdate}
                         />
                       );
                     })}
