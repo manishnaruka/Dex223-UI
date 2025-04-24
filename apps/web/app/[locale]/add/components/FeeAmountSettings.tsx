@@ -13,7 +13,7 @@ import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import { FEE_AMOUNT_DETAIL, FEE_TIERS } from "@/config/constants/liquidityFee";
 import { useFeeTierDistribution } from "@/hooks/useFeeTierDistribution";
-import { PoolsParams, PoolState, usePools } from "@/hooks/usePools";
+import { PoolsParams, PoolState, usePools, useStorePools } from "@/hooks/usePools";
 import { FeeAmount } from "@/sdk_bi/constants";
 
 import { useLiquidityPriceRangeStore } from "../stores/useLiquidityPriceRangeStore";
@@ -115,7 +115,7 @@ export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisa
   );
 
   // get pool data on-chain for latest states
-  const pools = usePools(poolParams);
+  const pools = useStorePools(poolParams);
 
   const poolsByFeeTier: Record<FeeAmount, PoolState> = useMemo(
     () =>

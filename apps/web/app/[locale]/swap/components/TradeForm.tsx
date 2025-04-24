@@ -36,10 +36,12 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
+import { useStorePools } from "@/hooks/usePools";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
+import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
@@ -443,6 +445,16 @@ export default function TradeForm() {
   const nativeCurrency = useNativeCurrency();
   const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
   const { setIsOpen: setConfirmConvertDialogOpen } = useConfirmConvertDialogStore();
+
+  const data = useStorePools([
+    {
+      currencyA: tokenA,
+      currencyB: tokenB,
+      tier: FeeAmount.MEDIUM,
+    },
+  ]);
+
+  console.log(data);
 
   return (
     <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">

@@ -5,7 +5,7 @@ import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 
 import useFeeTierDistributionQuery from "../graphql/thegraph/FeeTierDistributionQuery";
-import { PoolsParams, PoolState, usePools } from "./usePools";
+import { PoolsParams, PoolState, useStorePools } from "./usePools";
 
 // maximum number of blocks past which we consider the data stale
 const MAX_DATA_BLOCK_AGE = 20;
@@ -32,7 +32,7 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
     ],
     [tokenA, tokenB],
   );
-  const [poolStateLow, poolStateMedium, poolStateHigh] = usePools(poolParams);
+  const [poolStateLow, poolStateMedium, poolStateHigh] = useStorePools(poolParams);
 
   return useMemo(() => {
     if (isLoading || error || !distributions) {
