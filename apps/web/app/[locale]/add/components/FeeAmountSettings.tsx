@@ -13,7 +13,7 @@ import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import { FEE_AMOUNT_DETAIL, FEE_TIERS } from "@/config/constants/liquidityFee";
 import { useFeeTierDistribution } from "@/hooks/useFeeTierDistribution";
-import { PoolsParams, PoolState, usePools, useStorePools } from "@/hooks/usePools";
+import { PoolsParams, PoolState, useStorePools } from "@/hooks/usePools";
 import { FeeAmount } from "@/sdk_bi/constants";
 
 import { useLiquidityPriceRangeStore } from "../stores/useLiquidityPriceRangeStore";

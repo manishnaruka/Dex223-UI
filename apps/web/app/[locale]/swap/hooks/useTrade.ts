@@ -4,7 +4,7 @@ import { parseUnits } from "viem";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import { IIFE } from "@/functions/iife";
-import { PoolsResult, PoolState, usePools, useStorePools } from "@/hooks/usePools";
+import { PoolsResult, PoolState, useStorePools } from "@/hooks/usePools";
 import { FeeAmount, TradeType } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
