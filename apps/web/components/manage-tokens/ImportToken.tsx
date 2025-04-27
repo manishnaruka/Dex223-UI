@@ -354,7 +354,9 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                       tokenName &&
                       tokenDecimals &&
                       tokenSymbol &&
-                      predictedOtherAddress
+                      predictedOtherAddress &&
+                      erc20AddressToImport &&
+                      erc223AddressToImport
                     ) {
                       const currentCustomList = tokenLists?.find(
                         (t) => t.id === `custom-${chainId}`,
@@ -363,7 +365,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                       const token = new Token(
                         chainId,
                         erc20AddressToImport as Address,
-                        erc223AddressToImport,
+                        erc223AddressToImport as Address,
                         tokenDecimals,
                         tokenSymbol,
                         tokenName,
