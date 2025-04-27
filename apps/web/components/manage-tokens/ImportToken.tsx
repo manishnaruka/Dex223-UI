@@ -362,8 +362,8 @@ export default function ImportToken({ setContent, handleClose }: Props) {
 
                       const token = new Token(
                         chainId,
-                        tokenAddressToImport as Address,
-                        predictedOtherAddress,
+                        erc20AddressToImport as Address,
+                        erc223AddressToImport,
                         tokenDecimals,
                         tokenSymbol,
                         tokenName,

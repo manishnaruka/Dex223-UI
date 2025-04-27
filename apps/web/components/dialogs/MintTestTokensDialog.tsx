@@ -79,8 +79,8 @@ export default function MintTestTokensDialog() {
   });
 
   const mintErc223 = useMemo(() => {
-    return !isAddress1Wrapper && Boolean(erc223Origin);
-  }, [erc223Origin, isAddress1Wrapper]);
+    return false;
+  }, []);
 
   const { data: balance, refetch } = useReadContract({
     abi: ERC20_ABI,
@@ -98,6 +98,8 @@ export default function MintTestTokensDialog() {
   useEffect(() => {
     refetch();
   }, [latestBlock, refetch]);
+
+  console.log(tokenToMint);
 
   const handleMint = useCallback(() => {
     if (!tokenToMint || !walletClient || !publicClient) {
