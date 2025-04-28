@@ -493,13 +493,17 @@ export default function useSwap() {
 
         closeConfirmInWalletAlert();
 
+        console.log(hash);
+
         if (hash) {
+          console.log(hash);
           setSwapHash(hash);
+          setSwapStatus(SwapStatus.LOADING);
 
           const transaction = await getTransactionWithRetries({ hash, publicClient });
           if (transaction) {
             const nonce = transaction.nonce;
-            setSwapStatus(SwapStatus.LOADING);
+
             addRecentTransaction(
               {
                 hash,
