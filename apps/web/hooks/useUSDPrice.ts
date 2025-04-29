@@ -53,13 +53,15 @@ export const useUSDPrice = (tokenAddress: Address | undefined) => {
 
         console.log("Price data");
         console.log(priceData);
-        const pricesObj = {};
+        const pricesObj: Record<string, number> = {};
 
-        priceData.data?.tokens.forEach((token) => {
-          const price = token?.tokenDayData[0].priceUSD;
-          const address = token?.id;
-          pricesObj[address] = price;
-        });
+        priceData.data?.tokens.forEach(
+          (token: { id: string; tokenDayData: { priceUSD: number }[] }) => {
+            const price = token?.tokenDayData[0].priceUSD;
+            const address = token?.id;
+            pricesObj[address] = price;
+          },
+        );
 
         console.log(pricesObj);
         setPrices(pricesObj);

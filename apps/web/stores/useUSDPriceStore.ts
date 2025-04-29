@@ -4,6 +4,7 @@ interface USDPriceStore {
   prices: Record<string, number | undefined>;
   loading: Record<string, boolean>;
   setPrice: (token: string, price: number) => void;
+  setPrices: (prices: Record<string, number> | undefined) => void;
   setLoading: (token: string, isLoading: boolean) => void;
   isInitialized: boolean;
   setInitialized: () => void;
