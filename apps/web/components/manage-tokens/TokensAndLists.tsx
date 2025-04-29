@@ -198,7 +198,7 @@ export default function TokensAndLists({ setContent, handleClose, setTokenForPor
                 endIcon="import-token"
                 colorScheme={ButtonColor.LIGHT_GREEN}
                 onClick={() => setContent("import-token")}
-                className="rounded-r-0 xl:rounded-r-0 md:rounded-r-0 flex-grow"
+                className="rounded-r-0 xl:rounded-r-0 md:rounded-r-0 sm:rounde-r-0 lg:rounded-r-0 flex-grow"
               >
                 {t("import_token")}
               </Button>

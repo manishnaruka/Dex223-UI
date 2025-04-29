@@ -33,7 +33,7 @@ export default function ManageTokenItem({
     <div className="group">
       <div className="flex justify-between py-1.5">
         <div className="flex gap-3 items-center">
-          <Image className="rounded-full" width={40} height={40} src={token.logoURI || ""} alt="" />
+          <Image className="rounded-2" width={40} height={40} src={token.logoURI || ""} alt="" />
           <div className="flex flex-col">
             <span>{token.name}</span>
             <span className="text-secondary-text">{token.symbol}</span>

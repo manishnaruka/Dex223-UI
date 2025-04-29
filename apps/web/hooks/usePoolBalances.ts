@@ -1,13 +1,8 @@
-import { useQuery } from "@apollo/client";
 import gql from "graphql-tag";
-import { Address } from "viem";
-import { useAccount, useBalance } from "wagmi";
+import { useBalance } from "wagmi";
 
-import { chainToApolloClient } from "@/graphql/thegraph/apollo";
-import { DexChainId } from "@/sdk_bi/chains";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
-import { Token } from "@/sdk_bi/entities/token";
 import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
 export const PoolDataDocument = gql`
   query PoolDataQuery($id: String) {

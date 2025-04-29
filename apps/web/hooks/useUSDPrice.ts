@@ -1,15 +1,16 @@
-import { useLazyQuery } from "@apollo/client";
+import { useApolloClient, useLazyQuery } from "@apollo/client";
 import gql from "graphql-tag";
 import { useEffect, useMemo, useState } from "react";
 import { Address } from "viem";
 
+import { IIFE } from "@/functions/iife";
 import { apolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useUSDPriceStore } from "@/stores/useUSDPriceStore";
 
 type FetchPriceFn = (token: string) => Promise<number>;
 
-const query = gql(`
+const queryPrice = gql(`
   query USDPrice($address: String!) {
     token(id: $address) {
       name
@@ -20,37 +21,77 @@ const query = gql(`
   }
 `);
 
+const queryPrices = gql(`
+  query USDPrices {
+  tokens {
+    id
+    tokenDayData(first: 1, orderBy: date, orderDirection: desc) {
+      priceUSD
+      date
+    }
+  }
+}
+`);
+
+let isInitialized = false;
+let isInitializing = false;
 export const useUSDPrice = (tokenAddress: Address | undefined) => {
-  const { prices, loading, setPrice, setLoading } = useUSDPriceStore();
+  const { prices, loading, setPrice, setLoading, setPrices } = useUSDPriceStore();
   const chainId = useCurrentChainId();
   const [error, setError] = useState<string | null>(null);
   const client = useMemo(() => {
     return apolloClient(chainId);
   }, [chainId]);
-  const [getPrice] = useLazyQuery(query, { client });
 
+  const [getPrice] = useLazyQuery(queryPrice, { client });
+  const [getPrices] = useLazyQuery(queryPrices, { client });
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const priceData = await getPrices();
+
+        console.log("Price data");
+        console.log(priceData);
+        const pricesObj = {};
+
+        priceData.data?.tokens.forEach((token) => {
+          const price = token?.tokenDayData[0].priceUSD;
+          const address = token?.id;
+          pricesObj[address] = price;
+        });
+
+        console.log(pricesObj);
+        setPrices(pricesObj);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        isInitializing = false;
+        isInitialized = true;
+      }
+    };
+
+    if (!isInitialized && !isInitializing) {
+      console.log("Initialize tokens");
+      isInitializing = true;
+      fetchPrices();
+    }
+  }, [getPrices, setPrices]);
   // Fetch price if not available and not already loading
   useEffect(() => {
-    console.log("Fetch initialized");
     const fetchPrice = async () => {
-      console.log(loading);
-      console.log(prices);
-      console.log(tokenAddress);
       if (!tokenAddress || loading[tokenAddress] || prices[tokenAddress] !== undefined) return;
 
-      console.log("Started loading");
       setLoading(tokenAddress, true);
       try {
-        console.log("Loading price");
         const priceData = await getPrice({ variables: { address: tokenAddress.toLowerCase() } });
-        console.log(priceData);
 
         if (priceData.data.token) {
           const price =
             priceData.data.token?.tokenDayData[priceData.data.token?.tokenDayData.length - 1]
               .priceUSD;
           setError(null);
-          setPrice(tokenAddress, price);
+          setPrice(tokenAddress.toLowerCase(), price);
         } else {
           setError("Token price not found");
         }
@@ -62,19 +103,25 @@ export const useUSDPrice = (tokenAddress: Address | undefined) => {
       }
     };
 
-    console.log(tokenAddress);
-    console.log(prices);
-    console.log(loading);
-    console.log(error);
-    if (tokenAddress && prices[tokenAddress] === undefined && !loading[tokenAddress] && !error) {
-      console.log("Check");
+    if (
+      tokenAddress &&
+      prices[tokenAddress.toLowerCase()] === undefined &&
+      !loading[tokenAddress] &&
+      !error &&
+      isInitialized &&
+      !isInitializing
+    ) {
+      console.log(`No price for token ${tokenAddress}, fetching...`);
+      console.log(prices);
       fetchPrice();
     }
   }, [tokenAddress, prices, loading, setLoading, setPrice, getPrice, error, chainId]);
 
   return {
     price: tokenAddress ? prices[tokenAddress] : undefined,
-    isLoading: tokenAddress && (loading[tokenAddress] || prices[tokenAddress] === undefined),
+    isLoading:
+      tokenAddress &&
+      (loading[tokenAddress] || prices[tokenAddress] === undefined || !isInitialized),
     error,
   };
 };

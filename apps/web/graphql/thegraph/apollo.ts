@@ -6,6 +6,7 @@ import {
   InMemoryCache,
   NormalizedCacheObject,
 } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 
 import { DexChainId } from "@/sdk_bi/chains";
 
@@ -24,7 +25,7 @@ const CHAIN_SUBGRAPH_URL: Record<DexChainId, string> = {
   // [ChainId.BASE]:
   //   "https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest?source=uniswap",
   [DexChainId.MAINNET]:
-    "https://api.studio.thegraph.com/query/56540/dex223-v1-mainnet/version/latest",
+    "https://gateway.thegraph.com/api/subgraphs/id/78wjdcwJTbTmvhnUcyXjZVDPk5kWGFuosEuEWDimvHf2",
   [DexChainId.SEPOLIA]:
     "https://api.studio.thegraph.com/query/56540/dex223-v1-sepolia/version/latest",
   // [DexChainId.CALLISTO]: "",
@@ -32,7 +33,8 @@ const CHAIN_SUBGRAPH_URL: Record<DexChainId, string> = {
   [DexChainId.EOS]: "https://graph.dex223.io/subgraphs/name/dex223-eosevm",
 };
 
-const httpLink = new HttpLink({ uri: CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA] });
+const httpLink = new HttpLink({ uri: CHAIN_SUBGRAPH_URL[DexChainId.MAINNET] });
+
 export function getAuthMiddleware(chainId: DexChainId) {
   return new ApolloLink((operation, forward) => {
     operation.setContext(() => ({
@@ -46,17 +48,27 @@ export function getAuthMiddleware(chainId: DexChainId) {
   });
 }
 
+const authLink = setContext((_, { headers }) => {
+  // return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: `Bearer dd02abf59536e6ad2a565be4702550bb`,
+    },
+  };
+});
+
 export function apolloClient(chainId: DexChainId) {
   return new ApolloClient({
     cache: new InMemoryCache(),
-    link: concat(getAuthMiddleware(chainId), httpLink),
+    link: authLink.concat(concat(getAuthMiddleware(chainId), httpLink)),
   });
 }
 
 export const chainToApolloClient: Record<DexChainId, ApolloClient<NormalizedCacheObject>> = {
   [DexChainId.MAINNET]: new ApolloClient({
     cache: new InMemoryCache(),
-    uri: CHAIN_SUBGRAPH_URL[DexChainId.MAINNET],
+    link: authLink.concat(concat(getAuthMiddleware(DexChainId.MAINNET), httpLink)),
   }),
   // [ChainId.ARBITRUM_ONE]: new ApolloClient({
   //   cache: new InMemoryCache(),
