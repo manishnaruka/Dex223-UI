@@ -53,7 +53,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: `Bearer ${process.env.AUTH_TOKEN_GQL}`,
+      authorization: `Bearer ${process.env.NEXT_PUBLIC_AUTH_TOKEN_GQL}`,
     },
   };
 });
