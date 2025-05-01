@@ -88,7 +88,7 @@ export const useUSDPrice = (tokenAddress: Address | undefined) => {
       try {
         const priceData = await getPrice({ variables: { address: tokenAddress.toLowerCase() } });
 
-        if (priceData.data.token) {
+        if (priceData.data?.token) {
           const price =
             priceData.data.token?.tokenDayData[priceData.data.token?.tokenDayData.length - 1]
               .priceUSD;

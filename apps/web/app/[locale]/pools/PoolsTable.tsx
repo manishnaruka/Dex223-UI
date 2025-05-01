@@ -318,7 +318,7 @@ const PoolsTableMobile = ({
           className={sorting === SortingType.NONE ? "text-secondary-text" : "text-green"}
         />
       </div>
-      <div className="flex md:hidden flex-col gap-4">
+      <div className="flex lg:hidden flex-col gap-4">
         {tableData.map((pool: any, index: number) => {
           return (
             <PoolsTableItemMobile

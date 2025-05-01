@@ -100,7 +100,7 @@ function PinnedTokenRow({
             </div>
 
             <span className="text-secondary-text text-12">
-              {formatFloat(erc20Balance?.formatted || "0.0")} {token.symbol}
+              {formatFloat(erc20Balance?.formatted || "0")} {token.symbol}
             </span>
           </div>
           <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
@@ -113,7 +113,7 @@ function PinnedTokenRow({
             </div>
 
             <span className="text-secondary-text text-12">
-              {formatFloat(erc223Balance?.formatted || "0.0")} {token.symbol}
+              {formatFloat(erc223Balance?.formatted || "0")} {token.symbol}
             </span>
           </div>
         </div>
@@ -128,7 +128,7 @@ function PinnedTokenRow({
           </div>
 
           <span className="text-secondary-text text-12">
-            {formatFloat(erc20Balance?.formatted || "0.0")} {token.symbol}
+            {formatFloat(erc20Balance?.formatted || "0")} {token.symbol}
           </span>
         </div>
       )}

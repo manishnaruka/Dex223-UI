@@ -1,5 +1,7 @@
 import clsx from "clsx";
 
+import { clsxMerge } from "@/functions/clsxMerge";
+
 export enum BadgeVariant {
   COLORED,
   DEFAULT,
@@ -32,7 +34,7 @@ export default function Badge(props: Props) {
       const { text, color = "green", size = "default", className } = props;
       return (
         <div
-          className={clsx(
+          className={clsxMerge(
             "rounded-5 px-2 font-medium box-border text-nowrap",
             color === "blue" && "bg-blue-bg shadow-[0_0_0_1px_theme(colors.blue)_inset] text-blue",
             color === "green" &&

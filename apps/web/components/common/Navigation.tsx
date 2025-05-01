@@ -35,7 +35,7 @@ function NavigationExternalLinksContainer({
 }) {
   return (
     <div className="flex flex-col text-16 text-primary-text gap-1">
-      <div className="text-secondary-text">{title}</div>
+      <div className="text-tertiary-text">{title}</div>
       <div className="flex flex-col">
         {links.map((link) => {
           return <NavigationExternalLink key={link.text} href={link.href} text={link.text} />;

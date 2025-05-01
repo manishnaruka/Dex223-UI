@@ -5,7 +5,7 @@ export default function ToastProvider({ children }: PropsWithChildren) {
   return (
     <>
       {children}
-      <Toaster position="bottom-center" />
+      <Toaster className="w-[380px]" position="bottom-center" />
     </>
   );
 }

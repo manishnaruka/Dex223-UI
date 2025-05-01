@@ -10,6 +10,7 @@ const nextConfig = {
     "@repo/ui"
   ],
   images: {
+    dangerouslyAllowSVG: true,
     domains: ['ipfs.io', 'cloudflare-ipfs.com', 'gateway.pinata.cloud'],
     remotePatterns: [
       {

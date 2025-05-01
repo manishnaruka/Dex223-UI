@@ -504,7 +504,7 @@ export default function ConfirmSwapDialog() {
       return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
     }
 
-    return "0.00";
+    return "0";
   }, [baseFee, gasPriceSettings]);
   const isConversion = useMemo(() => tokenB && tokenA?.equals(tokenB), [tokenA, tokenB]);
 
@@ -609,7 +609,7 @@ export default function ConfirmSwapDialog() {
                   height={24}
                 />
                 <span>
-                  {tokenA?.symbol} {typedValue}
+                  {typedValue} {tokenA?.symbol}
                 </span>
                 <Svg className="text-tertiary-text" iconName="next" />
                 <Image
@@ -619,7 +619,7 @@ export default function ConfirmSwapDialog() {
                   height={24}
                 />
                 <span>
-                  {tokenB?.symbol} {output}
+                  {output} {tokenB?.symbol}
                 </span>
               </div>
             </div>

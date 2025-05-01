@@ -87,7 +87,7 @@ function MobileStandardOption({
                   standard === Standard.ERC223 ? "text-right" : "text-left",
                 )}
               >
-                {balance || "0.0"} {symbol}
+                {balance || "0"} {symbol}
               </span>
             </span>
           </span>
@@ -186,7 +186,7 @@ function StandardOption({
               <span className={standard === active ? "text-secondary-text" : "text-tertiary-text"}>
                 {t("balance")}
               </span>{" "}
-              {balance || "0.0"} {symbol}
+              {balance || "0"} {symbol}
             </span>
           </span>
         )}
@@ -270,7 +270,7 @@ export default function TokenInput({
             allowedDecimalSeparators={[","]}
             decimalScale={token?.decimals}
             inputMode="decimal"
-            placeholder="0.0"
+            placeholder="0"
             className={clsx(
               "h-12 bg-transparent outline-0 border-0 text-32 w-full peer placeholder:text-tertiary-text",
               readOnly && "pointer-events-none",
@@ -283,7 +283,7 @@ export default function TokenInput({
             allowNegative={false}
           />
           <span className="text-12 block -mt-1 text-tertiary-text">
-            ${price ? formatFloat(price * +value) : "0.00"}
+            ${price ? formatFloat(price * +value) : "0"}
           </span>
           <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
@@ -450,7 +450,7 @@ export default function TokenInput({
             <span className={clsx("block text-primary-text")}>
               {t("balance")}{" "}
               <span className="whitespace-nowrap">
-                {balance1 || "0.0"} {token.symbol}
+                {balance1 || "0"} {token.symbol}
               </span>
             </span>
           </div>

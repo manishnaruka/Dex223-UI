@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import Svg from "@/components/atoms/Svg";
 import TokenAddressWithStandard from "@/components/atoms/TokenAddressWithStandard";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import TrustBadge from "@/components/badges/TrustBadge";
 import IconButton from "@/components/buttons/IconButton";
 import { useTokenPortfolioDialogStore } from "@/components/dialogs/stores/useTokenPortfolioDialogStore";
@@ -68,11 +69,25 @@ export function SelectedTokenInfoItem({ token }: { token: Currency }) {
             />
             <div className="flex flex-col">
               <div className="flex gap-2 items-center">
-                <div className="table table-fixed w-full">
-                  <span className="table-cell overflow-hidden overflow-ellipsis whitespace-nowrap">
-                    {token.name}
-                  </span>
-                </div>
+                {token.isToken ? (
+                  <div className="table table-fixed w-full">
+                    <span className="table-cell overflow-hidden overflow-ellipsis whitespace-nowrap">
+                      {token.name}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span>{token.name}</span>
+                    {token.isNative && (
+                      <Badge
+                        variant={BadgeVariant.COLORED}
+                        color="green"
+                        text="Native"
+                        className="text-10 lg:text-12 lg:py-px"
+                      />
+                    )}
+                  </div>
+                )}
               </div>
               <div className="text-secondary-text text-12">
                 <div className="table table-fixed w-full">

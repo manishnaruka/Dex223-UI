@@ -263,7 +263,7 @@ export const RevokeDialog = () => {
                   isNumeric
                   disabled={inputDisabled}
                   decimalScale={token.decimals}
-                  placeholder="0.0"
+                  placeholder="0"
                   internalText={t("amount", { symbol: token.symbol })}
                   allowNegative={false}
                   error={error}

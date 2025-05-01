@@ -12,11 +12,17 @@ import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsSt
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Container from "@/components/atoms/Container";
+import Button from "@/components/buttons/Button";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useSwapSearchParams } from "@/hooks/useSwapSearchParams";
+import { addNotification } from "@/other/notification";
+import {
+  RecentTransactionStatus,
+  RecentTransactionTitleTemplate,
+} from "@/stores/useRecentTransactionsStore";
 
 export default function SwapPage() {
   useSwapSearchParams();

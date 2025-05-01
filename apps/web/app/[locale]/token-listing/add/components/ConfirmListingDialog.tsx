@@ -451,7 +451,7 @@ export default function ConfirmListingDialog() {
       return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
     }
 
-    return "0.00";
+    return "0";
   }, [baseFee, gasPriceSettings]);
 
   const tokensToList = useTokensToList();

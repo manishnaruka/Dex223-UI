@@ -16,6 +16,11 @@ export function addNotification(
         transactionStatus={transactionStatus}
       />
     ),
-    { position: "top-right", duration: options?.duration || 7500, ...options },
+    {
+      className: "right-0 w-full",
+      position: "top-right",
+      duration: options?.duration || 7500,
+      ...options,
+    },
   );
 }

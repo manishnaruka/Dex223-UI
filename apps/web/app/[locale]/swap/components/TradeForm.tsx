@@ -126,10 +126,18 @@ function OpenConfirmDialogButton({
     );
   }
 
-  if (!typedValue) {
+  if (!+typedValue) {
     return (
       <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("enter_amount")}
+      </Button>
+    );
+  }
+
+  if (!isSufficientBalance) {
+    return (
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+        {t("insufficient_balance")}
       </Button>
     );
   }
@@ -154,14 +162,6 @@ function OpenConfirmDialogButton({
     return (
       <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         {t("swap_is_unavailable_for_this_pair")}
-      </Button>
-    );
-  }
-
-  if (!isSufficientBalance) {
-    return (
-      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
-        {t("insufficient_balance")}
       </Button>
     );
   }
@@ -454,8 +454,6 @@ export default function TradeForm() {
     },
   ]);
 
-  console.log(data);
-
   return (
     <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">
       <div className="flex justify-between items-center mb-2.5">
@@ -499,8 +497,8 @@ export default function TradeForm() {
         gasERC223={gasERC223}
         token={tokenA}
         isEqualTokens={!!tokenA && !!tokenB && tokenA.wrapped.address0 === tokenB.wrapped.address0}
-        balance0={tokenA0Balance ? formatFloat(tokenA0Balance.formatted) : "0.0"}
-        balance1={tokenA1Balance ? formatFloat(tokenA1Balance.formatted) : "0.0"}
+        balance0={tokenA0Balance ? formatFloat(tokenA0Balance.formatted) : "0"}
+        balance1={tokenA1Balance ? formatFloat(tokenA1Balance.formatted) : "0"}
         setMax={
           (Boolean(tokenA0Balance?.value) && tokenAStandard === Standard.ERC20) ||
           (Boolean(tokenA1Balance?.value) && tokenAStandard === Standard.ERC223)
@@ -599,8 +597,8 @@ export default function TradeForm() {
           setIsOpenedTokenPick(true);
         }}
         token={tokenB}
-        balance0={tokenB0Balance ? formatFloat(tokenB0Balance.formatted) : "0.0"}
-        balance1={tokenB1Balance ? formatFloat(tokenB1Balance.formatted) : "0.0"}
+        balance0={tokenB0Balance ? formatFloat(tokenB0Balance.formatted) : "0"}
+        balance1={tokenB1Balance ? formatFloat(tokenB1Balance.formatted) : "0"}
         label={t("you_receive")}
         standard={tokenBStandard}
         otherStandard={tokenAStandard}
