@@ -470,10 +470,12 @@ export default function PoolPage({
                     onClick={() => setIsOpen(true)}
                     size={ButtonSize.MEDIUM}
                     mobileSize={ButtonSize.SMALL}
-                    disabled={!fees[0] && !fees[1]}
+                    // disabled={!fees[0] && !fees[1]}
+                    disabled={true}
                     className="disabled:bg-quaternary-bg"
                   >
-                    {t("collect_fees_title")}
+                    {/*{t("collect_fees_title")}*/}
+                    Fee collection temporary disabled
                   </Button>
                 </div>
 
@@ -954,13 +956,15 @@ export default function PoolPage({
               />
 
               {[CollectFeesStatus.INITIAL].includes(status) ? (
-                <Button onClick={() => handleCollectFees()} fullWidth>
-                  {t("collect_fees_title")}
+                <Button onClick={() => handleCollectFees()} disabled fullWidth>
+                  {/*{t("collect_fees_title")}*/}
+                  Fee collection temporary disabled
                 </Button>
               ) : null}
               {CollectFeesStatus.LOADING === status ? (
-                <Button fullWidth isLoading={true}>
-                  {t("collect_fees_title")}
+                <Button fullWidth isLoading={true} disabled>
+                  {/*{t("collect_fees_title")}*/}
+                  Fee collection temporary disabled
                   <span className="flex items-center gap-2">
                     <Preloader size={20} color="black" />
                   </span>
