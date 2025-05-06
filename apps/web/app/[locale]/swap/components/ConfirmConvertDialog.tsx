@@ -69,7 +69,6 @@ function ApproveRow({
   const t = useTranslations("Swap");
   const chainId = useCurrentChainId();
 
-
   return (
     <div
       className={clsx(
