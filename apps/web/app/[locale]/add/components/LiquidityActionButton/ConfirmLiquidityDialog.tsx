@@ -538,8 +538,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                 <div className="text-18">{currentPriceString}</div>
                 <div className="text-14 text-tertiary-text">
                   {showFirst
-                    ? `${token0?.symbol} per ${token1?.symbol}`
-                    : `${token1?.symbol} per ${token0?.symbol}`}
+                    ? `${token0?.symbol} = 1 ${token1?.symbol}`
+                    : `${token1?.symbol} = 1 ${token0?.symbol}`}
                 </div>
               </div>
             </div>

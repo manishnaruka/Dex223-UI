@@ -405,11 +405,16 @@ export default function PickTokenDialog({
   });
   const items = virtualizer.getVirtualItems();
 
+  const minYPadding = useMemo(() => (pinnedTokens?.length ? 8 : 0), [pinnedTokens]);
+
   const [paddingTop, paddingBottom] = useMemo(() => {
     return items.length > 0
-      ? [items[0].start, Math.max(0, virtualizer.getTotalSize() - items[items.length - 1].end)]
-      : [0, 0];
-  }, [items, virtualizer]);
+      ? [
+          Math.max(minYPadding, items[0].start),
+          Math.max(8, virtualizer.getTotalSize() - items[items.length - 1].end),
+        ]
+      : [minYPadding, 8];
+  }, [items, minYPadding, virtualizer]);
 
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
@@ -543,7 +548,7 @@ export default function PickTokenDialog({
                 <div
                   className={clsxMerge(
                     "flex-grow flex min-h-0",
-                    simpleForm && " overflow-hidden md:pb-5",
+                    simpleForm && "overflow-hidden md:pb-5",
                   )}
                 >
                   {Boolean(filteredTokens.length) && (

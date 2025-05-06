@@ -70,7 +70,7 @@ export default function PickTokenDialog({
           )}
 
           {!tokensLoading && tokens.length && (
-            <div style={{ flex: "1 1 auto" }} className="pb-[1px]">
+            <div style={{ flex: "1 1 auto" }} className="pb-[1px] ">
               {Boolean(tokens.length) && (
                 <SimpleBar
                   scrollableNodeProps={{
@@ -85,10 +85,11 @@ export default function PickTokenDialog({
                       paddingTop,
                       paddingBottom,
                     }}
+                    className="max-md:pb-2"
                   >
                     {items.map((item) => (
                       <button
-                        className="pl-4 sm:pl-6 lg:pl-10 w-[calc(100%_-_14px)] block duration-200 hover:bg-tertiary-bg"
+                        className="pl-4 sm:pl-6 lg:pl-10 w-[calc(100%_-_14px)] block duration-200 hover:bg-tertiary-bg "
                         onClick={() => {
                           handlePick(filteredTokens[item.index]);
                           setIsOpen(false);

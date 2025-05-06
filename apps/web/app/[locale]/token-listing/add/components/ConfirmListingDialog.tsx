@@ -144,7 +144,7 @@ function ListTokenRow({
               isDisabled ? "text-tertiary-text" : "text-green",
               isReverted && "text-red-light",
             )}
-            iconName="swap"
+            iconName="listing"
           />
         </div>
       </div>

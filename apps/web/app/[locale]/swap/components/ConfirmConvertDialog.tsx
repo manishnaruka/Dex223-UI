@@ -486,7 +486,7 @@ export default function ConfirmConvertDialog() {
       return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
     }
 
-    return "0.00";
+    return "0";
   }, [baseFee, gasPriceSettings]);
 
   const isConversion = useMemo(() => tokenB && tokenA?.equals(tokenB), [tokenA, tokenB]);

@@ -5,8 +5,6 @@ const emptyImagePath = "/images/empty-large";
 /** @type {import('tailwindcss').Config} */
 const config = {
   content: [
-    "../../apps/web/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../apps/web/components/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/blog/app/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/exchange/app/**/*.{js,ts,jsx,tsx,mdx}",

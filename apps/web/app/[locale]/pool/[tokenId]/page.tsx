@@ -672,8 +672,8 @@ export default function PoolPage({
                   <div className="text-16 lg:text-18">{currentPriceString}</div>
                   <div className="text-12 lg:text-14 text-tertiary-text">
                     {showFirst
-                      ? `${token0?.symbol} per ${token1?.symbol}`
-                      : `${token1?.symbol} per ${token0?.symbol}`}
+                      ? `${token0?.symbol} = 1 ${token1?.symbol}`
+                      : `${token1?.symbol} = 1 ${token0?.symbol}`}
                   </div>
                 </div>
               </div>
@@ -814,7 +814,12 @@ export default function PoolPage({
               )}
 
               {/* Standard A */}
-              <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
+              <div
+                className={clsx(
+                  "flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 mt-4",
+                  token0?.isNative ? "py-3" : "pt-3 pb-4 lg:pb-5",
+                )}
+              >
                 <div
                   className={clsx("flex gap-2 items-start", token0?.isNative && "justify-between")}
                 >
@@ -876,7 +881,12 @@ export default function PoolPage({
                 )}
               </div>
               {/* Standard B */}
-              <div className="flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 py-3 mt-4">
+              <div
+                className={clsx(
+                  "flex flex-col rounded-3 bg-tertiary-bg px-4 lg:px-5 mt-4",
+                  token1?.isNative ? "py-3" : "pt-3 pb-4 lg:pb-5",
+                )}
+              >
                 <div
                   className={clsx("flex gap-2 items-start", token1?.isNative && "justify-between")}
                 >
