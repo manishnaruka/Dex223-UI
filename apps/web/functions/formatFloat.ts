@@ -9,7 +9,7 @@ export function formatFloat(
   const maximumSignificantDigits = options?.significantDigits ?? 2;
 
   if (numberValue < 1e-10) {
-    if (options?.trimZero) {
+    if (options?.trimZero || numberValue === 0) {
       return "0";
     }
 

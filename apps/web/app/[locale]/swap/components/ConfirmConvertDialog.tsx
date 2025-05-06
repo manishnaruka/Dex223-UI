@@ -69,10 +69,11 @@ function ApproveRow({
   const t = useTranslations("Swap");
   const chainId = useCurrentChainId();
 
+
   return (
     <div
       className={clsx(
-        "grid grid-cols-[32px_1fr_1fr] gap-2 h-10 before:absolute relative before:left-[15px] before:-bottom-4 before:w-0.5 before:h-3 before:rounded-1",
+        "grid grid-cols-[32px_auto_1fr] gap-2 h-10 before:absolute relative before:left-[15px] before:-bottom-4 before:w-0.5 before:h-3 before:rounded-1",
         isSuccess ? "before:bg-green" : "before:bg-green-bg",
       )}
     >
@@ -142,7 +143,7 @@ function SwapRow({
   const chainId = useCurrentChainId();
 
   return (
-    <div className="grid grid-cols-[32px_1fr_1fr] gap-2 h-10">
+    <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
       <div className="flex items-center h-full">
         <div
           className={clsxMerge(

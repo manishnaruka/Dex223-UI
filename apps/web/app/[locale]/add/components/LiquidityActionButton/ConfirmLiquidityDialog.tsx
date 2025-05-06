@@ -686,7 +686,7 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
         <div className="h-px w-full bg-secondary-border mb-4 mt-5" />
         {/* <ApproveRow /> */}
         {/* LIQUIDITY ROW */}
-        <div className="grid grid-cols-[32px_1fr_1fr] gap-2 h-10">
+        <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
           <div className="flex items-center h-full">
             <div
               className={clsx(
