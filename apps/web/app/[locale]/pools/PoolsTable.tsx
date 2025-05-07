@@ -84,6 +84,9 @@ const PoolsTableDesktop = ({
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
+  console.log(tableData);
+  console.log("TABLE DATA");
+
   return (
     <div className="hidden lg:grid pr-3 pl-2 rounded-3 overflow-hidden bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(30px,1fr),_minmax(30px,1fr),_minmax(30px,1fr)] pb-2">
       <div className=" h-[60px] flex items-center justify-center  text-tertiary-text ">#</div>
@@ -140,6 +143,32 @@ const PoolsTableDesktop = ({
             </React.Fragment>
           ))
         : tableData.map((o: any, index: number) => {
+            let token0Symbol = o.token0.symbol;
+            let token1Symbol = o.token1.symbol;
+
+            let token0Image = "/images/tokens/placeholder.svg";
+            let token1Image = "/images/tokens/placeholder.svg";
+
+            const d223 = "0x0908078Da2935A14BC7a17770292818C85b580dd";
+            if (o.token0.addressERC223 === d223.toLowerCase()) {
+              token0Symbol = "D223";
+              token0Image = "/images/tokens/DEX.svg";
+            }
+            if (o.token1.addressERC223 === d223.toLowerCase()) {
+              token1Symbol = "D223";
+              token1Image = "/images/tokens/DEX.svg";
+            }
+
+            const weth9 = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+            if (o.token0.id === weth9.toLowerCase()) {
+              token0Symbol = "ETH";
+              token0Image = "/images/tokens/ETH.svg";
+            }
+            if (o.token1.id === weth9.toLowerCase()) {
+              token1Symbol = "ETH";
+              token1Image = "/images/tokens/ETH.svg";
+            }
+
             return (
               <React.Fragment key={o.id || index}>
                 <div
@@ -156,18 +185,18 @@ const PoolsTableDesktop = ({
                   onClick={() => openPoolHandler(o.id)}
                   className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
                 >
-                  <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
+                  <Image src={token0Image} width={24} height={24} alt="" />
                   <Image
-                    src="/images/tokens/placeholder.svg"
+                    src={token1Image}
                     width={24}
                     height={24}
                     alt=""
-                    className="-ml-3 bg-primary-bg rounded-full"
+                    className="-ml-2 bg-primary-bg rounded-full"
                   />
-                  <span className="ml-3 mr-2">{`${truncateMiddle(o.token0.symbol, {
+                  <span className="ml-3 mr-2">{`${truncateMiddle(token0Symbol, {
                     charsFromStart: 4,
                     charsFromEnd: 3,
-                  })}/${truncateMiddle(o.token1.symbol, {
+                  })}/${truncateMiddle(token1Symbol, {
                     charsFromStart: 4,
                     charsFromEnd: 3,
                   })}`}</span>

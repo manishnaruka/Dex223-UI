@@ -125,7 +125,7 @@ const useCollectFeesParams = () => {
       const encodedCoolectParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "collect" as const,
-        args: [{ ...collectArgs, recipient: ZERO_ADDRESS }] as const,
+        args: [collectArgs] as const,
       });
 
       const encodedUnwrapParams = encodeFunctionData({
@@ -138,7 +138,7 @@ const useCollectFeesParams = () => {
         address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "multicall" as const,
-        args: [[encodedCoolectParams, encodedUnwrapParams]] as const,
+        args: [[encodedCoolectParams]] as const,
       };
     }
 

@@ -47,7 +47,7 @@ export const useCollectFeesStore = create<CollectFeesStore>((set, get) => ({
 
 export const useTokensOutCode = () => {
   const { token0Standard, token1Standard } = useCollectFeesStore();
-  const tokensOutCode = useMemo(() => {
+  return useMemo(() => {
     // 0 >> both ERC-20
     // 1 >> 0 ERC-20, 1 ERC-223
     // 2 >> 0 ERC-223, 1 ERC-20
@@ -58,5 +58,4 @@ export const useTokensOutCode = () => {
     if (token0Standard === Standard.ERC223 && token1Standard === Standard.ERC223) return 3;
     return 0;
   }, [token0Standard, token1Standard]);
-  return tokensOutCode;
 };
