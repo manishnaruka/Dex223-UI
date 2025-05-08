@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { encodeFunctionData, getAbiItem } from "viem";
+import { encodeFunctionData, formatUnits, getAbiItem, parseUnits } from "viem";
 import {
   useAccount,
   usePublicClient,
@@ -21,15 +21,22 @@ import {
   useRefreshStore,
   useTokensOutCode,
 } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesStore";
+import { SwapStatus } from "@/app/[locale]/swap/stores/useSwapStatusStore";
+import { ERC20_ABI } from "@/config/abis/erc20";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { WETH9_ABI } from "@/config/abis/weth9";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
+import addToast from "@/other/toast";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Token } from "@/sdk_bi/entities/token";
+import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
+import { MAX_SAFE_INTEGER } from "@/sdk_bi/utils/sqrt";
 import {
+  GasFeeModel,
   RecentTransactionTitleTemplate,
   stringifyObject,
   useRecentTransactionsStore,
@@ -95,7 +102,7 @@ const useCollectFeesParams = () => {
   const { address } = useAccount();
   const recipient = address || ZERO_ADDRESS;
 
-  const fees = useCollectFees();
+  // const fees = useCollectFees();
 
   const collectFeesParams = useMemo(() => {
     if (!pool) return undefined;
@@ -107,40 +114,40 @@ const useCollectFeesParams = () => {
       amount1Max: MAX_UINT128,
       tokensOutCode,
     };
-    const nativeCoinAmount = pool.token0.isNative
-      ? fees[0]
-      : pool.token1.isNative
-        ? fees[1]
-        : undefined;
+    // const nativeCoinAmount = pool.token0.isNative
+    //   ? fees[0]
+    //   : pool.token1.isNative
+    //     ? fees[1]
+    //     : undefined;
+    //
+    // const tokenAddress = !pool.token0.isNative
+    //   ? token0Standard === Standard.ERC20
+    //     ? pool.token0.wrapped.address0
+    //     : pool.token0.wrapped.address1
+    //   : token1Standard === Standard.ERC20
+    //     ? pool.token1.wrapped.address0
+    //     : pool.token1.wrapped.address1;
 
-    const tokenAddress = !pool.token0.isNative
-      ? token0Standard === Standard.ERC20
-        ? pool.token0.wrapped.address0
-        : pool.token0.wrapped.address1
-      : token1Standard === Standard.ERC20
-        ? pool.token1.wrapped.address0
-        : pool.token1.wrapped.address1;
-
-    if (nativeCoinAmount) {
-      const encodedCoolectParams = encodeFunctionData({
-        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        functionName: "collect" as const,
-        args: [collectArgs] as const,
-      });
-
-      const encodedUnwrapParams = encodeFunctionData({
-        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        functionName: "unwrapWETH9",
-        args: [nativeCoinAmount, recipient],
-      });
-
-      return {
-        address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
-        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        functionName: "multicall" as const,
-        args: [[encodedCoolectParams]] as const,
-      };
-    }
+    // if (nativeCoinAmount) {
+    //   const encodedCoolectParams = encodeFunctionData({
+    //     abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
+    //     functionName: "collect" as const,
+    //     args: [collectArgs] as const,
+    //   });
+    //
+    //   const encodedUnwrapParams = encodeFunctionData({
+    //     abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
+    //     functionName: "unwrapWETH9",
+    //     args: [nativeCoinAmount, recipient],
+    //   });
+    //
+    //   return {
+    //     address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
+    //     abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
+    //     functionName: "multicall" as const,
+    //     args: [[encodedCoolectParams]] as const,
+    //   };
+    // }
 
     return {
       address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId],
@@ -148,17 +155,7 @@ const useCollectFeesParams = () => {
       functionName: "collect" as const,
       args: [collectArgs] as const,
     };
-  }, [
-    pool,
-    chainId,
-    poolAddress,
-    tokenId,
-    tokensOutCode,
-    recipient,
-    fees,
-    token0Standard,
-    token1Standard,
-  ]);
+  }, [pool, chainId, poolAddress, tokenId, tokensOutCode, recipient]);
 
   return { collectFeesParams };
 };
@@ -194,10 +191,106 @@ export function useCollectFeesEstimatedGas() {
   }, [publicClient, address, collectFeesParams]);
 }
 
+const unwrapGasLimitMap: Record<DexChainId, { base: bigint; additional: bigint }> = {
+  [DexChainId.MAINNET]: { base: BigInt(50000), additional: BigInt(12000) },
+  [DexChainId.SEPOLIA]: { base: BigInt(46200), additional: BigInt(10000) },
+  [DexChainId.BSC_TESTNET]: { base: BigInt(46200), additional: BigInt(10000) },
+  [DexChainId.EOS]: { base: BigInt(46200), additional: BigInt(10000) },
+};
+const defaultUnwrapValue = BigInt(46000);
+
+export function useUnwrapWETH9() {
+  const { address } = useAccount();
+  const chainId = useCurrentChainId();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+  const { addRecentTransaction } = useRecentTransactionsStore();
+  const { pool } = useCollectFeesStore();
+
+  const gasLimit = useMemo(() => {
+    if (unwrapGasLimitMap[chainId]) {
+      return unwrapGasLimitMap[chainId].additional + unwrapGasLimitMap[chainId].base;
+    }
+
+    return defaultUnwrapValue;
+  }, [chainId]);
+
+  const handleUnwrap = useCallback(
+    async (amount: bigint) => {
+      if (!walletClient) {
+        return;
+      }
+
+      try {
+        const params = {
+          address: wrappedTokens[chainId].address0,
+          abi: WETH9_ABI,
+          functionName: "withdraw",
+          args: [amount],
+        };
+        const hash = await walletClient.writeContract(params);
+
+        if (hash) {
+          const transaction = await getTransactionWithRetries({ hash, publicClient });
+
+          if (transaction) {
+            const transaction = await publicClient.getTransaction({
+              hash,
+              blockTag: "pending" as any,
+            });
+
+            const nonce = transaction.nonce;
+
+            addRecentTransaction(
+              {
+                hash,
+                nonce,
+                chainId,
+                gas: {
+                  model: GasFeeModel.EIP1559,
+                  gas: gasLimit.toString(),
+                  maxFeePerGas: undefined,
+                  maxPriorityFeePerGas: undefined,
+                },
+                params: {
+                  ...stringifyObject(params),
+                  abi: [getAbiItem({ name: "withdraw", abi: WETH9_ABI })],
+                },
+                title: {
+                  symbol: "ETH",
+                  template: RecentTransactionTitleTemplate.UNWRAP,
+                  amount: formatUnits(amount, 18),
+                  logoURI: "/images/tokens/ETH.svg",
+                },
+              },
+              address,
+            );
+
+            // no await needed, function should return hash without waiting
+            // waitAndReFetch(hash);
+
+            return { success: true as const, hash };
+          }
+        }
+
+        return { success: false as const };
+      } catch (e) {
+        console.log(e);
+        addToast((e as any).toString(), "error");
+        return { success: false as const };
+      }
+    },
+    [addRecentTransaction, address, chainId, gasLimit, publicClient, walletClient],
+  );
+
+  return { handleUnwrap };
+}
+
 export function usePositionFees(): {
   fees: [bigint, bigint] | [undefined, undefined];
   handleCollectFees: () => void;
 } {
+  const { handleUnwrap } = useUnwrapWETH9();
   const { pool } = useCollectFeesStore();
   const { setStatus, setHash, setErrorType } = useCollectFeesStatusStore();
   const publicClient = usePublicClient();
@@ -214,6 +307,12 @@ export function usePositionFees(): {
   console.log(collectFeesParams);
 
   const { gasSettings, customGasLimit, gasModel } = useCollectFeesGasSettings();
+
+  const nativeCoinAmount = pool?.token0.isNative
+    ? fees[0]
+    : pool?.token1.isNative
+      ? fees[1]
+      : undefined;
 
   const handleCollectFees = useCallback(async () => {
     setStatus(CollectFeesStatus.INITIAL);
@@ -276,26 +375,54 @@ export function usePositionFees(): {
         setStatus(CollectFeesStatus.LOADING);
         await publicClient.waitForTransactionReceipt({ hash });
         setStatus(CollectFeesStatus.SUCCESS);
-        return { success: true };
+
+        if (nativeCoinAmount) {
+          // openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
+
+          setStatus(CollectFeesStatus.UNWRAP_PENDING);
+          const result = await handleUnwrap(nativeCoinAmount);
+
+          if (!result?.success) {
+            setStatus(CollectFeesStatus.UNWRAP_ERROR);
+
+            // closeConfirmInWalletAlert();
+            return;
+          } else {
+            // setApproveHash(result.hash);
+            setStatus(CollectFeesStatus.UNWRAP_LOADING);
+            // closeConfirmInWalletAlert();
+
+            const approveReceipt = await publicClient.waitForTransactionReceipt({
+              hash: result.hash,
+            });
+
+            if (approveReceipt.status === "reverted") {
+              setStatus(CollectFeesStatus.UNWRAP_ERROR);
+              return;
+            }
+          }
+        }
       }
     } catch (error) {
       console.error(error);
       setStatus(CollectFeesStatus.ERROR);
     }
   }, [
-    addRecentTransaction,
-    address,
-    chainId,
-    fees,
-    pool,
+    setStatus,
     publicClient,
     walletClient,
-    setHash,
+    chainId,
+    address,
+    pool,
     collectFeesParams,
-    setStatus,
     customGasLimit,
     gasSettings,
+    setHash,
+    addRecentTransaction,
     gasModel,
+    fees,
+    nativeCoinAmount,
+    handleUnwrap,
   ]);
 
   return {

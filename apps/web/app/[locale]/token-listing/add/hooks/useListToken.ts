@@ -289,7 +289,7 @@ export default function useListToken() {
           gas: gasToUse,
         } as any);
 
-        hash = await walletClient.writeContract({ ...request, account: undefined }); // TODO: remove any
+        hash = await walletClient.writeContract({ ...request, account: undefined });
 
         closeConfirmInWalletAlert();
 

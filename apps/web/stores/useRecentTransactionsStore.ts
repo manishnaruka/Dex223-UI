@@ -24,6 +24,7 @@ export enum RecentTransactionTitleTemplate {
   LIST_SINGLE,
   LIST_DOUBLE,
   CONVERT,
+  UNWRAP,
 }
 
 type CommonRecentTransaction = {
@@ -77,6 +78,9 @@ export type IRecentTransactionTitle =
     } & SingleTokenTransactionTitle)
   | ({
       template: RecentTransactionTitleTemplate.WITHDRAW;
+    } & SingleTokenTransactionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.UNWRAP;
     } & SingleTokenTransactionTitle)
   | ({
       template: RecentTransactionTitleTemplate.CONVERT;

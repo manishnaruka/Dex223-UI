@@ -968,6 +968,11 @@ export default function PoolPage({
                   {t("collect_fees_title")}
                 </Button>
               ) : null}
+              {[CollectFeesStatus.UNWRAP_LOADING].includes(status) ? (
+                <Button disabled fullWidth>
+                  Unwrap loading...
+                </Button>
+              ) : null}
               {CollectFeesStatus.LOADING === status ? (
                 <Button fullWidth isLoading={true} disabled>
                   {t("collect_fees_title")}

@@ -38,6 +38,7 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
     case RecentTransactionTitleTemplate.DEPOSIT:
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.CONVERT:
+    case RecentTransactionTitleTemplate.UNWRAP:
       return (
         <NotificationSubtitleText>
           {t("single_subtitle", {
@@ -117,6 +118,16 @@ function NotificationTitle({
             {status === RecentTransactionStatus.SUCCESS
               ? t("conversion_success_notification", { standard: title.standard })
               : t("conversion_revert_notification")}
+          </NotificationTitleText>
+        </div>
+      );
+    case RecentTransactionTitleTemplate.UNWRAP:
+      return (
+        <div className="flex items-center gap-1">
+          <NotificationTitleText>
+            {status === RecentTransactionStatus.SUCCESS
+              ? "Successfully unwrapped"
+              : "Unwrapping WETH9 failed"}
           </NotificationTitleText>
         </div>
       );

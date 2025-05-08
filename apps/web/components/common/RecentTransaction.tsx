@@ -111,6 +111,14 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           </span>
         </span>
       );
+    case RecentTransactionTitleTemplate.UNWRAP:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="convert" />
+
+          <span className="font-medium inline text-16">Unwrap {title.symbol}</span>
+        </span>
+      );
     case RecentTransactionTitleTemplate.SWAP:
       return (
         <span className="mr-1 text-0">
@@ -160,6 +168,7 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
     case RecentTransactionTitleTemplate.DEPOSIT:
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.CONVERT:
+    case RecentTransactionTitleTemplate.UNWRAP:
       return (
         <span className="text-14 text-secondary-text">
           {t("single_subtitle", {
@@ -200,6 +209,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.LIST_SINGLE:
     case RecentTransactionTitleTemplate.CONVERT:
+    case RecentTransactionTitleTemplate.UNWRAP:
       return (
         <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
           <Image width={36} height={36} src={title.logoURI} alt="" />

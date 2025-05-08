@@ -7,6 +7,10 @@ export enum CollectFeesStatus {
   LOADING,
   SUCCESS,
   ERROR,
+  UNWRAP_PENDING,
+  UNWRAP_LOADING,
+  UNWRAP_ERROR,
+  UNWRAP_SUCCESS,
 }
 
 export enum CollectFeesError {
