@@ -28,7 +28,7 @@ export default function TwoVersionsInfo() {
             convert: (chunks) => (
               <a
                 target="_blank"
-                href="https://gorbatiukcom.github.io/token-converter/"
+                href="https://dexaran.github.io/token-converter/"
                 className="text-green underline hocus:text-green-hover duration-200"
               >
                 {chunks}

@@ -1,7 +1,6 @@
 "use client";
 import "react-loading-skeleton/dist/skeleton.css";
 
-import Alert from "@repo/ui/alert";
 import ExternalTextLink from "@repo/ui/external-text-link";
 import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
@@ -24,11 +23,9 @@ import {
 } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesGasSettings";
 import { usePoolRecentTransactionsStore } from "@/app/[locale]/pool/[tokenId]/stores/usePoolRecentTransactionsStore";
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
-import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
-import { SwapError, useSwapStatusStore } from "@/app/[locale]/swap/stores/useSwapStatusStore";
-import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
+import { useSwapStatusStore } from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -61,67 +58,97 @@ import { useRouter } from "@/i18n/routing";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { Standard } from "@/sdk_bi/standard";
 import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
-import {
-  RecentTransactionTitleTemplate,
-  useRecentTransactionsStore,
-} from "@/stores/useRecentTransactionsStore";
+import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
 
 function CollectRow({
-  logoURI = "",
-  isPending = false,
-  isLoading = false,
-  isSuccess = false,
-  isSuccessSwap = false,
-  isReverted = false,
+  status,
   hash,
+  isETHPool,
 }: {
-  logoURI: string | undefined;
-  isLoading?: boolean;
-  isPending?: boolean;
-  isSuccess?: boolean;
-  isSuccessSwap?: boolean;
-  isReverted?: boolean;
+  isETHPool: boolean;
+  status: CollectFeesStatus;
   hash?: Address | undefined;
 }) {
   const t = useTranslations("Swap");
   const chainId = useCurrentChainId();
 
-  console.log("here!", isSuccessSwap);
+  const text = useMemo(() => {
+    switch (status) {
+      case CollectFeesStatus.ERROR:
+        return "Failed to collect fees";
+      case CollectFeesStatus.LOADING:
+        return "Claiming fees";
+      case CollectFeesStatus.SUCCESS:
+        return "Fees successfully claimed";
+      default:
+        return "Claim fees";
+    }
+  }, [status]);
+
+  const icon = useMemo(() => {
+    switch (status) {
+      case CollectFeesStatus.ERROR:
+        return <Svg className="text-red-light" iconName="warning" size={20} />;
+      case CollectFeesStatus.LOADING:
+        return <Preloader size={20} />;
+      case CollectFeesStatus.PENDING:
+        return (
+          <>
+            <Preloader type="linear" />
+            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
+          </>
+        );
+      case CollectFeesStatus.SUCCESS:
+      case CollectFeesStatus.UNWRAP_SUCCESS:
+      case CollectFeesStatus.UNWRAP_LOADING:
+      case CollectFeesStatus.UNWRAP_ERROR:
+      case CollectFeesStatus.UNWRAP_PENDING:
+        return <Svg className="text-green" iconName="done" size={20} />;
+      default:
+        return null;
+    }
+  }, [status, t]);
 
   return (
     <div
       className={clsx(
-        "grid grid-cols-[32px_auto_1fr] gap-2 h-10 before:absolute relative before:left-[15px] before:-bottom-4 before:w-0.5 before:h-3 before:rounded-1",
-        isSuccess ? "before:bg-green" : "before:bg-green-bg",
+        "grid grid-cols-[32px_auto_1fr] gap-2 h-10 ",
+        isETHPool &&
+          "before:absolute relative before:left-[15px] before:-bottom-4 before:w-0.5 before:h-3 before:rounded-1",
+        isETHPool &&
+          (status === CollectFeesStatus.SUCCESS ? "before:bg-green" : "before:bg-green-bg"),
       )}
     >
-      <div className="flex items-center">
-        <Image
-          className={clsx(isSuccess && "", "rounded-full")}
-          src={logoURI}
-          alt=""
-          width={32}
-          height={32}
-        />
+      <div className="flex items-center h-full">
+        <div
+          className={clsxMerge(
+            "p-1 rounded-full h-8 w-8",
+            "bg-green-bg",
+            status === CollectFeesStatus.ERROR && "bg-red-bg",
+          )}
+        >
+          <Svg
+            className={clsxMerge(
+              "text-green",
+              status === CollectFeesStatus.ERROR && "text-red-light",
+            )}
+            iconName="collect"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col justify-center">
         <span
           className={clsx(
-            isSuccess ? "text-secondary-text text-14" : "text-14",
-            isSuccessSwap && "text-primary-text",
+            status === CollectFeesStatus.SUCCESS ? "text-secondary-text text-14" : "text-14",
+            status === CollectFeesStatus.UNWRAP_SUCCESS && "text-primary-text",
           )}
         >
-          {(isSuccess || isSuccessSwap) && t("approved")}
-          {isPending && "Confirm in your wallet"}
-          {isLoading && "Approving"}
-          {!isSuccess && !isPending && !isReverted && !isLoading && !isSuccessSwap && "Approve"}
-          {isReverted && "Approve failed"}
+          {text}
         </span>
-        {!isSuccess && <span className="text-green text-12">{t("why_do_i_have_to_approve")}</span>}
       </div>
       <div className="flex items-center gap-2 justify-end">
         {hash && (
@@ -129,39 +156,68 @@ function CollectRow({
             <IconButton iconName="forward" />
           </a>
         )}
-        {isPending && (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        )}
-        {isLoading && <Preloader size={20} />}
-        {(isSuccess || isSuccessSwap) && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
+        {icon}
       </div>
     </div>
   );
 }
 
 function UnwrapWETH9Row({
-  isPending = false,
-  isLoading = false,
-  isSuccess = false,
-  isSettled = false,
-  isReverted = false,
-  isDisabled = false,
+  status,
   hash,
 }: {
-  isLoading?: boolean;
-  isPending?: boolean;
-  isSettled?: boolean;
-  isSuccess?: boolean;
-  isReverted?: boolean;
-  isDisabled?: boolean;
+  status: CollectFeesStatus;
   hash?: Address | undefined;
 }) {
   const t = useTranslations("Swap");
   const chainId = useCurrentChainId();
+
+  const text = useMemo(() => {
+    switch (status) {
+      case CollectFeesStatus.INITIAL:
+        return "Unwrap WETH to ETH";
+      case CollectFeesStatus.ERROR:
+        return "Failed to unwrap WETH";
+      case CollectFeesStatus.LOADING:
+        return "Unwrapping WETH";
+      case CollectFeesStatus.PENDING:
+        return "Unwrap WETH to ETH";
+      case CollectFeesStatus.SUCCESS:
+        return "Unwrapped WETH to ETH";
+      default:
+        return "Unwrap WETH to ETH";
+    }
+  }, [status]);
+
+  const isDisabled = useMemo(() => {
+    return (
+      status === CollectFeesStatus.PENDING ||
+      status === CollectFeesStatus.INITIAL ||
+      status === CollectFeesStatus.LOADING ||
+      status === CollectFeesStatus.ERROR ||
+      status === CollectFeesStatus.SUCCESS
+    );
+  }, [status]);
+
+  const icon = useMemo(() => {
+    switch (status) {
+      case CollectFeesStatus.UNWRAP_ERROR:
+        return <Svg className="text-red-light" iconName="warning" size={20} />;
+      case CollectFeesStatus.UNWRAP_LOADING:
+        return <Preloader size={20} />;
+      case CollectFeesStatus.UNWRAP_PENDING:
+        return (
+          <>
+            <Preloader type="linear" />
+            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
+          </>
+        );
+      case CollectFeesStatus.UNWRAP_SUCCESS:
+        return <Svg className="text-green" iconName="done" size={20} />;
+      default:
+        return null;
+    }
+  }, [status, t]);
 
   return (
     <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
@@ -170,14 +226,14 @@ function UnwrapWETH9Row({
           className={clsxMerge(
             "p-1 rounded-full h-8 w-8",
             isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            isReverted && "bg-red-bg",
+            status === CollectFeesStatus.UNWRAP_ERROR && "bg-red-bg",
           )}
         >
           <Svg
             className={clsxMerge(
               "rotate-90",
               isDisabled ? "text-tertiary-text" : "text-green",
-              isReverted && "text-red-light",
+              status === CollectFeesStatus.UNWRAP_ERROR && "text-red-light",
             )}
             iconName="swap"
           />
@@ -186,10 +242,7 @@ function UnwrapWETH9Row({
 
       <div className="flex flex-col justify-center">
         <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
-          {(isPending || (!isLoading && !isReverted && !isSuccess)) && t("confirm_swap")}
-          {isLoading && t("executing_swap")}
-          {isReverted && "Failed to confirm a swap"}
-          {isSuccess && "Executed swap"}
+          {text}
         </span>
       </div>
       <div className="flex items-center gap-2 justify-end">
@@ -198,15 +251,7 @@ function UnwrapWETH9Row({
             <IconButton iconName="forward" />
           </a>
         )}
-        {isPending && (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        )}
-        {isLoading && <Preloader size={20} />}
-        {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
+        {icon}
       </div>
     </div>
   );
@@ -217,145 +262,17 @@ function Rows({ children }: PropsWithChildren<{}>) {
 
 function CollectActionButton() {
   const t = useTranslations("Swap");
-  const { typedValue } = useSwapAmountsStore();
-  const { setIsOpen } = useConfirmSwapDialogStore();
 
-  const { fees, handleCollectFees } = usePositionFees();
+  const { handleCollectFees, isETHPool } = usePositionFees();
 
-  const { swapHash, approveHash, errorType } = useSwapStatusStore();
-  const { status, hash, setStatus } = useCollectFeesStatusStore();
+  const { status, hash } = useCollectFeesStatusStore();
 
-  if (tokenA.isToken && tokenAStandard === Standard.ERC20) {
-    if (isPendingApprove) {
-      return (
-        <Rows>
-          <ApproveRow isPending logoURI={tokenA.logoURI} />
-          <SwapRow isDisabled />
-        </Rows>
-      );
-    }
-
-    if (isLoadingApprove) {
-      return (
-        <Rows>
-          <ApproveRow hash={approveHash} isLoading logoURI={tokenA.logoURI} />
-          <SwapRow isDisabled />
-        </Rows>
-      );
-    }
-
-    if (isRevertedApprove) {
-      return (
-        <>
-          <Rows>
-            <ApproveRow hash={approveHash} isReverted logoURI={tokenA.logoURI} />
-            <SwapRow isDisabled />
-          </Rows>
-          <div className="flex flex-col gap-5 mt-4">
-            <Alert
-              withIcon={false}
-              type="error"
-              text={
-                <span>
-                  Transaction failed due to lack of gas or an internal contract error. Try using
-                  higher slippage or gas to ensure your transaction is completed. If you still have
-                  issues, click{" "}
-                  <a href="#" className="text-green hocus:underline">
-                    common errors
-                  </a>
-                  .
-                </span>
-              }
-            />
-            <Button
-              fullWidth
-              onClick={() => {
-                setIsOpen(false);
-              }}
-            >
-              Try again
-            </Button>
-          </div>
-        </>
-      );
-    }
-  }
-
-  if (isPendingSwap) {
+  if (status !== CollectFeesStatus.INITIAL) {
     return (
       <Rows>
-        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
-          <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
-        )}
-        <SwapRow isPending />
+        <CollectRow isETHPool={isETHPool} hash={hash} status={status} />
+        {isETHPool && <UnwrapWETH9Row status={status} />}
       </Rows>
-    );
-  }
-
-  if (isLoadingSwap) {
-    return (
-      <Rows>
-        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
-          <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
-        )}
-        <SwapRow hash={swapHash} isLoading />
-      </Rows>
-    );
-  }
-
-  if (isSuccessSwap) {
-    return (
-      <Rows>
-        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
-          <ApproveRow hash={approveHash} isSuccessSwap logoURI={tokenA.logoURI} />
-        )}
-        <SwapRow hash={swapHash} isSettled isSuccess />
-      </Rows>
-    );
-  }
-
-  if (isRevertedSwap) {
-    return (
-      <>
-        <Rows>
-          {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
-            <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
-          )}
-          <SwapRow hash={swapHash} isSettled isReverted />
-        </Rows>
-        <div className="flex flex-col gap-5 mt-4">
-          <Alert
-            withIcon={false}
-            type="error"
-            text={
-              errorType === SwapError.UNKNOWN ? (
-                <span>
-                  Transaction failed due to lack of gas or an internal contract error. Try using
-                  higher slippage or gas to ensure your transaction is completed. If you still have
-                  issues, click{" "}
-                  <a href="#" className="text-green hocus:underline">
-                    common errors
-                  </a>
-                  .
-                </span>
-              ) : (
-                <span>
-                  Transaction failed due to lack of gas. Try increasing gas limit to ensure your
-                  transaction is completed. If you still have issues, contact support.
-                </span>
-              )
-            }
-          />
-          <Button
-            fullWidth
-            onClick={() => {
-              setIsOpen(false);
-            }}
-          >
-            Try again
-          </Button>
-        </div>
-      </>
     );
   }
 
@@ -1031,88 +948,7 @@ export default function PoolPage({
                   </div>
                   <span className="text-16 lg:text-18 -mt-0.5 md:mt-0 font-bold text-secondary-text">{`${token0?.symbol} and ${token1?.symbol}`}</span>
                 </div>
-                <div className="flex items-center gap-4 justify-end">
-                  {hash && (
-                    <a
-                      target="_blank"
-                      href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
-                    >
-                      <IconButton iconName="forward" />
-                    </a>
-                  )}
-
-                  {/* Speed Up button */}
-                  {transaction && status === CollectFeesStatus.LOADING && (
-                    <Button
-                      className="relative hidden md:block"
-                      colorScheme={ButtonColor.LIGHT_GREEN}
-                      variant={ButtonVariant.CONTAINED}
-                      size={ButtonSize.EXTRA_SMALL}
-                      onClick={() => handleSpeedUp(transaction)}
-                    >
-                      {transaction.replacement === "repriced" && (
-                        <span className="absolute -top-1.5 right-0.5 text-green">
-                          <Svg size={16} iconName="speed-up" />
-                        </span>
-                      )}
-                      <span className="text-12 font-medium pb-[3px] pt-[1px] flex items-center flex-row text-nowrap">
-                        {t("speed_up")}
-                      </span>
-                    </Button>
-                  )}
-
-                  {status === CollectFeesStatus.PENDING && !isMobile && (
-                    <>
-                      <Preloader type="linear" />
-                      <span className="text-secondary-text text-14">Proceed in your wallet</span>
-                    </>
-                  )}
-                  {status === CollectFeesStatus.LOADING && (
-                    <div className="-mt-0.5 md:mt-0">
-                      {" "}
-                      <Preloader size={20} />
-                    </div>
-                  )}
-                  {status === CollectFeesStatus.SUCCESS && (
-                    <div className="-mt-0.5 md:mt-0">
-                      <Svg className="text-green" iconName="done" size={20} />
-                    </div>
-                  )}
-                  {status === CollectFeesStatus.ERROR && (
-                    <div className="-mt-0.5 md:mt-0">
-                      <Svg className="text-red-light" iconName="warning" size={24} />
-                    </div>
-                  )}
-                </div>
               </div>
-
-              {status === CollectFeesStatus.PENDING && isMobile && (
-                <div className="flex flex-nowrap gap-2 mt-2 items-center">
-                  <Preloader type="linear" />
-                  <span className="text-secondary-text text-14">Proceed in your wallet</span>
-                </div>
-              )}
-
-              {/* Speed Up button - on Mobile */}
-              {transaction && status === CollectFeesStatus.LOADING && (
-                <Button
-                  className="relative md:hidden rounded-5 mt-3"
-                  fullWidth
-                  colorScheme={ButtonColor.LIGHT_GREEN}
-                  variant={ButtonVariant.CONTAINED}
-                  size={ButtonSize.SMALL}
-                  onClick={() => handleSpeedUp(transaction)}
-                >
-                  {transaction.replacement === "repriced" && (
-                    <span className="absolute -top-2 right-4 text-green">
-                      <Svg size={20} iconName="speed-up" />
-                    </span>
-                  )}
-                  <span className="text-14 font-medium pb-[5px] pt-[5px] flex items-center flex-row text-nowrap">
-                    {t("speed_up")}
-                  </span>
-                </Button>
-              )}
 
               {/* Standard A */}
               <div
@@ -1246,25 +1082,33 @@ export default function PoolPage({
                   </div>
                 )}
               </div>
-              <div className="text-secondary-text my-4 text-14 lg:text-16">
-                {t("collecting_fee_message")}
-              </div>
             </div>
-            <div className="flex-shrink-0 w-full h-[1px] bg-quaternary-bg mb-4 md:hidden" />
+            {status !== CollectFeesStatus.INITIAL && (
+              <div className="card-spacing-x">
+                <div className="flex-shrink-0 w-full h-[1px] bg-quaternary-bg mb-4 mt-5" />
+              </div>
+            )}
             <div className="flex-shrink-0 card-spacing md:w-[570px] md:h-auto">
-              <RemoveLiquidityGasSettings
-                gasPriceOption={gasPriceOption}
-                gasPriceSettings={gasPriceSettings}
-                setGasPriceOption={setGasPriceOption}
-                setGasPriceSettings={setGasPriceSettings}
-                estimatedGas={estimatedGas}
-                customGasLimit={customGasLimit}
-                setEstimatedGas={setEstimatedGas}
-                setCustomGasLimit={setCustomGasLimit}
-                isAdvanced={isAdvanced}
-                setIsAdvanced={setIsAdvanced}
-                gasPrice={gasPrice}
-              />
+              {status === CollectFeesStatus.INITIAL && (
+                <>
+                  <div className="text-secondary-text my-4 text-14 lg:text-16">
+                    {t("collecting_fee_message")}
+                  </div>
+                  <RemoveLiquidityGasSettings
+                    gasPriceOption={gasPriceOption}
+                    gasPriceSettings={gasPriceSettings}
+                    setGasPriceOption={setGasPriceOption}
+                    setGasPriceSettings={setGasPriceSettings}
+                    estimatedGas={estimatedGas}
+                    customGasLimit={customGasLimit}
+                    setEstimatedGas={setEstimatedGas}
+                    setCustomGasLimit={setCustomGasLimit}
+                    isAdvanced={isAdvanced}
+                    setIsAdvanced={setIsAdvanced}
+                    gasPrice={gasPrice}
+                  />
+                </>
+              )}
 
               <CollectActionButton />
             </div>

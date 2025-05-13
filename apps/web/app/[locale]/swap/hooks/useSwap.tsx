@@ -84,9 +84,6 @@ export function useSwapParams() {
 
   const { trade, isLoading: isLoadingTrade } = useTrade();
 
-  console.log("TRADE");
-  console.log(trade);
-
   const poolAddress = useComputePoolAddressDex({
     tokenA,
     tokenB,

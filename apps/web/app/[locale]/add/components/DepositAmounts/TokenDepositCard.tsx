@@ -157,15 +157,16 @@ function InputTotalAmount({
                 alt=""
                 width={24}
                 height={24}
+                className="flex-shrink-0"
               />
-              <span className="text-nowrap pr-7">{currencySymbolShortX2}</span>
+              <span className="text-nowrap pr-3">{currencySymbolShortX2}</span>
             </div>
           ) : (
             <div
               className={`rounded-5 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : "bg-primary-bg"}`}
             >
               <Image src={"/images/tokens/placeholder.svg"} alt="" width={24} height={24} />
-              <span className="text-nowrap pr-7">{t("select_token")}</span>
+              <span className="text-nowrap pr-3">{t("select_token")}</span>
             </div>
           )}
         </div>
