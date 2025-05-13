@@ -8,10 +8,10 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { use, useEffect, useMemo, useState } from "react";
+import React, { PropsWithChildren, use, useEffect, useMemo, useState } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import { useMediaQuery } from "react-responsive";
-import { formatUnits } from "viem";
+import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
@@ -24,6 +24,11 @@ import {
 } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesGasSettings";
 import { usePoolRecentTransactionsStore } from "@/app/[locale]/pool/[tokenId]/stores/usePoolRecentTransactionsStore";
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
+import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
+import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
+import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
+import { SwapError, useSwapStatusStore } from "@/app/[locale]/swap/stores/useSwapStatusStore";
+import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -38,6 +43,7 @@ import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
+import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -62,6 +68,303 @@ import {
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
+
+function CollectRow({
+  logoURI = "",
+  isPending = false,
+  isLoading = false,
+  isSuccess = false,
+  isSuccessSwap = false,
+  isReverted = false,
+  hash,
+}: {
+  logoURI: string | undefined;
+  isLoading?: boolean;
+  isPending?: boolean;
+  isSuccess?: boolean;
+  isSuccessSwap?: boolean;
+  isReverted?: boolean;
+  hash?: Address | undefined;
+}) {
+  const t = useTranslations("Swap");
+  const chainId = useCurrentChainId();
+
+  console.log("here!", isSuccessSwap);
+
+  return (
+    <div
+      className={clsx(
+        "grid grid-cols-[32px_auto_1fr] gap-2 h-10 before:absolute relative before:left-[15px] before:-bottom-4 before:w-0.5 before:h-3 before:rounded-1",
+        isSuccess ? "before:bg-green" : "before:bg-green-bg",
+      )}
+    >
+      <div className="flex items-center">
+        <Image
+          className={clsx(isSuccess && "", "rounded-full")}
+          src={logoURI}
+          alt=""
+          width={32}
+          height={32}
+        />
+      </div>
+
+      <div className="flex flex-col justify-center">
+        <span
+          className={clsx(
+            isSuccess ? "text-secondary-text text-14" : "text-14",
+            isSuccessSwap && "text-primary-text",
+          )}
+        >
+          {(isSuccess || isSuccessSwap) && t("approved")}
+          {isPending && "Confirm in your wallet"}
+          {isLoading && "Approving"}
+          {!isSuccess && !isPending && !isReverted && !isLoading && !isSuccessSwap && "Approve"}
+          {isReverted && "Approve failed"}
+        </span>
+        {!isSuccess && <span className="text-green text-12">{t("why_do_i_have_to_approve")}</span>}
+      </div>
+      <div className="flex items-center gap-2 justify-end">
+        {hash && (
+          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
+            <IconButton iconName="forward" />
+          </a>
+        )}
+        {isPending && (
+          <>
+            <Preloader type="linear" />
+            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
+          </>
+        )}
+        {isLoading && <Preloader size={20} />}
+        {(isSuccess || isSuccessSwap) && <Svg className="text-green" iconName="done" size={20} />}
+        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
+      </div>
+    </div>
+  );
+}
+
+function UnwrapWETH9Row({
+  isPending = false,
+  isLoading = false,
+  isSuccess = false,
+  isSettled = false,
+  isReverted = false,
+  isDisabled = false,
+  hash,
+}: {
+  isLoading?: boolean;
+  isPending?: boolean;
+  isSettled?: boolean;
+  isSuccess?: boolean;
+  isReverted?: boolean;
+  isDisabled?: boolean;
+  hash?: Address | undefined;
+}) {
+  const t = useTranslations("Swap");
+  const chainId = useCurrentChainId();
+
+  return (
+    <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
+      <div className="flex items-center h-full">
+        <div
+          className={clsxMerge(
+            "p-1 rounded-full h-8 w-8",
+            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
+            isReverted && "bg-red-bg",
+          )}
+        >
+          <Svg
+            className={clsxMerge(
+              "rotate-90",
+              isDisabled ? "text-tertiary-text" : "text-green",
+              isReverted && "text-red-light",
+            )}
+            iconName="swap"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col justify-center">
+        <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
+          {(isPending || (!isLoading && !isReverted && !isSuccess)) && t("confirm_swap")}
+          {isLoading && t("executing_swap")}
+          {isReverted && "Failed to confirm a swap"}
+          {isSuccess && "Executed swap"}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 justify-end">
+        {hash && (
+          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
+            <IconButton iconName="forward" />
+          </a>
+        )}
+        {isPending && (
+          <>
+            <Preloader type="linear" />
+            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
+          </>
+        )}
+        {isLoading && <Preloader size={20} />}
+        {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
+        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
+      </div>
+    </div>
+  );
+}
+function Rows({ children }: PropsWithChildren<{}>) {
+  return <div className="flex flex-col gap-5">{children}</div>;
+}
+
+function CollectActionButton() {
+  const t = useTranslations("Swap");
+  const { typedValue } = useSwapAmountsStore();
+  const { setIsOpen } = useConfirmSwapDialogStore();
+
+  const { fees, handleCollectFees } = usePositionFees();
+
+  const { swapHash, approveHash, errorType } = useSwapStatusStore();
+  const { status, hash, setStatus } = useCollectFeesStatusStore();
+
+  if (tokenA.isToken && tokenAStandard === Standard.ERC20) {
+    if (isPendingApprove) {
+      return (
+        <Rows>
+          <ApproveRow isPending logoURI={tokenA.logoURI} />
+          <SwapRow isDisabled />
+        </Rows>
+      );
+    }
+
+    if (isLoadingApprove) {
+      return (
+        <Rows>
+          <ApproveRow hash={approveHash} isLoading logoURI={tokenA.logoURI} />
+          <SwapRow isDisabled />
+        </Rows>
+      );
+    }
+
+    if (isRevertedApprove) {
+      return (
+        <>
+          <Rows>
+            <ApproveRow hash={approveHash} isReverted logoURI={tokenA.logoURI} />
+            <SwapRow isDisabled />
+          </Rows>
+          <div className="flex flex-col gap-5 mt-4">
+            <Alert
+              withIcon={false}
+              type="error"
+              text={
+                <span>
+                  Transaction failed due to lack of gas or an internal contract error. Try using
+                  higher slippage or gas to ensure your transaction is completed. If you still have
+                  issues, click{" "}
+                  <a href="#" className="text-green hocus:underline">
+                    common errors
+                  </a>
+                  .
+                </span>
+              }
+            />
+            <Button
+              fullWidth
+              onClick={() => {
+                setIsOpen(false);
+              }}
+            >
+              Try again
+            </Button>
+          </div>
+        </>
+      );
+    }
+  }
+
+  if (isPendingSwap) {
+    return (
+      <Rows>
+        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
+          <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
+        )}
+        <SwapRow isPending />
+      </Rows>
+    );
+  }
+
+  if (isLoadingSwap) {
+    return (
+      <Rows>
+        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
+          <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
+        )}
+        <SwapRow hash={swapHash} isLoading />
+      </Rows>
+    );
+  }
+
+  if (isSuccessSwap) {
+    return (
+      <Rows>
+        {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
+          <ApproveRow hash={approveHash} isSuccessSwap logoURI={tokenA.logoURI} />
+        )}
+        <SwapRow hash={swapHash} isSettled isSuccess />
+      </Rows>
+    );
+  }
+
+  if (isRevertedSwap) {
+    return (
+      <>
+        <Rows>
+          {tokenA.isToken && tokenAStandard === Standard.ERC20 && (
+            <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />
+          )}
+          <SwapRow hash={swapHash} isSettled isReverted />
+        </Rows>
+        <div className="flex flex-col gap-5 mt-4">
+          <Alert
+            withIcon={false}
+            type="error"
+            text={
+              errorType === SwapError.UNKNOWN ? (
+                <span>
+                  Transaction failed due to lack of gas or an internal contract error. Try using
+                  higher slippage or gas to ensure your transaction is completed. If you still have
+                  issues, click{" "}
+                  <a href="#" className="text-green hocus:underline">
+                    common errors
+                  </a>
+                  .
+                </span>
+              ) : (
+                <span>
+                  Transaction failed due to lack of gas. Try increasing gas limit to ensure your
+                  transaction is completed. If you still have issues, contact support.
+                </span>
+              )
+            }
+          />
+          <Button
+            fullWidth
+            onClick={() => {
+              setIsOpen(false);
+            }}
+          >
+            Try again
+          </Button>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <Button onClick={() => handleCollectFees()} fullWidth>
+      Collect fees
+    </Button>
+  );
+}
 
 export default function PoolPage({
   params,
@@ -140,7 +443,7 @@ export default function PoolPage({
     setTokenId(positionInfo?.tokenId);
   }, [position?.pool, poolAddress, positionInfo?.tokenId, setPool, setPoolAddress, setTokenId]);
 
-  const { fees, handleCollectFees } = usePositionFees();
+  const { fees } = usePositionFees();
 
   const { inRange, removed } = usePositionRangeStatus({ position });
   const { minPriceString, maxPriceString, currentPriceString, ratio } = usePositionPrices({
@@ -963,51 +1266,7 @@ export default function PoolPage({
                 gasPrice={gasPrice}
               />
 
-              {[CollectFeesStatus.INITIAL].includes(status) ? (
-                <Button onClick={() => handleCollectFees()} fullWidth>
-                  {t("collect_fees_title")}
-                </Button>
-              ) : null}
-              {CollectFeesStatus.LOADING === status ? (
-                <Button fullWidth isLoading={true} disabled>
-                  {t("collect_fees_title")}
-                  <span className="flex items-center gap-2">
-                    <Preloader size={20} color="black" />
-                  </span>
-                </Button>
-              ) : null}
-              {CollectFeesStatus.PENDING === status ? (
-                <Button fullWidth disabled>
-                  <span className="flex items-center gap-2">
-                    <Preloader size={20} color="green" type="linear" />
-                  </span>
-                </Button>
-              ) : null}
-              {[CollectFeesStatus.ERROR].includes(status) ? (
-                <div className="flex flex-col gap-5">
-                  <Alert
-                    withIcon={false}
-                    type="error"
-                    text={
-                      <span>
-                        {t("failed_transaction_error_message")}{" "}
-                        <a href="#" className="text-green hocus:text-green-hover underline">
-                          {t("common_errors")}
-                        </a>
-                        .
-                      </span>
-                    }
-                  />
-                  <Button onClick={() => handleCollectFees()} fullWidth>
-                    Try again
-                  </Button>
-                </div>
-              ) : null}
-              {[CollectFeesStatus.SUCCESS].includes(status) ? (
-                <Button onClick={handleClose} fullWidth>
-                  Close
-                </Button>
-              ) : null}
+              <CollectActionButton />
             </div>
           </div>
         </DrawerDialog>
