@@ -106,6 +106,8 @@ export function useSwapParams() {
     );
   }, [dependentAmount, slippage, trade]);
 
+  console.log(minimumAmountOut);
+
   const swapParams = useMemo(() => {
     if (
       !tokenA ||
@@ -131,7 +133,7 @@ export function useSwapParams() {
       recipient: address as Address,
       deadline,
       amountIn: parseUnits(typedValue, tokenA.decimals),
-      amountOutMinimum: BigInt(0),
+      amountOutMinimum: minimumAmountOut,
       sqrtPriceLimitX96: BigInt(sqrtPriceLimitX96.toString()),
       prefer223Out: tokenBStandard === Standard.ERC223,
     };
@@ -198,7 +200,7 @@ export function useSwapParams() {
               ),
               deadline,
               recipient: ROUTER_ADDRESS[chainId],
-              amountOutMinimum: BigInt(0),
+              amountOutMinimum: minimumAmountOut,
               amountIn: parseUnits(typedValue, tokenA.decimals),
               prefer223Out: false,
             },
@@ -236,7 +238,7 @@ export function useSwapParams() {
               (address as Address) || poolAddress.poolAddress, // recipient
               zeroForOne, //zeroForOne
               parseUnits(typedValue, tokenA.decimals), // amountSpecified
-              BigInt(0), //amountOutMinimum
+              minimumAmountOut, //amountOutMinimum
               BigInt(sqrtPriceLimitX96.toString()), //sqrtPriceLimitX96
               tokenBStandard === Standard.ERC223, // prefer223Out
               encodeAbiParameters(
@@ -330,6 +332,8 @@ export default function useSwap() {
   const { trade } = useTrade();
   const { address } = useAccount();
   const publicClient = usePublicClient();
+
+  console.log(trade);
 
   const chainId = useCurrentChainId();
 

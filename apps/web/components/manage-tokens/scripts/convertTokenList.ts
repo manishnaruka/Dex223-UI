@@ -88,16 +88,32 @@ export function predictWrapperAddress(
   converterAddress: Address,
 ): string {
   const _bytecode = isERC20 ? bytecode223 : bytecode20;
-  const create2Inputs = [
-    "0xff",
-    converterAddress,
-    keccak256(
-      encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
+  const hash = keccak256(
+    encodePacked(
+      ["bytes1", "address", "bytes32", "bytes32"],
+      [
+        "0xff",
+        converterAddress,
+        keccak256(
+          encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
+        ),
+        keccak256(_bytecode as `0x${string}`),
+      ],
     ),
-    keccak256(_bytecode as `0x${string}`),
-  ];
-  const sanitizedInputs = `0x${create2Inputs.map((i) => i.slice(2)).join("")}`;
-  return getAddress(`0x${keccak256(sanitizedInputs as `0x${string}`).slice(-40)}`);
+  );
+
+  return getAddress(`0x${hash.slice(-40)}`);
+
+  // const create2Inputs = [
+  //   "0xff",
+  //   converterAddress,
+  //   keccak256(
+  //     encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
+  //   ),
+  //   keccak256(_bytecode as `0x${string}`),
+  // ];
+  // const sanitizedInputs = `0x${create2Inputs.map((i) => i.slice(2)).join("")}`;
+  // return getAddress(`0x${keccak256(sanitizedInputs as `0x${string}`).slice(-40)}`);
 }
 
 function formatItem(token: uniToken, address223: string): Token {

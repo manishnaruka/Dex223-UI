@@ -36,7 +36,7 @@ export default function MintTestTokensDialog() {
     useConnectWalletDialogStateStore();
   const [isPopoverOpened, setPopoverOpened] = useState(false);
 
-  const [amountToMint, setAmountToMint] = useState<string>("1000");
+  const [amountToMint, setAmountToMint] = useState<string>("1000000");
   const publicClient = usePublicClient();
 
   const [isLoading, setIsLoading] = useState(false);
