@@ -41,8 +41,8 @@ export const useLiquidityPriceRangeStore = create<LiquidityPriceRangeStore>((set
     if (price) {
       const zoomLevels = ZOOM_LEVELS[feeAmount ?? FeeAmount.MEDIUM];
       set({
-        leftRangeTypedValue: (price * zoomLevels.initialMin).toFixed(6),
-        rightRangeTypedValue: (price * zoomLevels.initialMax).toFixed(6),
+        leftRangeTypedValue: (price * zoomLevels.initialMin).toFixed(10),
+        rightRangeTypedValue: (price * zoomLevels.initialMax).toFixed(10),
       });
     } else {
       set({

@@ -129,8 +129,6 @@ export const PriceRange = ({
   // TODO existingPosition
   const existingPosition = undefined as any;
 
-  // parse typed range values and determine the closest ticks
-  // lower should always be a smaller tick
   useEffect(() => {
     setTicks({
       [Bound.LOWER]:

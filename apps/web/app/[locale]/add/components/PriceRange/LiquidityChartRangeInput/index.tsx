@@ -99,7 +99,7 @@ export default function LiquidityChartRangeInput({
           mode === "reset") &&
         leftRangeValue > 0
       ) {
-        onLeftRangeInput(leftRangeValue.toFixed(6));
+        onLeftRangeInput(leftRangeValue.toFixed(10));
       }
 
       if (
@@ -109,7 +109,7 @@ export default function LiquidityChartRangeInput({
         // todo: remove this check. Upper bound for large numbers
         // sometimes fails to parse to tick.
         if (rightRangeValue < 1e35) {
-          onRightRangeInput(rightRangeValue.toFixed(6));
+          onRightRangeInput(rightRangeValue.toFixed(10));
         }
       }
       // });
