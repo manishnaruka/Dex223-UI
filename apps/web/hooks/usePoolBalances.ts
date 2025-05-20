@@ -16,14 +16,16 @@ export const PoolDataDocument = gql`
 export const usePoolBalances = ({
   tokenA,
   tokenB,
+  fee,
 }: {
   tokenA: Currency | undefined;
   tokenB: Currency | undefined;
+  fee: FeeAmount | undefined;
 }) => {
   const { poolAddress } = useComputePoolAddressDex({
     tokenA,
     tokenB,
-    tier: FeeAmount.MEDIUM,
+    tier: fee,
   });
 
   const { data: erc20BalanceToken0 } = useBalance({

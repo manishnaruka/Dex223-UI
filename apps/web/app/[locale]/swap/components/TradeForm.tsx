@@ -1,6 +1,8 @@
+import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
@@ -44,6 +46,7 @@ import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
@@ -53,12 +56,14 @@ const ActionButtonSize = ButtonSize.EXTRA_LARGE;
 const MobileActionButtonSize = ButtonSize.LARGE;
 function OpenConfirmDialogButton({
   isSufficientBalance,
+  isSufficientPoolBalance,
   isTradeReady,
   isTradeLoading,
 }: {
   isSufficientBalance: boolean;
   isTradeReady: boolean;
   isTradeLoading: boolean;
+  isSufficientPoolBalance: boolean;
 }) {
   const tWallet = useTranslations("Wallet");
   const t = useTranslations("Swap");
@@ -144,8 +149,21 @@ function OpenConfirmDialogButton({
 
   if (tokenA.equals(tokenB)) {
     return (
-      <Button fullWidth onClick={() => setConfirmConvertDialogOpen(true)}>
+      <Button
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+        fullWidth
+        onClick={() => setConfirmConvertDialogOpen(true)}
+      >
         Convert {tokenA.wrapped.symbol} to {tokenBStandard}
+      </Button>
+    );
+  }
+
+  if (!isSufficientPoolBalance) {
+    return (
+      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+        Insufficient liquidity for this trade
       </Button>
     );
   }
@@ -214,10 +232,12 @@ export default function TradeForm() {
   });
 
   const { trade, isLoading: isLoadingTrade } = useTrade();
+  console.log(trade);
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({
     tokenA,
     tokenB,
+    fee: trade?.route.pools?.[0]?.fee,
   });
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
@@ -231,6 +251,33 @@ export default function TradeForm() {
 
     return dependentAmount?.toSignificant() || "";
   }, [dependentAmount, tokenA, tokenB, typedValue]);
+
+  const { slippage } = useSwapSettingsStore();
+
+  const minimumAmountOut = useMemo(() => {
+    if (!trade) {
+      return BigInt(0);
+    }
+
+    return BigInt(
+      trade
+        .minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
+        .quotient.toString(),
+    );
+  }, [dependentAmount, slippage, trade]);
+
+  const isSufficientPoolBalance = useMemo(() => {
+    const erc20Balance = erc20BalanceToken1?.value ?? BigInt(0);
+    const erc223Balance = erc223BalanceToken1?.value ?? BigInt(0);
+    const poolBalance = erc20Balance + erc223Balance;
+
+    console.log(erc20BalanceToken1);
+    console.log(erc223BalanceToken1);
+    console.log("Is sufficient check");
+    console.log(poolBalance);
+    console.log(minimumAmountOut);
+    return poolBalance > minimumAmountOut;
+  }, [erc20BalanceToken1, erc223BalanceToken1, minimumAmountOut]);
 
   const isConvertationRequired = useMemo(() => {
     if (erc20BalanceToken1 && tokenBStandard === Standard.ERC20) {
@@ -446,14 +493,6 @@ export default function TradeForm() {
   const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
   const { setIsOpen: setConfirmConvertDialogOpen } = useConfirmConvertDialogStore();
 
-  const data = useStorePools([
-    {
-      currencyA: tokenA,
-      currencyB: tokenB,
-      tier: FeeAmount.MEDIUM,
-    },
-  ]);
-
   return (
     <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">
       <div className="flex justify-between items-center mb-2.5">
@@ -623,6 +662,35 @@ export default function TradeForm() {
         isEqualTokens={!!tokenA && !!tokenB && tokenA.wrapped.address0 === tokenB.wrapped.address0}
       />
 
+      {Boolean(trade) && !isSufficientPoolBalance && (
+        <div className="mt-5">
+          <Alert
+            text="Swap unavailable. One of the tokens lacks liquidity. Please try again later or choose another pair"
+            type="warning"
+          />
+        </div>
+      )}
+
+      {!isLoadingTrade && !Boolean(trade) && tokenA && tokenB && !!+typedValue && (
+        <div className="mt-5">
+          <Alert
+            text={
+              <span>
+                The requested pool does not exist. You can{" "}
+                <a
+                  className="text-green hover:text-green-hover duration-200"
+                  target="_blank"
+                  href={`/add?tokenA=${tokenA.wrapped.address0}&tokenB=${tokenB.wrapped.address0}`}
+                >
+                  create a new pool
+                </a>
+              </span>
+            }
+            type="warning"
+          />
+        </div>
+      )}
+
       {tokenA && tokenB && typedValue ? (
         <div
           className={clsx(
@@ -738,6 +806,7 @@ export default function TradeForm() {
               ? tokenA1Balance?.value >= parseUnits(typedValue, tokenA.decimals)
               : false))
         }
+        isSufficientPoolBalance={isSufficientPoolBalance}
         isTradeReady={Boolean(trade)}
         isTradeLoading={isLoadingTrade}
       />

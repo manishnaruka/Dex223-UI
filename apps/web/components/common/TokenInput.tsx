@@ -168,7 +168,14 @@ function StandardOption({
           />
         </div>
         {!token ? (
-          <div className="text-tertiary-text cursor-default">—</div>
+          <div
+            className={clsx(
+              "text-tertiary-text cursor-default",
+              standard === Standard.ERC223 ? "text-right" : "text-left",
+            )}
+          >
+            —
+          </div>
         ) : (
           <span
             className={clsx(

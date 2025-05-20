@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { formatGwei } from "viem";
-import { useBlockNumber, useGasPrice } from "wagmi";
+import { useGasPrice } from "wagmi";
 
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
@@ -17,10 +17,15 @@ import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 type SocialLink = {
   title: any;
   href: string;
-  icon: Extract<IconName, "telegram" | "x" | "discord" | "blog">;
+  icon: Extract<IconName, "telegram" | "x" | "discord" | "blog" | "shield">;
 };
 
 const socialLinks: SocialLink[] = [
+  {
+    title: "security_audit",
+    href: "https://www.beosin.com/audits/Dex223_202504300959.pdf",
+    icon: "shield",
+  },
   {
     title: "blog",
     href: "https://blog.dex223.io/",
@@ -58,7 +63,7 @@ function FooterLink({ href, title, icon }: SocialLink) {
         href={href}
         className={clsx(
           "lg:w-auto text-12 lg:text-16 flex gap-2 bg-primary-bg rounded-5 lg:py-2 lg:pr-4 lg:pl-5 p-2 hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200 w-full whitespace-nowrap justify-center items-center",
-          title === "blog" && "max-md:col-span-2",
+          // title === "blog" && "max-md:col-span-2",
         )}
       >
         {t(title)}
