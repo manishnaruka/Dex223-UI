@@ -2,8 +2,8 @@ import React from "react";
 import { useMediaQuery } from "react-responsive";
 
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
-import ClientOnly from "@/components/common/ClientOnly";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
+import { Standard } from "@/sdk_bi/standard";
 
 export default function ExternalConverterLink() {
   const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
@@ -20,13 +20,8 @@ export default function ExternalConverterLink() {
           className="text-tertiary-text group-hocus:text-green mr-1 flex-shrink-0 duration-200 "
         />
         Convert your{" "}
-        <ClientOnly>
-          <Badge size={isMobile ? "small" : undefined} text="ERC-20" />
-        </ClientOnly>{" "}
-        tokens to{" "}
-        <ClientOnly>
-          <Badge size={isMobile ? "small" : undefined} text="ERC-223" />
-        </ClientOnly>
+        <Badge size="small" variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
+        tokens to <Badge size="small" variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
       </div>
       <div className="relative before:opacity-0 before:duration-200 group-hocus:before:opacity-40 before:absolute before:w-4 before:h-4 before:rounded-full before:bg-green-hover-icon before:blur-[8px] before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2">
         <Svg

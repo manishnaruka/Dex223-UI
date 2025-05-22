@@ -182,7 +182,14 @@ export default function AddPoolPage() {
               variant={IconButtonVariant.BACK}
               iconSize={IconSize.REGULAR}
               buttonSize={IconButtonSize.LARGE}
-              onClick={() => router.push("/pools/positions")}
+              // onClick={() => }
+              onClick={() => {
+                // if (window.history.length > 1) {
+                window.history.back();
+                // } else {
+                // router.push("/pools/positions");
+                // }
+              }}
               // className="text-tertiary-text"
             />
           </div>

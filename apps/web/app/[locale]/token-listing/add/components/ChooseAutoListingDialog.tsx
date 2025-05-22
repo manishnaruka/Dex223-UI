@@ -71,18 +71,19 @@ export default function ChooseAutoListingDialog() {
                   <span className="font-medium w-[70px] overflow-ellipsis overflow-hidden md:w-[244px] whitespace-nowrap text-left">
                     {a.name}
                   </span>
-                  <span className="text-14">{a.tokens.length} tokens</span>
+                  <span className="text-14 text-secondary-text">{a.tokens.length} tokens</span>
                 </div>
                 <div className="flex items-center md:gap-3 gap-2">
                   {a.id === autoListing?.id && (
                     <Svg iconName="check" className="text-green" size={32} />
                   )}
                   {a.isFree ? (
-                    <Badge variant={BadgeVariant.COLORED} text="Free" color="green" />
+                    <Badge variant={BadgeVariant.COLORED} text="Free" color="green_outline" />
                   ) : (
-                    <Badge variant={BadgeVariant.COLORED} text="Paid" color="grey" />
+                    <Badge variant={BadgeVariant.COLORED} text="Paid" color="grey_outline" />
                   )}
                   <ExternalTextLink
+                    textClassname="min-w-[75px] text-left"
                     onClick={(e) => e.stopPropagation()}
                     text={truncateMiddle(a.id, { charsFromEnd: 3, charsFromStart: 3 })}
                     href={getExplorerLink(ExplorerLinkType.ADDRESS, a.id, chainId)}

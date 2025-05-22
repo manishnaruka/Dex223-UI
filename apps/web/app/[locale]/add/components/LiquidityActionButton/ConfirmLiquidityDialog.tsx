@@ -11,7 +11,7 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
 import Button from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
@@ -454,7 +454,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                   >
                     {aSymbol}
                   </span>
-                  <Badge color="green" text={tokenAStandard} />
+                  <Badge variant={BadgeVariant.STANDARD} standard={tokenAStandard} />
                 </div>
                 <span className="text-16 font-medium">
                   {formatFloat(parsedAmounts[Field.CURRENCY_A]?.toSignificant() || "")}
@@ -471,7 +471,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                   >
                     {bSymbol}
                   </span>
-                  <Badge color="green" text={tokenBStandard} />
+                  <Badge variant={BadgeVariant.STANDARD} standard={tokenBStandard} />
                 </div>
                 <span className="text-16 font-medium">
                   {formatFloat(parsedAmounts[Field.CURRENCY_B]?.toSignificant() || "")}

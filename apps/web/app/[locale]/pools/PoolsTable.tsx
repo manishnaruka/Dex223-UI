@@ -84,9 +84,6 @@ const PoolsTableDesktop = ({
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
-  console.log(tableData);
-  console.log("TABLE DATA");
-
   return (
     <div className="hidden lg:grid pr-3 pl-2 rounded-3 overflow-hidden bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(30px,1fr),_minmax(30px,1fr),_minmax(30px,1fr)] pb-2">
       <div className=" h-[60px] flex items-center justify-center  text-tertiary-text ">#</div>
@@ -302,7 +299,7 @@ const PoolsTableItemMobile = ({
             </div>
             <div className="flex w-full flex-col items-start bg-tertiary-bg rounded-2 px-4 py-[10px]">
               <span className="text-14 text-tertiary-text">7 day volume</span>
-              <span className="text-14 text-secondary-text">{`$${pool.poolDayData?.[0]?.volumeUSD || "—"}`}</span>
+              <span className="text-14 text-secondary-text">{`$${formatNumberKilos(pool.poolDayData?.[0]?.volumeUSD || 0)}`}</span>
             </div>
           </div>
         </div>

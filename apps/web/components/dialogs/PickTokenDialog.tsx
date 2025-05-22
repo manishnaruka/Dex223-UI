@@ -26,6 +26,7 @@ import { useTokens } from "@/hooks/useTokenLists";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 
@@ -240,7 +241,7 @@ function TokenRow({
             )}
             {erc20Balance && !currency.isNative && (
               <div className="flex items-center gap-1">
-                <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
+                <Badge size="small" variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
                 <span className="text-secondary-text text-12">
                   {formatFloat(erc20Balance?.formatted)} {currency.symbol}
                 </span>
@@ -248,7 +249,7 @@ function TokenRow({
             )}
             {erc223Balance && !currency.isNative && (
               <div className="flex items-center gap-1">
-                <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
+                <Badge size="small" variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
                 <span className="text-secondary-text text-12">
                   {formatFloat(erc223Balance?.formatted)} {currency.symbol}
                 </span>
@@ -269,7 +270,7 @@ function TokenRow({
         )}
         {erc20Balance && !currency.isNative && (
           <div className="flex items-center gap-1">
-            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
+            <Badge size="small" variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
             <span className="text-secondary-text text-12">
               {formatFloat(erc20Balance?.formatted)} {currency.symbol}
             </span>
@@ -277,7 +278,7 @@ function TokenRow({
         )}
         {erc223Balance && !currency.isNative && (
           <div className="flex items-center gap-1">
-            <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
+            <Badge size="small" variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
             <span className="text-secondary-text text-12">
               {formatFloat(erc223Balance?.formatted)} {currency.symbol}
             </span>
@@ -610,7 +611,12 @@ export default function PickTokenDialog({
                 </div>
 
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
-                  <div className="flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180 -mt-3">
+                  <div
+                    className={clsx(
+                      "flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180",
+                      !pinnedTokens.length && "-mt-3",
+                    )}
+                  >
                     <span className="text-secondary-text">{t("token_not_found")}</span>
                   </div>
                 )}

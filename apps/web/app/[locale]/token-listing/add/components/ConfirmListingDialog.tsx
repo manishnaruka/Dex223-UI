@@ -42,6 +42,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_bi/chains";
 import { ADDRESS_ZERO } from "@/sdk_bi/constants";
 import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 function ApproveRow({
@@ -140,7 +141,6 @@ function ListTokenRow({
         >
           <Svg
             className={clsxMerge(
-              "rotate-90",
               isDisabled ? "text-tertiary-text" : "text-green",
               isReverted && "text-red-light",
             )}
@@ -635,7 +635,7 @@ export default function ConfirmListingDialog() {
                   <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
 
                   {paymentToken.token.symbol}
-                  <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
+                  <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
                 </span>
               </div>
               {paymentToken?.token && !isAllowed && (

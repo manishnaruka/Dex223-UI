@@ -19,6 +19,7 @@ import { filterAutoListings } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Link } from "@/i18n/routing";
+import { Standard } from "@/sdk_bi/standard";
 
 export default function TokenListingPage() {
   const [searchValue, setSearchValue] = useState("");
@@ -127,7 +128,7 @@ export default function TokenListingPage() {
                               </span>{" "}
                               {paymentMethod.token.symbol}
                             </span>
-                            <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
+                            <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
                           </span>
                         ))
                       ) : (
@@ -236,7 +237,7 @@ export default function TokenListingPage() {
                                   </span>{" "}
                                   {paymentMethod.token.symbol}
                                 </span>
-                                <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
+                                <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
                               </span>
                             ))
                           : "Free"}

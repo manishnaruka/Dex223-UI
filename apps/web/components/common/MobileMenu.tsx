@@ -9,6 +9,7 @@ import Collapse from "@/components/atoms/Collapse";
 import Drawer from "@/components/atoms/Drawer";
 import LocaleSwitcher from "@/components/atoms/LocaleSwitcher";
 import Svg from "@/components/atoms/Svg";
+import Badge from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
@@ -30,6 +31,7 @@ export function MobileLink({
   handleClick,
   isMenu = false,
   isExternal = false,
+  comingSoon = false,
 }: {
   href: string;
   iconName: IconName;
@@ -41,6 +43,7 @@ export function MobileLink({
   handleClick?: (e: any) => void;
   isMenu?: boolean;
   isExternal?: boolean;
+  comingSoon?: boolean;
 }) {
   if (isExternal) {
     return (
@@ -70,27 +73,29 @@ export function MobileLink({
   }
 
   return (
-    <Link
-      onClick={(e) => {
-        if (handleClick) {
-          handleClick(e);
-        }
+    <div className={clsx("flex items-center gap-2", className)}>
+      <Link
+        onClick={(e) => {
+          if (handleClick) {
+            handleClick(e);
+          }
 
-        handleClose();
-      }}
-      href={href}
-      className={clsxMerge(
-        "flex items-center gap-2 py-3 px-4 duration-200",
-        !isActive && "hocus:bg-quaternary-bg text-secondary-text",
-        isActive && !isMenu && "text-green pointer-events-none",
-        isActive && isMenu && "bg-navigation-active-mobile text-green pointer-events-none",
-        disabled && "pointer-events-none opacity-50",
-        className,
-      )}
-    >
-      <Svg iconName={iconName} />
-      {title}
-    </Link>
+          handleClose();
+        }}
+        href={href}
+        className={clsxMerge(
+          "flex items-center gap-2 py-3 px-4 duration-200 flex-grow",
+          !isActive && "hocus:bg-quaternary-bg text-secondary-text",
+          isActive && !isMenu && "text-green pointer-events-none",
+          isActive && isMenu && "bg-navigation-active-mobile text-green pointer-events-none",
+          disabled && "pointer-events-none opacity-50",
+        )}
+      >
+        <Svg iconName={iconName} />
+        {title}
+      </Link>
+      {comingSoon && <Badge color="green_outline" text="Coming soon" />}
+    </div>
   );
 }
 
@@ -235,7 +240,7 @@ export default function MobileMenu() {
         isOpen={mobileMenuOpened}
         setIsOpen={setMobileMenuOpened}
       >
-        <div className="flex flex-col justify-between h-full">
+        <div className="flex flex-col justify-between h-full min-w-[300px]">
           <div className="py-6 grid gap-1">
             {[
               mobileLinks.map(({ href, iconName, title }) => {
@@ -249,6 +254,12 @@ export default function MobileMenu() {
                     handleClose={() => setMobileMenuOpened(false)}
                     isActive={pathname.includes(href)}
                     disabled={!["/swap", "/pools", "/portfolio", "/token-listing"].includes(href)}
+                    comingSoon={title === "borrow_lend" || title === "margin_trading"}
+                    className={
+                      title === "borrow_lend" || title === "margin_trading"
+                        ? "justify-between pr-4"
+                        : ""
+                    }
                   />
                 );
               }),
@@ -358,7 +369,7 @@ export default function MobileMenu() {
             </div>
           </div>
           <div className="flex flex-grow items-end gap-4 px-4 pb-4">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 flex-grow">
               <div className="flex gap-2">
                 <div className="flex items-center gap-1 text-12 text-secondary-text">
                   <Svg size={16} className="text-tertiary-text" iconName="gas" />
@@ -396,11 +407,12 @@ export default function MobileMenu() {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full flex-grow">
                 <LocaleSwitcher isMobile={true} />
                 <Button
                   size={ButtonSize.MEDIUM}
                   fullWidth
+                  className="flex-grow"
                   colorScheme={ButtonColor.LIGHT_GREEN}
                   endIcon="star"
                   onClick={() => {

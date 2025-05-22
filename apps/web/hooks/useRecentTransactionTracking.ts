@@ -59,7 +59,7 @@ export function useRecentTransactionTracking() {
         addNotification(title, RecentTransactionStatus.SUCCESS);
       } else if (transaction.status === "reverted") {
         updateTransactionStatus(id, RecentTransactionStatus.ERROR, address);
-        addNotification(title, RecentTransactionStatus.ERROR);
+        addNotification(title, RecentTransactionStatus.ERROR, { duration: Infinity });
       }
     },
     [address, publicClient, updateTransactionHash, updateTransactionStatus],

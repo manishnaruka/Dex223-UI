@@ -65,27 +65,33 @@ function PoolPosition({ onClick, positionInfo }: { onClick: any; positionInfo: P
       className="px-4 lg:px-5 py-4 rounded-3 bg-tertiary-bg hocus:bg-quaternary-bg duration-200 cursor-pointer"
       onClick={onClick}
     >
-      <div className="justify-between flex items-center mb-2 gap-2">
-        <div className="flex items-center gap-2">
-          <TokensPair tokenA={tokenA} tokenB={tokenB} variant="medium-primary" />
-          {fee ? (
-            <Badge
-              variant={BadgeVariant.PERCENTAGE}
-              percentage={`${FEE_AMOUNT_DETAIL[fee].label}%`}
-            />
-          ) : (
-            <Badge variant={BadgeVariant.DEFAULT} text="loading..." />
-          )}
+      <div className="justify-between md:items-center flex mb-2 gap-2">
+        <div className="flex gap-2 md:items-center">
+          <div className="min-h-[26px] flex items-center">
+            <TokensPair tokenA={tokenA} tokenB={tokenB} variant="medium-primary" />
+          </div>
+          <div className="h-[26px] flex items-center">
+            {fee ? (
+              <Badge
+                variant={BadgeVariant.PERCENTAGE}
+                percentage={`${FEE_AMOUNT_DETAIL[fee].label}%`}
+              />
+            ) : (
+              <Badge variant={BadgeVariant.DEFAULT} text="loading..." />
+            )}
+          </div>
         </div>
-        <RangeBadge
-          status={
-            removed
-              ? PositionRangeStatus.CLOSED
-              : inRange
-                ? PositionRangeStatus.IN_RANGE
-                : PositionRangeStatus.OUT_OF_RANGE
-          }
-        />
+        <div className="h-[26px] flex items-center">
+          <RangeBadge
+            status={
+              removed
+                ? PositionRangeStatus.CLOSED
+                : inRange
+                  ? PositionRangeStatus.IN_RANGE
+                  : PositionRangeStatus.OUT_OF_RANGE
+            }
+          />
+        </div>
       </div>
       <div className="hidden md:flex gap-2 items-center">
         <span className="text-secondary-text">Min:</span> {formatNumber(minTokenAPerTokenB)}{" "}

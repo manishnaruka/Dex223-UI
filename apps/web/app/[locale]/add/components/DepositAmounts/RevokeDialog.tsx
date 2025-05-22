@@ -1,22 +1,18 @@
 import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
-import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { NumericFormat } from "react-number-format";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
-import { clsxMerge } from "@/functions/clsxMerge";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
@@ -175,7 +171,7 @@ export const RevokeDialog = () => {
                   <span>{`${t("withdraw")} ${token.symbol}`}</span>
                 )}
 
-                <Badge color="green" text={standard} className="text-nowrap mr-auto" />
+                <Badge variant={BadgeVariant.STANDARD} standard={standard} className="mr-auto" />
               </div>
               <div className="flex items-center gap-2 justify-end ml-2 ">
                 {/* Speed Up button */}

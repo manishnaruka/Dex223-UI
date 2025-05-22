@@ -13,7 +13,7 @@ import Popover from "@/components/atoms/Popover";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import TabButton from "@/components/buttons/TabButton";
@@ -39,6 +39,8 @@ function PinnedTokenRow({
   token: Currency;
   onPriceUpdate: (address: Address, price: number) => void;
 }) {
+  const t = useTranslations("Swap");
+
   const {
     balance: { erc20Balance, erc223Balance },
   } = useTokenBalances(token);
@@ -94,9 +96,14 @@ function PinnedTokenRow({
             <div className="flex items-center gap-2">
               <span className="text-12 text-tertiary-text">Balance</span>
               <span className="block min-w-[58px]">
-                <Badge className="w-fit" size="small" text={Standard.ERC20} />
+                <Badge
+                  // className="w-fit"
+                  size="small"
+                  variant={BadgeVariant.STANDARD}
+                  standard={Standard.ERC20}
+                />
               </span>
-              <Tooltip iconSize={16} text="Tooltip text" />
+              <Tooltip iconSize={16} text={t("erc20_tooltip")} />
             </div>
 
             <span className="text-secondary-text text-12">
@@ -107,9 +114,14 @@ function PinnedTokenRow({
             <div className="flex items-center gap-2">
               <span className="text-12 text-tertiary-text">Balance</span>
               <span className="block min-w-[58px]">
-                <Badge className="w-fit" size="small" text={Standard.ERC223} />
+                <Badge
+                  // className="w-fit"
+                  size="small"
+                  variant={BadgeVariant.STANDARD}
+                  standard={Standard.ERC223}
+                />
               </span>
-              <Tooltip iconSize={16} text="Tooltip text" />
+              <Tooltip iconSize={16} text={t("erc223_tooltip")} />
             </div>
 
             <span className="text-secondary-text text-12">
@@ -124,7 +136,10 @@ function PinnedTokenRow({
             <span className="block min-w-[58px]">
               <Badge className="w-fit" size="small" text="Native" />
             </span>
-            <Tooltip iconSize={16} text="Tooltip text" />
+            <Tooltip
+              iconSize={16}
+              text="Native currency of the network you are using (e.g. ETH on Ethereum). On most networks gas fees are paid with native currency."
+            />
           </div>
 
           <span className="text-secondary-text text-12">
@@ -186,7 +201,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
   return (
     <>
       <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
-      <div className="card-spacing-x md:w-[600px] w-full">
+      <div className="card-spacing-x md:w-[600px] w-full max-h-[calc(100dvh_-_70px)]">
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
             <Image src={wallets.metamask.image} alt="" width={48} height={48} />

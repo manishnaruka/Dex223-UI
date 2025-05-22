@@ -70,7 +70,7 @@ export const useSwapSearchParams = () => {
   useEffect(() => {
     if (isInitialized) {
       if (currentPath !== updatedPath) {
-        window.history.pushState(null, "", updatedPath);
+        window.history.replaceState(null, "", updatedPath);
       }
     }
   }, [currentPath, updatedPath, isInitialized]);

@@ -34,6 +34,7 @@ import {
 } from "@/hooks/usePositions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/i18n/routing";
+import { Standard } from "@/sdk_bi/standard";
 
 import { DepositAmounts } from "../../add/components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "../../add/components/LiquidityActionButton/ConfirmLiquidityDialog";
@@ -177,13 +178,13 @@ export default function IncreaseLiquidityPage({
                     token={tokenA}
                     amount={existedPosition?.amount0.toSignificant() || "Loading..."}
                     percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
-                    standards={["ERC-20", "ERC-223"]} // TODO
+                    standards={[Standard.ERC20, Standard.ERC223]} // TODO
                   />
                   <PositionLiquidityCard
                     token={tokenB}
                     amount={existedPosition?.amount1.toSignificant() || "Loading..."}
                     percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
-                    standards={["ERC-20", "ERC-223"]} // TODO
+                    standards={[Standard.ERC20, Standard.ERC223]} // TODO
                   />
                 </div>
               </div>

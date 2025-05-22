@@ -46,8 +46,6 @@ export default function SwapPage() {
     resetAmount();
   }, [chainId, resetAmount, resetTokens]);
 
-  const { data: walletClient } = useWalletClient();
-
   return (
     <>
       <Container>

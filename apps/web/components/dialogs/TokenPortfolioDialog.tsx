@@ -19,6 +19,7 @@ import { TokenListId } from "@/db/db";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 
 function TokenListInfo({
@@ -113,7 +114,7 @@ export function TokenPortfolioDialogContent({
         </div>
         <div className="grid grid-cols-[1fr_auto_32px] gap-x-2 -mr-1 gap-y-1">
           <span className="text-secondary-text flex items-center gap-1">
-            {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
+            {t("address")} <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />{" "}
           </span>
           <ExternalTextLink
             text={`${token.address0.slice(0, 6)}...${token.address0.slice(-6)}`}
@@ -127,7 +128,7 @@ export function TokenPortfolioDialogContent({
             text={token.address0}
           />
           <span className="text-secondary-text flex items-center gap-1">
-            {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-223" />{" "}
+            {t("address")} <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />{" "}
           </span>
           <ExternalTextLink
             text={`${token.address1.slice(0, 6)}...${token.address1.slice(-6)}`}

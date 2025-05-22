@@ -44,11 +44,13 @@ const LiquidityStatusNotifier = ({
   onClick: () => void;
 }) => {
   return (
-    <div className="flex w-full pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
-      <Preloader size={20} color="green" type="circular" />
+    <div className="flex flex-wrap pb-4 sm:pb-2 pt-2 w-full pl-4 sm:pl-6 min-h-12 bg-tertiary-bg gap-2 flex-row mb-4 rounded-3 items-center justify-between px-2">
+      <span className="flex-shrink-0 w-6 h-6 block">
+        <Preloader size={24} color="green" type="circular" />
+      </span>
       <span className="mr-auto items-center text-14 text-primary-text">{text}</span>
       <Button
-        className="ml-auto mr-3"
+        className="ml-auto mr-3 max-sm:w-full"
         variant={ButtonVariant.CONTAINED}
         size={ButtonSize.EXTRA_SMALL}
         onClick={onClick}

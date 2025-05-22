@@ -29,6 +29,7 @@ import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 
 interface Props {
   setContent: (content: ManageTokensDialogContent) => void;
@@ -274,7 +275,8 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     <div className="mb-4 flex flex-col gap-4 pl-5 pr-3 pb-5 pt-4 bg-tertiary-bg rounded-3">
                       <div className="grid grid-cols-[1fr_auto_32px] gap-y-1">
                         <span className="text-secondary-text flex items-center gap-1">
-                          {t("address")} <Badge variant={BadgeVariant.COLORED} text="ERC-20" />{" "}
+                          {t("address")}{" "}
+                          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />{" "}
                         </span>
                         <ExternalTextLink
                           text={truncateMiddle(erc20AddressToImport)}
@@ -292,7 +294,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                         />
                         <span className="text-secondary-text flex items-center gap-1">
                           {t("address")}{" "}
-                          <Badge variant={BadgeVariant.COLORED} text="ERC-223" color="green" />
+                          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
                         </span>
                         {erc223AddressToImport && isErc223Exist && (
                           <>

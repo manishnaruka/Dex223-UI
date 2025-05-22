@@ -11,7 +11,6 @@ import React, { PropsWithChildren, use, useEffect, useMemo, useState } from "rea
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import { useMediaQuery } from "react-responsive";
 import { Address, formatUnits } from "viem";
-import { useAccount } from "wagmi";
 
 import PositionLiquidityCard from "@/app/[locale]/pool/[tokenId]/components/PositionLiquidityCard";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
@@ -23,22 +22,18 @@ import {
 } from "@/app/[locale]/pool/[tokenId]/stores/useCollectFeesGasSettings";
 import { usePoolRecentTransactionsStore } from "@/app/[locale]/pool/[tokenId]/stores/usePoolRecentTransactionsStore";
 import { RemoveLiquidityGasSettings } from "@/app/[locale]/remove/[tokenId]/components/RemoveLiquidityGasSettings";
-import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
-import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
-import { useSwapStatusStore } from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import RangeBadge, { PositionRangeStatus } from "@/components/badges/RangeBadge";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import TokensPair from "@/components/common/TokensPair";
-import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { FEE_AMOUNT_DETAIL } from "@/config/constants/liquidityFee";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
@@ -58,7 +53,6 @@ import { useRouter } from "@/i18n/routing";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { Standard } from "@/sdk_bi/standard";
 import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
-import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
 import { CollectFeesStatus, useCollectFeesStatusStore } from "./stores/useCollectFeesStatusStore";
 import { useCollectFeesStore, useRefreshStore } from "./stores/useCollectFeesStore";
@@ -368,22 +362,6 @@ export default function PoolPage({
     showFirst,
   });
 
-  const { address: accountAddress } = useAccount();
-  const { transactions } = useRecentTransactionsStore();
-  const { hash: liquidityHash } = useCollectFeesStatusStore();
-  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
-
-  const transaction = useMemo(() => {
-    if (liquidityHash && accountAddress) {
-      const txs = transactions[accountAddress];
-      for (let tx of txs) {
-        if (tx.hash === liquidityHash) {
-          return tx;
-        }
-      }
-    }
-  }, [accountAddress, liquidityHash, transactions]);
-
   const handleClose = () => {
     reset();
     setIsOpen(false);
@@ -657,7 +635,7 @@ export default function PoolPage({
                   <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                     <PositionLiquidityCard
                       token={token0}
-                      standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      standards={token0?.isNative ? "native" : [Standard.ERC20, Standard.ERC223]}
                       amount={position?.amount0.toSignificant() || "Loading..."}
                       percentage={ratio ? (showFirst ? ratio : 100 - ratio) : "Loading..."}
                     />
@@ -665,7 +643,7 @@ export default function PoolPage({
                   <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                     <PositionLiquidityCard
                       token={token1}
-                      standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      standards={token1?.isNative ? "native" : [Standard.ERC20, Standard.ERC223]}
                       amount={position?.amount1.toSignificant() || "Loading..."}
                       percentage={ratio ? (!showFirst ? ratio : 100 - ratio) : "Loading..."}
                     />
@@ -701,14 +679,14 @@ export default function PoolPage({
                   <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                     <PositionLiquidityCard
                       token={token0}
-                      standards={token0?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      standards={token0?.isNative ? "native" : [Standard.ERC20, Standard.ERC223]}
                       amount={token0FeeFormatted}
                     />
                   </div>
                   <div className="p-4 lg:p-0 bg-quaternary-bg lg:bg-transparent rounded-3">
                     <PositionLiquidityCard
                       token={token1}
-                      standards={token1?.isNative ? ["Native"] : ["ERC-20", "ERC-223"]}
+                      standards={token1?.isNative ? "native" : [Standard.ERC20, Standard.ERC223]}
                       amount={token1FeeFormatted}
                     />
                   </div>
@@ -990,7 +968,7 @@ export default function PoolPage({
                       <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
                         <div className="flex items-center gap-2 md:w-auto">
                           <span className="text-sm lg:text-base ">{t("standard")}</span>
-                          <Badge color="green" text="ERC-20" />
+                          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
                         </div>
                         <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
                           {`${token0FeeFormatted} ${token0?.symbol}`}
@@ -1007,7 +985,7 @@ export default function PoolPage({
                       <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
                         <div className="flex items-center gap-2 md:w-auto">
                           <span className="text-sm lg:text-base ">{t("standard")}</span>
-                          <Badge color="green" text="ERC-223" />
+                          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
                         </div>
                         <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
                           {`${token0FeeFormatted} ${token0?.symbol}`}
@@ -1055,7 +1033,7 @@ export default function PoolPage({
                       <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
                         <div className="flex items-center gap-2 md:w-auto">
                           <span className="text-sm lg:text-base ">{t("standard")}</span>
-                          <Badge color="green" text="ERC-20" />
+                          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
                         </div>
                         <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
                           {`${token1FeeFormatted} ${token1?.symbol}`}
@@ -1072,7 +1050,7 @@ export default function PoolPage({
                       <div className="flex flex-wrap md:flex-row items-start md:items-center md:justify-between w-full gap-1 md:gap-0">
                         <div className="flex items-center gap-2 md:w-auto">
                           <span className="text-sm lg:text-base ">{t("standard")}</span>
-                          <Badge color="green" text="ERC-223" />
+                          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
                         </div>
                         <span className="text-sm lg:text-base ml-auto md:w-auto text-right md:text-left whitespace-nowrap">
                           {`${token1FeeFormatted} ${token1?.symbol}`}

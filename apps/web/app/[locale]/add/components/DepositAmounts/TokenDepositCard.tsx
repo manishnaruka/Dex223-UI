@@ -7,7 +7,7 @@ import { NumericFormat } from "react-number-format";
 import { formatUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
 
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import InputButton from "@/components/buttons/InputButton";
 import { formatFloat } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -129,6 +129,7 @@ function InputTotalAmount({
       )}
     >
       <div className="mb-1 flex justify-between items-center">
+        {/*<div className="border border-red border-px">*/}
         <NumericFormat
           allowedDecimalSeparators={[","]}
           decimalScale={currency?.decimals}
@@ -147,7 +148,9 @@ function InputTotalAmount({
           onFocus={() => setIsFocused(true)} // Set focus state when NumericFormat is focused
           onBlur={() => setIsFocused(false)} // Remove focus state when NumericFormat loses focus
         />
-        <div className="justify-end bg-secondary-bg rounded-5 py-1 pl-1 flex items-center gap-2 ">
+        {/*</div>*/}
+
+        <div className="justify-end bg-secondary-bg rounded-5 py-1 pl-1 flex items-center gap-2 flex-shrink-0">
           {currency ? (
             <div
               className={`rounded-5 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : "bg-primary-bg"}`}
@@ -165,7 +168,13 @@ function InputTotalAmount({
             <div
               className={`rounded-5 gap-2 p-1 flex flex-row items-center flex-nowrap ${isDisabled ? "bg-tertiary-bg" : "bg-primary-bg"}`}
             >
-              <Image src={"/images/tokens/placeholder.svg"} alt="" width={24} height={24} />
+              <Image
+                src={"/images/tokens/placeholder.svg"}
+                className="flex-shrink-0"
+                alt=""
+                width={24}
+                height={24}
+              />
               <span className="text-nowrap pr-3">{t("select_token")}</span>
             </div>
           )}
@@ -246,7 +255,11 @@ function InputStandardAmount({
     <div className="flex flex-col gap-2 w-full">
       <div className="flex items-center gap-1 lg:gap-2">
         <span className="text-secondary-text">{t("standard")}</span>
-        <Badge color={standard === Standard.ERC20 ? "purple" : "green"} text={standard} />
+        <Badge
+          color={standard === Standard.ERC20 ? "purple" : "green"}
+          variant={BadgeVariant.STANDARD}
+          standard={standard}
+        />
         <Tooltip
           iconSize={20}
           text={standard === Standard.ERC20 ? tSwap("erc20_tooltip") : tSwap("erc223_tooltip")}
@@ -462,6 +475,7 @@ export default function TokenDepositCard({
           height={24}
           src={currency?.logoURI || "/images/tokens/placeholder.svg"}
           alt=""
+          className="flex-shrink-0"
         />
         <h3 className={`text-16 font-bold text-secondary-text text-nowrap`}>
           {currency

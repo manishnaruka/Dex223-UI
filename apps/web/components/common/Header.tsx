@@ -17,8 +17,8 @@ export default function Header() {
   const { handleOpen } = useMintTestTokensDialogStore();
   return (
     <div>
-      <header className="md:mb-3 xl:before:hidden before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:bottom-0 before:left-0">
-        <Container className="pl-4 pr-1 md:px-5">
+      <header className="xl:before:hidden before:h-[1px] before:bg-gradient-to-r before:from-secondary-border/20 before:via-50% before:via-secondary-border before:to-secondary-border/20 before:w-full before:absolute relative before:bottom-0 before:left-0">
+        <Container className="pl-4 pr-1 md:px-5 max-w-[1920px]">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-5">
               <Link className="relative w-7 h-8 xl:w-[35px] xl:h-10" href="/">
@@ -46,13 +46,13 @@ export default function Header() {
       </header>
       {process.env.NEXT_PUBLIC_ENV === "development" && (
         <div className="pt-2.5 md:pt-2 md:pb-2 pb-4 bg-gradient-to-r from-green-bg to-green-bg/0">
-          <Container className="flex h-full items-center px-5">
+          <Container className="flex h-full items-center px-5 max-w-[1920px]">
             <div className="flex justify-between items-center w-full flex-wrap gap-2">
               <div className="flex items-center gap-2 justify-between md:justify-start flex-grow">
                 Get test tokens for free
                 <Image src="/images/test-tokens.svg" alt="" width={92} height={48} />
               </div>
-              <div className="w-full md:w-[168px]">
+              <div className="w-full md:w-[170px]">
                 <Button
                   fullWidth
                   onClick={handleOpen}

@@ -30,7 +30,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { networks } from "@/config/networks";
@@ -40,10 +40,8 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
-import { CONVERTER_ADDRESS, ROUTER_ADDRESS } from "@/sdk_bi/addresses";
+import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
-import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
-import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
@@ -401,7 +399,11 @@ function ReadonlyTokenAmountCard({
             height={32}
           />
           {token?.symbol}
-          <Badge color="green" text={token?.isNative ? "Native" : standard} />
+          {token?.isNative ? (
+            <Badge color="green" text={"Native"} />
+          ) : (
+            <Badge variant={BadgeVariant.STANDARD} standard={standard} />
+          )}
         </div>
       </div>
       <p className="text-secondary-text text-14">${amountUSD}</p>
@@ -596,9 +598,9 @@ export default function ConfirmConvertDialog() {
               </div>
 
               <div className="flex justify-center gap-2 items-center">
-                <Badge text={tokenAStandard} />
+                <Badge variant={BadgeVariant.STANDARD} standard={tokenAStandard} />
                 <Svg className="text-tertiary-text" iconName="next" />
-                <Badge text={tokenBStandard} />
+                <Badge variant={BadgeVariant.STANDARD} standard={tokenBStandard} />
               </div>
             </div>
           )}
@@ -699,7 +701,7 @@ export default function ConfirmConvertDialog() {
                         mobileSize={ButtonSize.SMALL}
                         colorScheme={ButtonColor.LIGHT_GREEN}
                         onClick={() => setEditApproveActive(false)}
-                        className="!rounded-20"
+                        className="!rounded-20 disabled:bg-quaternary-bg"
                       >
                         Save
                       </Button>

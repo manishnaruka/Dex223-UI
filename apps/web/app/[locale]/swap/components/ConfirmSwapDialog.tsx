@@ -30,7 +30,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { networks } from "@/config/networks";
@@ -407,7 +407,11 @@ function ReadonlyTokenAmountCard({
             height={32}
           />
           {token?.symbol}
-          <Badge color="green" text={token?.isNative ? "Native" : standard} />
+          {token?.isNative ? (
+            <Badge color="green" text={"Native"} />
+          ) : (
+            <Badge variant={BadgeVariant.STANDARD} standard={standard} />
+          )}
         </div>
       </div>
       <p className="text-secondary-text text-14">${amountUSD}</p>
@@ -755,7 +759,7 @@ export default function ConfirmSwapDialog() {
                         mobileSize={ButtonSize.SMALL}
                         colorScheme={ButtonColor.LIGHT_GREEN}
                         onClick={() => setEditApproveActive(false)}
-                        className="!rounded-20"
+                        className="!rounded-20 disabled:bg-quaternary-bg"
                       >
                         Save
                       </Button>

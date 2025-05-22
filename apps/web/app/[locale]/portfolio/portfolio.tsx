@@ -202,6 +202,12 @@ const ManageWalletsContent = ({
     wallets.length || showFromSearch ? "list" : "add",
   );
 
+  useEffect(() => {
+    if (!wallets.length && content !== "add") {
+      setContent("add");
+    }
+  }, [wallets.length, content]);
+
   const handleAddWallet = useCallback(() => {
     addWallet(searchValue as Address);
     setSearchValue("");
@@ -210,37 +216,29 @@ const ManageWalletsContent = ({
   }, [addWallet, searchValue, setSearchValue, setShowFromSearch]);
 
   const popupBackHandler = useCallback(() => {
-    if (content === "list") {
-      return undefined;
-    } else if (content === "manage") {
-      return () => {
-        setContent("list");
-      };
+    if (content === "manage") {
+      setContent("list");
     } else if (content === "add") {
-      if (wallets.length) {
-        return () => {
-          setContent("list");
-        };
-      } else {
-        return undefined;
-      }
-    } else {
-      return undefined;
+      setContent("list");
     }
-  }, [content, wallets.length]);
+  }, [content]);
 
   return (
     <div className="bg-primary-bg  lg:min-w-[450px]">
       <DialogHeader
         className={
-          content === "add" || content === "manage"
+          (content === "add" && !!wallets.length) || content === "manage"
             ? "md:pr-3 px-4 md:pl-3"
-            : "md:pr-3 px-4 md:pl-5"
+            : "md:pr-3 px-4 md:pl-5 lg:pl-5 lg:pr-3"
         }
         onClose={() => {
           setIsOpened(false);
         }}
-        onBack={content === "add" || content === "manage" ? popupBackHandler : undefined}
+        onBack={
+          (content === "add" && !!wallets.length) || content === "manage"
+            ? popupBackHandler
+            : undefined
+        }
         settings={
           content === "list" && !showFromSearch ? (
             <Button

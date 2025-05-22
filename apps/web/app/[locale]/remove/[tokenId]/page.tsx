@@ -43,6 +43,7 @@ import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracki
 import { Link, useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { Standard } from "@/sdk_bi/standard";
 import {
   RecentTransactionTitleTemplate,
   useRecentTransactionsStore,
@@ -163,10 +164,10 @@ export default function DecreaseLiquidityPage({
 
   const { address: accountAddress } = useAccount();
   const { transactions } = useRecentTransactionsStore();
-  const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
+  const { handleSpeedUp } = useTransactionSpeedUpDialogStore();
 
   const transaction = useMemo(() => {
-    if (hash && accountAddress) {
+    if (hash && accountAddress && !!transactions) {
       const txs = transactions[accountAddress];
       for (let tx of txs) {
         if (tx.hash === hash) {
@@ -371,7 +372,7 @@ export default function DecreaseLiquidityPage({
                 <div className="flex justify-between flex-col gap-3">
                   <PositionLiquidityCard
                     token={tokenA}
-                    standards={["ERC-20", "ERC-223"]} // TODO check if token has standards
+                    standards={[Standard.ERC20, Standard.ERC223]} // TODO check if token has standards
                     amount={
                       position?.amount0
                         .multiply(new Percent(percentage))
@@ -381,7 +382,7 @@ export default function DecreaseLiquidityPage({
                   />
                   <PositionLiquidityCard
                     token={tokenB}
-                    standards={["ERC-20", "ERC-223"]}
+                    standards={[Standard.ERC20, Standard.ERC223]}
                     amount={
                       position?.amount1
                         .multiply(new Percent(percentage))
@@ -475,7 +476,7 @@ export default function DecreaseLiquidityPage({
         }}
       >
         <DialogHeader onClose={handleClose} title={t("confirm_removing_liquidity")} />
-        <div className="card-spacing md:w-[570px] md:h-auto overflow-y-auto">
+        <div className="card-spacing md:w-[570px] md:h-auto">
           <div
             className={clsxMerge(
               "flex justify-between items-start",

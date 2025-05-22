@@ -2,10 +2,11 @@ import { useTranslations } from "next-intl";
 import React, { PropsWithChildren } from "react";
 
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import { RecentTransactionLogo } from "@/components/common/RecentTransaction";
 import { formatFloat } from "@/functions/formatFloat";
+import { Standard } from "@/sdk_bi/standard";
 import {
   IRecentTransactionTitle,
   RecentTransactionStatus,
@@ -108,7 +109,7 @@ function NotificationTitle({
               ? t("withdraw_success_notification", { symbol: title.symbol })
               : t("withdraw_revert_notification", { symbol: title.symbol })}
           </NotificationTitleText>
-          <Badge color="green" text="ERC-223" />
+          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
         </div>
       );
     case RecentTransactionTitleTemplate.CONVERT:

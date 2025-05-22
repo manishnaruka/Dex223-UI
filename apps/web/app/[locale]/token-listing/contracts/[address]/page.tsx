@@ -31,6 +31,7 @@ import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 
 interface TokenListInfoCardProps extends HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -40,10 +41,13 @@ function TokenListInfoCard({ title, value, className, ...props }: TokenListInfoC
   return (
     <div
       {...props}
-      className={clsxMerge("bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col", className)}
+      className={clsxMerge(
+        "bg-tertiary-bg rounded-3 px-4 py-2 md:px-5 md:py-4 flex flex-col",
+        className,
+      )}
     >
-      <h3 className="text-tertiary-text">{title}</h3>
-      <span className="text-secondary-text text-20 font-medium">{value}</span>
+      <h3 className="max-md:text-14 text-tertiary-text">{title}</h3>
+      <span className="text-secondary-text text-16 md:text-20 font-medium">{value}</span>
     </div>
   );
 }
@@ -266,7 +270,7 @@ export default function AutoListingContractDetails({
             </span>
           </Link>
         </div>
-        <div className="my-2 xl:my-10 px-4">
+        <div className="mt-2 mb-4 xl:my-10 px-4">
           <div className="flex justify-between mb-2 xl:mb-5">
             <h1 className="text-24 xl:text-40 font-medium">Listing contract details</h1>
             <Link
@@ -293,7 +297,7 @@ export default function AutoListingContractDetails({
                   <ExternalTextLink
                     text={truncateMiddle(use(params).address, {
                       charsFromEnd: 3,
-                      charsFromStart: 3,
+                      charsFromStart: 4,
                     })}
                     href="#"
                   />{" "}
@@ -367,10 +371,10 @@ export default function AutoListingContractDetails({
 
           <div>
             <div>
-              <div className="flex justify-between mb-4 xl:mb-5 flex-col xl:flex-row">
+              <div className="flex justify-between  flex-col xl:flex-row">
                 <h1 className="text-18 xl:text-32 font-medium mb-2 xl:mb-0">Tokens</h1>
                 {!!listingContract.tokens.length && (
-                  <div className="w-full md:w-[480px]">
+                  <div className="w-full md:w-[480px] mb-4 xl:mb-5">
                     <SearchInput
                       className="bg-tertiary-bg"
                       value={searchValue}
@@ -454,7 +458,11 @@ export default function AutoListingContractDetails({
                           <div className="bg-tertiary-bg pb-1 pl-4 pt-2.5 rounded-2">
                             <div className="flex items-center gap-2 text-secondary-text text-14">
                               Address
-                              <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-20" />
+                              <Badge
+                                size="small"
+                                variant={BadgeVariant.STANDARD}
+                                standard={Standard.ERC20}
+                              />
                             </div>
                             <div className="flex items-center text-14 -mt-0.5">
                               <ExternalTextLink
@@ -478,7 +486,11 @@ export default function AutoListingContractDetails({
                           <div className="bg-tertiary-bg pb-1 pl-4 pt-2.5 rounded-2">
                             <div className="flex items-center gap-2 text-secondary-text text-14">
                               Address
-                              <Badge size="small" variant={BadgeVariant.COLORED} text="ERC-223" />
+                              <Badge
+                                size="small"
+                                variant={BadgeVariant.STANDARD}
+                                standard={Standard.ERC223}
+                              />
                             </div>
                             <div className="flex items-center text-14 -mt-0.5">
                               <ExternalTextLink
@@ -510,11 +522,11 @@ export default function AutoListingContractDetails({
                       <div>Name</div>
                       <div className="flex items-center gap-2">
                         Address
-                        <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-20" />
+                        <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
                       </div>
                       <div className="flex items-center gap-2">
                         Address
-                        <Badge variant={BadgeVariant.COLORED} color="green" text="ERC-223" />
+                        <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
                       </div>
                       <div>Found in</div>
                       <div>Details</div>

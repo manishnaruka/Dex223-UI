@@ -11,7 +11,7 @@ import { Address, formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import { TableData } from "@/app/[locale]/portfolio/components/Deposited/DepositedWithdrawTable";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { formatNumber } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
@@ -150,10 +150,10 @@ export const DesktopTable = ({
       <div className="hidden lg:grid pr-5 pl-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(60px,1.33fr),_minmax(60px,1.33fr),_minmax(50px,1.33fr),_minmax(40px,1.1fr)] pb-2 relative">
         <div className="text-secondary-text pl-5 h-[60px] flex items-center">Token</div>
         <div className="text-secondary-text h-[60px] flex items-center gap-2">
-          Approved <Badge color="green" text="ERC-20" />
+          Approved <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
         </div>
         <div className="text-secondary-text h-[60px] flex items-center gap-2">
-          Deposited <Badge color="green" text="ERC-223" />
+          Deposited <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
         </div>
         <div className="text-secondary-text h-[60px] flex items-center">Total Amount, $</div>
         <div className="text-secondary-text pr-5 h-[60px] flex items-center">Action / Owner</div>
@@ -224,7 +224,12 @@ const DepositedTokenMobileTableItem = ({
         </div>
         <div className="flex gap-1 items-baseline">
           <div className="flex gap-2 w-1/2 items-baseline">
-            <Badge color="green" text="ERC-20" size={isMobile ? "small" : "default"} />
+            <Badge
+              color="green"
+              variant={BadgeVariant.STANDARD}
+              standard={Standard.ERC20}
+              size={isMobile ? "small" : "default"}
+            />
             <span className="text-12 text-secondary-text">
               {`${formatNumber(formatUnits(deposite.approved, deposite.token.decimals), 6)} ${truncateMiddle(
                 deposite.token.symbol || "",
@@ -236,7 +241,12 @@ const DepositedTokenMobileTableItem = ({
             </span>
           </div>
           <div className="flex gap-2 w-1/2 items-baseline">
-            <Badge color="green" text="ERC-223" size={isMobile ? "small" : "default"} />
+            <Badge
+              color="green"
+              variant={BadgeVariant.STANDARD}
+              standard={Standard.ERC223}
+              size={isMobile ? "small" : "default"}
+            />
             <span className="text-12 text-secondary-text">
               {`${formatNumber(formatUnits(deposite.deposited, deposite.token.decimals), 6)} ${truncateMiddle(
                 deposite.token.symbol || "",

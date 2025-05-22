@@ -2,11 +2,11 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { NumericFormat } from "react-number-format";
 
 import SelectButton from "@/components/atoms/SelectButton";
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import InputButton from "@/components/buttons/InputButton";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
@@ -160,7 +160,7 @@ function StandardOption({
           >
             {t("standard")}
           </span>
-          <Badge size="small" color="green" text={standard} />
+          <Badge size="small" variant={BadgeVariant.STANDARD} standard={standard} />
 
           <Tooltip
             iconSize={16}

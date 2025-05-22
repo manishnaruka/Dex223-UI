@@ -5,9 +5,10 @@ import Image from "next/image";
 import React from "react";
 import { useMediaQuery } from "react-responsive";
 
-import Badge from "@/components/badges/Badge";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import { formatNumberKilos } from "@/functions/formatFloat";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
 
 export const BalancesDesktopTable = ({
   tableData,
@@ -20,10 +21,10 @@ export const BalancesDesktopTable = ({
     <div className="hidden lg:grid pr-5 pl-5 pb-5 rounded-5 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,1.33fr)] relative">
       <div className="text-tertiary-text pl-5 h-[60px] flex items-center">Token</div>
       <div className="text-tertiary-text h-[60px] flex items-center gap-2">
-        Amount <Badge color="green" text="ERC-20" />
+        Amount <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
       </div>
       <div className="text-tertiary-text h-[60px] flex items-center gap-2">
-        Amount <Badge color="green" text="ERC-223" />
+        Amount <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
       </div>
       <div className="text-tertiary-text h-[60px] flex items-center">Amount, $</div>
       {tableData.map((o: any, index: number) => {
@@ -122,11 +123,19 @@ export const BalancesMobileTable = ({
             </div>
             <div className="flex justify-between gap-x-2">
               <div className="flex gap-1 items-baseline w-1/2 overflow-hidden ">
-                <Badge color="green" text="ERC-20" size={isMobile ? "small" : "default"} />
+                <Badge
+                  variant={BadgeVariant.STANDARD}
+                  standard={Standard.ERC20}
+                  size={isMobile ? "small" : "default"}
+                />
                 <span className="text-12 text-primary-text">{`${formatNumberKilos(parseFloat(o.amountERC20))} ${o.token.symbol}`}</span>
               </div>
               <div className="flex gap-1 items-baseline w-1/2 overflow-hidden">
-                <Badge color="green" text="ERC-223" size={isMobile ? "small" : "default"} />
+                <Badge
+                  variant={BadgeVariant.STANDARD}
+                  standard={Standard.ERC223}
+                  size={isMobile ? "small" : "default"}
+                />
                 <span className="text-12 text-primary-text">{`${formatNumberKilos(parseFloat(o.amountERC223))} ${o.token.symbol}`}</span>
               </div>
             </div>
