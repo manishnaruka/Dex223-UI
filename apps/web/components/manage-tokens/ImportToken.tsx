@@ -86,16 +86,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  console.log(
-    predictWrapperAddress(
-      tokenAddressToImport && isAddress(tokenAddressToImport)
-        ? tokenAddressToImport
-        : "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      true,
-      CONVERTER_ADDRESS[chainId],
-    ),
-  );
-
   const { data: tokenSymbol } = useReadContract({
     abi: ERC20_ABI,
     functionName: "symbol",

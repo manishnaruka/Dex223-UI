@@ -8,12 +8,15 @@ import { bytecodes } from "./converter";
 import schemaJson from "./tokenlist.schema.json";
 
 const ajv = new Ajv({ allErrors: true, verbose: true });
-
+type AddressMap = { [key: `0x${string}`]: string | undefined };
+import erc223Map from "@/db/lists/predicts_valid.json" assert { type: "json" };
+import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
+const erc223MapData = erc223Map as AddressMap;
 const { bytecode20, bytecode223 } = bytecodes;
 
 type uniToken = {
   chainId: number;
-  address: string;
+  address: Address;
   symbol: string;
   name: string;
   decimals: number;
@@ -83,26 +86,37 @@ async function validate(data: any) {
  * @returns Wrapped token address.
  */
 export function predictWrapperAddress(
-  tokenAddress: string,
+  tokenAddress: Address,
   isERC20: boolean = true,
   converterAddress: Address,
 ): string {
-  const _bytecode = isERC20 ? bytecode223 : bytecode20;
-  const hash = keccak256(
-    encodePacked(
-      ["bytes1", "address", "bytes32", "bytes32"],
-      [
-        "0xff",
-        converterAddress,
-        keccak256(
-          encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
-        ),
-        keccak256(_bytecode as `0x${string}`),
-      ],
-    ),
-  );
+  const wrapperAddress = erc223MapData[tokenAddress.toLowerCase() as Address];
 
-  return getAddress(`0x${hash.slice(-40)}`);
+  if (!wrapperAddress) {
+    console.log("NO ADDRESS FOUND for ", tokenAddress);
+    return ZERO_ADDRESS;
+  }
+
+  console.log(wrapperAddress);
+
+  return wrapperAddress;
+
+  // const _bytecode = isERC20 ? bytecode223 : bytecode20;
+  // const hash = keccak256(
+  //   encodePacked(
+  //     ["bytes1", "address", "bytes32", "bytes32"],
+  //     [
+  //       "0xff",
+  //       converterAddress,
+  //       keccak256(
+  //         encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
+  //       ),
+  //       keccak256(_bytecode as `0x${string}`),
+  //     ],
+  //   ),
+  // );
+  //
+  // return getAddress(`0x${hash.slice(-40)}`);
 
   // const create2Inputs = [
   //   "0xff",
