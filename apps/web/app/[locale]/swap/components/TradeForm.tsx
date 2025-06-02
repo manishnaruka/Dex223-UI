@@ -271,11 +271,6 @@ export default function TradeForm() {
     const erc223Balance = erc223BalanceToken1?.value ?? BigInt(0);
     const poolBalance = erc20Balance + erc223Balance;
 
-    console.log(erc20BalanceToken1);
-    console.log(erc223BalanceToken1);
-    console.log("Is sufficient check");
-    console.log(poolBalance);
-    console.log(minimumAmountOut);
     return poolBalance > minimumAmountOut;
   }, [erc20BalanceToken1, erc223BalanceToken1, minimumAmountOut]);
 
