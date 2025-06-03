@@ -9,6 +9,7 @@ import schemaJson from "./tokenlist.schema.json";
 
 const ajv = new Ajv({ allErrors: true, verbose: true });
 type AddressMap = { [key: `0x${string}`]: string | undefined };
+import { TokenMapper } from "@/db/entities/TokenMapper";
 import erc223Map from "@/db/lists/predicts_valid.json" assert { type: "json" };
 import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 const erc223MapData = erc223Map as AddressMap;
@@ -148,7 +149,7 @@ async function getList(url: string): Promise<UniData> {
     const data = await response.json();
 
     console.log(data);
-    await validate(data);
+    // await validate(data);
     return data;
   } catch (e) {
     console.log(e);
@@ -156,15 +157,19 @@ async function getList(url: string): Promise<UniData> {
   }
 }
 
+const mapper = new TokenMapper();
+
 /**
  * Downloads token list in Uniswap format and converts it into Dex223 token list format.
  * @param url URL of token list
  * @returns Promise with formatted Dex223 token list.
  */
-export async function convertList(url: string, converterAddress: Address): Promise<any> {
+export async function convertList(url: string, chainId: number): Promise<any> {
   const data = await getList(url);
 
-  const list = data.tokens;
+  await mapper.init();
+
+  const list = data.tokens.filter((t) => t.chainId === chainId);
   console.log("list", list);
 
   if (list.length === 0) {
@@ -181,9 +186,11 @@ export async function convertList(url: string, converterAddress: Address): Promi
 
   // console.time('parseList');
   for (let token of list) {
-    const erc223address = predictWrapperAddress(token.address, true, converterAddress);
-    const newItem = formatItem(token, erc223address);
-    convertedList.tokens.push(newItem);
+    const erc223address = mapper.getERC223(token.address);
+    if (erc223address) {
+      const newItem = formatItem(token, erc223address);
+      convertedList.tokens.push(newItem);
+    }
   }
   // console.timeEnd('parseList');
 

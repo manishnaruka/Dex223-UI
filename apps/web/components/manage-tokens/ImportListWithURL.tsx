@@ -14,9 +14,9 @@ import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { db, TokenList } from "@/db/db";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { fetchTokenList, useTokenLists } from "@/hooks/useTokenLists";
+import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
-import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
+
 interface Props {
   setContent: (content: ManageTokensDialogContent) => void;
 }
@@ -47,18 +47,21 @@ export default function ImportListWithURL({ setContent }: Props) {
           return;
         }
 
-        const data = await convertList(tokenListAddressToImport, CONVERTER_ADDRESS[chainId]);
+        const data = await convertList(tokenListAddressToImport, chainId);
 
         console.log(data);
         //TODO: Check that all tokens in list from same chain
         const listChainId = data.tokens[0].chainId;
 
-        if (data && listChainId) {
+        const filteredTokenList = data?.tokens.filter((t: any) => t.chainId === chainId);
+
+        if (filteredTokenList && filteredTokenList.length > 0) {
           setTokenListToImport({
             enabled: true,
             chainId: listChainId,
             list: {
               ...data,
+              tokens: filteredTokenList,
               logoURI: data.logoURI.startsWith("ipfs://")
                 ? data.logoURI.replace("ipfs://", "https://ipfs.io/ipfs/")
                 : data.logoURI,

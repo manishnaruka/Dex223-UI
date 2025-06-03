@@ -119,9 +119,6 @@ export default function useWithdraw({
     },
   });
 
-  console.log("Current deposit");
-  console.log(currentDeposit.data);
-
   const amountToWithdraw = currentDeposit.data as bigint;
 
   const { data: blockNumber } = useScopedBlockNumber({ watch: true });

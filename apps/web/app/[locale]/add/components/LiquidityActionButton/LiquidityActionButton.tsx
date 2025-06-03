@@ -196,8 +196,6 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
       : BigInt(currentDepositA || 0) >= amountToCheckA;
   }, [amountToCheckA, currentAllowanceA, currentDepositA, tokenA?.isNative, tokenAStandard]);
 
-  console.log(`isSufficientAllowanceA: ${isSufficientAllowanceA}`);
-
   const isSufficientAllowanceB = useMemo(() => {
     if (tokenB?.isNative) {
       return true;

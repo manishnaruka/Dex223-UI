@@ -18,7 +18,7 @@ export const wrappedTokens: Record<DexChainId, Token> = {
   [DexChainId.SEPOLIA]: new Token(
     DexChainId.SEPOLIA,
     "0xb16F35c0Ae2912430DAc15764477E179D9B9EbEa",
-    "0x32AB1Ee7E48CbbE091F79EeC606677c9e8Bd584E",
+    "0xdc31fbF5C6149e612A6a01eB30cE85906866A9DA",
     18,
     "WETH",
     "Wrapped Ether",

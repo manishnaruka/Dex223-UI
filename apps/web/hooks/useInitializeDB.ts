@@ -5,6 +5,7 @@ import { useCallback, useEffect } from "react";
 import { Address } from "viem";
 
 import { db, TokenListId } from "@/db/db";
+import { syncErc223MappingFromApi } from "@/db/entities/TokenMapper";
 import { defaultLists } from "@/db/lists";
 import { IIFE } from "@/functions/iife";
 import useAutoListingApolloClient from "@/hooks/useAutoListingApolloClient";
@@ -52,6 +53,13 @@ export default function useInitializeDB() {
           }
         }
       }
+    });
+  }, []);
+
+  useEffect(() => {
+    IIFE(async () => {
+      await syncErc223MappingFromApi();
+      console.log("ERC mapping updated!");
     });
   }, []);
 }
