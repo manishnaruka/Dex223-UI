@@ -27,13 +27,14 @@ const CHAIN_SUBGRAPH_URL: Record<DexChainId, string> = {
   [DexChainId.MAINNET]:
     "https://gateway.thegraph.com/api/subgraphs/id/78wjdcwJTbTmvhnUcyXjZVDPk5kWGFuosEuEWDimvHf2",
   [DexChainId.SEPOLIA]:
-    "https://api.studio.thegraph.com/query/56540/dex223-v1-sepolia/version/latest",
+    "https://gateway.thegraph.com/api/subgraphs/id/9oohHEx5ivUXguYBGVJojrKuBQHLtLzg7df1pUC6mg8w",
   // [DexChainId.CALLISTO]: "",
   [DexChainId.BSC_TESTNET]: "https://api.studio.thegraph.com/query/56540/dex223-v1-chapel/1.0.82",
   [DexChainId.EOS]: "https://graph.dex223.io/subgraphs/name/dex223-eosevm",
 };
 
 const httpLink = new HttpLink({ uri: CHAIN_SUBGRAPH_URL[DexChainId.MAINNET] });
+const httpLinkSep = new HttpLink({ uri: CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA] });
 
 export function getAuthMiddleware(chainId: DexChainId) {
   return new ApolloLink((operation, forward) => {
@@ -96,7 +97,7 @@ export const chainToApolloClient: Record<DexChainId, ApolloClient<NormalizedCach
   // }),
   [DexChainId.SEPOLIA]: new ApolloClient({
     cache: new InMemoryCache(),
-    uri: CHAIN_SUBGRAPH_URL[DexChainId.SEPOLIA],
+    link: authLink.concat(concat(getAuthMiddleware(DexChainId.SEPOLIA), httpLinkSep)),
   }),
   [DexChainId.BSC_TESTNET]: new ApolloClient({
     cache: new InMemoryCache(),

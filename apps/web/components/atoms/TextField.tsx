@@ -15,6 +15,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   isError?: boolean;
   isWarning?: boolean;
   inputSize?: InputSize;
+  noMargin?: boolean;
 } & (
     | {
         error?: boolean | string;
@@ -45,14 +46,16 @@ export function InputLabel({
   label,
   tooltipText,
   inputSize = InputSize.DEFAULT,
+  noMargin = false,
   ...props
 }: Omit<Props & { inputSize?: InputSize }, "helperText">) {
   return (
     <p
       className={clsx(
-        "font-bold mb-1 flex items-center gap-1 text-secondary-text",
+        "font-bold flex items-center gap-1 text-secondary-text",
         props.disabled && "opacity-50",
         inputLabelSizeMap[inputSize],
+        !noMargin && "mb-1",
       )}
     >
       {label}

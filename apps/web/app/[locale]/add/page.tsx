@@ -31,7 +31,6 @@ import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
@@ -58,8 +57,6 @@ export default function AddPoolPage() {
     useAddLiquidityRecentTransactionsStore();
 
   const t = useTranslations("Liquidity");
-
-  const router = useRouter();
 
   const { tokenA, tokenB, setTokenA, setTokenB, setBothTokens } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
@@ -182,15 +179,9 @@ export default function AddPoolPage() {
               variant={IconButtonVariant.BACK}
               iconSize={IconSize.REGULAR}
               buttonSize={IconButtonSize.LARGE}
-              // onClick={() => }
               onClick={() => {
-                // if (window.history.length > 1) {
                 window.history.back();
-                // } else {
-                // router.push("/pools/positions");
-                // }
               }}
-              // className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">{t("add_liquidity_title")}</h2>

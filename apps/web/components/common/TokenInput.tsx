@@ -241,7 +241,7 @@ export default function TokenInput({
   onInputChange: (value: string) => void;
   balance0: string | undefined;
   balance1: string | undefined;
-  label: string;
+  label?: string;
   standard: Standard;
   otherStandard: Standard;
   setStandard: (standard: Standard) => void;
@@ -261,15 +261,17 @@ export default function TokenInput({
 
   return (
     <div className="p-5 bg-secondary-bg rounded-3 relative">
-      <div className="flex justify-between items-center mb-5 h-[22px]">
-        <span className="text-14 block text-secondary-text">{label}</span>
-        {setMax && setHalf && (
-          <div className="flex items-center gap-2">
-            <InputButton onClick={setHalf} isActive={isHalf} text="Half" />
-            <InputButton onClick={setMax} isActive={isMax} text="Max" />
-          </div>
-        )}
-      </div>
+      {label && (
+        <div className="flex justify-between items-center mb-5 h-[22px]">
+          <span className="text-14 block text-secondary-text">{label}</span>
+          {setMax && setHalf && (
+            <div className="flex items-center gap-2">
+              <InputButton onClick={setHalf} isActive={isHalf} text="Half" />
+              <InputButton onClick={setMax} isActive={isMax} text="Max" />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center mb-5 justify-between">
         <div>

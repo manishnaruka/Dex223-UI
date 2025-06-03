@@ -148,6 +148,9 @@ input[type="range"]::-webkit-slider-thumb {
   outline: 12px solid transparent;
   box-shadow: theme("boxShadow.DEFAULT");
 
+  z-index: 20;
+  position: relative;
+
   --tw-shadow-color: theme("colors.green / 80%");
 }
 input[type="range"].variant-purple::-webkit-slider-thumb {

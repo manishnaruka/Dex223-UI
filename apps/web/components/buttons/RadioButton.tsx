@@ -5,7 +5,6 @@ import { clsxMerge } from "@/functions/clsxMerge";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   isActive: boolean;
-  onClick: () => void;
   bgColor?: "bg-tertiary-bg" | "bg-quaternary-bg";
 }
 

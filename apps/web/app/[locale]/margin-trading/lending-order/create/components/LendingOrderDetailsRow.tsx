@@ -1,7 +1,7 @@
 import Tooltip from "@repo/ui/tooltip";
 import React, { ReactNode } from "react";
 
-export default function SwapDetailsRow({
+export default function LendingOrderDetailsRow({
   title,
   value,
   tooltipText,
@@ -12,7 +12,7 @@ export default function SwapDetailsRow({
 }) {
   return (
     <div className="flex justify-between items-center">
-      <div className="flex gap-1 items-center text-secondary-text">
+      <div className="flex gap-1 items-center text-14 text-secondary-text">
         {tooltipText && <Tooltip iconSize={20} text={tooltipText} />}
         {title}
       </div>
