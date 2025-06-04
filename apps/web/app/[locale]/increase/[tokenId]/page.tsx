@@ -6,6 +6,7 @@ import React, { use, useEffect, useMemo, useState } from "react";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
+import { useLiquidityApprove } from "@/app/[locale]/add/hooks/useLiquidityApprove";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "@/app/[locale]/add/stores/useLiquidityPriceRangeStore";
 import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
@@ -107,14 +108,16 @@ export default function IncreaseLiquidityPage({
   // PRICE RANGE HOOK START
   const { price } = usePriceRange();
   // PRICE RANGE HOOK END
+  const { updateAllowance } = useLiquidityApprove();
 
   // Deposit Amounts START
-  const { parsedAmounts, currencies, depositADisabled, depositBDisabled } = useV3DerivedMintInfo({
-    tokenA,
-    tokenB,
-    tier,
-    price,
-  });
+  const { parsedAmounts, currencies, depositADisabled, depositBDisabled, position, noLiquidity } =
+    useV3DerivedMintInfo({
+      tokenA,
+      tokenB,
+      tier,
+      price,
+    });
 
   // Deposit Amounts END
 
@@ -274,7 +277,14 @@ export default function IncreaseLiquidityPage({
       </div>
       <RevokeDialog />
 
-      <ConfirmLiquidityDialog increase tokenId={use(params).tokenId} />
+      <ConfirmLiquidityDialog
+        increase
+        tokenId={use(params).tokenId}
+        position={position}
+        noLiquidity={noLiquidity}
+        parsedAmounts={parsedAmounts}
+        updateAllowance={updateAllowance}
+      />
     </Container>
   );
 }

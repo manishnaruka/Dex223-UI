@@ -2,7 +2,6 @@ import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
@@ -10,7 +9,7 @@ import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
-import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
+import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -38,12 +37,11 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
-import { useStorePools } from "@/hooks/usePools";
+import { PoolState } from "@/hooks/usePools";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
-import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
@@ -231,7 +229,23 @@ export default function TradeForm() {
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
-  const { trade, isLoading: isLoadingTrade } = useTrade();
+  const { trade, isLoading: isLoadingTrade, pools } = useTrade();
+
+  console.log("POOLS", pools);
+
+  const poolsLoading = useMemo(() => {
+    return (
+      pools.some((pool) => pool[0] === PoolState.LOADING) ||
+      pools.some((pool) => pool[0] === PoolState.INVALID)
+    );
+  }, [pools]);
+
+  const poolExists = useMemo(() => {
+    return !!(
+      pools.every((pool) => pool[0] !== PoolState.LOADING) &&
+      pools.find((pool) => pool[0] === PoolState.EXISTS)
+    );
+  }, [pools]);
   console.log(trade);
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({

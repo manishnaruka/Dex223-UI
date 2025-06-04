@@ -1,4 +1,5 @@
 import Alert from "@repo/ui/alert";
+import debounce from "lodash.debounce";
 import { useTranslations } from "next-intl";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -66,6 +67,7 @@ export default function LiquidityChartRangeInput({
   onRightRangeInput: (typedValue: string) => void;
   interactive: boolean;
 }) {
+  const prevDomainRef = useRef<[number, number] | null>(null);
   const t = useTranslations("Liquidity");
   const chartWrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -78,62 +80,89 @@ export default function LiquidityChartRangeInput({
       feeAmount,
     };
   }, [currencyA, currencyB, feeAmount]);
-
+  const [pendingDomain, setPendingDomain] = useState<[number, number] | undefined>(undefined);
   const { isLoading, error, formattedData } = useDensityChartData(densityParams);
 
   const onBrushDomainChangeEnded = useCallback(
-    (domain: [number, number], mode: string | undefined) => {
-      let leftRangeValue = Number(domain[0]);
-      const rightRangeValue = Number(domain[1]);
+    debounce((domain: [number, number]) => {
+      setPendingDomain(domain); // Save immediately for chart
 
-      if (leftRangeValue <= 0) {
-        leftRangeValue = 1 / 10 ** 6;
-      }
+      const [left, right] = domain;
+      const prev = prevDomainRef.current;
+      prevDomainRef.current = domain;
 
-      // TODO HANDLE !!
-      // batch(() => {
-      // simulate user input for auto-formatting and other validations
-      if (
-        (!ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER] ||
-          mode === "handle" ||
-          mode === "reset") &&
-        leftRangeValue > 0
-      ) {
-        onLeftRangeInput(leftRangeValue.toFixed(10));
-      }
+      if (!prev) return;
 
-      if (
-        (!ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER] || mode === "reset") &&
-        rightRangeValue > 0
-      ) {
-        // todo: remove this check. Upper bound for large numbers
-        // sometimes fails to parse to tick.
-        if (rightRangeValue < 1e35) {
-          onRightRangeInput(rightRangeValue.toFixed(10));
-        }
-      }
-      // });
-    },
-    [isSorted, onLeftRangeInput, onRightRangeInput, ticksAtLimit],
+      const [prevLeft, prevRight] = prev;
+
+      if (left !== prevLeft) onLeftRangeInput(left.toFixed(10));
+      if (right !== prevRight) onRightRangeInput(right.toFixed(10));
+    }, 100),
+    [onLeftRangeInput, onRightRangeInput],
   );
+
+  const externalDomain: [number, number] | undefined = useMemo(() => {
+    const lower = priceLower?.toSignificant(6);
+    const upper = priceUpper?.toSignificant(6);
+
+    if (!lower || !upper) return undefined;
+
+    return [parseFloat(lower), parseFloat(upper)];
+  }, [priceLower, priceUpper]);
+
+  // sync when app state catches up
+  useEffect(() => {
+    if (
+      pendingDomain &&
+      externalDomain &&
+      Math.abs(pendingDomain[0] - externalDomain[0]) < 1e-8 &&
+      Math.abs(pendingDomain[1] - externalDomain[1]) < 1e-8
+    ) {
+      setPendingDomain(undefined); // external state caught up
+    }
+  }, [externalDomain, pendingDomain]);
+
+  useEffect(() => {
+    // If externalDomain changed while user isn't dragging (i.e., no pendingDomain)
+    if (!pendingDomain && externalDomain) {
+      prevDomainRef.current = externalDomain;
+    }
+
+    // If pendingDomain is stale compared to external inputs, update it
+    if (
+      pendingDomain &&
+      externalDomain &&
+      (Math.abs(pendingDomain[0] - externalDomain[0]) > 1e-6 ||
+        Math.abs(pendingDomain[1] - externalDomain[1]) > 1e-6)
+    ) {
+      // External inputs changed → update chart domain to match
+      setPendingDomain(undefined);
+      prevDomainRef.current = null;
+    }
+  }, [externalDomain, pendingDomain]);
+
+  const brushDomain = pendingDomain ?? externalDomain;
 
   interactive = interactive && Boolean(formattedData?.length);
 
-  const brushDomain: [number, number] | undefined = useMemo(() => {
-    const leftPrice = isSorted ? priceLower : priceUpper?.invert();
-    const rightPrice = isSorted ? priceUpper : priceLower?.invert();
-
-    return leftPrice && rightPrice
-      ? [parseFloat(leftPrice?.toSignificant(6)), parseFloat(rightPrice?.toSignificant(6))]
-      : undefined;
-  }, [isSorted, priceLower, priceUpper]);
+  // const brushDomain: [number, number] | undefined = useMemo(() => {
+  //   const leftPrice = isSorted ? priceLower : priceUpper?.invert();
+  //   const rightPrice = isSorted ? priceUpper : priceLower?.invert();
+  //
+  //   return leftPrice && rightPrice
+  //     ? [parseFloat(leftPrice?.toSignificant(6)), parseFloat(rightPrice?.toSignificant(6))]
+  //     : undefined;
+  // }, [isSorted, priceLower, priceUpper]);
 
   const brushLabelValue = useCallback(
     (d: "w" | "e", x: number) => {
       if (!price) return "";
 
-      if (d === "w" && ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER]) return "0";
-      if (d === "e" && ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER]) return "∞";
+      if (d === "w" && (ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER] || x <= 1e-6))
+        return "0";
+
+      if (d === "e" && (ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER] || x >= 1e35))
+        return "∞";
 
       const percent =
         (x < price ? -1 : 1) * ((Math.max(x, price) - Math.min(x, price)) / price) * 100;
@@ -147,15 +176,15 @@ export default function LiquidityChartRangeInput({
 
   const zoomLevels = ZOOM_LEVELS[feeAmount ?? FeeAmount.MEDIUM];
 
-  // SET DEFAULT PRICE RANGE
-  useEffect(() => {
-    if (price && !brushDomain) {
-      onBrushDomainChangeEnded(
-        [price * zoomLevels.initialMin, price * zoomLevels.initialMax],
-        undefined,
-      );
-    }
-  }, [brushDomain, onBrushDomainChangeEnded, price, zoomLevels.initialMin, zoomLevels.initialMax]);
+  // // SET DEFAULT PRICE RANGE
+  // useEffect(() => {
+  //   if (price && !brushDomain) {
+  //     onBrushDomainChangeEnded(
+  //       [price * zoomLevels.initialMin, price * zoomLevels.initialMax],
+  //       undefined,
+  //     );
+  //   }
+  // }, [brushDomain, onBrushDomainChangeEnded, price, zoomLevels.initialMin, zoomLevels.initialMax]);
 
   // const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
   // State to manage chart dimensions

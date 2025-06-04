@@ -29,6 +29,7 @@ import { useTokens } from "@/hooks/useTokenLists";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
+import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
@@ -198,6 +199,8 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
     );
   }, [childPrices]);
 
+  const { setActiveTab: setManageTokensActiveTab, setIsOpen } = useManageTokensDialogStore();
+
   return (
     <>
       <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
@@ -257,7 +260,14 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
           <>
             {pinnedTokens.length ? (
               <div className="h-[376px] -mt-3 pt-3">
-                <button className="h-12 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group">
+                <button
+                  onClick={() => {
+                    console.log("clicked");
+                    setIsOpen(true);
+                    setManageTokensActiveTab(1);
+                  }}
+                  className="h-12 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group"
+                >
                   <span className="flex items-center gap-2">
                     <Svg
                       className="text-tertiary-text group-hocus:text-green duration-200 "
@@ -292,7 +302,14 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
               </div>
             ) : (
               <div className="flex flex-col justify-center h-[376px] overflow-auto gap-2 bg-empty-no-pinned-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
-                <button className="h-12 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group">
+                <button
+                  onClick={() => {
+                    console.log("clicked");
+                    setIsOpen(true);
+                    setManageTokensActiveTab(1);
+                  }}
+                  className="h-12 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group"
+                >
                   <span className="flex items-center gap-2">
                     <Svg
                       className="text-tertiary-text group-hocus:text-green duration-200 "
@@ -307,7 +324,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     />
                   </div>
                 </button>
-                <div className="flex-grow flex items-center justify-center relative -top-[60px]">
+                <div className="flex-grow flex items-center justify-center relative -top-[60px] pointer-events-none">
                   <span className="text-secondary-text">{t("assets_will_be_displayed_here")}</span>
                 </div>
               </div>

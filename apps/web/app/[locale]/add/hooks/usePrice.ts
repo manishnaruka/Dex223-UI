@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { useDerivedTokens } from "@/app/[locale]/add/hooks/useDerivedTokens";
+import { usePriceDirectionStore } from "@/app/[locale]/add/stores/usePriceDirectionStore";
 import { getTickToPrice, tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { TICK_SPACINGS } from "@/sdk_bi/constants";
@@ -17,7 +19,7 @@ import { useSortedTokens } from "./useSortedTokens";
 export const usePriceRange = () => {
   const { ticks, leftRangeTypedValue, rightRangeTypedValue, startPriceTypedValue } =
     useLiquidityPriceRangeStore();
-  const { tokenA, tokenB, setBothTokens } = useAddLiquidityTokensStore();
+  const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
 
   console.log("ticks", ticks);
@@ -30,7 +32,7 @@ export const usePriceRange = () => {
     tokenB,
   });
 
-  const invertPrice = Boolean(tokenA && token0 && !tokenA.equals(token0));
+  const { invertPrice, baseToken, quoteToken } = useDerivedTokens();
 
   // always returns the price with 0 as base token
   const pricesAtTicks = useMemo(() => {
@@ -93,11 +95,12 @@ export const usePriceRange = () => {
     [tickSpaceLimits, tickLower, tickUpper, tier],
   );
 
+  const leftPrice = getTickToPrice(baseToken?.wrapped, quoteToken?.wrapped, tickLower);
+  const rightPrice = getTickToPrice(baseToken?.wrapped, quoteToken?.wrapped, tickUpper);
+
   const isSorted = tokenA && tokenB && tokenA.wrapped.sortsBefore(tokenB.wrapped);
   const isFullRange =
     typeof leftRangeTypedValue === "boolean" && typeof rightRangeTypedValue === "boolean";
-  const leftPrice = isSorted ? priceLower : priceUpper?.invert();
-  const rightPrice = isSorted ? priceUpper : priceLower?.invert();
 
   return {
     price,

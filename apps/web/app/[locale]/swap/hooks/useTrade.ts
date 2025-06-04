@@ -20,7 +20,11 @@ function filterPools(poolStates: PoolsResult): Pool[] {
     .map(([, pool]) => pool); // Extract the Pool objects
 }
 
-export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
+export function useTrade(): {
+  trade: TokenTrade | null;
+  isLoading: boolean;
+  pools: PoolsResult;
+} {
   const { tokenA, tokenB } = useSwapTokensStore();
 
   const { typedValue } = useSwapAmountsStore();
@@ -65,6 +69,7 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
 
   return {
     trade: trade,
+    pools: pools,
     isLoading: poolState === PoolState.LOADING,
   };
 }

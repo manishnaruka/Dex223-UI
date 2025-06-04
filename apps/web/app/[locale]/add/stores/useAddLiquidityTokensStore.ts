@@ -21,31 +21,18 @@ export const useAddLiquidityTokensStore = create<AddLiquidityTokensStore>((set, 
   tokenB: undefined,
 
   setTokenA: (token) =>
-    set((state) => {
-      const newToken = state.tokenB && token?.equals(state.tokenB) ? undefined : token;
-      // const newPath = `/en/add/${newToken?.address0}/${state.tokenB?.address0}`;
-      // window.history.replaceState(null, "", newPath);
-      return {
-        tokenA: newToken,
-      };
+    set({
+      tokenA: token,
     }),
   setTokenB: (token) =>
-    set((state) => {
-      const newToken = state.tokenA && token?.equals(state.tokenA) ? undefined : token;
-      // const newPath = `/en/add/${state.tokenA?.address}/${newToken?.address}`;
-      // window.history.replaceState(null, "", newPath);
-      return {
-        tokenB: newToken,
-      };
+    set({
+      tokenB: token,
     }),
   setBothTokens: ({ tokenA, tokenB }) =>
     set(() => {
-      const newTokenB = tokenA && tokenB?.equals(tokenA) ? undefined : tokenB;
-      // const newPath = `/en/add/${tokenA?.address}/${newTokenB?.address}`;
-      // window.history.replaceState(null, "", newPath);
       return {
         tokenA,
-        tokenB: newTokenB,
+        tokenB,
       };
     }),
 }));

@@ -84,7 +84,7 @@ export function useWithdrawEstimatedGas({
           setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
         }
       } catch (e) {
-        console.error(e);
+        console.log(e);
         setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
       }
     });

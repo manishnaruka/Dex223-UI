@@ -11,8 +11,8 @@ interface Props {
   title: string;
   value: string;
   onUserInput: (typedValue: string) => void;
-  decrement: () => string;
-  increment: () => string;
+  decrement: () => void;
+  increment: () => void;
   prependSymbol?: string;
   maxDecimals?: number;
   tokenA?: Currency | undefined;
@@ -58,17 +58,6 @@ export default function PriceRangeInput({
     handleBlur(localValue); // trigger update on parent value
   }, [handleBlur, localValue]);
 
-  // for button clicks
-  const handleDecrement = useCallback(() => {
-    setUseLocalValue(false);
-    onUserInput(decrement());
-  }, [decrement, onUserInput]);
-
-  const handleIncrement = useCallback(() => {
-    setUseLocalValue(false);
-    onUserInput(increment());
-  }, [increment, onUserInput]);
-
   useEffect(() => {
     if (localValue !== value && !useLocalValue) {
       setLocalValue(value); // reset local value to match parent
@@ -97,8 +86,8 @@ export default function PriceRangeInput({
         <span className="text-12 text-tertiary-text">
           {tokenA && tokenB
             ? t("price_per", {
-                symbol0: tokenB.symbol,
-                symbol1: tokenA.symbol,
+                symbol0: tokenB.symbol, // quote
+                symbol1: tokenA.symbol, // base
               })
             : ""}
         </span>
@@ -107,15 +96,13 @@ export default function PriceRangeInput({
         <IconButton
           variant={IconButtonVariant.CONTROL}
           iconName="add"
-          onClick={handleIncrement}
-          // className="rounded-2 bg-primary-bg hocus:bg-green-bg duration-200 "
+          onClick={increment}
           disabled={noLiquidity}
         />
         <IconButton
           variant={IconButtonVariant.CONTROL}
           iconName="minus"
-          onClick={handleDecrement}
-          // className="rounded-2 bg-primary-bg hocus:bg-green-bg duration-200 "
+          onClick={decrement}
           disabled={noLiquidity}
         />
       </div>

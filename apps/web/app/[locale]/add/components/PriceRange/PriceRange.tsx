@@ -1,23 +1,26 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
+import LiquidityChartRangeInput from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput";
+import { ZOOM_LEVELS } from "@/app/[locale]/add/hooks/types";
+import { useDerivedTokens } from "@/app/[locale]/add/hooks/useDerivedTokens";
 import { useRefreshTicksDataStore } from "@/app/[locale]/add/stores/useRefreshTicksDataStore";
 import { useZoomStateStore } from "@/app/[locale]/add/stores/useZoomStateStore";
 import Svg from "@/components/atoms/Svg";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
-import { tryParseTick } from "@/functions/tryParseTick";
+import { getTickToPrice, tryParseTick } from "@/functions/tryParseTick";
 import { usePool } from "@/hooks/usePools";
-import { Currency } from "@/sdk_bi/entities/currency";
+import { FeeAmount } from "@/sdk_bi/constants";
 import { Price } from "@/sdk_bi/entities/fractions/price";
 import { Token } from "@/sdk_bi/entities/token";
+import { TickMath } from "@/sdk_bi/utils/tickMath";
 
 import { useRangeHopCallbacks } from "../../hooks/useRangeHopCallbacks";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
 import { useLiquidityPriceRangeStore } from "../../stores/useLiquidityPriceRangeStore";
 import { useLiquidityTierStore } from "../../stores/useLiquidityTierStore";
 import { CurrentPrice } from "./CurrentPrice";
-import LiquidityChartRangeInput from "./LiquidityChartRangeInput";
 import { Bound } from "./LiquidityChartRangeInput/types";
 import { PriceRangeHeader } from "./PriceRangeHeader";
 import PriceRangeInput from "./PriceRangeInput";
@@ -25,24 +28,15 @@ import PriceRangeInput from "./PriceRangeInput";
 export const PriceRange = ({
   noLiquidity,
   formattedPrice,
-  invertPrice,
-  isFullRange,
-  isSorted,
-  leftPrice,
   price,
-  pricesAtTicks,
-  rightPrice,
-  tickSpaceLimits,
   ticksAtLimit,
-  token0,
-  token1,
   outOfRange,
   isFormDisabled,
+  tickSpaceLimits,
 }: {
   noLiquidity: boolean;
   price: Price<Token, Token> | undefined;
   formattedPrice: string | number;
-  invertPrice: boolean;
   pricesAtTicks: {
     LOWER: Price<Token, Token> | undefined;
     UPPER: Price<Token, Token> | undefined;
@@ -51,12 +45,8 @@ export const PriceRange = ({
     LOWER: boolean;
     UPPER: boolean;
   };
-  isSorted: boolean | undefined;
-  isFullRange: boolean;
   leftPrice: Price<Token, Token> | undefined;
   rightPrice: Price<Token, Token> | undefined;
-  token0: Currency | undefined;
-  token1: Currency | undefined;
   tickSpaceLimits: {
     LOWER: number | undefined;
     UPPER: number | undefined;
@@ -70,11 +60,7 @@ export const PriceRange = ({
   const { setRefreshTicksTrigger } = useRefreshTicksDataStore();
   const {
     ticks,
-    leftRangeTypedValue,
-    rightRangeTypedValue,
     startPriceTypedValue,
-    clearPriceRange,
-    setFullRange,
     setLeftRangeTypedValue,
     setRightRangeTypedValue,
     setStartPriceTypedValue,
@@ -87,34 +73,87 @@ export const PriceRange = ({
     currencyB: tokenB,
     tier,
   });
-  const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
+  // const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
+  const { baseToken, quoteToken, invertPrice, toggleInvertPrice } = useDerivedTokens();
+
+  console.log(ticksAtLimit);
+  const initializePriceRangeWithZoom = useCallback(
+    ({
+      price,
+      feeAmount,
+      baseToken,
+      quoteToken,
+    }: {
+      price?: number;
+      feeAmount: FeeAmount;
+      baseToken?: Token;
+      quoteToken?: Token;
+    }) => {
+      console.log("[initZoom] TRIGGERED", { baseToken, quoteToken, price, feeAmount });
+      if (!price || !baseToken || !quoteToken) return;
+
+      const zoom = ZOOM_LEVELS[feeAmount];
+      const left = (price * zoom.initialMin).toFixed(8);
+      const right = (price * zoom.initialMax).toFixed(8);
+
+      setLeftRangeTypedValue(left);
+      setRightRangeTypedValue(right);
+
+      const [token0, token1] =
+        baseToken && quoteToken
+          ? baseToken.sortsBefore(quoteToken)
+            ? [baseToken, quoteToken]
+            : [quoteToken, baseToken]
+          : [undefined, undefined];
+
+      const lowerTick = tryParseTick(token0, token1, feeAmount, left);
+      const upperTick = tryParseTick(token0, token1, feeAmount, right);
+
+      if (lowerTick !== undefined || upperTick !== undefined) {
+        setTicks({
+          ...(lowerTick !== undefined && { [Bound.LOWER]: lowerTick }),
+          ...(upperTick !== undefined && { [Bound.UPPER]: upperTick }),
+        });
+      }
+
+      // resetUserModified(); // Optional
+    },
+    [setLeftRangeTypedValue, setRightRangeTypedValue, setTicks],
+  );
+
+  const isFullRange = useMemo(() => {
+    return (
+      tickSpaceLimits.UPPER === ticks[Bound.UPPER] && tickSpaceLimits.LOWER === ticks[Bound.LOWER]
+    );
+  }, [ticks, tickSpaceLimits]);
 
   const handleSetFullRange = useCallback(() => {
     if (!isFullRange) {
-      setFullRange();
+      setTicks({
+        [Bound.LOWER]: tickSpaceLimits.LOWER,
+        [Bound.UPPER]: tickSpaceLimits.UPPER,
+      });
     } else {
-      const currentPrice = price
-        ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))
-        : undefined;
-      resetPriceRangeValue({
-        price: currentPrice,
-        feeAmount: tier,
-      });
+      if (price !== undefined && baseToken && quoteToken && tier !== undefined) {
+        initializePriceRangeWithZoom({
+          price: parseFloat(price.toSignificant(8)),
+          feeAmount: tier,
+          baseToken: baseToken.wrapped,
+          quoteToken: quoteToken.wrapped,
+        });
+      }
     }
-  }, [setFullRange, isFullRange, resetPriceRangeValue, price, invertPrice, tier]);
-
-  useEffect(() => {
-    if (!isFullRange) {
-      const currentPrice = price
-        ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))
-        : undefined;
-
-      resetPriceRangeValue({
-        price: currentPrice,
-        feeAmount: tier,
-      });
-    }
-  }, [price, invertPrice, isFullRange, resetPriceRangeValue, tier]);
+  }, [
+    isFullRange,
+    setTicks,
+    tickSpaceLimits.LOWER,
+    tickSpaceLimits.UPPER,
+    price,
+    baseToken,
+    quoteToken,
+    tier,
+    initializePriceRangeWithZoom,
+  ]);
 
   const { getDecrementLower, getIncrementLower, getDecrementUpper, getIncrementUpper } =
     useRangeHopCallbacks(
@@ -126,71 +165,126 @@ export const PriceRange = ({
       pool,
     );
 
-  const getBound = (side: "left" | "right", invertPrice: boolean): Bound => {
-    if (side === "left") return invertPrice ? Bound.UPPER : Bound.LOWER;
-    if (side === "right") return invertPrice ? Bound.LOWER : Bound.UPPER;
-    throw new Error("Invalid side");
-  };
+  const handleBlur = (
+    side: "left" | "right",
+    value: string,
+    baseToken?: Token,
+    quoteToken?: Token,
+  ) => {
+    if (!tier || !baseToken || !quoteToken) return;
 
-  const handleBlur = (side: "left" | "right", rawValue: string, tokenA: Token, tokenB: Token) => {
-    const bound = getBound(side, invertPrice);
-    const parsedTick = tryParseTick(tokenA, tokenB, tier, rawValue);
+    const parsedTick = tryParseTick(baseToken, quoteToken, tier, value);
 
     if (parsedTick !== undefined) {
-      setTicks({ [bound]: parsedTick });
+      setTicks({
+        [side === "left" ? Bound.LOWER : Bound.UPPER]: parsedTick,
+      });
     }
   };
 
-  // TODO existingPosition
-  const existingPosition = undefined as any;
+  useEffect(() => {
+    if (price !== undefined && baseToken && quoteToken && tier !== undefined) {
+      initializePriceRangeWithZoom({
+        price: parseFloat(price.toSignificant(8)),
+        feeAmount: tier,
+        baseToken: baseToken.wrapped,
+        quoteToken: quoteToken.wrapped,
+      });
+    }
+  }, [price, baseToken, quoteToken, tier, initializePriceRangeWithZoom]);
 
-  // useEffect(() => {
-  //   setTicks({
-  //     [Bound.LOWER]:
-  //       typeof existingPosition?.tickLower === "number"
-  //         ? existingPosition.tickLower
-  //         : (invertPrice && typeof rightRangeTypedValue === "boolean") ||
-  //             (!invertPrice && typeof leftRangeTypedValue === "boolean")
-  //           ? tickSpaceLimits[Bound.LOWER]
-  //           : invertPrice
-  //             ? tryParseTick(
-  //                 token1?.wrapped,
-  //                 token0?.wrapped,
-  //                 tier,
-  //                 rightRangeTypedValue.toString(),
-  //               )
-  //             : tryParseTick(
-  //                 token0?.wrapped,
-  //                 token1?.wrapped,
-  //                 tier,
-  //                 leftRangeTypedValue.toString(),
-  //               ),
-  //     [Bound.UPPER]:
-  //       typeof existingPosition?.tickUpper === "number"
-  //         ? existingPosition.tickUpper
-  //         : (!invertPrice && typeof rightRangeTypedValue === "boolean") ||
-  //             (invertPrice && typeof leftRangeTypedValue === "boolean")
-  //           ? tickSpaceLimits[Bound.UPPER]
-  //           : invertPrice
-  //             ? tryParseTick(token1?.wrapped, token0?.wrapped, tier, leftRangeTypedValue.toString())
-  //             : tryParseTick(
-  //                 token0?.wrapped,
-  //                 token1?.wrapped,
-  //                 tier,
-  //                 rightRangeTypedValue.toString(),
-  //               ),
-  //   });
-  // }, [
-  //   existingPosition,
-  //   tier,
-  //   invertPrice,
-  //   leftRangeTypedValue,
-  //   rightRangeTypedValue,
-  //   token0,
-  //   token1,
-  //   tickSpaceLimits,
-  //   setTicks,
-  // ]);
+  const isInverted = invertPrice;
+
+  // Prices:
+  const priceLower = getTickToPrice(baseToken?.wrapped, quoteToken?.wrapped, ticks[Bound.LOWER]);
+  const priceUpper = getTickToPrice(baseToken?.wrapped, quoteToken?.wrapped, ticks[Bound.UPPER]);
+
+  const inputTopValue = isInverted ? priceUpper : priceLower;
+  const inputBottomValue = isInverted ? priceLower : priceUpper;
+
+  // Handlers:
+  const inputTopSetter = isInverted ? setRightRangeTypedValue : setLeftRangeTypedValue;
+  const inputBottomSetter = isInverted ? setLeftRangeTypedValue : setRightRangeTypedValue;
+
+  const inputTopBlur = (value: string) =>
+    handleBlur(isInverted ? "right" : "left", value, baseToken?.wrapped, quoteToken?.wrapped);
+
+  const inputBottomBlur = (value: string) =>
+    handleBlur(isInverted ? "left" : "right", value, baseToken?.wrapped, quoteToken?.wrapped);
+
+  const incrementTopInput = useCallback(() => {
+    const value = isInverted ? getDecrementUpper() : getIncrementLower();
+    const tick = tryParseTick(tokenA?.wrapped, tokenB?.wrapped, tier, value);
+    if (tick !== undefined) {
+      setTicks({
+        [isInverted ? Bound.UPPER : Bound.LOWER]: tick, // or UPPER depending on which input
+      });
+    }
+  }, [
+    getDecrementUpper,
+    getIncrementLower,
+    isInverted,
+    setTicks,
+    tier,
+    tokenA?.wrapped,
+    tokenB?.wrapped,
+  ]);
+
+  const decrementTopInput = useCallback(() => {
+    const value = isInverted ? getIncrementUpper() : getDecrementLower();
+    const tick = tryParseTick(tokenA?.wrapped, tokenB?.wrapped, tier, value);
+    if (tick !== undefined) {
+      setTicks({
+        [isInverted ? Bound.UPPER : Bound.LOWER]: tick, // or UPPER depending on which input
+      });
+    }
+  }, [
+    getDecrementLower,
+    getIncrementUpper,
+    isInverted,
+    setTicks,
+    tier,
+    tokenA?.wrapped,
+    tokenB?.wrapped,
+  ]);
+
+  const incrementBottomInput = useCallback(() => {
+    const value = isInverted ? getDecrementLower() : getIncrementUpper();
+
+    const tick = tryParseTick(tokenA?.wrapped, tokenB?.wrapped, tier, value);
+    if (tick !== undefined) {
+      setTicks({
+        [isInverted ? Bound.LOWER : Bound.UPPER]: tick, // or UPPER depending on which input
+      });
+    }
+  }, [
+    getDecrementLower,
+    getIncrementUpper,
+    isInverted,
+    setTicks,
+    tier,
+    tokenA?.wrapped,
+    tokenB?.wrapped,
+  ]);
+
+  const decrementBottomInput = useCallback(() => {
+    const value = isInverted ? getIncrementLower() : getDecrementUpper();
+
+    const tick = tryParseTick(tokenA?.wrapped, tokenB?.wrapped, tier, value);
+    if (tick !== undefined) {
+      setTicks({
+        [isInverted ? Bound.LOWER : Bound.UPPER]: tick, // or UPPER depending on which input
+      });
+    }
+  }, [
+    getDecrementUpper,
+    getIncrementLower,
+    isInverted,
+    setTicks,
+    tier,
+    tokenA?.wrapped,
+    tokenB?.wrapped,
+  ]);
 
   return (
     <div
@@ -200,73 +294,35 @@ export const PriceRange = ({
       )}
     >
       <PriceRangeHeader
-        isSorted={!!isSorted}
         isFullRange={isFullRange}
-        button0Text={isSorted ? tokenA?.symbol : tokenB?.symbol}
-        button0Handler={() => {
-          if (!isSorted) {
-            setBothTokens({
-              tokenA: tokenB,
-              tokenB: tokenA,
-            });
-            if (startPriceTypedValue) clearPriceRange();
-          }
-        }}
-        button1Text={isSorted ? tokenB?.symbol : tokenA?.symbol}
-        button1Handler={() => {
-          if (isSorted) {
-            setBothTokens({
-              tokenA: tokenB,
-              tokenB: tokenA,
-            });
-            if (startPriceTypedValue) clearPriceRange();
-          }
-        }}
         handleSetFullRange={handleSetFullRange}
+        baseSymbol={baseToken?.symbol}
+        quoteSymbol={quoteToken?.symbol}
+        invertPrice={invertPrice}
+        onFlip={toggleInvertPrice}
       />
       <PriceRangeInput
-        value={
-          ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER]
-            ? "0"
-            : (leftPrice?.toSignificant(8) ?? "0")
-        }
-        onUserInput={setLeftRangeTypedValue}
         title={t("low_price")}
-        decrement={isSorted ? getDecrementLower : getIncrementUpper}
-        increment={isSorted ? getIncrementLower : getDecrementUpper}
-        tokenA={tokenA}
-        tokenB={tokenB}
+        value={ticksAtLimit[Bound.LOWER] ? "0" : (inputTopValue?.toSignificant(8) ?? "0")}
+        onUserInput={inputTopSetter}
+        decrement={decrementTopInput}
+        increment={incrementTopInput}
+        tokenA={baseToken}
+        tokenB={quoteToken}
         noLiquidity={noLiquidity}
-        handleBlur={(value: string) =>
-          handleBlur(
-            "left",
-            value,
-            invertPrice ? token1?.wrapped : token0?.wrapped,
-            invertPrice ? token0?.wrapped : token1?.wrapped,
-          )
-        }
+        handleBlur={inputTopBlur}
       />
+
       <PriceRangeInput
         title={t("high_price")}
-        value={
-          ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER]
-            ? "∞"
-            : (rightPrice?.toSignificant(8) ?? "0")
-        }
-        onUserInput={setRightRangeTypedValue}
-        decrement={isSorted ? getDecrementUpper : getIncrementLower}
-        increment={isSorted ? getIncrementUpper : getDecrementLower}
-        tokenA={tokenA}
-        tokenB={tokenB}
+        value={ticksAtLimit[Bound.UPPER] ? "∞" : (inputBottomValue?.toSignificant(8) ?? "0")}
+        onUserInput={inputBottomSetter}
+        decrement={decrementBottomInput}
+        increment={incrementBottomInput}
+        tokenA={baseToken}
+        tokenB={quoteToken}
         noLiquidity={noLiquidity}
-        handleBlur={(value: string) =>
-          handleBlur(
-            "right",
-            value,
-            invertPrice ? token1?.wrapped : token0?.wrapped,
-            invertPrice ? token0?.wrapped : token1?.wrapped,
-          )
-        }
+        handleBlur={inputBottomBlur}
       />
       {outOfRange ? (
         <span className="text-14 border border-orange rounded-3 px-4 py-2 bg-orange-bg">
@@ -295,8 +351,12 @@ export const PriceRange = ({
               }}
             />
             <div className="flex justify-between text-12 text-tertiary-text">
-              <span>{`${t("token_starting_price", { symbol: tokenA?.symbol })}:`}</span>
-              <span>{`${formattedPrice} ${tokenA ? `${tokenB?.symbol} = 1 ${tokenA?.symbol}` : ""}`}</span>
+              <span>{`${t("token_starting_price", { symbol: baseToken?.symbol })}:`}</span>
+              <span>
+                {formattedPrice !== "-" && baseToken && quoteToken
+                  ? `${formattedPrice} ${quoteToken.symbol} = 1 ${baseToken.symbol}`
+                  : ""}
+              </span>
             </div>
           </div>
         </>
@@ -305,7 +365,11 @@ export const PriceRange = ({
           <div className="flex w-full flex-row mt-1">
             <CurrentPrice
               price={formattedPrice}
-              description={tokenA ? `${tokenB?.symbol} = 1 ${tokenA?.symbol}` : ""}
+              description={
+                formattedPrice !== "-" && baseToken && quoteToken
+                  ? `${quoteToken.symbol} = 1 ${baseToken.symbol}`
+                  : ""
+              }
             />
             <div className="ml-auto flex-col mt-1">
               <div
@@ -341,23 +405,26 @@ export const PriceRange = ({
               </div>
             </div>
           </div>
-          <LiquidityChartRangeInput
-            currencyA={tokenA ?? undefined}
-            currencyB={tokenB ?? undefined}
-            feeAmount={tier}
-            ticksAtLimit={ticksAtLimit}
-            price={
-              price
-                ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))
-                : undefined
-            }
-            priceLower={priceLower}
-            priceUpper={priceUpper}
-            // interactive={!hasExistingPosition}
-            onLeftRangeInput={setLeftRangeTypedValue}
-            onRightRangeInput={setRightRangeTypedValue}
-            interactive={true}
-          />
+          {/*<LiquidityChartRangeInput*/}
+          {/*  currencyA={tokenA}*/}
+          {/*  currencyB={tokenB}*/}
+          {/*  feeAmount={tier}*/}
+          {/*  ticksAtLimit={ticksAtLimit}*/}
+          {/*  price={*/}
+          {/*    price*/}
+          {/*      ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))*/}
+          {/*      : undefined*/}
+          {/*  }*/}
+          {/*  priceLower={priceLower}*/}
+          {/*  priceUpper={priceUpper}*/}
+          {/*  onLeftRangeInput={(val) => {*/}
+          {/*    inputTopBlur(val); // Or whatever your function is*/}
+          {/*  }}*/}
+          {/*  onRightRangeInput={(val) => {*/}
+          {/*    inputBottomBlur(val);*/}
+          {/*  }}*/}
+          {/*  interactive={true}*/}
+          {/*/>*/}
         </>
       )}
     </div>

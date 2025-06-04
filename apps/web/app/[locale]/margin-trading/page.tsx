@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 
-import BorrowMarketFilter from "@/app/[locale]/borrow-market/components/BorrowMarketFilter";
-import BorrowMarketTable from "@/app/[locale]/borrow-market/components/BorrowMarketTable";
+import BorrowMarketFilter from "@/app/[locale]/margin-trading/components/BorrowMarketFilter";
+import BorrowMarketTable from "@/app/[locale]/margin-trading/components/BorrowMarketTable";
 import LendingOrderCard from "@/app/[locale]/margin-trading/components/LendingOrderCard";
 import MarginPositionCard from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import Container from "@/components/atoms/Container";
