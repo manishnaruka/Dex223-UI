@@ -18,6 +18,7 @@ interface Props {
   tokenA?: Currency | undefined;
   tokenB?: Currency | undefined;
   noLiquidity?: boolean;
+  handleBlur: (value: string) => void;
 }
 export default function PriceRangeInput({
   title,
@@ -30,6 +31,7 @@ export default function PriceRangeInput({
   tokenA,
   tokenB,
   noLiquidity,
+  handleBlur,
 }: Props) {
   const t = useTranslations("Liquidity");
 
@@ -53,8 +55,8 @@ export default function PriceRangeInput({
   const handleOnBlur = useCallback(() => {
     setIsFocused(false);
     setUseLocalValue(false);
-    onUserInput(localValue); // trigger update on parent value
-  }, [localValue, onUserInput]);
+    handleBlur(localValue); // trigger update on parent value
+  }, [handleBlur, localValue]);
 
   // for button clicks
   const handleDecrement = useCallback(() => {

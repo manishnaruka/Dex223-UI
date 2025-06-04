@@ -21,7 +21,7 @@ interface LiquidityPriceRangeStore {
   resetPriceRangeValue: ({ price, feeAmount }: { price?: number; feeAmount: FeeAmount }) => void;
   setFullRange: () => void;
   clearPriceRange: () => void;
-  setTicks: (ticks: Ticks) => void;
+  setTicks: (partial: Partial<Ticks>) => void;
 }
 
 export const useLiquidityPriceRangeStore = create<LiquidityPriceRangeStore>((set, get) => ({
@@ -65,5 +65,11 @@ export const useLiquidityPriceRangeStore = create<LiquidityPriceRangeStore>((set
         [Bound.UPPER]: undefined,
       },
     }),
-  setTicks: (ticks) => set({ ticks }),
+  setTicks: (partial) =>
+    set((state) => ({
+      ticks: {
+        ...state.ticks,
+        ...partial,
+      },
+    })),
 }));

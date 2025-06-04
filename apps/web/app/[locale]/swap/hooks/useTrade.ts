@@ -34,6 +34,8 @@ export function useTrade(): { trade: TokenTrade | null; isLoading: boolean } {
     }),
   );
 
+  console.log(pools);
+
   const [trade, setTrade] = useState<TokenTrade | null>(null);
 
   const [poolState, pool] = useMemo(() => {

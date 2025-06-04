@@ -132,16 +132,6 @@ export function useAddLiquidityParams({
         args: createParams,
       });
 
-      console.log(createParams);
-      return {
-        abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
-        address: NONFUNGIBLE_POSITION_MANAGER_ADDRESS[chainId as DexChainId],
-        functionName: "mint",
-        account: accountAddress,
-        args: [mintParams],
-        value,
-      };
-
       const encodedMintParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "mint",
@@ -162,7 +152,7 @@ export function useAddLiquidityParams({
         account: accountAddress,
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
         functionName: "multicall" as const,
-        args: [[encodedCreateParams]],
+        args: [[encodedCreateParams, encodedMintParams]],
         value,
       };
       return params;
@@ -356,17 +346,17 @@ export const useAddLiquidity = ({
       }
       setLiquidityStatus(AddLiquidityStatus.MINT_PENDING);
       try {
-        // const estimatedGas = await publicClient.estimateContractGas(addLiquidityParams);
-        //
-        // const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-        //
-        // const { request } = await publicClient.simulateContract({
-        //   ...addLiquidityParams,
-        //   ...gasSettings,
-        //   gas: gasToUse,
-        // });
-        const hash = await walletClient.writeContract({
+        const estimatedGas = await publicClient.estimateContractGas(addLiquidityParams);
+
+        const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
+
+        const { request } = await publicClient.simulateContract({
           ...addLiquidityParams,
+          ...gasSettings,
+          gas: gasToUse,
+        });
+        const hash = await walletClient.writeContract({
+          ...request,
           account: undefined,
         });
 
@@ -386,7 +376,7 @@ export const useAddLiquidity = ({
             chainId,
             gas: {
               ...stringifyObject({ ...gasSettings, model: gasModel }),
-              gas: "1200000",
+              gas: gasToUse.toString(),
             },
             params: {
               ...stringifyObject(addLiquidityParams),

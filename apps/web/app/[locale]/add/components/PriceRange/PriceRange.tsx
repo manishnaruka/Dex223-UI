@@ -126,56 +126,71 @@ export const PriceRange = ({
       pool,
     );
 
+  const getBound = (side: "left" | "right", invertPrice: boolean): Bound => {
+    if (side === "left") return invertPrice ? Bound.UPPER : Bound.LOWER;
+    if (side === "right") return invertPrice ? Bound.LOWER : Bound.UPPER;
+    throw new Error("Invalid side");
+  };
+
+  const handleBlur = (side: "left" | "right", rawValue: string, tokenA: Token, tokenB: Token) => {
+    const bound = getBound(side, invertPrice);
+    const parsedTick = tryParseTick(tokenA, tokenB, tier, rawValue);
+
+    if (parsedTick !== undefined) {
+      setTicks({ [bound]: parsedTick });
+    }
+  };
+
   // TODO existingPosition
   const existingPosition = undefined as any;
 
-  useEffect(() => {
-    setTicks({
-      [Bound.LOWER]:
-        typeof existingPosition?.tickLower === "number"
-          ? existingPosition.tickLower
-          : (invertPrice && typeof rightRangeTypedValue === "boolean") ||
-              (!invertPrice && typeof leftRangeTypedValue === "boolean")
-            ? tickSpaceLimits[Bound.LOWER]
-            : invertPrice
-              ? tryParseTick(
-                  token1?.wrapped,
-                  token0?.wrapped,
-                  tier,
-                  rightRangeTypedValue.toString(),
-                )
-              : tryParseTick(
-                  token0?.wrapped,
-                  token1?.wrapped,
-                  tier,
-                  leftRangeTypedValue.toString(),
-                ),
-      [Bound.UPPER]:
-        typeof existingPosition?.tickUpper === "number"
-          ? existingPosition.tickUpper
-          : (!invertPrice && typeof rightRangeTypedValue === "boolean") ||
-              (invertPrice && typeof leftRangeTypedValue === "boolean")
-            ? tickSpaceLimits[Bound.UPPER]
-            : invertPrice
-              ? tryParseTick(token1?.wrapped, token0?.wrapped, tier, leftRangeTypedValue.toString())
-              : tryParseTick(
-                  token0?.wrapped,
-                  token1?.wrapped,
-                  tier,
-                  rightRangeTypedValue.toString(),
-                ),
-    });
-  }, [
-    existingPosition,
-    tier,
-    invertPrice,
-    leftRangeTypedValue,
-    rightRangeTypedValue,
-    token0,
-    token1,
-    tickSpaceLimits,
-    setTicks,
-  ]);
+  // useEffect(() => {
+  //   setTicks({
+  //     [Bound.LOWER]:
+  //       typeof existingPosition?.tickLower === "number"
+  //         ? existingPosition.tickLower
+  //         : (invertPrice && typeof rightRangeTypedValue === "boolean") ||
+  //             (!invertPrice && typeof leftRangeTypedValue === "boolean")
+  //           ? tickSpaceLimits[Bound.LOWER]
+  //           : invertPrice
+  //             ? tryParseTick(
+  //                 token1?.wrapped,
+  //                 token0?.wrapped,
+  //                 tier,
+  //                 rightRangeTypedValue.toString(),
+  //               )
+  //             : tryParseTick(
+  //                 token0?.wrapped,
+  //                 token1?.wrapped,
+  //                 tier,
+  //                 leftRangeTypedValue.toString(),
+  //               ),
+  //     [Bound.UPPER]:
+  //       typeof existingPosition?.tickUpper === "number"
+  //         ? existingPosition.tickUpper
+  //         : (!invertPrice && typeof rightRangeTypedValue === "boolean") ||
+  //             (invertPrice && typeof leftRangeTypedValue === "boolean")
+  //           ? tickSpaceLimits[Bound.UPPER]
+  //           : invertPrice
+  //             ? tryParseTick(token1?.wrapped, token0?.wrapped, tier, leftRangeTypedValue.toString())
+  //             : tryParseTick(
+  //                 token0?.wrapped,
+  //                 token1?.wrapped,
+  //                 tier,
+  //                 rightRangeTypedValue.toString(),
+  //               ),
+  //   });
+  // }, [
+  //   existingPosition,
+  //   tier,
+  //   invertPrice,
+  //   leftRangeTypedValue,
+  //   rightRangeTypedValue,
+  //   token0,
+  //   token1,
+  //   tickSpaceLimits,
+  //   setTicks,
+  // ]);
 
   return (
     <div
@@ -222,6 +237,14 @@ export const PriceRange = ({
         tokenA={tokenA}
         tokenB={tokenB}
         noLiquidity={noLiquidity}
+        handleBlur={(value: string) =>
+          handleBlur(
+            "left",
+            value,
+            invertPrice ? token1?.wrapped : token0?.wrapped,
+            invertPrice ? token0?.wrapped : token1?.wrapped,
+          )
+        }
       />
       <PriceRangeInput
         title={t("high_price")}
@@ -236,6 +259,14 @@ export const PriceRange = ({
         tokenA={tokenA}
         tokenB={tokenB}
         noLiquidity={noLiquidity}
+        handleBlur={(value: string) =>
+          handleBlur(
+            "right",
+            value,
+            invertPrice ? token1?.wrapped : token0?.wrapped,
+            invertPrice ? token0?.wrapped : token1?.wrapped,
+          )
+        }
       />
       {outOfRange ? (
         <span className="text-14 border border-orange rounded-3 px-4 py-2 bg-orange-bg">

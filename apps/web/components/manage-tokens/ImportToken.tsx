@@ -351,7 +351,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
                     if (
                       chainId &&
                       tokenName &&
-                      tokenDecimals &&
+                      tokenDecimals != null &&
                       tokenSymbol &&
                       predictedOtherAddress &&
                       erc20AddressToImport &&
