@@ -10,7 +10,7 @@ import { useAccount } from "wagmi";
 
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
+import { TradeError, useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
@@ -229,22 +229,10 @@ export default function TradeForm() {
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
-  const { trade, isLoading: isLoadingTrade, pools } = useTrade();
-
-  console.log("POOLS", pools);
-
-  const poolsLoading = useMemo(() => {
-    return (
-      pools.some((pool) => pool[0] === PoolState.LOADING) ||
-      pools.some((pool) => pool[0] === PoolState.INVALID)
-    );
-  }, [pools]);
+  const { trade, isLoading: isLoadingTrade, error, pools } = useTrade();
 
   const poolExists = useMemo(() => {
-    return !!(
-      pools.every((pool) => pool[0] !== PoolState.LOADING) &&
-      pools.find((pool) => pool[0] === PoolState.EXISTS)
-    );
+    return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
   }, [pools]);
   console.log(trade);
 
@@ -671,7 +659,7 @@ export default function TradeForm() {
         isEqualTokens={!!tokenA && !!tokenB && tokenA.wrapped.address0 === tokenB.wrapped.address0}
       />
 
-      {Boolean(trade) && !isSufficientPoolBalance && (
+      {error === TradeError.NO_LIQUIDITY && (
         <div className="mt-5">
           <Alert
             text="Swap unavailable. One of the tokens lacks liquidity. Please try again later or choose another pair"
@@ -680,7 +668,7 @@ export default function TradeForm() {
         </div>
       )}
 
-      {!isLoadingTrade && !Boolean(trade) && tokenA && tokenB && !!+typedValue && (
+      {!isLoadingTrade && !poolExists && tokenA && tokenB && (
         <div className="mt-5">
           <Alert
             text={

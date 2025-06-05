@@ -61,11 +61,12 @@ export default function AddPoolPage() {
 
   const handlePick = useCallback(
     (token: Currency) => {
-      if (currentlyPicking === "tokenA" && tokenB) {
-        if (token.wrapped.equals(tokenB.wrapped)) {
+      if (currentlyPicking === "tokenA") {
+        if (tokenB && token.wrapped.equals(tokenB.wrapped)) {
           // User picked same as tokenB → swap
           setBothTokens({ tokenA: tokenB, tokenB: tokenA });
         } else {
+          console.log("Picking token&");
           setTokenA(token);
         }
       }
