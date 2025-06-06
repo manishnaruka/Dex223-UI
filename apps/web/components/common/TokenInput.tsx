@@ -44,6 +44,7 @@ function MobileStandardOption({
   return (
     <div className="flex flex-col">
       <button
+        type="button"
         onClick={() => {
           setIsActive(standard);
 
@@ -128,6 +129,7 @@ function StandardOption({
   return (
     <div className="flex flex-col">
       <button
+        type="button"
         onClick={() => {
           setIsActive(standard);
 
@@ -297,6 +299,7 @@ export default function TokenInput({
           <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
         </div>
         <SelectButton
+          type="button"
           className="flex-shrink-0"
           variant="rounded"
           onClick={handleClick}
@@ -395,6 +398,7 @@ export default function TokenInput({
               {[Standard.ERC20, Standard.ERC223].map((st) => {
                 return (
                   <button
+                    type="button"
                     key={st}
                     className={clsxMerge(
                       "h-6 rounded-3 duration-200 px-2 min-w-[58px] text-secondary-text",

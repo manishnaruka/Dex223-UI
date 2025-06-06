@@ -9,15 +9,26 @@ import useTokenBalances from "@/hooks/useTokenBalances";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 
-export default function LendingOrderTokenSelect() {
-  const [token, setToken] = React.useState<Currency | undefined>();
-  const [tokenStandard, setTokenStandard] = React.useState<Standard>(Standard.ERC20);
+export default function LendingOrderTokenSelect({
+  token,
+  setToken,
+  amount,
+  setAmount,
+  standard,
+  setStandard,
+}: {
+  token: Currency | undefined;
+  setToken: (token: Currency) => void;
+  amount: string;
+  setAmount: (amount: string) => void;
+  standard: Standard;
+  setStandard: (standard: Standard) => void;
+}) {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
-  const [typedValue, setTypedValue] = React.useState<string>("");
 
   const handlePick = useCallback((token: Currency) => {
     setToken(token);
-    setTokenStandard(Standard.ERC20);
+    setStandard(Standard.ERC20);
 
     setIsOpenedTokenPick(false);
   }, []);
@@ -41,9 +52,9 @@ export default function LendingOrderTokenSelect() {
           setIsOpenedTokenPick(true);
         }}
         token={token}
-        value={typedValue}
+        value={amount}
         onInputChange={(value) => {
-          setTypedValue(value);
+          setAmount(value);
         }}
         balance0={
           token0Balance && Boolean(token0Balance.value) ? formatFloat(token0Balance.formatted) : "0"
@@ -51,9 +62,9 @@ export default function LendingOrderTokenSelect() {
         balance1={
           token1Balance && Boolean(token1Balance.value) ? formatFloat(token1Balance.formatted) : "0"
         }
-        standard={tokenStandard}
+        standard={standard}
         otherStandard={Standard.ERC20}
-        setStandard={setTokenStandard}
+        setStandard={setStandard}
         setOtherStandard={() => {}}
       />
       <PickTokenDialog

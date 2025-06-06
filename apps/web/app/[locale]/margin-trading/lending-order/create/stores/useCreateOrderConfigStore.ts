@@ -1,8 +1,20 @@
 import { Address } from "viem";
 import { create } from "zustand";
 
+import {
+  LendingOrderPeriod,
+  LendingOrderPeriodType,
+  PerpetualPeriodType,
+} from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
+
 type FirstStepValues = {
-  interestRatePerMonth: number;
+  interestRatePerMonth: string;
+  period: LendingOrderPeriod;
+  loanToken: Currency | undefined;
+  loanAmount: string;
+  loanTokenStandard: Standard;
 };
 
 type SecondStepValues = {
@@ -29,7 +41,20 @@ interface CreateOrderConfig {
 
 export const useCreateOrderConfigStore = create<CreateOrderConfig>((set, get) => ({
   firstStepValues: {
-    interestRatePerMonth: 0,
+    interestRatePerMonth: "",
+    period: {
+      type: LendingOrderPeriodType.FIXED, // or PERPETUAL
+      lendingOrderDeadline: "", // string or Date
+      positionDuration: "",
+      borrowingPeriod: {
+        type: PerpetualPeriodType.DAYS, // or SECONDS
+        borrowingPeriodInDays: "",
+        borrowingPeriodInSeconds: "",
+      },
+    },
+    loanToken: undefined,
+    loanAmount: "",
+    loanTokenStandard: Standard.ERC20,
   },
   secondStepValues: {
     leverage: 5,

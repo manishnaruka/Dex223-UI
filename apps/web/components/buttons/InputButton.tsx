@@ -9,6 +9,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 export default function InputButton({ text, isActive, ...props }: Props) {
   return (
     <button
+      type="button"
       {...props}
       className={clsx(
         "rounded-5 px-2 text-12 py-0.5 border hocus:bg-green-bg duration-200",

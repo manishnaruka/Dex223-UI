@@ -1,65 +1,83 @@
 import Alert from "@repo/ui/alert";
 import React from "react";
 
+import {
+  LendingOrderPeriod,
+  LendingOrderPeriodType,
+  PerpetualPeriodType,
+} from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import RadioButton from "@/components/buttons/RadioButton";
 import Tab from "@/components/tabs/Tab";
 import Tabs from "@/components/tabs/Tabs";
 
-type PeriodType = "fixed" | "perpetual";
-enum PerpetualPeriodType {
-  DAYS,
-  SECONDS,
-}
-
-const labelsMap: Record<PeriodType, string> = {
-  fixed: "Fixed period",
-  perpetual: "Perpetual period",
+const labelsMap: Record<LendingOrderPeriodType, string> = {
+  [LendingOrderPeriodType.FIXED]: "Fixed period",
+  [LendingOrderPeriodType.PERPETUAL]: "Perpetual period",
 };
 
-const periods: PeriodType[] = ["fixed", "perpetual"];
-
-export default function LendingOrderPeriodConfig() {
-  const [period, setPeriod] = React.useState<PeriodType>("fixed");
-  const [perpetualPeriodType, setPerpetualPeriodType] = React.useState<PerpetualPeriodType>(
-    PerpetualPeriodType.DAYS,
-  );
-
+export default function LendingOrderPeriodConfig({
+  values,
+  setValues,
+}: {
+  values: LendingOrderPeriod;
+  setValues: (values: LendingOrderPeriod) => void;
+}) {
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4">
       <InputLabel label="Period type" />
       <div className="grid grid-cols-2 gap-2 mb-4 mt-1">
-        {periods.map((_period) => (
+        {[LendingOrderPeriodType.FIXED, LendingOrderPeriodType.PERPETUAL].map((_period) => (
           <RadioButton
+            type="button"
             key={_period}
-            isActive={_period === period}
+            isActive={_period === values.type}
             onClick={() => {
-              setPeriod(_period);
+              setValues({ ...values, type: _period });
             }}
           >
             {labelsMap[_period]}
           </RadioButton>
         ))}
       </div>
-      {period === "fixed" && (
+      {values.type === LendingOrderPeriodType.FIXED && (
         <>
           <TextField
             label="Lending order deadline"
             tooltipText="tooltip text"
             placeholder="DD.MM.YYYY hh:mm:ss aa"
+            value={values.lendingOrderDeadline}
+            onChange={(e) =>
+              setValues({
+                ...values,
+                lendingOrderDeadline: e.target.value,
+              })
+            }
           />
           <TextField
             label="Margin positions duration"
             placeholder={"0"}
             tooltipText="tooltip text"
+            value={values.positionDuration}
+            onChange={(e) =>
+              setValues({
+                ...values,
+                positionDuration: e.target.value,
+              })
+            }
           />
         </>
       )}
-      {period === "perpetual" && (
+      {values.type === LendingOrderPeriodType.PERPETUAL && (
         <div className="w-full">
           <Tabs
-            activeTab={perpetualPeriodType}
-            setActiveTab={setPerpetualPeriodType}
+            activeTab={values.borrowingPeriod.type}
+            setActiveTab={(value: PerpetualPeriodType) =>
+              setValues({
+                ...values,
+                borrowingPeriod: { ...values.borrowingPeriod, type: value },
+              })
+            }
             fullWidth
             colorScheme={"secondary"}
           >
@@ -70,6 +88,16 @@ export default function LendingOrderPeriodConfig() {
                   tooltipText="tooltip text"
                   placeholder="0"
                   internalText={"days"}
+                  value={values.borrowingPeriod.borrowingPeriodInDays}
+                  onChange={(e) =>
+                    setValues({
+                      ...values,
+                      borrowingPeriod: {
+                        ...values.borrowingPeriod,
+                        borrowingPeriodInDays: e.target.value,
+                      },
+                    })
+                  }
                 />
               </div>
             </Tab>
@@ -81,6 +109,16 @@ export default function LendingOrderPeriodConfig() {
                   placeholder="0"
                   internalText={"seconds"}
                   helperText={"450000 seconds = 5.2 days"}
+                  value={values.borrowingPeriod.borrowingPeriodInSeconds}
+                  onChange={(e) =>
+                    setValues({
+                      ...values,
+                      borrowingPeriod: {
+                        ...values.borrowingPeriod,
+                        borrowingPeriodInSeconds: e.target.value,
+                      },
+                    })
+                  }
                 />
               </div>
             </Tab>

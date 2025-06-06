@@ -1,5 +1,8 @@
 "use client";
 
+import React from "react";
+
+import DateTimePicker from "@/components/atoms/DateTimePicker";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 
 export default function DebugRequestsPage() {
@@ -16,6 +19,12 @@ export default function DebugRequestsPage() {
   //     console.log("New block", block.number);
   //   },
   // });
+  return (
+    <div className="w-[400px] p-5 bg-quaternary-bg">
+      <DateTimePicker />
+    </div>
+  );
+
   if (error) return <div>{error.toString()}</div>;
 
   return <>{isLoading ? <div>Loading...</div> : <div>{price}</div>}</>;
