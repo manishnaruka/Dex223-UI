@@ -1,17 +1,18 @@
 import Alert from "@repo/ui/alert";
-import debounce from "lodash.debounce";
 import { useTranslations } from "next-intl";
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
+import { ZOOM_LEVELS } from "@/app/[locale]/add/hooks/types";
 import { FeeAmount } from "@/sdk_bi/constants";
-import { Currency } from "@/sdk_bi/entities/currency";
-import { Price } from "@/sdk_bi/entities/fractions/price";
-import { Token } from "@/sdk_bi/entities/token";
 
-import { ZOOM_LEVELS } from "../../../hooks/types";
 import { Chart } from "./Chart";
 import { formatDelta, useDensityChartData } from "./hooks";
-import { Bound } from "./types";
+
+function parseFloatWithDefault(value: string | number | undefined, fallback = 0): number {
+  const parsed = parseFloat(String(value));
+  return isNaN(parsed) ? fallback : parsed;
+}
 
 const ChartWrapper = ({ children, ...props }: any) => (
   <div
@@ -29,21 +30,6 @@ const ChartWrapper = ({ children, ...props }: any) => (
   </div>
 );
 
-function InfoBox({ message, icon }: { message?: ReactNode; icon: ReactNode }) {
-  return (
-    <div style={{ height: "100%", justifyContent: "center" }}>
-      {icon}
-      {" icon: "}
-      {message && (
-        //   <ThemedText.DeprecatedMediumHeader padding={10} marginTop="20px" textAlign="center">
-        //   {message}
-        // </ThemedText.DeprecatedMediumHeader>
-        <span>{message}</span>
-      )}
-    </div>
-  );
-}
-
 export default function LiquidityChartRangeInput({
   currencyA,
   currencyB,
@@ -54,159 +40,89 @@ export default function LiquidityChartRangeInput({
   priceUpper,
   onLeftRangeInput,
   onRightRangeInput,
-  interactive,
+  interactive: _interactive,
 }: {
-  currencyA?: Currency;
-  currencyB?: Currency;
-  feeAmount?: FeeAmount;
-  ticksAtLimit: { [bound in Bound]?: boolean | undefined };
+  currencyA: any;
+  currencyB: any;
+  feeAmount: FeeAmount;
+  ticksAtLimit: Record<Bound, boolean>;
   price?: number;
-  priceLower?: Price<Token, Token>;
-  priceUpper?: Price<Token, Token>;
-  onLeftRangeInput: (typedValue: string) => void;
-  onRightRangeInput: (typedValue: string) => void;
+  priceLower?: any;
+  priceUpper?: any;
+  onLeftRangeInput: (val: string) => void;
+  onRightRangeInput: (val: string) => void;
   interactive: boolean;
 }) {
-  const prevDomainRef = useRef<[number, number] | null>(null);
   const t = useTranslations("Liquidity");
   const chartWrapperRef = useRef<HTMLDivElement | null>(null);
-
+  const prevDomainRef = useRef<[number, number] | null>(null);
   const isSorted = currencyA && currencyB && currencyA?.wrapped.sortsBefore(currencyB?.wrapped);
 
-  const densityParams = useMemo(() => {
-    return {
-      currencyA,
-      currencyB,
-      feeAmount,
-    };
-  }, [currencyA, currencyB, feeAmount]);
-  const [pendingDomain, setPendingDomain] = useState<[number, number] | undefined>(undefined);
+  const densityParams = useMemo(
+    () => ({ currencyA, currencyB, feeAmount }),
+    [currencyA, currencyB, feeAmount],
+  );
   const { isLoading, error, formattedData } = useDensityChartData(densityParams);
 
-  const onBrushDomainChangeEnded = useCallback(
-    debounce((domain: [number, number]) => {
-      setPendingDomain(domain); // Save immediately for chart
+  const [pendingDomain, setPendingDomain] = useState<[number, number] | undefined>();
 
-      const [left, right] = domain;
-      const prev = prevDomainRef.current;
-      prevDomainRef.current = domain;
+  const interactive = _interactive && Boolean(formattedData?.length);
+  const zoomLevels = ZOOM_LEVELS[feeAmount ?? FeeAmount.MEDIUM];
 
-      if (!prev) return;
-
-      const [prevLeft, prevRight] = prev;
-
-      if (left !== prevLeft) onLeftRangeInput(left.toFixed(10));
-      if (right !== prevRight) onRightRangeInput(right.toFixed(10));
-    }, 100),
-    [onLeftRangeInput, onRightRangeInput],
-  );
-
-  const externalDomain: [number, number] | undefined = useMemo(() => {
-    const lower = priceLower?.toSignificant(6);
-    const upper = priceUpper?.toSignificant(6);
-
-    if (!lower || !upper) return undefined;
-
-    return [parseFloat(lower), parseFloat(upper)];
-  }, [priceLower, priceUpper]);
-
-  // sync when app state catches up
-  useEffect(() => {
-    if (
-      pendingDomain &&
-      externalDomain &&
-      Math.abs(pendingDomain[0] - externalDomain[0]) < 1e-8 &&
-      Math.abs(pendingDomain[1] - externalDomain[1]) < 1e-8
-    ) {
-      setPendingDomain(undefined); // external state caught up
-    }
-  }, [externalDomain, pendingDomain]);
-
-  useEffect(() => {
-    // If externalDomain changed while user isn't dragging (i.e., no pendingDomain)
-    if (!pendingDomain && externalDomain) {
-      prevDomainRef.current = externalDomain;
-    }
-
-    // If pendingDomain is stale compared to external inputs, update it
-    if (
-      pendingDomain &&
-      externalDomain &&
-      (Math.abs(pendingDomain[0] - externalDomain[0]) > 1e-6 ||
-        Math.abs(pendingDomain[1] - externalDomain[1]) > 1e-6)
-    ) {
-      // External inputs changed → update chart domain to match
-      setPendingDomain(undefined);
-      prevDomainRef.current = null;
-    }
-  }, [externalDomain, pendingDomain]);
-
-  const brushDomain = pendingDomain ?? externalDomain;
-
-  interactive = interactive && Boolean(formattedData?.length);
-
-  // const brushDomain: [number, number] | undefined = useMemo(() => {
-  //   const leftPrice = isSorted ? priceLower : priceUpper?.invert();
-  //   const rightPrice = isSorted ? priceUpper : priceLower?.invert();
-  //
-  //   return leftPrice && rightPrice
-  //     ? [parseFloat(leftPrice?.toSignificant(6)), parseFloat(rightPrice?.toSignificant(6))]
-  //     : undefined;
-  // }, [isSorted, priceLower, priceUpper]);
+  const dimensions = useMemo(() => {
+    const isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false;
+    return isMobile ? { width: 252, height: 170 } : { width: 510, height: 312 };
+  }, []);
 
   const brushLabelValue = useCallback(
     (d: "w" | "e", x: number) => {
       if (!price) return "";
+      const isAtLimit =
+        (d === "w" && (ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER] || x <= 1e-6)) ||
+        (d === "e" && (ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER] || x >= 1e35));
+      if (isAtLimit) return d === "w" ? "0" : "∞";
 
-      if (d === "w" && (ticksAtLimit[isSorted ? Bound.LOWER : Bound.UPPER] || x <= 1e-6))
-        return "0";
-
-      if (d === "e" && (ticksAtLimit[isSorted ? Bound.UPPER : Bound.LOWER] || x >= 1e35))
-        return "∞";
-
-      const percent =
-        (x < price ? -1 : 1) * ((Math.max(x, price) - Math.min(x, price)) / price) * 100;
-
-      return price ? `${(Math.sign(percent) < 0 ? "-" : "") + formatDelta(percent)}` : "";
+      const percent = ((x - price) / price) * 100;
+      return `${percent < 0 ? "-" : ""}${formatDelta(Math.abs(percent))}`;
     },
     [isSorted, price, ticksAtLimit],
   );
 
+  const externalDomain = useMemo(() => {
+    if (!priceLower || !priceUpper) return undefined;
+    return [
+      parseFloatWithDefault(priceLower.toSignificant(6)),
+      parseFloatWithDefault(priceUpper.toSignificant(6)),
+    ];
+  }, [priceLower, priceUpper]);
+
+  // Clear pending domain only when external domain updates
+  useEffect(() => {
+    setPendingDomain(undefined);
+  }, [priceLower, priceUpper]);
+
+  const currentDomain =
+    (pendingDomain as [number, number] | undefined) ??
+    (externalDomain as [number, number] | undefined);
+
+  const handleBrushEnd = useCallback(
+    (domain: [number, number]) => {
+      setPendingDomain(domain);
+      const [left, right] = domain;
+      const prev = prevDomainRef.current;
+      prevDomainRef.current = domain;
+
+      console.log("fixed", left.toFixed(10));
+
+      if (!prev || left !== prev[0]) onLeftRangeInput(left.toFixed(10));
+      if (!prev || right !== prev[1]) onRightRangeInput(right.toFixed(10));
+    },
+    [onLeftRangeInput, onRightRangeInput],
+  );
+
   const isUninitialized = !currencyA || !currencyB || (formattedData === undefined && !isLoading);
 
-  const zoomLevels = ZOOM_LEVELS[feeAmount ?? FeeAmount.MEDIUM];
-
-  // // SET DEFAULT PRICE RANGE
-  // useEffect(() => {
-  //   if (price && !brushDomain) {
-  //     onBrushDomainChangeEnded(
-  //       [price * zoomLevels.initialMin, price * zoomLevels.initialMax],
-  //       undefined,
-  //     );
-  //   }
-  // }, [brushDomain, onBrushDomainChangeEnded, price, zoomLevels.initialMin, zoomLevels.initialMax]);
-
-  // const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
-  // State to manage chart dimensions
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }>(() => {
-    const isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false;
-    return isMobile ? { width: 252, height: 170 } : { width: 510, height: 312 };
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth <= 768;
-      const height = chartWrapperRef.current?.clientHeight || (isMobile ? 170 : 312);
-      setDimensions({ width: isMobile ? 252 : 510, height });
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Set initial dimensions
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
-    // <AutoColumn gap="md" style={{ minHeight: "200px" }}>
     <div
       style={{
         minHeight: "200px",
@@ -217,44 +133,22 @@ export default function LiquidityChartRangeInput({
     >
       {isUninitialized ? (
         <Alert type="info" text={t("price_chart_data_will_appear_here")} />
-      ) : // <InfoBox
-      //   message={<span>{t("price_chart_data_will_appear_here")}</span>}
-      //   // icon={<Inbox size={56} stroke={theme.neutral1} />}
-      //   icon={"Inbox"}
-      // />
-      isLoading ? (
-        <Alert type="info" text="Loader" />
-      ) : // <InfoBox icon={<span>Loader</span>} />
-      error ? (
+      ) : isLoading ? (
+        <Alert type="info" text="Loading..." />
+      ) : error ? (
         <Alert type="error" text={t("price_chart_data_not_available")} />
-      ) : // <InfoBox
-      //   message={<span>{t("price_chart_data_not_available")}</span>}
-      //   // icon={<CloudOff size={56} stroke={theme.neutral2} />}
-      //   icon={<span>CloudOff</span>}
-      // />
-      // ) : !formattedData || formattedData.length === 0 || !price ? (
-      !price ? (
+      ) : !price ? (
         <Alert type="error" text={t("price_chart_no_data")} />
       ) : (
-        // <InfoBox
-        //   message={<span>{t("price_chart_no_data")}</span>}
-        //   // icon={<BarChart2 size={56} stroke={theme.neutral2} />}
-        //   icon={<span>BarChart2 </span>}
-        // />
-        <ChartWrapper>
+        <ChartWrapper ref={chartWrapperRef}>
           <Chart
             data={{ series: formattedData!, current: price }}
-            // data={{ series: [], current: price }}
             dimensions={dimensions}
             margins={{ top: 10, right: 2, bottom: 20, left: 0 }}
             styles={{
-              area: {
-                selection: "#FC72FF",
-              },
+              area: { selection: "#FC72FF" },
               brush: {
                 handle: {
-                  // west: saturate(0.1, tokenAColor) ?? theme.critical,
-                  // east: saturate(0.1, tokenBColor) ?? theme.accent1,
                   west: "#8089BD",
                   east: "#8089BD",
                 },
@@ -262,8 +156,8 @@ export default function LiquidityChartRangeInput({
             }}
             interactive={interactive}
             brushLabels={brushLabelValue}
-            brushDomain={brushDomain}
-            onBrushDomainChange={onBrushDomainChangeEnded}
+            brushDomain={currentDomain}
+            onBrushDomainChange={handleBrushEnd}
             zoomLevels={zoomLevels}
             ticksAtLimit={ticksAtLimit}
           />

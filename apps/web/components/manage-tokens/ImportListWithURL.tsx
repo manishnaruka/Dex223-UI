@@ -49,8 +49,6 @@ export default function ImportListWithURL({ setContent }: Props) {
 
         const data = await convertList(tokenListAddressToImport, chainId);
 
-        console.log(data);
-        //TODO: Check that all tokens in list from same chain
         const listChainId = data.tokens[0].chainId;
 
         const filteredTokenList = data?.tokens.filter((t: any) => t.chainId === chainId);
@@ -95,8 +93,6 @@ export default function ImportListWithURL({ setContent }: Props) {
       return tokenList.list.name.toLowerCase() === tokenListToImport?.list.name.toLowerCase();
     });
   }, [tokenListToImport?.list.name, tokenLists]);
-
-  console.log(alreadyImportedList);
 
   return (
     <div className="flex flex-col flex-grow">

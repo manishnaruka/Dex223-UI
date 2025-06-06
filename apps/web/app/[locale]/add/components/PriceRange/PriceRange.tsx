@@ -405,26 +405,26 @@ export const PriceRange = ({
               </div>
             </div>
           </div>
-          {/*<LiquidityChartRangeInput*/}
-          {/*  currencyA={tokenA}*/}
-          {/*  currencyB={tokenB}*/}
-          {/*  feeAmount={tier}*/}
-          {/*  ticksAtLimit={ticksAtLimit}*/}
-          {/*  price={*/}
-          {/*    price*/}
-          {/*      ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))*/}
-          {/*      : undefined*/}
-          {/*  }*/}
-          {/*  priceLower={priceLower}*/}
-          {/*  priceUpper={priceUpper}*/}
-          {/*  onLeftRangeInput={(val) => {*/}
-          {/*    inputTopBlur(val); // Or whatever your function is*/}
-          {/*  }}*/}
-          {/*  onRightRangeInput={(val) => {*/}
-          {/*    inputBottomBlur(val);*/}
-          {/*  }}*/}
-          {/*  interactive={true}*/}
-          {/*/>*/}
+          <LiquidityChartRangeInput
+            currencyA={tokenA}
+            currencyB={tokenB}
+            feeAmount={tier}
+            ticksAtLimit={ticksAtLimit}
+            price={
+              price
+                ? parseFloat((invertPrice ? price.invert() : price).toSignificant(8))
+                : undefined
+            }
+            priceLower={inputTopValue}
+            priceUpper={inputBottomValue}
+            onLeftRangeInput={(val) => {
+              inputTopBlur(val); // Or whatever your function is
+            }}
+            onRightRangeInput={(val) => {
+              inputBottomBlur(val);
+            }}
+            interactive={true}
+          />
         </>
       )}
     </div>

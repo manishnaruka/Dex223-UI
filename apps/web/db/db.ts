@@ -35,24 +35,17 @@ export interface RecentTransaction {
   value: IRecentTransaction;
 }
 
-export interface Erc223Mapping {
-  erc20: Address;
-  erc223: Address;
-}
-
 export class DatabaseDexie extends Dexie {
   // 'tokenLists' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
   tokenLists!: Table<TokenList>;
   recentTransactions!: Table<RecentTransaction, string>;
-  erc223Mapping!: Table<Erc223Mapping, string>;
 
   constructor() {
     super("DEX223_INDEXED_DB");
     this.version(1).stores({
       tokenLists: "++id, autoListingContract, lastUpdated, enabled, list, chainId", // Primary key and indexed props
       recentTransactions: "&key",
-      erc223Mapping: "&erc20,erc223", // & = primary key по erc20
     });
   }
 }

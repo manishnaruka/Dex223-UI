@@ -84,7 +84,6 @@ export const usePriceRange = () => {
   );
 
   const { [Bound.LOWER]: tickLower, [Bound.UPPER]: tickUpper } = ticks || {};
-  const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
 
   // specifies whether the lower and upper ticks is at the exteme bounds
   const ticksAtLimit = useMemo(
