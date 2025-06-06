@@ -91,33 +91,35 @@ export function predictWrapperAddress(
   isERC20: boolean = true,
   converterAddress: Address,
 ): string {
-  const wrapperAddress = erc223MapData[tokenAddress.toLowerCase() as Address];
-
-  if (!wrapperAddress) {
-    console.log("NO ADDRESS FOUND for ", tokenAddress);
-    return ZERO_ADDRESS;
-  }
-
-  console.log(wrapperAddress);
-
-  return wrapperAddress;
-
-  // const _bytecode = isERC20 ? bytecode223 : bytecode20;
-  // const hash = keccak256(
-  //   encodePacked(
-  //     ["bytes1", "address", "bytes32", "bytes32"],
-  //     [
-  //       "0xff",
-  //       converterAddress,
-  //       keccak256(
-  //         encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
-  //       ),
-  //       keccak256(_bytecode as `0x${string}`),
-  //     ],
-  //   ),
-  // );
+  // const wrapperAddress = erc223MapData[tokenAddress.toLowerCase() as Address];
   //
-  // return getAddress(`0x${hash.slice(-40)}`);
+  // if (!wrapperAddress) {
+  //   console.log("NO ADDRESS FOUND for ", tokenAddress);
+  //   return ZERO_ADDRESS;
+  // }
+  //
+  // console.log(wrapperAddress);
+  //
+  // return wrapperAddress;
+
+  const _bytecode = isERC20 ? bytecode223 : bytecode20;
+  const hash = keccak256(
+    encodePacked(
+      ["bytes1", "address", "bytes32", "bytes32"],
+      [
+        "0xff",
+        converterAddress,
+        keccak256(
+          encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
+        ),
+        keccak256(_bytecode as `0x${string}`),
+      ],
+    ),
+  );
+  console.log("THis is running");
+  console.log(hash);
+
+  return getAddress(`0x${hash.slice(-40)}`);
 
   // const create2Inputs = [
   //   "0xff",
