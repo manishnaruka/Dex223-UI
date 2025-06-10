@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
+import { InputSize } from "@/components/atoms/Input";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import TokenInput from "@/components/common/TokenInput";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
@@ -17,6 +18,7 @@ export default function LendingOrderTokenSelect({
   standard,
   setStandard,
   errors,
+  label = "Loan amount",
 }: {
   token: Currency | undefined;
   setToken: (token: Currency) => Promise<void>;
@@ -25,6 +27,7 @@ export default function LendingOrderTokenSelect({
   standard: Standard;
   setStandard: (standard: Standard) => Promise<void>;
   errors: string[];
+  label?: string;
 }) {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
@@ -51,7 +54,7 @@ export default function LendingOrderTokenSelect({
 
   return (
     <div className="">
-      <InputLabel label="Loan amount" tooltipText="Tooltip text" />
+      <InputLabel inputSize={InputSize.LARGE} label={label} tooltipText="Tooltip text" />
       <TokenInput
         isError={!!errors.length}
         handleClick={() => {

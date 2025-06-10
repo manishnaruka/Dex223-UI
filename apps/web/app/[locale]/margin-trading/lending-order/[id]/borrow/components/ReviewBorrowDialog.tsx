@@ -3,15 +3,17 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { PropsWithChildren, useEffect, useMemo } from "react";
+import React, { PropsWithChildren, useMemo } from "react";
 import { Address } from "viem";
 
-import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
-import useCreateOrder from "@/app/[locale]/margin-trading/lending-order/create/hooks/useCreateOrder";
+import useCreateMarginPosition from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
+import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import {
-  CreateOrderStatus,
-  useCreateOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStatusStore";
+  CreateMarginPositionStatus,
+  useCreateMarginPositionStatusStore,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
+import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
+import { CreateOrderStatus } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStatusStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input from "@/components/atoms/Input";
@@ -24,90 +26,11 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Standard } from "@/sdk_bi/standard";
 
-function DepositRow({ status, hash }: { status: CreateOrderStatus; hash?: Address | undefined }) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
-
-  const text = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.ERROR_DEPOSIT:
-        return "Failed to deposit funds";
-      case CreateOrderStatus.LOADING_DEPOSIT:
-        return "Depositing funds";
-      case CreateOrderStatus.SUCCESS:
-        return "Funds successfully deposited";
-      default:
-        return "Deposit funds";
-    }
-  }, [status]);
-
-  const icon = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.ERROR_DEPOSIT:
-        return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateOrderStatus.LOADING_DEPOSIT:
-        return <Preloader size={20} />;
-      case CreateOrderStatus.PENDING_DEPOSIT:
-        return (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        );
-      case CreateOrderStatus.SUCCESS:
-        return <Svg className="text-green" iconName="done" size={20} />;
-      default:
-        return null;
-    }
-  }, [status, t]);
-
-  return (
-    <div className={clsx("grid grid-cols-[32px_auto_1fr] gap-2 h-10 ")}>
-      <div className="flex items-center h-full">
-        <div
-          className={clsxMerge(
-            "p-1 rounded-full h-8 w-8",
-            "bg-green-bg",
-            status === CreateOrderStatus.ERROR_DEPOSIT && "bg-red-bg",
-          )}
-        >
-          <Svg
-            className={clsxMerge(
-              "text-green",
-              status === CreateOrderStatus.ERROR_DEPOSIT && "text-red-light",
-            )}
-            iconName="deposit"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span
-          className={clsx(
-            status === CreateOrderStatus.SUCCESS ? "text-secondary-text text-14" : "text-14",
-            status === CreateOrderStatus.SUCCESS && "text-primary-text",
-          )}
-        >
-          {text}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {icon}
-      </div>
-    </div>
-  );
-}
-
-function ConfirmOrderRow({
+function ApproveRow({
   status,
   hash,
 }: {
-  status: CreateOrderStatus;
+  status: CreateMarginPositionStatus;
   hash?: Address | undefined;
 }) {
   const t = useTranslations("Swap");
@@ -115,48 +38,38 @@ function ConfirmOrderRow({
 
   const text = useMemo(() => {
     switch (status) {
-      case CreateOrderStatus.INITIAL:
-        return "Confirm lending order";
-      case CreateOrderStatus.ERROR_CONFIRM_ORDER:
-        return "Failed to unwrap WETH";
-      case CreateOrderStatus.LOADING_CONFIRM_ORDER:
-        return "Unwrapping WETH";
-      case CreateOrderStatus.PENDING_CONFIRM_ORDER:
-        return "Unwrap WETH to ETH";
-      case CreateOrderStatus.SUCCESS:
-        return "Unwrapped WETH to ETH";
+      case CreateMarginPositionStatus.INITIAL:
+        return "Approve USDT";
+      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
+        return "Failed to approve USDT";
+      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
+        return "Approving USDT";
+      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
+        return "Approve USDT";
       default:
-        return "Unwrap WETH to ETH";
+        return "Approved USDT";
     }
   }, [status]);
 
   const isDisabled = useMemo(() => {
-    return (
-      status === CreateOrderStatus.PENDING_CONFIRM_ORDER ||
-      status === CreateOrderStatus.INITIAL ||
-      status === CreateOrderStatus.LOADING_CONFIRM_ORDER ||
-      status === CreateOrderStatus.ERROR_CONFIRM_ORDER ||
-      status === CreateOrderStatus.SUCCESS
-    );
+    return status !== CreateMarginPositionStatus.LOADING_APPROVE_BORROW;
   }, [status]);
 
   const icon = useMemo(() => {
     switch (status) {
-      case CreateOrderStatus.ERROR_CONFIRM_ORDER:
+      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
         return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateOrderStatus.LOADING_CONFIRM_ORDER:
+      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
         return <Preloader size={20} />;
-      case CreateOrderStatus.PENDING_CONFIRM_ORDER:
+      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
         return (
           <>
             <Preloader type="linear" />
             <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
           </>
         );
-      case CreateOrderStatus.SUCCESS:
-        return <Svg className="text-green" iconName="done" size={20} />;
       default:
-        return null;
+        return <Svg className="text-green" iconName="done" size={20} />;
     }
   }, [status, t]);
 
@@ -167,14 +80,14 @@ function ConfirmOrderRow({
           className={clsxMerge(
             "p-1 rounded-full h-8 w-8",
             isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            status === CreateOrderStatus.ERROR_CONFIRM_ORDER && "bg-red-bg",
+            status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "bg-red-bg",
           )}
         >
           <Svg
             className={clsxMerge(
               "rotate-90",
               isDisabled ? "text-tertiary-text" : "text-green",
-              status === CreateOrderStatus.ERROR_CONFIRM_ORDER && "text-red-light",
+              status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "text-red-light",
             )}
             iconName="swap"
           />
@@ -198,19 +111,25 @@ function ConfirmOrderRow({
   );
 }
 
-function ApproveRow({ status, hash }: { status: CreateOrderStatus; hash?: Address | undefined }) {
+function ApproveLiquidationRow({
+  status,
+  hash,
+}: {
+  status: CreateMarginPositionStatus;
+  hash?: Address | undefined;
+}) {
   const t = useTranslations("Swap");
   const chainId = useCurrentChainId();
 
   const text = useMemo(() => {
     switch (status) {
-      case CreateOrderStatus.INITIAL:
+      case CreateMarginPositionStatus.INITIAL:
         return "Approve USDT";
-      case CreateOrderStatus.ERROR_APPROVE:
+      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
         return "Failed to approve USDT";
-      case CreateOrderStatus.LOADING_APPROVE:
+      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
         return "Approving USDT";
-      case CreateOrderStatus.PENDING_APPROVE:
+      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
         return "Approve USDT";
       default:
         return "Approved USDT";
@@ -218,16 +137,16 @@ function ApproveRow({ status, hash }: { status: CreateOrderStatus; hash?: Addres
   }, [status]);
 
   const isDisabled = useMemo(() => {
-    return status !== CreateOrderStatus.LOADING_APPROVE;
+    return status !== CreateMarginPositionStatus.LOADING_APPROVE_BORROW;
   }, [status]);
 
   const icon = useMemo(() => {
     switch (status) {
-      case CreateOrderStatus.ERROR_APPROVE:
+      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
         return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateOrderStatus.LOADING_APPROVE:
+      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
         return <Preloader size={20} />;
-      case CreateOrderStatus.PENDING_APPROVE:
+      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
         return (
           <>
             <Preloader type="linear" />
@@ -246,14 +165,14 @@ function ApproveRow({ status, hash }: { status: CreateOrderStatus; hash?: Addres
           className={clsxMerge(
             "p-1 rounded-full h-8 w-8",
             isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            status === CreateOrderStatus.ERROR_APPROVE && "bg-red-bg",
+            status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "bg-red-bg",
           )}
         >
           <Svg
             className={clsxMerge(
               "rotate-90",
               isDisabled ? "text-tertiary-text" : "text-green",
-              status === CreateOrderStatus.ERROR_APPROVE && "text-red-light",
+              status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "text-red-light",
             )}
             iconName="swap"
           />
@@ -281,54 +200,32 @@ function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
 
-function CreateOrderActionButton() {
-  const t = useTranslations("Swap");
+function CreateMarginPositionActionButton() {
+  const { handleCreateMarginPosition } = useCreateMarginPosition();
+  const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
+    useCreateMarginPositionStatusStore();
 
-  const { handleCreateOrder } = useCreateOrder();
-
-  const { status, approveHash, depositHash, confirmOrderHash } = useCreateOrderStatusStore();
-
-  if (status !== CreateOrderStatus.INITIAL) {
+  if (status !== CreateMarginPositionStatus.INITIAL) {
     return (
       <Rows>
-        <ApproveRow hash={approveHash} status={status} />
-        <ConfirmOrderRow hash={confirmOrderHash} status={status} />
-        <DepositRow hash={depositHash} status={status} />
+        <ApproveRow status={status} hash={approveBorrowHash} />
+        <ApproveRow status={status} hash={approveBorrowHash} />
       </Rows>
     );
   }
-
-  return (
-    <Button onClick={() => handleCreateOrder("1")} fullWidth>
-      Create lending order
-    </Button>
-  );
+  return <Button onClick={handleCreateMarginPosition}>Confirm borrow</Button>;
 }
 
-export default function ReviewLendingOrderDialog({
+export default function ReviewBorrowDialog({
   isOpen,
   setIsOpen,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }) {
+  const { values, setValues } = useCreateMarginPositionConfigStore();
+
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
-
-  const { status, setStatus } = useCreateOrderStatusStore();
-
-  useEffect(() => {
-    if (
-      (status === CreateOrderStatus.ERROR_APPROVE ||
-        status === CreateOrderStatus.ERROR_DEPOSIT ||
-        status === CreateOrderStatus.ERROR_CONFIRM_ORDER ||
-        status === CreateOrderStatus.SUCCESS) &&
-      !isOpen
-    ) {
-      setTimeout(() => {
-        setStatus(CreateOrderStatus.INITIAL);
-      }, 400);
-    }
-  }, [isOpen, setStatus, status]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
@@ -347,7 +244,7 @@ export default function ReviewLendingOrderDialog({
           </div>
           <p className="text-tertiary-text text-14">$1,000.00</p>
         </div>
-        {status === CreateOrderStatus.INITIAL && (
+        {status === CreateMarginPositionStatus.INITIAL && (
           <>
             <div className="flex flex-col gap-2 mb-5">
               <LendingOrderDetailsRow
@@ -503,7 +400,7 @@ export default function ReviewLendingOrderDialog({
           </>
         )}
 
-        <CreateOrderActionButton />
+        <CreateMarginPositionActionButton />
       </div>
     </DrawerDialog>
   );

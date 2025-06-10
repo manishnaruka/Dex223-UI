@@ -324,16 +324,14 @@ export function useSwapEstimatedGas() {
     });
   }, [publicClient, address, swapParams, isAllowedA]);
 }
+
 export default function useSwap() {
-  console.log("useSwap fired before dialog mounted");
   const t = useTranslations("Swap");
   const { data: walletClient } = useWalletClient();
   const { tokenA, tokenB, tokenAStandard, tokenBStandard } = useSwapTokensStore();
   const { trade } = useTrade();
   const { address } = useAccount();
   const publicClient = usePublicClient();
-
-  console.log(trade);
 
   const chainId = useCurrentChainId();
 

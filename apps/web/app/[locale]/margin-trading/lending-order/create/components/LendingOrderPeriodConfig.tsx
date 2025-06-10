@@ -60,6 +60,7 @@ export default function LendingOrderPeriodConfig({
             error={errors?.lendingOrderDeadline}
           />
           <TextField
+            internalText="days"
             label="Margin positions duration"
             placeholder={"0"}
             tooltipText="tooltip text"
