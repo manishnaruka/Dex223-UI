@@ -37,7 +37,7 @@ const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
         isError &&
           "border-red-light hocus:shadow hocus:shadow-red-light-shadow/60 focus:shadow focus:shadow-red-light-shadow/60",
         isWarning &&
-          "border-orange hocus:shadow hocus:shadow-yellow/60 focus:shadow focus:shadow-yellow/60",
+          "border-orange hocus:shadow hocus:shadow-orange/60 focus:shadow focus:shadow-orange/60",
         props.disabled && "opacity-50 pointer-events-none",
         props.readOnly && "pointer-events-none bg-primary-bg border-secondary-border",
         className,

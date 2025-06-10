@@ -14,6 +14,7 @@ import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Token } from "@/sdk_bi/entities/token";
+import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 
 export default function ManageTokenItem({
   token,
@@ -29,6 +30,12 @@ export default function ManageTokenItem({
 
   const chainId = useCurrentChainId();
 
+  const { toggleToken, isTokenPinned, pinnedTokens } = usePinnedTokensStore((s) => ({
+    toggleToken: s.toggleToken,
+    pinnedTokens: s.tokens,
+    isTokenPinned: s.tokens[token.chainId]?.includes(token.isNative ? "native" : token.address0),
+  }));
+
   return (
     <div className="group">
       <div className="flex justify-between py-1.5">
@@ -39,7 +46,7 @@ export default function ManageTokenItem({
             <span className="text-secondary-text">{token.symbol}</span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           {token.wrapped.lists?.includes(`custom-${chainId}`) && (
             <div className="group-hocus:opacity-100 opacity-0 duration-200">
               <IconButton
@@ -121,7 +128,7 @@ export default function ManageTokenItem({
                     onClick={(e) => e.stopPropagation()}
                     ref={ref.setReference}
                     {...refProps}
-                    className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer"
+                    className="flex gap-0.5 items-center text-secondary-text text-14 cursor-pointer relative pr-2"
                   >
                     {token.lists?.length || 1}
                     <Svg className="text-tertiary-text" iconName="list" />
@@ -134,6 +141,20 @@ export default function ManageTokenItem({
           {token.isToken && (
             <IconButton onClick={() => setTokenForPortfolio(token)} iconName="details" />
           )}
+
+          <IconButton
+            iconName={isTokenPinned ? "pin-fill" : "pin"}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (pinnedTokens[token.chainId]?.length < 8 || isTokenPinned) {
+                toggleToken(token.isNative ? "native" : token.address0, token.chainId);
+              } else {
+                addToast("Pinning limit reached: 8 tokens", "info");
+              }
+            }}
+            buttonSize={40}
+            active={isTokenPinned}
+          />
         </div>
       </div>
     </div>

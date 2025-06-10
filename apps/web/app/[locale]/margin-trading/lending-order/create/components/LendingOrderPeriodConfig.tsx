@@ -3,9 +3,11 @@ import React from "react";
 
 import {
   LendingOrderPeriod,
+  LendingOrderPeriodErrors,
   LendingOrderPeriodType,
   PerpetualPeriodType,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
+import DateTimePicker from "@/components/atoms/DateTimePicker";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import RadioButton from "@/components/buttons/RadioButton";
 import Tab from "@/components/tabs/Tab";
@@ -19,9 +21,11 @@ const labelsMap: Record<LendingOrderPeriodType, string> = {
 export default function LendingOrderPeriodConfig({
   values,
   setValues,
+  errors,
 }: {
   values: LendingOrderPeriod;
   setValues: (values: LendingOrderPeriod) => void;
+  errors?: LendingOrderPeriodErrors;
 }) {
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4">
@@ -41,8 +45,8 @@ export default function LendingOrderPeriodConfig({
         ))}
       </div>
       {values.type === LendingOrderPeriodType.FIXED && (
-        <>
-          <TextField
+        <div className="flex flex-col gap-1.5">
+          <DateTimePicker
             label="Lending order deadline"
             tooltipText="tooltip text"
             placeholder="DD.MM.YYYY hh:mm:ss aa"
@@ -53,6 +57,7 @@ export default function LendingOrderPeriodConfig({
                 lendingOrderDeadline: e.target.value,
               })
             }
+            error={errors?.lendingOrderDeadline}
           />
           <TextField
             label="Margin positions duration"
@@ -65,8 +70,9 @@ export default function LendingOrderPeriodConfig({
                 positionDuration: e.target.value,
               })
             }
+            error={errors?.positionDuration}
           />
-        </>
+        </div>
       )}
       {values.type === LendingOrderPeriodType.PERPETUAL && (
         <div className="w-full">
@@ -84,6 +90,7 @@ export default function LendingOrderPeriodConfig({
             <Tab title="Days">
               <div className="mt-4">
                 <TextField
+                  isNumeric
                   label="Borrowing period"
                   tooltipText="tooltip text"
                   placeholder="0"
@@ -98,27 +105,30 @@ export default function LendingOrderPeriodConfig({
                       },
                     })
                   }
+                  error={errors?.borrowingPeriod?.borrowingPeriodInDays}
                 />
               </div>
             </Tab>
-            <Tab title="Seconds">
+            <Tab title="Minutes">
               <div className="mt-4">
                 <TextField
+                  isNumeric
                   label="Borrowing period"
                   tooltipText="tooltip text"
                   placeholder="0"
                   internalText={"seconds"}
-                  helperText={"450000 seconds = 5.2 days"}
-                  value={values.borrowingPeriod.borrowingPeriodInSeconds}
+                  helperText={"1440 seconds = 1 day"}
+                  value={values.borrowingPeriod.borrowingPeriodInMinutes}
                   onChange={(e) =>
                     setValues({
                       ...values,
                       borrowingPeriod: {
                         ...values.borrowingPeriod,
-                        borrowingPeriodInSeconds: e.target.value,
+                        borrowingPeriodInMinutes: e.target.value,
                       },
                     })
                   }
+                  error={errors?.borrowingPeriod?.borrowingPeriodInMinutes}
                 />
               </div>
             </Tab>

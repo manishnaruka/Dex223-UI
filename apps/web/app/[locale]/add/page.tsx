@@ -6,6 +6,7 @@ import React, { useCallback, useState } from "react";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
+import { useLiquidityApprove } from "@/app/[locale]/add/hooks/useLiquidityApprove";
 import {
   Field,
   useLiquidityAmountsStore,
@@ -42,13 +43,6 @@ import { usePriceRange } from "./hooks/usePrice";
 import { useV3DerivedMintInfo } from "./hooks/useV3DerivedMintInfo";
 import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStore";
 
-function compareTokens(tokenA: Currency, tokenB: Currency) {
-  const tokenAaddress = tokenA.isNative ? tokenA.wrapped.address0 : tokenA.address0;
-  const tokenBaddress = tokenB.isNative ? tokenB.wrapped.address0 : tokenB.address0;
-
-  return tokenAaddress.toString() > tokenBaddress.toString();
-}
-
 export default function AddPoolPage() {
   usePoolsSearchParams();
   useRecentTransactionTracking();
@@ -60,95 +54,65 @@ export default function AddPoolPage() {
 
   const { tokenA, tokenB, setTokenA, setTokenB, setBothTokens } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
-  const { ticks, clearPriceRange } = useLiquidityPriceRangeStore();
+  const { ticks } = useLiquidityPriceRangeStore();
   const { setTypedValue } = useLiquidityAmountsStore();
-  const { setStartPriceTypedValue } = useLiquidityPriceRangeStore();
-
+  const { updateAllowance } = useLiquidityApprove();
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
   const handlePick = useCallback(
     (token: Currency) => {
       if (currentlyPicking === "tokenA") {
-        if (token === tokenB) {
-          setIsOpenedTokenPick(false);
-          return;
-        }
-
-        let res = false;
-        if (token && tokenB) {
-          res = compareTokens(token, tokenB);
-        }
-
-        if (res) {
-          setBothTokens({ tokenA: tokenB, tokenB: token });
+        if (tokenB && token.wrapped.equals(tokenB.wrapped)) {
+          // User picked same as tokenB → swap
+          setBothTokens({ tokenA: tokenB, tokenB: tokenA });
         } else {
+          console.log("Picking token&");
           setTokenA(token);
         }
       }
 
-      if (currentlyPicking === "tokenB") {
-        if (token === tokenA) {
-          setIsOpenedTokenPick(false);
-          return;
-        }
-
-        let res = false;
-        if (token && tokenA) {
-          res = compareTokens(tokenA, token);
-        }
-
-        if (res) {
-          setBothTokens({ tokenA: token, tokenB: tokenA });
+      if (currentlyPicking === "tokenB" && tokenA) {
+        if (token.wrapped.equals(tokenA.wrapped)) {
+          // User picked same as tokenA → swap
+          setBothTokens({ tokenA: tokenB, tokenB: tokenA });
         } else {
           setTokenB(token);
         }
       }
 
-      clearPriceRange();
       setTypedValue({ field: Field.CURRENCY_A, typedValue: "" });
-      setStartPriceTypedValue("");
       setIsOpenedTokenPick(false);
     },
-    [
-      currentlyPicking,
-      clearPriceRange,
-      setTypedValue,
-      setStartPriceTypedValue,
-      tokenB,
-      setTokenA,
-      setTokenB,
-      tokenA,
-      setBothTokens,
-    ],
+    [currentlyPicking, setTypedValue, tokenB, tokenA, setTokenA, setTokenB, setBothTokens],
   );
 
   // PRICE RANGE HOOK START
   const {
     formattedPrice,
-    invertPrice,
     price,
     pricesAtTicks,
     ticksAtLimit,
-    isFullRange,
-    isSorted,
     leftPrice,
     rightPrice,
-    token0,
-    token1,
     tickSpaceLimits,
   } = usePriceRange();
   // PRICE RANGE HOOK END
 
   // Deposit Amounts START
-  const { parsedAmounts, currencies, noLiquidity, outOfRange, depositADisabled, depositBDisabled } =
-    useV3DerivedMintInfo({
-      tokenA,
-      tokenB,
-      tier,
-      price,
-    });
-
-  // Deposit Amounts END
+  const {
+    parsedAmounts,
+    currencies,
+    noLiquidity,
+    outOfRange,
+    depositADisabled,
+    depositBDisabled,
+    position,
+  } = useV3DerivedMintInfo({
+    tokenA,
+    tokenB,
+    tier,
+    price,
+  });
 
   const { status, approve0Status, approve1Status, deposite0Status, deposite1Status } =
     useAddLiquidityStatusStore();
@@ -280,17 +244,12 @@ export default function AddPoolPage() {
             <PriceRange
               noLiquidity={noLiquidity}
               formattedPrice={formattedPrice}
-              invertPrice={invertPrice}
-              isFullRange={isFullRange}
-              isSorted={isSorted}
               leftPrice={leftPrice}
               price={price}
               pricesAtTicks={pricesAtTicks}
               rightPrice={rightPrice}
               tickSpaceLimits={tickSpaceLimits}
               ticksAtLimit={ticksAtLimit}
-              token0={token0}
-              token1={token1}
               outOfRange={outOfRange}
               isFormDisabled={isFormDisabled}
             />
@@ -314,7 +273,12 @@ export default function AddPoolPage() {
         setIsOpen={setIsOpenedTokenPick}
       />
       <RevokeDialog />
-      <ConfirmLiquidityDialog />
+      <ConfirmLiquidityDialog
+        parsedAmounts={parsedAmounts}
+        position={position}
+        noLiquidity={noLiquidity}
+        updateAllowance={updateAllowance}
+      />
     </Container>
   );
 }

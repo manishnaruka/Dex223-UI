@@ -8,7 +8,7 @@ import Link from "next/link";
 import React from "react";
 import SimpleBar from "simplebar-react";
 
-import { HeaderItem } from "@/app/[locale]/borrow-market/components/BorrowMarketTable";
+import { HeaderItem } from "@/app/[locale]/margin-trading/components/BorrowMarketTable";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";

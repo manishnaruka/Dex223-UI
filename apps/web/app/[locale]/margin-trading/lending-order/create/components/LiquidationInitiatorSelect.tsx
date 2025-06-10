@@ -1,6 +1,10 @@
 import React, { useState } from "react";
-import { Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
+import {
+  LiquidationMode,
+  LiquidationType,
+} from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
@@ -8,31 +12,31 @@ import Button from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 
-type LiquidationInitiator = "anyone" | "specified";
-
-const labelsMap: Record<LiquidationInitiator, string> = {
-  anyone: "Anyone",
-  specified: "Specified addresses",
+const labelsMap: Record<LiquidationType, string> = {
+  [LiquidationType.ANYONE]: "Anyone",
+  [LiquidationType.SPECIFIED]: "Specified addresses",
 };
 
-const initiators: LiquidationInitiator[] = ["anyone", "specified"];
-
-export default function LiquidationInitiatorSelect() {
-  const [initiator, setInitiator] = useState<LiquidationInitiator>("anyone");
-  const [eligibleAddresses, setEligibleAddresses] = useState<Address[]>([]);
-
+export default function LiquidationInitiatorSelect({
+  values,
+  setValue,
+}: {
+  values: LiquidationMode;
+  setValue: (values: LiquidationMode) => void;
+}) {
   const [inputValue, setInputValue] = useState("");
 
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-6">
       <InputLabel label="May initiate liquidation" />
       <div className="grid grid-cols-2 gap-2 mb-4 mt-1">
-        {initiators.map((_initiator) => (
+        {[LiquidationType.ANYONE, LiquidationType.SPECIFIED].map((_initiator) => (
           <RadioButton
+            type="button"
             key={_initiator}
-            isActive={_initiator === initiator}
+            isActive={_initiator === values.type}
             onClick={() => {
-              setInitiator(_initiator);
+              setValue({ ...values, type: _initiator });
             }}
           >
             {labelsMap[_initiator]}
@@ -40,7 +44,7 @@ export default function LiquidationInitiatorSelect() {
         ))}
       </div>
 
-      {initiator === "specified" && (
+      {values.type === LiquidationType.SPECIFIED && (
         <div>
           <InputLabel label="Address eligible for liquidation" tooltipText="Tooltip text" />
           <div className="grid grid-cols-[1fr_48px] gap-3">
@@ -50,10 +54,14 @@ export default function LiquidationInitiatorSelect() {
               placeholder="0x..."
             />
             <Button
+              type="button"
               className="!px-0"
               onClick={() => {
                 if (isAddress(inputValue)) {
-                  setEligibleAddresses([...eligibleAddresses, inputValue]);
+                  setValue({
+                    ...values,
+                    whitelistedLiquidators: [...values.whitelistedLiquidators, inputValue],
+                  });
                   setInputValue("");
                 }
               }}
@@ -62,9 +70,9 @@ export default function LiquidationInitiatorSelect() {
             </Button>
           </div>
 
-          {eligibleAddresses.length > 0 && (
+          {values.whitelistedLiquidators.length > 0 && (
             <div className="mt-4 flex flex-col gap-1">
-              {eligibleAddresses.map((_address) => {
+              {values.whitelistedLiquidators.map((_address) => {
                 return (
                   <div
                     key={_address}
@@ -73,11 +81,12 @@ export default function LiquidationInitiatorSelect() {
                     {_address}{" "}
                     <IconButton
                       onClick={() =>
-                        setEligibleAddresses(
-                          eligibleAddresses.filter(
-                            (eligibleAddress) => eligibleAddress !== _address,
+                        setValue({
+                          ...values,
+                          whitelistedLiquidators: values.whitelistedLiquidators.filter(
+                            (a) => a !== _address,
                           ),
-                        )
+                        })
                       }
                       buttonSize={24}
                       iconName="close"

@@ -1,3 +1,4 @@
+import Checkbox from "@repo/ui/checkbox";
 import clsx from "clsx";
 import { Formik } from "formik";
 import Image from "next/image";
@@ -6,11 +7,22 @@ import { number, object } from "yup";
 
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import LendingOrderTokensSourceConfig from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderTokensSourceConfig";
+import PickAllowedTokenListsDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickAllowedTokenListsDialog";
+import PickAllowedTokensDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickAllowedTokensDialog";
+import PickCollateralTokensDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickCollateralTokensDialog";
+import {
+  LendingOrderPeriod,
+  LendingOrderTradingTokens,
+} from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
+import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokenListsDialogOpened";
+import { useAllowedTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokensDialogOpened";
+import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCollateralTokensDialogOpened";
 import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import {
   CreateOrderStep,
   useCreateOrderStepStore,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
+import { values } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import { InputSize } from "@/components/atoms/Input";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
@@ -20,6 +32,7 @@ export default function SecondStep() {
   const { setStep } = useCreateOrderStepStore();
 
   const { secondStepValues, setSecondStepValues } = useCreateOrderConfigStore();
+  const { setIsOpen: setCollateralDialogOpened } = useCollateralTokensDialogOpenedStore();
 
   return (
     <Formik
@@ -83,7 +96,7 @@ export default function SecondStep() {
             />
           </div>
 
-          <div className="mb-5">
+          <div className="mb-5 p-5 bg-tertiary-bg rounded-3">
             <div className="flex justify-between items-center">
               <InputLabel
                 inputSize={InputSize.LARGE}
@@ -91,36 +104,67 @@ export default function SecondStep() {
                 tooltipText="Tooltip text"
                 noMargin
               />
-              <IconButton buttonSize={32} iconSize={20} iconName={"edit"} />
+              <IconButton
+                onClick={() => {
+                  setCollateralDialogOpened(true);
+                }}
+                buttonSize={32}
+                iconSize={20}
+                iconName={"edit"}
+              />
             </div>
-            <div className="bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start flex flex-wrap gap-1">
-              {["ETH", "USDT", "DAI"].map((tokenName) => {
+            <div className="mb-3 bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start content-start flex flex-wrap gap-1">
+              {props.values.collateralTokens.map((currency) => {
                 return (
                   <div
-                    key={tokenName}
+                    key={
+                      currency.isToken ? currency.address0 : `native-${currency.wrapped.address0}`
+                    }
                     className="border pl-1 py-1 pr-3 flex items-center gap-2 rounded-1 border-secondary-border"
                   >
                     <Image
+                      className="flex-shrink-0"
                       width={24}
                       height={24}
-                      src={"/images/tokens/placeholder.svg"}
-                      alt={tokenName}
+                      src={currency.logoURI || "/images/tokens/placeholder.svg"}
+                      alt={""}
                     />
-                    <span>{tokenName}</span>
+                    <span>{currency.name}</span>
                   </div>
                 );
               })}
             </div>
+            <div className="py-2">
+              <Checkbox
+                label="Allow ERC-223 trading"
+                tooltipText="Tooltip text"
+                labelClassName="text-secondary-text"
+                checked={props.values.includeERC223Collateral}
+                handleChange={() =>
+                  props.setFieldValue(
+                    "includeERC223Collateral",
+                    !props.values.includeERC223Collateral,
+                  )
+                }
+                id={"allow-223-collateral"}
+              />
+            </div>
           </div>
-          <LendingOrderTokensSourceConfig />
+          <LendingOrderTokensSourceConfig
+            values={props.values.tradingTokens}
+            setValues={(values: LendingOrderTradingTokens) =>
+              props.setFieldValue("tradingTokens", values)
+            }
+          />
           <TextField
+            isNumeric
             value={props.values.minimumBorrowingAmount}
             onChange={(e) => props.setFieldValue("minimumBorrowingAmount", +e.target.value)}
             label="Minimum borrowing amount"
             placeholder="Minimum borrowing amount"
             internalText="USDT"
             tooltipText="Tooltip text"
-            error={props.errors.minimumBorrowingAmount}
+            error={props.touched.minimumBorrowingAmount && props.errors.minimumBorrowingAmount}
           />
           <pre>{JSON.stringify(props.errors, null, 2)}</pre>
 
@@ -137,6 +181,27 @@ export default function SecondStep() {
               Next step
             </Button>
           </div>
+
+          <PickAllowedTokenListsDialog
+            setAutoListing={(tradingTokensAutoListing) =>
+              props.setFieldValue("tradingTokens", {
+                ...props.values.tradingTokens,
+                tradingTokensAutoListing,
+              })
+            }
+          />
+          <PickCollateralTokensDialog
+            collateralTokens={props.values.collateralTokens}
+            handlePick={(collateralTokens) =>
+              props.setFieldValue("collateralTokens", collateralTokens)
+            }
+          />
+          <PickAllowedTokensDialog
+            allowedTokens={props.values.tradingTokens.allowedTokens}
+            handlePick={(allowedTokens) =>
+              props.setFieldValue("tradingTokens", { ...props.values.tradingTokens, allowedTokens })
+            }
+          />
         </form>
       )}
     </Formik>

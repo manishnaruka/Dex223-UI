@@ -75,7 +75,7 @@ export function computePoolAddress({
 }
 
 const cachedKeys = new Set<string>();
-const computePoolAddressDex = async ({
+export const computePoolAddressDex = async ({
   addressTokenA,
   addressTokenB,
   tier,
@@ -92,6 +92,7 @@ const computePoolAddressDex = async ({
     chainId,
     tier,
   });
+  console.log(key);
 
   if (cachedKeys.has(key) || !DEX_SUPPORTED_CHAINS.includes(chainId)) return undefined;
   cachedKeys.add(key);
@@ -103,8 +104,33 @@ const computePoolAddressDex = async ({
       functionName: "getPool",
       args: [addressTokenA, addressTokenB, tier],
     });
+    console.log("PPASDS", poolContract);
     cachedKeys.delete(key);
     return poolContract;
+  } catch (e) {
+    console.log(e);
+    return undefined;
+  }
+};
+
+export const computePoolAddressDexNoCache = async ({
+  addressTokenA,
+  addressTokenB,
+  tier,
+  chainId,
+}: {
+  addressTokenA: Address;
+  addressTokenB: Address;
+  tier: FeeAmount;
+  chainId: DexChainId;
+}) => {
+  try {
+    return await readContract(config, {
+      abi: FACTORY_ABI,
+      address: FACTORY_ADDRESS[chainId],
+      functionName: "getPool",
+      args: [addressTokenA, addressTokenB, tier],
+    });
   } catch (e) {
     console.log(e);
     return undefined;

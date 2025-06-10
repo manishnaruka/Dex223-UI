@@ -110,6 +110,8 @@ export function useAddLiquidityParams({
         toHex(position.pool.sqrtRatioX96) as any,
       ] as [Address, Address, Address, Address, FeeAmount, bigint];
 
+      console.log(createParams);
+
       const mintParams = {
         token0: position.pool.token0.wrapped.address0,
         token1: position.pool.token1.wrapped.address0,
@@ -129,8 +131,6 @@ export function useAddLiquidityParams({
         functionName: "createAndInitializePoolIfNecessary",
         args: createParams,
       });
-
-      console.log(createParams);
 
       const encodedMintParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
@@ -355,7 +355,10 @@ export const useAddLiquidity = ({
           ...gasSettings,
           gas: gasToUse,
         });
-        const hash = await walletClient.writeContract({ ...request, account: undefined });
+        const hash = await walletClient.writeContract({
+          ...request,
+          account: undefined,
+        });
 
         setLiquidityHash(hash);
 

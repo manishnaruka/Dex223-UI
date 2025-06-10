@@ -5,53 +5,57 @@ import { useTranslations } from "next-intl";
 export const PriceRangeHeader = ({
   isFullRange,
   handleSetFullRange,
-  isSorted,
-  button0Text,
-  button1Text,
-  button0Handler,
-  button1Handler,
+  baseSymbol,
+  quoteSymbol,
+  invertPrice,
+  onFlip,
 }: {
-  isSorted: boolean;
   isFullRange: boolean;
   handleSetFullRange: () => void;
-  button0Text?: string;
-  button1Text?: string;
-  button0Handler: () => void;
-  button1Handler: () => void;
+  baseSymbol?: string;
+  quoteSymbol?: string;
+  invertPrice: boolean;
+  onFlip: () => void;
 }) => {
   const t = useTranslations("Liquidity");
   return (
     <div className="flex flex-col gap-1 md:gap-0 md:flex-row md:justify-between md:items-center">
       <h3 className="text-16 font-bold text-secondary-text">{t("set_price_range")}</h3>
-      {button0Text && button1Text ? (
+      {baseSymbol && quoteSymbol ? (
         <div className="flex gap-3 justify-between md:items-center">
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-12">{t("full_range")}</span>
-            <Switch checked={isFullRange} handleChange={handleSetFullRange} />
+            <Switch
+              checked={isFullRange}
+              handleChange={() => {
+                console.log("Full range");
+                handleSetFullRange();
+              }}
+            />
           </div>
 
           <div className="flex p-0.5 gap-0.5 rounded-2 bg-secondary-bg">
             <button
-              onClick={button0Handler}
+              onClick={onFlip}
               className={clsx(
                 "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
-                isSorted
+                !invertPrice
                   ? "bg-green-bg border-green text-primary-text"
                   : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
               )}
             >
-              {button0Text}
+              {invertPrice ? baseSymbol : quoteSymbol}
             </button>
             <button
-              onClick={button1Handler}
+              onClick={onFlip}
               className={clsx(
                 "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
-                !isSorted
+                invertPrice
                   ? "bg-green-bg border-green text-primary-text"
                   : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
               )}
             >
-              {button1Text}
+              {invertPrice ? quoteSymbol : baseSymbol}
             </button>
           </div>
         </div>

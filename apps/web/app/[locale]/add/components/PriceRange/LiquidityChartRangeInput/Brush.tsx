@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { BrushBehavior, brushX, D3BrushEvent, ScaleLinear, select } from "d3";
+import throttle from "lodash.throttle";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { usePrevious } from "./hooks";
@@ -141,11 +142,14 @@ export const Brush = ({
   // keep local and external brush extent in sync
   // i.e. snap to ticks on bruhs end
   useEffect(() => {
+    console.log("Local brush changed");
     setLocalBrushExtent(brushExtent);
   }, [brushExtent]);
 
   // initialize the brush
   useEffect(() => {
+    console.log("Initializer fired");
+
     if (!brushRef.current) return;
 
     brushBehavior.current = brushX<SVGGElement>()
@@ -155,7 +159,8 @@ export const Brush = ({
       ])
       .handleSize(30)
       .filter(() => interactive)
-      .on("brush end", brushed);
+      .on("brush", throttle(brushed, 16))
+      .on("end", brushed);
 
     brushBehavior.current(select(brushRef.current));
 

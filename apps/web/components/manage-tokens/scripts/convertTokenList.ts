@@ -8,10 +8,8 @@ import { bytecodes } from "./converter";
 import schemaJson from "./tokenlist.schema.json";
 
 const ajv = new Ajv({ allErrors: true, verbose: true });
-type AddressMap = { [key: `0x${string}`]: string | undefined };
-import erc223Map from "@/db/lists/predicts_valid.json" assert { type: "json" };
-import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
-const erc223MapData = erc223Map as AddressMap;
+import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
 const { bytecode20, bytecode223 } = bytecodes;
 
 type uniToken = {
@@ -90,44 +88,22 @@ export function predictWrapperAddress(
   isERC20: boolean = true,
   converterAddress: Address,
 ): string {
-  const wrapperAddress = erc223MapData[tokenAddress.toLowerCase() as Address];
+  const _bytecode = isERC20 ? bytecode223 : bytecode20;
+  const hash = keccak256(
+    encodePacked(
+      ["bytes1", "address", "bytes32", "bytes32"],
+      [
+        "0xff",
+        converterAddress,
+        keccak256(
+          encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
+        ),
+        keccak256(_bytecode as `0x${string}`),
+      ],
+    ),
+  );
 
-  if (!wrapperAddress) {
-    console.log("NO ADDRESS FOUND for ", tokenAddress);
-    return ZERO_ADDRESS;
-  }
-
-  console.log(wrapperAddress);
-
-  return wrapperAddress;
-
-  // const _bytecode = isERC20 ? bytecode223 : bytecode20;
-  // const hash = keccak256(
-  //   encodePacked(
-  //     ["bytes1", "address", "bytes32", "bytes32"],
-  //     [
-  //       "0xff",
-  //       converterAddress,
-  //       keccak256(
-  //         encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
-  //       ),
-  //       keccak256(_bytecode as `0x${string}`),
-  //     ],
-  //   ),
-  // );
-  //
-  // return getAddress(`0x${hash.slice(-40)}`);
-
-  // const create2Inputs = [
-  //   "0xff",
-  //   converterAddress,
-  //   keccak256(
-  //     encodeAbiParameters([{ name: "x", type: "address" }], [tokenAddress as `0x${string}`]),
-  //   ),
-  //   keccak256(_bytecode as `0x${string}`),
-  // ];
-  // const sanitizedInputs = `0x${create2Inputs.map((i) => i.slice(2)).join("")}`;
-  // return getAddress(`0x${keccak256(sanitizedInputs as `0x${string}`).slice(-40)}`);
+  return getAddress(`0x${hash.slice(-40)}`);
 }
 
 function formatItem(token: uniToken, address223: string): Token {
@@ -161,10 +137,10 @@ async function getList(url: string): Promise<UniData> {
  * @param url URL of token list
  * @returns Promise with formatted Dex223 token list.
  */
-export async function convertList(url: string, converterAddress: Address): Promise<any> {
+export async function convertList(url: string, chainId: DexChainId): Promise<any> {
   const data = await getList(url);
 
-  const list = data.tokens;
+  const list = data.tokens.filter((t) => t.chainId === chainId);
   console.log("list", list);
 
   if (list.length === 0) {
@@ -181,9 +157,11 @@ export async function convertList(url: string, converterAddress: Address): Promi
 
   // console.time('parseList');
   for (let token of list) {
-    const erc223address = predictWrapperAddress(token.address, true, converterAddress);
-    const newItem = formatItem(token, erc223address);
-    convertedList.tokens.push(newItem);
+    const erc223address = predictWrapperAddress(token.address, true, CONVERTER_ADDRESS[chainId]);
+    if (erc223address) {
+      const newItem = formatItem(token, erc223address);
+      convertedList.tokens.push(newItem);
+    }
   }
   // console.timeEnd('parseList');
 

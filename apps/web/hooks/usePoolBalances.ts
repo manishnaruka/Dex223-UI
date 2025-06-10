@@ -28,15 +28,15 @@ export const usePoolBalances = ({
     tier: fee,
   });
 
-  const { data: erc20BalanceToken0 } = useBalance({
-    address: poolAddress,
-    token: tokenA ? tokenA.wrapped.address0 : undefined,
-  });
-
-  const { data: erc223BalanceToken0 } = useBalance({
-    address: poolAddress,
-    token: tokenA ? tokenA.wrapped.address1 : undefined,
-  });
+  // const { data: erc20BalanceToken0 } = useBalance({
+  //   address: poolAddress,
+  //   token: tokenA ? tokenA.wrapped.address0 : undefined,
+  // });
+  //
+  // const { data: erc223BalanceToken0 } = useBalance({
+  //   address: poolAddress,
+  //   token: tokenA ? tokenA.wrapped.address1 : undefined,
+  // });
 
   const { data: erc20BalanceToken1 } = useBalance({
     address: poolAddress,
@@ -48,5 +48,5 @@ export const usePoolBalances = ({
     token: tokenB ? tokenB.wrapped.address1 : undefined,
   });
 
-  return { erc20BalanceToken0, erc223BalanceToken0, erc20BalanceToken1, erc223BalanceToken1 };
+  return { erc20BalanceToken1, erc223BalanceToken1 };
 };

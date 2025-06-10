@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
+import { useDerivedTokens } from "@/app/[locale]/add/hooks/useDerivedTokens";
+import { usePriceDirectionStore } from "@/app/[locale]/add/stores/usePriceDirectionStore";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -23,6 +25,11 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { usePositionPrices, usePositionRangeStatus } from "@/hooks/usePositions";
 import { Link } from "@/i18n/routing";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { Position } from "@/sdk_bi/entities/position";
+import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
@@ -295,9 +302,27 @@ const ApproveDialog = () => {
   );
 };
 
-const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId?: string }) => {
+const MintDialog = ({
+  increase = false,
+  tokenId,
+  position,
+  noLiquidity,
+  parsedAmounts,
+  updateAllowance,
+}: {
+  increase?: boolean;
+  tokenId?: string;
+  position: Position | undefined;
+  noLiquidity: boolean;
+  parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
+  updateAllowance: () => Promise<void>;
+}) => {
   const tSwap = useTranslations("Swap");
   const t = useTranslations("Liquidity");
+  const { baseToken, quoteToken, invertPrice, toggleInvertPrice } = useDerivedTokens();
+
+  const [showFirst, setShowFirst] = useState(invertPrice);
+
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const chainId = useCurrentChainId();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
@@ -305,20 +330,11 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
     tokenA,
     tokenB,
   });
-  const { tier } = useLiquidityTierStore();
-  const { price } = usePriceRange();
-  const { tokenAStandard, tokenBStandard } = useTokensStandards();
-  const [showFirst, setShowFirst] = useState(true);
-  const { liquidityHash, status } = useAddLiquidityStatusStore();
-  const { updateAllowance } = useLiquidityApprove();
-  const { gasPriceOption } = useAddLiquidityGasPriceStore();
 
-  const { parsedAmounts, position, noLiquidity } = useV3DerivedMintInfo({
-    tokenA,
-    tokenB,
-    tier,
-    price,
-  });
+  const { tier } = useLiquidityTierStore();
+  const { tokenAStandard, tokenBStandard } = useTokensStandards();
+  const { liquidityHash, status } = useAddLiquidityStatusStore();
+  const { gasPriceOption } = useAddLiquidityGasPriceStore();
 
   // Gas price
   const gasPrice = useAddLiquidityGasPrice();
@@ -329,7 +345,6 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
       ? "Create Pool & Mint liquidity"
       : "Mint liquidity";
   const { inRange } = usePositionRangeStatus({ position });
-
   const { minPriceString, maxPriceString, currentPriceString } = usePositionPrices({
     position,
     showFirst,
@@ -489,18 +504,7 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
               <span className="font-bold text-secondary-text">Selected range</span>
               <div className="flex gap-0.5 bg-secondary-bg rounded-2 p-0.5">
                 <button
-                  onClick={() => setShowFirst(true)}
-                  className={clsx(
-                    "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
-                    showFirst
-                      ? "bg-green-bg border-green text-primary-text"
-                      : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
-                  )}
-                >
-                  {tokenA?.symbol}
-                </button>
-                <button
-                  onClick={() => setShowFirst(false)}
+                  onClick={() => setShowFirst(!showFirst)}
                   className={clsx(
                     "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
                     !showFirst
@@ -508,7 +512,18 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
                       : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
                   )}
                 >
-                  {tokenB?.symbol}
+                  {showFirst ? baseToken?.symbol : quoteToken?.symbol}
+                </button>
+                <button
+                  onClick={() => setShowFirst(!showFirst)}
+                  className={clsx(
+                    "text-12 h-7 rounded-2 min-w-[60px] px-3 border duration-200",
+                    invertPrice
+                      ? "bg-green-bg border-green text-primary-text"
+                      : "hocus:bg-green-bg bg-primary-bg border-transparent text-secondary-text",
+                  )}
+                >
+                  {showFirst ? quoteToken?.symbol : baseToken?.symbol}
                 </button>
               </div>
             </div>
@@ -597,7 +612,8 @@ const MintDialog = ({ increase = false, tokenId }: { increase?: boolean; tokenId
         ) : (
           <Button
             onClick={() => {
-              handleAddLiquidity({ updateAllowance }).then();
+              handleAddLiquidity({ updateAllowance });
+              // console.log("Clicked");
             }}
             fullWidth
           >
@@ -752,9 +768,17 @@ const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
 export default function ConfirmLiquidityDialog({
   increase = false,
   tokenId,
+  position,
+  noLiquidity,
+  parsedAmounts,
+  updateAllowance,
 }: {
   increase?: boolean;
   tokenId?: string;
+  position: Position | undefined;
+  noLiquidity: boolean;
+  parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
+  updateAllowance: () => Promise<void>;
 }) {
   const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
 
@@ -779,7 +803,14 @@ export default function ConfirmLiquidityDialog({
           AddLiquidityStatus.MINT_PENDING,
           AddLiquidityStatus.MINT_LOADING,
         ].includes(status) ? (
-          <MintDialog increase={increase} tokenId={tokenId} />
+          <MintDialog
+            increase={increase}
+            tokenId={tokenId}
+            noLiquidity={noLiquidity}
+            position={position}
+            parsedAmounts={parsedAmounts}
+            updateAllowance={updateAllowance}
+          />
         ) : null}
         {[AddLiquidityStatus.SUCCESS].includes(status) ? <SuccessfulDialog /> : null}
         {[AddLiquidityStatus.MINT_ERROR].includes(status) ? <SuccessfulDialog isError /> : null}

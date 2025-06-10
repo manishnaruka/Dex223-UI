@@ -49,6 +49,7 @@ function IconButtonFrame({
 }: FrameProps) {
   return (
     <button
+      type="button"
       className={clsxMerge(
         buttonSize === IconButtonSize.EXTRA_SMALL && "w-6 h-6",
         buttonSize === IconButtonSize.SMALL && "w-8 h-8",

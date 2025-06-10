@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { InputLabel } from "@/components/atoms/TextField";
+import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import TokenInput from "@/components/common/TokenInput";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { formatFloat } from "@/functions/formatFloat";
@@ -16,22 +16,27 @@ export default function LendingOrderTokenSelect({
   setAmount,
   standard,
   setStandard,
+  errors,
 }: {
   token: Currency | undefined;
-  setToken: (token: Currency) => void;
+  setToken: (token: Currency) => Promise<void>;
   amount: string;
   setAmount: (amount: string) => void;
   standard: Standard;
-  setStandard: (standard: Standard) => void;
+  setStandard: (standard: Standard) => Promise<void>;
+  errors: string[];
 }) {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
-  const handlePick = useCallback((token: Currency) => {
-    setToken(token);
-    setStandard(Standard.ERC20);
+  const handlePick = useCallback(
+    async (token: Currency) => {
+      await setToken(token);
+      await setStandard(Standard.ERC20);
 
-    setIsOpenedTokenPick(false);
-  }, []);
+      setIsOpenedTokenPick(false);
+    },
+    [setStandard, setToken],
+  );
 
   const {
     balance: { erc20Balance: token0Balance, erc223Balance: token1Balance },
@@ -48,6 +53,7 @@ export default function LendingOrderTokenSelect({
     <div className="">
       <InputLabel label="Loan amount" tooltipText="Tooltip text" />
       <TokenInput
+        isError={!!errors.length}
         handleClick={() => {
           setIsOpenedTokenPick(true);
         }}
@@ -72,7 +78,9 @@ export default function LendingOrderTokenSelect({
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
       />
-      <div className="h-[18px] mb-4" />
+      <div className="mb-4">
+        <HelperText error={errors[0]} />
+      </div>
     </div>
   );
 }

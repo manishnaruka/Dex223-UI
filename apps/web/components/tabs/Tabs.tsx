@@ -9,7 +9,7 @@ interface Props {
   activeTab?: number;
   setActiveTab?: any;
   fullWidth?: boolean;
-  colorScheme: "primary" | "secondary";
+  colorScheme?: "primary" | "secondary";
 }
 
 function Tabs({

@@ -236,6 +236,7 @@ export default function TokenInput({
   gasERC20,
   gasERC223,
   isEqualTokens,
+  isError,
 }: {
   handleClick: () => void;
   token: Currency | undefined;
@@ -256,6 +257,7 @@ export default function TokenInput({
   gasERC20?: string;
   gasERC223?: string;
   isEqualTokens?: boolean;
+  isError?: boolean;
 }) {
   const t = useTranslations("Swap");
 
@@ -296,7 +298,13 @@ export default function TokenInput({
           <span className="text-12 block -mt-1 text-tertiary-text">
             ${price ? formatFloat(price * +value) : "0"}
           </span>
-          <div className="duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0" />
+          <div
+            className={clsxMerge(
+              "duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0",
+              isError &&
+                "shadow-red-light/60 border-red-light shadow peer-hocus:shadow-red-light/60 peer-focus:shadow peer-focus:shadow-red-light/60 peer-focus:border-red-light",
+            )}
+          />
         </div>
         <SelectButton
           type="button"

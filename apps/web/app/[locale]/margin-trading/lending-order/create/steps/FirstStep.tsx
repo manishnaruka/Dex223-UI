@@ -1,5 +1,5 @@
 import { Formik } from "formik";
-import React from "react";
+import React, { useMemo } from "react";
 import * as Yup from "yup";
 
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
@@ -17,7 +17,9 @@ import {
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonSize } from "@/components/buttons/Button";
+import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 
 const fixedPeriodSchema = Yup.object({
@@ -30,7 +32,7 @@ const perpetualPeriodSchema = Yup.object({
   type: Yup.mixed<LendingOrderPeriodType>().oneOf([LendingOrderPeriodType.PERPETUAL]).required(),
   borrowingPeriod: Yup.object({
     type: Yup.mixed<PerpetualPeriodType>()
-      .oneOf([PerpetualPeriodType.DAYS, PerpetualPeriodType.SECONDS])
+      .oneOf([PerpetualPeriodType.DAYS, PerpetualPeriodType.MINUTES])
       .required(),
 
     borrowingPeriodInDays: Yup.number().when("type", {
@@ -39,9 +41,9 @@ const perpetualPeriodSchema = Yup.object({
       otherwise: (s) => s.notRequired().nullable(), // <-- remove when not in use
     }),
 
-    borrowingPeriodInSeconds: Yup.number().when("type", {
-      is: PerpetualPeriodType.SECONDS,
-      then: (s) => s.typeError("Must be a number").required("Seconds required"),
+    borrowingPeriodInMinutes: Yup.number().when("type", {
+      is: PerpetualPeriodType.MINUTES,
+      then: (s) => s.typeError("Must be a number").required("Minutes required"),
       otherwise: (s) => s.notRequired().nullable(),
     }),
   }).required("Borrowing period required"),
@@ -57,7 +59,7 @@ const periodSchema = Yup.lazy((value: any) => {
 });
 
 const schema = Yup.object({
-  loanToken: Yup.object().required("Token is required"),
+  loanToken: Yup.object().default(undefined).required("Please select a token"),
 
   loanAmount: Yup.number()
     .typeError("Loan amount must be a number")
@@ -76,6 +78,30 @@ const schema = Yup.object({
   period: periodSchema, // your conditional schema from previous step
 });
 
+function getTokenOrAmountError({
+  touchedAmount,
+  touchedToken,
+  amountError,
+  tokenError,
+}: {
+  touchedAmount?: boolean;
+  touchedToken?: boolean;
+  amountError?: string;
+  tokenError?: string;
+}) {
+  const errors = [];
+
+  if (touchedToken && tokenError) {
+    errors.push(tokenError);
+  }
+
+  if (touchedAmount && amountError) {
+    errors.push(amountError);
+  }
+
+  return errors;
+}
+
 export default function FirstStep() {
   const { setStep } = useCreateOrderStepStore();
 
@@ -92,31 +118,50 @@ export default function FirstStep() {
       }}
       validationSchema={schema}
       onSubmit={async (values) => {
-        console.log(values);
         setFirstStepValues(values);
         setStep(CreateOrderStep.SECOND);
       }}
     >
       {(props) => (
-        <form onSubmit={props.handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            props.handleSubmit();
+          }}
+        >
           <LendingOrderTokenSelect
             token={props.values.loanToken}
-            setToken={(token: Currency) => props.setFieldValue("loanToken", token)}
+            setToken={async (token: Currency) => {
+              await props.setFieldValue("loanToken", token);
+            }}
             amount={props.values.loanAmount}
             setAmount={(loanAmount: string) => props.setFieldValue("loanAmount", loanAmount)}
             standard={props.values.loanTokenStandard}
-            setStandard={(standard: Standard) => props.setFieldValue("loanTokenStandard", standard)}
+            setStandard={async (standard: Standard) => {
+              await props.setFieldValue("loanTokenStandard", standard);
+            }}
+            errors={getTokenOrAmountError({
+              touchedAmount: props.touched.loanAmount,
+              touchedToken: props.touched.loanToken,
+              tokenError: props.errors.loanToken,
+              amountError: props.errors.loanAmount,
+            })}
           />
           <LendingOrderPeriodConfig
             setValues={(values: LendingOrderPeriod) => props.setFieldValue("period", values)}
             values={props.values.period}
+            errors={props.touched.period ? props.errors.period : undefined}
           />
           <TextField
             isNumeric
             label="Interest rate per month"
             placeholder="Interest rate per month"
             internalText="%"
-            error={props.errors.interestRatePerMonth}
+            error={
+              props.touched.interestRatePerMonth && props.errors.interestRatePerMonth
+                ? props.errors.interestRatePerMonth
+                : undefined
+            }
             value={props.values.interestRatePerMonth}
             onChange={(e) => props.setFieldValue("interestRatePerMonth", e.target.value)}
           />
@@ -125,9 +170,16 @@ export default function FirstStep() {
             <LendingOrderDetailsRow title={"Interest rate for the entire period"} value={"—"} />
             <LendingOrderDetailsRow title={"You will receive for the entire period"} value={"—"} />
           </div>
-          <pre>{JSON.stringify(props.errors, null, 2)}</pre>
+          {/*<pre>{JSON.stringify(props.touched, null, 2)}</pre>*/}
+          {/*<pre>{JSON.stringify(props.errors, null, 2)}</pre>*/}
+          {/*<pre>{JSON.stringify(props.values, null, 2)}</pre>*/}
 
-          <Button type="submit" size={ButtonSize.EXTRA_LARGE} fullWidth>
+          <Button
+            disabled={Object.keys(props.touched).length > 0 && Object.keys(props.errors).length > 0}
+            type="submit"
+            size={ButtonSize.EXTRA_LARGE}
+            fullWidth
+          >
             Next step
           </Button>
         </form>

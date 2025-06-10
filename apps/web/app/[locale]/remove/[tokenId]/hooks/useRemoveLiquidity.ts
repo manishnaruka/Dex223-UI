@@ -70,6 +70,7 @@ const useRemoveLiquidityParams = () => {
       amount1Min: amount1Min as any,
       deadline,
     };
+
     const removeLiquidityParams = {
       account: accountAddress as Address,
       abi: NONFUNGIBLE_POSITION_MANAGER_ABI,
@@ -205,20 +206,21 @@ export default function useRemoveLiquidity() {
       setStatus(RemoveLiquidityStatus.ERROR);
     }
   }, [
-    accountAddress,
-    addRecentTransaction,
-    chainId,
+    setHash,
     publicClient,
     walletClient,
-    setHash,
-    setStatus,
+    accountAddress,
     tokenA,
     tokenB,
-    minimumAmounts,
+    chainId,
     removeLiquidityParams,
+    setStatus,
     customGasLimit,
-    gasModel,
     gasSettings,
+    addRecentTransaction,
+    gasModel,
+    minimumAmounts,
+    setRefreshDepositsTrigger,
   ]);
 
   return { handleRemoveLiquidity };

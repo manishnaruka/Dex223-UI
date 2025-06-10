@@ -2,12 +2,14 @@ import { InputHTMLAttributes } from "react";
 
 import { clsxMerge } from "../functions/clsxMerge";
 import CheckIcon from "../icons/CheckIcon";
+import Tooltip from "./Tooltip";
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   checked: boolean;
   handleChange: (event?: any) => void; // InputHTMLAttributes<HTMLInputElement>["onChange"]
   id: string;
   label?: string;
+  tooltipText?: string;
   labelClassName?: string;
 }
 
@@ -18,6 +20,7 @@ export default function Checkbox({
   label,
   labelClassName,
   className,
+                                   tooltipText
 }: Props) {
   return (
     <div className="flex">
@@ -32,13 +35,17 @@ export default function Checkbox({
         checked={checked}
       />
       {label ? (
-        <label className={clsxMerge("ui-pl-2 ui-cursor-pointer", labelClassName)} htmlFor={id}>
-          {label}
-        </label>
+        <div className="ui-flex ui-items-center ui-gap-1">
+          <label
+            className={clsxMerge("ui-pl-2 ui-cursor-pointer", labelClassName)}
+            htmlFor={id}
+          >
+            {label}
+          </label>
+          {tooltipText && <Tooltip text={tooltipText} />}
+        </div>
       ) : null}
-      <CheckIcon
-        className="ui-duration-200 ui-absolute ui-opacity-0 peer-checked:ui-opacity-100 ui-text-secondary-bg ui-pointer-events-none"
-      />
+      <CheckIcon className="ui-duration-200 ui-absolute ui-opacity-0 peer-checked:ui-opacity-100 ui-text-secondary-bg ui-pointer-events-none" />
     </div>
   );
 }
