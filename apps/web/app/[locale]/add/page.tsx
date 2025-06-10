@@ -56,7 +56,6 @@ export default function AddPoolPage() {
   const { tier } = useLiquidityTierStore();
   const { ticks } = useLiquidityPriceRangeStore();
   const { setTypedValue } = useLiquidityAmountsStore();
-  const { updateAllowance } = useLiquidityApprove();
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
   const handlePick = useCallback(
@@ -113,6 +112,8 @@ export default function AddPoolPage() {
     tier,
     price,
   });
+
+  const { updateAllowance } = useLiquidityApprove(parsedAmounts);
 
   const { status, approve0Status, approve1Status, deposite0Status, deposite1Status } =
     useAddLiquidityStatusStore();

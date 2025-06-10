@@ -3,12 +3,17 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
-import { useLiquidityAmountsStore } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
+import {
+  Field,
+  useLiquidityAmountsStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { formatFloat } from "@/functions/formatFloat";
 import { getChainSymbol } from "@/functions/getChainSymbol";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 
 import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
@@ -19,7 +24,13 @@ import {
   useAddLiquidityGasPriceStore,
 } from "../../stores/useAddLiquidityGasSettings";
 
-export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: boolean }) => {
+export const AddLiquidityGasSettings = ({
+  isFormDisabled,
+  parsedAmounts,
+}: {
+  isFormDisabled: boolean;
+  parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
+}) => {
   //
   const chainId = useCurrentChainId();
   const [isOpenedFee, setIsOpenedFee] = useState(false);
@@ -47,7 +58,7 @@ export const AddLiquidityGasSettings = ({ isFormDisabled }: { isFormDisabled: bo
   const tGas = useTranslations("GasSettings");
   const { typedValue } = useLiquidityAmountsStore();
 
-  const { approveTotalGasLimit, approveTransactionsCount } = useLiquidityApprove();
+  const { approveTotalGasLimit, approveTransactionsCount } = useLiquidityApprove(parsedAmounts);
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
 
   const totalGasLimit = useMemo(() => {

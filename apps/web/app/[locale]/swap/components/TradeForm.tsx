@@ -668,7 +668,7 @@ export default function TradeForm() {
         </div>
       )}
 
-      {!isLoadingTrade && !poolExists && tokenA && tokenB && (
+      {!isLoadingTrade && !poolExists && tokenA && tokenB && !tokenA.equals(tokenB) && (
         <div className="mt-5">
           <Alert
             text={

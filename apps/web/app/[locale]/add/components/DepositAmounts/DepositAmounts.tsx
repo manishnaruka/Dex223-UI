@@ -61,7 +61,7 @@ export const DepositAmounts = ({
         setTokenStandardRatio={setTokenAStandardRatio}
         // gasPrice={gasPrice}
       />
-      <AddLiquidityGasSettings isFormDisabled={isFormDisabled} />
+      <AddLiquidityGasSettings isFormDisabled={isFormDisabled} parsedAmounts={parsedAmounts} />
       <TokenDepositCard
         value={parsedAmounts[Field.CURRENCY_B]}
         formattedValue={formattedAmounts[Field.CURRENCY_B]}
@@ -71,6 +71,7 @@ export const DepositAmounts = ({
         isOutOfRange={depositBDisabled}
         tokenStandardRatio={tokenBStandardRatio}
         setTokenStandardRatio={setTokenBStandardRatio}
+
         // gasPrice={gasPrice}
       />
     </div>
