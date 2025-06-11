@@ -1,3 +1,4 @@
+import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import clsx from "clsx";
 import { Formik } from "formik";
@@ -31,14 +32,14 @@ import IconButton from "@/components/buttons/IconButton";
 export default function SecondStep() {
   const { setStep } = useCreateOrderStepStore();
 
-  const { secondStepValues, setSecondStepValues } = useCreateOrderConfigStore();
+  const { firstStepValues, secondStepValues, setSecondStepValues } = useCreateOrderConfigStore();
   const { setIsOpen: setCollateralDialogOpened } = useCollateralTokensDialogOpenedStore();
 
   return (
     <Formik
       initialValues={secondStepValues}
       validationSchema={object({
-        leverage: number().required().min(1),
+        leverage: number().required().min(1).max(100),
         minimumBorrowingAmount: number().required().min(1),
       })}
       onSubmit={async (values, { validateForm }) => {
@@ -51,11 +52,16 @@ export default function SecondStep() {
       {(props) => (
         <form onSubmit={props.handleSubmit}>
           <TextField
+            isNumeric
+            max={100}
+            min={1}
+            decimalScale={4}
             label="Leverage"
             placeholder="Leverage"
             internalText="x"
             tooltipText={"Tooltip text"}
             value={props.values.leverage}
+            error={props.errors.leverage}
             onChange={(e) => props.setFieldValue("leverage", +e.target.value)}
           />
           <div className="mb-4">
@@ -165,10 +171,32 @@ export default function SecondStep() {
             internalText="USDT"
             tooltipText="Tooltip text"
             error={props.touched.minimumBorrowingAmount && props.errors.minimumBorrowingAmount}
+            isWarning={Boolean(
+              props.values.minimumBorrowingAmount &&
+                +props.values.minimumBorrowingAmount < +firstStepValues.loanAmount * 0.2,
+            )}
+            isError={Boolean(
+              props.values.minimumBorrowingAmount &&
+                props.values.minimumBorrowingAmount > firstStepValues.loanAmount,
+            )}
           />
-          <pre>{JSON.stringify(props.errors, null, 2)}</pre>
 
-          <div className="grid grid-cols-2 gap-2">
+          {props.values.minimumBorrowingAmount &&
+            +props.values.minimumBorrowingAmount < +firstStepValues.loanAmount * 0.2 && (
+              <Alert
+                text="Setting low values for minimum borrowing amount may result in smaller positions taking loans from your order. Make sure that liquidation collaterals are sufficient to cover the gas fees."
+                type="warning"
+              />
+            )}
+          {props.values.minimumBorrowingAmount &&
+            props.values.minimumBorrowingAmount > firstStepValues.loanAmount && (
+              <Alert
+                text="Minimum borrowing amount exceeds specified order balance. Borrowers will not be able to take loans from this order."
+                type="error"
+              />
+            )}
+
+          <div className="grid grid-cols-2 gap-2 mt-4">
             <Button
               colorScheme={ButtonColor.LIGHT_GREEN}
               onClick={() => setStep(CreateOrderStep.FIRST)}
@@ -177,7 +205,16 @@ export default function SecondStep() {
             >
               Previous step
             </Button>
-            <Button size={ButtonSize.EXTRA_LARGE} fullWidth type="submit">
+            <Button
+              disabled={
+                (props.values.minimumBorrowingAmount &&
+                  props.values.minimumBorrowingAmount > firstStepValues.loanAmount) ||
+                (Object.keys(props.touched).length > 0 && Object.keys(props.errors).length > 0)
+              }
+              size={ButtonSize.EXTRA_LARGE}
+              fullWidth
+              type="submit"
+            >
               Next step
             </Button>
           </div>

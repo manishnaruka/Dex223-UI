@@ -92,6 +92,7 @@ export default function LendingOrderPeriodConfig({
               <div className="mt-4">
                 <TextField
                   isNumeric
+                  decimalScale={0}
                   label="Borrowing period"
                   tooltipText="tooltip text"
                   placeholder="0"
@@ -114,6 +115,7 @@ export default function LendingOrderPeriodConfig({
               <div className="mt-4">
                 <TextField
                   isNumeric
+                  decimalScale={0}
                   label="Borrowing period"
                   tooltipText="tooltip text"
                   placeholder="0"

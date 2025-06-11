@@ -39,6 +39,7 @@ export default function DateTimePicker({
       <InputLabel inputSize={inputSize} label={label} tooltipText={tooltipText} />
       <div className="relative">
         <Input
+          // min={minValue}
           className="h-12 text-16 rounded-2 md:rounded-3 appearence-none duration-200 focus:outline-0 pl-4 md:pl-5 placeholder:text-tertiary-text w-full bg-secondary-bg border text-primary-text"
           type="datetime-local"
           isError={Boolean(error) || isError}

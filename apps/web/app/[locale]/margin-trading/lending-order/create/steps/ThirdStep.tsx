@@ -20,6 +20,8 @@ import {
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
+import { NativeCurrency } from "@/sdk_bi/entities/nativeCurrency";
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 export const thirdStepSchema = Yup.object().shape({
@@ -40,7 +42,8 @@ export const thirdStepSchema = Yup.object().shape({
   orderCurrencyLimit: Yup.number()
     .typeError("Order currency limit must be a number")
     .required("Order currency limit is required")
-    .min(2, "Minimum value is 2"),
+    .min(2, "Minimum value is 2")
+    .max(10, "Maximum value is 10"),
 
   liquidationFeeToken: Yup.object().required("Liquidation fee token is required"),
 
@@ -58,11 +61,11 @@ export default function ThirdStep() {
   const { setStep } = useCreateOrderStepStore();
   const { firstStepValues, secondStepValues, thirdStepValues, setThirdStepValues } =
     useCreateOrderConfigStore();
-
+  const nativeCurrency = useNativeCurrency();
   console.log(firstStepValues, secondStepValues);
   return (
     <Formik
-      initialValues={thirdStepValues}
+      initialValues={{ ...thirdStepValues, liquidationFeeToken: nativeCurrency }}
       validationSchema={thirdStepSchema}
       onSubmit={async (values, { validateForm }) => {
         // const errors = await validateForm(values);
@@ -86,10 +89,10 @@ export default function ThirdStep() {
             value={values.orderCurrencyLimit}
             onChange={(e) => setFieldValue("orderCurrencyLimit", e.target.value)}
             error={touched.orderCurrencyLimit && errors.orderCurrencyLimit}
-            isWarning={+values.orderCurrencyLimit > 4}
+            isWarning={+values.orderCurrencyLimit > 4 && +values.orderCurrencyLimit < 10}
           />
 
-          {+values.orderCurrencyLimit > 4 && (
+          {+values.orderCurrencyLimit > 4 && +values.orderCurrencyLimit < 10 && (
             <Alert
               type="warning"
               text="If more than 4 currencies are specified, the liquidation fee (Borrower) will be higher"
@@ -136,7 +139,7 @@ export default function ThirdStep() {
             </div>
           </div>
 
-          <pre>{JSON.stringify(errors, null, 2)}</pre>
+          {/*<pre>{JSON.stringify(errors, null, 2)}</pre>*/}
 
           <div className="grid grid-cols-2 gap-2">
             <Button
@@ -148,7 +151,12 @@ export default function ThirdStep() {
             >
               Previous step
             </Button>
-            <Button size={ButtonSize.EXTRA_LARGE} fullWidth type="submit">
+            <Button
+              size={ButtonSize.EXTRA_LARGE}
+              fullWidth
+              type="submit"
+              disabled={Object.keys(touched).length > 0 && Object.keys(errors).length > 0}
+            >
               Create lending order
             </Button>
           </div>

@@ -1,231 +1,141 @@
-import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import React, { PropsWithChildren, useMemo } from "react";
-import { Address } from "viem";
+import React, { PropsWithChildren, useEffect } from "react";
 
 import useCreateMarginPosition from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
+import { useConfirmCreateMarginPositionDialogStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useConfirmCreateMarginPositionDialogOpened";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import {
   CreateMarginPositionStatus,
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
-import { CreateOrderStatus } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStatusStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input from "@/components/atoms/Input";
-import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton from "@/components/buttons/IconButton";
-import { clsxMerge } from "@/functions/clsxMerge";
-import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
+import OperationStepRow, {
+  operationStatusToStepStatus,
+  OperationStepStatus,
+} from "@/components/common/OperationStepRow";
+import { IconName } from "@/config/types/IconName";
 import { Standard } from "@/sdk_bi/standard";
-
-function ApproveRow({
-  status,
-  hash,
-}: {
-  status: CreateMarginPositionStatus;
-  hash?: Address | undefined;
-}) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
-
-  const text = useMemo(() => {
-    switch (status) {
-      case CreateMarginPositionStatus.INITIAL:
-        return "Approve USDT";
-      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
-        return "Failed to approve USDT";
-      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
-        return "Approving USDT";
-      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
-        return "Approve USDT";
-      default:
-        return "Approved USDT";
-    }
-  }, [status]);
-
-  const isDisabled = useMemo(() => {
-    return status !== CreateMarginPositionStatus.LOADING_APPROVE_BORROW;
-  }, [status]);
-
-  const icon = useMemo(() => {
-    switch (status) {
-      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
-        return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
-        return <Preloader size={20} />;
-      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
-        return (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        );
-      default:
-        return <Svg className="text-green" iconName="done" size={20} />;
-    }
-  }, [status, t]);
-
-  return (
-    <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
-      <div className="flex items-center h-full">
-        <div
-          className={clsxMerge(
-            "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "bg-red-bg",
-          )}
-        >
-          <Svg
-            className={clsxMerge(
-              "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-green",
-              status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "text-red-light",
-            )}
-            iconName="swap"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
-          {text}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {icon}
-      </div>
-    </div>
-  );
-}
-
-function ApproveLiquidationRow({
-  status,
-  hash,
-}: {
-  status: CreateMarginPositionStatus;
-  hash?: Address | undefined;
-}) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
-
-  const text = useMemo(() => {
-    switch (status) {
-      case CreateMarginPositionStatus.INITIAL:
-        return "Approve USDT";
-      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
-        return "Failed to approve USDT";
-      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
-        return "Approving USDT";
-      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
-        return "Approve USDT";
-      default:
-        return "Approved USDT";
-    }
-  }, [status]);
-
-  const isDisabled = useMemo(() => {
-    return status !== CreateMarginPositionStatus.LOADING_APPROVE_BORROW;
-  }, [status]);
-
-  const icon = useMemo(() => {
-    switch (status) {
-      case CreateMarginPositionStatus.ERROR_APPROVE_BORROW:
-        return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateMarginPositionStatus.LOADING_APPROVE_BORROW:
-        return <Preloader size={20} />;
-      case CreateMarginPositionStatus.PENDING_APPROVE_BORROW:
-        return (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        );
-      default:
-        return <Svg className="text-green" iconName="done" size={20} />;
-    }
-  }, [status, t]);
-
-  return (
-    <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
-      <div className="flex items-center h-full">
-        <div
-          className={clsxMerge(
-            "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "bg-red-bg",
-          )}
-        >
-          <Svg
-            className={clsxMerge(
-              "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-green",
-              status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && "text-red-light",
-            )}
-            iconName="swap"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
-          {text}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {icon}
-      </div>
-    </div>
-  );
-}
 
 function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
+
+type StepTextMap = {
+  [key in OperationStepStatus]: string;
+};
+
+type OperationStepConfig = {
+  iconName: IconName;
+  textMap: StepTextMap;
+  pending: CreateMarginPositionStatus;
+  loading: CreateMarginPositionStatus;
+  error: CreateMarginPositionStatus;
+};
+
+function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, string> {
+  return {
+    [OperationStepStatus.IDLE]: `Approve ${tokenSymbol}`,
+    [OperationStepStatus.AWAITING_SIGNATURE]: `Approve ${tokenSymbol}`,
+    [OperationStepStatus.LOADING]: `Approving ${tokenSymbol}`,
+    [OperationStepStatus.STEP_COMPLETED]: `Approved ${tokenSymbol}`,
+    [OperationStepStatus.STEP_FAILED]: `Approve ${tokenSymbol} failed`,
+    [OperationStepStatus.OPERATION_COMPLETED]: `Approved ${tokenSymbol}`,
+  };
+}
+
+const marginSteps: OperationStepConfig[] = [
+  {
+    iconName: "done",
+    pending: CreateMarginPositionStatus.PENDING_APPROVE_BORROW,
+    loading: CreateMarginPositionStatus.LOADING_APPROVE_BORROW,
+    error: CreateMarginPositionStatus.ERROR_APPROVE_BORROW,
+    textMap: getApproveTextMap("USDT"),
+  },
+  {
+    iconName: "done",
+    pending: CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE,
+    loading: CreateMarginPositionStatus.LOADING_APPROVE_LIQUIDATION_FEE,
+    error: CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE,
+    textMap: getApproveTextMap("DAI"),
+  },
+  {
+    iconName: "borrow",
+    pending: CreateMarginPositionStatus.PENDING_BORROW,
+    loading: CreateMarginPositionStatus.LOADING_BORROW,
+    error: CreateMarginPositionStatus.ERROR_BORROW,
+    textMap: {
+      [OperationStepStatus.IDLE]: "Borrow",
+      [OperationStepStatus.AWAITING_SIGNATURE]: "Borrow",
+      [OperationStepStatus.LOADING]: "Borrowing",
+      [OperationStepStatus.STEP_COMPLETED]: "Successfully borrowed",
+      [OperationStepStatus.STEP_FAILED]: "Borrow failed",
+      [OperationStepStatus.OPERATION_COMPLETED]: "Successfully borrowed",
+    },
+  },
+  // Repeat for other steps
+];
 
 function CreateMarginPositionActionButton() {
   const { handleCreateMarginPosition } = useCreateMarginPosition();
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
     useCreateMarginPositionStatusStore();
 
+  const orderedHashes = [approveBorrowHash, approveBorrowHash, borrowHash];
+
   if (status !== CreateMarginPositionStatus.INITIAL) {
     return (
       <Rows>
-        <ApproveRow status={status} hash={approveBorrowHash} />
-        <ApproveRow status={status} hash={approveBorrowHash} />
+        {marginSteps.map((step, index) => (
+          <OperationStepRow
+            key={index}
+            iconName={step.iconName}
+            hash={orderedHashes[index]}
+            statusTextMap={step.textMap}
+            status={operationStatusToStepStatus({
+              currentStatus: status,
+              orderedSteps: marginSteps.flatMap((s) => [s.pending, s.loading, s.error]),
+              stepIndex: index,
+              pendingStep: step.pending,
+              loadingStep: step.loading,
+              errorStep: step.error,
+              successStep: CreateMarginPositionStatus.SUCCESS,
+            })}
+            isFirstStep={index === 0}
+          />
+        ))}
       </Rows>
     );
   }
   return <Button onClick={handleCreateMarginPosition}>Confirm borrow</Button>;
 }
 
-export default function ReviewBorrowDialog({
-  isOpen,
-  setIsOpen,
-}: {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}) {
+export default function ReviewBorrowDialog() {
+  const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
   const { values, setValues } = useCreateMarginPositionConfigStore();
-
+  const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
+    useCreateMarginPositionStatusStore();
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
+
+  useEffect(() => {
+    if (
+      (status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW ||
+        status === CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE ||
+        status === CreateMarginPositionStatus.ERROR_BORROW ||
+        status === CreateMarginPositionStatus.SUCCESS) &&
+      !isOpen
+    ) {
+      setTimeout(() => {
+        setStatus(CreateMarginPositionStatus.INITIAL);
+      }, 400);
+    }
+  }, [isOpen, setStatus, status]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>

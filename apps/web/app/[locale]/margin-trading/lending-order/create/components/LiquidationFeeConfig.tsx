@@ -1,4 +1,5 @@
 import { FormikErrors, FormikTouched } from "formik";
+import Image from "next/image";
 import React, { useCallback, useState } from "react";
 
 import { ThirdStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
@@ -75,7 +76,15 @@ export default function LiquidationFeeConfig({
         fullWidth
         onClick={() => setIsOpenedTokenPick(true)}
       >
-        {values.liquidationFeeToken?.wrapped.symbol || "Select token"}
+        <span className=" flex items-center gap-2">
+          <Image
+            src={values.liquidationFeeToken?.logoURI || "/images/tokens/placeholder.svg"}
+            width={24}
+            height={24}
+            alt=""
+          />
+          {values.liquidationFeeToken?.symbol || "Select token"}
+        </span>
       </SelectButton>
 
       <TextField

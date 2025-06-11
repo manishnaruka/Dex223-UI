@@ -17,12 +17,14 @@ export default function useCreateMarginPosition() {
     await sleep(5000);
     setStatus(CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE);
     await sleep(5000);
-    setStatus(CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE);
+    setStatus(CreateMarginPositionStatus.LOADING_APPROVE_LIQUIDATION_FEE);
     await sleep(6000);
     setStatus(CreateMarginPositionStatus.PENDING_BORROW);
     await sleep(5000);
     setStatus(CreateMarginPositionStatus.LOADING_BORROW);
     await sleep(5000);
+    setStatus(CreateMarginPositionStatus.ERROR_BORROW);
+    return;
     setStatus(CreateMarginPositionStatus.SUCCESS);
   }, [setStatus]);
 

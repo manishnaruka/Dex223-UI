@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { parseUnits } from "viem";
 
 import { InputSize } from "@/components/atoms/Input";
 import { HelperText, InputLabel } from "@/components/atoms/TextField";
@@ -19,6 +20,7 @@ export default function LendingOrderTokenSelect({
   setStandard,
   errors,
   label = "Loan amount",
+  setIsEnoughBalance,
 }: {
   token: Currency | undefined;
   setToken: (token: Currency) => Promise<void>;
@@ -28,6 +30,7 @@ export default function LendingOrderTokenSelect({
   setStandard: (standard: Standard) => Promise<void>;
   errors: string[];
   label?: string;
+  setIsEnoughBalance?: (isEnoughBalance: boolean) => void;
 }) {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
@@ -45,6 +48,24 @@ export default function LendingOrderTokenSelect({
     balance: { erc20Balance: token0Balance, erc223Balance: token1Balance },
     refetch: refetchBalance,
   } = useTokenBalances(token);
+
+  useEffect(() => {
+    if (!token || !token0Balance || !token1Balance || !setIsEnoughBalance) {
+      return;
+    }
+
+    if (
+      (standard === Standard.ERC20 &&
+        parseUnits(amount, token.decimals ?? 18) > token0Balance.value) ||
+      (standard === Standard.ERC223 &&
+        parseUnits(amount, token.decimals ?? 18) > token1Balance.value)
+    ) {
+      setIsEnoughBalance(false);
+      return;
+    } else {
+      setIsEnoughBalance(true);
+    }
+  }, [amount, setIsEnoughBalance, standard, token, token0Balance, token1Balance]);
 
   const { data: blockNumber } = useScopedBlockNumber();
 

@@ -1,10 +1,8 @@
-import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo } from "react";
-import { Address } from "viem";
 
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import useCreateOrder from "@/app/[locale]/margin-trading/lending-order/create/hooks/useCreateOrder";
@@ -15,271 +13,80 @@ import {
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input from "@/components/atoms/Input";
-import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton from "@/components/buttons/IconButton";
-import { clsxMerge } from "@/functions/clsxMerge";
-import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
+import OperationStepRow, {
+  operationStatusToStepStatus,
+  OperationStepStatus,
+} from "@/components/common/OperationStepRow";
+import { IconName } from "@/config/types/IconName";
 import { Standard } from "@/sdk_bi/standard";
-
-function DepositRow({ status, hash }: { status: CreateOrderStatus; hash?: Address | undefined }) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
-
-  const text = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.ERROR_DEPOSIT:
-        return "Failed to deposit funds";
-      case CreateOrderStatus.LOADING_DEPOSIT:
-        return "Depositing funds";
-      case CreateOrderStatus.SUCCESS:
-        return "Funds successfully deposited";
-      default:
-        return "Deposit funds";
-    }
-  }, [status]);
-
-  const icon = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.ERROR_DEPOSIT:
-        return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateOrderStatus.LOADING_DEPOSIT:
-        return <Preloader size={20} />;
-      case CreateOrderStatus.PENDING_DEPOSIT:
-        return (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        );
-      case CreateOrderStatus.SUCCESS:
-        return <Svg className="text-green" iconName="done" size={20} />;
-      default:
-        return null;
-    }
-  }, [status, t]);
-
-  return (
-    <div className={clsx("grid grid-cols-[32px_auto_1fr] gap-2 h-10 ")}>
-      <div className="flex items-center h-full">
-        <div
-          className={clsxMerge(
-            "p-1 rounded-full h-8 w-8",
-            "bg-green-bg",
-            status === CreateOrderStatus.ERROR_DEPOSIT && "bg-red-bg",
-          )}
-        >
-          <Svg
-            className={clsxMerge(
-              "text-green",
-              status === CreateOrderStatus.ERROR_DEPOSIT && "text-red-light",
-            )}
-            iconName="deposit"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span
-          className={clsx(
-            status === CreateOrderStatus.SUCCESS ? "text-secondary-text text-14" : "text-14",
-            status === CreateOrderStatus.SUCCESS && "text-primary-text",
-          )}
-        >
-          {text}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {icon}
-      </div>
-    </div>
-  );
-}
-
-function ConfirmOrderRow({
-  status,
-  hash,
-}: {
-  status: CreateOrderStatus;
-  hash?: Address | undefined;
-}) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
-
-  const text = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.INITIAL:
-        return "Confirm lending order";
-      case CreateOrderStatus.ERROR_CONFIRM_ORDER:
-        return "Failed to unwrap WETH";
-      case CreateOrderStatus.LOADING_CONFIRM_ORDER:
-        return "Unwrapping WETH";
-      case CreateOrderStatus.PENDING_CONFIRM_ORDER:
-        return "Unwrap WETH to ETH";
-      case CreateOrderStatus.SUCCESS:
-        return "Unwrapped WETH to ETH";
-      default:
-        return "Unwrap WETH to ETH";
-    }
-  }, [status]);
-
-  const isDisabled = useMemo(() => {
-    return (
-      status === CreateOrderStatus.PENDING_CONFIRM_ORDER ||
-      status === CreateOrderStatus.INITIAL ||
-      status === CreateOrderStatus.LOADING_CONFIRM_ORDER ||
-      status === CreateOrderStatus.ERROR_CONFIRM_ORDER ||
-      status === CreateOrderStatus.SUCCESS
-    );
-  }, [status]);
-
-  const icon = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.ERROR_CONFIRM_ORDER:
-        return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateOrderStatus.LOADING_CONFIRM_ORDER:
-        return <Preloader size={20} />;
-      case CreateOrderStatus.PENDING_CONFIRM_ORDER:
-        return (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        );
-      case CreateOrderStatus.SUCCESS:
-        return <Svg className="text-green" iconName="done" size={20} />;
-      default:
-        return null;
-    }
-  }, [status, t]);
-
-  return (
-    <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
-      <div className="flex items-center h-full">
-        <div
-          className={clsxMerge(
-            "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            status === CreateOrderStatus.ERROR_CONFIRM_ORDER && "bg-red-bg",
-          )}
-        >
-          <Svg
-            className={clsxMerge(
-              "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-green",
-              status === CreateOrderStatus.ERROR_CONFIRM_ORDER && "text-red-light",
-            )}
-            iconName="swap"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
-          {text}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {icon}
-      </div>
-    </div>
-  );
-}
-
-function ApproveRow({ status, hash }: { status: CreateOrderStatus; hash?: Address | undefined }) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
-
-  const text = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.INITIAL:
-        return "Approve USDT";
-      case CreateOrderStatus.ERROR_APPROVE:
-        return "Failed to approve USDT";
-      case CreateOrderStatus.LOADING_APPROVE:
-        return "Approving USDT";
-      case CreateOrderStatus.PENDING_APPROVE:
-        return "Approve USDT";
-      default:
-        return "Approved USDT";
-    }
-  }, [status]);
-
-  const isDisabled = useMemo(() => {
-    return status !== CreateOrderStatus.LOADING_APPROVE;
-  }, [status]);
-
-  const icon = useMemo(() => {
-    switch (status) {
-      case CreateOrderStatus.ERROR_APPROVE:
-        return <Svg className="text-red-light" iconName="warning" size={20} />;
-      case CreateOrderStatus.LOADING_APPROVE:
-        return <Preloader size={20} />;
-      case CreateOrderStatus.PENDING_APPROVE:
-        return (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        );
-      default:
-        return <Svg className="text-green" iconName="done" size={20} />;
-    }
-  }, [status, t]);
-
-  return (
-    <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
-      <div className="flex items-center h-full">
-        <div
-          className={clsxMerge(
-            "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            status === CreateOrderStatus.ERROR_APPROVE && "bg-red-bg",
-          )}
-        >
-          <Svg
-            className={clsxMerge(
-              "rotate-90",
-              isDisabled ? "text-tertiary-text" : "text-green",
-              status === CreateOrderStatus.ERROR_APPROVE && "text-red-light",
-            )}
-            iconName="swap"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
-          {text}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {icon}
-      </div>
-    </div>
-  );
-}
 
 function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
+
+type StepTextMap = {
+  [key in OperationStepStatus]: string;
+};
+
+type OperationStepConfig = {
+  iconName: IconName;
+  textMap: StepTextMap;
+  pending: CreateOrderStatus;
+  loading: CreateOrderStatus;
+  error: CreateOrderStatus;
+};
+
+function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, string> {
+  return {
+    [OperationStepStatus.IDLE]: `Approve ${tokenSymbol}`,
+    [OperationStepStatus.AWAITING_SIGNATURE]: `Approve ${tokenSymbol}`,
+    [OperationStepStatus.LOADING]: `Approving ${tokenSymbol}`,
+    [OperationStepStatus.STEP_COMPLETED]: `Approved ${tokenSymbol}`,
+    [OperationStepStatus.STEP_FAILED]: `Approve ${tokenSymbol} failed`,
+    [OperationStepStatus.OPERATION_COMPLETED]: `Approved ${tokenSymbol}`,
+  };
+}
+
+const createOrderSteps: OperationStepConfig[] = [
+  {
+    iconName: "lending",
+    pending: CreateOrderStatus.PENDING_CONFIRM_ORDER,
+    loading: CreateOrderStatus.LOADING_CONFIRM_ORDER,
+    error: CreateOrderStatus.ERROR_CONFIRM_ORDER,
+    textMap: {
+      [OperationStepStatus.IDLE]: "Confirm lending order",
+      [OperationStepStatus.AWAITING_SIGNATURE]: "Confirm lending order",
+      [OperationStepStatus.LOADING]: "Executing lending order",
+      [OperationStepStatus.STEP_COMPLETED]: "Lending order confirmed",
+      [OperationStepStatus.STEP_FAILED]: "Failed to confirm a lending order",
+      [OperationStepStatus.OPERATION_COMPLETED]: "Lending order confirmed",
+    },
+  },
+  {
+    iconName: "done",
+    pending: CreateOrderStatus.PENDING_APPROVE,
+    loading: CreateOrderStatus.LOADING_APPROVE,
+    error: CreateOrderStatus.ERROR_APPROVE,
+    textMap: getApproveTextMap("DAI"),
+  },
+  {
+    iconName: "deposit",
+    pending: CreateOrderStatus.PENDING_DEPOSIT,
+    loading: CreateOrderStatus.LOADING_DEPOSIT,
+    error: CreateOrderStatus.ERROR_DEPOSIT,
+    textMap: {
+      [OperationStepStatus.IDLE]: "Deposit funds",
+      [OperationStepStatus.AWAITING_SIGNATURE]: "Deposit funds",
+      [OperationStepStatus.LOADING]: "Executing deposit",
+      [OperationStepStatus.STEP_COMPLETED]: "Deposited funds",
+      [OperationStepStatus.STEP_FAILED]: "Failed to deposit funds",
+      [OperationStepStatus.OPERATION_COMPLETED]: "Deposited funds",
+    },
+  },
+  // Repeat for other steps
+];
 
 function CreateOrderActionButton() {
   const t = useTranslations("Swap");
@@ -291,9 +98,24 @@ function CreateOrderActionButton() {
   if (status !== CreateOrderStatus.INITIAL) {
     return (
       <Rows>
-        <ApproveRow hash={approveHash} status={status} />
-        <ConfirmOrderRow hash={confirmOrderHash} status={status} />
-        <DepositRow hash={depositHash} status={status} />
+        {createOrderSteps.map((step, index) => (
+          <OperationStepRow
+            key={index}
+            iconName={step.iconName}
+            hash={[confirmOrderHash, approveHash, depositHash][index]}
+            statusTextMap={step.textMap}
+            status={operationStatusToStepStatus({
+              currentStatus: status,
+              orderedSteps: createOrderSteps.flatMap((s) => [s.pending, s.loading, s.error]),
+              stepIndex: index,
+              pendingStep: step.pending,
+              loadingStep: step.loading,
+              errorStep: step.error,
+              successStep: CreateOrderStatus.SUCCESS,
+            })}
+            isFirstStep={index === 0}
+          />
+        ))}
       </Rows>
     );
   }

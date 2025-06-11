@@ -6,6 +6,8 @@ import React from "react";
 import { formatEther, formatGwei } from "viem";
 import * as Yup from "yup";
 
+import ReviewBorrowDialog from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/components/ReviewBorrowDialog";
+import { useConfirmCreateMarginPositionDialogStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useConfirmCreateMarginPositionDialogOpened";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import LendingOrderTokenSelect from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderTokenSelect";
@@ -68,6 +70,7 @@ export default function BorrowPage() {
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useBorrowRecentTransactionsStore();
   const [isDetailsExpanded, setIsDetailsExpanded] = React.useState(false);
+  const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
 
   const { values, setValues } = useCreateMarginPositionConfigStore();
 
@@ -91,6 +94,7 @@ export default function BorrowPage() {
           initialValues={values}
           onSubmit={(values) => {
             setValues(values);
+            setIsOpen(true);
           }}
         >
           {({ values, touched, setFieldValue, errors, handleSubmit }) => (
@@ -230,6 +234,8 @@ export default function BorrowPage() {
             </form>
           )}
         </Formik>
+
+        <ReviewBorrowDialog />
 
         <div className="rounded-3 bg-tertiary-bg">
           <button

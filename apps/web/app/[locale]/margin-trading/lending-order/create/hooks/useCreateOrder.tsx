@@ -79,26 +79,26 @@ export default function useCreateOrder() {
 
   const handleCreateOrder = useCallback(
     async (amountToApprove: string) => {
-      // setStatus(CreateOrderStatus.PENDING_APPROVE);
-      // await sleep(1000);
-      // setStatus(CreateOrderStatus.LOADING_APPROVE);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.PENDING_DEPOSIT);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.LOADING_DEPOSIT);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.SUCCESS);
-      //
-      // return;
+      setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
+      await sleep(4000);
+
+      setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+      await sleep(4000);
+
+      setStatus(CreateOrderStatus.PENDING_APPROVE);
+      await sleep(1000);
+      setStatus(CreateOrderStatus.LOADING_APPROVE);
+      await sleep(4000);
+
+      setStatus(CreateOrderStatus.PENDING_DEPOSIT);
+      await sleep(4000);
+
+      setStatus(CreateOrderStatus.LOADING_DEPOSIT);
+      await sleep(4000);
+
+      setStatus(CreateOrderStatus.SUCCESS);
+
+      return;
 
       if (!publicClient || !params.loanToken) {
         return;

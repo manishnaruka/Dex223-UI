@@ -1,33 +1,40 @@
 import React, { useState } from "react";
+import { Address } from "viem";
 
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
 import RadioButton from "@/components/buttons/RadioButton";
+import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 
-type LiquidationOracle = "dex223" | "uniswap" | "link";
+type LiquidationOracle = "dex223";
 
 const labelsMap: Record<LiquidationOracle, string> = {
-  dex223: "DEX223 market",
-  uniswap: "Uniswap market",
-  link: "LINK price oracle",
+  dex223: "Default Dex223 Price relay",
+  // uniswap: "Uniswap market",
+  // link: "LINK price oracle",
 };
 
 const linksMap: Record<LiquidationOracle, string> = {
   dex223: "#",
-  uniswap: "#",
-  link: "#",
+  // uniswap: "#",
+  // link: "#",
 };
 
-const oracles: LiquidationOracle[] = ["dex223", "uniswap", "link"];
+const oracleValuesMap: Record<LiquidationOracle, Address> = {
+  dex223: ZERO_ADDRESS,
+};
+
+const oracles: LiquidationOracle[] = ["dex223"];
 
 export default function LiquidationOracleSelect() {
   const [oracle, setOracle] = useState<LiquidationOracle>("dex223");
   return (
     <div className="mb-[34px]">
       <InputLabel label="Liquidation price source" />
-      <div className="grid grid-cols-2 gap-2 mb-4 mt-1">
+      <div className="grid gap-2 mb-4 mt-1">
         {oracles.map((_oracle) => (
           <RadioButton
+            type="button"
             key={_oracle}
             className="min-h-10 py-0 items-center"
             isActive={_oracle === oracle}
