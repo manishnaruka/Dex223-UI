@@ -273,6 +273,8 @@ export default function RecentTransaction({
   const t = useTranslations("RecentTransactions");
   const { handleSpeedUp, handleCancel, replacement } = useTransactionSpeedUpDialogStore();
 
+  console.log(transaction);
+
   return (
     <div
       key={transaction.hash}

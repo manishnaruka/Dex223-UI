@@ -10,6 +10,7 @@ import { useStoreDeposit } from "@/hooks/useDeposit";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Standard } from "@/sdk_bi/standard";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 
@@ -39,9 +40,9 @@ export enum ApproveTransactionType {
   "ERC20_AND_ERC223",
 }
 
-export const useLiquidityApprove = () => {
-  // const isMetamaskMobile = useDetectMetaMaskMobile();
-
+export const useLiquidityApprove = (parsedAmounts: {
+  [field in Field]: CurrencyAmount<Currency> | undefined;
+}) => {
   const { gasSettings } = useAddLiquidityGasSettings(); // not used:  , gasModel, customGasLimit
   const {
     approve0Status,
@@ -64,17 +65,8 @@ export const useLiquidityApprove = () => {
 
   const chainId = useCurrentChainId();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
-  const { price } = usePriceRange();
-
-  const { tier } = useLiquidityTierStore();
 
   const { tokenAStandard, tokenBStandard } = useTokensStandards();
-  const { parsedAmounts } = useV3DerivedMintInfo({
-    tokenA,
-    tokenB,
-    tier,
-    price,
-  });
 
   const amountToCheckA = parsedAmounts[Field.CURRENCY_A]
     ? BigInt(parsedAmounts[Field.CURRENCY_A].quotient.toString())

@@ -23,7 +23,7 @@ export function formatFloat(
   } else {
     const _value = numberValue.toFixed(maximumSignificantDigits);
     if (options?.trimZero) {
-      return _value.replace(/0*$/g, "").replace(/.$/g, "").replace(/\.$/g, "");
+      return _value.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
     }
     return _value;
   }
