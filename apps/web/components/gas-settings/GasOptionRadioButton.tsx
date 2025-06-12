@@ -3,7 +3,9 @@ import clsx from "clsx";
 import React, { ReactNode } from "react";
 
 import Svg from "@/components/atoms/Svg";
+import { ThemeColors } from "@/config/theme/colors";
 import { IconName } from "@/config/types/IconName";
+import { useColorScheme } from "@/lib/color-scheme";
 
 interface Props {
   gasPriceGWEI: string | undefined;
@@ -29,6 +31,8 @@ export default function GasOptionRadioButton({
   isActive,
   disabled,
 }: Props) {
+  const colorScheme = useColorScheme();
+
   return (
     <div
       onClick={onClick}
@@ -44,7 +48,11 @@ export default function GasOptionRadioButton({
           !!customContent
             ? "border-primary-bg rounded-t-3 border-b"
             : "border-primary-bg rounded-3",
-          !isActive && "group-hocus:bg-green-bg",
+          !isActive &&
+            {
+              [ThemeColors.GREEN]: "group-hocus:bg-green-bg",
+              [ThemeColors.PURPLE]: "group-hocus:bg-purple-bg",
+            }[colorScheme],
           disabled && "opacity-50",
         )}
       >
@@ -53,14 +61,25 @@ export default function GasOptionRadioButton({
             className={clsx(
               "w-4 h-4 duration-200 before:duration-200 border bg-secondary-bg rounded-full before:w-2.5 before:h-2.5 before:absolute before:top-1/2 before:rounded-full before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 relative",
               isActive
-                ? "border-green before:bg-green"
-                : "border-secondary-border group-hocus:border-green",
+                ? {
+                    [ThemeColors.GREEN]: "border-green before:bg-green",
+                    [ThemeColors.PURPLE]: "border-purple before:bg-purple",
+                  }[colorScheme]
+                : {
+                    [ThemeColors.GREEN]: "border-secondary-border group-hocus:border-green",
+                    [ThemeColors.PURPLE]: "border-secondary-border group-hocus:border-purple",
+                  }[colorScheme],
             )}
           />
 
           <span
             className={clsx(
-              isActive ? "text-green" : "text-tertiary-text group-hocus:text-primary-text",
+              isActive
+                ? {
+                    [ThemeColors.GREEN]: "text-green",
+                    [ThemeColors.PURPLE]: "text-purple ",
+                  }[colorScheme]
+                : "text-tertiary-text group-hocus:text-primary-text",
               "duration-200",
             )}
           >

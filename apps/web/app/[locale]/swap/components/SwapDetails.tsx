@@ -14,9 +14,11 @@ import {
 import Collapse from "@/components/atoms/Collapse";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
+import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
+import { useColorScheme } from "@/lib/color-scheme";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
@@ -76,6 +78,8 @@ export default function SwapDetails({
   const { price: priceA } = useUSDPrice(tokenA.wrapped.address0);
   const { price: priceB } = useUSDPrice(tokenB.wrapped.address0);
 
+  const colorScheme = useColorScheme();
+
   return (
     <>
       <div
@@ -84,7 +88,12 @@ export default function SwapDetails({
         <div
           className={clsx(
             "min-h-12 flex justify-between duration-200 px-5 text-secondary-text py-3 gap-2",
-            !isDetailsExpanded ? "hocus:bg-green-bg rounded-3" : "rounded-t-3",
+            !isDetailsExpanded
+              ? {
+                  [ThemeColors.GREEN]: "hocus:bg-green-bg rounded-3",
+                  [ThemeColors.PURPLE]: "hocus:bg-purple-bg rounded-3",
+                }[colorScheme]
+              : "rounded-t-3",
           )}
           role="button"
           tabIndex={0}
@@ -95,7 +104,13 @@ export default function SwapDetails({
               e.stopPropagation();
               setIsPriceInverted(!isPriceInverted);
             }}
-            className="text-14 hocus:text-green duration-200 text-left py-0.5"
+            className={clsx(
+              "text-14  duration-200 text-left py-0.5",
+              {
+                [ThemeColors.GREEN]: "hocus:text-green",
+                [ThemeColors.PURPLE]: "hocus:text-purple",
+              }[colorScheme],
+            )}
           >
             <span>1 {isPriceInverted ? tokenB.symbol : tokenA.symbol}</span> <span>= </span>
             <span>

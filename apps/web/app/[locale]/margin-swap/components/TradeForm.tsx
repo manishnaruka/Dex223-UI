@@ -32,6 +32,7 @@ import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import { networks } from "@/config/networks";
+import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -42,6 +43,7 @@ import { PoolState } from "@/hooks/usePools";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
+import { useColorScheme } from "@/lib/color-scheme";
 import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
@@ -79,6 +81,7 @@ function OpenConfirmDialogButton({
   if (!isConnected) {
     return (
       <Button
+        colorScheme={ButtonColor.PURPLE}
         onClick={() => setWalletConnectOpened(true)}
         fullWidth
         size={ActionButtonSize}
@@ -91,7 +94,13 @@ function OpenConfirmDialogButton({
 
   if (isLoadingSwap) {
     return (
-      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        isLoading
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         <span className="flex items-center gap-2">
           <span>{t("processing_swap")}</span>
           <Preloader size={20} color="black" />
@@ -102,7 +111,13 @@ function OpenConfirmDialogButton({
 
   if (isLoadingApprove) {
     return (
-      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        isLoading
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         <span className="flex items-center gap-2">
           <span>{t("approving_in_progress")}</span>
           <Preloader size={20} color="black" />
@@ -113,7 +128,13 @@ function OpenConfirmDialogButton({
 
   if (isPendingApprove || isPendingSwap) {
     return (
-      <Button fullWidth isLoading size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        isLoading
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         <span className="flex items-center gap-2">
           <span>{t("waiting_for_confirmation")}</span>
           <Preloader size={20} color="black" />
@@ -124,7 +145,13 @@ function OpenConfirmDialogButton({
 
   if (!tokenA || !tokenB) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        disabled
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         {t("select_tokens")}
       </Button>
     );
@@ -132,7 +159,13 @@ function OpenConfirmDialogButton({
 
   if (!+typedValue) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        disabled
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         {t("enter_amount")}
       </Button>
     );
@@ -140,7 +173,13 @@ function OpenConfirmDialogButton({
 
   if (!isSufficientBalance) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        disabled
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         {t("insufficient_balance")}
       </Button>
     );
@@ -149,6 +188,7 @@ function OpenConfirmDialogButton({
   if (tokenA.equals(tokenB)) {
     return (
       <Button
+        colorScheme={ButtonColor.PURPLE}
         size={ActionButtonSize}
         mobileSize={MobileActionButtonSize}
         fullWidth
@@ -161,7 +201,13 @@ function OpenConfirmDialogButton({
 
   if (!isSufficientPoolBalance) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        disabled
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         Insufficient liquidity for this trade
       </Button>
     );
@@ -169,7 +215,13 @@ function OpenConfirmDialogButton({
 
   if (isTradeLoading) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        disabled
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         {t("looking_for_the_best_trade")}
       </Button>
     );
@@ -177,7 +229,13 @@ function OpenConfirmDialogButton({
 
   if (!isTradeReady) {
     return (
-      <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
+      <Button
+        colorScheme={ButtonColor.PURPLE}
+        fullWidth
+        disabled
+        size={ActionButtonSize}
+        mobileSize={MobileActionButtonSize}
+      >
         {t("swap_is_unavailable_for_this_pair")}
       </Button>
     );
@@ -185,6 +243,7 @@ function OpenConfirmDialogButton({
 
   return (
     <Button
+      colorScheme={ButtonColor.PURPLE}
       onClick={() => setConfirmSwapDialogOpen(true)}
       fullWidth
       size={ActionButtonSize}
@@ -490,6 +549,7 @@ export default function TradeForm() {
   const nativeCurrency = useNativeCurrency();
   const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
   const { setIsOpen: setConfirmConvertDialogOpen } = useConfirmConvertDialogStore();
+  const colorScheme = useColorScheme();
 
   return (
     <div className="card-spacing pt-2.5 bg-primary-bg rounded-5">
@@ -501,11 +561,13 @@ export default function TradeForm() {
             active={showRecentTransactions}
             iconName="recent-transactions"
             onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+            colorScheme={ThemeColors.PURPLE}
           />
           <IconButton
             buttonSize={IconButtonSize.LARGE}
             iconName="gas-edit"
             onClick={() => setIsOpenedFee(true)}
+            colorScheme={ThemeColors.PURPLE}
           />
 
           <span className="relative">
@@ -514,6 +576,7 @@ export default function TradeForm() {
               iconSize={24}
               iconName="settings"
               onClick={() => setIsOpen(true)}
+              colorScheme={ThemeColors.PURPLE}
             />
             {computed.isModified && (
               <div className="absolute w-2 h-2 right-[13px] top-[13px] bg-primary-bg flex items-center z-10 justify-center rounded-full">
@@ -524,6 +587,7 @@ export default function TradeForm() {
         </div>
       </div>
       <TokenInput
+        colorScheme={ThemeColors.PURPLE}
         value={typedValue}
         onInputChange={(value) => setTypedValue({ typedValue: value, field: Field.CURRENCY_A })}
         handleClick={() => {
@@ -621,6 +685,7 @@ export default function TradeForm() {
       />
       <div className="relative h-4 md:h-5 z-10">
         <SwapButton
+          colorScheme={ThemeColors.PURPLE}
           onClick={() => {
             setTokenB(tokenA);
             setTokenA(tokenB);
@@ -635,6 +700,7 @@ export default function TradeForm() {
       </div>
       <TokenInput
         readOnly
+        colorScheme={ThemeColors.PURPLE}
         value={dependentAmountValue}
         onInputChange={(value) => null}
         handleClick={() => {
@@ -737,7 +803,11 @@ export default function TradeForm() {
                 </span>
                 <Button
                   size={ButtonSize.EXTRA_SMALL}
-                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  colorScheme={
+                    colorScheme === ThemeColors.GREEN
+                      ? ButtonColor.LIGHT_GREEN
+                      : ButtonColor.LIGHT_PURPLE
+                  }
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsOpenedFee(true);

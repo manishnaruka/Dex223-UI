@@ -4,7 +4,7 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useFormik } from "formik";
 import debounce from "lodash.debounce";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { formatEther, formatGwei, parseGwei } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -18,12 +18,14 @@ import useNetworkFeeGasValidation from "@/components/gas-settings/hooks/useNetwo
 import LegacyField from "@/components/gas-settings/LegacyField";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
 import { isEip1559Supported } from "@/config/constants/eip1559";
+import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
+import { useColorScheme } from "@/lib/color-scheme";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_bi/chains";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
@@ -105,6 +107,7 @@ function NetworkFeeDialogContent({
   setCustomGasLimit,
 }: Omit<Props, "isOpen" | "setIsAdvanced">) {
   const chainId = useCurrentChainId();
+  const colorScheme = useColorScheme();
 
   const { baseFee, priorityFee, gasPrice } = useFees();
 
@@ -412,9 +415,16 @@ function NetworkFeeDialogContent({
                               type="button"
                               className={clsx(
                                 values.gasPriceModel === GasFeeModel.EIP1559
-                                  ? "bg-green-bg border-green"
+                                  ? {
+                                      [ThemeColors.GREEN]: "bg-green-bg border-green",
+                                      [ThemeColors.PURPLE]: "bg-purple-bg border-purple",
+                                    }[colorScheme]
                                   : "bg-primary-bg border-transparent",
-                                "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border group hocus:bg-green-bg rounded-3 duration-200",
+                                "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border group  rounded-3 duration-200",
+                                {
+                                  [ThemeColors.GREEN]: "hocus:bg-green-bg",
+                                  [ThemeColors.PURPLE]: "hocus:bg-purple-bg",
+                                }[colorScheme],
                               )}
                               onClick={() => setFieldValue("gasPriceModel", GasFeeModel.EIP1559)}
                             >
@@ -443,9 +453,16 @@ function NetworkFeeDialogContent({
                               type="button"
                               className={clsx(
                                 values.gasPriceModel === GasFeeModel.LEGACY
-                                  ? "bg-green-bg border-green"
-                                  : "bg-primary-bg border-transparent text-secondary-text",
-                                "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border hocus:bg-green-bg rounded-3 duration-200",
+                                  ? {
+                                      [ThemeColors.GREEN]: "bg-green-bg border-green",
+                                      [ThemeColors.PURPLE]: "bg-purple-bg border-purple",
+                                    }[colorScheme]
+                                  : "bg-primary-bg border-transparent",
+                                "flex flex-col gap-1 justify-center group/button items-center py-3 px-5 border group  rounded-3 duration-200",
+                                {
+                                  [ThemeColors.GREEN]: "hocus:bg-green-bg",
+                                  [ThemeColors.PURPLE]: "hocus:bg-purple-bg",
+                                }[colorScheme],
                               )}
                               onClick={() => setFieldValue("gasPriceModel", GasFeeModel.LEGACY)}
                             >
@@ -542,11 +559,14 @@ function NetworkFeeDialogContent({
           type="button"
           fullWidth
           onClick={handleCancel}
-          colorScheme={ButtonColor.LIGHT_GREEN}
+          colorScheme={
+            colorScheme === ThemeColors.GREEN ? ButtonColor.LIGHT_GREEN : ButtonColor.LIGHT_PURPLE
+          }
         >
           Cancel
         </Button>
         <Button
+          colorScheme={colorScheme === ThemeColors.GREEN ? ButtonColor.GREEN : ButtonColor.PURPLE}
           disabled={Boolean(
             (!isAdvanced &&
               (maxFeePerGasError || maxPriorityFeePerGasError) &&
@@ -577,6 +597,7 @@ export default function NetworkFeeConfigDialog({
   const [containerHeight, setContainerHeight] = useState("auto"); // Default to auto height
   const ref = useRef<HTMLDivElement>(null);
   // Function to check and adjust the container height based on the content
+  const colorScheme = useColorScheme();
 
   // Run adjustHeight on window resize or on initial load
   useEffect(() => {
@@ -623,7 +644,11 @@ export default function NetworkFeeConfigDialog({
           settings={
             <div className="flex items-center gap-2">
               <span className="text-12">Advanced mode</span>
-              <Switch checked={isAdvanced} handleChange={() => setIsAdvanced(!isAdvanced)} />
+              <Switch
+                colorScheme={colorScheme}
+                checked={isAdvanced}
+                handleChange={() => setIsAdvanced(!isAdvanced)}
+              />
             </div>
           }
         />

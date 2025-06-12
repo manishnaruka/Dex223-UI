@@ -7,6 +7,8 @@ import { ReactNode, useMemo } from "react";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 
+import PositionAsset from "./widgets/PositionAsset";
+
 enum DangerStatus {
   STABLE,
   RISKY,
@@ -66,15 +68,6 @@ function MarginPositionBalanceCard({
         USDT
       </div>
     </GradientCard>
-  );
-}
-
-function PositionAsset() {
-  return (
-    <div className="flex items-center gap-1 bg-quaternary-bg px-2 py-1 rounded-1">
-      <span>122.32</span>
-      <span className="text-tertiary-text">USDT</span>
-    </div>
   );
 }
 
@@ -242,14 +235,14 @@ export default function MarginPositionCard({
         </div>
 
         <div className="flex gap-2">
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
         </div>
       </div>
 
@@ -401,14 +394,14 @@ export function LendingPositionCard({
         </div>
 
         <div className="flex gap-2">
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
-          <PositionAsset />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
+          <PositionAsset amount={12.22} symbol={"USDT"} />
         </div>
       </div>
 

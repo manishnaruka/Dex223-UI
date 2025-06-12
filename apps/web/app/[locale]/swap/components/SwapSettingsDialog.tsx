@@ -24,7 +24,9 @@ import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import TextButton from "@/components/buttons/TextButton";
 import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
+import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { useColorScheme } from "@/lib/color-scheme";
 import addToast from "@/other/toast";
 
 function SettingsButtons({ children }: PropsWithChildren) {
@@ -34,17 +36,34 @@ function SettingsButtons({ children }: PropsWithChildren) {
 interface SettingsButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   text: string;
   isActive?: boolean;
+  colorScheme?: ThemeColors;
 }
 
-function SettingsButton({ text, isActive = false, className, ...props }: SettingsButtonProps) {
+function SettingsButton({
+  text,
+  isActive = false,
+  className,
+  colorScheme = ThemeColors.GREEN,
+  ...props
+}: SettingsButtonProps) {
   return (
     <button
       {...props}
       className={clsxMerge(
         "duration-200 px-6 w-full border flex items-center justify-center rounded-2 text-12 lg:text-16 h-10 md:h-12",
         isActive
-          ? "bg-green-bg shadow shadow-green/60 border-green text-primary-text"
-          : "bg-tertiary-bg border-transparent hocus:bg-green-bg text-secondary-text",
+          ? {
+              [ThemeColors.GREEN]:
+                "bg-green-bg shadow shadow-green/60 border-green text-primary-text",
+              [ThemeColors.PURPLE]:
+                "bg-purple-bg shadow shadow-purple/60 border-purple text-primary-text",
+            }[colorScheme]
+          : {
+              [ThemeColors.GREEN]:
+                "bg-tertiary-bg border-transparent hocus:bg-green-bg text-secondary-text",
+              [ThemeColors.PURPLE]:
+                "bg-tertiary-bg border-transparent hocus:bg-purple-bg text-secondary-text",
+            }[colorScheme],
         className,
       )}
     >
@@ -56,8 +75,14 @@ function SettingsButton({ text, isActive = false, className, ...props }: Setting
 type SettingsInputProps = NumericFormatProps & {
   isError?: boolean;
   isActive?: boolean;
+  colorScheme?: ThemeColors;
 };
-function SettingsInput({ isActive, isError, ...props }: SettingsInputProps) {
+function SettingsInput({
+  isActive,
+  isError,
+  colorScheme = ThemeColors.GREEN,
+  ...props
+}: SettingsInputProps) {
   return (
     <NumericFormat
       inputMode="decimal"
@@ -80,12 +105,22 @@ function SettingsInput({ isActive, isError, ...props }: SettingsInputProps) {
         " focus:outline-0  rounded-2 duration-200 py-1.5 md:py-2.5 px-1.5 md:px-3 text-center placeholder:text-center placeholder:text-secondary-text w-full border text-12 lg:text-16",
         isActive &&
           !isError &&
-          "bg-green-bg shadow shadow-green/60 border-green text-primary-text hocus:bg-green-bg ",
+          {
+            [ThemeColors.GREEN]:
+              "bg-green-bg shadow shadow-green/60 border-green text-primary-text hocus:bg-green-bg",
+            [ThemeColors.PURPLE]:
+              "bg-purple-bg shadow shadow-purple/60 border-purple text-primary-text hocus:bg-purple-bg ",
+          }[colorScheme],
         isError &&
           "bg-secondary-bg shadow shadow-red/60 border-red-light text-primary-text hocus:bg-red-bg",
         !isError &&
           !isActive &&
-          "focus:border-green bg-secondary-bg border-transparent hocus:bg-green-bg text-secondary-text focus:bg-green-bg focus::shadow focus::shadow-green/60",
+          {
+            [ThemeColors.GREEN]:
+              "focus:border-green bg-secondary-bg border-transparent hocus:bg-green-bg text-secondary-text focus:bg-green-bg focus::shadow focus::shadow-green/60",
+            [ThemeColors.PURPLE]:
+              "focus:border-green bg-secondary-bg border-transparent hocus:bg-purple-bg text-secondary-text focus:bg-purple-bg focus::shadow focus::shadow-purple/60",
+          }[colorScheme],
       )}
     />
   );
@@ -117,6 +152,7 @@ function getTitle(slippageType: SlippageType, value: string, t: any) {
 }
 
 function SwapSettingsDialogContent() {
+  const colorScheme = useColorScheme();
   const { isOpen, setIsOpen } = useTransactionSettingsDialogStore();
 
   const t = useTranslations("Swap");
@@ -239,6 +275,7 @@ function SwapSettingsDialogContent() {
       <div className="flex gap-3 md:gap-5">
         <span>
           <SettingsButton
+            colorScheme={colorScheme}
             onClick={() => {
               setSlippageType(SlippageType.AUTO);
               setCustomSlippage("0.5");
@@ -252,6 +289,7 @@ function SwapSettingsDialogContent() {
           {defaultTypes.map((sl) => {
             return (
               <SettingsButton
+                colorScheme={colorScheme}
                 key={sl}
                 onClick={() => setSlippageType(sl)}
                 isActive={slippageType === sl}
@@ -260,6 +298,7 @@ function SwapSettingsDialogContent() {
             );
           })}
           <SettingsInput
+            colorScheme={colorScheme}
             onFocus={() => setSlippageType(SlippageType.CUSTOM)}
             placeholder={t("custom")}
             value={customSlippage}
@@ -297,7 +336,12 @@ function SwapSettingsDialogContent() {
             <Tooltip iconSize={24} text={t("deadline_tooltip")} />
           </p>
           {+customDeadline !== 20 && (
-            <TextButton className="pr-0" endIcon="reset" onClick={() => setCustomDeadline("20")}>
+            <TextButton
+              colorScheme={colorScheme}
+              className="pr-0"
+              endIcon="reset"
+              onClick={() => setCustomDeadline("20")}
+            >
               {t("set_default")}
             </TextButton>
           )}
@@ -315,6 +359,7 @@ function SwapSettingsDialogContent() {
             allowNegative={false}
             customInput={Input}
             inputMode="decimal"
+            colorScheme={colorScheme}
           />
           <span className="absolute right-5 top-1/2 -translate-y-1/2 text-secondary-text">
             {t("minutes")}
@@ -326,10 +371,21 @@ function SwapSettingsDialogContent() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN} onClick={handleCancel}>
+        <Button
+          colorScheme={
+            colorScheme === ThemeColors.GREEN ? ButtonColor.LIGHT_GREEN : ButtonColor.LIGHT_PURPLE
+          }
+          fullWidth
+          onClick={handleCancel}
+        >
           {t("cancel")}
         </Button>
-        <Button disabled={isButtonDisabled} fullWidth onClick={handleSave}>
+        <Button
+          colorScheme={colorScheme === ThemeColors.GREEN ? ButtonColor.GREEN : ButtonColor.PURPLE}
+          disabled={isButtonDisabled}
+          fullWidth
+          onClick={handleSave}
+        >
           {t("save_settings")}
         </Button>
       </div>

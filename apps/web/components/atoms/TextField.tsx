@@ -4,6 +4,7 @@ import { InputHTMLAttributes, ReactNode } from "react";
 import { NumericFormat } from "react-number-format";
 
 import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
+import { ThemeColors } from "@/config/theme/colors";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -16,6 +17,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   isWarning?: boolean;
   inputSize?: InputSize;
   noMargin?: boolean;
+  colorScheme?: ThemeColors;
 } & (
     | {
         error?: boolean | string;

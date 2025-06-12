@@ -8,214 +8,14 @@ import { NumericFormat } from "react-number-format";
 import SelectButton from "@/components/atoms/SelectButton";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import InputButton from "@/components/buttons/InputButton";
+import TokenStandardSelector from "@/components/common/TokenStandardSelector";
+import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { Currency } from "@/sdk_bi/entities/currency";
-import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 
-function MobileStandardOption({
-  balance,
-  symbol,
-  standard,
-  active,
-  other,
-  setIsActive,
-  setOther,
-  token,
-  isEqualTokens,
-}: {
-  balance: string | undefined;
-  symbol: string | undefined;
-  standard: Standard;
-  active: Standard;
-  other: Standard;
-  setOther: (standard: Standard) => void;
-  setIsActive: (isActive: Standard) => void;
-  token: Token | undefined;
-  isEqualTokens?: boolean;
-}) {
-  const t = useTranslations("Swap");
-  const isActive = useMemo(() => {
-    return active === standard;
-  }, [active, standard]);
-
-  return (
-    <div className="flex flex-col">
-      <button
-        type="button"
-        onClick={() => {
-          setIsActive(standard);
-
-          if (other === standard && isEqualTokens) {
-            if (standard === Standard.ERC20) {
-              setOther(Standard.ERC223);
-            } else {
-              setOther(Standard.ERC20);
-            }
-          }
-        }}
-        className={clsxMerge(
-          "*:z-10 pt-10 flex flex-col gap-1 px-3 pb-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
-          isActive ? "before:opacity-100" : "before:opacity-0 hocus:before:opacity-100",
-          standard === Standard.ERC223 &&
-            "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
-          standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
-          !token && "before:opacity-0 hocus:before:opacity-0 before:cursor-default cursor-default",
-        )}
-      >
-        {!token ? (
-          <div className="text-tertiary-text cursor-default">—</div>
-        ) : (
-          <span
-            className={clsx(
-              "flex flex-col",
-              standard === active ? "text-secondary-text" : "text-tertiary-text",
-              standard === Standard.ERC223 ? "items-end" : "items-start",
-            )}
-          >
-            {t("balance")}{" "}
-            <span
-              className={clsx(
-                "w-full table table-fixed",
-                standard === active ? "text-primary-text" : "text-tertiary-text",
-              )}
-            >
-              <span
-                className={clsx(
-                  "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
-                  standard === Standard.ERC223 ? "text-right" : "text-left",
-                )}
-              >
-                {balance || "0"} {symbol}
-              </span>
-            </span>
-          </span>
-        )}
-      </button>
-    </div>
-  );
-}
-
-function StandardOption({
-  balance,
-  symbol,
-  standard,
-  active,
-  other,
-  setIsActive,
-  setOther,
-  token,
-  gas,
-  isEqualTokens,
-}: {
-  balance: string | undefined;
-  symbol: string | undefined;
-  standard: Standard;
-  active: Standard;
-  other: Standard;
-  setIsActive: (isActive: Standard) => void;
-  setOther: (standard: Standard) => void;
-  token: Token | undefined;
-  gas?: string;
-  isEqualTokens?: boolean;
-}) {
-  const t = useTranslations("Swap");
-  const isActive = useMemo(() => {
-    return active === standard;
-  }, [active, standard]);
-
-  return (
-    <div className="flex flex-col">
-      <button
-        type="button"
-        onClick={() => {
-          setIsActive(standard);
-
-          if (other === standard && isEqualTokens) {
-            if (standard === Standard.ERC20) {
-              setOther(Standard.ERC223);
-            } else {
-              setOther(Standard.ERC20);
-            }
-          }
-        }}
-        className={clsxMerge(
-          "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
-          isActive ? "before:opacity-100" : "before:opacity-0 hocus:before:opacity-100",
-          standard === Standard.ERC223 &&
-            "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
-          standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
-          !token &&
-            "before:opacity-0 hocus:before:opacity-0 before:cursor-default cursor-default pointer-events-none",
-          gas && standard === Standard.ERC20 && "rounded-b-0 before:rounded-b-0",
-          gas && standard === Standard.ERC223 && "rounded-b-0 before:rounded-t-0",
-        )}
-      >
-        <div className="flex items-center gap-1 cursor-default">
-          <span
-            className={clsxMerge(
-              "text-12 text-secondary-text",
-              (!token || standard !== active) && "text-tertiary-text",
-            )}
-          >
-            {t("standard")}
-          </span>
-          <Badge size="small" variant={BadgeVariant.STANDARD} standard={standard} />
-
-          <Tooltip
-            iconSize={16}
-            text={standard === Standard.ERC20 ? t("erc20_tooltip") : t("erc223_tooltip")}
-          />
-        </div>
-        {!token ? (
-          <div
-            className={clsx(
-              "text-tertiary-text cursor-default",
-              standard === Standard.ERC223 ? "text-right" : "text-left",
-            )}
-          >
-            —
-          </div>
-        ) : (
-          <span
-            className={clsx(
-              "w-[calc(100%-55px)] table table-fixed",
-              standard === active ? "text-secondary-text" : "text-tertiary-text",
-            )}
-          >
-            <span
-              className={clsx(
-                "table-cell whitespace-nowrap overflow-ellipsis overflow-hidden",
-                standard === active ? "text-primary-text" : "text-tertiary-text",
-                standard === Standard.ERC223 ? "text-right" : "text-left",
-              )}
-            >
-              <span className={standard === active ? "text-secondary-text" : "text-tertiary-text"}>
-                {t("balance")}
-              </span>{" "}
-              {balance || "0"} {symbol}
-            </span>
-          </span>
-        )}
-      </button>
-      {gas && (
-        <div
-          className={clsx(
-            "py-1 px-3 text-12 bg-swap-gas-gradient flex items-center text-tertiary-text w-fit",
-            standard === Standard.ERC20 &&
-              "bg-gradient-to-r from-primary-bg to-secondary-bg rounded-bl-2",
-            standard === Standard.ERC223 &&
-              "bg-gradient-to-l from-primary-bg to-secondary-bg rounded-br-2 justify-end ml-auto",
-          )}
-        >
-          {gas}
-        </div>
-      )}
-    </div>
-  );
-}
 export default function TokenInput({
   handleClick,
   token,
@@ -225,9 +25,7 @@ export default function TokenInput({
   balance1,
   label,
   setStandard,
-  setOtherStandard,
   standard,
-  otherStandard,
   readOnly = false,
   isHalf = false,
   isMax = false,
@@ -235,7 +33,7 @@ export default function TokenInput({
   setMax,
   gasERC20,
   gasERC223,
-  isEqualTokens,
+  colorScheme,
   isError,
 }: {
   handleClick: () => void;
@@ -258,6 +56,7 @@ export default function TokenInput({
   gasERC223?: string;
   isEqualTokens?: boolean;
   isError?: boolean;
+  colorScheme?: ThemeColors;
 }) {
   const t = useTranslations("Swap");
 
@@ -270,8 +69,13 @@ export default function TokenInput({
           <span className="text-14 block text-secondary-text">{label}</span>
           {setMax && setHalf && (
             <div className="flex items-center gap-2">
-              <InputButton onClick={setHalf} isActive={isHalf} text="Half" />
-              <InputButton onClick={setMax} isActive={isMax} text="Max" />
+              <InputButton
+                colorScheme={colorScheme}
+                onClick={setHalf}
+                isActive={isHalf}
+                text="Half"
+              />
+              <InputButton colorScheme={colorScheme} onClick={setMax} isActive={isMax} text="Max" />
             </div>
           )}
         </div>
@@ -300,7 +104,10 @@ export default function TokenInput({
           </span>
           <div
             className={clsxMerge(
-              "duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-hocus:shadow-green/60 peer-focus:shadow peer-focus:shadow-green/60 peer-focus:border-green top-0 left-0",
+              "duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-focus:shadow top-0 left-0",
+              colorScheme === ThemeColors.GREEN
+                ? "peer-hocus:shadow-green/60 peer-focus:shadow-green/60 peer-focus:border-green"
+                : "peer-hocus:shadow-purple/60 peer-focus:shadow-purple/60 peer-focus:border-purple",
               isError &&
                 "shadow-red-light/60 border-red-light shadow peer-hocus:shadow-red-light/60 peer-focus:shadow peer-focus:shadow-red-light/60 peer-focus:border-red-light",
             )}
@@ -312,6 +119,7 @@ export default function TokenInput({
           variant="rounded"
           onClick={handleClick}
           size="large"
+          colorScheme={colorScheme}
         >
           {token ? (
             <span className="flex gap-2 items-center">
@@ -333,126 +141,24 @@ export default function TokenInput({
       </div>
 
       {(!token || (token && token.isToken)) && (
-        <>
-          <div className="md:hidden pb-2 relative grid grid-cols-2">
-            <MobileStandardOption
-              token={token}
-              setIsActive={setStandard}
-              setOther={setOtherStandard}
-              active={standard}
-              other={otherStandard}
-              standard={Standard.ERC20}
-              symbol={token?.symbol}
-              balance={balance0}
-              isEqualTokens={isEqualTokens}
-            />
-            <div
-              className={clsxMerge(
-                "mx-auto z-10 text-10 w-[calc(100%-24px)] left-1/2 -translate-x-1/2 h-[32px] absolute top-1 rounded-20 border-green border p-1 flex gap-1 items-center",
-                !token && "border-secondary-border",
-              )}
-            >
-              {[Standard.ERC20, Standard.ERC223].map((st) => {
-                return (
-                  <button
-                    key={st}
-                    className={clsxMerge(
-                      "h-6 rounded-3 duration-200 px-2 min-w-[58px] w-full text-10 text-secondary-text",
-                      standard === st
-                        ? "bg-green text-black shadow shadow-green/60"
-                        : "hocus:bg-green-bg hocus:text-primary-text",
-                      !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
-                      !token && "text-tertiary-text pointer-events-none",
-                    )}
-                    onClick={() => setStandard(st)}
-                  >
-                    Standard {st}
-                  </button>
-                );
-              })}
-            </div>
-
-            <MobileStandardOption
-              token={token}
-              setIsActive={setStandard}
-              setOther={setOtherStandard}
-              active={standard}
-              other={otherStandard}
-              standard={Standard.ERC223}
-              symbol={token?.symbol}
-              balance={balance1}
-              isEqualTokens={isEqualTokens}
-            />
-          </div>
-          <div className="hidden md:grid md:grid-cols-2 gap-1 md:gap-3 relative">
-            <StandardOption
-              token={token}
-              setIsActive={setStandard}
-              setOther={setOtherStandard}
-              active={standard}
-              other={otherStandard}
-              standard={Standard.ERC20}
-              symbol={token?.symbol}
-              balance={balance0}
-              gas={gasERC20}
-              isEqualTokens={isEqualTokens}
-            />
-            <div
-              className={clsxMerge(
-                "relative mx-auto md:absolute md:left-1/2 md:top-[14px] md:-translate-x-1/2 z-10 text-10 h-[32px] rounded-20 border-green border p-1 flex gap-1 items-center",
-                !token && "border-secondary-border",
-              )}
-            >
-              {[Standard.ERC20, Standard.ERC223].map((st) => {
-                return (
-                  <button
-                    type="button"
-                    key={st}
-                    className={clsxMerge(
-                      "h-6 rounded-3 duration-200 px-2 min-w-[58px] text-secondary-text",
-                      standard === st
-                        ? "bg-green text-black shadow shadow-green/60"
-                        : "hocus:bg-green-bg hocus:text-primary-text",
-                      !token && st === Standard.ERC20 && "bg-primary-bg shadow-none",
-                      !token && "text-tertiary-text pointer-events-none",
-                    )}
-                    onClick={() => {
-                      setStandard(st);
-
-                      if (otherStandard === st && isEqualTokens) {
-                        if (st === Standard.ERC20) {
-                          setOtherStandard(Standard.ERC223);
-                        } else {
-                          setOtherStandard(Standard.ERC20);
-                        }
-                      }
-                    }}
-                  >
-                    {st}
-                  </button>
-                );
-              })}
-            </div>
-            <StandardOption
-              token={token}
-              setIsActive={setStandard}
-              setOther={setOtherStandard}
-              active={standard}
-              other={otherStandard}
-              standard={Standard.ERC223}
-              symbol={token?.symbol}
-              balance={balance1}
-              gas={gasERC223}
-              isEqualTokens={isEqualTokens}
-            />
-          </div>
-        </>
+        <TokenStandardSelector
+          selectedStandard={standard}
+          handleStandardSelect={(standard) => setStandard(standard)}
+          disabled={!token}
+          symbol={token?.symbol}
+          balance0={balance0}
+          balance1={balance1}
+          gasERC20={gasERC20}
+          gasERC223={gasERC223}
+          colorScheme={colorScheme}
+        />
       )}
       {token && token.isNative && (
         <div className="flex flex-col">
           <div
             className={clsxMerge(
-              "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 hocus:cursor-pointer text-12 group",
+              "*:z-10 flex flex-col gap-1 px-3 py-2.5  rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r  before:to-green-bg/0 hocus:cursor-pointer text-12 group",
+              colorScheme === ThemeColors.GREEN ? "before:from-green-bg" : "before:from-purple-bg",
               standard === Standard.ERC223 &&
                 "before:rotate-180 items-end bg-gradient-to-l from-primary-bg to-secondary-bg",
               standard === Standard.ERC20 && "bg-gradient-to-r from-primary-bg to-secondary-bg",
@@ -461,7 +167,7 @@ export default function TokenInput({
             )}
           >
             <div className="flex items-center gap-1 cursor-default">
-              <Badge color="green" text="Native" />
+              <Badge color={colorScheme === ThemeColors.GREEN ? "green" : "purple"} text="Native" />
               <Tooltip
                 iconSize={16}
                 text="Native currency of the network you are using (e.g. ETH on Ethereum). On most networks gas fees are paid with native currency."

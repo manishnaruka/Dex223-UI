@@ -23,6 +23,8 @@ export const enum ButtonColor {
   LIGHT_GREEN,
   LIGHT_RED,
   LIGHT_YELLOW,
+  PURPLE,
+  LIGHT_PURPLE,
 }
 
 type CommonProps = {
@@ -55,6 +57,9 @@ const buttonVariantClassnameMap: Record<ButtonVariant, Record<ButtonColor, strin
       "bg-yellow-bg text-secondary-text border-transparent border hocus:border-yellow-light hocus:bg-yellow-bg-hover hocus:text-primary-text",
     [ButtonColor.LIGHT_GREEN]:
       "bg-green-bg text-secondary-text border-transparent border hocus:border-green hocus:bg-green-bg-hover hocus:text-primary-text",
+    [ButtonColor.LIGHT_PURPLE]:
+      "bg-purple-bg text-secondary-text border-transparent border hocus:border-purple-hover hocus:bg-purple-bg-hover hocus:text-primary-text",
+    [ButtonColor.PURPLE]: "bg-purple text-secondary-bg hocus:bg-purple-hover",
   },
   [ButtonVariant.OUTLINED]: {
     [ButtonColor.RED]:
@@ -64,6 +69,10 @@ const buttonVariantClassnameMap: Record<ButtonVariant, Record<ButtonColor, strin
     [ButtonColor.LIGHT_YELLOW]: "bg-yellow-light text-black hocus:bg-red-hover",
     [ButtonColor.LIGHT_GREEN]:
       "bg-green-bg text-primary-text border-transparent border hocus:border-green",
+    [ButtonColor.PURPLE]:
+      "bg-red-bg text-secondary-text border-transparent border hocus:border-red-light hocus:bg-red-bg-hover hocus:text-primary-text",
+    [ButtonColor.LIGHT_PURPLE]:
+      "bg-red-bg text-secondary-text border-transparent border hocus:border-red-light hocus:bg-red-bg-hover hocus:text-primary-text",
   },
 };
 

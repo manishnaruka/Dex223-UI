@@ -1,7 +1,5 @@
 import { Address } from "viem";
 
-import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
-
 import { DexChainId } from "./chains";
 
 export const CONVERTER_ADDRESS: Record<DexChainId, Address> = {
@@ -52,6 +50,8 @@ export const FREE_AUTO_LISTING_ADDRESS: Record<DexChainId, Address> = {
   [DexChainId.BSC_TESTNET]: "0xde839Df421dA5B5a4b34d872D90517C90B511b57",
   [DexChainId.EOS]: "0x5bf0FD2874B54CD42a7b7F19E98a2AdA8c9A756d",
 };
+
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const MARGIN_TRADING_ADDRESS: Record<DexChainId, Address> = {
   [DexChainId.MAINNET]: ZERO_ADDRESS,

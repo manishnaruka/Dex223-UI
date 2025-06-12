@@ -1,14 +1,20 @@
 import clsx from "clsx";
 import { ChangeEvent } from "react";
 
+enum ThemeColors {
+    GREEN,
+    PURPLE,
+}
+
 interface Props {
   checked: boolean;
   handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
   small?: boolean;
   disabled?: boolean;
+  colorScheme?: ThemeColors;
 }
 
-export default function Switch({ checked, handleChange, small = false, disabled = false }: Props) {
+export default function Switch({ checked, handleChange, small = false, disabled = false, colorScheme = ThemeColors.GREEN }: Props) {
   return (
     <label className={clsx("ui-relative ui-inline-block ui-w-12 ui-h-6")}>
       <input
@@ -31,16 +37,10 @@ export default function Switch({ checked, handleChange, small = false, disabled 
                       ui-right-0
                       ui-left-0
                       ui-duration-200
-                      peer-checked:ui-border-green
-                      peer-checked:ui-bg-green-bg
                       peer-checked:hocus:ui-shadow
-                      peer-checked:hocus:ui-shadow-green/60
                       ui-border-primary-border
                       ui-border
                       ui-rounded-5
-                      peer-hocus:before:ui-bg-green
-                      peer-hocus:ui-border-green
-                      peer-checked:before:ui-bg-green
                       peer-checked:before:ui-translate-x-6
                       before:ui-content-['']
                       before:ui-absolute
@@ -52,6 +52,10 @@ export default function Switch({ checked, handleChange, small = false, disabled 
                       before:ui-rounded-full
                       before:ui-duration-200
                   `,
+            {
+                [ThemeColors.GREEN]: "peer-hocus:before:ui-bg-green peer-checked:before:ui-bg-green peer-hocus:ui-border-green peer-checked:ui-border-green peer-checked:ui-bg-green-bg peer-checked:hocus:ui-shadow-green/60",
+                [ThemeColors.PURPLE]: "peer-hocus:before:ui-bg-purple peer-checked:before:ui-bg-purple peer-hocus:ui-border-purple peer-checked:ui-border-purple peer-checked:ui-bg-purple-bg peer-checked:hocus:ui-shadow-purple/60",
+            }[colorScheme]
         )}
       />
     </label>

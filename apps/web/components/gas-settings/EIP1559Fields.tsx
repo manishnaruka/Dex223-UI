@@ -4,7 +4,9 @@ import { formatGwei } from "viem";
 import { InputSize } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
 import ErrorsAndWarnings from "@/components/gas-settings/ErrorsAndWarnings";
+import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
+import { useColorScheme } from "@/lib/color-scheme";
 
 export default function EIP1559Fields({
   maxFeePerGas,
@@ -35,6 +37,7 @@ export default function EIP1559Fields({
   maxPriorityFeePerGasWarning: string | undefined;
   helperButtonText?: ReactNode;
 }) {
+  const colorScheme = useColorScheme();
   const gasPriceErrors = useMemo(() => {
     const _errors: string[] = [];
 
@@ -63,6 +66,7 @@ export default function EIP1559Fields({
     <>
       <div className="grid gap-3 grid-cols-2">
         <TextField
+          colorScheme={colorScheme}
           isNumeric
           isError={!!maxFeePerGasError}
           isWarning={!!maxFeePerGasWarning}
@@ -92,7 +96,12 @@ Max fee sets the upper bound of the payment that you allow your transaction to c
 
                   // setUnsavedMaxFeePerGas( || BigInt(0));
                 }}
-                className="text-green duration-200 hocus:text-green-hover"
+                className={
+                  {
+                    [ThemeColors.GREEN]: "text-green duration-200 hocus:text-green-hover",
+                    [ThemeColors.PURPLE]: "text-purple duration-200 hocus:text-purple-hover",
+                  }[colorScheme]
+                }
               >
                 {helperButtonText}
               </button>{" "}
@@ -103,6 +112,7 @@ Max fee sets the upper bound of the payment that you allow your transaction to c
         />
 
         <TextField
+          colorScheme={colorScheme}
           isNumeric
           isError={!!maxPriorityFeePerGasError}
           isWarning={!!maxPriorityFeePerGasWarning}
@@ -128,7 +138,12 @@ Higher priority fee may reduce the amount of time needed for your transaction to
                     setMaxPriorityFeePerGasValue(formatGwei(currentMaxPriorityFeePerGas));
                   }
                 }}
-                className="text-green duration-200 hocus:text-green-hover"
+                className={
+                  {
+                    [ThemeColors.GREEN]: "text-green duration-200 hocus:text-green-hover",
+                    [ThemeColors.PURPLE]: "text-purple duration-200 hocus:text-purple-hover",
+                  }[colorScheme]
+                }
               >
                 {helperButtonText}
               </button>{" "}

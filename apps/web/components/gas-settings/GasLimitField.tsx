@@ -3,6 +3,8 @@ import React, { ChangeEvent, useEffect, useMemo } from "react";
 import { InputSize } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
 import ErrorsAndWarnings from "@/components/gas-settings/ErrorsAndWarnings";
+import { ThemeColors } from "@/config/theme/colors";
+import { useColorScheme } from "@/lib/color-scheme";
 
 export default function GasLimitField({
   value,
@@ -19,6 +21,7 @@ export default function GasLimitField({
   estimatedGas: bigint;
   gasLimitError: string | undefined;
 }) {
+  const colorScheme = useColorScheme();
   const gasLimitErrors = useMemo(() => {
     const _errors: string[] = [];
 
@@ -34,6 +37,7 @@ export default function GasLimitField({
   return (
     <>
       <TextField
+        colorScheme={colorScheme}
         isNumeric
         decimalScale={0}
         placeholder="Gas limit"
@@ -56,7 +60,12 @@ Setting a low Gas Limit may result in transaction failure if the amount of actio
               onClick={(e) => {
                 setFieldValue(estimatedGas ? estimatedGas.toString() : "100000");
               }}
-              className="text-green duration-200 hocus:text-green-hover"
+              className={
+                {
+                  [ThemeColors.GREEN]: "text-green duration-200 hocus:text-green-hover",
+                  [ThemeColors.PURPLE]: "text-purple duration-200 hocus:text-purple-hover",
+                }[colorScheme]
+              }
             >
               Estimated
             </button>{" "}
