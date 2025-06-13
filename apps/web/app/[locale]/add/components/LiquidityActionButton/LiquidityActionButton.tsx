@@ -89,7 +89,6 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
   const { address, isConnected } = useAccount();
   const { status: revokeStatus } = useRevokeStatusStore();
 
-  const { approveTransactionsCount, approveTransactionsType } = useLiquidityApprove();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
   const { setIsOpenedRevokeDialog, standard } = useRevokeDialogStatusStore();
 
@@ -101,6 +100,8 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
     tier,
     price,
   });
+
+  const { approveTransactionsCount, approveTransactionsType } = useLiquidityApprove(parsedAmounts);
 
   const { data: blockNumber } = useScopedBlockNumber({ watch: true });
   const chainId = useCurrentChainId();

@@ -108,7 +108,6 @@ export default function IncreaseLiquidityPage({
   // PRICE RANGE HOOK START
   const { price } = usePriceRange();
   // PRICE RANGE HOOK END
-  const { updateAllowance } = useLiquidityApprove();
 
   // Deposit Amounts START
   const { parsedAmounts, currencies, depositADisabled, depositBDisabled, position, noLiquidity } =
@@ -118,6 +117,7 @@ export default function IncreaseLiquidityPage({
       tier,
       price,
     });
+  const { updateAllowance } = useLiquidityApprove(parsedAmounts);
 
   // Deposit Amounts END
 

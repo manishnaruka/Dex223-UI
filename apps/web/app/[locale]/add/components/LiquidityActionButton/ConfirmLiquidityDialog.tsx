@@ -7,7 +7,6 @@ import React, { useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
 import { useDerivedTokens } from "@/app/[locale]/add/hooks/useDerivedTokens";
-import { usePriceDirectionStore } from "@/app/[locale]/add/stores/usePriceDirectionStore";
 import PositionPriceRangeCard from "@/app/[locale]/pool/[tokenId]/components/PositionPriceRangeCard";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -27,9 +26,7 @@ import { usePositionPrices, usePositionRangeStatus } from "@/hooks/usePositions"
 import { Link } from "@/i18n/routing";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
-import { Price } from "@/sdk_bi/entities/fractions/price";
 import { Position } from "@/sdk_bi/entities/position";
-import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
@@ -83,7 +80,11 @@ function isDefinedTransactionItem(item: {
   return !!item.transaction;
 }
 
-const ApproveDialog = () => {
+const ApproveDialog = ({
+  parsedAmounts,
+}: {
+  parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
+}) => {
   const t = useTranslations("Liquidity");
   const tSwap = useTranslations("Swap");
 
@@ -103,7 +104,7 @@ const ApproveDialog = () => {
     approveTotalGasLimit,
     currentDepositA,
     currentDepositB,
-  } = useLiquidityApprove();
+  } = useLiquidityApprove(parsedAmounts);
 
   const isLoadingA20 = approveTransactions.approveA
     ? [AddLiquidityApproveStatus.LOADING].includes(approveTransactions.approveA?.status)
@@ -796,7 +797,7 @@ export default function ConfirmLiquidityDialog({
           AddLiquidityStatus.APPROVE_LOADING,
           AddLiquidityStatus.APPROVE_ERROR,
         ].includes(status) ? (
-          <ApproveDialog />
+          <ApproveDialog parsedAmounts={parsedAmounts} />
         ) : null}
         {[
           AddLiquidityStatus.MINT,

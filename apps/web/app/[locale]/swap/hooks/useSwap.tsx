@@ -27,6 +27,7 @@ import { ERC223_ABI } from "@/config/abis/erc223";
 import { POOL_ABI } from "@/config/abis/pool";
 import { ROUTER_ABI } from "@/config/abis/router";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
+import { formatFloat } from "@/functions/formatFloat";
 import { getGasSettings } from "@/functions/gasSettings";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
@@ -342,7 +343,6 @@ export default function useSwap() {
 
   const { baseFee, priorityFee, gasPrice } = useFees();
 
-  const { slippage } = useSwapSettingsStore();
   const { typedValue } = useSwapAmountsStore();
   const { addRecentTransaction } = useRecentTransactionsStore();
 
@@ -381,8 +381,11 @@ export default function useSwap() {
       return "";
     }
 
-    return (+trade.outputAmount.toSignificant() * (100 - slippage)) / 100;
-  }, [isConversion, slippage, trade, typedValue]);
+    console.log("OUTPUT");
+    console.log(formatFloat(trade.outputAmount.toSignificant(), { significantDigits: 2 }));
+
+    return formatFloat(trade.outputAmount.toSignificant(), { significantDigits: 2 });
+  }, [isConversion, trade, typedValue]);
 
   const { swapParams } = useSwapParams();
 
@@ -537,7 +540,7 @@ export default function useSwap() {
                       symbol1: tokenB.symbol!,
                       template: RecentTransactionTitleTemplate.SWAP,
                       amount0: typedValue,
-                      amount1: output.toString(),
+                      amount1: output,
                       logoURI0: tokenA?.logoURI || "/images/tokens/placeholder.svg",
                       logoURI1: tokenB?.logoURI || "/images/tokens/placeholder.svg",
                     },
