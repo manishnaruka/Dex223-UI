@@ -97,13 +97,13 @@ export default function PriceRangeInput({
           variant={IconButtonVariant.CONTROL}
           iconName="add"
           onClick={increment}
-          disabled={noLiquidity}
+          // disabled={noLiquidity}
         />
         <IconButton
           variant={IconButtonVariant.CONTROL}
           iconName="minus"
           onClick={decrement}
-          disabled={noLiquidity}
+          // disabled={noLiquidity}
         />
       </div>
     </div>

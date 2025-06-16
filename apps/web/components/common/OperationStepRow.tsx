@@ -1,7 +1,7 @@
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import React, { useMemo } from "react";
+import React, { PropsWithChildren, useMemo } from "react";
 import { Address } from "viem";
 
 import Svg from "@/components/atoms/Svg";
@@ -18,6 +18,10 @@ export enum OperationStepStatus {
   STEP_COMPLETED,
   STEP_FAILED,
   OPERATION_COMPLETED,
+}
+
+export function OperationRows({ children }: PropsWithChildren<{}>) {
+  return <div className="flex flex-col gap-5">{children}</div>;
 }
 
 export function operationStatusToStepStatus<TStatus extends string | number>({

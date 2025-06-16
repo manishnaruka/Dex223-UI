@@ -24,6 +24,40 @@ interface StepComputations {
   feeAmount: bigint;
 }
 
+export function makeSqrtPriceLimitX96({
+  currentSqrtPriceX96,
+  shift,
+  zeroForOne,
+}: {
+  currentSqrtPriceX96: bigint;
+  shift: number; // e.g. 50 = 0.5 %
+  zeroForOne: boolean;
+}): bigint {
+  const currentTick = TickMath.getTickAtSqrtRatio(currentSqrtPriceX96);
+  console.log(currentTick);
+  console.log(shift);
+  const limitTick = zeroForOne ? currentTick - shift : currentTick + shift;
+  console.log("Limit tick", limitTick);
+  return TickMath.getSqrtRatioAtTick(limitTick);
+}
+
+export function shiftSqrtPriceX96ByPercent(sqrtPriceX96: bigint, percent: number): bigint {
+  const Q96 = 2n ** 96n;
+
+  // 1. Переводим в обычную цену
+  const sqrtPrice = Number(sqrtPriceX96) / Number(Q96);
+  const price = sqrtPrice ** 2;
+
+  // 2. Применяем процент
+  const shiftedPrice = price * (1 + percent / 100);
+
+  // 3. Возвращаем обратно в sqrtPriceX96
+  const shiftedSqrtPrice = Math.sqrt(shiftedPrice);
+  const shiftedSqrtPriceX96 = shiftedSqrtPrice * Number(Q96);
+
+  return BigInt(Math.floor(shiftedSqrtPriceX96));
+}
+
 /**
  * By default, pools will not allow operations that require ticks.
  */
@@ -231,10 +265,40 @@ export class Pool {
     liquidity: bigint;
     tickCurrent: number;
   }> {
-    if (!sqrtPriceLimitX96)
-      sqrtPriceLimitX96 = zeroForOne
-        ? TickMath.MIN_SQRT_RATIO + ONE
-        : TickMath.MAX_SQRT_RATIO - ONE;
+    const extraTickScan =
+      {
+        500: 200,
+        3000: 100,
+        10000: 50,
+      }[this.fee] ?? 100;
+
+    if (zeroForOne) {
+      const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
+        this.tickCurrent,
+        true,
+        this.tickSpacing + 200,
+      );
+      sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
+    } else {
+      const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
+        this.tickCurrent,
+        false,
+        this.tickSpacing + extraTickScan,
+      );
+      sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
+    }
+    console.log("Check price limit...");
+    console.log(sqrtPriceLimitX96);
+    // if (!sqrtPriceLimitX96) {
+    //   sqrtPriceLimitX96 = makeSqrtPriceLimitX96({
+    //     currentSqrtPriceX96: this.sqrtRatioX96,
+    //     shift: this.tickSpacing + 200,
+    //     zeroForOne,
+    //   });
+    // }
+    // // sqrtPriceLimitX96 = zeroForOne
+    // //   ? TickMath.MIN_SQRT_RATIO + ONE
+    // //   : TickMath.MAX_SQRT_RATIO - ONE;
 
     if (zeroForOne) {
       invariant(sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO, "RATIO_MIN");
@@ -243,6 +307,8 @@ export class Pool {
       invariant(sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO, "RATIO_MAX");
       invariant(sqrtPriceLimitX96 > this.sqrtRatioX96, "RATIO_CURRENT");
     }
+
+    console.log("SWAP OPERATION", this.liquidity, this.sqrtRatioX96, this.tickDataProvider);
 
     const exactInput = amountSpecified >= ZERO;
 

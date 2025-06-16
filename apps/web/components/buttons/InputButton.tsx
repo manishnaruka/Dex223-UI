@@ -6,7 +6,7 @@ import { ThemeColors } from "@/config/theme/colors";
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   text: string;
   isActive: boolean;
-  colorScheme: ThemeColors.GREEN;
+  colorScheme: ThemeColors;
 }
 
 export default function InputButton({

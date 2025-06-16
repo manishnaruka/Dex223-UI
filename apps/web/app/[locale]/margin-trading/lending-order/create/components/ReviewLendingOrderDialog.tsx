@@ -16,15 +16,12 @@ import Input from "@/components/atoms/Input";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import OperationStepRow, {
+  OperationRows,
   operationStatusToStepStatus,
   OperationStepStatus,
 } from "@/components/common/OperationStepRow";
 import { IconName } from "@/config/types/IconName";
 import { Standard } from "@/sdk_bi/standard";
-
-function Rows({ children }: PropsWithChildren<{}>) {
-  return <div className="flex flex-col gap-5">{children}</div>;
-}
 
 type StepTextMap = {
   [key in OperationStepStatus]: string;
@@ -97,7 +94,7 @@ function CreateOrderActionButton() {
 
   if (status !== CreateOrderStatus.INITIAL) {
     return (
-      <Rows>
+      <OperationRows>
         {createOrderSteps.map((step, index) => (
           <OperationStepRow
             key={index}
@@ -116,7 +113,7 @@ function CreateOrderActionButton() {
             isFirstStep={index === 0}
           />
         ))}
-      </Rows>
+      </OperationRows>
     );
   }
 

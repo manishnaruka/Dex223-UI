@@ -533,7 +533,6 @@ export default function TradeForm() {
         gasERC20={gasERC20}
         gasERC223={gasERC223}
         token={tokenA}
-        isEqualTokens={!!tokenA && !!tokenB && tokenA.wrapped.address0 === tokenB.wrapped.address0}
         balance0={
           tokenA0Balance && Boolean(tokenA0Balance.value)
             ? formatFloat(tokenA0Balance.formatted)
@@ -615,9 +614,7 @@ export default function TradeForm() {
         }
         label={t("you_pay")}
         standard={tokenAStandard}
-        otherStandard={tokenBStandard}
         setStandard={setTokenAStandard}
-        setOtherStandard={setTokenBStandard}
       />
       <div className="relative h-4 md:h-5 z-10">
         <SwapButton
@@ -654,10 +651,7 @@ export default function TradeForm() {
         }
         label={t("you_receive")}
         standard={tokenBStandard}
-        otherStandard={tokenAStandard}
         setStandard={setTokenBStandard}
-        setOtherStandard={setTokenAStandard}
-        isEqualTokens={!!tokenA && !!tokenB && tokenA.wrapped.address0 === tokenB.wrapped.address0}
       />
 
       {error === TradeError.NO_LIQUIDITY && (

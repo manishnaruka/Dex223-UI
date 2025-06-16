@@ -33,7 +33,7 @@ export default function TokenInput({
   setMax,
   gasERC20,
   gasERC223,
-  colorScheme,
+  colorScheme = ThemeColors.GREEN,
   isError,
 }: {
   handleClick: () => void;
@@ -44,9 +44,7 @@ export default function TokenInput({
   balance1: string | undefined;
   label?: string;
   standard: Standard;
-  otherStandard: Standard;
   setStandard: (standard: Standard) => void;
-  setOtherStandard: (standard: Standard) => void;
   readOnly?: boolean;
   isHalf?: boolean;
   isMax?: boolean;
@@ -54,7 +52,6 @@ export default function TokenInput({
   setMax?: () => void;
   gasERC20?: string;
   gasERC223?: string;
-  isEqualTokens?: boolean;
   isError?: boolean;
   colorScheme?: ThemeColors;
 }) {

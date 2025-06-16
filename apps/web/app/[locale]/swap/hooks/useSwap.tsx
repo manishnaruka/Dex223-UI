@@ -472,12 +472,13 @@ export default function useSwap() {
 
         let _request;
         try {
-          const { request } = await publicClient.simulateContract({
+          const { request, result } = await publicClient.simulateContract({
             ...swapParams,
             account: address,
             ...gasSettings,
             gas: gasToUse,
           } as any);
+          console.log("Swap simulation result:", result);
           _request = request;
         } catch (e) {
           _request = {
