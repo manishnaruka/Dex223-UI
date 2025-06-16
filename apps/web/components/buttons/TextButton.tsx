@@ -1,17 +1,17 @@
-import clsx from "clsx";
 import { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
 import Svg from "@/components/atoms/Svg";
+import { ThemeColors } from "@/config/theme/colors";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  color?: "green" | "secondary";
+  colorScheme?: ThemeColors;
   endIcon?: IconName;
 }
 
 export default function TextButton({
-  color = "green",
+  colorScheme = ThemeColors.GREEN,
   endIcon,
   children,
   className,
@@ -21,8 +21,11 @@ export default function TextButton({
     <button
       className={clsxMerge(
         "disabled:opacity-50 disabled:pointer-events-none disabled:text-tertiary-text rounded-2 flex items-center justify-center gap-2 px-6 duration-200",
-        color === "green" && "text-green hocus:text-green-hover",
-        color === "secondary" && "text-secondary-text hocus:text-green-hover",
+        "text-secondary-text ",
+        {
+          [ThemeColors.GREEN]: "hocus:text-green-hover",
+          [ThemeColors.PURPLE]: "hocus:text-purple-hover",
+        }[colorScheme],
         className,
       )}
       {...props}

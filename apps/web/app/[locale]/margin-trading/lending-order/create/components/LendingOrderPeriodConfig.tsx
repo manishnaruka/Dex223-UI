@@ -1,86 +1,137 @@
 import Alert from "@repo/ui/alert";
 import React from "react";
 
+import {
+  LendingOrderPeriod,
+  LendingOrderPeriodErrors,
+  LendingOrderPeriodType,
+  PerpetualPeriodType,
+} from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
+import DateTimePicker from "@/components/atoms/DateTimePicker";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import RadioButton from "@/components/buttons/RadioButton";
 import Tab from "@/components/tabs/Tab";
 import Tabs from "@/components/tabs/Tabs";
 
-type PeriodType = "fixed" | "perpetual";
-enum PerpetualPeriodType {
-  DAYS,
-  SECONDS,
-}
-
-const labelsMap: Record<PeriodType, string> = {
-  fixed: "Fixed period",
-  perpetual: "Perpetual period",
+const labelsMap: Record<LendingOrderPeriodType, string> = {
+  [LendingOrderPeriodType.FIXED]: "Fixed period",
+  [LendingOrderPeriodType.PERPETUAL]: "Perpetual period",
 };
 
-const periods: PeriodType[] = ["fixed", "perpetual"];
-
-export default function LendingOrderPeriodConfig() {
-  const [period, setPeriod] = React.useState<PeriodType>("fixed");
-  const [perpetualPeriodType, setPerpetualPeriodType] = React.useState<PerpetualPeriodType>(
-    PerpetualPeriodType.DAYS,
-  );
-
+export default function LendingOrderPeriodConfig({
+  values,
+  setValues,
+  errors,
+}: {
+  values: LendingOrderPeriod;
+  setValues: (values: LendingOrderPeriod) => void;
+  errors?: LendingOrderPeriodErrors;
+}) {
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4">
       <InputLabel label="Period type" />
       <div className="grid grid-cols-2 gap-2 mb-4 mt-1">
-        {periods.map((_period) => (
+        {[LendingOrderPeriodType.FIXED, LendingOrderPeriodType.PERPETUAL].map((_period) => (
           <RadioButton
+            type="button"
             key={_period}
-            isActive={_period === period}
+            isActive={_period === values.type}
             onClick={() => {
-              setPeriod(_period);
+              setValues({ ...values, type: _period });
             }}
           >
             {labelsMap[_period]}
           </RadioButton>
         ))}
       </div>
-      {period === "fixed" && (
-        <>
-          <TextField
+      {values.type === LendingOrderPeriodType.FIXED && (
+        <div className="flex flex-col gap-1.5">
+          <DateTimePicker
             label="Lending order deadline"
             tooltipText="tooltip text"
             placeholder="DD.MM.YYYY hh:mm:ss aa"
+            value={values.lendingOrderDeadline}
+            onChange={(e) =>
+              setValues({
+                ...values,
+                lendingOrderDeadline: e.target.value,
+              })
+            }
+            error={errors?.lendingOrderDeadline}
           />
           <TextField
+            internalText="days"
             label="Margin positions duration"
             placeholder={"0"}
             tooltipText="tooltip text"
+            value={values.positionDuration}
+            onChange={(e) =>
+              setValues({
+                ...values,
+                positionDuration: e.target.value,
+              })
+            }
+            error={errors?.positionDuration}
           />
-        </>
+        </div>
       )}
-      {period === "perpetual" && (
+      {values.type === LendingOrderPeriodType.PERPETUAL && (
         <div className="w-full">
           <Tabs
-            activeTab={perpetualPeriodType}
-            setActiveTab={setPerpetualPeriodType}
+            activeTab={values.borrowingPeriod.type}
+            setActiveTab={(value: PerpetualPeriodType) =>
+              setValues({
+                ...values,
+                borrowingPeriod: { ...values.borrowingPeriod, type: value },
+              })
+            }
             fullWidth
             colorScheme={"secondary"}
           >
             <Tab title="Days">
               <div className="mt-4">
                 <TextField
+                  isNumeric
+                  decimalScale={0}
                   label="Borrowing period"
                   tooltipText="tooltip text"
                   placeholder="0"
                   internalText={"days"}
+                  value={values.borrowingPeriod.borrowingPeriodInDays}
+                  onChange={(e) =>
+                    setValues({
+                      ...values,
+                      borrowingPeriod: {
+                        ...values.borrowingPeriod,
+                        borrowingPeriodInDays: e.target.value,
+                      },
+                    })
+                  }
+                  error={errors?.borrowingPeriod?.borrowingPeriodInDays}
                 />
               </div>
             </Tab>
-            <Tab title="Seconds">
+            <Tab title="Minutes">
               <div className="mt-4">
                 <TextField
+                  isNumeric
+                  decimalScale={0}
                   label="Borrowing period"
                   tooltipText="tooltip text"
                   placeholder="0"
                   internalText={"seconds"}
-                  helperText={"450000 seconds = 5.2 days"}
+                  helperText={"1440 seconds = 1 day"}
+                  value={values.borrowingPeriod.borrowingPeriodInMinutes}
+                  onChange={(e) =>
+                    setValues({
+                      ...values,
+                      borrowingPeriod: {
+                        ...values.borrowingPeriod,
+                        borrowingPeriodInMinutes: e.target.value,
+                      },
+                    })
+                  }
+                  error={errors?.borrowingPeriod?.borrowingPeriodInMinutes}
                 />
               </div>
             </Tab>

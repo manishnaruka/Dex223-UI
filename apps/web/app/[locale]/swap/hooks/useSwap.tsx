@@ -325,16 +325,14 @@ export function useSwapEstimatedGas() {
     });
   }, [publicClient, address, swapParams, isAllowedA]);
 }
+
 export default function useSwap() {
-  console.log("useSwap fired before dialog mounted");
   const t = useTranslations("Swap");
   const { data: walletClient } = useWalletClient();
   const { tokenA, tokenB, tokenAStandard, tokenBStandard } = useSwapTokensStore();
   const { trade } = useTrade();
   const { address } = useAccount();
   const publicClient = usePublicClient();
-
-  console.log(trade);
 
   const chainId = useCurrentChainId();
 
@@ -474,12 +472,13 @@ export default function useSwap() {
 
         let _request;
         try {
-          const { request } = await publicClient.simulateContract({
+          const { request, result } = await publicClient.simulateContract({
             ...swapParams,
             account: address,
             ...gasSettings,
             gas: gasToUse,
           } as any);
+          console.log("Swap simulation result:", result);
           _request = request;
         } catch (e) {
           _request = {

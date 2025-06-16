@@ -3,6 +3,7 @@ import { ChangeEvent, forwardRef, InputHTMLAttributes, useRef } from "react";
 
 import Svg from "@/components/atoms/Svg";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
+import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
 
 export enum InputSize {
@@ -14,6 +15,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   isWarning?: boolean;
   inputSize?: InputSize;
   noCloseIcon?: boolean;
+  colorScheme?: ThemeColors;
 }
 
 const inputSizeMap: Record<InputSize, string> = {
@@ -22,7 +24,14 @@ const inputSizeMap: Record<InputSize, string> = {
 };
 
 const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
-  { isError = false, isWarning = false, className, inputSize = InputSize.LARGE, ...props },
+  {
+    isError = false,
+    isWarning = false,
+    className,
+    inputSize = InputSize.LARGE,
+    colorScheme = ThemeColors.GREEN,
+    ...props
+  },
   ref,
 ) {
   return (
@@ -33,11 +42,13 @@ const Input = forwardRef<HTMLInputElement | null, Props>(function Input(
         inputSizeMap[inputSize],
         !isError &&
           !isWarning &&
-          "border-transparent hocus:shadow hocus:shadow-green/60 focus:shadow focus:shadow-green focus:border-green",
+          (colorScheme === ThemeColors.GREEN
+            ? "border-transparent hocus:shadow hocus:shadow-green/60 focus:shadow focus:shadow-green focus:border-green"
+            : "border-transparent hocus:shadow hocus:shadow-purple/60 focus:shadow focus:shadow-purple focus:border-purple"),
         isError &&
           "border-red-light hocus:shadow hocus:shadow-red-light-shadow/60 focus:shadow focus:shadow-red-light-shadow/60",
         isWarning &&
-          "border-orange hocus:shadow hocus:shadow-yellow/60 focus:shadow focus:shadow-yellow/60",
+          "border-orange hocus:shadow hocus:shadow-orange/60 focus:shadow focus:shadow-orange/60",
         props.disabled && "opacity-50 pointer-events-none",
         props.readOnly && "pointer-events-none bg-primary-bg border-secondary-border",
         className,

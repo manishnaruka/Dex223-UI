@@ -7,8 +7,6 @@ const config = {
   content: [
     "../../apps/blog/app/**/*.{js,ts,jsx,tsx,mdx}",
     "../../apps/blog/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../apps/exchange/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../apps/exchange/components/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
     extend: {

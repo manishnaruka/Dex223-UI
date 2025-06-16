@@ -4,14 +4,14 @@ import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Fraction } from "@/sdk_bi/entities/fractions/fraction";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { Price } from "@/sdk_bi/entities/fractions/price";
-import { Pool } from "@/sdk_bi/entities/pool";
+import { makeSqrtPriceLimitX96, Pool, shiftSqrtPriceX96ByPercent } from "@/sdk_bi/entities/pool";
 import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 import { sortedInsert } from "@/sdk_bi/utils/sortedInsert";
 
 import { FACTORY_ADDRESS } from "../addresses";
 import { DexChainId } from "../chains";
-import { TradeType } from "../constants";
+import { TICK_SPACINGS, TradeType } from "../constants";
 import { ONE, ZERO } from "../internalConstants";
 import { computePoolAddress } from "../utils/computePoolAddress";
 import { Currency } from "./currency";
@@ -570,6 +570,8 @@ export class Trade<
       let amountOut: CurrencyAmount<Token>;
       try {
         [amountOut] = await pool.getOutputAmount(amountIn);
+        console.log(`Amount out for ${pool.fee} pool is:`);
+        console.log(amountOut.toSignificant());
       } catch (error) {
         // input too low
         // @ts-ignore

@@ -3,6 +3,7 @@ import { formatGwei } from "viem";
 
 import TextButton from "@/components/buttons/TextButton";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
+import { ThemeColors } from "@/config/theme/colors";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
@@ -23,6 +24,7 @@ export default function ConfigureAutomatically({
         <span className="hidden text-tertiary-text md:inline">Custom gas settings</span>
       </span>
       <TextButton
+        colorScheme={ThemeColors.PURPLE}
         onClick={() => {
           const multiplier = baseFeeMultipliers[chainId][GasOption.CHEAP];
 

@@ -346,3 +346,13 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
 [data-simplebar].simplebar-dragging .simplebar-scrollbar:before {
   opacity: 1!important;
 }
+
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  width: 2rem;             /* ⬅️ Increase size */
+  height: 2rem;
+  cursor: pointer;
+  padding: 0.5rem;         /* ⬅️ Increase clickable area */
+  background-size: 1.25rem; /* Optional: scale icon */
+}

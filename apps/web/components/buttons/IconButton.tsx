@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
-import { ButtonHTMLAttributes, useCallback, useEffect, useState } from "react";
-import { MouseEvent } from "react";
+import { ButtonHTMLAttributes, MouseEvent, useCallback, useEffect, useState } from "react";
 
 import Svg from "@/components/atoms/Svg";
+import { ThemeColors } from "@/config/theme/colors";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { copyToClipboard } from "@/functions/copyToClipboard";
@@ -49,6 +49,7 @@ function IconButtonFrame({
 }: FrameProps) {
   return (
     <button
+      type="button"
       className={clsxMerge(
         buttonSize === IconButtonSize.EXTRA_SMALL && "w-6 h-6",
         buttonSize === IconButtonSize.SMALL && "w-8 h-8",
@@ -96,7 +97,12 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
     | { variant: IconButtonVariant.CONTROL; iconName: IconName }
     | { variant: IconButtonVariant.COPY; text: string }
     | { variant: IconButtonVariant.BACK; iconName?: IconName }
-    | { variant?: IconButtonVariant.DEFAULT | undefined; iconName: IconName; active?: boolean }
+    | {
+        variant?: IconButtonVariant.DEFAULT | undefined;
+        iconName: IconName;
+        active?: boolean;
+        colorScheme?: ThemeColors;
+      }
     | {
         variant: IconButtonVariant.SORTING;
         sorting: SortingType;
@@ -165,14 +171,17 @@ export default function IconButton(_props: Props) {
   switch (_props.variant) {
     case IconButtonVariant.DEFAULT:
     case undefined: {
-      const { active, iconName, className, ...props } = _props;
+      const { active, iconName, className, colorScheme = ThemeColors.GREEN, ...props } = _props;
       return (
         <IconButtonFrame
           iconName={_props.iconName}
           className={clsxMerge(
             "text-tertiary-text relative before:opacity-0 before:duration-200 hocus:before:opacity-60 before:absolute before:w-4 before:h-4 before:rounded-full before:blur-[9px] duration-200",
-            active && "text-green",
-            !isTouchDevice && "hocus:text-green-hover-icon before:bg-green-hover-icon",
+            active && (colorScheme === ThemeColors.GREEN ? "text-green" : "text-purple"),
+            !isTouchDevice &&
+              (colorScheme === ThemeColors.GREEN
+                ? "hocus:text-green-hover-icon before:bg-green-hover-icon"
+                : "hocus:text-purple-hover-icon before:bg-purple-hover-icon"),
             className,
           )}
           {...props}

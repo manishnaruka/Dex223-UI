@@ -18,6 +18,9 @@ const POOL_QUERY = gql`
   query PoolsTicks($addresses: [ID!]) {
     pools(where: { id_in: $addresses }) {
       id
+      liquidity
+      tick
+      sqrtPrice
       ticks {
         tickIdx
         liquidityGross
@@ -26,6 +29,7 @@ const POOL_QUERY = gql`
     }
   }
 `;
+
 export const useFetchPoolData = (chainId: number) => {
   const _apolloClient = useMemo(() => {
     return apolloClient(chainId);
@@ -35,12 +39,14 @@ export const useFetchPoolData = (chainId: number) => {
     client: _apolloClient,
   });
 
-  const publicClient = usePublicClient();
-
   return useCallback(
     async (key: string, address: Address, token0: Currency, token1: Currency, tier: FeeAmount) => {
       try {
-        if (address === ZERO_ADDRESS || !publicClient) {
+        console.log(address);
+        console.log(token0);
+        console.log(tier);
+
+        if (address === ZERO_ADDRESS) {
           return null;
         }
         console.log("CAllback fired");
@@ -48,14 +54,14 @@ export const useFetchPoolData = (chainId: number) => {
         const queryResult = await triggerQuery({
           variables: { addresses: [address.toLowerCase()] },
         });
-        console.log(queryResult);
+
         const poolGqlData = queryResult.data?.pools?.[0];
         if (!poolGqlData) {
           // Pool does not exist in the subgraph
           return null;
         }
 
-        console.log(poolGqlData);
+        console.log("poolData", poolGqlData);
 
         const ticks = poolGqlData.ticks
           .map(
@@ -68,27 +74,14 @@ export const useFetchPoolData = (chainId: number) => {
           )
           .sort((a: Tick, b: Tick) => a.index - b.index);
 
-        console.log("READING FROM NODE");
-        // Step 2: Read from contracts via wagmi
-        const slot0Result = await publicClient.readContract({
-          address,
-          abi: POOL_STATE_ABI,
-          functionName: "slot0",
-        });
+        const liquidity = BigInt(poolGqlData.liquidity);
 
-        const liquidityResult = await publicClient.readContract({
-          address,
-          abi: POOL_STATE_ABI,
-          functionName: "liquidity",
-        });
+        console.log("Liquidity from gql:", liquidity);
+        const sqrtPriceX96 = BigInt(poolGqlData.sqrtPrice);
 
-        const [sqrtPriceX96, tick] = slot0Result;
-        const liquidity = liquidityResult as bigint;
+        const tick = +poolGqlData.tick;
 
-        console.log(sqrtPriceX96);
-        console.log(liquidity);
         if (!sqrtPriceX96 || sqrtPriceX96 === BigInt(0)) {
-          // Pool invalid on-chain
           return null;
         }
 
@@ -107,6 +100,6 @@ export const useFetchPoolData = (chainId: number) => {
         throw new Error(err.message || "Unknown error");
       }
     },
-    [publicClient, triggerQuery],
+    [triggerQuery],
   );
 };

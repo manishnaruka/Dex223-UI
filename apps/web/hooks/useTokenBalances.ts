@@ -3,7 +3,7 @@ import { useAccount, useBalance } from "wagmi";
 
 import { Currency } from "@/sdk_bi/entities/currency";
 
-export default function useTokenBalances(currency: Currency | undefined) {
+export default function useTokenBalances(currency: Currency | undefined | null) {
   const { address } = useAccount();
 
   const { data: erc20Balance, refetch: refetch20 } = useBalance({

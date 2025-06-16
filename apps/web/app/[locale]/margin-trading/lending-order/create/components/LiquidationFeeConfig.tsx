@@ -1,5 +1,8 @@
+import { FormikErrors, FormikTouched } from "formik";
+import Image from "next/image";
 import React, { useCallback, useState } from "react";
 
+import { ThirdStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import Select from "@/components/atoms/Select";
 import SelectButton from "@/components/atoms/SelectButton";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
@@ -17,17 +20,32 @@ const labelsMap: Record<LiquidationFeePayer, string> = {
 
 const feePayers: LiquidationFeePayer[] = ["borrower", "lender"];
 
-export default function LiquidationFeeConfig() {
+export default function LiquidationFeeConfig({
+  values,
+  setFieldValue,
+  errors,
+  touched,
+}: {
+  values: ThirdStepValues;
+  setFieldValue: (
+    field: string,
+    value: any,
+    shouldValidate?: boolean,
+  ) => Promise<void | FormikErrors<ThirdStepValues>>;
+  errors: FormikErrors<ThirdStepValues>;
+  touched: FormikTouched<ThirdStepValues>;
+}) {
   const [feePayer, setFeePayer] = React.useState<LiquidationFeePayer>("borrower");
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
-  const [liquidationFeeToken, setLiquidationFeeToken] = React.useState<Currency | undefined>();
+  const handlePick = useCallback(
+    (token: Currency) => {
+      setFieldValue("liquidationFeeToken", token);
 
-  const handlePick = useCallback((token: Currency) => {
-    setLiquidationFeeToken(token);
-
-    setIsOpenedTokenPick(false);
-  }, []);
+      setIsOpenedTokenPick(false);
+    },
+    [setFieldValue],
+  );
 
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mt-4 mb-6">
@@ -36,6 +54,7 @@ export default function LiquidationFeeConfig() {
         {feePayers.map((_feePayer) => {
           return (
             <RadioButton
+              type="button"
               disabled={_feePayer === "lender"}
               isActive={feePayer === _feePayer}
               onClick={() => {
@@ -51,12 +70,21 @@ export default function LiquidationFeeConfig() {
 
       <InputLabel label="Liquidation fee token" />
       <SelectButton
+        type="button"
         className="bg-quaternary-bg mb-6 pl-5"
         size={"medium"}
         fullWidth
         onClick={() => setIsOpenedTokenPick(true)}
       >
-        {liquidationFeeToken?.wrapped.symbol || "Select token"}
+        <span className=" flex items-center gap-2">
+          <Image
+            src={values.liquidationFeeToken?.logoURI || "/images/tokens/placeholder.svg"}
+            width={24}
+            height={24}
+            alt=""
+          />
+          {values.liquidationFeeToken?.symbol || "Select token"}
+        </span>
       </SelectButton>
 
       <TextField
@@ -64,12 +92,18 @@ export default function LiquidationFeeConfig() {
         tooltipText="Tooltip text"
         placeholder="Liquidation fee (for liquidator)"
         internalText="ETH"
+        value={values.liquidationFeeForLiquidator}
+        onChange={(e) => setFieldValue("liquidationFeeForLiquidator", e.target.value)}
+        error={touched.liquidationFeeForLiquidator && errors.liquidationFeeForLiquidator}
       />
       <TextField
         label="Liquidation fee (for lender)"
         tooltipText="Tooltip text"
         placeholder="Liquidation fee (for lender)"
         internalText="ETH"
+        value={values.liquidationFeeForLender}
+        onChange={(e) => setFieldValue("liquidationFeeForLender", e.target.value)}
+        error={touched.liquidationFeeForLender && errors.liquidationFeeForLender}
       />
 
       <PickTokenDialog

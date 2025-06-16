@@ -4,7 +4,9 @@ import { formatGwei, parseGwei } from "viem";
 import { InputSize } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
 import ErrorsAndWarnings from "@/components/gas-settings/ErrorsAndWarnings";
+import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
+import { useColorScheme } from "@/lib/color-scheme";
 
 export default function LegacyField({
   value,
@@ -23,6 +25,7 @@ export default function LegacyField({
   legacyGasPriceError: string | undefined;
   legacyGasPriceWarning: string | undefined;
 }) {
+  const colorScheme = useColorScheme();
   const legacyGasPriceErrors = useMemo(() => {
     const _errors: string[] = [];
 
@@ -50,6 +53,7 @@ export default function LegacyField({
   return (
     <>
       <TextField
+        colorScheme={colorScheme}
         isNumeric
         placeholder="Gas price"
         label="Gas price"
@@ -71,7 +75,12 @@ Your transaction will not confirm until your gasPrice is higher or equal to the 
                   setFieldValue(formatGwei(gasPrice));
                 }
               }}
-              className="text-green duration-200 hocus:text-green-hover"
+              className={
+                {
+                  [ThemeColors.GREEN]: "text-green duration-200 hocus:text-green-hover",
+                  [ThemeColors.PURPLE]: "text-purple duration-200 hocus:text-purple-hover",
+                }[colorScheme]
+              }
             >
               Current
             </button>{" "}

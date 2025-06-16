@@ -17,7 +17,6 @@ export default function DialogsProvider({ children }: PropsWithChildren) {
   return (
     <>
       {children}
-      <SwapSettingsDialog />
       <TransactionSpeedUpDialog />
       <ConfirmInWalletDialog />
       <FeedbackDialog />

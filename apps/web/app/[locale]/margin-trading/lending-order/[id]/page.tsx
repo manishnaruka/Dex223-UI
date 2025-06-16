@@ -4,8 +4,10 @@ import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import SimpleBar from "simplebar-react";
 
+import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
@@ -45,6 +47,8 @@ function TokenBadge() {
 }
 
 export default function LendingOrder() {
+  const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
+
   return (
     <div className="py-10">
       <Container>
@@ -99,7 +103,11 @@ export default function LendingOrder() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Button className="border-green" colorScheme={ButtonColor.LIGHT_GREEN}>
+                <Button
+                  onClick={() => setIsDepositDialogOpened(true)}
+                  className="border-green"
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                >
                   Deposit
                 </Button>
                 <Button className="border-green" colorScheme={ButtonColor.LIGHT_GREEN}>
@@ -235,6 +243,8 @@ export default function LendingOrder() {
           <MarginPositionInfoCard />
         </div>
       </Container>
+
+      <OrderDepositDialog isOpen={isDepositDialogOpened} setIsOpen={setIsDepositDialogOpened} />
     </div>
   );
 }

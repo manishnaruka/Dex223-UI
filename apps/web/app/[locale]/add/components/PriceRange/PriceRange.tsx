@@ -14,7 +14,6 @@ import { usePool } from "@/hooks/usePools";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Price } from "@/sdk_bi/entities/fractions/price";
 import { Token } from "@/sdk_bi/entities/token";
-import { TickMath } from "@/sdk_bi/utils/tickMath";
 
 import { useRangeHopCallbacks } from "../../hooks/useRangeHopCallbacks";
 import { useAddLiquidityTokensStore } from "../../stores/useAddLiquidityTokensStore";
@@ -73,10 +72,8 @@ export const PriceRange = ({
     currencyB: tokenB,
     tier,
   });
-  // const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks;
   const { baseToken, quoteToken, invertPrice, toggleInvertPrice } = useDerivedTokens();
 
-  console.log(ticksAtLimit);
   const initializePriceRangeWithZoom = useCallback(
     ({
       price,
