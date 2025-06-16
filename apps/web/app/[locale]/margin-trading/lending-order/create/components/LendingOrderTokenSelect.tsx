@@ -93,9 +93,7 @@ export default function LendingOrderTokenSelect({
           token1Balance && Boolean(token1Balance.value) ? formatFloat(token1Balance.formatted) : "0"
         }
         standard={standard}
-        otherStandard={Standard.ERC20}
         setStandard={setStandard}
-        setOtherStandard={() => {}}
       />
       <PickTokenDialog
         handlePick={handlePick}

@@ -79,6 +79,7 @@ export const useFetchPoolData = (chainId: number) => {
         console.log("Liquidity from gql:", liquidity);
         const sqrtPriceX96 = BigInt(poolGqlData.sqrtPrice);
 
+        console.log("SQRTPrice from gql:", sqrtPriceX96);
         const tick = +poolGqlData.tick;
 
         if (!sqrtPriceX96 || sqrtPriceX96 === BigInt(0)) {

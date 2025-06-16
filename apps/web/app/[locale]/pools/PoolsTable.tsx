@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
@@ -142,9 +142,10 @@ const PoolsTableDesktop = ({
         : tableData.map((o: any, index: number) => {
             let token0Symbol = o.token0.symbol;
             let token1Symbol = o.token1.symbol;
+            console.log(o);
 
-            let token0Image = "/images/tokens/placeholder.svg";
-            let token1Image = "/images/tokens/placeholder.svg";
+            let token0Image = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(o.token0.id)}/logo.png`;
+            let token1Image = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(o.token1.id)}/logo.png`;
 
             const d223 = "0x0908078Da2935A14BC7a17770292818C85b580dd";
             if (o.token0.addressERC223 === d223.toLowerCase()) {

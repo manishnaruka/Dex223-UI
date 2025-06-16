@@ -110,6 +110,7 @@ export function useAddLiquidityParams({
         toHex(position.pool.sqrtRatioX96) as any,
       ] as [Address, Address, Address, Address, FeeAmount, bigint];
 
+      console.log("SQRT=>>>>>>", position.pool.sqrtRatioX96);
       console.log(createParams);
 
       const mintParams = {

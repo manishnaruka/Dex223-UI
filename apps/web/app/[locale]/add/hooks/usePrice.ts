@@ -65,6 +65,8 @@ export const usePriceRange = () => {
       }
       return undefined;
     } else {
+      console.log("I'm here =>>>");
+      console.log(pool);
       // get the amount of quote currency
       return pool && token0 ? pool.priceOf(token0.wrapped) : undefined;
     }

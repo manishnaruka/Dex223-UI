@@ -276,7 +276,7 @@ export class Pool {
       const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
         this.tickCurrent,
         true,
-        this.tickSpacing + 200,
+        this.tickSpacing + extraTickScan,
       );
       sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
     } else {
@@ -287,18 +287,6 @@ export class Pool {
       );
       sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
     }
-    console.log("Check price limit...");
-    console.log(sqrtPriceLimitX96);
-    // if (!sqrtPriceLimitX96) {
-    //   sqrtPriceLimitX96 = makeSqrtPriceLimitX96({
-    //     currentSqrtPriceX96: this.sqrtRatioX96,
-    //     shift: this.tickSpacing + 200,
-    //     zeroForOne,
-    //   });
-    // }
-    // // sqrtPriceLimitX96 = zeroForOne
-    // //   ? TickMath.MIN_SQRT_RATIO + ONE
-    // //   : TickMath.MAX_SQRT_RATIO - ONE;
 
     if (zeroForOne) {
       invariant(sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO, "RATIO_MIN");
