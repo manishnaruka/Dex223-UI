@@ -5,13 +5,17 @@ import {
   OrderDepositStatus,
   useDepositOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
+import {
+  OrderWithdrawStatus,
+  useWithdrawOrderStatusStore,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useWithdrawOrderStatusStore";
 import sleep from "@/functions/sleep";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 
-export default function useOrderDeposit({ orderId }: { orderId: number }) {
-  const { setStatus } = useDepositOrderStatusStore();
+export default function useOrderWithdraw({ orderId }: { orderId: number }) {
+  const { setStatus } = useWithdrawOrderStatusStore();
   const chainId = useCurrentChainId();
 
   // const {
@@ -24,23 +28,17 @@ export default function useOrderDeposit({ orderId }: { orderId: number }) {
   //   amountToCheck: parseUnits(params.loanAmount, params.loanToken?.decimals ?? 18),
   // });
 
-  const handleOrderDeposit = useCallback(async () => {
+  const handleOrderWithdraw = useCallback(async () => {
     console.log(orderId);
-    setStatus(OrderDepositStatus.PENDING_APPROVE);
+    setStatus(OrderWithdrawStatus.PENDING_WITHDRAW);
     await sleep(1000);
-    setStatus(OrderDepositStatus.LOADING_APPROVE);
+    setStatus(OrderWithdrawStatus.LOADING_WITHDRAW);
     await sleep(4000);
 
-    setStatus(OrderDepositStatus.PENDING_DEPOSIT);
-    await sleep(4000);
-
-    setStatus(OrderDepositStatus.LOADING_DEPOSIT);
-    await sleep(4000);
-
-    setStatus(OrderDepositStatus.SUCCESS);
+    setStatus(OrderWithdrawStatus.SUCCESS);
 
     return;
   }, [orderId, setStatus]);
 
-  return { handleOrderDeposit };
+  return { handleOrderWithdraw };
 }

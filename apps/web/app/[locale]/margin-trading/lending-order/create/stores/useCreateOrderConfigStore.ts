@@ -1,4 +1,3 @@
-import { Address } from "viem";
 import { create } from "zustand";
 
 import {

@@ -15,18 +15,37 @@ enum DangerStatus {
   DANGEROUS,
 }
 
-function MarginPositionInfoCard() {
+type MarginPositionCardBg = "percent" | "deadline" | "margin-trading" | "currency";
+
+export type PositionInfoCardProps = {
+  title: string;
+  tooltipText: string;
+  value: string | ReactNode;
+  bg: MarginPositionCardBg;
+};
+
+const bgMap: Record<MarginPositionCardBg, string> = {
+  percent: "bg-[url(/images/card-bg/mpd.svg)]",
+  deadline: "bg-[url(/images/card-bg/mpd.svg)]",
+  "margin-trading": "bg-[url(/images/card-bg/mpd.svg)]",
+  currency: "bg-[url(/images/card-bg/mpd.svg)]",
+};
+
+export function OrderInfoCard({ title, tooltipText, value, bg }: PositionInfoCardProps) {
   return (
-    <div className="flex flex-col justify-center px-5 bg-tertiary-bg rounded-3">
+    <div
+      className={clsx(
+        "flex flex-col justify-center px-5 bg-tertiary-bg bg-account-card-pattern rounded-3 py-3 bg-right-top bg-no-repeat",
+        bgMap[bg],
+      )}
+    >
       <div className="flex items-center gap-1">
-        <span className="text-14 flex items-center gap-1 text-secondary-text">
-          Borrowed
-          <Tooltip text="Tooltip text" />
+        <span className="text-14 flex items-center gap-1 text-tertiary-text">
+          {title}
+          <Tooltip text={tooltipText} />
         </span>
       </div>
-      <div className="relative flex gap-1">
-        <span>100</span> USDT
-      </div>
+      <div className="relative flex gap-1 font-medium text-20 text-secondary-text">{value}</div>
     </div>
   );
 }

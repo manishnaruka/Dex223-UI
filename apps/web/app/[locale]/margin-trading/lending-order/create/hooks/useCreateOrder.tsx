@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo } from "react";
-import { parseUnits } from "viem";
+import { useCallback, useEffect, useMemo } from "react";
+import { Address, decodeEventLog, encodeAbiParameters, Hash, keccak256, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
@@ -12,22 +12,17 @@ import {
   useCreateOrderGasLimitStore,
   useCreateOrderGasPriceStore,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useSwapGasSettingsStore";
-import { SwapError } from "@/app/[locale]/swap/stores/useSwapStatusStore";
+import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { getGasSettings } from "@/functions/gasSettings";
-import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
-import sleep from "@/functions/sleep";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
+import useRunStep from "@/hooks/useRunStep";
+import { addNotification } from "@/other/notification";
 import addToast from "@/other/toast";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 import { Standard } from "@/sdk_bi/standard";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
-import {
-  RecentTransactionTitleTemplate,
-  stringifyObject,
-  useRecentTransactionsStore,
-} from "@/stores/useRecentTransactionsStore";
 
 function useCreateOrderParams() {
   const { firstStepValues, secondStepValues, thirdStepValues } = useCreateOrderConfigStore();
@@ -37,6 +32,42 @@ function useCreateOrderParams() {
     ...secondStepValues,
     ...thirdStepValues,
   };
+}
+
+export function sortAddresses(addresses: string[]): string[] {
+  return addresses.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+}
+
+export function getWhitelistId(addresses: Address[], isContract: boolean): Hash {
+  const encoded = encodeAbiParameters(
+    [
+      { type: "bool", name: "isContract" },
+      { type: "address[]", name: "tokens" },
+    ],
+    [isContract, addresses],
+  );
+
+  return keccak256(encoded);
+}
+
+/**
+ * Calculate the on‐chain interestRate parameter.
+ *
+ * The contract expects:
+ *   – interestRate = (30-day rate × 100) prorated to position duration
+ *   – e.g. 11.5% for 30 days ⇒ 1150, half that for 15 days ⇒ 575
+ *
+ * @param monthlyPct    30-day interest rate in percent (e.g. 11.5 for 11.5%)
+ * @param durationDays  Actual position length in days
+ * @returns             Integer interestRate for your contract
+ */
+export function calculateInterestRate(monthlyPct: number, durationDays: number): bigint {
+  // Convert 30-day % to “percent × 100”
+  const baseRate = monthlyPct * 100;
+  // Prorate by (durationDays / 30)
+  const prorated = (baseRate * durationDays) / 30;
+  // Round down to an integer (solidity uint)
+  return BigInt(Math.floor(prorated));
 }
 
 export default function useCreateOrder() {
@@ -64,7 +95,24 @@ export default function useCreateOrder() {
   const { customGasLimit } = useCreateOrderGasLimitStore();
   const { gasPriceOption, gasPriceSettings } = useCreateOrderGasPriceStore();
   const { baseFee, priorityFee, gasPrice } = useFees();
-  const { addRecentTransaction } = useRecentTransactionsStore();
+  const {
+    tradingTokens,
+    loanToken,
+    loanTokenStandard,
+    collateralTokens,
+    loanAmount,
+    includeERC223Collateral,
+    liquidationFeeToken,
+    liquidationFeeForLiquidator,
+    liquidationFeeForLender,
+    liquidationMode,
+    minimumBorrowingAmount,
+    orderCurrencyLimit,
+    period,
+    interestRatePerMonth,
+    leverage,
+    priceSource,
+  } = useCreateOrderParams();
 
   const gasSettings = useMemo(() => {
     return getGasSettings({
@@ -77,323 +125,293 @@ export default function useCreateOrder() {
     });
   }, [baseFee, chainId, gasPrice, priorityFee, gasPriceOption, gasPriceSettings]);
 
+  const { handleRunStep } = useRunStep();
+
+  useEffect(() => {
+    setStatus(CreateOrderStatus.INITIAL);
+  }, [setStatus]);
+
   const handleCreateOrder = useCallback(
     async (amountToApprove: string) => {
-      // setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.PENDING_APPROVE);
-      // await sleep(1000);
-      // setStatus(CreateOrderStatus.LOADING_APPROVE);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.PENDING_DEPOSIT);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.LOADING_DEPOSIT);
-      // await sleep(4000);
-      //
-      // setStatus(CreateOrderStatus.SUCCESS);
-      //
-      // return;
+      setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
 
-      if (!publicClient || !params.loanToken) {
+      if (
+        !params.loanToken ||
+        !publicClient ||
+        !walletClient ||
+        !loanToken ||
+        !liquidationFeeToken
+      ) {
         return;
       }
 
-      if (!isAllowedA && params.loanTokenStandard === Standard.ERC20 && params.loanToken.isToken) {
-        openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
+      const sortedAddresses = sortAddresses(
+        tradingTokens.allowedTokens.map((token) => token.wrapped.address0),
+      ) as Address[];
+
+      const addTokenListHash = await walletClient.writeContract({
+        abi: MARGIN_MODULE_ABI,
+        address: MARGIN_TRADING_ADDRESS[chainId],
+        functionName: "addTokenlist",
+        args: [sortedAddresses, false],
+        account: undefined,
+      });
+
+      setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+      await publicClient.waitForTransactionReceipt({ hash: addTokenListHash });
+      setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
+
+      const whitelistId = getWhitelistId(sortedAddresses, false);
+
+      try {
+        // const a = parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals);
+        // console.log(a);
+        // console.log(minimumBorrowingAmount);
+        //
+        // const b = parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals);
+        // console.log(b);
+        // console.log(minimumBorrowingAmount);
+        // console.log(liquidationFeeForLiquidator);
+        // console.log(loanToken.decimals, liquidationFeeToken.decimals);
+        // console.log([
+        //   whitelistId, // whitelist id from tokens that are allowed for trading
+        //   calculateInterestRate(Number(interestRatePerMonth), Number(period.positionDuration)), // interest rate for 30 days mutliplied by 100
+        //   BigInt(Number(period.positionDuration) * 24 * 60 * 60), // positionDuration in seconds
+        //   parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals), // minLoan,
+        //   parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals), // liquidationRewardAmount
+        //   liquidationFeeToken.wrapped.address0, // liquidationRewardAsset
+        //   loanTokenStandard === Standard.ERC20
+        //     ? loanToken.wrapped.address0
+        //     : loanToken.wrapped.address1, // asset address
+        //   Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000), // deadline
+        //   Number(orderCurrencyLimit), // currencyLimit
+        //   leverage, // leverage
+        //   "0xa8fa9e2c64a45ba5bc64089104c332be056c4c83", //oracle
+        // ]);
+
+        const createOrderHash = await walletClient.writeContract({
+          abi: MARGIN_MODULE_ABI,
+          address: MARGIN_TRADING_ADDRESS[chainId],
+          functionName: "createOrder",
+          args: [
+            whitelistId, // whitelist id from tokens that are allowed for trading
+            calculateInterestRate(Number(interestRatePerMonth), Number(period.positionDuration)), // interest rate for 30 days mutliplied by 100
+            BigInt(Number(period.positionDuration) * 24 * 60 * 60), // positionDuration in seconds
+            parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals), // minLoan,
+            parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals), // liquidationRewardAmount
+            liquidationFeeToken.wrapped.address0, // liquidationRewardAsset
+            loanTokenStandard === Standard.ERC20
+              ? loanToken.wrapped.address0
+              : loanToken.wrapped.address1, // asset address
+            Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000), // deadline
+            Number(orderCurrencyLimit), // currencyLimit
+            leverage, // leverage
+            "0xa8fa9e2c64a45ba5bc64089104c332be056c4c83", //oracle
+          ],
+          account: undefined,
+        });
+        setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+
+        const createOrderReceipt = await publicClient.waitForTransactionReceipt({
+          hash: createOrderHash,
+        });
+
+        const decodedLog = decodeEventLog({
+          abi: MARGIN_MODULE_ABI,
+          eventName: "OrderCreated",
+          data: createOrderReceipt.logs[0].data,
+          topics: createOrderReceipt.logs[0].topics,
+        });
+
+        console.log(decodedLog.args.orderId);
+        setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
+        const activateOrderHash = await walletClient.writeContract({
+          abi: MARGIN_MODULE_ABI,
+          address: MARGIN_TRADING_ADDRESS[chainId],
+          functionName: "activateOrder",
+          args: [decodedLog.args.orderId, collateralTokens.map((token) => token.wrapped.address0)],
+          account: undefined,
+        });
+        setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+
+        const activateOrderReceipt = await publicClient.waitForTransactionReceipt({
+          hash: activateOrderHash,
+        });
 
         setStatus(CreateOrderStatus.PENDING_APPROVE);
-        const result = await approveA({
-          customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
+        const approveResult = await approveA({
+          customAmount: parseUnits(loanAmount, params.loanToken.decimals ?? 18),
           customGasSettings: gasSettings,
         });
 
-        if (!result?.success) {
-          setStatus(CreateOrderStatus.INITIAL);
-          closeConfirmInWalletAlert();
+        if (!approveResult?.success) {
+          setStatus(CreateOrderStatus.ERROR_APPROVE);
           return;
-        } else {
-          setApproveHash(result.hash);
-          setStatus(CreateOrderStatus.LOADING_APPROVE);
-          closeConfirmInWalletAlert();
-
-          const approveReceipt = await publicClient.waitForTransactionReceipt({
-            hash: result.hash,
-          });
-
-          if (approveReceipt.status === "reverted") {
-            setStatus(CreateOrderStatus.ERROR_APPROVE);
-            return;
-          }
         }
-      }
 
-      if (
-        !walletClient ||
-        !address
-        // !tokenA ||
-        // !tokenB ||
-        // (!tokenA.equals(tokenB) && (!trade || !chainId)) ||
-        // !swapParams ||
-        // typeof output == null
-        // !estimatedGas
-      ) {
-        console.log({
-          walletClient,
-          address,
-          // tokenA,
-          // tokenB,
-          // trade,
-          // output,
-          publicClient,
-          chainId,
-          // swapParams,
+        setStatus(CreateOrderStatus.LOADING_APPROVE);
+
+        const approveReceipt = await publicClient.waitForTransactionReceipt({
+          hash: approveResult.hash,
         });
-        return;
-      }
 
-      setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
-      openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-
-      let confirmOrderHash;
-
-      try {
-        const estimatedGas = await publicClient.estimateContractGas({
-          account: address,
-          ...params,
-        } as any);
-
-        const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
-        let _request;
-        try {
-          const { request } = await publicClient.simulateContract({
-            ...params,
-            account: address,
-            ...gasSettings,
-            gas: gasToUse,
-          } as any);
-          _request = request;
-        } catch (e) {
-          _request = {
-            ...params,
-            ...gasSettings,
-            gas: gasToUse,
-            account: undefined,
-          } as any;
+        if (approveReceipt.status !== "success") {
+          setStatus(CreateOrderStatus.ERROR_APPROVE);
+          return;
         }
 
-        confirmOrderHash = await walletClient.writeContract({
-          ..._request,
+        setStatus(CreateOrderStatus.PENDING_DEPOSIT);
+
+        const depositOrderHash = await walletClient.writeContract({
+          abi: MARGIN_MODULE_ABI,
+          address: MARGIN_TRADING_ADDRESS[chainId],
+          functionName: "orderDeposit",
+          args: [decodedLog.args.orderId, parseUnits(loanAmount, params.loanToken.decimals ?? 18)],
           account: undefined,
         });
+        setStatus(CreateOrderStatus.LOADING_DEPOSIT);
 
-        closeConfirmInWalletAlert();
+        const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
 
-        if (!confirmOrderHash) {
-          setStatus(CreateOrderStatus.INITIAL);
-          return;
+        if (receipt.status === "success") {
+          setStatus(CreateOrderStatus.SUCCESS);
+        } else {
+          setStatus(CreateOrderStatus.ERROR_DEPOSIT);
         }
-
-        setConfirmOrderHash(confirmOrderHash);
-        setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-
-        const transaction = await getTransactionWithRetries({
-          hash: confirmOrderHash,
-          publicClient,
-        });
-        if (transaction) {
-          const nonce = transaction.nonce;
-
-          addRecentTransaction(
-            {
-              hash: confirmOrderHash,
-              nonce,
-              chainId,
-              gas: {
-                ...stringifyObject({ ...gasSettings, model: gasPriceSettings.model }),
-                gas: gasToUse.toString(),
-              },
-              params: {
-                ...stringifyObject(params),
-                abi: [
-                  // getAbiItem({
-                  //   name: swapParams.functionName,
-                  //   abi: swapParams.abi,
-                  //   args: swapParams.args as any,
-                  // }),
-                ],
-              },
-              title: {
-                symbol: params.loanToken.symbol!,
-                template: RecentTransactionTitleTemplate.CONVERT,
-                amount: params.loanAmount,
-                logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
-                standard: params.loanTokenStandard,
-              },
-            },
-            address,
-          );
-
-          const receipt = await publicClient.waitForTransactionReceipt({
-            hash: confirmOrderHash,
-          }); //TODO: add try catch
-          updateAllowance();
-
-          if (receipt.status === "reverted") {
-            setStatus(CreateOrderStatus.ERROR_CONFIRM_ORDER);
-
-            const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
-
-            if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
-              setErrorType(SwapError.OUT_OF_GAS);
-            } else {
-              setErrorType(SwapError.UNKNOWN);
-            }
-            return;
-          }
-
-          // DEPOSITING
-          setStatus(CreateOrderStatus.PENDING_DEPOSIT);
-          openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-
-          let depositHash;
-
-          try {
-            const estimatedGas = await publicClient.estimateContractGas({
-              account: address,
-              ...params,
-            } as any);
-
-            const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
-            let _request;
-            try {
-              const { request } = await publicClient.simulateContract({
-                ...params,
-                account: address,
-                ...gasSettings,
-                gas: gasToUse,
-              } as any);
-              _request = request;
-            } catch (e) {
-              _request = {
-                ...params,
-                ...gasSettings,
-                gas: gasToUse,
-                account: undefined,
-              } as any;
-            }
-
-            depositHash = await walletClient.writeContract({
-              ..._request,
-              account: undefined,
-            });
-
-            closeConfirmInWalletAlert();
-
-            if (!depositHash) {
-              setStatus(CreateOrderStatus.INITIAL);
-              return;
-            }
-
-            setDepositHash(depositHash);
-            setStatus(CreateOrderStatus.LOADING_DEPOSIT);
-
-            const transaction = await getTransactionWithRetries({
-              hash: confirmOrderHash,
-              publicClient,
-            });
-            if (transaction) {
-              const nonce = transaction.nonce;
-
-              addRecentTransaction(
-                {
-                  hash: depositHash,
-                  nonce,
-                  chainId,
-                  gas: {
-                    ...stringifyObject({ ...gasSettings, model: gasPriceSettings.model }),
-                    gas: gasToUse.toString(),
-                  },
-                  params: {
-                    ...stringifyObject(params),
-                    abi: [
-                      // getAbiItem({
-                      //   name: swapParams.functionName,
-                      //   abi: swapParams.abi,
-                      //   args: swapParams.args as any,
-                      // }),
-                    ],
-                  },
-                  title: {
-                    symbol: params.loanToken.symbol!,
-                    template: RecentTransactionTitleTemplate.CONVERT,
-                    amount: params.loanAmount,
-                    logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
-                    standard: params.loanTokenStandard,
-                  },
-                },
-                address,
-              );
-
-              const receipt = await publicClient.waitForTransactionReceipt({
-                hash: depositHash,
-              }); //TODO: add try catch
-              updateAllowance();
-
-              if (receipt.status === "reverted") {
-                setStatus(CreateOrderStatus.ERROR_DEPOSIT);
-
-                const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
-
-                if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gasToUse) {
-                  setErrorType(SwapError.OUT_OF_GAS);
-                } else {
-                  setErrorType(SwapError.UNKNOWN);
-                }
-              }
-            }
-          } catch (e) {
-            console.log(e);
-            addToast("Error while executing contract", "error");
-            closeConfirmInWalletAlert();
-            setStatus(CreateOrderStatus.INITIAL);
-          }
-        }
+        console.log(receipt);
+        // console.log("Receipt", receipt);
       } catch (e) {
         console.log(e);
-        addToast("Error while executing contract", "error");
-        closeConfirmInWalletAlert();
+        addToast("Unexpected error", "error");
         setStatus(CreateOrderStatus.INITIAL);
       }
+
+      // await handleRunStep({
+      //   params,
+      //   gasSettings,
+      //   customGasLimit,
+      //   title: {
+      //     symbol: params.loanToken.symbol!,
+      //     template: RecentTransactionTitleTemplate.CONVERT,
+      //     amount: params.loanAmount,
+      //     logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
+      //     standard: params.loanTokenStandard,
+      //   },
+      //   onReceiptReceive: (receipt, gas) => {
+      //     updateAllowance();
+      //
+      //     if (receipt.status === "reverted") {
+      //       setStatus(CreateOrderStatus.ERROR_CONFIRM_ORDER);
+      //
+      //       const ninetyEightPercent = (gas * BigInt(98)) / BigInt(100);
+      //
+      //       if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gas) {
+      //         setErrorType(SwapError.OUT_OF_GAS);
+      //       } else {
+      //         setErrorType(SwapError.UNKNOWN);
+      //       }
+      //       return;
+      //     }
+      //   },
+      //   gasPriceSettings,
+      //   onHashReceive: (hash) => {
+      //     if (!hash) {
+      //       setStatus(CreateOrderStatus.INITIAL);
+      //       throw new Error("Hash not found!");
+      //     }
+      //
+      //     setConfirmOrderHash(hash);
+      //     setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+      //   },
+      // });
+      //
+      // setStatus(CreateOrderStatus.PENDING_DEPOSIT);
+      //
+      // if (!isAllowedA && params.loanTokenStandard === Standard.ERC20 && params.loanToken.isToken) {
+      //   openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
+      //
+      //   setStatus(CreateOrderStatus.PENDING_APPROVE);
+      //   const result = await approveA({
+      //     customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
+      //     customGasSettings: gasSettings,
+      //   });
+      //
+      //   if (!result?.success) {
+      //     setStatus(CreateOrderStatus.INITIAL);
+      //     closeConfirmInWalletAlert();
+      //     return;
+      //   } else {
+      //     setApproveHash(result.hash);
+      //     setStatus(CreateOrderStatus.LOADING_APPROVE);
+      //     closeConfirmInWalletAlert();
+      //
+      //     const approveReceipt = await publicClient.waitForTransactionReceipt({
+      //       hash: result.hash,
+      //     });
+      //
+      //     if (approveReceipt.status === "reverted") {
+      //       setStatus(CreateOrderStatus.ERROR_APPROVE);
+      //       return;
+      //     }
+      //   }
+      // }
+      //
+      // await handleRunStep({
+      //   params,
+      //   gasSettings,
+      //   customGasLimit,
+      //   title: {
+      //     symbol: params.loanToken.symbol!,
+      //     template: RecentTransactionTitleTemplate.CONVERT,
+      //     amount: params.loanAmount,
+      //     logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
+      //     standard: params.loanTokenStandard,
+      //   },
+      //   onReceiptReceive: (receipt, gas) => {
+      //     updateAllowance();
+      //
+      //     if (receipt.status === "reverted") {
+      //       setStatus(CreateOrderStatus.ERROR_CONFIRM_ORDER);
+      //
+      //       const ninetyEightPercent = (gas * BigInt(98)) / BigInt(100);
+      //
+      //       if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gas) {
+      //         setErrorType(SwapError.OUT_OF_GAS);
+      //       } else {
+      //         setErrorType(SwapError.UNKNOWN);
+      //       }
+      //       return;
+      //     }
+      //   },
+      //   gasPriceSettings,
+      //   onHashReceive: (hash) => {
+      //     if (!hash) {
+      //       setStatus(CreateOrderStatus.INITIAL);
+      //       throw new Error("Hash not found!");
+      //     }
+      //
+      //     setConfirmOrderHash(hash);
+      //     setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+      //   },
+      // });
     },
     [
-      publicClient,
-      params,
-      isAllowedA,
-      walletClient,
-      address,
-      setStatus,
-      openConfirmInWalletAlert,
-      t,
-      approveA,
-      gasSettings,
-      closeConfirmInWalletAlert,
-      setApproveHash,
       chainId,
-      customGasLimit,
-      setConfirmOrderHash,
-      addRecentTransaction,
-      gasPriceSettings.model,
-      updateAllowance,
-      setErrorType,
-      setDepositHash,
+      interestRatePerMonth,
+      leverage,
+      liquidationFeeForLiquidator,
+      liquidationFeeToken,
+      loanToken,
+      loanTokenStandard,
+      minimumBorrowingAmount,
+      orderCurrencyLimit,
+      params.loanToken,
+      period.lendingOrderDeadline,
+      period.positionDuration,
+      publicClient,
+      setStatus,
+      tradingTokens.allowedTokens,
+      walletClient,
     ],
   );
 

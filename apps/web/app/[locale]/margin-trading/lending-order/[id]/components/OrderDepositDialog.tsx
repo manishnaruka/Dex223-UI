@@ -71,8 +71,8 @@ const depositOrderSteps: OperationStepConfig[] = [
   },
 ];
 
-function OrderDepositActionButton() {
-  const { handleOrderDeposit } = useOrderDeposit();
+function OrderDepositActionButton({ orderId }: { orderId: number }) {
+  const { handleOrderDeposit } = useOrderDeposit({ orderId });
 
   const { status, approveHash, depositHash } = useDepositOrderStatusStore();
 
@@ -111,9 +111,11 @@ function OrderDepositActionButton() {
 export default function OrderDepositDialog({
   isOpen,
   setIsOpen,
+  orderId,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  orderId: number;
 }) {
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
 
@@ -272,7 +274,7 @@ export default function OrderDepositDialog({
           </>
         )}
 
-        <OrderDepositActionButton />
+        <OrderDepositActionButton orderId={orderId} />
       </div>
     </DrawerDialog>
   );

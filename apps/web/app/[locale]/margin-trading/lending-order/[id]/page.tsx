@@ -4,39 +4,36 @@ import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { ReactNode, use, useState } from "react";
 import SimpleBar from "simplebar-react";
+import { Address } from "viem";
 
+import {
+  OrderInfoCard,
+  PositionInfoCardProps,
+} from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
+import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
+import { useOrderById } from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderById";
+import {
+  getWhitelistId,
+  sortAddresses,
+} from "@/app/[locale]/margin-trading/lending-order/create/hooks/useCreateOrder";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import truncateMiddle from "@/functions/truncateMiddle";
 
-function MarginPositionInfoCard() {
-  return (
-    <div className="flex flex-col justify-center px-5 bg-tertiary-bg rounded-3 py-3">
-      <div className="flex items-center gap-1">
-        <span className="text-14 flex items-center gap-1 text-secondary-text">
-          Borrowed
-          <Tooltip text="Tooltip text" />
-        </span>
-      </div>
-      <div className="relative flex gap-1">
-        <span>100</span> USDT
-      </div>
-    </div>
-  );
-}
-
-function OrderInfoBlock() {
+function OrderInfoBlock({ title, cards }: { title: string; cards: Array<PositionInfoCardProps> }) {
   return (
     <div>
-      <h3 className="text-20 font-medium mb-3">Interest rate</h3>
+      <h3 className="text-20 font-medium mb-3 text-secondary-text">{title}</h3>
       <div className="grid grid-cols-2 gap-3">
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
+        {cards.map((card, index) => (
+          <OrderInfoCard {...card} key={index} />
+        ))}
       </div>
     </div>
   );
@@ -46,8 +43,33 @@ function TokenBadge() {
   return <div className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2">USDT</div>;
 }
 
-export default function LendingOrder() {
+export default function LendingOrder({
+  params,
+}: {
+  params: Promise<{
+    id: number;
+  }>;
+}) {
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
+  const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
+  const { id } = use(params);
+
+  const { data, loading } = useOrderById(+id);
+
+  if (loading) {
+    return <div className="text-24 p-5">Order is loading...</div>;
+  }
+
+  console.log(data);
+  console.log(
+    getWhitelistId(
+      sortAddresses([
+        "0x8F5Ea3D9b780da2D0Ab6517ac4f6E697A948794f",
+        "0xEC5aa08386F4B20dE1ADF9Cdf225b71a133FfaBa",
+      ]) as Address[],
+      false,
+    ),
+  );
 
   return (
     <div className="py-10">
@@ -63,10 +85,14 @@ export default function LendingOrder() {
 
         <div className="flex items-center gap-3 mb-5">
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
-            Owner: <ExternalTextLink text="0x53D8...3BC52B" href="#" />
+            Owner:{" "}
+            <ExternalTextLink
+              text={truncateMiddle(data.order.owner, { charsFromEnd: 6, charsFromStart: 6 })}
+              href="#"
+            />
           </div>
-          <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
-            Lending order ID: <span className="text-secondary-text">287342379</span>
+          <div className="bg-primary-bg rounded-2 flex items-center gap-1 px-5 py-1 min-h-12 text-tertiary-text">
+            Lending order ID: <span className="text-secondary-text">{id}</span>
           </div>
         </div>
 
@@ -110,7 +136,11 @@ export default function LendingOrder() {
                 >
                   Deposit
                 </Button>
-                <Button className="border-green" colorScheme={ButtonColor.LIGHT_GREEN}>
+                <Button
+                  onClick={() => setIsWithdrawDialogOpened(true)}
+                  className="border-green"
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                >
                   Withdraw
                 </Button>
               </div>
@@ -144,10 +174,74 @@ export default function LendingOrder() {
         </div>
 
         <div className="grid grid-cols-2 rounded-5 gap-x-5 gap-y-4 bg-primary-bg px-10 pt-4 pb-5 mb-5">
-          <OrderInfoBlock />
-          <OrderInfoBlock />
-          <OrderInfoBlock />
-          <OrderInfoBlock />
+          <OrderInfoBlock
+            title="Interest rate"
+            cards={[
+              {
+                title: "Per month",
+                tooltipText: "Tooltip text",
+                value: "5%",
+                bg: "percent",
+              },
+              {
+                title: "Per entire period",
+                tooltipText: "Tooltip text",
+                value: "15%",
+                bg: "percent",
+              },
+            ]}
+          />
+          <OrderInfoBlock
+            cards={[
+              {
+                title: "Margin positions duration",
+                tooltipText: "Tooltip text",
+                value: "5%",
+                bg: "percent",
+              },
+              {
+                title: "Lending order deadline",
+                tooltipText: "Tooltip text",
+                value: "15%",
+                bg: "percent",
+              },
+            ]}
+            title="Time frame"
+          />
+          <OrderInfoBlock
+            cards={[
+              {
+                title: "Max leverage",
+                tooltipText: "Tooltip text",
+                value: `${data.order.leverage}%`,
+                bg: "percent",
+              },
+              {
+                title: "LTV",
+                tooltipText: "Tooltip text",
+                value: "-",
+                bg: "percent",
+              },
+            ]}
+            title="Financial metrics"
+          />
+          <OrderInfoBlock
+            cards={[
+              {
+                title: "Liquidation fee",
+                tooltipText: "Tooltip text",
+                value: "5%",
+                bg: "percent",
+              },
+              {
+                title: "Order currency limit",
+                tooltipText: "Tooltip text",
+                value: `${data.order.currencyLimit} currencies`,
+                bg: "percent",
+              },
+            ]}
+            title="Fee and currency limit"
+          />
         </div>
 
         <div className="bg-primary-bg rounded-5 px-10 pt-4 pb-5 flex flex-col gap-3 mb-5">
@@ -239,12 +333,33 @@ export default function LendingOrder() {
 
         <div className=" bg-primary-bg rounded-5 px-10 pt-4 pb-5 mb-5 flex flex-col gap-3">
           <h3 className="text-20 text-secondary-text font-medium">Liquidation details</h3>
-          <MarginPositionInfoCard />
-          <MarginPositionInfoCard />
+          <div className="grid grid-cols-2 gap-3">
+            <OrderInfoCard
+              value={<ExternalTextLink text="DEX223 Market" href={"#"} />}
+              title="Liquidation price source"
+              bg="percent"
+              tooltipText="Tooltip text"
+            />
+            <OrderInfoCard
+              value={"Anyone"}
+              title="Initiate liquidation "
+              bg="percent"
+              tooltipText="Tooltip text"
+            />
+          </div>
         </div>
       </Container>
 
-      <OrderDepositDialog isOpen={isDepositDialogOpened} setIsOpen={setIsDepositDialogOpened} />
+      <OrderDepositDialog
+        orderId={id}
+        isOpen={isDepositDialogOpened}
+        setIsOpen={setIsDepositDialogOpened}
+      />
+      <OrderWithdrawDialog
+        orderId={id}
+        isOpen={isWithdrawDialogOpened}
+        setIsOpen={setIsWithdrawDialogOpened}
+      />
     </div>
   );
 }
