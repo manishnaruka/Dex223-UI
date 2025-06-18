@@ -246,6 +246,8 @@ export default function TradeForm() {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
 
+  console.log(dependentAmount);
+
   const dependentAmountValue = useMemo(() => {
     if (tokenA && tokenB && tokenA.equals(tokenB)) {
       return typedValue;
