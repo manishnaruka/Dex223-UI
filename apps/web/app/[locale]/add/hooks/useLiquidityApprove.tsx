@@ -207,7 +207,6 @@ export const useLiquidityApprove = (parsedAmounts: {
     async ({ customAmountB }: { customAmountB?: bigint }) => {
       const amountB = customAmountB || amountToCheckB;
 
-      console.log("This shit is fired as well");
       if (!publicClient) {
         return;
       }
@@ -332,14 +331,12 @@ export const useLiquidityApprove = (parsedAmounts: {
             customGasSettings: gasSettings,
           });
 
-          console.log(result);
           if (!result?.success) {
             setApprove0Status(AddLiquidityApproveStatus.ERROR);
             closeConfirmInWalletAlert();
           } else {
             setApprove0Hash(result.hash);
             setApprove0Status(AddLiquidityApproveStatus.LOADING);
-            console.log("CLOSED");
             closeConfirmInWalletAlert();
 
             const approveReceipt = await publicClient.waitForTransactionReceipt({

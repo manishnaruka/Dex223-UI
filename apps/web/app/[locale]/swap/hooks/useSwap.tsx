@@ -107,8 +107,6 @@ export function useSwapParams() {
     );
   }, [dependentAmount, slippage, trade]);
 
-  console.log(minimumAmountOut);
-
   const swapParams = useMemo(() => {
     if (
       !tokenA ||
@@ -135,7 +133,7 @@ export function useSwapParams() {
       deadline,
       amountIn: parseUnits(typedValue, tokenA.decimals),
       amountOutMinimum: minimumAmountOut,
-      sqrtPriceLimitX96: BigInt(sqrtPriceLimitX96.toString()),
+      sqrtPriceLimitX96: sqrtPriceLimitX96,
       prefer223Out: tokenBStandard === Standard.ERC223,
     };
 
@@ -379,9 +377,6 @@ export default function useSwap() {
       return "";
     }
 
-    console.log("OUTPUT");
-    console.log(formatFloat(trade.outputAmount.toSignificant(), { significantDigits: 2 }));
-
     return formatFloat(trade.outputAmount.toSignificant(), { significantDigits: 2 });
   }, [isConversion, trade, typedValue]);
 
@@ -462,6 +457,7 @@ export default function useSwap() {
 
       let hash;
 
+      console.log("Swap parameters:", swapParams);
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
@@ -495,8 +491,6 @@ export default function useSwap() {
         });
 
         closeConfirmInWalletAlert();
-
-        console.log(hash);
 
         if (hash) {
           console.log(hash);

@@ -142,14 +142,11 @@ export const Brush = ({
   // keep local and external brush extent in sync
   // i.e. snap to ticks on bruhs end
   useEffect(() => {
-    console.log("Local brush changed");
     setLocalBrushExtent(brushExtent);
   }, [brushExtent]);
 
   // initialize the brush
   useEffect(() => {
-    console.log("Initializer fired");
-
     if (!brushRef.current) return;
 
     brushBehavior.current = brushX<SVGGElement>()

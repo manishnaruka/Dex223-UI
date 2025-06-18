@@ -34,10 +34,8 @@ export function makeSqrtPriceLimitX96({
   zeroForOne: boolean;
 }): bigint {
   const currentTick = TickMath.getTickAtSqrtRatio(currentSqrtPriceX96);
-  console.log(currentTick);
-  console.log(shift);
+
   const limitTick = zeroForOne ? currentTick - shift : currentTick + shift;
-  console.log("Limit tick", limitTick);
   return TickMath.getSqrtRatioAtTick(limitTick);
 }
 
@@ -295,8 +293,6 @@ export class Pool {
       invariant(sqrtPriceLimitX96 < TickMath.MAX_SQRT_RATIO, "RATIO_MAX");
       invariant(sqrtPriceLimitX96 > this.sqrtRatioX96, "RATIO_CURRENT");
     }
-
-    console.log("SWAP OPERATION", this.liquidity, this.sqrtRatioX96, this.tickDataProvider);
 
     const exactInput = amountSpecified >= ZERO;
 

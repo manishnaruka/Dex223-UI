@@ -125,8 +125,6 @@ export function useStoreDeposit({
         ] as const,
       };
 
-      console.log(params);
-
       try {
         // const { request } = await publicClient.simulateContract({
         //   ...params,

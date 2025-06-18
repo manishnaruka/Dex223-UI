@@ -22,8 +22,6 @@ export const usePriceRange = () => {
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
 
-  console.log("ticks", ticks);
-
   const [poolState, pool] = usePool({ currencyA: tokenA, currencyB: tokenB, tier });
   const noLiquidity = poolState === PoolState.NOT_EXISTS;
 
@@ -65,8 +63,6 @@ export const usePriceRange = () => {
       }
       return undefined;
     } else {
-      console.log("I'm here =>>>");
-      console.log(pool);
       // get the amount of quote currency
       return pool && token0 ? pool.priceOf(token0.wrapped) : undefined;
     }

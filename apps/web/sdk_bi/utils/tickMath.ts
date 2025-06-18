@@ -40,6 +40,7 @@ export abstract class TickMath {
    * @param tick the tick for which to compute the sqrt ratio
    */
   public static getSqrtRatioAtTick(tick: number) {
+    console.log("Current tick: " + tick);
     invariant(
       tick >= TickMath.MIN_TICK && tick <= TickMath.MAX_TICK && Number.isInteger(tick),
       "TICK",

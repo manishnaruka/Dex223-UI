@@ -12,7 +12,6 @@ export default function ConfirmInWalletAlert() {
   const { isOpened, description, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
   const { connector } = useAccount();
 
-  console.log(connector);
   return (
     <>
       {isOpened && (

@@ -63,8 +63,6 @@ export function useTrade(): {
 
   const debouncedTypedValue = useDebounce(typedValue, 150);
 
-  console.log("Pools", pools);
-
   useEffect(() => {
     if (!tokenA || !tokenB || !+debouncedTypedValue || !filterPools(pools).length) {
       setTrade(null);
@@ -75,8 +73,6 @@ export function useTrade(): {
     IIFE(async () => {
       setIsLoading(true);
       try {
-        console.log("Pools", pools, filterPools(pools));
-
         const trades = await Trade.bestTradeExactIn(
           filterPools(pools),
           CurrencyAmount.fromRawAmount(
@@ -87,10 +83,8 @@ export function useTrade(): {
           { maxHops: 1 },
         );
 
-        console.log("Trades", trades);
         if (trades.length > 0) {
           const bestTrade = trades[0];
-          console.log("BEST TRADE FROM THESE TWO", bestTrade);
           setTrade(bestTrade);
           setError(null);
         } else {

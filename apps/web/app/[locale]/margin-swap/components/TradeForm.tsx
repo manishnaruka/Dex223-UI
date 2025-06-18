@@ -294,7 +294,6 @@ export default function TradeForm() {
   const poolExists = useMemo(() => {
     return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
   }, [pools]);
-  console.log(trade);
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({
     tokenA,

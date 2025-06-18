@@ -22,7 +22,7 @@ export default function useTokenBalances(currency: Currency | undefined | null) 
   });
 
   const refetch = useCallback(() => {
-    console.log("Balances refetching...");
+    // console.log("Balances refetching...");
     refetch20();
     refetch223();
   }, [refetch20, refetch223]);

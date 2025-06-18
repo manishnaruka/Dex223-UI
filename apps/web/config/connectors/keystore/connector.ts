@@ -52,8 +52,6 @@ export function keystore({ pk }: KeystoreConnectorParameters) {
     async getAccounts() {
       if (!connected) throw new ConnectorNotConnectedError();
       const provider = await this.getProvider();
-      console.log("Provider in get acc");
-      console.log(provider);
 
       const accounts = await provider.request({ method: "eth_accounts" });
       return accounts.map((x: any) => getAddress(x));
@@ -61,8 +59,6 @@ export function keystore({ pk }: KeystoreConnectorParameters) {
     async getChainId() {
       const provider = await this.getProvider();
       const hexChainId = await provider.request({ method: "eth_chainId" });
-      console.log("Is there any? ");
-      console.log(hexChainId);
 
       return fromHex(hexChainId, "number");
     },

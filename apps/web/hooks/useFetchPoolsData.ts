@@ -49,7 +49,6 @@ export const useFetchPoolData = (chainId: number) => {
         if (address === ZERO_ADDRESS) {
           return null;
         }
-        console.log("CAllback fired");
         // Step 1: Query GraphQL for ticks
         const queryResult = await triggerQuery({
           variables: { addresses: [address.toLowerCase()] },
@@ -60,8 +59,6 @@ export const useFetchPoolData = (chainId: number) => {
           // Pool does not exist in the subgraph
           return null;
         }
-
-        console.log("poolData", poolGqlData);
 
         const ticks = poolGqlData.ticks
           .map(
@@ -76,17 +73,14 @@ export const useFetchPoolData = (chainId: number) => {
 
         const liquidity = BigInt(poolGqlData.liquidity);
 
-        console.log("Liquidity from gql:", liquidity);
         const sqrtPriceX96 = BigInt(poolGqlData.sqrtPrice);
 
-        console.log("SQRTPrice from gql:", sqrtPriceX96);
         const tick = +poolGqlData.tick;
 
         if (!sqrtPriceX96 || sqrtPriceX96 === BigInt(0)) {
           return null;
         }
 
-        console.log("Pool exists");
         return new Pool(
           token0,
           token1,

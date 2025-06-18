@@ -268,8 +268,6 @@ export function usePositionFees(): {
 
   const { collectFeesParams } = useCollectFeesParams();
 
-  console.log(collectFeesParams);
-
   const { gasSettings, customGasLimit, gasModel } = useCollectFeesGasSettings();
 
   const nativeCoinAmount = pool?.token0.isNative

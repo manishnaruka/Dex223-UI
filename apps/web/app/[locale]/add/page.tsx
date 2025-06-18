@@ -65,7 +65,6 @@ export default function AddPoolPage() {
           // User picked same as tokenB → swap
           setBothTokens({ tokenA: tokenB, tokenB: tokenA });
         } else {
-          console.log("Picking token&");
           setTokenA(token);
         }
       }
