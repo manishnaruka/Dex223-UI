@@ -183,14 +183,26 @@ const PoolsTableDesktop = ({
                   onClick={() => openPoolHandler(o.id)}
                   className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
                 >
-                  <Image className="rounded-full" src={token0Image} width={24} height={24} alt="" />
-                  <Image
-                    src={token1Image}
-                    width={24}
-                    height={24}
-                    alt=""
-                    className="-ml-2 bg-primary-bg rounded-full"
-                  />
+                  <div className="flex items-center ">
+                    <span className="w-[26px] h-[26px] rounded-full bg-primary-bg flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={token0Image || "/images/tokens/placeholder.svg"}
+                        alt="Ethereum"
+                        width={24}
+                        height={24}
+                        className="h-[24px] w-[24px] rounded-full"
+                      />
+                    </span>
+                    <span className="w-[26px] h-[26px]   rounded-full bg-primary-bg flex items-center justify-center -ml-3.5 overflow-hidden">
+                      <Image
+                        src={token1Image || "/images/tokens/placeholder.svg"}
+                        alt="Ethereum"
+                        width={24}
+                        height={24}
+                        className="h-[24px] w-[24px] rounded-full"
+                      />
+                    </span>
+                  </div>
                   <span className="ml-3 mr-2">{`${truncateMiddle(token0Symbol, {
                     charsFromStart: 4,
                     charsFromEnd: 3,
