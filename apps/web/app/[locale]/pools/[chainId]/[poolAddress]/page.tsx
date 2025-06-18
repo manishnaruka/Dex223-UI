@@ -275,7 +275,7 @@ export default function ExplorePoolPage({
                 </Button>
               </Link>
               <Link
-                href={`/add?tier=3000&tokenA=${pool?.token0?.id}&tokenB=${pool?.token1?.id}`}
+                href={`/add?tier=${pool.feeTier}&tokenA=${pool?.token0?.id}&tokenB=${pool?.token1?.id}&chainId=${chainId}`}
                 className="w-full"
               >
                 <Button fullWidth>

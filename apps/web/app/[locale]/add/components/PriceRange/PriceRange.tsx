@@ -86,7 +86,6 @@ export const PriceRange = ({
       baseToken?: Token;
       quoteToken?: Token;
     }) => {
-      console.log("[initZoom] TRIGGERED", { baseToken, quoteToken, price, feeAmount });
       if (!price || !baseToken || !quoteToken) return;
 
       const zoom = ZOOM_LEVELS[feeAmount];

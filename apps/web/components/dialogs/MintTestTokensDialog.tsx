@@ -99,8 +99,6 @@ export default function MintTestTokensDialog() {
     refetch();
   }, [latestBlock, refetch]);
 
-  console.log(tokenToMint);
-
   const handleMint = useCallback(() => {
     if (!tokenToMint || !walletClient || !publicClient) {
       addToast("Not correct data", "error");

@@ -193,8 +193,6 @@ export default function PickMultipleTokensDialog({
                                   internalTokens.find((_token) => _token.name === token.name),
                                 );
 
-                                console.log(isInList);
-
                                 if (isInList) {
                                   setInternalTokens(
                                     internalTokens.filter((_token) => _token.name !== token.name),

@@ -112,8 +112,6 @@ export default function LiquidityChartRangeInput({
       const prev = prevDomainRef.current;
       prevDomainRef.current = domain;
 
-      console.log("fixed", left.toFixed(10));
-
       if (!prev || left !== prev[0]) onLeftRangeInput(left.toFixed(10));
       if (!prev || right !== prev[1]) onRightRangeInput(right.toFixed(10));
     },

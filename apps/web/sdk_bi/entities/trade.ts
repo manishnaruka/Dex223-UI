@@ -1,13 +1,16 @@
+import { instanceOf } from "graphql/jsutils/instanceOf";
+import { InvariantError } from "next/dist/shared/lib/invariant-error";
 import invariant from "tiny-invariant";
 
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Fraction } from "@/sdk_bi/entities/fractions/fraction";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { Price } from "@/sdk_bi/entities/fractions/price";
-import { makeSqrtPriceLimitX96, Pool, shiftSqrtPriceX96ByPercent } from "@/sdk_bi/entities/pool";
+import { Pool } from "@/sdk_bi/entities/pool";
 import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 import { sortedInsert } from "@/sdk_bi/utils/sortedInsert";
+import { TickMath } from "@/sdk_bi/utils/tickMath";
 
 import { FACTORY_ADDRESS } from "../addresses";
 import { DexChainId } from "../chains";
@@ -572,13 +575,9 @@ export class Trade<
         [amountOut] = await pool.getOutputAmount(amountIn);
         console.log(`Amount out for ${pool.fee} pool is:`);
         console.log(amountOut.toSignificant());
-      } catch (error) {
-        // input too low
-        // @ts-ignore
-        if (error.isInsufficientInputAmountError) {
-          continue;
-        }
-        throw error;
+      } catch (error: any) {
+        console.log(error);
+        continue;
       }
       // we have arrived at the output token, so this is the final trade of one of the paths
       if (amountOut.currency.isToken && amountOut.currency.equals(tokenOut)) {

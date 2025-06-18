@@ -235,7 +235,6 @@ export default function TradeForm() {
   const poolExists = useMemo(() => {
     return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
   }, [pools]);
-  console.log(trade);
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({
     tokenA,
@@ -614,7 +613,18 @@ export default function TradeForm() {
         }
         label={t("you_pay")}
         standard={tokenAStandard}
-        setStandard={setTokenAStandard}
+        setStandard={(standard) => {
+          setTokenAStandard(standard);
+
+          if (
+            standard === tokenBStandard &&
+            tokenA &&
+            tokenB &&
+            tokenA.wrapped.equals(tokenB.wrapped)
+          ) {
+            setTokenBStandard(standard === Standard.ERC20 ? Standard.ERC223 : Standard.ERC20);
+          }
+        }}
       />
       <div className="relative h-4 md:h-5 z-10">
         <SwapButton
@@ -651,7 +661,18 @@ export default function TradeForm() {
         }
         label={t("you_receive")}
         standard={tokenBStandard}
-        setStandard={setTokenBStandard}
+        setStandard={(standard) => {
+          setTokenBStandard(standard);
+
+          if (
+            standard === tokenAStandard &&
+            tokenA &&
+            tokenB &&
+            tokenA.wrapped.equals(tokenB.wrapped)
+          ) {
+            setTokenAStandard(standard === Standard.ERC20 ? Standard.ERC223 : Standard.ERC20);
+          }
+        }}
       />
 
       {error === TradeError.NO_LIQUIDITY && (

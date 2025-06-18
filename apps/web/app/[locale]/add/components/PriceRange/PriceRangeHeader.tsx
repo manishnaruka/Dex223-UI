@@ -28,7 +28,6 @@ export const PriceRangeHeader = ({
             <Switch
               checked={isFullRange}
               handleChange={() => {
-                console.log("Full range");
                 handleSetFullRange();
               }}
             />

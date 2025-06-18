@@ -123,7 +123,6 @@ async function getList(url: string): Promise<UniData> {
     const response = await fetch(url);
     const data = await response.json();
 
-    console.log(data);
     await validate(data);
     return data;
   } catch (e) {
@@ -141,7 +140,6 @@ export async function convertList(url: string, chainId: DexChainId): Promise<any
   const data = await getList(url);
 
   const list = data.tokens.filter((t) => t.chainId === chainId);
-  console.log("list", list);
 
   if (list.length === 0) {
     console.error("No data found");

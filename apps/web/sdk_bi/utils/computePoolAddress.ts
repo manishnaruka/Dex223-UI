@@ -92,7 +92,6 @@ export const computePoolAddressDex = async ({
     chainId,
     tier,
   });
-  console.log(key);
 
   if (cachedKeys.has(key) || !DEX_SUPPORTED_CHAINS.includes(chainId)) return undefined;
   cachedKeys.add(key);
@@ -104,7 +103,6 @@ export const computePoolAddressDex = async ({
       functionName: "getPool",
       args: [addressTokenA, addressTokenB, tier],
     });
-    console.log("PPASDS", poolContract);
     cachedKeys.delete(key);
     return poolContract;
   } catch (e) {

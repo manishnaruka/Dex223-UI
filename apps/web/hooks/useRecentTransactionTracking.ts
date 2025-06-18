@@ -69,7 +69,6 @@ export function useRecentTransactionTracking() {
     async (hash: `0x${string}`, id: string, title: IRecentTransactionTitle) => {
       while (true) {
         try {
-          console.log("trying again");
           await waitAndUpdate(hash, id, title);
           return;
         } catch (e) {

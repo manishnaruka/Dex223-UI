@@ -188,7 +188,7 @@ function InternalTrustBadge({ rateRange }: { rateRange: BadgeTrustRate }) {
 }
 
 function TooltipContent({ rate, logoURI, rateRange, totalScore }: InternalProps) {
-  console.log("Rate:", rate);
+  // console.log("Rate:", rate);
   const internalTokenScore = useMemo(() => {
     if (totalScore > 100) {
       return 100;

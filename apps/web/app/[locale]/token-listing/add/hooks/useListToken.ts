@@ -163,8 +163,6 @@ export default function useListToken() {
     tier: FeeAmount.MEDIUM,
   });
 
-  console.log("poolAddress:", poolAddress);
-
   const tokensToList = useTokensToList();
 
   const isFree = useMemo(() => {

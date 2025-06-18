@@ -69,8 +69,6 @@ function ApproveRow({
   const t = useTranslations("Swap");
   const chainId = useCurrentChainId();
 
-  console.log("here!", isSuccessSwap);
-
   return (
     <div
       className={clsx(
@@ -439,6 +437,14 @@ export default function ConfirmSwapDialog() {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
 
+  const inputAmount = useMemo(() => {
+    if (!trade) {
+      return "";
+    }
+
+    return trade.inputAmount.toSignificant();
+  }, [trade]);
+
   const output = useMemo(() => {
     if (!trade) {
       return "";
@@ -489,6 +495,8 @@ export default function ConfirmSwapDialog() {
       setAmountToApprove(typedValue);
     }
   }, [typedValue]);
+
+  console.log("Input amount", inputAmount);
 
   const { gasPriceSettings } = useSwapGasPriceStore();
   const { data: baseFee } = useGasPrice();

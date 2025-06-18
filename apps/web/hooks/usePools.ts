@@ -120,8 +120,6 @@ export function useStorePools(poolsParams: PoolsParams): PoolsResult {
             }
           })
           .catch((err) => {
-            console.log(err);
-            console.log("SET INVALID");
             setStatus(key, PoolState.INVALID, undefined, err.message);
           });
       }

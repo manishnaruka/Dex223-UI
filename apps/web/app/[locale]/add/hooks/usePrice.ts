@@ -22,8 +22,6 @@ export const usePriceRange = () => {
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
   const { tier } = useLiquidityTierStore();
 
-  console.log("ticks", ticks);
-
   const [poolState, pool] = usePool({ currencyA: tokenA, currencyB: tokenB, tier });
   const noLiquidity = poolState === PoolState.NOT_EXISTS;
 

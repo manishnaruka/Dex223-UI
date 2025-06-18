@@ -207,9 +207,6 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
       : BigInt(currentDepositB || 0) >= amountToCheckB;
   }, [amountToCheckB, currentAllowanceB, currentDepositB, tokenB?.isNative, tokenBStandard]);
 
-  console.log(tokenB0Balance);
-  console.log(amountToCheckB);
-
   const isSufficientBalanceB = useMemo(() => {
     return tokenBStandard === Standard.ERC20
       ? tokenB0Balance
@@ -226,9 +223,6 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
     tokenB1Balance,
     tokenBStandard,
   ]);
-
-  console.log(`isSufficientBalanceA: ${isSufficientBalanceA}`);
-  console.log(`isSufficientBalanceA: ${isSufficientBalanceB}`);
 
   const isSufficientBalance = useMemo(() => {
     return isSufficientBalanceA && isSufficientBalanceB;

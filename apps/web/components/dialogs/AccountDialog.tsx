@@ -53,8 +53,6 @@ function PinnedTokenRow({
       }
       return formatFloat("0");
     }
-    console.log(erc20Balance);
-    console.log(erc223Balance);
 
     const _erc20Balance = erc20Balance?.value || 0n;
     const _erc223Balance = erc223Balance?.value || 0n;

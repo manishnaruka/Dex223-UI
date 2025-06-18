@@ -160,9 +160,6 @@ export default function FirstStep() {
 
   const [isEnoughBalance, setIsEnoughBalance] = useState<boolean>(true);
 
-  console.log(token0Balance);
-  console.log(parseUnits(firstStepValues.loanAmount, firstStepValues.loanToken?.decimals ?? 18));
-
   return (
     <Formik
       initialValues={{

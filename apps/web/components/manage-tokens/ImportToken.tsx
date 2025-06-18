@@ -2,10 +2,11 @@ import { isZeroAddress } from "@ethereumjs/util";
 import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import ExternalTextLink from "@repo/ui/external-text-link";
+import { multicall } from "@wagmi/core";
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Address, isAddress } from "viem";
-import { useReadContract } from "wagmi";
+import { usePublicClient, useReadContract } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -20,6 +21,7 @@ import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
+import { config } from "@/config/wagmi/config";
 import { db } from "@/db/db";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
@@ -28,6 +30,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
 import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 
@@ -70,6 +73,139 @@ function EmptyState({
     );
   }
 }
+
+export function useImportToken() {
+  const chainId = useCurrentChainId();
+  const tokenLists = useTokenLists();
+  const publicClient = usePublicClient();
+
+  const handleImport = useCallback(
+    async (tokenAddressToImport: Address, chainId: DexChainId) => {
+      console.log(tokenAddressToImport);
+      console.log(chainId);
+
+      const calls = [
+        {
+          abi: ERC20_ABI,
+          address: tokenAddressToImport! as Address,
+          chainId,
+          functionName: "name",
+        },
+        {
+          abi: ERC20_ABI,
+          address: tokenAddressToImport! as Address,
+          chainId,
+          functionName: "symbol",
+        },
+        {
+          abi: ERC20_ABI,
+          address: tokenAddressToImport! as Address,
+          chainId,
+          functionName: "decimals",
+        },
+        {
+          abi: ERC223_ABI,
+          address: tokenAddressToImport! as Address,
+          chainId,
+          functionName: "standard",
+        },
+        {
+          abi: TOKEN_CONVERTER_ABI,
+          functionName: "isWrapper",
+          address: CONVERTER_ADDRESS[chainId],
+          chainId,
+          args: [tokenAddressToImport as Address],
+        },
+      ];
+
+      if (!publicClient) {
+        return;
+      }
+
+      const res = await publicClient.multicall({ contracts: calls });
+
+      const name = res[0].result;
+      const symbol = res[1].result;
+      const decimals = res[2].result;
+      const standard = res[3].result;
+      const isWrapper = res[4].result;
+      console.log("RESULTS", res);
+
+      const otherAddressFunctionName =
+        isWrapper == null
+          ? null
+          : isWrapper
+            ? standard === 223
+              ? "getERC20OriginFor"
+              : "getERC223OriginFor"
+            : "predictWrapperAddress";
+
+      const predictedOtherAddress = await publicClient.readContract({
+        abi: TOKEN_CONVERTER_ABI,
+        functionName: otherAddressFunctionName!,
+        address: CONVERTER_ADDRESS[chainId],
+        args: [tokenAddressToImport as Address, standard !== 223],
+      });
+
+      console.log(predictedOtherAddress);
+
+      const { erc20AddressToImport, erc223AddressToImport } =
+        standard === 223
+          ? {
+              erc20AddressToImport: predictedOtherAddress,
+              erc223AddressToImport: tokenAddressToImport,
+            }
+          : {
+              erc223AddressToImport: predictedOtherAddress,
+              erc20AddressToImport: tokenAddressToImport,
+            };
+
+      if (!decimals || !name || !symbol) {
+        return;
+      }
+
+      const token = new Token(
+        chainId,
+        erc20AddressToImport as Address,
+        erc223AddressToImport as Address,
+        decimals as number,
+        symbol as string,
+        name as string,
+        "/images/tokens/placeholder.svg",
+      );
+
+      const currentCustomList = tokenLists?.find((t) => t.id === `custom-${chainId}`);
+
+      if (!currentCustomList) {
+        await db.tokenLists.add({
+          id: `custom-${chainId}`,
+          enabled: true,
+          chainId,
+          list: {
+            name: "Custom token list",
+            version: {
+              minor: 0,
+              major: 0,
+              patch: 0,
+            },
+            tokens: [token],
+            logoURI: "/images/token-list-placeholder.svg",
+          },
+        });
+      } else {
+        (db.tokenLists as any).update(`custom-${chainId}`, {
+          "list.tokens": [...currentCustomList.list.tokens, token],
+        });
+      }
+
+      return token;
+    },
+    [chainId, publicClient, tokenLists],
+  );
+
+  return { handleImport };
+}
+
 export default function ImportToken({ setContent, handleClose }: Props) {
   const t = useTranslations("ManageTokens");
   const [tokenAddressToImport, setTokenAddressToImport] = useState("");
