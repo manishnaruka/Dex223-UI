@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { Address, decodeEventLog, encodeAbiParameters, Hash, keccak256, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
+import { TradingTokensInputMode } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import {
   CreateOrderStatus,
@@ -18,7 +19,6 @@ import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import useRunStep from "@/hooks/useRunStep";
-import { addNotification } from "@/other/notification";
 import addToast from "@/other/toast";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 import { Standard } from "@/sdk_bi/standard";
@@ -140,14 +140,23 @@ export default function useCreateOrder() {
         !publicClient ||
         !walletClient ||
         !loanToken ||
-        !liquidationFeeToken
+        !liquidationFeeToken ||
+        (tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING &&
+          !tradingTokens.tradingTokensAutoListing)
       ) {
         return;
       }
 
-      const sortedAddresses = sortAddresses(
-        tradingTokens.allowedTokens.map((token) => token.wrapped.address0),
-      ) as Address[];
+      const sortedAddresses =
+        tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING
+          ? [tradingTokens.tradingTokensAutoListing!.id] // add ! here because we have check upper
+          : (sortAddresses(
+              tradingTokens.allowedTokens.flatMap((token) =>
+                tradingTokens.includeERC223Trading
+                  ? [token.wrapped.address0, token.wrapped.address1]
+                  : [token.wrapped.address0],
+              ),
+            ) as Address[]);
 
       const addTokenListHash = await walletClient.writeContract({
         abi: MARGIN_MODULE_ABI,
@@ -161,52 +170,47 @@ export default function useCreateOrder() {
       await publicClient.waitForTransactionReceipt({ hash: addTokenListHash });
       setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
 
-      const whitelistId = getWhitelistId(sortedAddresses, false);
+      const whitelistId = getWhitelistId(
+        sortedAddresses,
+        tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING,
+      );
 
       try {
-        // const a = parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals);
-        // console.log(a);
-        // console.log(minimumBorrowingAmount);
-        //
-        // const b = parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals);
-        // console.log(b);
-        // console.log(minimumBorrowingAmount);
-        // console.log(liquidationFeeForLiquidator);
-        // console.log(loanToken.decimals, liquidationFeeToken.decimals);
-        // console.log([
-        //   whitelistId, // whitelist id from tokens that are allowed for trading
-        //   calculateInterestRate(Number(interestRatePerMonth), Number(period.positionDuration)), // interest rate for 30 days mutliplied by 100
-        //   BigInt(Number(period.positionDuration) * 24 * 60 * 60), // positionDuration in seconds
-        //   parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals), // minLoan,
-        //   parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals), // liquidationRewardAmount
-        //   liquidationFeeToken.wrapped.address0, // liquidationRewardAsset
-        //   loanTokenStandard === Standard.ERC20
-        //     ? loanToken.wrapped.address0
-        //     : loanToken.wrapped.address1, // asset address
-        //   Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000), // deadline
-        //   Number(orderCurrencyLimit), // currencyLimit
-        //   leverage, // leverage
-        //   "0xa8fa9e2c64a45ba5bc64089104c332be056c4c83", //oracle
-        // ]);
-
         const createOrderHash = await walletClient.writeContract({
           abi: MARGIN_MODULE_ABI,
           address: MARGIN_TRADING_ADDRESS[chainId],
           functionName: "createOrder",
           args: [
-            whitelistId, // whitelist id from tokens that are allowed for trading
-            calculateInterestRate(Number(interestRatePerMonth), Number(period.positionDuration)), // interest rate for 30 days mutliplied by 100
-            BigInt(Number(period.positionDuration) * 24 * 60 * 60), // positionDuration in seconds
-            parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals), // minLoan,
-            parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals), // liquidationRewardAmount
-            liquidationFeeToken.wrapped.address0, // liquidationRewardAsset
-            loanTokenStandard === Standard.ERC20
-              ? loanToken.wrapped.address0
-              : loanToken.wrapped.address1, // asset address
-            Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000), // deadline
-            Number(orderCurrencyLimit), // currencyLimit
-            leverage, // leverage
-            "0xa8fa9e2c64a45ba5bc64089104c332be056c4c83", //oracle
+            {
+              whitelistId: whitelistId,
+              // interest rate for 30 days mutliplied by 100
+              interestRate: calculateInterestRate(
+                Number(interestRatePerMonth),
+                Number(period.positionDuration),
+              ),
+              duration: BigInt(Number(period.positionDuration) * 24 * 60 * 60), // positionDuration in seconds
+              minLoan: parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals),
+              liquidationRewardAmount: parseUnits(
+                liquidationFeeForLiquidator,
+                liquidationFeeToken.decimals,
+              ),
+              liquidationRewardAsset: liquidationFeeToken.wrapped.address0,
+              asset:
+                loanTokenStandard === Standard.ERC20
+                  ? loanToken.wrapped.address0
+                  : loanToken.wrapped.address1,
+              deadline: Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000),
+              currencyLimit: Number(orderCurrencyLimit),
+              leverage,
+              oracle: "0xa8fa9e2c64a45ba5bc64089104c332be056c4c83",
+              collateral: collateralTokens.flatMap((token) => {
+                if (includeERC223Collateral) {
+                  return [token.wrapped.address0, token.wrapped.address1];
+                }
+                return [token.wrapped.address0];
+              }),
+            },
+            // whitelist id from tokens that are allowed for trading
           ],
           account: undefined,
         });
@@ -223,62 +227,73 @@ export default function useCreateOrder() {
           topics: createOrderReceipt.logs[0].topics,
         });
 
-        console.log(decodedLog.args.orderId);
-        setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
-        const activateOrderHash = await walletClient.writeContract({
-          abi: MARGIN_MODULE_ABI,
-          address: MARGIN_TRADING_ADDRESS[chainId],
-          functionName: "activateOrder",
-          args: [decodedLog.args.orderId, collateralTokens.map((token) => token.wrapped.address0)],
-          account: undefined,
-        });
-        setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+        if (params.loanToken.isNative) {
+          setStatus(CreateOrderStatus.PENDING_DEPOSIT);
 
-        const activateOrderReceipt = await publicClient.waitForTransactionReceipt({
-          hash: activateOrderHash,
-        });
+          const depositOrderHash = await walletClient.writeContract({
+            abi: MARGIN_MODULE_ABI,
+            address: MARGIN_TRADING_ADDRESS[chainId],
+            functionName: "orderDepositWETH9",
+            args: [decodedLog.args.orderId, params.loanToken.wrapped.address0],
+            value: parseUnits(loanAmount, params.loanToken.decimals ?? 18),
+            account: undefined,
+          });
+          setStatus(CreateOrderStatus.LOADING_DEPOSIT);
 
-        setStatus(CreateOrderStatus.PENDING_APPROVE);
-        const approveResult = await approveA({
-          customAmount: parseUnits(loanAmount, params.loanToken.decimals ?? 18),
-          customGasSettings: gasSettings,
-        });
+          const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
 
-        if (!approveResult?.success) {
-          setStatus(CreateOrderStatus.ERROR_APPROVE);
-          return;
-        }
-
-        setStatus(CreateOrderStatus.LOADING_APPROVE);
-
-        const approveReceipt = await publicClient.waitForTransactionReceipt({
-          hash: approveResult.hash,
-        });
-
-        if (approveReceipt.status !== "success") {
-          setStatus(CreateOrderStatus.ERROR_APPROVE);
-          return;
-        }
-
-        setStatus(CreateOrderStatus.PENDING_DEPOSIT);
-
-        const depositOrderHash = await walletClient.writeContract({
-          abi: MARGIN_MODULE_ABI,
-          address: MARGIN_TRADING_ADDRESS[chainId],
-          functionName: "orderDeposit",
-          args: [decodedLog.args.orderId, parseUnits(loanAmount, params.loanToken.decimals ?? 18)],
-          account: undefined,
-        });
-        setStatus(CreateOrderStatus.LOADING_DEPOSIT);
-
-        const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
-
-        if (receipt.status === "success") {
-          setStatus(CreateOrderStatus.SUCCESS);
+          if (receipt.status === "success") {
+            setStatus(CreateOrderStatus.SUCCESS);
+          } else {
+            setStatus(CreateOrderStatus.ERROR_DEPOSIT);
+          }
         } else {
-          setStatus(CreateOrderStatus.ERROR_DEPOSIT);
+          setStatus(CreateOrderStatus.PENDING_APPROVE);
+          const approveResult = await approveA({
+            customAmount: parseUnits(loanAmount, params.loanToken.decimals ?? 18),
+            customGasSettings: gasSettings,
+          });
+
+          if (!approveResult?.success) {
+            setStatus(CreateOrderStatus.ERROR_APPROVE);
+            return;
+          }
+
+          setStatus(CreateOrderStatus.LOADING_APPROVE);
+
+          const approveReceipt = await publicClient.waitForTransactionReceipt({
+            hash: approveResult.hash,
+          });
+
+          if (approveReceipt.status !== "success") {
+            setStatus(CreateOrderStatus.ERROR_APPROVE);
+            return;
+          }
+
+          setStatus(CreateOrderStatus.PENDING_DEPOSIT);
+
+          const depositOrderHash = await walletClient.writeContract({
+            abi: MARGIN_MODULE_ABI,
+            address: MARGIN_TRADING_ADDRESS[chainId],
+            functionName: "orderDepositToken",
+            args: [
+              decodedLog.args.orderId,
+              parseUnits(loanAmount, params.loanToken.decimals ?? 18),
+            ],
+            account: undefined,
+          });
+          setStatus(CreateOrderStatus.LOADING_DEPOSIT);
+
+          const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
+
+          if (receipt.status === "success") {
+            setStatus(CreateOrderStatus.SUCCESS);
+          } else {
+            setStatus(CreateOrderStatus.ERROR_DEPOSIT);
+          }
+          console.log(receipt);
         }
-        console.log(receipt);
+
         // console.log("Receipt", receipt);
       } catch (e) {
         console.log(e);

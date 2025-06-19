@@ -5,11 +5,11 @@ import { useMemo } from "react";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { DexChainId } from "@/sdk_bi/chains";
 
-const autoListingUrlMap: Record<DexChainId, string> = {
+const marginModuleUrlMap: Record<DexChainId, string> = {
   [DexChainId.MAINNET]:
     "https://gateway.thegraph.com/api/subgraphs/id/4Zk7s54TCuxMvJVWMzDax5QRsGVRTPoXmw58gKqzZGQi",
   [DexChainId.SEPOLIA]:
-    "https://api.studio.thegraph.com/query/56540/dex-223-subgraph-margin-module-sepolia/0.0.2",
+    "https://api.studio.thegraph.com/query/56540/dex-223-subgraph-margin-module-sepolia/0.0.4",
   [DexChainId.BSC_TESTNET]:
     "https://api.studio.thegraph.com/query/56540/dex223-auto-listing-chapel/version/latest/",
   [DexChainId.EOS]: "https://graph.dex223.io/subgraphs/name/dex223-auto-listing-eosevm/",
@@ -31,7 +31,7 @@ export default function useMarginModuleApolloClient() {
   const authMiddleware = useMemo(() => {
     return new ApolloLink((operation, forward) => {
       operation.setContext(() => ({
-        uri: autoListingUrlMap[chainId],
+        uri: marginModuleUrlMap[chainId],
       }));
 
       return forward(operation);
@@ -45,7 +45,7 @@ export default function useMarginModuleApolloClient() {
         concat(
           authMiddleware,
           new HttpLink({
-            uri: autoListingUrlMap[chainId],
+            uri: marginModuleUrlMap[chainId],
           }),
         ),
       ),

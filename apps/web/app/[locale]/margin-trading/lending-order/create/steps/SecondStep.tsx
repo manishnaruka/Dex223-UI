@@ -40,7 +40,7 @@ export default function SecondStep() {
       initialValues={secondStepValues}
       validationSchema={object({
         leverage: number().required().min(1).max(100),
-        minimumBorrowingAmount: number().required().min(1),
+        minimumBorrowingAmount: number().required().moreThan(0),
       })}
       onSubmit={async (values, { validateForm }) => {
         // const errors = await validateForm(values);
