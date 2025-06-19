@@ -8,9 +8,10 @@ import { useMediaQuery } from "react-responsive";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
+import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog";
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import SwapSettingsDialog from "@/app/[locale]/swap/components/SwapSettingsDialog";
-import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
+import { useSwapEstimatedGas, useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import { TradeError, useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
@@ -231,6 +232,7 @@ export default function TradeForm() {
   });
 
   const { trade, isLoading: isLoadingTrade, error, pools } = useTrade();
+  useSwapEstimatedGas({ trade });
 
   const poolExists = useMemo(() => {
     return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
@@ -854,6 +856,7 @@ export default function TradeForm() {
         setIsOpen={setIsOpenedTokenPick}
       />
       <SwapSettingsDialog />
+      <ConfirmSwapDialog trade={trade} />
     </div>
   );
 }

@@ -44,6 +44,7 @@ import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { Trade } from "@/sdk_bi/entities/trade";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
@@ -417,7 +418,7 @@ function ReadonlyTokenAmountCard({
   );
 }
 
-export default function ConfirmSwapDialog() {
+export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, any> | null }) {
   const t = useTranslations("Swap");
   const {
     tokenA,
@@ -431,19 +432,11 @@ export default function ConfirmSwapDialog() {
 
   const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
 
-  const { trade } = useTrade();
+  console.log("Trade", trade);
 
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
-
-  const inputAmount = useMemo(() => {
-    if (!trade) {
-      return "";
-    }
-
-    return trade.inputAmount.toSignificant();
-  }, [trade]);
 
   const output = useMemo(() => {
     if (!trade) {

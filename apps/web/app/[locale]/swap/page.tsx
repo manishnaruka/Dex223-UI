@@ -30,7 +30,6 @@ import {
 export default function SwapPage() {
   useSwapSearchParams();
   useRecentTransactionTracking();
-  useSwapEstimatedGas();
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
@@ -80,7 +79,6 @@ export default function SwapPage() {
           </div>
         </div>
 
-        <ConfirmSwapDialog />
         <ConfirmConvertDialog />
       </Container>
     </>
