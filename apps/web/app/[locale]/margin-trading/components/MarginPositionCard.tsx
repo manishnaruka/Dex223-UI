@@ -236,9 +236,9 @@ export default function MarginPositionCard({
           totalBalance={totalBalance}
           expectedBalance={expectedBalance}
         />
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
+        {/*<MarginPositionInfoCard />*/}
+        {/*<MarginPositionInfoCard />*/}
+        {/*<MarginPositionInfoCard />*/}
       </div>
 
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">
@@ -395,9 +395,9 @@ export function LendingPositionCard({
           totalBalance={totalBalance}
           expectedBalance={expectedBalance}
         />
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
+        {/*<MarginPositionInfoCard />*/}
+        {/*<MarginPositionInfoCard />*/}
+        {/*<MarginPositionInfoCard />*/}
       </div>
 
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">

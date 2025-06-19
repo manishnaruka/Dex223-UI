@@ -233,35 +233,36 @@ export class Pool {
     liquidity: bigint;
     tickCurrent: number;
   }> {
-    sqrtPriceLimitX96 = SqrtPriceMath.getNextSqrtPriceFromInput(
-      this.sqrtRatioX96,
-      this.liquidity,
-      amountSpecified,
-      zeroForOne,
-    );
-    // const extraTickScan =
-    //   {
-    //     500: 200,
-    //     3000: 100,
-    //     10000: 50,
-    //   }[this.fee] ?? 100;
-    //
-    // if (zeroForOne) {
-    //   const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
-    //     this.tickCurrent,
-    //     true,
-    //     this.tickSpacing,
-    //   );
-    //   sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
-    // } else {
-    //   const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
-    //     this.tickCurrent,
-    //     false,
-    //     this.tickSpacing,
-    //   );
-    //   sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
-    // }
+    // sqrtPriceLimitX96 = SqrtPriceMath.getNextSqrtPriceFromInput(
+    //   this.sqrtRatioX96,
+    //   this.liquidity,
+    //   amountSpecified,
+    //   zeroForOne,
+    // );
+    const extraTickScan =
+      {
+        500: 200,
+        3000: 100,
+        10000: 50,
+      }[this.fee] ?? 100;
 
+    if (zeroForOne) {
+      const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
+        this.tickCurrent,
+        true,
+        this.tickSpacing + extraTickScan,
+      );
+      sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
+    } else {
+      const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
+        this.tickCurrent,
+        false,
+        this.tickSpacing + extraTickScan,
+      );
+      sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
+    }
+
+    invariant(this.liquidity > BigInt(0), "INSUFFICIENT_LIQUIDITY");
     if (zeroForOne) {
       invariant(sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO, "RATIO_MIN");
       invariant(sqrtPriceLimitX96 < this.sqrtRatioX96, "RATIO_CURRENT");

@@ -584,6 +584,7 @@ export class Trade<
         console.log(amountOut.toSignificant());
       } catch (error: any) {
         console.log(error);
+        // just skip this pool and keep going
         continue;
       }
       // we have arrived at the output token, so this is the final trade of one of the paths

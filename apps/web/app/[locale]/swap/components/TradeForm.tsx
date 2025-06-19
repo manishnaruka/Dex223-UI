@@ -270,10 +270,14 @@ export default function TradeForm() {
     );
   }, [dependentAmount, slippage, trade]);
 
+  console.log("Trade", trade);
+
   const isSufficientPoolBalance = useMemo(() => {
     const erc20Balance = erc20BalanceToken1?.value ?? BigInt(0);
     const erc223Balance = erc223BalanceToken1?.value ?? BigInt(0);
     const poolBalance = erc20Balance + erc223Balance;
+
+    console.log("Pool balance", poolBalance);
 
     return poolBalance > minimumAmountOut;
   }, [erc20BalanceToken1, erc223BalanceToken1, minimumAmountOut]);

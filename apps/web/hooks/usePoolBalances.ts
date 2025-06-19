@@ -38,6 +38,8 @@ export const usePoolBalances = ({
   //   token: tokenA ? tokenA.wrapped.address1 : undefined,
   // });
 
+  console.log(poolAddress);
+
   const { data: erc20BalanceToken1 } = useBalance({
     address: poolAddress,
     token: tokenB ? tokenB.wrapped.address0 : undefined,
