@@ -496,8 +496,6 @@ export default function ConfirmSwapDialog() {
     }
   }, [typedValue]);
 
-  console.log("Input amount", inputAmount);
-
   const { gasPriceSettings } = useSwapGasPriceStore();
   const { data: baseFee } = useGasPrice();
 
