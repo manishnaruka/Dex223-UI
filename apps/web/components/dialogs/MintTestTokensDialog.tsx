@@ -1,7 +1,7 @@
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Address, formatUnits, isAddress, parseUnits } from "viem";
+import { Address, formatUnits, parseUnits } from "viem";
 import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
