@@ -12,7 +12,7 @@ import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog"
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import SwapSettingsDialog from "@/app/[locale]/swap/components/SwapSettingsDialog";
 import { useSwapEstimatedGas, useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { TradeError, useTrade } from "@/app/[locale]/swap/hooks/useTrade";
+import { useTrade, useTradeComputation } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
@@ -24,6 +24,7 @@ import {
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
+import { TradeError } from "@/app/[locale]/swap/stores/useSwapTradeStore";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";
@@ -203,6 +204,7 @@ const gasOptionTitle: Record<GasOption, any> = {
 };
 export default function TradeForm() {
   const t = useTranslations("Swap");
+  useTradeComputation();
 
   const chainId = useCurrentChainId();
   const [isOpenedFee, setIsOpenedFee] = useState(false);
@@ -231,12 +233,12 @@ export default function TradeForm() {
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
-  const { trade, isLoading: isLoadingTrade, error, pools } = useTrade();
+  const { trade, loading, error } = useTrade();
   useSwapEstimatedGas({ trade });
 
-  const poolExists = useMemo(() => {
-    return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
-  }, [pools]);
+  // const poolExists = useMemo(() => {
+  //   return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
+  // }, [pools]);
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({
     tokenA,
@@ -686,7 +688,7 @@ export default function TradeForm() {
         </div>
       )}
 
-      {!isLoadingTrade && !poolExists && tokenA && tokenB && !tokenA.equals(tokenB) && (
+      {tokenA && tokenB && error === TradeError.NO_POOLS && (
         <div className="mt-5">
           <Alert
             text={
@@ -823,7 +825,7 @@ export default function TradeForm() {
         }
         isSufficientPoolBalance={isSufficientPoolBalance}
         isTradeReady={Boolean(trade)}
-        isTradeLoading={isLoadingTrade}
+        isTradeLoading={loading}
       />
 
       {trade && tokenA && tokenB && (

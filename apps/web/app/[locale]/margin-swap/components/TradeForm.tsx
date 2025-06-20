@@ -289,11 +289,11 @@ export default function TradeForm() {
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
-  const { trade, isLoading: isLoadingTrade, error, pools } = useTrade();
+  const { trade, error, loading } = useTrade();
 
-  const poolExists = useMemo(() => {
-    return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
-  }, [pools]);
+  // const poolExists = useMemo(() => {
+  //   return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
+  // }, [pools]);
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({
     tokenA,
@@ -719,34 +719,34 @@ export default function TradeForm() {
         setStandard={setTokenBStandard}
       />
 
-      {error === TradeError.NO_LIQUIDITY && (
-        <div className="mt-5">
-          <Alert
-            text="Swap unavailable. One of the tokens lacks liquidity. Please try again later or choose another pair"
-            type="warning"
-          />
-        </div>
-      )}
+      {/*{error === TradeError.NO_LIQUIDITY && (*/}
+      {/*  <div className="mt-5">*/}
+      {/*    <Alert*/}
+      {/*      text="Swap unavailable. One of the tokens lacks liquidity. Please try again later or choose another pair"*/}
+      {/*      type="warning"*/}
+      {/*    />*/}
+      {/*  </div>*/}
+      {/*)}*/}
 
-      {!isLoadingTrade && !poolExists && tokenA && tokenB && !tokenA.equals(tokenB) && (
-        <div className="mt-5">
-          <Alert
-            text={
-              <span>
-                The requested pool does not exist. You can{" "}
-                <a
-                  className="text-green hover:text-green-hover duration-200"
-                  target="_blank"
-                  href={`/add?tokenA=${tokenA.wrapped.address0}&tokenB=${tokenB.wrapped.address0}`}
-                >
-                  create a new pool
-                </a>
-              </span>
-            }
-            type="warning"
-          />
-        </div>
-      )}
+      {/*{!isLoadingTrade && !poolExists && tokenA && tokenB && !tokenA.equals(tokenB) && (*/}
+      {/*  <div className="mt-5">*/}
+      {/*    <Alert*/}
+      {/*      text={*/}
+      {/*        <span>*/}
+      {/*          The requested pool does not exist. You can{" "}*/}
+      {/*          <a*/}
+      {/*            className="text-green hover:text-green-hover duration-200"*/}
+      {/*            target="_blank"*/}
+      {/*            href={`/add?tokenA=${tokenA.wrapped.address0}&tokenB=${tokenB.wrapped.address0}`}*/}
+      {/*          >*/}
+      {/*            create a new pool*/}
+      {/*          </a>*/}
+      {/*        </span>*/}
+      {/*      }*/}
+      {/*      type="warning"*/}
+      {/*    />*/}
+      {/*  </div>*/}
+      {/*)}*/}
 
       {tokenA && tokenB && typedValue ? (
         <div
@@ -869,7 +869,7 @@ export default function TradeForm() {
         }
         isSufficientPoolBalance={isSufficientPoolBalance}
         isTradeReady={Boolean(trade)}
-        isTradeLoading={isLoadingTrade}
+        isTradeLoading={false}
       />
 
       {trade && tokenA && tokenB && (
