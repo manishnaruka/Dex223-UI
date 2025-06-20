@@ -12,6 +12,7 @@ interface SwapTokensStore {
   tokenBStandard: Standard;
   setTokenAStandard: (address: Standard) => void;
   setTokenBStandard: (address: Standard) => void;
+  switchTokens: () => void;
   reset: () => void;
 }
 
@@ -34,5 +35,13 @@ export const useSwapTokensStore = create<SwapTokensStore>((set, get) => ({
       tokenB: undefined,
       tokenAStandard: Standard.ERC20,
       tokenBStandard: Standard.ERC20,
+    }),
+
+  switchTokens: () =>
+    set({
+      tokenA: get().tokenB,
+      tokenB: get().tokenA,
+      tokenAStandard: get().tokenBStandard,
+      tokenBStandard: get().tokenAStandard,
     }),
 }));

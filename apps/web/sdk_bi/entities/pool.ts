@@ -4,6 +4,7 @@ import { BigintIsh, FeeAmount, TICK_SPACINGS } from "@/sdk_bi/constants";
 import { NoTickDataProvider, TickDataProvider } from "@/sdk_bi/entities/tickDataProvider";
 import { TickListDataProvider } from "@/sdk_bi/entities/tickListDataProvider";
 import { LiquidityMath } from "@/sdk_bi/utils/liquidityMath";
+import { SqrtPriceMath } from "@/sdk_bi/utils/sqrtPriceMath";
 import { SwapMath } from "@/sdk_bi/utils/swapMath";
 
 import { NEGATIVE_ONE, ONE, Q192, ZERO } from "../internalConstants";
@@ -22,38 +23,6 @@ interface StepComputations {
   amountIn: bigint;
   amountOut: bigint;
   feeAmount: bigint;
-}
-
-export function makeSqrtPriceLimitX96({
-  currentSqrtPriceX96,
-  shift,
-  zeroForOne,
-}: {
-  currentSqrtPriceX96: bigint;
-  shift: number; // e.g. 50 = 0.5 %
-  zeroForOne: boolean;
-}): bigint {
-  const currentTick = TickMath.getTickAtSqrtRatio(currentSqrtPriceX96);
-
-  const limitTick = zeroForOne ? currentTick - shift : currentTick + shift;
-  return TickMath.getSqrtRatioAtTick(limitTick);
-}
-
-export function shiftSqrtPriceX96ByPercent(sqrtPriceX96: bigint, percent: number): bigint {
-  const Q96 = 2n ** 96n;
-
-  // 1. Переводим в обычную цену
-  const sqrtPrice = Number(sqrtPriceX96) / Number(Q96);
-  const price = sqrtPrice ** 2;
-
-  // 2. Применяем процент
-  const shiftedPrice = price * (1 + percent / 100);
-
-  // 3. Возвращаем обратно в sqrtPriceX96
-  const shiftedSqrtPrice = Math.sqrt(shiftedPrice);
-  const shiftedSqrtPriceX96 = shiftedSqrtPrice * Number(Q96);
-
-  return BigInt(Math.floor(shiftedSqrtPriceX96));
 }
 
 /**
@@ -194,6 +163,7 @@ export class Pool {
       tickCurrent,
     } = await this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX96);
     const outputToken = zeroForOne ? this.token1.wrapped : this.token0.wrapped;
+    console.log("fifi", outputAmount);
     return [
       CurrencyAmount.fromRawAmount(outputToken, outputAmount * NEGATIVE_ONE),
       new Pool(
@@ -263,6 +233,12 @@ export class Pool {
     liquidity: bigint;
     tickCurrent: number;
   }> {
+    // sqrtPriceLimitX96 = SqrtPriceMath.getNextSqrtPriceFromInput(
+    //   this.sqrtRatioX96,
+    //   this.liquidity,
+    //   amountSpecified,
+    //   zeroForOne,
+    // );
     const extraTickScan =
       {
         500: 200,
@@ -274,7 +250,7 @@ export class Pool {
       const [nextTick, _] = await this.tickDataProvider.nextInitializedTickWithinOneWord(
         this.tickCurrent,
         true,
-        this.tickSpacing + 200,
+        this.tickSpacing + extraTickScan,
       );
       sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
     } else {
@@ -286,6 +262,7 @@ export class Pool {
       sqrtPriceLimitX96 = TickMath.getSqrtRatioAtTick(nextTick);
     }
 
+    invariant(this.liquidity > BigInt(0), "INSUFFICIENT_LIQUIDITY");
     if (zeroForOne) {
       invariant(sqrtPriceLimitX96 > TickMath.MIN_SQRT_RATIO, "RATIO_MIN");
       invariant(sqrtPriceLimitX96 < this.sqrtRatioX96, "RATIO_CURRENT");
@@ -305,6 +282,9 @@ export class Pool {
       tick: this.tickCurrent,
       liquidity: this.liquidity,
     };
+
+    console.log(amountSpecified);
+    console.log(state.sqrtPriceX96);
 
     // start swap while loop
     while (state.amountSpecifiedRemaining !== ZERO && state.sqrtPriceX96 != sqrtPriceLimitX96) {

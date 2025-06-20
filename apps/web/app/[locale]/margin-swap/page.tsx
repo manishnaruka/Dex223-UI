@@ -56,7 +56,7 @@ export default function MarginSwapPage() {
           </div>
         </div>
 
-        <ConfirmSwapDialog />
+        <ConfirmSwapDialog trade={null} />
         <ConfirmConvertDialog />
       </Container>
     </ColorSchemeProvider>

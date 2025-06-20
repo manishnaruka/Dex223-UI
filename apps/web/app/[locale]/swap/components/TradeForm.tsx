@@ -8,10 +8,11 @@ import { useMediaQuery } from "react-responsive";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
+import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog";
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import SwapSettingsDialog from "@/app/[locale]/swap/components/SwapSettingsDialog";
-import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { TradeError, useTrade } from "@/app/[locale]/swap/hooks/useTrade";
+import { useSwapEstimatedGas, useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
+import { useTrade, useTradeComputation } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
@@ -23,6 +24,7 @@ import {
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
+import { TradeError } from "@/app/[locale]/swap/stores/useSwapTradeStore";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";
@@ -38,7 +40,6 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
-import { PoolState } from "@/hooks/usePools";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
@@ -55,14 +56,12 @@ const ActionButtonSize = ButtonSize.EXTRA_LARGE;
 const MobileActionButtonSize = ButtonSize.LARGE;
 function OpenConfirmDialogButton({
   isSufficientBalance,
-  isSufficientPoolBalance,
   isTradeReady,
   isTradeLoading,
 }: {
   isSufficientBalance: boolean;
   isTradeReady: boolean;
   isTradeLoading: boolean;
-  isSufficientPoolBalance: boolean;
 }) {
   const tWallet = useTranslations("Wallet");
   const t = useTranslations("Swap");
@@ -75,6 +74,7 @@ function OpenConfirmDialogButton({
 
   const { isLoadingSwap, isLoadingApprove, isPendingApprove, isPendingSwap } = useSwapStatus();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
+  const { error } = useTrade();
 
   if (!isConnected) {
     return (
@@ -159,7 +159,7 @@ function OpenConfirmDialogButton({
     );
   }
 
-  if (!isSufficientPoolBalance) {
+  if (error === TradeError.NO_LIQUIDITY) {
     return (
       <Button fullWidth disabled size={ActionButtonSize} mobileSize={MobileActionButtonSize}>
         Insufficient liquidity for this trade
@@ -202,6 +202,7 @@ const gasOptionTitle: Record<GasOption, any> = {
 };
 export default function TradeForm() {
   const t = useTranslations("Swap");
+  useTradeComputation();
 
   const chainId = useCurrentChainId();
   const [isOpenedFee, setIsOpenedFee] = useState(false);
@@ -217,6 +218,7 @@ export default function TradeForm() {
     tokenBStandard,
     setTokenAStandard,
     setTokenBStandard,
+    switchTokens,
   } = useSwapTokensStore();
   const { computed } = useSwapSettingsStore();
 
@@ -230,11 +232,8 @@ export default function TradeForm() {
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
-  const { trade, isLoading: isLoadingTrade, error, pools } = useTrade();
-
-  const poolExists = useMemo(() => {
-    return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
-  }, [pools]);
+  const { trade, loading, error } = useTrade();
+  useSwapEstimatedGas({ trade });
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({
     tokenA,
@@ -253,28 +252,6 @@ export default function TradeForm() {
 
     return dependentAmount?.toSignificant() || "";
   }, [dependentAmount, tokenA, tokenB, typedValue]);
-
-  const { slippage } = useSwapSettingsStore();
-
-  const minimumAmountOut = useMemo(() => {
-    if (!trade) {
-      return BigInt(0);
-    }
-
-    return BigInt(
-      trade
-        .minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
-        .quotient.toString(),
-    );
-  }, [dependentAmount, slippage, trade]);
-
-  const isSufficientPoolBalance = useMemo(() => {
-    const erc20Balance = erc20BalanceToken1?.value ?? BigInt(0);
-    const erc223Balance = erc223BalanceToken1?.value ?? BigInt(0);
-    const poolBalance = erc20Balance + erc223Balance;
-
-    return poolBalance > minimumAmountOut;
-  }, [erc20BalanceToken1, erc223BalanceToken1, minimumAmountOut]);
 
   const isConvertationRequired = useMemo(() => {
     if (erc20BalanceToken1 && tokenBStandard === Standard.ERC20) {
@@ -629,10 +606,7 @@ export default function TradeForm() {
       <div className="relative h-4 md:h-5 z-10">
         <SwapButton
           onClick={() => {
-            setTokenB(tokenA);
-            setTokenA(tokenB);
-            setTokenAStandard(tokenBStandard);
-            setTokenBStandard(tokenAStandard);
+            switchTokens();
             setTypedValue({
               typedValue: dependentAmountValue,
               field: Field.CURRENCY_A,
@@ -684,7 +658,7 @@ export default function TradeForm() {
         </div>
       )}
 
-      {!isLoadingTrade && !poolExists && tokenA && tokenB && !tokenA.equals(tokenB) && (
+      {tokenA && tokenB && !tokenA.equals(tokenB) && error === TradeError.NO_POOLS && (
         <div className="mt-5">
           <Alert
             text={
@@ -819,9 +793,8 @@ export default function TradeForm() {
               ? tokenA1Balance?.value >= parseUnits(typedValue, tokenA.decimals)
               : false))
         }
-        isSufficientPoolBalance={isSufficientPoolBalance}
         isTradeReady={Boolean(trade)}
-        isTradeLoading={isLoadingTrade}
+        isTradeLoading={loading}
       />
 
       {trade && tokenA && tokenB && (
@@ -854,6 +827,7 @@ export default function TradeForm() {
         setIsOpen={setIsOpenedTokenPick}
       />
       <SwapSettingsDialog />
+      <ConfirmSwapDialog trade={trade} />
     </div>
   );
 }

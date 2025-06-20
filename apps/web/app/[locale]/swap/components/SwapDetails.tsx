@@ -13,7 +13,6 @@ import {
 } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import Collapse from "@/components/atoms/Collapse";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
 import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
@@ -22,7 +21,6 @@ import { useColorScheme } from "@/lib/color-scheme";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
-import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 
 export default function SwapDetails({
   trade,

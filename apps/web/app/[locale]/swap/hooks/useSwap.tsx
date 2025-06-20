@@ -43,6 +43,7 @@ import { ADDRESS_ZERO, FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
+import { Trade } from "@/sdk_bi/entities/trade";
 import { ONE } from "@/sdk_bi/internalConstants";
 import { getTokenAddressForStandard, Standard } from "@/sdk_bi/standard";
 import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
@@ -73,7 +74,7 @@ function encodePath(address0: Address, address1: Address, fee: FeeAmount): Addre
   return `${address0}${fee.toString(16).padStart(6, "0")}${address1.slice(2)}`;
 }
 
-export function useSwapParams() {
+export function useSwapParams({ trade }: { trade: Trade<any, any, any> | null }) {
   const { tokenA, tokenB, tokenAStandard, tokenBStandard } = useSwapTokensStore();
   const chainId = useCurrentChainId();
   const { address } = useAccount();
@@ -82,8 +83,6 @@ export function useSwapParams() {
 
   const { slippage, deadline: _deadline } = useSwapSettingsStore();
   const deadline = useTransactionDeadline(_deadline);
-
-  const { trade, isLoading: isLoadingTrade } = useTrade();
 
   const poolAddress = useComputePoolAddressDex({
     tokenA,
@@ -281,9 +280,9 @@ export function useSwapParams() {
   return { swapParams };
 }
 
-export function useSwapEstimatedGas() {
+export function useSwapEstimatedGas({ trade }: { trade: Trade<any, any, any> | null }) {
   const { address } = useAccount();
-  const { swapParams } = useSwapParams();
+  const { swapParams } = useSwapParams({ trade });
   const publicClient = usePublicClient();
   const { setEstimatedGas } = useSwapGasLimitStore();
   const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
@@ -380,7 +379,7 @@ export default function useSwap() {
     return formatFloat(trade.outputAmount.toSignificant(), { significantDigits: 2 });
   }, [isConversion, trade, typedValue]);
 
-  const { swapParams } = useSwapParams();
+  const { swapParams } = useSwapParams({ trade });
 
   const gasSettings = useMemo(() => {
     return getGasSettings({
@@ -398,6 +397,8 @@ export default function useSwap() {
       if (!publicClient || !tokenA) {
         return;
       }
+
+      console.log("Starting swap");
 
       if (!isAllowedA && tokenAStandard === Standard.ERC20 && tokenA.isToken) {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
