@@ -1,4 +1,3 @@
-import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
@@ -11,7 +10,7 @@ import { useAccount } from "wagmi";
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import SwapSettingsDialog from "@/app/[locale]/swap/components/SwapSettingsDialog";
 import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { TradeError, useTrade } from "@/app/[locale]/swap/hooks/useTrade";
+import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmConvertDialogStore } from "@/app/[locale]/swap/stores/useConfirmConvertDialogOpened";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
@@ -289,11 +288,7 @@ export default function TradeForm() {
     amountToCheck: parseUnits(typedValue, tokenA?.decimals ?? 18),
   });
 
-  const { trade, error, loading } = useTrade();
-
-  // const poolExists = useMemo(() => {
-  //   return !!pools.find((pool) => pool[0] === PoolState.EXISTS);
-  // }, [pools]);
+  const { trade } = useTrade();
 
   const { erc20BalanceToken1, erc223BalanceToken1 } = usePoolBalances({
     tokenA,
@@ -683,10 +678,6 @@ export default function TradeForm() {
         <SwapButton
           colorScheme={ThemeColors.PURPLE}
           onClick={() => {
-            setTokenB(tokenA);
-            setTokenA(tokenB);
-            setTokenAStandard(tokenBStandard);
-            setTokenBStandard(tokenAStandard);
             setTypedValue({
               typedValue: dependentAmountValue,
               field: Field.CURRENCY_A,

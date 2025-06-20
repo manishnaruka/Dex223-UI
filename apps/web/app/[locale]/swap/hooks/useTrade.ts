@@ -100,6 +100,10 @@ export function useTradeComputation() {
   useEffect(() => {
     let active = true;
 
+    if (typedValue !== debounced) {
+      return;
+    }
+
     // early exits
     if (!tokenA || !tokenB || !+debounced) {
       setLoading(false);
@@ -164,6 +168,7 @@ export function useTradeComputation() {
 
       if (quotes.length === 0) {
         setError(TradeError.NO_LIQUIDITY);
+        setTrade(null);
         setLoading(false);
         return;
       }
@@ -189,5 +194,17 @@ export function useTradeComputation() {
     return () => {
       active = false;
     };
-  }, [tokenA, tokenB, debounced, pools, client, address, chainId, setTrade, setError, setLoading]);
+  }, [
+    tokenA,
+    tokenB,
+    debounced,
+    pools,
+    client,
+    address,
+    chainId,
+    setTrade,
+    setError,
+    setLoading,
+    typedValue,
+  ]);
 }
