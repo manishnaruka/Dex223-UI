@@ -67,12 +67,13 @@ export function useTradeComputation() {
     const valid = filterPools(pools);
     if (valid.length === 0) {
       setError(TradeError.NO_POOLS);
+      setTrade(null);
       setLoading(false);
     } else {
       // clear that error if pools now exist
       setError(null);
     }
-  }, [tokenA, tokenB, pools, setError, setLoading]);
+  }, [tokenA, tokenB, pools, setError, setLoading, setTrade]);
 
   //
   // 2. Immediately set loading when user types—but skip if no pools
