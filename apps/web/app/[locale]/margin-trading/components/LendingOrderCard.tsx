@@ -38,7 +38,7 @@ function LiquidationInfo({ label, value }: { label: string; value: number }) {
   );
 }
 
-export default function LendingOrderCard() {
+export default function LendingOrderCard({ order }: { order: { baseAssetSymbol: string } }) {
   return (
     <>
       <div className="border-4 border-green-bg rounded-5 pt-3 px-5 pb-5">
@@ -75,7 +75,7 @@ export default function LendingOrderCard() {
                   <Tooltip text="Tooltip text" />
                 </span>
                 <p className="text-20">
-                  1000 / 500 <span className="text-secondary-text">USDT</span>
+                  1000 / 500 <span className="text-secondary-text">{order.baseAssetSymbol}</span>
                 </p>
               </div>
             </div>

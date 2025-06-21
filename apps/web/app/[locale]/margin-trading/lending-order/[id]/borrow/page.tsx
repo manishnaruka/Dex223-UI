@@ -2,11 +2,13 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import { Formik } from "formik";
 import Image from "next/image";
-import React from "react";
-import { formatEther, formatGwei } from "viem";
+import React, { use, useMemo } from "react";
+import { formatEther, formatGwei, formatUnits } from "viem";
 import * as Yup from "yup";
 
 import ReviewBorrowDialog from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/components/ReviewBorrowDialog";
+import useOrderByIdFromNode from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useOrderByIdFromNode";
+import useTokenFromNode from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useTokenFromNode";
 import { useConfirmCreateMarginPositionDialogStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useConfirmCreateMarginPositionDialogOpened";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
@@ -53,9 +55,9 @@ const schema = Yup.object({
     .required("Loan amount is required")
     .positive("Loan amount must be greater than zero"),
   collateralAmount: Yup.number()
-    .typeError("Loan amount must be a number")
-    .required("Loan amount is required")
-    .positive("Loan amount must be greater than zero"),
+    .typeError("Collateral amount must be a number")
+    .required("Collateral amount is required")
+    .positive("Collateral amount must be greater than zero"),
   collateralToken: Yup.object().default(undefined).required("Please select a token"),
   collateralTokenStandard: Yup.string()
     .oneOf([Standard.ERC20, Standard.ERC223])
@@ -66,7 +68,14 @@ const schema = Yup.object({
     .positive("Loan amount must be greater than zero"),
 });
 
-export default function BorrowPage() {
+export default function BorrowPage({
+  params,
+}: {
+  params: Promise<{
+    id: string;
+  }>;
+}) {
+  const { id: orderId } = use(params);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useBorrowRecentTransactionsStore();
   const [isDetailsExpanded, setIsDetailsExpanded] = React.useState(false);
@@ -74,6 +83,55 @@ export default function BorrowPage() {
 
   const { values, setValues } = useCreateMarginPositionConfigStore();
 
+  const data = useOrderByIdFromNode(+orderId);
+
+  console.log(data);
+
+  const [
+    ownerAddress,
+    id,
+    whitelistId,
+    interestRate,
+    duration,
+    minLoan,
+    baseAssetAddress,
+    currencyLimit,
+    leverage,
+    oracle,
+    balance,
+    liquidationInfo,
+  ] = useMemo(() => {
+    return (
+      data || [
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        BigInt(0),
+        undefined,
+        undefined,
+        1,
+        undefined,
+        BigInt(0),
+        {
+          deadline: undefined,
+          liquidationRewardAsset: undefined,
+          liquidationRewardAmount: BigInt(0),
+        },
+      ]
+    );
+  }, [data]);
+
+  const { deadline, liquidationRewardAmount, liquidationRewardAsset } = liquidationInfo;
+
+  const { tokenSymbol: baseAssetSymbol, tokenDecimals: baseAssetDecimals } =
+    useTokenFromNode(baseAssetAddress);
+  const { tokenSymbol: feeAssetSymbol, tokenDecimals: feeAssetDecimals } =
+    useTokenFromNode(liquidationRewardAsset);
+
+  console.log(baseAssetDecimals);
+  console.log(feeAssetDecimals);
   return (
     <div className="mx-auto w-[600px] my-10">
       <div className="card-spacing pt-2.5 bg-primary-bg rounded-5 grid gap-3">
@@ -102,8 +160,8 @@ export default function BorrowPage() {
               <TextField
                 placeholder="Enter borrow amount"
                 label="I want to borrow"
-                helperText="Min/max available: 900/4000 USDT"
-                internalText="USDT"
+                helperText={`Min/max available: ${formatUnits(minLoan, baseAssetDecimals ?? 18)}/${formatUnits(balance, baseAssetDecimals ?? 18)} ${baseAssetSymbol}`}
+                internalText={baseAssetSymbol}
                 value={values.borrowAmount}
                 onChange={(e) => {
                   setFieldValue("borrowAmount", e.target.value);
@@ -136,7 +194,7 @@ export default function BorrowPage() {
 
                 <TextField
                   label="Leverage"
-                  helperText="Max leverage: 100x"
+                  helperText={`Max leverage: ${leverage}x`}
                   internalText="x"
                   tooltipText="Tooltip text"
                   value={values.leverage}
@@ -156,7 +214,7 @@ export default function BorrowPage() {
                 <div className="flex justify-between items-center bg-tertiary-bg py-2 px-5 rounded-3">
                   <div className="flex items-center gap-2">
                     <Image src="/images/tokens/placeholder.svg" alt="" width={24} height={24} />
-                    0.3 DAI
+                    {formatUnits(liquidationRewardAmount, feeAssetDecimals ?? 18)} {feeAssetSymbol}
                   </div>
 
                   <div
@@ -235,7 +293,7 @@ export default function BorrowPage() {
           )}
         </Formik>
 
-        <ReviewBorrowDialog />
+        <ReviewBorrowDialog orderId={orderId} />
 
         <div className="rounded-3 bg-tertiary-bg">
           <button

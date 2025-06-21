@@ -5,6 +5,7 @@ import BorrowMarketFilter from "@/app/[locale]/margin-trading/components/BorrowM
 import BorrowMarketTable from "@/app/[locale]/margin-trading/components/BorrowMarketTable";
 import LendingOrderCard from "@/app/[locale]/margin-trading/components/LendingOrderCard";
 import MarginPositionCard from "@/app/[locale]/margin-trading/components/MarginPositionCard";
+import LendingOrdersTab from "@/app/[locale]/margin-trading/tabs/LendingOrdersTab";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import SelectButton from "@/components/atoms/SelectButton";
@@ -61,16 +62,7 @@ export default function MarginTrading() {
             </div>
           </Tab>
           <Tab title="Lending orders">
-            <div className="flex justify-between my-5 items-center">
-              <span className="text-20 text-tertiary-text">3 lending orders</span>
-              <div className="max-w-[460px] flex-grow">
-                <SearchInput placeholder="Search address" className="bg-primary-bg" />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-5">
-              <LendingOrderCard />
-            </div>
+            <LendingOrdersTab />
           </Tab>
           <Tab title="Margin positions">
             <div className="flex justify-between my-5 items-center">

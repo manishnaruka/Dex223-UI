@@ -82,7 +82,7 @@ const marginSteps: OperationStepConfig[] = [
   // Repeat for other steps
 ];
 
-function CreateMarginPositionActionButton() {
+function CreateMarginPositionActionButton({ orderId }: { orderId: string }) {
   const { handleCreateMarginPosition } = useCreateMarginPosition();
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
     useCreateMarginPositionStatusStore();
@@ -113,10 +113,10 @@ function CreateMarginPositionActionButton() {
       </Rows>
     );
   }
-  return <Button onClick={handleCreateMarginPosition}>Confirm borrow</Button>;
+  return <Button onClick={() => handleCreateMarginPosition(orderId)}>Confirm borrow</Button>;
 }
 
-export default function ReviewBorrowDialog() {
+export default function ReviewBorrowDialog({ orderId }: { orderId: string }) {
   const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
   const { values, setValues } = useCreateMarginPositionConfigStore();
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
@@ -310,7 +310,7 @@ export default function ReviewBorrowDialog() {
           </>
         )}
 
-        <CreateMarginPositionActionButton />
+        <CreateMarginPositionActionButton orderId={orderId} />
       </div>
     </DrawerDialog>
   );
