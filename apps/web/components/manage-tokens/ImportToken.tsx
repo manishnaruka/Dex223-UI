@@ -336,8 +336,8 @@ export default function ImportToken({ setContent, handleClose }: Props) {
       }
 
       return {
-        erc223AddressToImport: predictedOtherAddress,
         erc20AddressToImport: tokenAddressToImport,
+        erc223AddressToImport: predictedOtherAddress,
         isErc223Exist: otherAddress && isAddress(otherAddress) && !isZeroAddress(otherAddress),
         isErc20Exist: true,
       };

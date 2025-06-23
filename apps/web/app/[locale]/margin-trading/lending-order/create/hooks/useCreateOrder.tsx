@@ -227,6 +227,8 @@ export default function useCreateOrder() {
           topics: createOrderReceipt.logs[0].topics,
         });
 
+        console.log("Decoded log", decodedLog);
+
         if (params.loanToken.isNative) {
           setStatus(CreateOrderStatus.PENDING_DEPOSIT);
 

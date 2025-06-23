@@ -169,7 +169,7 @@ export default function BorrowMarketTable() {
     }
   }, [sorting]);
 
-  if (orders.loading) {
+  if (orders.loading || !orders.data) {
     return <div>Loading...</div>;
   }
 
