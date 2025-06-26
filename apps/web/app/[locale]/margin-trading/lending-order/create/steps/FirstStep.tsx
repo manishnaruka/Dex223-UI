@@ -224,39 +224,11 @@ export default function FirstStep() {
           <div className="bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col gap-2 mb-5 mt-4">
             <LendingOrderDetailsRow
               title={"Interest rate for the entire period"}
-              value={
-                !props.values.loanAmount ||
-                !props.values.interestRatePerMonth ||
-                props.values.period.type === LendingOrderPeriodType.PERPETUAL
-                  ? "—"
-                  : formatFloat(
-                      calculateFinalAmount({
-                        loanAmount: +props.values.loanAmount,
-                        interestRatePerMonth: +props.values.interestRatePerMonth,
-                        positionDurationDays: +props.values.period.positionDuration,
-                        lendingOrderDeadline: new Date(props.values.period.lendingOrderDeadline),
-                      }) / +props.values.loanAmount,
-                      { trimZero: true },
-                    ) + "%"
-              }
+              value={<span className="text-red">TODO</span>}
             />
             <LendingOrderDetailsRow
               title={"You will receive for the entire period"}
-              value={
-                !props.values.loanAmount ||
-                !props.values.interestRatePerMonth ||
-                props.values.period.type === LendingOrderPeriodType.PERPETUAL
-                  ? "—"
-                  : formatFloat(
-                      calculateFinalAmount({
-                        loanAmount: +props.values.loanAmount,
-                        interestRatePerMonth: +props.values.interestRatePerMonth,
-                        positionDurationDays: +props.values.period.positionDuration,
-                        lendingOrderDeadline: new Date(props.values.period.lendingOrderDeadline),
-                      }),
-                      { trimZero: true },
-                    )
-              }
+              value={<span className="text-red">TODO</span>}
             />
           </div>
           {/*<pre>{JSON.stringify(props.touched, null, 2)}</pre>*/}

@@ -104,8 +104,11 @@ export default function OperationStepRow({
             <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
           </>
         );
-      default:
+      case OperationStepStatus.STEP_COMPLETED:
+      case OperationStepStatus.OPERATION_COMPLETED:
         return <Svg className="text-green" iconName="done" size={20} />;
+      default:
+        return null;
     }
   }, [status, t]);
 

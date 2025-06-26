@@ -91,7 +91,7 @@ export default function LiquidationFeeConfig({
         label="Liquidation fee (for liquidator)"
         tooltipText="Tooltip text"
         placeholder="Liquidation fee (for liquidator)"
-        internalText="ETH"
+        internalText={values.liquidationFeeToken?.symbol}
         value={values.liquidationFeeForLiquidator}
         onChange={(e) => setFieldValue("liquidationFeeForLiquidator", e.target.value)}
         error={touched.liquidationFeeForLiquidator && errors.liquidationFeeForLiquidator}
@@ -100,7 +100,7 @@ export default function LiquidationFeeConfig({
         label="Liquidation fee (for lender)"
         tooltipText="Tooltip text"
         placeholder="Liquidation fee (for lender)"
-        internalText="ETH"
+        internalText={values.liquidationFeeToken?.symbol}
         value={values.liquidationFeeForLender}
         onChange={(e) => setFieldValue("liquidationFeeForLender", e.target.value)}
         error={touched.liquidationFeeForLender && errors.liquidationFeeForLender}

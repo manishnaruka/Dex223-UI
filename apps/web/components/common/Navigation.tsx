@@ -66,18 +66,16 @@ const menuItems: Array<
           className="min-w-[238px]"
         />
         <MobileLink
-          disabled
-          isActive={pathname === "/margin-trading"}
-          href="/margin-trading"
+          isActive={pathname === "/margin-swap"}
+          href="/margin-swap"
           iconName="margin-trading"
           title={t("margin_trading")}
           handleClose={handleClose}
-          className="min-w-[238px] pr-5"
-          comingSoon
+          className="min-w-[238px]"
         />
       </div>
     ),
-    activeFlags: ["/swap", "/margin-trading"],
+    activeFlags: ["/swap", "/margin-swap"],
   },
   {
     label: "pools",
@@ -85,7 +83,7 @@ const menuItems: Array<
   },
   {
     label: "borrow_lend",
-    href: "#",
+    href: "/margin-trading",
   },
   {
     label: "portfolio",

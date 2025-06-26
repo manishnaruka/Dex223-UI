@@ -1,31 +1,19 @@
 "use client";
 import clsx from "clsx";
 import React, { useEffect } from "react";
-import { parseUnits } from "viem";
-import { useWalletClient } from "wagmi";
 
 import ConfirmConvertDialog from "@/app/[locale]/swap/components/ConfirmConvertDialog";
-import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog";
-import ExternalConverterLink from "@/app/[locale]/swap/components/ExternalConverterLink";
 import TradeForm from "@/app/[locale]/swap/components/TradeForm";
 import TwoVersionsInfo from "@/app/[locale]/swap/components/TwoVersionsInfo";
-import { useSwapEstimatedGas } from "@/app/[locale]/swap/hooks/useSwap";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Container from "@/components/atoms/Container";
-import Button from "@/components/buttons/Button";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
-import { ERC223_ABI } from "@/config/abis/erc223";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useSwapSearchParams } from "@/hooks/useSwapSearchParams";
-import { addNotification } from "@/other/notification";
-import {
-  RecentTransactionStatus,
-  RecentTransactionTitleTemplate,
-} from "@/stores/useRecentTransactionsStore";
 
 export default function SwapPage() {
   useSwapSearchParams();
@@ -70,7 +58,6 @@ export default function SwapPage() {
             <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
               <div className="flex flex-col gap-2 lg:gap-3">
                 <TwoVersionsInfo />
-                <ExternalConverterLink />
               </div>
 
               <TradeForm />

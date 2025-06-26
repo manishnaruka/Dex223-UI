@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 
+import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import {
   CreateMarginPositionStatus,
@@ -16,7 +17,7 @@ import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Token } from "@/sdk_bi/entities/token";
 
-export default function useCreateMarginPosition() {
+export default function useCreateMarginPosition(order: LendingOrder) {
   const { setStatus } = useCreateMarginPositionStatusStore();
 
   const { values } = useCreateMarginPositionConfigStore();
@@ -27,31 +28,39 @@ export default function useCreateMarginPosition() {
   const { isAllowed: isAllowedA, writeTokenApprove: approveA } = useStoreAllowance({
     token: values.collateralToken,
     contractAddress: MARGIN_TRADING_ADDRESS[chainId],
-    amountToCheck: parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18),
+    amountToCheck: parseUnits(
+      values.collateralAmount.toString(),
+      values.collateralToken?.decimals ?? 18,
+    ),
   });
 
   const { isAllowed: isAllowedB, writeTokenApprove: approveB } = useStoreAllowance({
-    token: new Token(
-      DexChainId.SEPOLIA,
-      "0x51a3F4b5fFA9125Da78b55ed201eFD92401604fa",
-      "0x51a3F4b5fFA9125Da78b55ed201eFD92401604fa",
-      18,
-    ),
+    token: order.liquidationRewardAsset,
     contractAddress: MARGIN_TRADING_ADDRESS[chainId],
-    amountToCheck: parseUnits("200", 18),
+    amountToCheck: order.liquidationRewardAmount,
+  });
+
+  const { isAllowed: isAllowedBoth, writeTokenApprove: approveBoth } = useStoreAllowance({
+    token: values.collateralToken?.equals(order.liquidationRewardAsset)
+      ? values.collateralToken
+      : undefined,
+    contractAddress: MARGIN_TRADING_ADDRESS[chainId],
+    amountToCheck:
+      order.liquidationRewardAmount +
+      parseUnits(values.collateralAmount.toString(), values.collateralToken?.decimals ?? 18),
   });
 
   const handleCreateMarginPosition = useCallback(
     async (orderId: string) => {
-      setStatus(CreateMarginPositionStatus.PENDING_APPROVE_BORROW);
-
-      if (!values.collateralToken || !values.collateralAmount || !walletClient || !publicClient) {
+      if (!values.collateralAmount || !walletClient || !publicClient) {
         return;
       }
 
-      if (!isAllowedA) {
+      if (!isAllowedA && !values.collateralToken?.equals(order.liquidationRewardAsset)) {
+        setStatus(CreateMarginPositionStatus.PENDING_APPROVE_BORROW);
+
         const approveResult = await approveA({
-          customAmount: parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18),
+          // customAmount: parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18),
           // customGasSettings: gasSettings,
         });
 
@@ -72,7 +81,7 @@ export default function useCreateMarginPosition() {
         }
       }
 
-      if (!isAllowedB) {
+      if (!isAllowedB && !values.collateralToken?.equals(order.liquidationRewardAsset)) {
         setStatus(CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE);
 
         const approveResult = await approveB({
@@ -97,20 +106,45 @@ export default function useCreateMarginPosition() {
         }
       }
 
+      if (!isAllowedBoth) {
+        setStatus(CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE);
+
+        const approveResult = await approveBoth({
+          // customAmount: parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18),
+          // customGasSettings: gasSettings,
+        });
+
+        if (!approveResult?.success) {
+          setStatus(CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE);
+          return;
+        }
+
+        setStatus(CreateMarginPositionStatus.LOADING_APPROVE_LIQUIDATION_FEE);
+
+        const approveReceipt = await publicClient.waitForTransactionReceipt({
+          hash: approveResult.hash,
+        });
+
+        if (approveReceipt.status !== "success") {
+          setStatus(CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE);
+          return;
+        }
+      }
+
       setStatus(CreateMarginPositionStatus.PENDING_BORROW);
 
+      console.log(values);
       const takeLoanHash = await walletClient.writeContract({
         abi: MARGIN_MODULE_ABI,
         address: MARGIN_TRADING_ADDRESS[chainId],
         functionName: "takeLoan",
         args: [
           BigInt(orderId),
-          parseUnits(values.borrowAmount, 18),
-          BigInt(0),
-          parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18),
+          parseUnits(values.borrowAmount.toString(), 18),
+          BigInt(values.collateralAssetId),
+          parseUnits(values.collateralAmount.toString(), 18),
         ],
         account: undefined,
-        value: BigInt(0),
       });
 
       setStatus(CreateMarginPositionStatus.LOADING_BORROW);
@@ -132,12 +166,16 @@ export default function useCreateMarginPosition() {
     },
     [
       approveA,
+      approveB,
+      approveBoth,
       chainId,
+      isAllowedA,
+      isAllowedB,
+      isAllowedBoth,
+      order.liquidationRewardAsset,
       publicClient,
       setStatus,
-      values.borrowAmount,
-      values.collateralAmount,
-      values.collateralToken,
+      values,
       walletClient,
     ],
   );

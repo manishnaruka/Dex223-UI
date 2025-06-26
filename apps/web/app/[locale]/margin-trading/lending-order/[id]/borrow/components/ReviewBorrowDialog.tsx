@@ -3,6 +3,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import React, { PropsWithChildren, useEffect } from "react";
 
+import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import useCreateMarginPosition from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
 import { useConfirmCreateMarginPositionDialogStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useConfirmCreateMarginPositionDialogOpened";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
@@ -82,8 +83,14 @@ const marginSteps: OperationStepConfig[] = [
   // Repeat for other steps
 ];
 
-function CreateMarginPositionActionButton({ orderId }: { orderId: string }) {
-  const { handleCreateMarginPosition } = useCreateMarginPosition();
+function CreateMarginPositionActionButton({
+  orderId,
+  order,
+}: {
+  orderId: string;
+  order: LendingOrder;
+}) {
+  const { handleCreateMarginPosition } = useCreateMarginPosition(order);
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
     useCreateMarginPositionStatusStore();
 
@@ -116,7 +123,13 @@ function CreateMarginPositionActionButton({ orderId }: { orderId: string }) {
   return <Button onClick={() => handleCreateMarginPosition(orderId)}>Confirm borrow</Button>;
 }
 
-export default function ReviewBorrowDialog({ orderId }: { orderId: string }) {
+export default function ReviewBorrowDialog({
+  orderId,
+  order,
+}: {
+  orderId: string;
+  order: LendingOrder;
+}) {
   const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
   const { values, setValues } = useCreateMarginPositionConfigStore();
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
@@ -310,7 +323,7 @@ export default function ReviewBorrowDialog({ orderId }: { orderId: string }) {
           </>
         )}
 
-        <CreateMarginPositionActionButton orderId={orderId} />
+        <CreateMarginPositionActionButton orderId={orderId} order={order} />
       </div>
     </DrawerDialog>
   );

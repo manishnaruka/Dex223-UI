@@ -36,6 +36,7 @@ interface Props {
   handlePick: (token: Currency) => void;
   simpleForm?: boolean;
   prevToken?: Currency | null;
+  availableTokens?: Currency[];
 }
 
 function FoundInOtherListMarker() {
@@ -367,8 +368,10 @@ export default function PickTokenDialog({
   handlePick,
   simpleForm = false,
   prevToken = null,
+  availableTokens,
 }: Props) {
-  const tokens = useTokens();
+  const currencies = useTokens();
+  const tokens = availableTokens || currencies;
   const t = useTranslations("ManageTokens");
   const chainId = useCurrentChainId();
   const { tokens: pinnedTokensAddresses, toggleToken } = usePinnedTokensStore();

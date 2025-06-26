@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
+import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import useOrderDeposit from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderDeposit";
 import useOrderWithdraw from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderWithdraw";
 import {
@@ -52,8 +53,20 @@ const withdrawOrderSteps: OperationStepConfig[] = [
   },
 ];
 
-function OrderWithdrawActionButton({ orderId }: { orderId: number }) {
-  const { handleOrderWithdraw } = useOrderWithdraw({ orderId });
+function OrderWithdrawActionButton({
+  orderId,
+  order,
+  amountToWithdraw,
+}: {
+  orderId: number;
+  order: LendingOrder;
+  amountToWithdraw: string;
+}) {
+  const { handleOrderWithdraw } = useOrderWithdraw({
+    orderId,
+    amountToWithdraw,
+    currency: order.baseAsset,
+  });
 
   const { status, withdrawHash } = useWithdrawOrderStatusStore();
 
@@ -93,14 +106,16 @@ export default function OrderWithdrawDialog({
   isOpen,
   setIsOpen,
   orderId,
+  order,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   orderId: number;
+  order: LendingOrder;
 }) {
-  const [isEditApproveActive, setEditApproveActive] = React.useState(false);
-
   const { status, setStatus } = useWithdrawOrderStatusStore();
+
+  const [amountToWithdraw, setAmountToWithdraw] = useState<string>("");
 
   useEffect(() => {
     if (
@@ -128,6 +143,8 @@ export default function OrderWithdrawDialog({
               tooltipText="Tooltip text"
               internalText="USDT"
               placeholder="Withdraw amount"
+              value={amountToWithdraw}
+              onChange={(e) => setAmountToWithdraw(e.target.value)}
             />
 
             <InputLabel
@@ -207,7 +224,11 @@ export default function OrderWithdrawDialog({
             <div className="h-px bg-secondary-border my-4" />
           </>
         )}
-        <OrderWithdrawActionButton orderId={orderId} />
+        <OrderWithdrawActionButton
+          orderId={orderId}
+          order={order}
+          amountToWithdraw={amountToWithdraw}
+        />
       </div>
     </DrawerDialog>
   );

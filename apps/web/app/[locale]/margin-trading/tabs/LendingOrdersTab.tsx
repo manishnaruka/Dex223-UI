@@ -23,7 +23,7 @@ export default function LendingOrdersTab() {
       </div>
 
       <div className="flex flex-col gap-5">
-        {data.orders.map((order) => (
+        {data.orders.map((order: any) => (
           <LendingOrderCard
             key={order.id}
             order={{ baseAssetSymbol: order.baseAssetToken.symbol }}

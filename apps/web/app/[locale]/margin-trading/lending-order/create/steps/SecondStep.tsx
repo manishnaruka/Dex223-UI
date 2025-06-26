@@ -95,10 +95,10 @@ export default function SecondStep() {
           </div>
 
           <div className="bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col gap-2 mb-5">
-            <LendingOrderDetailsRow title={"LTV"} value={"7%"} />
+            <LendingOrderDetailsRow title={"LTV"} value={<span className="text-red">TODO</span>} />
             <LendingOrderDetailsRow
               title={"You will receive for the entire period"}
-              value={"150 USDT"}
+              value={<span className="text-red">TODO</span>}
             />
           </div>
 
@@ -182,19 +182,19 @@ export default function SecondStep() {
           />
 
           {props.values.minimumBorrowingAmount &&
-            +props.values.minimumBorrowingAmount < +firstStepValues.loanAmount * 0.2 && (
-              <Alert
-                text="Setting low values for minimum borrowing amount may result in smaller positions taking loans from your order. Make sure that liquidation collaterals are sufficient to cover the gas fees."
-                type="warning"
-              />
-            )}
+          +props.values.minimumBorrowingAmount < +firstStepValues.loanAmount * 0.2 ? (
+            <Alert
+              text="Setting low values for minimum borrowing amount may result in smaller positions taking loans from your order. Make sure that liquidation collaterals are sufficient to cover the gas fees."
+              type="warning"
+            />
+          ) : null}
           {props.values.minimumBorrowingAmount &&
-            props.values.minimumBorrowingAmount > firstStepValues.loanAmount && (
-              <Alert
-                text="Minimum borrowing amount exceeds specified order balance. Borrowers will not be able to take loans from this order."
-                type="error"
-              />
-            )}
+          props.values.minimumBorrowingAmount > firstStepValues.loanAmount ? (
+            <Alert
+              text="Minimum borrowing amount exceeds specified order balance. Borrowers will not be able to take loans from this order."
+              type="error"
+            />
+          ) : null}
 
           <div className="grid grid-cols-2 gap-2 mt-4">
             <Button

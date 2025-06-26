@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
 import { Address, decodeEventLog, encodeAbiParameters, Hash, keccak256, parseUnits } from "viem";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { usePublicClient, useWalletClient } from "wagmi";
 
 import { TradingTokensInputMode } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
@@ -18,13 +18,11 @@ import { getGasSettings } from "@/functions/gasSettings";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
-import useRunStep from "@/hooks/useRunStep";
 import addToast from "@/other/toast";
-import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
+import { MARGIN_TRADING_ADDRESS, ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Standard } from "@/sdk_bi/standard";
-import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 
-function useCreateOrderParams() {
+export function useCreateOrderParams() {
   const { firstStepValues, secondStepValues, thirdStepValues } = useCreateOrderConfigStore();
 
   return {
@@ -63,11 +61,11 @@ export function getWhitelistId(addresses: Address[], isContract: boolean): Hash 
  */
 export function calculateInterestRate(monthlyPct: number, durationDays: number): bigint {
   // Convert 30-day % to “percent × 100”
-  const baseRate = monthlyPct * 100;
+  return BigInt(monthlyPct * 100);
   // Prorate by (durationDays / 30)
-  const prorated = (baseRate * durationDays) / 30;
-  // Round down to an integer (solidity uint)
-  return BigInt(Math.floor(prorated));
+  // const prorated = (baseRate * durationDays) / 30;
+  // // Round down to an integer (solidity uint)
+  // return BigInt(Math.floor(prorated));
 }
 
 export default function useCreateOrder() {
@@ -76,9 +74,7 @@ export default function useCreateOrder() {
   const params = useCreateOrderParams();
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
-  const { address } = useAccount();
 
-  const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
   const { setStatus, setApproveHash, setDepositHash, setConfirmOrderHash, setErrorType } =
     useCreateOrderStatusStore();
 
@@ -124,8 +120,6 @@ export default function useCreateOrder() {
       gasPriceSettings,
     });
   }, [baseFee, chainId, gasPrice, priorityFee, gasPriceOption, gasPriceSettings]);
-
-  const { handleRunStep } = useRunStep();
 
   useEffect(() => {
     setStatus(CreateOrderStatus.INITIAL);
@@ -202,7 +196,7 @@ export default function useCreateOrder() {
               deadline: Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000),
               currencyLimit: Number(orderCurrencyLimit),
               leverage,
-              oracle: "0xa8fa9e2c64a45ba5bc64089104c332be056c4c83",
+              oracle: ORACLE_ADDRESS[chainId],
               collateral: collateralTokens.flatMap((token) => {
                 if (includeERC223Collateral) {
                   return [token.wrapped.address0, token.wrapped.address1];
@@ -252,7 +246,7 @@ export default function useCreateOrder() {
         } else {
           setStatus(CreateOrderStatus.PENDING_APPROVE);
           const approveResult = await approveA({
-            customAmount: parseUnits(loanAmount, params.loanToken.decimals ?? 18),
+            customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
             customGasSettings: gasSettings,
           });
 

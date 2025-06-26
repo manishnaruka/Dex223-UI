@@ -1,11 +1,14 @@
 "use client";
 import ExternalTextLink from "@repo/ui/external-text-link";
+import clsx from "clsx";
 import { Formik } from "formik";
 import Image from "next/image";
 import React, { use, useMemo } from "react";
 import { formatEther, formatGwei, formatUnits } from "viem";
+import { useChainId } from "wagmi";
 import * as Yup from "yup";
 
+import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import ReviewBorrowDialog from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/components/ReviewBorrowDialog";
 import useOrderByIdFromNode from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useOrderByIdFromNode";
 import useTokenFromNode from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useTokenFromNode";
@@ -18,10 +21,14 @@ import Collapse from "@/components/atoms/Collapse";
 import { InputSize } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField, { HelperText, InputLabel } from "@/components/atoms/TextField";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 
@@ -58,10 +65,11 @@ const schema = Yup.object({
     .typeError("Collateral amount must be a number")
     .required("Collateral amount is required")
     .positive("Collateral amount must be greater than zero"),
-  collateralToken: Yup.object().default(undefined).required("Please select a token"),
-  collateralTokenStandard: Yup.string()
-    .oneOf([Standard.ERC20, Standard.ERC223])
-    .required("Token standard is required"),
+  // collateralToken: Yup.object().default(undefined).required("Please select a token"),
+  // collateralTokenStandard: Yup.string()
+  //   .oneOf([Standard.ERC20, Standard.ERC223])
+  //   .required("Token standard is required"),
+  collateralTokenId: Yup.number(),
   leverage: Yup.number()
     .typeError("Loan amount must be a number")
     .required("Loan amount is required")
@@ -83,55 +91,14 @@ export default function BorrowPage({
 
   const { values, setValues } = useCreateMarginPositionConfigStore();
 
-  const data = useOrderByIdFromNode(+orderId);
+  const { order, loading } = useOrder({ id: +orderId });
 
-  console.log(data);
+  const chainId = useCurrentChainId();
 
-  const [
-    ownerAddress,
-    id,
-    whitelistId,
-    interestRate,
-    duration,
-    minLoan,
-    baseAssetAddress,
-    currencyLimit,
-    leverage,
-    oracle,
-    balance,
-    liquidationInfo,
-  ] = useMemo(() => {
-    return (
-      data || [
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        BigInt(0),
-        undefined,
-        undefined,
-        1,
-        undefined,
-        BigInt(0),
-        {
-          deadline: undefined,
-          liquidationRewardAsset: undefined,
-          liquidationRewardAmount: BigInt(0),
-        },
-      ]
-    );
-  }, [data]);
+  if (loading || !order) {
+    return "Loading...";
+  }
 
-  const { deadline, liquidationRewardAmount, liquidationRewardAsset } = liquidationInfo;
-
-  const { tokenSymbol: baseAssetSymbol, tokenDecimals: baseAssetDecimals } =
-    useTokenFromNode(baseAssetAddress);
-  const { tokenSymbol: feeAssetSymbol, tokenDecimals: feeAssetDecimals } =
-    useTokenFromNode(liquidationRewardAsset);
-
-  console.log(baseAssetDecimals);
-  console.log(feeAssetDecimals);
   return (
     <div className="mx-auto w-[600px] my-10">
       <div className="card-spacing pt-2.5 bg-primary-bg rounded-5 grid gap-3">
@@ -157,19 +124,7 @@ export default function BorrowPage({
         >
           {({ values, touched, setFieldValue, errors, handleSubmit }) => (
             <form onSubmit={handleSubmit}>
-              <TextField
-                placeholder="Enter borrow amount"
-                label="I want to borrow"
-                helperText={`Min/max available: ${formatUnits(minLoan, baseAssetDecimals ?? 18)}/${formatUnits(balance, baseAssetDecimals ?? 18)} ${baseAssetSymbol}`}
-                internalText={baseAssetSymbol}
-                value={values.borrowAmount}
-                onChange={(e) => {
-                  setFieldValue("borrowAmount", e.target.value);
-                }}
-                error={touched.borrowAmount && errors.borrowAmount}
-              />
-
-              <div className="bg-tertiary-bg rounded-3 p-5 my-4">
+              <div className="bg-tertiary-bg rounded-3 p-5 mb-4">
                 <LendingOrderTokenSelect
                   label="Collateral amount"
                   token={values.collateralToken}
@@ -177,9 +132,13 @@ export default function BorrowPage({
                     await setFieldValue("collateralToken", token);
                   }}
                   amount={values.collateralAmount}
-                  setAmount={(collateralAmount: string) =>
-                    setFieldValue("collateralAmount", collateralAmount)
-                  }
+                  setAmount={(collateralAmount: string) => {
+                    const C = parseFloat(collateralAmount) || 0;
+                    const L = parseFloat(values.leverage) || 1;
+                    const B = C * (L - 1);
+                    setFieldValue("collateralAmount", C);
+                    setFieldValue("borrowAmount", B);
+                  }}
                   standard={values.collateralTokenStandard}
                   setStandard={async (standard: Standard) => {
                     await setFieldValue("collateralTokenStandard", standard);
@@ -190,65 +149,124 @@ export default function BorrowPage({
                     tokenError: errors.collateralToken,
                     amountError: errors.collateralAmount,
                   })}
+                  tokens={order.allowedCollateralAssets}
+                  helperText={
+                    values.collateralToken &&
+                    `Min collateral amount: ${+formatUnits(order.minLoan, order?.baseAsset.decimals ?? 18) * 1.01} ${values.collateralToken?.symbol}`
+                  }
                 />
-
                 <TextField
+                  isNumeric
+                  max={order.leverage}
+                  min={1}
+                  decimalScale={4}
                   label="Leverage"
-                  helperText={`Max leverage: ${leverage}x`}
+                  helperText={`Max leverage: ${order.leverage}x`}
                   internalText="x"
-                  tooltipText="Tooltip text"
+                  tooltipText={"Tooltip text"}
                   value={values.leverage}
-                  onChange={(e) => {
-                    setFieldValue("leverage", e.target.value);
-                  }}
                   error={touched.leverage && errors.leverage}
+                  onChange={(e) => {
+                    const L = parseFloat(e.target.value) || 1;
+                    const C = parseFloat(values.collateralAmount) || 0;
+                    const B = C * (L - 1);
+                    setFieldValue("borrowAmount", B);
+                    setFieldValue("leverage", L);
+                  }}
                 />
+                <div className="mb-4">
+                  <input
+                    min={1}
+                    max={order.leverage}
+                    value={values.leverage}
+                    onChange={(e) => setFieldValue("leverage", +e.target.value)}
+                    step={1}
+                    type="range"
+                    className="mb-1.5 !rounded-r-0"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, #7DA491 0%, #7DA491 ${(+values.leverage * 100) / order?.leverage}%, #0F0F0F ${values.leverage}%, #0F0F0F 100%)`,
+                      width:
+                        order?.leverage < 50
+                          ? `calc(${order.leverage}% + 20px)`
+                          : `${order?.leverage}%`,
+                    }}
+                  />
+
+                  <div className="z-10 relative flex justify-between text-12 text-secondary-text ">
+                    {[1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((_, i) => (
+                      <span
+                        key={_}
+                        className={clsx(
+                          "min-w-[28px] flex justify-center relative before:h-3 before:w-0.5 before:absolute before:left-1/2 before:-top-[16px] before:-translate-x-1/2 before:pointer-events-none",
+                          +values.leverage <= _
+                            ? "before:bg-quaternary-bg"
+                            : "before:bg-green-hover",
+                        )}
+                      >
+                        {_}x
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div className="mb-4">
+              <TextField
+                placeholder="Enter borrow amount"
+                label="I want to borrow"
+                helperText={
+                  <span>
+                    <span>Min / Max available:</span>{" "}
+                    <span className="text-secondary-text">
+                      {formatUnits(order.minLoan, order.baseAsset.decimals ?? 18)} /{" "}
+                      {formatUnits(order.balance, order.baseAsset.decimals ?? 18)}{" "}
+                      {order.baseAsset.symbol}
+                    </span>
+                  </span>
+                }
+                internalText={order.baseAsset.symbol}
+                value={values.borrowAmount}
+                onChange={(e) => {
+                  const B = parseFloat(e.target.value) || 0;
+                  const L = parseFloat(values.leverage) || 1;
+                  // if L>1: C = B/(L-1), else leave C alone
+                  const C = L > 1 ? B / (L - 1) : values.collateralAmount;
+                  setFieldValue("borrowAmount", e.target.value);
+                  setFieldValue("collateralAmount", C);
+                }}
+                error={touched.borrowAmount && errors.borrowAmount}
+              />
+
+              <div className="my-4">
                 <InputLabel
                   label="Total liquidation fee"
                   inputSize={InputSize.LARGE}
                   tooltipText="Tooltip text"
                 />
-                <div className="flex justify-between items-center bg-tertiary-bg py-2 px-5 rounded-3">
+                <div className="flex justify-between items-center bg-tertiary-bg py-3 px-5 rounded-3">
                   <div className="flex items-center gap-2">
                     <Image src="/images/tokens/placeholder.svg" alt="" width={24} height={24} />
-                    {formatUnits(liquidationRewardAmount, feeAssetDecimals ?? 18)} {feeAssetSymbol}
+                    {formatUnits(
+                      order.liquidationRewardAmount,
+                      order.liquidationRewardAsset.decimals ?? 18,
+                    )}{" "}
+                    {order.liquidationRewardAsset.symbol}
                   </div>
 
-                  <div
-                    className={clsxMerge(
-                      "relative z-10 text-10 h-[32px] rounded-20 border-green border p-1 flex gap-1 items-center",
-                    )}
-                  >
-                    {[Standard.ERC20, Standard.ERC223].map((st) => {
-                      return (
-                        <button
-                          type={"button"}
-                          key={st}
-                          className={clsxMerge(
-                            "h-6 rounded-3 duration-200 px-2 min-w-[58px] text-secondary-text",
-                            values.liquidationFeeStandard === st
-                              ? "bg-green text-black shadow shadow-green/60"
-                              : "hocus:bg-green-bg hocus:text-primary-text",
-                          )}
-                          onClick={() => {
-                            setFieldValue("liquidationFeeStandard", st);
-                          }}
-                        >
-                          {st}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {order.liquidationRewardAsset?.isNative ? (
+                    <Badge color="green" text={"Native"} />
+                  ) : (
+                    <Badge
+                      variant={BadgeVariant.STANDARD}
+                      standard={order.liquidationRewardAssetStandard}
+                    />
+                  )}
                 </div>
                 <HelperText helperText="Liquidation fee (Borrower + Lender)" />
               </div>
 
               <div className="rounded-3 bg-tertiary-bg justify-between flex px-5 py-3 mb-5">
                 <span className="text-tertiary-text">
-                  Lending order id: <span className="text-secondary-text">12341234</span>
+                  Lending order id: <span className="text-secondary-text">{orderId}</span>
                 </span>
                 <ExternalTextLink text="View details" href={"#"} />
               </div>
@@ -284,7 +302,7 @@ export default function BorrowPage({
                   </Button>
                 </div>
               </div>
-              <pre>{JSON.stringify(errors, null, 2)}</pre>
+              {/*<pre>{JSON.stringify(errors, null, 2)}</pre>*/}
 
               <Button type="submit" fullWidth>
                 Start borrowing now
@@ -293,26 +311,86 @@ export default function BorrowPage({
           )}
         </Formik>
 
-        <ReviewBorrowDialog orderId={orderId} />
+        <ReviewBorrowDialog orderId={orderId} order={order} />
 
         <div className="rounded-3 bg-tertiary-bg">
           <button
             onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
-            className="flex justify-between px-5 py-3 text-secondary-text"
+            className="flex justify-between px-5 py-3 text-secondary-text w-full"
           >
             Borrow details
-            <Svg iconName="small-expand-arrow" />
+            <Svg
+              iconName="small-expand-arrow"
+              className={clsx("duration-200", isDetailsExpanded ? "-rotate-180" : "")}
+            />
           </button>
           <Collapse open={isDetailsExpanded}>
-            <div className="flex flex-col gap-2 mb-5">
+            <div className="flex flex-col gap-2 mb-5 px-5 pb-5">
               <LendingOrderDetailsRow
-                title="May initiate liquidation"
-                value={"30 days"}
+                title="Interest rate per month"
+                value={order.interestRate / 100}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
-                title="Pays the liquidation deposit"
-                value={"30 days"}
+                title="Interest rate for the entire period"
+                value={<span className="text-red">TODO</span>}
+                tooltipText="Tooltip text"
+              />
+              <LendingOrderDetailsRow
+                title="Max leverage"
+                value={`${order.leverage}x`}
+                tooltipText="Tooltip text"
+              />
+              <LendingOrderDetailsRow
+                title="Leverage"
+                value={`${values.leverage}x`}
+                tooltipText="Tooltip text"
+              />
+              <LendingOrderDetailsRow
+                title="LTV"
+                value={<span className="text-red">TODO</span>}
+                tooltipText="Tooltip text"
+              />
+              <LendingOrderDetailsRow
+                title="Duration"
+                value={`${order.positionDuration} days`}
+                tooltipText="Tooltip text"
+              />
+              <LendingOrderDetailsRow
+                title="Deadline"
+                value={new Date(order.deadline).toLocaleDateString("en-GB").split("/").join(".")}
+                tooltipText="Tooltip text"
+              />
+
+              <LendingOrderDetailsRow
+                title="Order currency limit"
+                value={order.currencyLimit}
+                tooltipText="Tooltip text"
+              />
+
+              <LendingOrderDetailsRow
+                title="May initiate liquidation"
+                value={"Anyone"}
+                tooltipText="Tooltip text"
+              />
+
+              <LendingOrderDetailsRow
+                title="Tokens allowed for trading"
+                value={<span className="text-red">TODO</span>}
+                tooltipText="Tooltip text"
+              />
+              <LendingOrderDetailsRow
+                title="Liquidation price source"
+                value={
+                  <ExternalTextLink
+                    text="Dex223 Market"
+                    href={getExplorerLink(
+                      ExplorerLinkType.ADDRESS,
+                      ORACLE_ADDRESS[chainId],
+                      chainId,
+                    )}
+                  />
+                }
                 tooltipText="Tooltip text"
               />
             </div>

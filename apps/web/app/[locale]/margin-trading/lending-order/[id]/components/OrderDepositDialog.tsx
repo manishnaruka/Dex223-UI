@@ -1,8 +1,9 @@
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import React, { useEffect } from "react";
-import { formatEther, formatGwei } from "viem";
+import React, { useEffect, useState } from "react";
+import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 
+import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import useOrderDeposit from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderDeposit";
 import {
   OrderDepositStatus,
@@ -22,6 +23,7 @@ import OperationStepRow, {
 import TokenInput from "@/components/common/TokenInput";
 import { IconName } from "@/config/types/IconName";
 import { formatFloat } from "@/functions/formatFloat";
+import useTokenBalances from "@/hooks/useTokenBalances";
 import { Standard } from "@/sdk_bi/standard";
 
 type StepTextMap = {
@@ -71,8 +73,22 @@ const depositOrderSteps: OperationStepConfig[] = [
   },
 ];
 
-function OrderDepositActionButton({ orderId }: { orderId: number }) {
-  const { handleOrderDeposit } = useOrderDeposit({ orderId });
+function OrderDepositActionButton({
+  orderId,
+  order,
+  amountToApprove,
+  amountToDeposit,
+}: {
+  orderId: number;
+  order: LendingOrder;
+  amountToApprove: string;
+  amountToDeposit: string;
+}) {
+  const { handleOrderDeposit } = useOrderDeposit({
+    orderId,
+    currency: order.baseAsset,
+    amount: amountToDeposit,
+  });
 
   const { status, approveHash, depositHash } = useDepositOrderStatusStore();
 
@@ -102,8 +118,8 @@ function OrderDepositActionButton({ orderId }: { orderId: number }) {
   }
 
   return (
-    <Button onClick={() => handleOrderDeposit()} fullWidth>
-      Create lending order
+    <Button onClick={() => handleOrderDeposit(amountToApprove)} fullWidth>
+      Deposit {order.baseAsset.symbol}
     </Button>
   );
 }
@@ -112,14 +128,33 @@ export default function OrderDepositDialog({
   isOpen,
   setIsOpen,
   orderId,
+  order,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   orderId: number;
+  order: LendingOrder;
 }) {
-  const [isEditApproveActive, setEditApproveActive] = React.useState(false);
+  const [isEditApproveActive, setEditApproveActive] = useState(false);
+  const {
+    balance: { erc20Balance: tokenA0Balance, erc223Balance: tokenA1Balance },
+    refetch: refetchABalance,
+  } = useTokenBalances(order.baseAsset);
 
   const { status, setStatus } = useDepositOrderStatusStore();
+  const [amountToDeposit, setAmountToDeposit] = useState("");
+
+  const [amountToApprove, setAmountToApprove] = useState("");
+
+  const [isAmountToApproveModified, setAmountToApproveModified] = useState(false);
+  // useEffect(() => {
+  //   if (
+  //     parseUnits(amountToApprove, order.baseAsset.decimals) <
+  //     parseUnits(amountToDeposit, order.baseAsset.decimals)
+  //   ) {
+  //     setAmountToApprove(amountToDeposit);
+  //   }
+  // }, [amountToApprove, amountToDeposit, order.baseAsset.decimals]);
 
   useEffect(() => {
     if (
@@ -133,6 +168,7 @@ export default function OrderDepositDialog({
       }, 400);
     }
   }, [isOpen, setStatus, status]);
+  console.log(order);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
@@ -146,90 +182,108 @@ export default function OrderDepositDialog({
             <InputLabel label="Deposit amount" tooltipText="Tooltip text" />
             <TokenInput
               handleClick={() => null}
-              token={undefined}
-              value={"0"}
-              onInputChange={() => null}
-              balance0={"0"}
-              balance1={"0"}
+              token={order.baseAsset}
+              value={amountToDeposit}
+              onInputChange={(value) => {
+                setAmountToDeposit(value);
+                if (
+                  parseUnits(value, order.baseAsset.decimals) >
+                    parseUnits(amountToApprove, order.baseAsset.decimals) ||
+                  !isAmountToApproveModified
+                ) {
+                  setAmountToApprove(value);
+                  setAmountToApproveModified(false);
+                }
+              }}
+              balance0={
+                tokenA0Balance && Boolean(tokenA0Balance.value)
+                  ? formatFloat(tokenA0Balance.formatted)
+                  : "0"
+              }
+              balance1={
+                tokenA1Balance && Boolean(tokenA1Balance.value)
+                  ? formatFloat(tokenA1Balance.formatted)
+                  : "0"
+              }
               standard={Standard.ERC20}
               setStandard={() => null}
-              readOnly
             />
 
-            <div
-              className={clsx(
-                "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5 mb-5",
-                // parseUnits(amountToApprove, paymentToken.token.decimals) <
-                //   paymentToken.price * BigInt(tokensToList.length) && "pb-[26px]",
-              )}
-            >
-              <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                <Tooltip
-                  iconSize={20}
-                  text={
-                    " In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
-                  }
-                />
-                <span className="text-14">Approve amount</span>
-              </div>
-              <div className="flex items-center gap-2 flex-grow justify-end">
-                {!isEditApproveActive ? (
-                  <span className="text-14">
-                    {1000} {"USDT"}
-                  </span>
-                ) : (
-                  <div className="flex-grow">
-                    <div className="relative w-full flex-grow">
-                      <Input
-                        // isError={
-                        //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                        //   paymentToken.price * BigInt(tokensToList.length)
-                        // }
-                        className="h-8 pl-3"
-                        // value={amountToApprove}
-                        // onChange={(e) => setAmountToApprove(e.target.value)}
-                        type="text"
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
-                        {"USDT"}
-                      </span>
+            {order.baseAsset.isToken ? (
+              <div
+                className={clsx(
+                  "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5",
+                  parseUnits(amountToApprove, order.baseAsset.decimals) <
+                    parseUnits(amountToDeposit, order.baseAsset.decimals) && "pb-[26px]",
+                )}
+              >
+                <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
+                  <Tooltip
+                    iconSize={20}
+                    text={
+                      "In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
+                    }
+                  />
+                  <span className="text-14">Approve amount</span>
+                </div>
+                <div className="flex items-center gap-2 flex-grow justify-end">
+                  {!isEditApproveActive ? (
+                    <span className="text-14">
+                      {amountToApprove ? `${amountToApprove} ${order.baseAsset.symbol}` : "—"}
+                    </span>
+                  ) : (
+                    <div className="flex-grow">
+                      <div className="relative w-full flex-grow">
+                        <Input
+                          isError={
+                            parseUnits(amountToApprove, order.baseAsset.decimals) <
+                            parseUnits(amountToDeposit, order.baseAsset.decimals)
+                          }
+                          className="h-8 pl-3"
+                          value={amountToApprove}
+                          onChange={(e) => setAmountToApprove(e.target.value)}
+                          type="text"
+                        />
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
+                          {order.baseAsset.symbol}
+                        </span>
+                      </div>
+                      {parseUnits(amountToApprove, order.baseAsset.decimals) <
+                        parseUnits(amountToDeposit, order.baseAsset.decimals) && (
+                        <span className="text-red-light absolute text-12 translate-y-0.5">
+                          Must be higher or equal {amountToDeposit}
+                        </span>
+                      )}
                     </div>
-                    {/*{parseUnits(amountToApprove, paymentToken.token.decimals) <*/}
-                    {/*  paymentToken.price * BigInt(tokensToList.length) && (*/}
-                    {/*  <span className="text-red-light absolute text-12 translate-y-0.5">*/}
-                    {/*    Must be higher or equal{" "}*/}
-                    {/*    {formatUnits(*/}
-                    {/*      paymentToken.price * BigInt(tokensToList.length),*/}
-                    {/*      paymentToken.token.decimals,*/}
-                    {/*    )}*/}
-                    {/*  </span>*/}
-                    {/*)}*/}
-                  </div>
-                )}
-                {!isEditApproveActive ? (
-                  <Button
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(true)}
-                  >
-                    Edit
-                  </Button>
-                ) : (
-                  <Button
-                    // disabled={
-                    //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                    //   paymentToken.price * BigInt(tokensToList.length)
-                    // }
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(false)}
-                  >
-                    Save
-                  </Button>
-                )}
+                  )}
+                  {!isEditApproveActive ? (
+                    <Button
+                      size={ButtonSize.EXTRA_SMALL}
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                      onClick={() => setEditApproveActive(true)}
+                    >
+                      Edit
+                    </Button>
+                  ) : (
+                    <Button
+                      disabled={
+                        parseUnits(amountToApprove, order.baseAsset.decimals) <
+                        parseUnits(amountToDeposit, order.baseAsset.decimals)
+                      }
+                      size={ButtonSize.EXTRA_SMALL}
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                      onClick={() => {
+                        setEditApproveActive(false);
+                        setAmountToApproveModified(true);
+                      }}
+                    >
+                      Save
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3 flex-col xs:flex-row">
+            ) : null}
+            <div className="mt-5 bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3 flex-col xs:flex-row">
               <div className="text-12 xs:text-14 flex items-center gap-8 justify-between xs:justify-start max-xs:w-full">
                 <p className="flex flex-col text-tertiary-text">
                   <span>Gas price:</span>
@@ -274,7 +328,12 @@ export default function OrderDepositDialog({
           </>
         )}
 
-        <OrderDepositActionButton orderId={orderId} />
+        <OrderDepositActionButton
+          orderId={orderId}
+          order={order}
+          amountToApprove={amountToApprove}
+          amountToDeposit={amountToDeposit}
+        />
       </div>
     </DrawerDialog>
   );

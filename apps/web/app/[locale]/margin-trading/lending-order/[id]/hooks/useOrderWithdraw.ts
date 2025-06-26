@@ -1,44 +1,66 @@
 import { useCallback } from "react";
 import { parseUnits } from "viem";
+import { usePublicClient, useWalletClient } from "wagmi";
 
-import {
-  OrderDepositStatus,
-  useDepositOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
 import {
   OrderWithdrawStatus,
   useWithdrawOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useWithdrawOrderStatusStore";
-import sleep from "@/functions/sleep";
-import { useStoreAllowance } from "@/hooks/useAllowance";
+import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
+import { Currency } from "@/sdk_bi/entities/currency";
 
-export default function useOrderWithdraw({ orderId }: { orderId: number }) {
+export default function useOrderWithdraw({
+  orderId,
+  currency,
+  amountToWithdraw,
+}: {
+  orderId: number;
+  currency: Currency;
+  amountToWithdraw: string;
+}) {
   const { setStatus } = useWithdrawOrderStatusStore();
   const chainId = useCurrentChainId();
+  const { data: walletClient } = useWalletClient();
 
-  // const {
-  //   isAllowed: isAllowedA,
-  //   writeTokenApprove: approveA,
-  //   updateAllowance,
-  // } = useStoreAllowance({
-  //   token: params.loanToken,
-  //   contractAddress: MARGIN_TRADING_ADDRESS[chainId],
-  //   amountToCheck: parseUnits(params.loanAmount, params.loanToken?.decimals ?? 18),
-  // });
+  const publicClient = usePublicClient();
 
   const handleOrderWithdraw = useCallback(async () => {
-    console.log(orderId);
-    setStatus(OrderWithdrawStatus.PENDING_WITHDRAW);
-    await sleep(1000);
-    setStatus(OrderWithdrawStatus.LOADING_WITHDRAW);
-    await sleep(4000);
+    if (!walletClient || !publicClient) {
+      return;
+    }
 
-    setStatus(OrderWithdrawStatus.SUCCESS);
+    setStatus(OrderWithdrawStatus.PENDING_WITHDRAW);
+
+    const depositOrderHash = await walletClient.writeContract({
+      abi: MARGIN_MODULE_ABI,
+      address: MARGIN_TRADING_ADDRESS[chainId],
+      functionName: "orderWithdraw",
+      args: [BigInt(orderId), parseUnits(amountToWithdraw, currency.decimals ?? 18)],
+      account: undefined,
+    });
+    setStatus(OrderWithdrawStatus.LOADING_WITHDRAW);
+
+    const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
+
+    if (receipt.status === "success") {
+      setStatus(OrderWithdrawStatus.SUCCESS);
+    } else {
+      setStatus(OrderWithdrawStatus.ERROR_WITHDRAW);
+    }
 
     return;
-  }, [orderId, setStatus]);
+  }, [
+    amountToWithdraw,
+    chainId,
+    currency.decimals,
+    currency.wrapped.address0,
+    orderId,
+    publicClient,
+    setStatus,
+    walletClient,
+  ]);
 
   return { handleOrderWithdraw };
 }

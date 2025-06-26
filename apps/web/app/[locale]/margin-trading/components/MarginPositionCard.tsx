@@ -15,7 +15,31 @@ enum DangerStatus {
   DANGEROUS,
 }
 
-type MarginPositionCardBg = "percent" | "deadline" | "margin-trading" | "currency";
+type MarginPositionCardBg =
+  | "assets"
+  | "borrowed"
+  | "collateral"
+  | "currency"
+  | "deadline"
+  | "frozen"
+  | "initiate_liquidation"
+  | "leverage"
+  | "liquidation"
+  | "liquidation_cost"
+  | "liquidation_date"
+  | "liquidation_fee"
+  | "liquidation_price_source"
+  | "ltv"
+  | "margin_positions_duration"
+  | "margin_trading"
+  | "margin_trading_outline"
+  | "margin_trading_outline_mobile"
+  | "mpd"
+  | "percentage"
+  | "profit"
+  | "reward"
+  | "tokens_allowed_for_trading"
+  | "closed";
 
 export type PositionInfoCardProps = {
   title: string;
@@ -25,17 +49,37 @@ export type PositionInfoCardProps = {
 };
 
 const bgMap: Record<MarginPositionCardBg, string> = {
-  percent: "bg-[url(/images/card-bg/mpd.svg)]",
-  deadline: "bg-[url(/images/card-bg/mpd.svg)]",
-  "margin-trading": "bg-[url(/images/card-bg/mpd.svg)]",
-  currency: "bg-[url(/images/card-bg/mpd.svg)]",
+  assets: "bg-[url(/images/card-bg/assets.svg)]",
+  borrowed: "bg-[url(/images/card-bg/borrowed.svg)]",
+  collateral: "bg-[url(/images/card-bg/collateral.svg)]",
+  currency: "bg-[url(/images/card-bg/currency.svg)]",
+  deadline: "bg-[url(/images/card-bg/deadline.svg)]",
+  frozen: "bg-[url(/images/card-bg/frozen.svg)]",
+  initiate_liquidation: "bg-[url(/images/card-bg/initiate_liquidation.svg)]",
+  leverage: "bg-[url(/images/card-bg/leverage.svg)]",
+  liquidation: "bg-[url(/images/card-bg/liquidation.svg)]",
+  liquidation_cost: "bg-[url(/images/card-bg/liquidation_cost.svg)]",
+  liquidation_date: "bg-[url(/images/card-bg/liquidation_date.svg)]",
+  liquidation_fee: "bg-[url(/images/card-bg/liquidation_fee.svg)]",
+  liquidation_price_source: "bg-[url(/images/card-bg/liquidation_price_source.svg)]",
+  ltv: "bg-[url(/images/card-bg/ltv.svg)]",
+  margin_positions_duration: "bg-[url(/images/card-bg/margin_positions_duration.svg)]",
+  margin_trading: "bg-[url(/images/card-bg/margin_trading.svg)]",
+  margin_trading_outline: "bg-[url(/images/card-bg/margin_trading_outline.svg)]",
+  margin_trading_outline_mobile: "bg-[url(/images/card-bg/margin_trading_outline_mobile.svg)]",
+  mpd: "bg-[url(/images/card-bg/mpd.svg)]",
+  percentage: "bg-[url(/images/card-bg/percentage.svg)]",
+  profit: "bg-[url(/images/card-bg/profit.svg)]",
+  reward: "bg-[url(/images/card-bg/reward.svg)]",
+  tokens_allowed_for_trading: "bg-[url(/images/card-bg/tokens_allowed_for_trading.svg)]",
+  closed: "bg-[url(/images/card-bg/closed.svg)]",
 };
 
 export function OrderInfoCard({ title, tooltipText, value, bg }: PositionInfoCardProps) {
   return (
     <div
       className={clsx(
-        "flex flex-col justify-center px-5 bg-tertiary-bg bg-account-card-pattern rounded-3 py-3 bg-right-top bg-no-repeat",
+        "flex flex-col justify-center px-5 bg-tertiary-bg rounded-3 py-3 bg-right-top bg-no-repeat bg-[length:120px_80px]",
         bgMap[bg],
       )}
     >

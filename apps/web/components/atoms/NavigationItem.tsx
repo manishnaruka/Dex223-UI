@@ -23,18 +23,11 @@ export default function NavigationItem({ href, title, active, id }: Props) {
           active
             ? "bg-navigation-active text-green shadow-green/60 text-shadow"
             : "hocus:bg-navigation-hover hocus:text-green hocus:shadow-green/60 hocus:text-shadow text-secondary-text",
-          !["/swap", "/pools", "/token-listing", "/portfolio"].includes(href) &&
-            "opacity-50 pointer-events-none",
         )}
         href={href}
       >
         {title}
       </Link>
-      {id === "borrow_lend" && (
-        <div className="absolute left-1/2 -translate-x-1/2 -bottom-[19px]">
-          <Badge color="green_outline" text="Coming soon" />
-        </div>
-      )}
     </span>
   );
 }

@@ -13,6 +13,7 @@ import {
   useCreateOrderStepStore,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 
 const stepsLabels: Record<CreateOrderStep, string> = {
   [CreateOrderStep.FIRST]: "Loan",
@@ -21,6 +22,8 @@ const stepsLabels: Record<CreateOrderStep, string> = {
 };
 
 export default function CreateLendingOrderPage() {
+  useRecentTransactionTracking();
+
   const { step } = useCreateOrderStepStore((state) => ({ step: state.step }));
 
   const { isOpen, setIsOpen } = useConfirmCreateOrderDialogStore();

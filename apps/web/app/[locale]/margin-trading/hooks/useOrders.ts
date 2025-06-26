@@ -9,16 +9,42 @@ import { DexChainId } from "@/sdk_bi/chains";
 const query = gql`
   query GetOrders {
     orders {
-      minLoan
-      id
+      owner
+      balance
       leverage
-      baseAssetToken {
-        address
+      collateralTokens {
+        addressERC20
+        addressERC223
         decimals
         id
         name
         symbol
       }
+      baseAssetToken {
+        id
+        decimals
+        addressERC223
+        addressERC20
+        name
+        symbol
+      }
+      collaterals
+      currencyLimit
+      deadline
+      duration
+      id
+      interestRate
+      liquidationRewardAmount
+      liquidationRewardAsset
+      liquidationRewardAssetToken {
+        addressERC20
+        addressERC223
+        decimals
+        id
+        name
+        symbol
+      }
+      minLoan
     }
   }
 `;
@@ -26,22 +52,42 @@ const query = gql`
 const queryOwner = gql(`
   query GetOrders($owner: String!) {
     orders(where: {owner: $owner}) {
-      id
-      duration
-      currencyLimit
-      createdAt
-      interestRate
+      owner
+      balance
       leverage
-      minLoan
-      baseAssetToken {
-        address
+      collateralTokens {
+        addressERC20
+        addressERC223
         decimals
         id
         name
         symbol
       }
-      baseAsset
-      balance
+      baseAssetToken {
+        id
+        decimals
+        addressERC223
+        addressERC20
+        name
+        symbol
+      }
+      collaterals
+      currencyLimit
+      deadline
+      duration
+      id
+      interestRate
+      liquidationRewardAmount
+      liquidationRewardAsset
+      liquidationRewardAssetToken {
+        addressERC20
+        addressERC223
+        decimals
+        id
+        name
+        symbol
+      }
+      minLoan
     }
   }
 `);

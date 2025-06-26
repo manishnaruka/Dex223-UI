@@ -2,6 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import React from "react";
+import { formatUnits } from "viem";
 
 import { useOrders } from "@/app/[locale]/margin-trading/hooks/useOrders";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
@@ -173,11 +174,10 @@ export default function BorrowMarketTable() {
     return <div>Loading...</div>;
   }
 
-  console.log(orders);
   return (
-    <div className="pr-5 pl-2 grid rounded-2 overflow-hidden gap-x-2 bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(77px,1.33fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,2.67fr),_minmax(50px,2.67fr),_minmax(78px,1.67fr),_minmax(50px,max-content)] pb-2">
-      <HeaderItem label="Min / Max borrowing" sorting={sorting} handleSort={handleSort} isFirst />
-      <div className="h-[60px] flex items-center relative -left-3">
+    <div className="grid rounded-2 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(77px,1.33fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,2.67fr),_minmax(50px,2.67fr),_minmax(78px,1.67fr),_minmax(50px,max-content)] pb-2">
+      <HeaderItem label="Order balance" sorting={sorting} handleSort={handleSort} isFirst />
+      <div className="h-[60px] flex items-center relative -left-3 pr-2 pl-2">
         <IconButton
           variant={IconButtonVariant.DEFAULT}
           buttonSize={IconButtonSize.SMALL}
@@ -186,7 +186,7 @@ export default function BorrowMarketTable() {
         />
         Interest{" "}
       </div>
-      <div className="h-[60px] flex items-center relative -left-3">
+      <div className="h-[60px] flex items-center relative -left-3 pr-2">
         <IconButton
           variant={IconButtonVariant.DEFAULT}
           buttonSize={IconButtonSize.SMALL}
@@ -195,7 +195,7 @@ export default function BorrowMarketTable() {
         />
         Leverage{" "}
       </div>
-      <div className="h-[60px] flex items-center relative -left-3">
+      <div className="h-[60px] flex items-center relative -left-3 pr-2">
         <IconButton
           variant={IconButtonVariant.DEFAULT}
           buttonSize={IconButtonSize.SMALL}
@@ -204,9 +204,9 @@ export default function BorrowMarketTable() {
         />
         Limit{" "}
       </div>
-      <div className=" h-[60px] flex items-center">Collateral tokens</div>
-      <div className=" h-[60px] flex items-center">Tradable tokens</div>
-      <div className=" h-[60px] flex items-center relative -left-3">
+      <div className=" h-[60px] flex items-center pr-2">Collateral tokens</div>
+      <div className=" h-[60px] flex items-cente pr-2r">Tradable tokens</div>
+      <div className=" h-[60px] flex items-center relative -left-3 pr-2">
         <IconButton
           variant={IconButtonVariant.DEFAULT}
           buttonSize={IconButtonSize.SMALL}
@@ -219,29 +219,45 @@ export default function BorrowMarketTable() {
 
       {orders.data.orders.map((o: any) => {
         return (
-          <React.Fragment key={o.id}>
-            <div className=" pl-3 h-[56px] flex items-center gap-2">
+          <Link
+            href={`/margin-trading/lending-order/${o.id}`}
+            className="group contents"
+            key={o.id}
+          >
+            <div className=" pl-3 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2 pl-2">
               <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
+              <span>{formatUnits(o.balance, o.baseAssetToken.decimals ?? 18)}</span>
               <span>{o.baseAssetToken.symbol}</span>
             </div>
-            <div className=" h-[56px] flex items-center">{"interest"}</div>
-            <div className=" h-[56px] flex items-center">{o.leverage}x</div>
-            <div className=" h-[56px] flex items-center">{"o.limit"}</div>
-            <div className=" h-[56px] flex items-center">{"o.collateralTokens"} tokens</div>
-            <div className=" h-[56px] flex items-center">{"o.tradableTokens"} tokens</div>
-            <div className=" h-[56px] flex items-center">
+            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+              {Math.floor(o.interestRate / 100)}%
+            </div>
+            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+              {o.leverage}x
+            </div>
+            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+              {o.currencyLimit}
+            </div>
+            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+              {o.collateralTokens.length} tokens
+            </div>
+            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+              {"o.tradableTokens"} tokens
+            </div>
+            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
               {/*{Array.isArray(o.period)*/}
               {/*  ? `${o.period[0]} - ${o.period[1]} days`*/}
-              {/*  : `${o.period} days`}*/}0 days
+              {/*  : `${o.period} days`}*/}
+              {Math.floor((o.duration * 100) / 24 / 60 / 60) / 100} days
             </div>
-            <div className=" h-[56px] flex items-center">
+            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-5">
               <Link href={`/margin-trading/lending-order/${o.id}/borrow`}>
                 <Button colorScheme={ButtonColor.LIGHT_GREEN} size={ButtonSize.MEDIUM}>
                   Borrow
                 </Button>
               </Link>
             </div>
-          </React.Fragment>
+          </Link>
         );
       })}
     </div>

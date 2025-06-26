@@ -39,6 +39,7 @@ export default function LendingOrderPeriodConfig({
             onClick={() => {
               setValues({ ...values, type: _period });
             }}
+            disabled={_period === LendingOrderPeriodType.PERPETUAL}
           >
             {labelsMap[_period]}
           </RadioButton>

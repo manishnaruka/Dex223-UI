@@ -35,6 +35,7 @@ export default function TokenInput({
   gasERC223,
   colorScheme = ThemeColors.GREEN,
   isError,
+  handleBlur,
 }: {
   handleClick: () => void;
   token: Currency | undefined;
@@ -54,6 +55,7 @@ export default function TokenInput({
   gasERC223?: string;
   isError?: boolean;
   colorScheme?: ThemeColors;
+  handleBlur?: () => void;
 }) {
   const t = useTranslations("Swap");
 
@@ -95,6 +97,7 @@ export default function TokenInput({
               onInputChange(values.value);
             }}
             allowNegative={false}
+            onBlur={handleBlur}
           />
           <span className="text-12 block -mt-1 text-tertiary-text">
             ${price ? formatFloat(price * +value) : "0"}

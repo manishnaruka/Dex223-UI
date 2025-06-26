@@ -65,7 +65,7 @@ export default function LendingOrderTokensSourceConfig({
             />
           </div>
           <div className="mb-3">
-            <div className="bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start flex flex-wrap gap-1">
+            <div className="bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start content-start flex flex-wrap gap-1">
               {values.allowedTokens.map((currency) => {
                 return (
                   <div

@@ -21,6 +21,8 @@ export default function LendingOrderTokenSelect({
   errors,
   label = "Loan amount",
   setIsEnoughBalance,
+  tokens,
+  helperText,
 }: {
   token: Currency | undefined;
   setToken: (token: Currency) => Promise<void>;
@@ -31,6 +33,8 @@ export default function LendingOrderTokenSelect({
   errors: string[];
   label?: string;
   setIsEnoughBalance?: (isEnoughBalance: boolean) => void;
+  tokens?: Currency[];
+  helperText?: string;
 }) {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
@@ -99,9 +103,10 @@ export default function LendingOrderTokenSelect({
         handlePick={handlePick}
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
+        availableTokens={tokens}
       />
       <div className="mb-4">
-        <HelperText error={errors[0]} />
+        <HelperText helperText={helperText} error={errors[0]} />
       </div>
     </div>
   );
