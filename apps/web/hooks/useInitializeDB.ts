@@ -9,6 +9,7 @@ import { defaultLists } from "@/db/lists";
 import { IIFE } from "@/functions/iife";
 import useAutoListingApolloClient from "@/hooks/useAutoListingApolloClient";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useDeepEffect from "@/hooks/useDeepEffect";
 import { CORE_AUTO_LISTING_ADDRESS, FREE_AUTO_LISTING_ADDRESS } from "@/sdk_bi/addresses";
 import { DEX_SUPPORTED_CHAINS, DexChainId } from "@/sdk_bi/chains";
 import { Token } from "@/sdk_bi/entities/token";
@@ -126,7 +127,7 @@ export function useAutoListingUpdater() {
     [allAutoListings, chainId],
   );
 
-  useEffect(() => {
+  useDeepEffect(() => {
     IIFE(async () => {
       if (!allAutoListings) return;
 
