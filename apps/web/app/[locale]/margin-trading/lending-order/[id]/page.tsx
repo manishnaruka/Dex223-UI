@@ -318,8 +318,41 @@ export default function LendingOrder({
 
             <SimpleBar style={{ maxHeight: 216 }}>
               <div className="flex gap-1 flex-wrap">
-                {[...Array(125)].map((v, index) => {
-                  return <TokenBadge key={index} />;
+                {order.allowedTradingAssets.map((tradingToken) => {
+                  return tradingToken.isToken ? (
+                    <button
+                      key={tradingToken.address0}
+                      onClick={() =>
+                        setTokenForPortfolio(
+                          new Token(
+                            chainId,
+                            tradingToken.address0,
+                            tradingToken.address1,
+                            +tradingToken.decimals,
+                            tradingToken.symbol,
+                            tradingToken.name,
+                            "/images/tokens/placeholder.svg",
+                            tokenLists
+                              ?.filter((tokenList) => {
+                                return !!tokenList.list.tokens.find(
+                                  (t) =>
+                                    t.address0.toLowerCase() ===
+                                    tradingToken.address0.toLowerCase(),
+                                );
+                              })
+                              .map((t) => t.id),
+                          ),
+                        )
+                      }
+                      className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
+                    >
+                      {tradingToken.symbol}
+                    </button>
+                  ) : (
+                    <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
+                      {tradingToken.symbol}
+                    </div>
+                  );
                 })}
               </div>
             </SimpleBar>
