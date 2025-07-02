@@ -91,13 +91,17 @@ const queryLastUpdated = gql(`
 
 export function useAutoListingUpdater() {
   const chainId = useCurrentChainId();
-  const allAutoListings = useLiveQuery(() =>
-    db.tokenLists
-      .where("chainId")
-      .equals(chainId)
-      .filter((list) => Boolean(list.autoListingContract))
-      .toArray(),
+  const allAutoListings = useLiveQuery(
+    () =>
+      db.tokenLists
+        .where("chainId")
+        .equals(chainId)
+        .filter((list) => Boolean(list.autoListingContract))
+        .toArray(),
+    [chainId],
   );
+
+  console.log(allAutoListings);
 
   const client = useAutoListingApolloClient();
 
@@ -124,9 +128,7 @@ export function useAutoListingUpdater() {
 
   useEffect(() => {
     IIFE(async () => {
-      if (!allAutoListings) {
-        return;
-      }
+      if (!allAutoListings) return;
 
       const addressesToActualize = new Set<string>([]);
 
@@ -181,12 +183,16 @@ export function useAutoListingUpdater() {
           first: Array.from(addressesToActualize).length,
         },
       });
+      console.log(autoListingsToUpdate);
 
       const resultData = autoListingsToUpdate.data?.autoListings;
 
+      console.log(resultData);
       if (resultData && resultData.length) {
         for (let i = 0; i < resultData.length; i++) {
           const [id, name] = getMeta(resultData[i].id);
+
+          console.log(id, name);
 
           await db.tokenLists.put(
             {
