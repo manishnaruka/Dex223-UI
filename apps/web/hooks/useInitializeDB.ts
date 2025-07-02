@@ -102,8 +102,6 @@ export function useAutoListingUpdater() {
     [chainId],
   );
 
-  console.log(allAutoListings);
-
   const client = useAutoListingApolloClient();
 
   const [checkLastUpdated] = useLazyQuery(queryLastUpdated, { client });
@@ -184,16 +182,12 @@ export function useAutoListingUpdater() {
           first: Array.from(addressesToActualize).length,
         },
       });
-      console.log(autoListingsToUpdate);
 
       const resultData = autoListingsToUpdate.data?.autoListings;
 
-      console.log(resultData);
       if (resultData && resultData.length) {
         for (let i = 0; i < resultData.length; i++) {
           const [id, name] = getMeta(resultData[i].id);
-
-          console.log(id, name);
 
           await db.tokenLists.put(
             {
