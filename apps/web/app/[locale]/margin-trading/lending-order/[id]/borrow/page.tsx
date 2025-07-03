@@ -76,6 +76,48 @@ const schema = Yup.object({
     .positive("Loan amount must be greater than zero"),
 });
 
+type Marks = number[];
+
+export function getMarks(max: number): Marks {
+  const niceSteps = [1, 2, 5, 10, 20, 25, 50, 100];
+
+  // 1. Визначаємо крок, щоб не більше 10 сегментів
+  let step: number;
+  if (max <= 10) {
+    step = 1;
+  } else {
+    const rawStep = Math.ceil(max / 10);
+    step = niceSteps.find((f) => f >= rawStep) ?? rawStep;
+  }
+
+  const marks: number[] = [];
+  marks.push(1);
+  for (let m = step; m < max; m += step) {
+    if (m > 1) {
+      marks.push(m);
+    }
+  }
+
+  if (marks[marks.length - 1] !== max) {
+    marks.push(max);
+  }
+
+  const threshold = Math.max(step - 4, 0);
+  if (marks.length >= 2) {
+    const penult = marks[marks.length - 2];
+    if (max - penult < threshold) {
+      marks.splice(marks.length - 2, 1);
+    }
+  }
+
+  return marks;
+}
+
+console.log(getMarks(3));
+
+const testOrderLeverage = 78;
+const testCollateralPrice = 4;
+
 export default function BorrowPage({
   params,
 }: {
@@ -150,10 +192,7 @@ export default function BorrowPage({
                     amountError: errors.collateralAmount,
                   })}
                   tokens={order.allowedCollateralAssets}
-                  helperText={
-                    values.collateralToken &&
-                    `Min collateral amount: ${+formatUnits(order.minLoan, order?.baseAsset.decimals ?? 18) * 1.01} ${values.collateralToken?.symbol}`
-                  }
+                  helperText={`Min collateral amount: ${+formatUnits(order.minLoan, order?.baseAsset.decimals ?? 18) * 1.01} ${values.collateralToken?.symbol}`}
                 />
                 <TextField
                   isNumeric
@@ -174,38 +213,43 @@ export default function BorrowPage({
                     setFieldValue("leverage", L);
                   }}
                 />
-                <div className="mb-4">
+                <div className="mb-4 ">
                   <input
                     min={1}
                     max={order.leverage}
                     value={values.leverage}
-                    onChange={(e) => setFieldValue("leverage", +e.target.value)}
+                    onChange={(e) => {
+                      const L = parseFloat(e.target.value) || 1;
+                      const C = parseFloat(values.collateralAmount) || 0;
+                      const B = C * (L - 1);
+                      setFieldValue("borrowAmount", B);
+                      setFieldValue("leverage", L);
+                    }}
                     step={1}
                     type="range"
-                    className="mb-1.5 !rounded-r-0"
+                    className="mb-1.5 w-full"
                     style={{
-                      backgroundImage: `linear-gradient(to right, #7DA491 0%, #7DA491 ${(+values.leverage * 100) / order?.leverage}%, #0F0F0F ${values.leverage}%, #0F0F0F 100%)`,
-                      width:
-                        order?.leverage < 50
-                          ? `calc(${order.leverage}% + 20px)`
-                          : `${order?.leverage}%`,
+                      backgroundImage: `linear-gradient(to right, #7DA491 0%, #7DA491 ${((+values.leverage - 1) / (order.leverage - 1)) * 100}%, #0F0F0F ${values?.leverage}%, #0F0F0F 100%)`,
                     }}
                   />
 
-                  <div className="z-10 relative flex justify-between text-12 text-secondary-text ">
-                    {[1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((_, i) => (
-                      <span
-                        key={_}
-                        className={clsx(
-                          "min-w-[28px] flex justify-center relative before:h-3 before:w-0.5 before:absolute before:left-1/2 before:-top-[16px] before:-translate-x-1/2 before:pointer-events-none",
-                          +values.leverage <= _
-                            ? "before:bg-quaternary-bg"
-                            : "before:bg-green-hover",
-                        )}
-                      >
-                        {_}x
-                      </span>
-                    ))}
+                  <div className="z-10 relative text-12 text-secondary-text px-[13px]">
+                    <div className="relative">
+                      {getMarks(order.leverage).map((_, i) => (
+                        <span
+                          key={_}
+                          className={clsx(
+                            "min-w-[28px] flex justify-center absolute before:h-3 before:w-0.5 before:absolute before:left-1/2 before:-top-[16px] before:-translate-x-1/2 before:pointer-events-none -translate-x-1/2",
+                            +values.leverage <= _
+                              ? "before:bg-quaternary-bg"
+                              : "before:bg-green-hover",
+                          )}
+                          style={{ left: `${((_ - 1) / (order.leverage - 1)) * 100}%` }}
+                        >
+                          {_}x
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

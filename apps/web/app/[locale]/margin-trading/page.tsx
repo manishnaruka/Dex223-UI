@@ -3,11 +3,9 @@ import React, { useState } from "react";
 
 import BorrowMarketFilter from "@/app/[locale]/margin-trading/components/BorrowMarketFilter";
 import BorrowMarketTable from "@/app/[locale]/margin-trading/components/BorrowMarketTable";
-import LendingOrderCard from "@/app/[locale]/margin-trading/components/LendingOrderCard";
-import MarginPositionCard from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import LendingOrdersTab from "@/app/[locale]/margin-trading/tabs/LendingOrdersTab";
+import MarginPositionsTab from "@/app/[locale]/margin-trading/tabs/MarginPositionsTab";
 import Container from "@/components/atoms/Container";
-import { SearchInput } from "@/components/atoms/Input";
 import SelectButton from "@/components/atoms/SelectButton";
 import { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor } from "@/components/buttons/Button";
@@ -65,44 +63,7 @@ export default function MarginTrading() {
             <LendingOrdersTab />
           </Tab>
           <Tab title="Margin positions">
-            <div className="flex justify-between my-5 items-center">
-              <span className="text-20 text-tertiary-text">17 margin positions</span>
-              <div className="max-w-[460px] flex-grow">
-                <SearchInput placeholder="Search address" className="bg-primary-bg" />
-              </div>
-            </div>
-            <div className="flex flex-col gap-5">
-              <MarginPositionCard
-                expectedBalance={100}
-                totalBalance={150}
-                liquidationFee={10}
-                liquidationCost={2}
-              />
-              <MarginPositionCard
-                expectedBalance={150}
-                totalBalance={100}
-                liquidationFee={10}
-                liquidationCost={9.5}
-              />
-              <MarginPositionCard
-                expectedBalance={150}
-                totalBalance={200}
-                liquidationFee={10}
-                liquidationCost={9.5}
-              />
-              <MarginPositionCard
-                expectedBalance={95}
-                totalBalance={100}
-                liquidationFee={10}
-                liquidationCost={12}
-              />
-              <MarginPositionCard
-                expectedBalance={150}
-                totalBalance={100}
-                liquidationFee={10}
-                liquidationCost={12}
-              />
-            </div>
+            <MarginPositionsTab />
           </Tab>
         </Tabs>
       </Container>

@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import React from "react";
 import { formatUnits } from "viem";
 
-import { useOrders } from "@/app/[locale]/margin-trading/hooks/useOrders";
+import { LendingOrder, useOrders } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
@@ -154,7 +154,7 @@ const testData: Order[] = [
 export default function BorrowMarketTable() {
   const [sorting, setSorting] = useState<SortingType>(SortingType.NONE);
 
-  const orders = useOrders();
+  const { loading, orders } = useOrders();
 
   const handleSort = useCallback(() => {
     switch (sorting) {
@@ -170,7 +170,7 @@ export default function BorrowMarketTable() {
     }
   }, [sorting]);
 
-  if (orders.loading || !orders.data) {
+  if (loading || !orders) {
     return <div>Loading...</div>;
   }
 
@@ -205,7 +205,7 @@ export default function BorrowMarketTable() {
         Limit{" "}
       </div>
       <div className=" h-[60px] flex items-center pr-2">Collateral tokens</div>
-      <div className=" h-[60px] flex items-cente pr-2r">Tradable tokens</div>
+      <div className=" h-[60px] flex items-center pr-2">Tradable tokens</div>
       <div className=" h-[60px] flex items-center relative -left-3 pr-2">
         <IconButton
           variant={IconButtonVariant.DEFAULT}
@@ -217,7 +217,7 @@ export default function BorrowMarketTable() {
       </div>
       <div className=" h-[60px] flex items-center">Action</div>
 
-      {orders.data.orders.map((o: any) => {
+      {orders.map((o: LendingOrder) => {
         return (
           <Link
             href={`/margin-trading/lending-order/${o.id}`}
@@ -226,8 +226,8 @@ export default function BorrowMarketTable() {
           >
             <div className=" pl-3 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2 pl-2">
               <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
-              <span>{formatUnits(o.balance, o.baseAssetToken.decimals ?? 18)}</span>
-              <span>{o.baseAssetToken.symbol}</span>
+              <span>{formatUnits(o.balance, o.baseAsset.decimals ?? 18)}</span>
+              <span>{o.baseAsset.symbol}</span>
             </div>
             <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
               {Math.floor(o.interestRate / 100)}%
@@ -239,16 +239,16 @@ export default function BorrowMarketTable() {
               {o.currencyLimit}
             </div>
             <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {o.collateralTokens.length} tokens
+              {o.allowedCollateralAssets.length} tokens
             </div>
             <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {"o.tradableTokens"} tokens
+              {o.allowedTradingAssets.length} tokens
             </div>
             <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
               {/*{Array.isArray(o.period)*/}
               {/*  ? `${o.period[0]} - ${o.period[1]} days`*/}
               {/*  : `${o.period} days`}*/}
-              {Math.floor((o.duration * 100) / 24 / 60 / 60) / 100} days
+              {Math.floor((o.positionDuration * 100) / 24 / 60 / 60) / 100} days
             </div>
             <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-5">
               <Link href={`/margin-trading/lending-order/${o.id}/borrow`}>

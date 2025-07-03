@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { ReactNode, useMemo } from "react";
 
+import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 
@@ -167,6 +168,7 @@ interface Props {
   expectedBalance: number;
   liquidationFee: number;
   liquidationCost: number;
+  position: MarginPosition;
 }
 
 const dangerIconsMap: Record<Exclude<DangerStatus, DangerStatus.STABLE>, ReactNode> = {
@@ -199,6 +201,7 @@ export default function MarginPositionCard({
   expectedBalance,
   liquidationFee,
   liquidationCost,
+  position,
 }: Props) {
   const balanceStatus: DangerStatus = useMemo(() => {
     if (totalBalance < expectedBalance) {
@@ -358,6 +361,7 @@ export function LendingPositionCard({
   expectedBalance,
   liquidationFee,
   liquidationCost,
+  position,
 }: Props) {
   const balanceStatus: DangerStatus = useMemo(() => {
     if (totalBalance < expectedBalance) {

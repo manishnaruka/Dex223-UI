@@ -1,50 +1,64 @@
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Link from "next/link";
+import { formatUnits } from "viem";
 
 import MarginPositionCard, {
   LendingPositionCard,
 } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
+import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 
-function MarginPositionInfoCard() {
+function LendingOrderInfoCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col justify-center px-5 bg-tertiary-bg rounded-3 py-2.5">
       <div className="flex items-center gap-1">
-        <span className="text-14 flex items-center gap-1 text-secondary-text">
-          Borrowed
+        <span className="text-14 flex items-center gap-1 text-tertiary-text">
+          {label}
           <Tooltip text="Tooltip text" />
         </span>
       </div>
-      <div className="relative flex gap-1">
-        <span>100</span> USDT
-      </div>
+      <div className="text-16 font-medium text-secondary-text whitespace-nowrap">{value}</div>
     </div>
   );
 }
 
-function LiquidationInfo({ label, value }: { label: string; value: number }) {
+function LiquidationInfo({
+  label,
+  feeForLiquidator,
+  feeForLender,
+  symbol,
+}: {
+  label: string;
+  feeForLiquidator: string;
+  feeForLender: string;
+  symbol: string;
+}) {
   return (
     <div className="border-l-4 border-tertiary-bg rounded-1 pl-4 min-w-[185px]">
       <div className="flex items-center gap-2 whitespace-nowrap">
         {label} <Tooltip text="Tooltip text" />
       </div>
       <p className="relative -top-1 flex gap-1 whitespace-nowrap items-center font-medium">
-        <span className="text-secondary-text">{value}</span>
-        <span className="">USDT</span>
+        <span className="text-secondary-text">{feeForLiquidator}</span>
+        <span className="">{symbol}</span>
       </p>
     </div>
   );
 }
 
-export default function LendingOrderCard({ order }: { order: { baseAssetSymbol: string } }) {
+export default function LendingOrderCard({ order }: { order: LendingOrder }) {
+  console.log(order);
   return (
     <>
-      <div className="border-4 border-green-bg rounded-5 pt-3 px-5 pb-5">
+      <div className="border-4 border-green-bg rounded-5 pt-3 px-5 pb-5 bg-primary-bg">
         <div className="flex justify-between mb-3 min-h-10 items-center">
-          <Link className="flex items-center gap-2" href="#">
-            View margin position details
+          <Link
+            className="flex items-center gap-2"
+            href={`/margin-trading/lending-order/${order.id}`}
+          >
+            View lending order details
             <Svg iconName="next" />
           </Link>
           <span className="text-green flex items-center gap-3 ">
@@ -75,22 +89,50 @@ export default function LendingOrderCard({ order }: { order: { baseAssetSymbol: 
                   <Tooltip text="Tooltip text" />
                 </span>
                 <p className="text-20">
-                  1000 / 500 <span className="text-secondary-text">{order.baseAssetSymbol}</span>
+                  1000 / 500 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                 </p>
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <MarginPositionInfoCard />
+              <LendingOrderInfoCard
+                label="Deadline"
+                value={`${new Date(order.deadline * 1000)
+                  .toLocaleDateString("en-GB")
+                  .split("/")
+                  .join(".")} ${new Date(order.deadline * 1000).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: true,
+                })}`}
+              />
 
-              <LiquidationInfo value={0.2} label="Fee for liquidator / for lender" />
+              <LiquidationInfo
+                symbol={order.liquidationRewardAsset.symbol || "Unknown"}
+                feeForLiquidator={formatUnits(
+                  order.liquidationRewardAmount,
+                  order.liquidationRewardAsset.decimals,
+                )}
+                feeForLender={formatUnits(
+                  order.liquidationRewardAmount,
+                  order.liquidationRewardAsset.decimals,
+                )}
+                label="Fee for liquidator"
+              />
             </div>
           </div>
 
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-3 gap-3">
-              <MarginPositionInfoCard />
-              <MarginPositionInfoCard />
-              <MarginPositionInfoCard />
+              <LendingOrderInfoCard
+                label={"Duration"}
+                value={`${order.positionDuration / 24 / 60 / 60} days`}
+              />
+              <LendingOrderInfoCard label="Max leverage" value={`${order.leverage}x`} />
+              <LendingOrderInfoCard
+                label="Interest rate"
+                value={`${order.interestRate / 100}% per month`}
+              />
             </div>
             <div className="grid grid-cols-4 gap-3">
               <Button colorScheme={ButtonColor.LIGHT_GREEN}>Close</Button>
@@ -102,101 +144,39 @@ export default function LendingOrderCard({ order }: { order: { baseAssetSymbol: 
         </div>
       </div>
       <div className="grid gap-5 grid-cols-[80px_1fr]">
-        <div
-          className={clsx(
-            "relative -top-[68px]",
-            "before:w-1 before:absolute before:bg-green-bg before:left-0 before:h-full before:top-[68px]",
-          )}
-        >
-          <svg
-            width="80"
-            height="112"
-            viewBox="0 0 80 112"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
-              fill="#3C4C4A"
-            />
-          </svg>
-        </div>
-        <LendingPositionCard
-          totalBalance={2}
-          expectedBalance={10}
-          liquidationFee={2}
-          liquidationCost={10}
-        />
-        <div
-          className={clsx(
-            "relative -top-[68px]",
-            "before:w-1 before:absolute before:bg-green-bg before:left-0 before:h-full before:top-[68px]",
-          )}
-        >
-          <svg
-            width="80"
-            height="112"
-            viewBox="0 0 80 112"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
-              fill="#3C4C4A"
-            />
-          </svg>
-        </div>
-        <LendingPositionCard
-          totalBalance={2}
-          expectedBalance={10}
-          liquidationFee={2}
-          liquidationCost={10}
-        />
-        <div
-          className={clsx(
-            "relative -top-[68px]",
-            "before:w-1 before:absolute before:bg-green-bg before:left-0 before:h-full before:top-[68px]",
-          )}
-        >
-          <svg
-            width="80"
-            height="112"
-            viewBox="0 0 80 112"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
-              fill="#3C4C4A"
-            />
-          </svg>
-        </div>
-        <LendingPositionCard
-          totalBalance={12}
-          expectedBalance={10}
-          liquidationFee={12}
-          liquidationCost={10}
-        />
-        <div className={clsx("relative -top-[68px]")}>
-          <svg
-            width="80"
-            height="112"
-            viewBox="0 0 80 112"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
-              fill="#3C4C4A"
-            />
-          </svg>
-        </div>
-        <LendingPositionCard
-          totalBalance={12}
-          expectedBalance={10}
-          liquidationFee={2}
-          liquidationCost={10}
-        />
+        {!!order.positions?.length &&
+          order.positions.map((position, index) => (
+            <>
+              <div
+                className={clsx(
+                  "relative -top-[68px]",
+                  index !== order.positions!.length - 1 &&
+                    "before:w-1 before:absolute before:bg-green-bg before:left-0 before:h-full before:top-[68px]",
+                )}
+              >
+                <svg
+                  width="80"
+                  height="112"
+                  viewBox="0 0 80 112"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M80 100L60 88.453V111.547L80 100ZM0 0V92H4V0H0ZM10 102H62V98H10V102ZM0 92C0 97.5229 4.47715 102 10 102V98C6.68629 98 4 95.3137 4 92H0Z"
+                    fill="#3C4C4A"
+                  />
+                </svg>
+              </div>
+
+              <LendingPositionCard
+                totalBalance={2}
+                expectedBalance={10}
+                liquidationFee={2}
+                liquidationCost={10}
+                position={position}
+              />
+            </>
+          ))}
       </div>
     </>
   );
