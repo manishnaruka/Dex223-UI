@@ -1,0 +1,47 @@
+import { create } from "zustand";
+
+import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
+
+interface MarginSwapTokensStore {
+  tokenA: Currency | undefined;
+  tokenB: Currency | undefined;
+  setTokenA: (token: Currency | undefined) => void;
+  setTokenB: (token: Currency | undefined) => void;
+  tokenAStandard: Standard;
+  tokenBStandard: Standard;
+  setTokenAStandard: (address: Standard) => void;
+  setTokenBStandard: (address: Standard) => void;
+  switchTokens: () => void;
+  reset: () => void;
+}
+
+export const useMarginSwapTokensStore = create<MarginSwapTokensStore>((set, get) => ({
+  tokenA: undefined,
+  tokenB: undefined,
+  tokenAAddress: undefined,
+  tokenAStandard: Standard.ERC20,
+  tokenBAddress: undefined,
+  tokenBStandard: Standard.ERC20,
+
+  setTokenA: (tokenA) => set({ tokenA }),
+  setTokenB: (tokenB) => set({ tokenB }),
+
+  setTokenAStandard: (tokenAStandard) => set({ tokenAStandard }),
+  setTokenBStandard: (tokenBStandard) => set({ tokenBStandard }),
+  reset: () =>
+    set({
+      tokenA: undefined,
+      tokenB: undefined,
+      tokenAStandard: Standard.ERC20,
+      tokenBStandard: Standard.ERC20,
+    }),
+
+  switchTokens: () =>
+    set({
+      tokenA: get().tokenB,
+      tokenB: get().tokenA,
+      tokenAStandard: get().tokenBStandard,
+      tokenBStandard: get().tokenAStandard,
+    }),
+}));

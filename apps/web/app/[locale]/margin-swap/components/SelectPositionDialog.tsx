@@ -1,9 +1,13 @@
 import Tooltip from "@repo/ui/tooltip";
 import React, { ReactNode, useState } from "react";
+import { useAccount } from "wagmi";
 import { date } from "yup";
 
+import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapPositionStore";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import PositionDetailCard from "@/app/[locale]/margin-trading/components/widgets/PositionDetailCard";
+import { usePositionsByOwner } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
+import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
@@ -32,13 +36,11 @@ const dangerIconsMap: Record<Exclude<DangerStatus, DangerStatus.STABLE>, ReactNo
 };
 
 function PositionSelectItem({
-  id,
-  deadline,
-  assets,
+  position,
+  handleSelectedPosition,
 }: {
-  id: number;
-  deadline: Date;
-  assets: string[];
+  handleSelectedPosition: (position: MarginPosition) => void;
+  position: MarginPosition;
 }) {
   return (
     <div className="p-5 rounded-3 bg-tertiary-bg">
@@ -48,11 +50,11 @@ function PositionSelectItem({
           <Svg iconName="next" />
         </Link>
         <div className="w-[178px]">
-          <PositionDetailCard title="ID" value={id} tooltipText="Tooltip text" />
+          <PositionDetailCard title="ID" value={position.id} tooltipText="Tooltip text" />
         </div>
         <PositionDetailCard
           title="Deadline"
-          value={deadline.toLocaleString("en-US").toString()}
+          value={new Date(position.deadline * 1000).toLocaleString("en-GB").split("/").join(".")}
           tooltipText="Tooltip text"
         />
         <span className="text-green flex items-center gap-3 min-w-[92px]">
@@ -65,6 +67,7 @@ function PositionSelectItem({
             size={ButtonSize.MEDIUM}
             colorScheme={ButtonColor.PURPLE}
             className="flex-grow"
+            onClick={() => handleSelectedPosition(position)}
           >
             Select position
           </Button>
@@ -75,7 +78,7 @@ function PositionSelectItem({
         <div className="flex items-center gap-1">
           <Tooltip text="Tooltip text" /> Assets 12/16
         </div>
-        {assets.map((asset) => (
+        {position.assets?.map((asset: string) => (
           <PositionAsset key={asset} amount={12.22} symbol={asset} />
         ))}
       </div>
@@ -84,6 +87,12 @@ function PositionSelectItem({
 }
 
 export function SelectedPositionInfo() {
+  const { marginSwapPosition } = useMarginSwapPositionStore();
+
+  if (!marginSwapPosition) {
+    return null;
+  }
+
   return (
     <div className="bg-primary-bg p-5 rounded-3">
       <div className="flex justify-between mb-3">
@@ -93,10 +102,13 @@ export function SelectedPositionInfo() {
         </Link>
       </div>
       <div className="grid gap-2.5">
-        <PositionDetailCard title="ID" value={"12121212"} tooltipText="Tooltip text" />
+        <PositionDetailCard title="ID" value={marginSwapPosition.id} tooltipText="Tooltip text" />
         <PositionDetailCard
           title="Deadline"
-          value={new Date(Date.now()).toLocaleString("en-US").toString()}
+          value={new Date(marginSwapPosition.deadline * 1000)
+            .toLocaleString("en-GB")
+            .split("/")
+            .join(".")}
           tooltipText="Tooltip text"
         />
         <div className="bg-tertiary-bg rounded-3 p-5">
@@ -119,6 +131,15 @@ export default function SelectPositionDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
+  const { setMarginSwapPosition } = useMarginSwapPositionStore();
+
+  const { address } = useAccount();
+  const { loading, positions } = usePositionsByOwner({ owner: address });
+
+  if (loading || !positions) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
@@ -131,21 +152,16 @@ export default function SelectPositionDialog() {
             onChange={(e) => setSearchValue(e.target.value)}
           />
           <div className="grid gap-5 mt-5">
-            <PositionSelectItem
-              id={287342379}
-              deadline={new Date(Date.now())}
-              assets={["USDT", "USDC"]}
-            />
-            <PositionSelectItem
-              id={287342373}
-              deadline={new Date(Date.now())}
-              assets={["USDT", "USDC"]}
-            />
-            <PositionSelectItem
-              id={28734}
-              deadline={new Date(Date.now())}
-              assets={["USDT", "USDC"]}
-            />
+            {positions.map((position) => (
+              <PositionSelectItem
+                key={position.id}
+                handleSelectedPosition={(position) => {
+                  setMarginSwapPosition(position);
+                  setIsOpen(false);
+                }}
+                position={position}
+              />
+            ))}
           </div>
         </div>
       </DrawerDialog>

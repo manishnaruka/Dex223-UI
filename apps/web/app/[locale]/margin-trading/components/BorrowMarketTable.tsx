@@ -1,10 +1,11 @@
 import clsx from "clsx";
 import Image from "next/image";
-import { useCallback, useState } from "react";
-import React from "react";
+import React, { useCallback, useRef, useState } from "react";
+import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
 
 import { LendingOrder, useOrders } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { useBorrowMarketFilterStore } from "@/app/[locale]/margin-trading/stores/useBorrowMarketFilterStore";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
@@ -12,24 +13,45 @@ import IconButton, {
   IconSize,
   SortingType,
 } from "@/components/buttons/IconButton";
+import { formatFloat } from "@/functions/formatFloat";
 import { Link } from "@/i18n/routing";
+
+type SortingField =
+  | "currencyLimit"
+  | "interestRate"
+  | "leverage"
+  | "balance"
+  | "duration"
+  | "collateralTokens"
+  | "tradableTokens"
+  | "minLoan";
 
 export function HeaderItem({
   isFirst = false,
   label,
   sorting,
   handleSort,
+  sortable = true,
+  field,
 }: {
   isFirst?: boolean;
   label: string;
-  handleSort?: () => void;
+  handleSort?: (field: SortingField) => void;
   sorting: SortingType;
+  sortable?: boolean;
+  field: SortingField;
 }) {
   return (
     <div
       role={handleSort && "button"}
-      onClick={handleSort}
-      className={clsx("h-[60px] flex items-center relative -left-3 mb-2", isFirst && "pl-2")}
+      onClick={() => {
+        if (handleSort) handleSort(field);
+      }}
+      className={clsx(
+        "h-[60px] flex items-center relative mb-2  text-tertiary-text",
+        isFirst && "pl-6",
+        handleSort && "-left-3",
+      )}
     >
       {handleSort && (
         <IconButton
@@ -58,208 +80,254 @@ type Order = {
   period: number | [number, number];
 };
 
-const testData: Order[] = [
-  {
-    token: { name: "AAVE", minAmount: 100, maxAmount: 1000 },
-    interest: 5,
-    leverage: 2,
-    limit: 6,
-    collateralTokens: 3,
-    tradableTokens: 22,
-    period: 4,
-  },
-  {
-    token: { name: "DOGE", minAmount: 1000, maxAmount: 10000 },
-    interest: 51,
-    leverage: 6,
-    limit: 4,
-    collateralTokens: 32,
-    tradableTokens: 6,
-    period: [3, 5],
-  },
-  {
-    token: { name: "SOL", minAmount: 52, maxAmount: 88 },
-    interest: 10,
-    leverage: 10,
-    limit: 4,
-    collateralTokens: 2421,
-    tradableTokens: 67,
-    period: [2, 8],
-  },
-  {
-    token: { name: "XDAI", minAmount: 667, maxAmount: 8823 },
-    interest: 25,
-    leverage: 6,
-    limit: 3,
-    collateralTokens: 144,
-    tradableTokens: 24,
-    period: 34,
-  },
-  {
-    token: { name: "RADIX", minAmount: 76.4, maxAmount: 817.23 },
-    interest: 15,
-    leverage: 14,
-    limit: 4,
-    collateralTokens: 1414,
-    tradableTokens: 357,
-    period: [30, 48],
-  },
-  {
-    token: { name: "SHIBDOGE", minAmount: 25, maxAmount: 182 },
-    interest: 5,
-    leverage: 12,
-    limit: 5,
-    collateralTokens: 175,
-    tradableTokens: 100356,
-    period: 30,
-  },
-  {
-    token: { name: "BTTC", minAmount: 2671.2, maxAmount: 827.5 },
-    interest: 8,
-    leverage: 10,
-    limit: 5,
-    collateralTokens: 26,
-    tradableTokens: 2,
-    period: 1,
-  },
-  {
-    token: { name: "AVAX", minAmount: 782, maxAmount: 2893 },
-    interest: 10,
-    leverage: 16,
-    limit: 8,
-    collateralTokens: 88,
-    tradableTokens: 33,
-    period: 13,
-  },
-  {
-    token: { name: "ONE", minAmount: 238, maxAmount: 2993 },
-    interest: 13,
-    leverage: 2,
-    limit: 4,
-    collateralTokens: 35,
-    tradableTokens: 234,
-    period: 15,
-  },
-  {
-    token: { name: "GLMR", minAmount: 782, maxAmount: 1456 },
-    interest: 5,
-    leverage: 10,
-    limit: 6,
-    collateralTokens: 1,
-    tradableTokens: 124,
-    period: [1, 3],
-  },
+const headerColumns: Array<{ field: SortingField; title: string; sortable: boolean }> = [
+  { field: "balance", title: "Order balance", sortable: true },
+  { field: "leverage", title: "Leverage", sortable: true },
+  { field: "interestRate", title: "Interest", sortable: true },
+  { field: "duration", title: "Duration", sortable: true },
+  { field: "currencyLimit", title: "Limit", sortable: true },
+  { field: "collateralTokens", title: "Collateral tokens", sortable: false },
+  { field: "tradableTokens", title: "Tradable tokens", sortable: false },
+  { field: "minLoan", title: "Min borrowing", sortable: true },
 ];
 
 export default function BorrowMarketTable() {
-  const [sorting, setSorting] = useState<SortingType>(SortingType.NONE);
+  const [sorting, setSorting] = useState<{ field: SortingField; direction: SortingType }>({
+    field: "currencyLimit",
+    direction: SortingType.NONE,
+  });
 
-  const { loading, orders } = useOrders();
+  const handleSort = useCallback(
+    (field: SortingField) => {
+      if (field === sorting.field) {
+        switch (sorting.direction) {
+          case SortingType.NONE:
+            setSorting((values) => ({ ...values, direction: SortingType.ASCENDING }));
+            return;
+          case SortingType.ASCENDING:
+            setSorting((values) => ({ ...values, direction: SortingType.DESCENDING }));
+            return;
+          case SortingType.DESCENDING:
+            setSorting((values) => ({ ...values, direction: SortingType.NONE }));
+            return;
+        }
+      } else {
+        setSorting({ field, direction: SortingType.ASCENDING });
+      }
+    },
+    [sorting],
+  );
 
-  const handleSort = useCallback(() => {
-    switch (sorting) {
-      case SortingType.NONE:
-        setSorting(SortingType.ASCENDING);
-        return;
-      case SortingType.ASCENDING:
-        setSorting(SortingType.DESCENDING);
-        return;
-      case SortingType.DESCENDING:
-        setSorting(SortingType.NONE);
-        return;
-    }
-  }, [sorting]);
+  const {
+    leverage,
+    maxInterestRatePerMonth,
+    maxPositionDuration,
+    orderCurrencyLimit,
+    minOrderBalance,
+    minLoanAmount,
+    minPositionDuration,
+  } = useBorrowMarketFilterStore();
+
+  const { loading, orders } = useOrders({
+    sortingDirection: sorting.direction,
+    orderBy: sorting.field,
+    leverage_lte: leverage,
+    currencyLimit_lte: orderCurrencyLimit || undefined,
+    duration_lte: maxPositionDuration || undefined,
+    duration_gte: minPositionDuration || undefined,
+    interestRate_lte: maxInterestRatePerMonth
+      ? (+maxInterestRatePerMonth * 100).toString()
+      : undefined,
+  });
+
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const didDrag = useRef(false);
+  const dragThreshold = 5;
 
   if (loading || !orders) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="grid rounded-2 overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(77px,1.33fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,2.67fr),_minmax(50px,2.67fr),_minmax(78px,1.67fr),_minmax(50px,max-content)] pb-2">
-      <HeaderItem label="Order balance" sorting={sorting} handleSort={handleSort} isFirst />
-      <div className="h-[60px] flex items-center relative -left-3 pr-2 pl-2">
-        <IconButton
-          variant={IconButtonVariant.DEFAULT}
-          buttonSize={IconButtonSize.SMALL}
-          iconSize={IconSize.SMALL}
-          iconName="sort"
-        />
-        Interest{" "}
-      </div>
-      <div className="h-[60px] flex items-center relative -left-3 pr-2">
-        <IconButton
-          variant={IconButtonVariant.DEFAULT}
-          buttonSize={IconButtonSize.SMALL}
-          iconSize={IconSize.SMALL}
-          iconName="sort"
-        />
-        Leverage{" "}
-      </div>
-      <div className="h-[60px] flex items-center relative -left-3 pr-2">
-        <IconButton
-          variant={IconButtonVariant.DEFAULT}
-          buttonSize={IconButtonSize.SMALL}
-          iconSize={IconSize.SMALL}
-          iconName="sort"
-        />
-        Limit{" "}
-      </div>
-      <div className=" h-[60px] flex items-center pr-2">Collateral tokens</div>
-      <div className=" h-[60px] flex items-center pr-2">Tradable tokens</div>
-      <div className=" h-[60px] flex items-center relative -left-3 pr-2">
-        <IconButton
-          variant={IconButtonVariant.DEFAULT}
-          buttonSize={IconButtonSize.SMALL}
-          iconSize={IconSize.SMALL}
-          iconName="sort"
-        />
-        Period{" "}
-      </div>
-      <div className=" h-[60px] flex items-center">Action</div>
+    <div className="grid grid-cols-[minmax(0,1fr)_300px] w-full rounded-t-2 overflow-hidden">
+      <SimpleBar
+        autoHide={false}
+        style={{ maxWidth: "100%", minWidth: "100%", width: "100%" }}
+        className="max-w-full"
+        scrollableNodeProps={{
+          onMouseDown(e: any) {
+            const el = e.currentTarget;
+            isDragging.current = true;
+            didDrag.current = false;
+            el.classList.add("is-grabbing");
 
-      {orders.map((o: LendingOrder) => {
-        return (
-          <Link
-            href={`/margin-trading/lending-order/${o.id}`}
-            className="group contents"
-            key={o.id}
-          >
-            <div className=" pl-3 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2 pl-2">
-              <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
-              <span>{formatUnits(o.balance, o.baseAsset.decimals ?? 18)}</span>
-              <span>{o.baseAsset.symbol}</span>
-            </div>
-            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {Math.floor(o.interestRate / 100)}%
-            </div>
-            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {o.leverage}x
-            </div>
-            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {o.currencyLimit}
-            </div>
-            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {o.allowedCollateralAssets.length} tokens
-            </div>
-            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {o.allowedTradingAssets.length} tokens
-            </div>
-            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-              {/*{Array.isArray(o.period)*/}
-              {/*  ? `${o.period[0]} - ${o.period[1]} days`*/}
-              {/*  : `${o.period} days`}*/}
-              {Math.floor((o.positionDuration * 100) / 24 / 60 / 60) / 100} days
-            </div>
-            <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-5">
-              <Link href={`/margin-trading/lending-order/${o.id}/borrow`}>
-                <Button colorScheme={ButtonColor.LIGHT_GREEN} size={ButtonSize.MEDIUM}>
-                  Borrow
-                </Button>
-              </Link>
-            </div>
-          </Link>
-        );
-      })}
+            startX.current = e.pageX - el.offsetLeft;
+            scrollLeft.current = el.scrollLeft;
+          },
+          onMouseMove(e: any) {
+            if (!isDragging.current) return;
+            e.preventDefault();
+            const el = e.currentTarget;
+            const x = e.pageX - el.offsetLeft;
+            const walk = x - startX.current;
+            if (Math.abs(walk) > dragThreshold) {
+              didDrag.current = true;
+            }
+            el.scrollLeft = scrollLeft.current - walk;
+          },
+          onMouseUp(e: any) {
+            isDragging.current = false;
+            e.currentTarget.classList.remove("is-grabbing");
+          },
+          onMouseLeave(e: any) {
+            isDragging.current = false;
+            e.currentTarget.classList.remove("is-grabbing");
+          },
+        }}
+      >
+        <div className="min-w-[1400px]">
+          <div className="grid overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(77px,1.33fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,2.67fr),_minmax(50px,2.67fr),_minmax(78px,1.67fr)] pb-2">
+            {headerColumns.map((columnData, index) => (
+              <HeaderItem
+                key={columnData.field}
+                label={columnData.title}
+                sorting={sorting.field === columnData.field ? sorting.direction : SortingType.NONE}
+                handleSort={!columnData.sortable ? undefined : handleSort}
+                field={columnData.field}
+                isFirst={index === 0}
+              />
+            ))}
+
+            {orders.map((o: LendingOrder) => {
+              return (
+                <Link
+                  href={`/margin-trading/lending-order/${o.id}`}
+                  className="group contents"
+                  key={o.id}
+                  onClick={(e) => {
+                    // if we dragged, cancel navigation
+                    if (didDrag.current) {
+                      e.preventDefault();
+                      didDrag.current = false;
+                    }
+                  }}
+                >
+                  <div className="pl-5 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
+                    <span>{formatUnits(o.balance, o.baseAsset.decimals ?? 18)}</span>
+                    <span>{o.baseAsset.symbol}</span>
+                  </div>
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    {o.leverage}x
+                  </div>
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    {Math.floor(o.interestRate / 100)}%
+                  </div>
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    {formatFloat(o.positionDuration / 60 / 60 / 24, { trimZero: true })} days
+                  </div>
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    {o.currencyLimit}
+                  </div>
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    <span className="flex gap-2">
+                      {o.allowedCollateralAssets.length > 2 ? (
+                        <>
+                          {o.allowedCollateralAssets.slice(0, 2).map((token) => (
+                            <span
+                              key={token.wrapped.address0}
+                              className="rounded-2 flex items-center gap-1 border border-secondary-border py-1 px-2"
+                            >
+                              {token.symbol}
+                            </span>
+                          ))}
+                          <span className="px-1 text-16 flex items-end">{"..."}</span>
+
+                          <span className="rounded-2 border border-secondary-border font-medium py-1 px-2 min-w-8 flex items-center justify-center">
+                            {o.allowedCollateralAssets.length - 2}
+                          </span>
+                        </>
+                      ) : (
+                        o.allowedCollateralAssets.map((token) => (
+                          <span
+                            key={token.wrapped.address0}
+                            className="rounded-2 flex items-center gap-1 border border-secondary-border py-1 px-2 pr-3"
+                          >
+                            {token.symbol}
+                          </span>
+                        ))
+                      )}
+                    </span>
+                  </div>
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    <span className="flex gap-2">
+                      {o.allowedTradingAssets.length > 2 ? (
+                        <>
+                          {o.allowedTradingAssets.slice(0, 2).map((token) => (
+                            <span
+                              key={token.wrapped.address0}
+                              className="rounded-2 flex items-center gap-1 border border-secondary-border py-1 px-2"
+                            >
+                              {token.symbol}
+                            </span>
+                          ))}
+                          <span className="px-1 text-16 flex items-end">{"..."}</span>
+
+                          <span className="rounded-2 border border-secondary-border font-medium py-1 px-2 min-w-8 flex items-center justify-center">
+                            {o.allowedTradingAssets.length - 2}
+                          </span>
+                        </>
+                      ) : (
+                        o.allowedTradingAssets.map((token) => (
+                          <span
+                            key={token.wrapped.address0}
+                            className="rounded-2 flex items-center gap-1 border border-secondary-border py-1 px-2"
+                          >
+                            {token.symbol}
+                          </span>
+                        ))
+                      )}
+                    </span>
+                  </div>
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
+                    {formatUnits(o.minLoan, o.baseAsset.decimals)} {o.baseAsset.symbol}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </SimpleBar>
+      <div className="h-full border-l border-secondary-border shadow-[0px_4px_40px_0px_#000000] relative z-40">
+        <div
+          className={clsx("h-[60px] flex items-center bg-quaternary-bg pl-5 text-tertiary-text")}
+        >
+          Actions
+        </div>
+        <div className="py-2.5 px-3 bg-primary-bg">
+          {orders.map((o: LendingOrder) => {
+            return (
+              <div key={o.id} className="p-2 gap-2 flex items-center">
+                <Link className={"flex-shrink-0"} href={`/margin-swap`}>
+                  <Button size={ButtonSize.MEDIUM} colorScheme={ButtonColor.LIGHT_PURPLE}>
+                    Margin swap
+                  </Button>
+                </Link>
+                <Link
+                  className={"flex-shrink-0"}
+                  href={`/margin-trading/lending-order/${o.id}/borrow`}
+                >
+                  <Button size={ButtonSize.MEDIUM} colorScheme={ButtonColor.LIGHT_GREEN}>
+                    Borrow
+                  </Button>
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 
 import BorrowMarketFilter from "@/app/[locale]/margin-trading/components/BorrowMarketFilter";
 import BorrowMarketTable from "@/app/[locale]/margin-trading/components/BorrowMarketTable";
+import FilterTags from "@/app/[locale]/margin-trading/components/FilterTags";
 import LendingOrdersTab from "@/app/[locale]/margin-trading/tabs/LendingOrdersTab";
 import MarginPositionsTab from "@/app/[locale]/margin-trading/tabs/MarginPositionsTab";
 import Container from "@/components/atoms/Container";
@@ -55,6 +56,7 @@ export default function MarginTrading() {
                   />
                 </div>
               </div>
+              <FilterTags />
 
               <BorrowMarketTable />
             </div>

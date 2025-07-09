@@ -310,11 +310,11 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
 
 .simplebar-scrollbar:before {
   background: theme("colors.primary-border") !important;
-  width: 8px !important;
 }
 
 .simplebar-track.simplebar-horizontal {
   height: 12px !important;
+  background: theme("colors.primary-bg") !important;
 }
 
 .simplebar-track.simplebar-vertical {
@@ -346,6 +346,19 @@ input[type="range"].variant-purple:focus::-moz-range-thumb {
 [data-simplebar].simplebar-dragging .simplebar-scrollbar:before {
   opacity: 1!important;
 }
+
+/*!* show a grabbing cursor when dragging *!*/
+/*.simplebar-content-wrapper.is-grabbing,*/
+/*.simplebar-content-wrapper.is-grabbing * {*/
+/*  cursor: grabbing !important;*/
+/*  cursor: -webkit-grabbing !important;*/
+/*}*/
+
+/*!* non-dragging state can still show grab *!*/
+/*.simplebar-content-wrapper {*/
+/*  cursor: grab;*/
+/*  cursor: -webkit-grab;*/
+/*}*/
 
 
 input[type="date"]::-webkit-calendar-picker-indicator,

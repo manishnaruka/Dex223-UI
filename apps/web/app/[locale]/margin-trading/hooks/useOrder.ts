@@ -3,6 +3,9 @@ import gql from "graphql-tag";
 import { useMemo } from "react";
 import { Address } from "viem";
 
+import { GqlToken, gqlTokenToCurrency } from "@/app/[locale]/margin-trading/hooks/helpers";
+import { SortingType } from "@/components/buttons/IconButton";
+import daysToSeconds from "@/functions/daysToSeconds";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useMarginModuleApolloClient from "@/hooks/useMarginModuleApolloClient";
@@ -14,8 +17,8 @@ import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
 
 const queryAllOrders = gql`
-  query GetOrders {
-    orders {
+  query GetOrders($orderBy: String, $orderDirection: String, $where: Order_filter) {
+    orders(orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
       owner
       balance
       leverage
@@ -184,6 +187,8 @@ export type MarginPosition = {
   loanAmount: bigint;
   loanAsset: Currency;
   deadline: number;
+  assets: any;
+  allowedForTradingTokens: Currency[];
 };
 
 export type LendingOrder = {
@@ -213,31 +218,6 @@ export type LendingOrder = {
 
   positions?: MarginPosition[];
 };
-
-type GqlToken = {
-  addressERC20: string;
-  addressERC223: string;
-  decimals: string;
-  id: string;
-  name: string;
-  symbol: string;
-};
-
-function gqlTokenToCurrency(gqlToken: GqlToken, chainId: DexChainId): Currency {
-  if (gqlToken.addressERC20.toLowerCase() === wrappedTokens[chainId].address0.toLowerCase()) {
-    return NativeCoin.onChain(chainId);
-  }
-
-  return new Token(
-    chainId,
-    gqlToken.addressERC20 as Address,
-    gqlToken.addressERC223 as Address,
-    +gqlToken.decimals,
-    gqlToken.symbol,
-    gqlToken.name,
-    "/images/tokens/placeholder.svg",
-  );
-}
 
 export function useOrder({ id }: { id: number }): {
   loading: boolean;
@@ -303,14 +283,63 @@ export function useOrder({ id }: { id: number }): {
   return { loading, order };
 }
 
-export function useOrders(): {
+export function useOrders({
+  sortingDirection,
+  orderBy,
+  leverage_lte,
+  currencyLimit_lte,
+  duration_lte,
+  duration_gte,
+  interestRate_lte,
+}: {
+  sortingDirection: SortingType;
+  orderBy: string;
+  leverage_lte: string;
+  currencyLimit_lte?: string;
+  duration_lte?: string;
+  duration_gte?: string;
+  interestRate_lte?: string;
+}): {
   loading: boolean;
   orders: LendingOrder[];
 } {
   const apolloClient = useMarginModuleApolloClient();
   const chainId = useCurrentChainId();
 
+  const where = useMemo(() => {
+    const f: Record<string, number> = {};
+
+    // helper to turn "" or undefined into undefined, else +string
+    const toNum = (raw?: string) => {
+      if (!raw || raw.trim() === "") return undefined;
+      const n = Number(raw);
+      return isNaN(n) ? undefined : n;
+    };
+
+    const lev = toNum(leverage_lte);
+    if (lev != null) f.leverage_lte = lev;
+
+    const curLim = toNum(currencyLimit_lte);
+    if (curLim != null) f.currencyLimit_lte = curLim;
+
+    const durL = toNum(duration_lte);
+    if (durL != null) f.duration_lte = daysToSeconds(durL);
+
+    const durG = toNum(duration_gte);
+    if (durG != null) f.duration_gte = daysToSeconds(durG);
+
+    const ir = toNum(interestRate_lte);
+    if (ir != null) f.interestRate_lte = ir;
+
+    return f;
+  }, [leverage_lte, currencyLimit_lte, duration_lte, duration_gte, interestRate_lte]);
+
   const { data, loading } = useQuery<any, any>(queryAllOrders, {
+    variables: {
+      orderBy: sortingDirection !== SortingType.NONE ? orderBy : undefined,
+      orderDirection: sortingDirection !== SortingType.NONE ? sortingDirection : undefined,
+      where,
+    },
     skip: !apolloClient,
     pollInterval: 30000,
     client: apolloClient || chainToApolloClient[DexChainId.SEPOLIA],
@@ -389,6 +418,7 @@ export function useOrdersByOwner({ owner }: { owner: Address | undefined }): {
 
     return data.orders.map((order: any) => {
       const {
+        id,
         owner,
         leverage,
         minLoan,
@@ -401,6 +431,7 @@ export function useOrdersByOwner({ owner }: { owner: Address | undefined }): {
       } = order;
 
       return {
+        id,
         owner,
         leverage,
         minLoan,

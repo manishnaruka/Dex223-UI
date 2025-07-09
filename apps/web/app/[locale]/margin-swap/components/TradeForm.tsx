@@ -7,6 +7,8 @@ import { useMediaQuery } from "react-responsive";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 
+import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapPositionStore";
+import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import SwapSettingsDialog from "@/app/[locale]/swap/components/SwapSettingsDialog";
 import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
@@ -258,6 +260,7 @@ const gasOptionTitle: Record<GasOption, any> = {
   [GasOption.FAST]: "fast",
   [GasOption.CUSTOM]: "custom",
 };
+
 export default function TradeForm() {
   const t = useTranslations("Swap");
 
@@ -275,7 +278,7 @@ export default function TradeForm() {
     tokenBStandard,
     setTokenAStandard,
     setTokenBStandard,
-  } = useSwapTokensStore();
+  } = useMarginSwapTokensStore();
   const { computed } = useSwapSettingsStore();
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
@@ -468,6 +471,8 @@ export default function TradeForm() {
 
   const { setIsOpen: setConfirmSwapDialogOpen } = useConfirmSwapDialogStore();
   const { baseFee, priorityFee, gasPrice } = useFees();
+
+  const { marginSwapPosition } = useMarginSwapPositionStore();
 
   useEffect(() => {
     updateDefaultState(chainId);
@@ -891,6 +896,7 @@ export default function TradeForm() {
         handlePick={handlePick}
         isOpen={isOpenedTokenPick}
         setIsOpen={setIsOpenedTokenPick}
+        availableTokens={marginSwapPosition?.allowedForTradingTokens}
       />
       <SwapSettingsDialog />
     </div>

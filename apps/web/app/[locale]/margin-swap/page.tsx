@@ -1,6 +1,7 @@
 "use client";
 import clsx from "clsx";
 import React from "react";
+import { useReadContract } from "wagmi";
 
 import SelectPositionDialog, {
   SelectedPositionInfo,
@@ -11,12 +12,24 @@ import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog"
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
+import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { ThemeColors } from "@/config/theme/colors";
 import { ColorSchemeProvider } from "@/lib/color-scheme";
+import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
 
 export default function MarginSwapPage() {
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
+
+  // const { data } = useReadContract({
+  //   abi: MARGIN_MODULE_ABI,
+  //   functionName: "getPositionAssets",
+  //   address: MARGIN_TRADING_ADDRESS[DexChainId.SEPOLIA],
+  //   args: [BigInt(0)],
+  // });
+  //
+  // console.log(data);
 
   return (
     <ColorSchemeProvider value={ThemeColors.PURPLE}>

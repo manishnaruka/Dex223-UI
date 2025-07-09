@@ -156,7 +156,7 @@ export default function useCreateOrder() {
         abi: MARGIN_MODULE_ABI,
         address: MARGIN_TRADING_ADDRESS[chainId],
         functionName: "addTokenlist",
-        args: [sortedAddresses, false],
+        args: [sortedAddresses, tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING],
         account: undefined,
       });
 

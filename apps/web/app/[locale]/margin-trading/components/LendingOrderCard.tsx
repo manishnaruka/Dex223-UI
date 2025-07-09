@@ -48,8 +48,17 @@ function LiquidationInfo({
   );
 }
 
-export default function LendingOrderCard({ order }: { order: LendingOrder }) {
+export default function LendingOrderCard({
+  order,
+  setOrderToDeposit,
+  setOrderToWithdraw,
+}: {
+  order: LendingOrder;
+  setOrderToDeposit: (order: LendingOrder) => void;
+  setOrderToWithdraw: (order: LendingOrder) => void;
+}) {
   console.log(order);
+
   return (
     <>
       <div className="border-4 border-green-bg rounded-5 pt-3 px-5 pb-5 bg-primary-bg">
@@ -136,8 +145,18 @@ export default function LendingOrderCard({ order }: { order: LendingOrder }) {
             </div>
             <div className="grid grid-cols-4 gap-3">
               <Button colorScheme={ButtonColor.LIGHT_GREEN}>Close</Button>
-              <Button colorScheme={ButtonColor.LIGHT_GREEN}>Deposit</Button>
-              <Button colorScheme={ButtonColor.LIGHT_GREEN}>Withdraw</Button>
+              <Button
+                onClick={() => setOrderToDeposit(order)}
+                colorScheme={ButtonColor.LIGHT_GREEN}
+              >
+                Deposit
+              </Button>
+              <Button
+                onClick={() => setOrderToWithdraw(order)}
+                colorScheme={ButtonColor.LIGHT_GREEN}
+              >
+                Withdraw
+              </Button>
               <Button colorScheme={ButtonColor.LIGHT_GREEN}>Edit</Button>
             </div>
           </div>
