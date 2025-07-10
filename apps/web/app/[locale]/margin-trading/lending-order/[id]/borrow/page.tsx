@@ -175,11 +175,21 @@ export default function BorrowPage({
                   }}
                   amount={values.collateralAmount}
                   setAmount={(collateralAmount: string) => {
-                    const C = parseFloat(collateralAmount) || 0;
-                    const L = parseFloat(values.leverage) || 1;
-                    const B = C * (L - 1);
+                    const C = parseFloat(collateralAmount) || 0; // collateral amount (in collateral‐token units)
+                    const L = parseFloat(values.leverage) || 1; // leverage factor
+                    const price = 4; // price = 4 collateral per 1 base
+
+                    // 1) If borrowAmount should be in **base**‐asset units:
+                    //    borrowBase = (collateral × (leverage−1)) ÷ price
+                    const borrowBase = (C * (L - 1)) / price;
+
+                    // 2) If borrowAmount should be in **collateral**‐asset units:
+                    //    borrowCollateral = (collateral × (leverage−1)) × price
+                    const borrowCollateral = C * (L - 1) * price;
+
+                    // choose one:
                     setFieldValue("collateralAmount", C);
-                    setFieldValue("borrowAmount", B);
+                    setFieldValue("borrowAmount", borrowBase);
                   }}
                   standard={values.collateralTokenStandard}
                   setStandard={async (standard: Standard) => {
@@ -440,135 +450,6 @@ export default function BorrowPage({
             </div>
           </Collapse>
         </div>
-        {/*{tokenA && tokenB && typedValue ? (*/}
-        {/*    <div*/}
-        {/*        className={clsx(*/}
-        {/*            "rounded-3 py-3.5 flex justify-between duration-200 px-5 bg-tertiary-bg my-5 md:items-center flex-wrap",*/}
-        {/*        )}*/}
-        {/*        role="button"*/}
-        {/*    >*/}
-        {/*        {computedGasSpending ? (*/}
-        {/*            <>*/}
-        {/*                <div className="flex flex-col justify-center">*/}
-        {/*                    <div className="flex items-center gap-1">*/}
-        {/*                        <Tooltip*/}
-        {/*                            iconSize={_isMobile ? 16 : 24}*/}
-        {/*                            text={t("network_fee_tooltip", {*/}
-        {/*                                networkName: networks.find((n) => n.chainId === chainId)?.name,*/}
-        {/*                            })}*/}
-        {/*                        />*/}
-        {/*                        <div className="text-secondary-text text-12 md:text-14 flex items-center ">*/}
-        {/*                            {t("network_fee")}*/}
-        {/*                        </div>*/}
-        {/*                        <span className="mr-1 text-12 md:hidden">*/}
-        {/*        {price && computedGasSpendingETH*/}
-        {/*            ? `$${formatFloat(+computedGasSpendingETH * price)}`*/}
-        {/*            : ""}*/}
-        {/*      </span>*/}
-        {/*                    </div>*/}
-        {/*                    <div className="flex items-center gap-2 max-sm:hidden">*/}
-        {/*      <span className="text-secondary-text text-12 md:text-14 ">*/}
-        {/*        {computedGasSpendingETH} {nativeCurrency.symbol}*/}
-        {/*      </span>*/}
-        {/*                        <span className="block h-4 w-px bg-primary-border"/>*/}
-        {/*                        <span className="text-tertiary-text mr-1 text-12 md:text-14 ">*/}
-        {/*        {computedGasSpending} GWEI*/}
-        {/*      </span>*/}
-        {/*                    </div>*/}
-        {/*                </div>*/}
-
-        {/*                <div className="flex items-center gap-2 justify-between md:justify-end">*/}
-        {/*    <span className="mr-1 text-14 max-md:hidden">*/}
-        {/*      {price && computedGasSpendingETH*/}
-        {/*          ? `$${formatFloat(+computedGasSpendingETH * price)}`*/}
-        {/*          : ""}*/}
-        {/*    </span>*/}
-        {/*                    <span*/}
-        {/*                        className="flex items-center justify-center px-2 text-12 md:text-14 h-5 rounded-20 font-500 text-tertiary-text border border-secondary-border">*/}
-        {/*      {t(gasOptionTitle[gasPriceOption])}*/}
-        {/*    </span>*/}
-        {/*                    <Button*/}
-        {/*                        size={ButtonSize.EXTRA_SMALL}*/}
-        {/*                        colorScheme={ButtonColor.LIGHT_GREEN}*/}
-        {/*                        onClick={(e) => {*/}
-        {/*                            e.stopPropagation();*/}
-        {/*                            setIsOpenedFee(true);*/}
-        {/*                        }}*/}
-        {/*                    >*/}
-        {/*                        {t("edit")}*/}
-        {/*                    </Button>*/}
-        {/*                </div>*/}
-
-        {/*                <div className="flex items-center gap-2 sm:hidden w-full mt-0.5">*/}
-        {/*    <span className="text-secondary-text text-12 md:text-14 ">*/}
-        {/*      {computedGasSpendingETH} {nativeCurrency.symbol}*/}
-        {/*    </span>*/}
-        {/*                    <span className="block h-4 w-px bg-primary-border"/>*/}
-        {/*                    <span className="text-tertiary-text mr-1 text-12 md:text-14 ">*/}
-        {/*      {computedGasSpending} GWEI*/}
-        {/*    </span>*/}
-        {/*                </div>*/}
-        {/*            </>*/}
-        {/*        ) : (*/}
-        {/*            <span className="text-secondary-text text-14 flex items-center min-h-[26px]">*/}
-        {/*  Fetching best price...*/}
-        {/*</span>*/}
-        {/*        )}*/}
-        {/*    </div>*/}
-        {/*) : (*/}
-        {/*    <div className="h-4 md:h-5"/>*/}
-        {/*)}*/}
-
-        {/*{(isLoadingSwap || isPendingSwap || isPendingApprove || isLoadingApprove) && (*/}
-        {/*    <div className="flex justify-between px-5 py-3 rounded-2 bg-tertiary-bg mb-5">*/}
-        {/*        <div className="flex items-center gap-2 text-14">*/}
-        {/*            <Preloader size={20}/>*/}
-
-        {/*            {isLoadingSwap && <span>{t("processing_swap")}</span>}*/}
-        {/*            {isPendingSwap && <span>{t("waiting_for_confirmation")}</span>}*/}
-        {/*            {isLoadingApprove && <span>{t("approving_in_progress")}</span>}*/}
-        {/*            {isPendingApprove && <span>{t("waiting_for_confirmation")}</span>}*/}
-        {/*        </div>*/}
-
-        {/*        <Button*/}
-        {/*            onClick={() => {*/}
-        {/*                if (tokenB && tokenA?.equals(tokenB)) {*/}
-        {/*                    setConfirmConvertDialogOpen(true);*/}
-        {/*                } else {*/}
-        {/*                    setConfirmSwapDialogOpen(true);*/}
-        {/*                }*/}
-        {/*            }}*/}
-        {/*            size={ButtonSize.EXTRA_SMALL}*/}
-        {/*        >*/}
-        {/*            {tokenB && tokenA?.equals(tokenB) ? "Review conversion" : t("review_swap")}*/}
-        {/*        </Button>*/}
-        {/*    </div>*/}
-        {/*)}*/}
-
-        {/*<OpenConfirmDialogButton*/}
-        {/*    isSufficientBalance={*/}
-        {/*        (tokenAStandard === Standard.ERC20 &&*/}
-        {/*            (tokenA0Balance && tokenA*/}
-        {/*                ? tokenA0Balance?.value >= parseUnits(typedValue, tokenA.decimals)*/}
-        {/*                : false)) ||*/}
-        {/*        (tokenAStandard === Standard.ERC223 &&*/}
-        {/*            (tokenA1Balance && tokenA*/}
-        {/*                ? tokenA1Balance?.value >= parseUnits(typedValue, tokenA.decimals)*/}
-        {/*                : false))*/}
-        {/*    }*/}
-        {/*    isTradeReady={Boolean(trade)}*/}
-        {/*    isTradeLoading={isLoadingTrade}*/}
-        {/*/>*/}
-
-        {/*{trade && tokenA && tokenB && (*/}
-        {/*    <SwapDetails*/}
-        {/*        trade={trade}*/}
-        {/*        tokenA={tokenA}*/}
-        {/*        tokenB={tokenB}*/}
-        {/*        networkFee={computedGasSpendingETH}*/}
-        {/*        gasPrice={computedGasSpending}*/}
-        {/*    />*/}
-        {/*)}*/}
 
         {/*<NetworkFeeConfigDialog*/}
         {/*  isAdvanced={isAdvanced}*/}

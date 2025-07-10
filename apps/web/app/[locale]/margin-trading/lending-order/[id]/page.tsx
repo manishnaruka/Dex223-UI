@@ -3,10 +3,10 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
-import Link from "next/link";
-import React, { use, useState } from "react";
+import React, { use, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 
 import {
   OrderInfoCard,
@@ -26,6 +26,7 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
+import { Link } from "@/i18n/routing";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Token } from "@/sdk_bi/entities/token";
 
@@ -56,6 +57,7 @@ export default function LendingOrder({
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
   const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
   const { id } = use(params);
+  const { address } = useAccount();
 
   const { order, loading } = useOrder({ id: +id });
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
@@ -63,7 +65,11 @@ export default function LendingOrder({
 
   const tokenLists = useTokenLists();
 
+  const isOwner = useMemo(() => {
+    return Boolean(address) && address === order?.owner;
+  }, [address, order?.owner]);
   console.log(order);
+
   if (loading || !order) {
     return <div className="text-24 p-5">Order is loading...</div>;
   }
@@ -104,10 +110,21 @@ export default function LendingOrder({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Button colorScheme={ButtonColor.LIGHT_GREEN}>Close</Button>
-              <Button>Edit</Button>
-            </div>
+            {isOwner ? (
+              <div className="flex items-center gap-3">
+                <Button colorScheme={ButtonColor.LIGHT_GREEN}>Close</Button>
+                <Button>Edit</Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link href={`/margin-trading/lending-order/${order.id}/borrow`}>
+                  <Button colorScheme={ButtonColor.LIGHT_PURPLE}>Margin swap</Button>
+                </Link>
+                <Link href={`/margin-trading/lending-order/${order.id}/borrow`}>
+                  <Button>Borrow</Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -126,35 +143,53 @@ export default function LendingOrder({
                   <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={() => setIsDepositDialogOpened(true)}
-                  className="border-green"
-                  colorScheme={ButtonColor.LIGHT_GREEN}
-                >
-                  Deposit
-                </Button>
-                <Button
-                  onClick={() => setIsWithdrawDialogOpened(true)}
-                  className="border-green"
-                  colorScheme={ButtonColor.LIGHT_GREEN}
-                >
-                  Withdraw
-                </Button>
-              </div>
-            </GradientCard>
-            <GradientCard className=" px-5 py-3 ">
-              <div className="">
-                <div className="items-center flex gap-1 text-tertiary-text">
-                  Total balance
-                  <Tooltip text="Tooltip text" />
+              {isOwner && (
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={() => setIsDepositDialogOpened(true)}
+                    className="border-green"
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                  >
+                    Deposit
+                  </Button>
+                  <Button
+                    onClick={() => setIsWithdrawDialogOpened(true)}
+                    className="border-green"
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                  >
+                    Withdraw
+                  </Button>
                 </div>
-
-                <p className="font-medium text-20">
-                  2233.34 <span className="text-secondary-text">AAVE</span>
-                </p>
-              </div>
+              )}
             </GradientCard>
+            {isOwner ? (
+              <GradientCard className=" px-5 py-3 ">
+                <div className="">
+                  <div className="items-center flex gap-1 text-tertiary-text">
+                    Total balance
+                    <Tooltip text="Tooltip text" />
+                  </div>
+
+                  <p className="font-medium text-20">
+                    2233.34 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                  </p>
+                </div>
+              </GradientCard>
+            ) : (
+              <GradientCard className=" px-5 py-3 ">
+                <div className="">
+                  <div className="items-center flex gap-1 text-tertiary-text">
+                    Min borrowing
+                    <Tooltip text="Tooltip text" />
+                  </div>
+
+                  <p className="font-medium text-20">
+                    {formatUnits(order.minLoan, order.baseAsset.decimals)}{" "}
+                    <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                  </p>
+                </div>
+              </GradientCard>
+            )}
           </div>
         </div>
 
@@ -309,7 +344,9 @@ export default function LendingOrder({
                   Tokens allowed for trading
                   <Tooltip text="Tooltip text" />
                 </h3>
-                <span className="text-20 font-medium">125 tokens</span>
+                <span className="text-20 font-medium">
+                  {order.allowedTradingAssets.length} tokens
+                </span>
               </div>
               <div>
                 <SearchInput placeholder="Token name" className="bg-primary-bg" />

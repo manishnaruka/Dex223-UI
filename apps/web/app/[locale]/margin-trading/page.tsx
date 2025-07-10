@@ -12,6 +12,7 @@ import { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import Tab from "@/components/tabs/Tab";
 import Tabs from "@/components/tabs/Tabs";
+import { Link } from "@/i18n/routing";
 
 export default function MarginTrading() {
   const [isDrawerOpened, setDrawerOpened] = useState(false);
@@ -19,7 +20,13 @@ export default function MarginTrading() {
   return (
     <div className="my-10">
       <Container>
-        <Tabs>
+        <Tabs
+          rightContent={
+            <Link href={"/margin-trading/lending-order/create"}>
+              <Button endIcon="add">New lending order</Button>
+            </Link>
+          }
+        >
           <Tab title="Borrow market">
             <div className="pt-4">
               <div className="grid grid-cols-[1fr_1fr_1fr_min-content] gap-2.5 mb-4">
