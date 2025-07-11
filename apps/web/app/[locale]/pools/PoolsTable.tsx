@@ -1,6 +1,5 @@
 import "react-loading-skeleton/dist/skeleton.css";
 
-import { SortingType } from "blog/components/buttons/IconButton";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -11,6 +10,7 @@ import { Address, getAddress } from "viem";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import { SortingType } from "@/components/buttons/IconButton";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
@@ -25,12 +25,6 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRouter } from "@/i18n/routing";
 
 import { usePoolsData } from "./hooks";
-
-const GQLSorting: { [index: number]: "asc" | "desc" | undefined } = {
-  [SortingType.NONE]: undefined,
-  [SortingType.ASCENDING]: "asc",
-  [SortingType.DESCENDING]: "desc",
-};
 
 function HeaderItem({
   isFirst = false,
@@ -419,7 +413,7 @@ export default function PoolsTable({
   const chainId = useCurrentChainId();
   const { data, loading } = usePoolsData({
     chainId,
-    orderDirection: GQLSorting[SortingType.NONE], //sorting],
+    orderDirection: undefined, //sorting],
     filter,
   });
 

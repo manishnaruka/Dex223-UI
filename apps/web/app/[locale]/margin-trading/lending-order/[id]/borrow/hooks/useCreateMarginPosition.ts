@@ -154,6 +154,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
       }
 
       if (!values.collateralToken?.isNative && !isAllowedA) {
+        // TODO: Check why allowance won't work
         setStatus(CreateMarginPositionStatus.PENDING_APPROVE_BORROW);
 
         const approveResult = await approveA({
@@ -216,14 +217,14 @@ export default function useCreateMarginPosition(order: LendingOrder) {
         functionName: "takeLoan",
         args: [
           BigInt(orderId),
-          parseUnits(values.borrowAmount.toString(), 18),
+          parseUnits(values.borrowAmount.toString(), order.baseAsset.decimals),
           BigInt(
             order.collateralAddresses.findIndex(
               (address) =>
                 values.collateralToken?.wrapped.address0.toLowerCase() === address.toLowerCase(), //TODO: ad check for erc223
             ),
           ),
-          parseUnits(values.collateralAmount.toString(), 18),
+          parseUnits(values.collateralAmount.toString(), values.collateralToken?.decimals ?? 18),
         ],
         account: undefined,
       });
@@ -251,6 +252,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
       chainId,
       isAllowedA,
       isAllowedB,
+      order.collateralAddresses,
       order.liquidationRewardAsset,
       publicClient,
       setStatus,

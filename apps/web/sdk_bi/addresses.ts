@@ -62,7 +62,7 @@ export const MARGIN_TRADING_ADDRESS: Record<DexChainId, Address> = {
 
 export const ORACLE_ADDRESS: Record<DexChainId, Address> = {
   [DexChainId.MAINNET]: ZERO_ADDRESS,
-  [DexChainId.SEPOLIA]: "0xa8fa9e2c64a45ba5bc64089104c332be056c4c83",
+  [DexChainId.SEPOLIA]: "0x7890A9fbAFD1Bed90a22b71deBE7788AC0904d8e",
   [DexChainId.BSC_TESTNET]: ZERO_ADDRESS,
   [DexChainId.EOS]: ZERO_ADDRESS,
 };

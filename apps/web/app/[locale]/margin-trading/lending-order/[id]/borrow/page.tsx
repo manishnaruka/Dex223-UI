@@ -3,9 +3,9 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import clsx from "clsx";
 import { Formik } from "formik";
 import Image from "next/image";
-import React, { use, useMemo } from "react";
-import { formatEther, formatGwei, formatUnits } from "viem";
-import { useChainId } from "wagmi";
+import React, { use, useEffect, useMemo, useState } from "react";
+import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
+import { useChainId, usePublicClient } from "wagmi";
 import * as Yup from "yup";
 
 import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
@@ -24,11 +24,14 @@ import TextField, { HelperText, InputLabel } from "@/components/atoms/TextField"
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import { ORACLE_ABI } from "@/config/abis/oracle";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
+import { DexChainId } from "@/sdk_bi/chains";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 
@@ -78,7 +81,7 @@ const schema = Yup.object({
 
 type Marks = number[];
 
-export function getMarks(max: number): Marks {
+function getMarks(max: number): Marks {
   const niceSteps = [1, 2, 5, 10, 20, 25, 50, 100];
 
   // 1. Визначаємо крок, щоб не більше 10 сегментів
@@ -113,10 +116,21 @@ export function getMarks(max: number): Marks {
   return marks;
 }
 
-console.log(getMarks(3));
+function getPrice(inputAmount: bigint, outputAmount: bigint, scale: bigint = 10n ** 18n): number {
+  return Number((outputAmount * scale) / inputAmount) / Number(scale);
+}
 
-const testOrderLeverage = 78;
-const testCollateralPrice = 4;
+function recalculateFromCollateral(collateral: number, leverage: number, price: number): number {
+  return (collateral * (leverage - 1)) / price;
+}
+
+function recalculateFromBorrow(borrow: number, leverage: number, price: number): number {
+  return (borrow * price) / (leverage - 1);
+}
+
+function recalculateLeverage(collateral: number, borrow: number, price: number): number {
+  return (borrow * price) / collateral + 1;
+}
 
 export default function BorrowPage({
   params,
@@ -128,14 +142,55 @@ export default function BorrowPage({
   const { id: orderId } = use(params);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useBorrowRecentTransactionsStore();
-  const [isDetailsExpanded, setIsDetailsExpanded] = React.useState(false);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
   const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
 
-  const { values, setValues } = useCreateMarginPositionConfigStore();
+  const { values: savedValues, setValues } = useCreateMarginPositionConfigStore();
 
   const { order, loading } = useOrder({ id: +orderId });
 
   const chainId = useCurrentChainId();
+
+  const publicClient = usePublicClient();
+  const [ratio, setRatio] = useState<number | undefined>();
+
+  useEffect(() => {
+    IIFE(async () => {
+      console.log("Fired");
+
+      if (!order?.baseAsset || !savedValues.collateralToken || !publicClient) {
+        console.log("Returned");
+
+        return;
+      }
+
+      console.log([
+        order.baseAsset.wrapped.address0,
+        savedValues.collateralToken.wrapped.address0,
+        parseUnits("1", order.baseAsset.decimals),
+      ]);
+      try {
+        const data = await publicClient.readContract({
+          address: ORACLE_ADDRESS[chainId],
+          abi: ORACLE_ABI,
+          functionName: "getAmountOut",
+          args: [
+            "0x8F5Ea3D9b780da2D0Ab6517ac4f6E697A948794f",
+            "0xEC5aa08386F4B20dE1ADF9Cdf225b71a133FfaBa",
+            BigInt(100),
+            // parseUnits("1", order.baseAsset.decimals),
+          ],
+        });
+        console.log(data);
+        const ratio = getPrice(parseUnits("1", order.baseAsset.decimals), data);
+        setRatio(ratio);
+      } catch (e) {
+        console.log(e);
+      }
+    });
+  }, [chainId, order?.baseAsset, publicClient, savedValues.collateralToken]);
+
+  console.log(ratio);
 
   if (loading || !order) {
     return "Loading...";
@@ -158,7 +213,7 @@ export default function BorrowPage({
 
         <Formik
           validationSchema={schema}
-          initialValues={values}
+          initialValues={savedValues}
           onSubmit={(values) => {
             setValues(values);
             setIsOpen(true);
@@ -171,25 +226,20 @@ export default function BorrowPage({
                   label="Collateral amount"
                   token={values.collateralToken}
                   setToken={async (token: Currency) => {
+                    setValues({ ...savedValues, collateralToken: token });
                     await setFieldValue("collateralToken", token);
                   }}
                   amount={values.collateralAmount}
                   setAmount={(collateralAmount: string) => {
-                    const C = parseFloat(collateralAmount) || 0; // collateral amount (in collateral‐token units)
-                    const L = parseFloat(values.leverage) || 1; // leverage factor
-                    const price = 4; // price = 4 collateral per 1 base
+                    const C = parseFloat(collateralAmount) || 0;
+                    const L = parseFloat(values.leverage) || 1;
 
-                    // 1) If borrowAmount should be in **base**‐asset units:
-                    //    borrowBase = (collateral × (leverage−1)) ÷ price
-                    const borrowBase = (C * (L - 1)) / price;
+                    if (ratio) {
+                      const B = recalculateFromCollateral(C, L, 1 / ratio);
+                      setFieldValue("borrowAmount", B);
+                    }
 
-                    // 2) If borrowAmount should be in **collateral**‐asset units:
-                    //    borrowCollateral = (collateral × (leverage−1)) × price
-                    const borrowCollateral = C * (L - 1) * price;
-
-                    // choose one:
                     setFieldValue("collateralAmount", C);
-                    setFieldValue("borrowAmount", borrowBase);
                   }}
                   standard={values.collateralTokenStandard}
                   setStandard={async (standard: Standard) => {
@@ -218,8 +268,11 @@ export default function BorrowPage({
                   onChange={(e) => {
                     const L = parseFloat(e.target.value) || 1;
                     const C = parseFloat(values.collateralAmount) || 0;
-                    const B = C * (L - 1);
-                    setFieldValue("borrowAmount", B);
+
+                    if (ratio) {
+                      const B = recalculateFromCollateral(C, L, 1 / ratio);
+                      setFieldValue("borrowAmount", B);
+                    }
                     setFieldValue("leverage", L);
                   }}
                 />
@@ -231,8 +284,11 @@ export default function BorrowPage({
                     onChange={(e) => {
                       const L = parseFloat(e.target.value) || 1;
                       const C = parseFloat(values.collateralAmount) || 0;
-                      const B = C * (L - 1);
-                      setFieldValue("borrowAmount", B);
+
+                      if (ratio) {
+                        const B = recalculateFromCollateral(C, L, 1 / ratio);
+                        setFieldValue("borrowAmount", B);
+                      }
                       setFieldValue("leverage", L);
                     }}
                     step={1}
@@ -282,10 +338,12 @@ export default function BorrowPage({
                 onChange={(e) => {
                   const B = parseFloat(e.target.value) || 0;
                   const L = parseFloat(values.leverage) || 1;
-                  // if L>1: C = B/(L-1), else leave C alone
-                  const C = L > 1 ? B / (L - 1) : values.collateralAmount;
-                  setFieldValue("borrowAmount", e.target.value);
-                  setFieldValue("collateralAmount", C);
+                  if (ratio) {
+                    const C = recalculateFromBorrow(B, L, 1 / ratio);
+                    setFieldValue("collateralAmount", C);
+                  }
+
+                  setFieldValue("borrowAmount", B);
                 }}
                 error={touched.borrowAmount && errors.borrowAmount}
               />
@@ -361,95 +419,98 @@ export default function BorrowPage({
               <Button type="submit" fullWidth>
                 Start borrowing now
               </Button>
+
+              <ReviewBorrowDialog orderId={orderId} order={order} />
+
+              <div className="rounded-3 bg-tertiary-bg mt-4">
+                <button
+                  onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
+                  className="flex justify-between px-5 py-3 text-secondary-text w-full"
+                >
+                  Borrow details
+                  <Svg
+                    iconName="small-expand-arrow"
+                    className={clsx("duration-200", isDetailsExpanded ? "-rotate-180" : "")}
+                  />
+                </button>
+                <Collapse open={isDetailsExpanded}>
+                  <div className="flex flex-col gap-2 mb-5 px-5 pb-5">
+                    <LendingOrderDetailsRow
+                      title="Interest rate per month"
+                      value={order.interestRate / 100}
+                      tooltipText="Tooltip text"
+                    />
+                    <LendingOrderDetailsRow
+                      title="Interest rate for the entire period"
+                      value={<span className="text-red">TODO</span>}
+                      tooltipText="Tooltip text"
+                    />
+                    <LendingOrderDetailsRow
+                      title="Max leverage"
+                      value={`${order.leverage}x`}
+                      tooltipText="Tooltip text"
+                    />
+                    <LendingOrderDetailsRow
+                      title="Leverage"
+                      value={`${values.leverage}x`}
+                      tooltipText="Tooltip text"
+                    />
+                    <LendingOrderDetailsRow
+                      title="LTV"
+                      value={<span className="text-red">TODO</span>}
+                      tooltipText="Tooltip text"
+                    />
+                    <LendingOrderDetailsRow
+                      title="Duration"
+                      value={`${order.positionDuration} days`}
+                      tooltipText="Tooltip text"
+                    />
+                    <LendingOrderDetailsRow
+                      title="Deadline"
+                      value={new Date(order.deadline)
+                        .toLocaleDateString("en-GB")
+                        .split("/")
+                        .join(".")}
+                      tooltipText="Tooltip text"
+                    />
+
+                    <LendingOrderDetailsRow
+                      title="Order currency limit"
+                      value={order.currencyLimit}
+                      tooltipText="Tooltip text"
+                    />
+
+                    <LendingOrderDetailsRow
+                      title="May initiate liquidation"
+                      value={"Anyone"}
+                      tooltipText="Tooltip text"
+                    />
+
+                    <LendingOrderDetailsRow
+                      title="Tokens allowed for trading"
+                      value={<span className="text-red">TODO</span>}
+                      tooltipText="Tooltip text"
+                    />
+                    <LendingOrderDetailsRow
+                      title="Liquidation price source"
+                      value={
+                        <ExternalTextLink
+                          text="Dex223 Market"
+                          href={getExplorerLink(
+                            ExplorerLinkType.ADDRESS,
+                            ORACLE_ADDRESS[chainId],
+                            chainId,
+                          )}
+                        />
+                      }
+                      tooltipText="Tooltip text"
+                    />
+                  </div>
+                </Collapse>
+              </div>
             </form>
           )}
         </Formik>
-
-        <ReviewBorrowDialog orderId={orderId} order={order} />
-
-        <div className="rounded-3 bg-tertiary-bg">
-          <button
-            onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
-            className="flex justify-between px-5 py-3 text-secondary-text w-full"
-          >
-            Borrow details
-            <Svg
-              iconName="small-expand-arrow"
-              className={clsx("duration-200", isDetailsExpanded ? "-rotate-180" : "")}
-            />
-          </button>
-          <Collapse open={isDetailsExpanded}>
-            <div className="flex flex-col gap-2 mb-5 px-5 pb-5">
-              <LendingOrderDetailsRow
-                title="Interest rate per month"
-                value={order.interestRate / 100}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Interest rate for the entire period"
-                value={<span className="text-red">TODO</span>}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Max leverage"
-                value={`${order.leverage}x`}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Leverage"
-                value={`${values.leverage}x`}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="LTV"
-                value={<span className="text-red">TODO</span>}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Duration"
-                value={`${order.positionDuration} days`}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Deadline"
-                value={new Date(order.deadline).toLocaleDateString("en-GB").split("/").join(".")}
-                tooltipText="Tooltip text"
-              />
-
-              <LendingOrderDetailsRow
-                title="Order currency limit"
-                value={order.currencyLimit}
-                tooltipText="Tooltip text"
-              />
-
-              <LendingOrderDetailsRow
-                title="May initiate liquidation"
-                value={"Anyone"}
-                tooltipText="Tooltip text"
-              />
-
-              <LendingOrderDetailsRow
-                title="Tokens allowed for trading"
-                value={<span className="text-red">TODO</span>}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Liquidation price source"
-                value={
-                  <ExternalTextLink
-                    text="Dex223 Market"
-                    href={getExplorerLink(
-                      ExplorerLinkType.ADDRESS,
-                      ORACLE_ADDRESS[chainId],
-                      chainId,
-                    )}
-                  />
-                }
-                tooltipText="Tooltip text"
-              />
-            </div>
-          </Collapse>
-        </div>
 
         {/*<NetworkFeeConfigDialog*/}
         {/*  isAdvanced={isAdvanced}*/}

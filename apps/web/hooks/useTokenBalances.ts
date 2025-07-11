@@ -1,20 +1,23 @@
 import { useCallback } from "react";
+import { Address } from "viem";
 import { useAccount, useBalance } from "wagmi";
 
 import { Currency } from "@/sdk_bi/entities/currency";
 
-export default function useTokenBalances(currency: Currency | undefined | null) {
-  const { address } = useAccount();
+export default function useTokenBalances(currency: Currency | undefined | null, address?: Address) {
+  const { address: userAddress } = useAccount();
+
+  const _address = address || userAddress;
 
   const { data: erc20Balance, refetch: refetch20 } = useBalance({
-    address: currency ? address : undefined,
+    address: currency ? _address : undefined,
     token: currency && !currency.isNative ? currency.address0 : undefined,
     query: {
       enabled: Boolean(currency),
     },
   });
   const { data: erc223Balance, refetch: refetch223 } = useBalance({
-    address: currency ? address : undefined,
+    address: currency ? _address : undefined,
     token: currency && !currency.isNative ? currency.address1 : undefined,
     query: {
       enabled: Boolean(currency),
