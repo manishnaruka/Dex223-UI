@@ -2,21 +2,26 @@
 import clsx from "clsx";
 import React from "react";
 
+import ConfirmMarginSwapDialog from "@/app/[locale]/margin-swap/components/ConfirmMarginSwapDialog";
 import SelectPositionDialog, {
   SelectedPositionInfo,
 } from "@/app/[locale]/margin-swap/components/SelectPositionDialog";
 import TradeForm from "@/app/[locale]/margin-swap/components/TradeForm";
+import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import ConfirmConvertDialog from "@/app/[locale]/swap/components/ConfirmConvertDialog";
 import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
+import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
+import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import { ThemeColors } from "@/config/theme/colors";
 import { ColorSchemeProvider } from "@/lib/color-scheme";
 
 export default function MarginSwapPage() {
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
+  const { tokenA, tokenB, reset: resetTokens } = useMarginSwapTokensStore();
 
   // const { data } = useReadContract({
   //   abi: MARGIN_MODULE_ABI,
@@ -60,13 +65,10 @@ export default function MarginSwapPage() {
               <SelectedPositionInfo />
 
               <TradeForm />
-              {/*<SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />*/}
+              <SelectedTokensInfo tokenA={tokenA} tokenB={tokenB} />
             </div>
           </div>
         </div>
-
-        <ConfirmSwapDialog trade={null} />
-        <ConfirmConvertDialog />
       </Container>
     </ColorSchemeProvider>
   );

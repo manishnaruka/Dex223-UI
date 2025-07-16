@@ -3,9 +3,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { formatUnits } from "viem";
 
-import MarginPositionCard, {
-  LendingPositionCard,
-} from "@/app/[locale]/margin-trading/components/MarginPositionCard";
+import { LendingPositionCard } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
@@ -52,10 +50,12 @@ export default function LendingOrderCard({
   order,
   setOrderToDeposit,
   setOrderToWithdraw,
+  setOrderToToggle,
 }: {
   order: LendingOrder;
   setOrderToDeposit: (order: LendingOrder) => void;
   setOrderToWithdraw: (order: LendingOrder) => void;
+  setOrderToToggle: (order: LendingOrder) => void;
 }) {
   console.log(order);
 
@@ -144,7 +144,9 @@ export default function LendingOrderCard({
               />
             </div>
             <div className="grid grid-cols-4 gap-3">
-              <Button colorScheme={ButtonColor.LIGHT_GREEN}>Close</Button>
+              <Button onClick={() => setOrderToToggle(order)} colorScheme={ButtonColor.LIGHT_GREEN}>
+                Close
+              </Button>
               <Button
                 onClick={() => setOrderToDeposit(order)}
                 colorScheme={ButtonColor.LIGHT_GREEN}
@@ -157,7 +159,9 @@ export default function LendingOrderCard({
               >
                 Withdraw
               </Button>
-              <Button colorScheme={ButtonColor.LIGHT_GREEN}>Edit</Button>
+              <Link href={`/margin-trading/lending-order/${order.id}/edit`}>
+                <Button colorScheme={ButtonColor.LIGHT_GREEN}> Edit</Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -193,6 +197,7 @@ export default function LendingOrderCard({
                 liquidationFee={2}
                 liquidationCost={10}
                 position={position}
+                order={order}
               />
             </>
           ))}

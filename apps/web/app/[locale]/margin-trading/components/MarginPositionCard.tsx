@@ -2,9 +2,10 @@ import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Link from "next/link";
-import { ReactNode, useMemo } from "react";
+import React, { ReactNode, useMemo } from "react";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
+import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 
@@ -190,12 +191,6 @@ const marginPositionCardBorderMap: Record<DangerStatus, string> = {
   [DangerStatus.DANGEROUS]: "border border-red-light shadow shadow-red-light/60",
 };
 
-const progressBarBackgroundMap: Record<DangerStatus, string> = {
-  [DangerStatus.STABLE]: "bg-gradient-progress-bar-green",
-  [DangerStatus.RISKY]: "bg-gradient-progress-bar-yellow",
-  [DangerStatus.DANGEROUS]: "bg-gradient-progress-bar-red",
-};
-
 export default function MarginPositionCard({
   totalBalance,
   expectedBalance,
@@ -283,15 +278,12 @@ export default function MarginPositionCard({
           totalBalance={totalBalance}
           expectedBalance={expectedBalance}
         />
-        {/*<MarginPositionInfoCard />*/}
-        {/*<MarginPositionInfoCard />*/}
-        {/*<MarginPositionInfoCard />*/}
       </div>
 
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">
         <div className="flex justify-between">
           <span className="text-tertiary-text flex items-center gap-2">
-            Assets: 12/16
+            Assets: {position.assets.length} / {position.currencyLimit} tokens
             <Tooltip text="Tooltip text" />
           </span>
           <span className="flex items-center gap-2 py-2 text-secondary-text">
@@ -301,14 +293,9 @@ export default function MarginPositionCard({
         </div>
 
         <div className="flex gap-2">
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
+          {position.assets.map((asset, index) => (
+            <PositionAsset amount={0.0} symbol={asset.symbol || "Unknown"} key={index} />
+          ))}
         </div>
       </div>
 
@@ -341,17 +328,7 @@ export default function MarginPositionCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 mb-1">
-        <div className="text-secondary-text">04.05.2024 08:20:00 AM</div>
-        <div className="text-center text-18 ">37%</div>
-        <div className="text-secondary-text text-right">04.05.2024 08:20:00 AM</div>
-      </div>
-      <div className="bg-secondary-bg h-5 relative">
-        <div
-          className={clsx("absolute h-full left-0 top-0", progressBarBackgroundMap[cardStatus])}
-          style={{ width: "33%" }}
-        />
-      </div>
+      <PositionProgressBar position={position} />
     </div>
   );
 }
@@ -362,7 +339,8 @@ export function LendingPositionCard({
   liquidationFee,
   liquidationCost,
   position,
-}: Props) {
+  order,
+}: Props & { order: LendingOrder }) {
   const balanceStatus: DangerStatus = useMemo(() => {
     if (totalBalance < expectedBalance) {
       return DangerStatus.DANGEROUS;
@@ -451,7 +429,7 @@ export function LendingPositionCard({
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">
         <div className="flex justify-between">
           <span className="text-tertiary-text flex items-center gap-2">
-            Assets: 12/16
+            Assets: {position.assets.length} / {order.currencyLimit}
             <Tooltip text="Tooltip text" />
           </span>
           <span className="flex items-center gap-2 py-2 text-secondary-text">
@@ -461,14 +439,13 @@ export function LendingPositionCard({
         </div>
 
         <div className="flex gap-2">
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
-          <PositionAsset amount={12.22} symbol={"USDT"} />
+          {position.assets?.map((asset) => (
+            <PositionAsset
+              key={asset.wrapped.address0}
+              amount={12.22}
+              symbol={asset.symbol || "Unknown"}
+            />
+          ))}
         </div>
       </div>
 
@@ -495,17 +472,7 @@ export function LendingPositionCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 mb-1">
-        <div className="text-secondary-text">04.05.2024 08:20:00 AM</div>
-        <div className="text-center text-18 ">37%</div>
-        <div className="text-secondary-text text-right">04.05.2024 08:20:00 AM</div>
-      </div>
-      <div className="bg-secondary-bg h-5 relative">
-        <div
-          className={clsx("absolute h-full left-0 top-0", progressBarBackgroundMap[cardStatus])}
-          style={{ width: "33%" }}
-        />
-      </div>
+      <PositionProgressBar dangerStatus={cardStatus} position={position} />
     </div>
   );
 }

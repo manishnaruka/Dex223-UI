@@ -76,10 +76,14 @@ function PositionSelectItem({
 
       <div className="bg-primary-bg rounded-3 p-5 flex flex-wrap gap-2">
         <div className="flex items-center gap-1">
-          <Tooltip text="Tooltip text" /> Assets 12/16
+          <Tooltip text="Tooltip text" /> Assets {position.assets.length}/{position.currencyLimit}
         </div>
-        {position.assets?.map((asset: string) => (
-          <PositionAsset key={asset} amount={12.22} symbol={asset} />
+        {position.assets?.map((asset) => (
+          <PositionAsset
+            key={asset.wrapped.address0}
+            amount={12.22}
+            symbol={asset.symbol || "Unknown"}
+          />
         ))}
       </div>
     </div>
@@ -114,11 +118,17 @@ export function SelectedPositionInfo() {
         <div className="bg-tertiary-bg rounded-3 p-5">
           <div className="flex items-center gap-1 w-full text-tertiary-text mb-2">
             <Tooltip text="Tooltip text" /> <span>Assets:</span>
-            <span className="text-secondary-text">12 / 16</span>
+            <span className="text-secondary-text">
+              {marginSwapPosition.assets.length || 0} / {marginSwapPosition.currencyLimit}
+            </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {["USDT", "USDC"].map((asset) => (
-              <PositionAsset key={asset} amount={12.22} symbol={asset} />
+            {marginSwapPosition.assets?.map((asset) => (
+              <PositionAsset
+                key={asset.wrapped.address0}
+                amount={12.22}
+                symbol={asset.symbol || "Unknown"}
+              />
             ))}
           </div>
         </div>{" "}

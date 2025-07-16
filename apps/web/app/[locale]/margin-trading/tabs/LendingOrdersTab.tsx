@@ -6,12 +6,15 @@ import { LendingOrder, useOrdersByOwner } from "@/app/[locale]/margin-trading/ho
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
 import { SearchInput } from "@/components/atoms/Input";
 
+import OrderCloseDialog from "../lending-order/[id]/components/OrderCloseDialog";
+
 export default function LendingOrdersTab() {
   const { address } = useAccount();
   const { orders } = useOrdersByOwner({ owner: address });
 
   const [orderToDeposit, setOrderToDeposit] = useState<LendingOrder | undefined>();
   const [orderToWithdraw, setOrderToWithdraw] = useState<LendingOrder | undefined>();
+  const [orderToToggle, setOrderToToggle] = useState<LendingOrder | undefined>();
 
   if (!orders) {
     return <div>Loading...</div>;
@@ -33,10 +36,19 @@ export default function LendingOrdersTab() {
             order={order}
             setOrderToDeposit={setOrderToDeposit}
             setOrderToWithdraw={setOrderToWithdraw}
+            setOrderToToggle={setOrderToToggle}
           />
         ))}
       </div>
 
+      {orderToToggle && (
+        <OrderCloseDialog
+          isOpen={Boolean(orderToToggle)}
+          setIsOpen={() => setOrderToToggle(undefined)}
+          orderId={orderToToggle.id}
+          order={orderToToggle}
+        />
+      )}
       {orderToDeposit && (
         <OrderDepositDialog
           isOpen={Boolean(orderToDeposit)}

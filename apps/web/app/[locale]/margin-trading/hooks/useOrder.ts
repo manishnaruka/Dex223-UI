@@ -113,6 +113,20 @@ const queryOwner = gql(`
         loanAmount
         owner
         id
+        createdAt
+        assets {
+          address
+          balance
+          id
+        }
+        assetsTokens {
+          addressERC20
+          addressERC223
+          decimals
+          id
+          name
+          symbol
+        }
       }
       whitelist {
        allowedForTradingTokens {
@@ -187,8 +201,18 @@ export type MarginPosition = {
   loanAmount: bigint;
   loanAsset: Currency;
   deadline: number;
-  assets: any;
+  assetAddresses: {
+    address: Address;
+    balance: bigint;
+    assetId: number;
+  }[];
+  assets: Currency[];
+  allowedForTradingAddresses: Address[];
   allowedForTradingTokens: Currency[];
+  currencyLimit: number;
+  isAllowedErc223Trading: boolean;
+  orderId: number;
+  createdAt: number;
 };
 
 export type LendingOrder = {
@@ -458,6 +482,11 @@ export function useOrdersByOwner({ owner }: { owner: Address | undefined }): {
             loanAmount: position.loanAmount,
             loanAsset: gqlTokenToCurrency(order.baseAssetToken, chainId),
             deadline: position.deadline,
+            createdAt: position.createdAt,
+            assetAddresses: position.assets,
+            assets: position.assetsTokens.map((tradingToken: GqlToken) =>
+              gqlTokenToCurrency(tradingToken, chainId),
+            ),
           };
         }),
       };

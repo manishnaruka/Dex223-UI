@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Address } from "viem";
 
 import { GqlToken, gqlTokenToCurrency } from "@/app/[locale]/margin-trading/hooks/helpers";
-import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useMarginModuleApolloClient from "@/hooks/useMarginModuleApolloClient";
@@ -16,10 +16,66 @@ const queryOwner = gql(`
       owner
       loanAmount
       deadline
-      assets
+      assets {
+        address
+        balance
+        id
+      }
+      assetsTokens {
+        addressERC20
+        addressERC223
+        decimals
+        id
+        name
+        symbol
+      }
       id
+      createdAt
       order {
+        id
+        currencyLimit
         whitelist {
+          allowedForTrading
+          allowedForTradingTokens {
+            addressERC20
+            addressERC223
+            decimals
+            id
+            name
+            symbol
+          }
+        }
+      }
+    }
+  }
+`);
+
+const queryById = gql(`
+  query GetPosition($id: ID!) {
+    position(id: $id) {
+      owner
+      loanAmount
+      deadline
+      assets {
+        address
+        balance
+        id
+      }
+      assetsTokens {
+        addressERC20
+        addressERC223
+        decimals
+        id
+        name
+        symbol
+      }
+      id
+      createdAt
+      order {
+        id
+        currencyLimit
+        whitelist {
+          allowedForTrading
           allowedForTradingTokens {
             addressERC20
             addressERC223
@@ -56,20 +112,78 @@ export function usePositionsByOwner({ owner }: { owner: Address | undefined }): 
     }
 
     return data.positions.map((position: any) => {
-      const { owner, loanAmount, deadline, assets, id, order } = position;
+      console.log(position);
+      const { createdAt, owner, loanAmount, deadline, assets, assetsTokens, id, order } = position;
 
       return {
         owner,
         deadline,
         loanAmount,
-        assets,
+        assetAddresses: assets,
+        assets: assetsTokens.map((tradingToken: GqlToken) =>
+          gqlTokenToCurrency(tradingToken, chainId),
+        ),
+        isAllowedErc223Trading:
+          order.whitelist.allowedForTrading.length !==
+          order.whitelist.allowedForTradingTokens.length,
         id,
+        allowedForTradingAddresses: order.whitelist.allowedForTrading,
         allowedForTradingTokens: order.whitelist.allowedForTradingTokens.map(
           (tradingToken: GqlToken) => gqlTokenToCurrency(tradingToken, chainId),
         ),
+        currencyLimit: order.currencyLimit,
+        createdAt,
       };
     });
   }, [chainId, data]);
 
   return { loading, positions };
+}
+
+export default function useMarginPositionById({ id }: { id: string }): {
+  loading: boolean;
+  position: MarginPosition;
+} {
+  const apolloClient = useMarginModuleApolloClient();
+  const chainId = useCurrentChainId();
+
+  const { data, loading } = useQuery<any, any>(queryById, {
+    variables: {
+      id,
+    },
+    skip: !apolloClient || !id,
+    pollInterval: 30000,
+    client: apolloClient || chainToApolloClient[DexChainId.SEPOLIA],
+  });
+
+  const position = useMemo(() => {
+    if (!data) {
+      return data;
+    }
+
+    const { createdAt, owner, loanAmount, deadline, assets, assetsTokens, id, order } =
+      data.position;
+
+    return {
+      owner,
+      deadline,
+      loanAmount,
+      assetAddresses: assets,
+      assets: assetsTokens.map((tradingToken: GqlToken) =>
+        gqlTokenToCurrency(tradingToken, chainId),
+      ),
+      isAllowedErc223Trading:
+        order.whitelist.allowedForTrading.length !== order.whitelist.allowedForTradingTokens.length,
+      id,
+      allowedForTradingAddresses: order.whitelist.allowedForTrading,
+      allowedForTradingTokens: order.whitelist.allowedForTradingTokens.map(
+        (tradingToken: GqlToken) => gqlTokenToCurrency(tradingToken, chainId),
+      ),
+      currencyLimit: order.currencyLimit,
+      orderId: order.id,
+      createdAt,
+    };
+  }, [chainId, data]);
+
+  return { loading, position };
 }

@@ -1,18 +1,18 @@
 import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
-import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { NumericFormat } from "react-number-format";
 import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
+import useMarginSwap from "@/app/[locale]/margin-swap/hooks/useMarginSwap";
+import { useConfirmMarginSwapDialogStore } from "@/app/[locale]/margin-swap/stores/useConfirmMarginSwapDialogOpened";
+import { useMarginSwapAmountsStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapAmountsStore";
+import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
-import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
-import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
+import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import {
   useSwapGasLimitStore,
   useSwapGasPriceStore,
@@ -23,14 +23,11 @@ import {
   SwapStatus,
   useSwapStatusStore,
 } from "@/app/[locale]/swap/stores/useSwapStatusStore";
-import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { networks } from "@/config/networks";
 import { clsxMerge } from "@/functions/clsxMerge";
@@ -204,11 +201,11 @@ function SwapActionButton({
   isEditApproveActive: boolean;
 }) {
   const t = useTranslations("Swap");
-  const { tokenA, tokenB, tokenAStandard } = useSwapTokensStore();
-  const { typedValue } = useSwapAmountsStore();
-  const { setIsOpen } = useConfirmSwapDialogStore();
+  const { tokenA, tokenB, tokenAStandard } = useMarginSwapTokensStore();
+  const { typedValue } = useMarginSwapAmountsStore();
+  const { setIsOpen } = useConfirmMarginSwapDialogStore();
 
-  const { handleSwap } = useSwap();
+  const { handleMarginSwap } = useMarginSwap();
 
   const {
     isPendingApprove,
@@ -374,8 +371,13 @@ function SwapActionButton({
   }
 
   return (
-    <Button disabled={isEditApproveActive} onClick={() => handleSwap(amountToApprove)} fullWidth>
-      {t("confirm_swap")}
+    <Button
+      colorScheme={ButtonColor.PURPLE}
+      disabled={isEditApproveActive}
+      onClick={() => handleMarginSwap()}
+      fullWidth
+    >
+      Confirm margin swap
     </Button>
   );
 }
@@ -406,9 +408,9 @@ function ReadonlyTokenAmountCard({
           />
           {token?.symbol}
           {token?.isNative ? (
-            <Badge color="green" text={"Native"} />
+            <Badge color="purple" text={"Native"} />
           ) : (
-            <Badge variant={BadgeVariant.STANDARD} standard={standard} />
+            <Badge color="purple" variant={BadgeVariant.STANDARD} standard={standard} />
           )}
         </div>
       </div>
@@ -417,7 +419,7 @@ function ReadonlyTokenAmountCard({
   );
 }
 
-export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, any> | null }) {
+export default function ConfirmMarginSwapDialog({ trade }: { trade: Trade<any, any, any> | null }) {
   const t = useTranslations("Swap");
   const {
     tokenA,
@@ -425,11 +427,11 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
     tokenAStandard,
     tokenBStandard,
     reset: resetTokens,
-  } = useSwapTokensStore();
-  const { typedValue, reset: resetAmounts } = useSwapAmountsStore();
+  } = useMarginSwapTokensStore();
+  const { typedValue, reset: resetAmounts } = useMarginSwapAmountsStore();
   const chainId = useCurrentChainId();
 
-  const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
+  const { isOpen, setIsOpen } = useConfirmMarginSwapDialogStore();
 
   console.log("Trade", trade);
 
@@ -559,215 +561,136 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
           onClose={() => {
             setIsOpen(false);
           }}
-          title={t("review_swap")}
+          title={"Review margin swap"}
         />
         <div className="card-spacing">
-          {!isSettledSwap && !isRevertedApprove && (
-            <div className="flex flex-col gap-3">
-              <ReadonlyTokenAmountCard
-                token={tokenA}
-                amount={typedValue}
-                amountUSD={priceA ? formatFloat(priceA * +typedValue) : ""}
-                standard={tokenAStandard}
-                title={t("you_pay")}
-              />
-              <ReadonlyTokenAmountCard
-                token={tokenB}
-                amount={output}
-                amountUSD={priceB ? formatFloat(priceB * +output) : ""}
-                standard={tokenBStandard}
-                title={t("you_receive")}
-              />
-            </div>
-          )}
-          {(isSettledSwap || isRevertedApprove) && (
-            <div>
-              <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
-                {(isRevertedSwap || isRevertedApprove) && <EmptyStateIcon iconName="warning" />}
+          {/*{!isSettledSwap && !isRevertedApprove && (*/}
+          <div className="flex flex-col gap-3">
+            <ReadonlyTokenAmountCard
+              token={tokenA}
+              amount={typedValue}
+              amountUSD={priceA ? formatFloat(priceA * +typedValue) : ""}
+              standard={tokenAStandard}
+              title={t("you_pay")}
+            />
+            <ReadonlyTokenAmountCard
+              token={tokenB}
+              amount={output}
+              amountUSD={priceB ? formatFloat(priceB * +output) : ""}
+              standard={tokenBStandard}
+              title={t("you_receive")}
+            />
+          </div>
+          {/*)}*/}
+          {/*{(isSettledSwap || isRevertedApprove) && (*/}
+          {/*  <div>*/}
+          {/*    <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">*/}
+          {/*      {(isRevertedSwap || isRevertedApprove) && <EmptyStateIcon iconName="warning" />}*/}
 
-                {isSuccessSwap && (
-                  <>
-                    <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
-                    <Svg
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
-                      iconName={"success"}
-                      size={65}
-                    />
-                  </>
-                )}
-              </div>
+          {/*      {isSuccessSwap && (*/}
+          {/*        <>*/}
+          {/*          <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />*/}
+          {/*          <Svg*/}
+          {/*            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"*/}
+          {/*            iconName={"success"}*/}
+          {/*            size={65}*/}
+          {/*          />*/}
+          {/*        </>*/}
+          {/*      )}*/}
+          {/*    </div>*/}
 
-              <div className="flex justify-center">
-                <span className="text-20 font-bold text-primary-text mb-1">
-                  {isRevertedSwap && t("swap_failed")}
-                  {isSuccessSwap && t("successful_swap")}
-                  {isRevertedApprove && "Approve failed"}
-                </span>
-              </div>
+          {/*    <div className="flex justify-center">*/}
+          {/*      <span className="text-20 font-bold text-primary-text mb-1">*/}
+          {/*        {isRevertedSwap && t("swap_failed")}*/}
+          {/*        {isSuccessSwap && t("successful_swap")}*/}
+          {/*        {isRevertedApprove && "Approve failed"}*/}
+          {/*      </span>*/}
+          {/*    </div>*/}
 
-              <div className="flex justify-center gap-2 items-center">
-                <Image
-                  src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
-                  alt=""
-                  width={24}
-                  height={24}
-                />
-                <span>
-                  {typedValue} {tokenA?.symbol}
-                </span>
-                <Svg className="text-tertiary-text" iconName="next" />
-                <Image
-                  src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
-                  alt=""
-                  width={24}
-                  height={24}
-                />
-                <span>
-                  {output} {tokenB?.symbol}
-                </span>
-              </div>
-            </div>
-          )}
-          {!isProcessing && (
-            <div className="pb-4 flex flex-col gap-2 rounded-b-3 text-14 mt-4">
-              <SwapDetailsRow
-                title={t("network_fee")}
-                value={
-                  <div>
-                    <span className="text-secondary-text mr-1 text-14">
-                      {computedGasSpending} GWEI
-                    </span>{" "}
-                    <span className="mr-1 text-14">
-                      {priceNative && `~$${formatFloat(priceNative * +computedGasSpending)}`}
-                    </span>
-                  </div>
-                }
-                tooltipText={t("network_fee_tooltip", {
-                  networkName: networks.find((n) => n.chainId === chainId)?.name,
-                })}
-              />
-              <SwapDetailsRow
-                title={t("minimum_received")}
-                value={
-                  trade
-                    ?.minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
-                    .toSignificant() || "Loading..."
-                }
-                tooltipText={t("minimum_received_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("price_impact")}
-                value={trade ? `${formatFloat(trade.priceImpact.toSignificant())}%` : "Loading..."}
-                tooltipText={t("price_impact_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("trading_fee")}
-                value={
-                  typedValue && Boolean(+typedValue) && tokenA
-                    ? `${(+typedValue * 0.3) / 100} ${tokenA.symbol}`
-                    : "Loading..."
-                }
-                tooltipText={t("trading_fee_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("order_routing")}
-                value={t("direct_swap")}
-                tooltipText={t("route_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("maximum_slippage")}
-                value={`${slippage}%`}
-                tooltipText={t("maximum_slippage_tooltip")}
-              />
-              <SwapDetailsRow
-                title={t("gas_limit")}
-                value={
-                  customGasLimit
-                    ? customGasLimit.toString()
-                    : (estimatedGas + BigInt(30000)).toString() || "Loading..."
-                }
-                tooltipText={t("gas_limit_tooltip")}
-              />
-
-              {tokenA?.isToken && tokenAStandard === Standard.ERC20 && !isAllowedA && (
-                <div
-                  className={clsx(
-                    "bg-tertiary-bg rounded-3 flex items-center px-5 py-2 min-h-12 mt-2 gap-2",
-                    +amountToApprove < +typedValue && "sm:pb-[26px]",
-                  )}
-                >
-                  <div className="sm:items-center sm:justify-between sm:gap-5 flex-grow flex flex-col gap-1 sm:flex-row">
-                    <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap sm:flex-row-reverse">
-                      <span>Approve amount</span>
-                      <Tooltip
-                        text={
-                          "In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
-                        }
-                      />
-                    </div>
-
-                    {!isEditApproveActive ? (
-                      <span>
-                        {amountToApprove} {tokenA.symbol}
-                      </span>
-                    ) : (
-                      <div className="flex-grow">
-                        <div className="relative w-full flex-grow">
-                          <NumericFormat
-                            inputMode="decimal"
-                            allowedDecimalSeparators={[","]}
-                            isError={+amountToApprove < +typedValue}
-                            className="h-8 pl-3"
-                            value={amountToApprove}
-                            onValueChange={(values) => {
-                              setAmountToApprove(values.value);
-                            }}
-                            customInput={Input}
-                            allowNegative={false}
-                            type="text"
-                          />
-                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
-                            {tokenA.symbol}
-                          </span>
-                        </div>
-                        {+amountToApprove < +typedValue && (
-                          <span className="text-red-light sm:absolute text-12 sm:translate-y-0.5">
-                            Must be higher or equal {typedValue}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center">
-                    {!isEditApproveActive ? (
-                      <Button
-                        size={ButtonSize.EXTRA_SMALL}
-                        mobileSize={ButtonSize.SMALL}
-                        colorScheme={ButtonColor.LIGHT_GREEN}
-                        onClick={() => setEditApproveActive(true)}
-                        className="!rounded-20"
-                      >
-                        Edit
-                      </Button>
-                    ) : (
-                      <Button
-                        disabled={+amountToApprove < +typedValue}
-                        size={ButtonSize.EXTRA_SMALL}
-                        mobileSize={ButtonSize.SMALL}
-                        colorScheme={ButtonColor.LIGHT_GREEN}
-                        onClick={() => setEditApproveActive(false)}
-                        className="!rounded-20 disabled:bg-quaternary-bg"
-                      >
-                        Save
-                      </Button>
-                    )}
-                  </div>
+          {/*    <div className="flex justify-center gap-2 items-center">*/}
+          {/*      <Image*/}
+          {/*        src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}*/}
+          {/*        alt=""*/}
+          {/*        width={24}*/}
+          {/*        height={24}*/}
+          {/*      />*/}
+          {/*      <span>*/}
+          {/*        {typedValue} {tokenA?.symbol}*/}
+          {/*      </span>*/}
+          {/*      <Svg className="text-tertiary-text" iconName="next" />*/}
+          {/*      <Image*/}
+          {/*        src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}*/}
+          {/*        alt=""*/}
+          {/*        width={24}*/}
+          {/*        height={24}*/}
+          {/*      />*/}
+          {/*      <span>*/}
+          {/*        {output} {tokenB?.symbol}*/}
+          {/*      </span>*/}
+          {/*    </div>*/}
+          {/*  </div>*/}
+          {/*)}*/}
+          <div className="pb-4 flex flex-col gap-2 rounded-b-3 text-14 mt-4">
+            <SwapDetailsRow
+              title={t("network_fee")}
+              value={
+                <div>
+                  <span className="text-secondary-text mr-1 text-14">
+                    {computedGasSpending} GWEI
+                  </span>{" "}
+                  <span className="mr-1 text-14">
+                    {priceNative && `~$${formatFloat(priceNative * +computedGasSpending)}`}
+                  </span>
                 </div>
-              )}
-            </div>
-          )}
-          {isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}
+              }
+              tooltipText={t("network_fee_tooltip", {
+                networkName: networks.find((n) => n.chainId === chainId)?.name,
+              })}
+            />
+            <SwapDetailsRow
+              title={t("minimum_received")}
+              value={
+                trade
+                  ?.minimumAmountOut(new Percent(slippage * 100, 10000), dependentAmount)
+                  .toSignificant() || "Loading..."
+              }
+              tooltipText={t("minimum_received_tooltip")}
+            />
+            <SwapDetailsRow
+              title={t("price_impact")}
+              value={trade ? `${formatFloat(trade.priceImpact.toSignificant())}%` : "Loading..."}
+              tooltipText={t("price_impact_tooltip")}
+            />
+            <SwapDetailsRow
+              title={t("trading_fee")}
+              value={
+                typedValue && Boolean(+typedValue) && tokenA
+                  ? `${(+typedValue * 0.3) / 100} ${tokenA.symbol}`
+                  : "Loading..."
+              }
+              tooltipText={t("trading_fee_tooltip")}
+            />
+            <SwapDetailsRow
+              title={t("order_routing")}
+              value={t("direct_swap")}
+              tooltipText={t("route_tooltip")}
+            />
+            <SwapDetailsRow
+              title={t("maximum_slippage")}
+              value={`${slippage}%`}
+              tooltipText={t("maximum_slippage_tooltip")}
+            />
+            <SwapDetailsRow
+              title={t("gas_limit")}
+              value={
+                customGasLimit
+                  ? customGasLimit.toString()
+                  : (estimatedGas + BigInt(30000)).toString() || "Loading..."
+              }
+              tooltipText={t("gas_limit_tooltip")}
+            />
+          </div>
+          {/*{isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}*/}
           <SwapActionButton
             isEditApproveActive={isEditApproveActive}
             amountToApprove={amountToApprove}

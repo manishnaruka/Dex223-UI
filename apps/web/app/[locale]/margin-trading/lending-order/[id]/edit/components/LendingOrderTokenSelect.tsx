@@ -30,7 +30,7 @@ export default function LendingOrderTokenSelect({
   setAmount: (amount: string) => void;
   standard: Standard;
   setStandard: (standard: Standard) => Promise<void>;
-  errors?: string[];
+  errors: string[];
   label?: string;
   setIsEnoughBalance?: (isEnoughBalance: boolean) => void;
   tokens?: Currency[];
@@ -53,6 +53,24 @@ export default function LendingOrderTokenSelect({
     refetch: refetchBalance,
   } = useTokenBalances(token);
 
+  useEffect(() => {
+    if (!token || !token0Balance || !token1Balance || !setIsEnoughBalance) {
+      return;
+    }
+
+    if (
+      (standard === Standard.ERC20 &&
+        parseUnits(amount, token.decimals ?? 18) > token0Balance.value) ||
+      (standard === Standard.ERC223 &&
+        parseUnits(amount, token.decimals ?? 18) > token1Balance.value)
+    ) {
+      setIsEnoughBalance(false);
+      return;
+    } else {
+      setIsEnoughBalance(true);
+    }
+  }, [amount, setIsEnoughBalance, standard, token, token0Balance, token1Balance]);
+
   const { data: blockNumber } = useScopedBlockNumber();
 
   useEffect(() => {
@@ -63,7 +81,7 @@ export default function LendingOrderTokenSelect({
     <div className="">
       <InputLabel inputSize={InputSize.LARGE} label={label} tooltipText="Tooltip text" />
       <TokenInput
-        isError={false}
+        isError={!!errors.length}
         handleClick={() => {
           setIsOpenedTokenPick(true);
         }}
@@ -88,7 +106,7 @@ export default function LendingOrderTokenSelect({
         availableTokens={tokens}
       />
       <div className="mb-4">
-        <HelperText helperText={helperText} />
+        <HelperText helperText={helperText} error={errors[0]} />
       </div>
     </div>
   );

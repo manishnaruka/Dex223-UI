@@ -97,12 +97,19 @@ export const computePoolAddressDex = async ({
   cachedKeys.add(key);
 
   try {
+    console.log("Factory: " + FACTORY_ADDRESS[chainId]);
+    console.log(
+      "Address 1/ Address / Tier: " + addressTokenA + " / " + addressTokenB + " / " + tier,
+    );
+
     const poolContract = await readContract(config, {
       abi: FACTORY_ABI,
       address: FACTORY_ADDRESS[chainId],
       functionName: "getPool",
       args: [addressTokenA, addressTokenB, tier],
     });
+
+    console.log("Pool contract from node: " + poolContract);
     cachedKeys.delete(key);
     return poolContract;
   } catch (e) {

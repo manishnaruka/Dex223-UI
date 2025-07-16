@@ -5,10 +5,14 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { use } from "react";
 import SimpleBar from "simplebar-react";
+import { lightlinkPegasus } from "viem/chains";
 
 import { HeaderItem } from "@/app/[locale]/margin-trading/components/BorrowMarketTable";
+import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
+import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
+import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
@@ -19,6 +23,7 @@ import IconButton, {
   IconSize,
   SortingType,
 } from "@/components/buttons/IconButton";
+import truncateMiddle from "@/functions/truncateMiddle";
 
 function MarginPositionInfoCard() {
   return (
@@ -179,7 +184,23 @@ function TokenBadge() {
   );
 }
 
-export default function MarginPosition() {
+export default function MarginPosition({
+  params,
+}: {
+  params: Promise<{
+    id: string;
+  }>;
+}) {
+  const { id: positionId } = use(params);
+
+  const { position, loading } = useMarginPositionById({ id: positionId });
+
+  console.log(position);
+
+  if (loading || !position) {
+    return "Loading";
+  }
+
   return (
     <div className="py-10">
       <Container>
@@ -194,13 +215,17 @@ export default function MarginPosition() {
 
         <div className="flex items-center gap-3 mb-5">
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
-            Owner: <ExternalTextLink text="0x53D8...3BC52B" href="#" />
+            Owner:{" "}
+            <ExternalTextLink
+              text={truncateMiddle(position.owner, { charsFromEnd: 6, charsFromStart: 6 })}
+              href="#"
+            />
           </div>
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
-            Margin position ID: <span className="text-secondary-text">287342379</span>
+            Margin position ID: <span className="text-secondary-text">{position.id}</span>
           </div>
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
-            Lending order ID: <ExternalTextLink text="287342379" href="#" />
+            Lending order ID: <ExternalTextLink text={position.orderId.toString()} href="#" />
           </div>
         </div>
 
@@ -259,19 +284,7 @@ export default function MarginPosition() {
             <MarginPositionInfoCard />
             <MarginPositionInfoCard />
           </div>
-          <div className="mt-2">
-            <div className="grid grid-cols-3 mb-1">
-              <div className="text-secondary-text">04.05.2024 08:20:00 AM</div>
-              <div className="text-center text-18 ">37%</div>
-              <div className="text-secondary-text text-right">04.05.2024 08:20:00 AM</div>
-            </div>
-            <div className="bg-secondary-bg h-5 relative">
-              <div
-                className={clsx("absolute h-full left-0 top-0 bg-gradient-progress-bar-green")}
-                style={{ width: "33%" }}
-              />
-            </div>
-          </div>
+          <PositionProgressBar position={position} />
         </div>
 
         <div className="bg-primary-bg rounded-5 px-10 pt-4 pb-5 flex flex-col gap-3 mb-5">
@@ -284,7 +297,9 @@ export default function MarginPosition() {
                   Assets
                   <Tooltip text="Tooltip text" />
                 </h3>
-                <span className="text-20 font-medium text-secondary-text">4/16 tokens</span>
+                <span className="text-20 font-medium text-secondary-text">
+                  {position.assets.length} / {position.currencyLimit} tokens
+                </span>
               </div>
               <div>
                 <SearchInput placeholder="Token name" className="bg-primary-bg" />
@@ -293,9 +308,13 @@ export default function MarginPosition() {
 
             <SimpleBar style={{ maxHeight: 216 }}>
               <div className="flex gap-1 flex-wrap">
-                {[...Array(4)].map((v, index) => {
-                  return <TokenBadge key={index} />;
-                })}
+                {position.assets?.map((asset) => (
+                  <PositionAsset
+                    key={asset.wrapped.address0}
+                    amount={12.22}
+                    symbol={asset.symbol || "Unknown"}
+                  />
+                ))}
               </div>
             </SimpleBar>
           </div>

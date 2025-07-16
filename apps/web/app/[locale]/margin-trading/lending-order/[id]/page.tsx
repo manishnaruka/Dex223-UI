@@ -2,6 +2,7 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
+import { add } from "dexie";
 import Image from "next/image";
 import React, { use, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
@@ -13,6 +14,7 @@ import {
   PositionInfoCardProps,
 } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import OrderCloseDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderCloseDialog";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
 import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
 import Container from "@/components/atoms/Container";
@@ -55,6 +57,7 @@ export default function LendingOrder({
   }>;
 }) {
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
+  const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
   const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
   const { id } = use(params);
   const { address } = useAccount();
@@ -66,9 +69,12 @@ export default function LendingOrder({
   const tokenLists = useTokenLists();
 
   const isOwner = useMemo(() => {
-    return Boolean(address) && address === order?.owner;
-  }, [address, order?.owner]);
-  console.log(order);
+    if (!address || !order) {
+      return false;
+    }
+
+    return address.toLowerCase() === order?.owner.toLowerCase();
+  }, [address, order]);
 
   if (loading || !order) {
     return <div className="text-24 p-5">Order is loading...</div>;
@@ -112,7 +118,12 @@ export default function LendingOrder({
 
             {isOwner ? (
               <div className="flex items-center gap-3">
-                <Button colorScheme={ButtonColor.LIGHT_GREEN}>Close</Button>
+                <Button
+                  onClick={() => setIsCloseDialogOpened(true)}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                >
+                  Close
+                </Button>
                 <Button>Edit</Button>
               </div>
             ) : (
@@ -430,6 +441,12 @@ export default function LendingOrder({
         orderId={id}
         isOpen={isWithdrawDialogOpened}
         setIsOpen={setIsWithdrawDialogOpened}
+        order={order}
+      />
+      <OrderCloseDialog
+        orderId={id}
+        isOpen={isCloseDialogOpened}
+        setIsOpen={setIsCloseDialogOpened}
         order={order}
       />
       <DrawerDialog isOpen={!!tokenForPortfolio} setIsOpen={() => setTokenForPortfolio(null)}>

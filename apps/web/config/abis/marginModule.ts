@@ -115,8 +115,9 @@ export const MARGIN_MODULE_ABI = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "bytes32", name: "", type: "bytes32" },
-      { indexed: false, internalType: "address[]", name: "", type: "address[]" },
+      { indexed: true, internalType: "bytes32", name: "hash", type: "bytes32" },
+      { indexed: false, internalType: "bool", name: "is_contract", type: "bool" },
+      { indexed: false, internalType: "address[]", name: "tokens", type: "address[]" },
     ],
     name: "TokenlistAdded",
     type: "event",
@@ -198,7 +199,7 @@ export const MARGIN_MODULE_ABI = [
   {
     inputs: [{ internalType: "uint256", name: "_orderId", type: "uint256" }],
     name: "getCollaterals",
-    outputs: [{ internalType: "address[]", name: "", type: "address[]" }],
+    outputs: [{ internalType: "address[]", name: "_collaterals", type: "address[]" }],
     stateMutability: "view",
     type: "function",
   },
@@ -238,6 +239,16 @@ export const MARGIN_MODULE_ABI = [
     type: "function",
   },
   {
+    inputs: [
+      { internalType: "uint256", name: "_positionId", type: "uint256" },
+      { internalType: "uint24[]", name: "_feeTiers", type: "uint24[]" },
+    ],
+    name: "getPositionActualPools",
+    outputs: [{ internalType: "address[]", name: "_pools", type: "address[]" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [{ internalType: "uint256", name: "id", type: "uint256" }],
     name: "getPositionAssets",
     outputs: [{ internalType: "address[]", name: "", type: "address[]" }],
@@ -248,6 +259,16 @@ export const MARGIN_MODULE_ABI = [
     inputs: [{ internalType: "uint256", name: "id", type: "uint256" }],
     name: "getPositionBalances",
     outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "positionId", type: "uint256" }],
+    name: "getPositionStatus",
+    outputs: [
+      { internalType: "uint256", name: "expected_balance", type: "uint256" },
+      { internalType: "uint256", name: "actual_balance", type: "uint256" },
+    ],
     stateMutability: "view",
     type: "function",
   },
@@ -428,6 +449,13 @@ export const MARGIN_MODULE_ABI = [
     name: "positionDeposit",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "positionInitialCollateral",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
     type: "function",
   },
   {
