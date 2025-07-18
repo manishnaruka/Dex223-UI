@@ -7,23 +7,17 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { use, useState } from "react";
 import SimpleBar from "simplebar-react";
-import { lightlinkPegasus } from "viem/chains";
 
-import { HeaderItem } from "@/app/[locale]/margin-trading/components/BorrowMarketTable";
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
+import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
+import PositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionWithdrawDialog";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, {
-  IconButtonSize,
-  IconButtonVariant,
-  IconSize,
-  SortingType,
-} from "@/components/buttons/IconButton";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import truncateMiddle from "@/functions/truncateMiddle";
 
 function MarginPositionInfoCard() {
@@ -243,10 +237,25 @@ export default function MarginPosition({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button>Trade</Button>
-              <Button onClick={() => setIsDepositDialogOpened(true)}>Deposit</Button>
-              <Button>Withdraw</Button>
-              <Button>Close</Button>
+              <Button colorScheme={ButtonColor.LIGHT_GREEN}>Trade</Button>
+              <Button
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                onClick={() => setIsDepositDialogOpened(true)}
+              >
+                Deposit
+              </Button>
+              <Button
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                onClick={() => setIsWithdrawDialogOpened(true)}
+              >
+                Withdraw
+              </Button>
+              <Button
+                colorScheme={ButtonColor.LIGHT_GREEN}
+                onClick={() => setIsCloseDialogOpened(true)}
+              >
+                Close
+              </Button>
             </div>
           </div>
 
@@ -259,7 +268,7 @@ export default function MarginPosition({
                 </div>
 
                 <p className="font-medium text-20">
-                  1000.34 <span className="text-secondary-text">AAVE</span>
+                  1000.34 <span className="text-secondary-text">{position.loanAsset.symbol}</span>
                 </p>
               </div>
             </GradientCard>
@@ -271,7 +280,7 @@ export default function MarginPosition({
                 </div>
 
                 <p className="font-medium text-20">
-                  2233.34 <span className="text-secondary-text">AAVE</span>
+                  2233.34 <span className="text-secondary-text">{position.loanAsset.symbol}</span>
                 </p>
               </div>
             </GradientCard>
@@ -383,6 +392,18 @@ export default function MarginPosition({
         isOpen={isDepositDialogOpened}
         setIsOpen={setIsDepositDialogOpened}
         position={position}
+      />
+
+      <PositionWithdrawDialog
+        isOpen={isWithdrawDialogOpened}
+        setIsOpen={setIsWithdrawDialogOpened}
+        position={position}
+      />
+
+      <PositionCloseDialog
+        isOpen={isCloseDialogOpened}
+        position={position}
+        setIsOpen={setIsCloseDialogOpened}
       />
     </div>
   );

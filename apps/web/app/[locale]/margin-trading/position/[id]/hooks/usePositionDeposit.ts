@@ -4,9 +4,9 @@ import { usePublicClient, useWalletClient } from "wagmi";
 
 import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import {
-  OrderDepositStatus,
-  useDepositOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
+  PositionDepositStatus,
+  useDepositPositionStatusStore,
+} from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionDepositStatusStore";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -22,7 +22,7 @@ export default function usePositionDeposit({
   currency: Currency;
   amount: string;
 }) {
-  const { setStatus } = useDepositOrderStatusStore();
+  const { setStatus } = useDepositPositionStatusStore();
   const chainId = useCurrentChainId();
   const { data: walletClient } = useWalletClient();
 
@@ -44,29 +44,29 @@ export default function usePositionDeposit({
         return;
       }
 
-      setStatus(OrderDepositStatus.PENDING_APPROVE);
+      setStatus(PositionDepositStatus.PENDING_APPROVE);
       const approveResult = await approveA({
         customAmount: parseUnits(amountToApprove, currency.decimals ?? 18),
         // customGasSettings: gasSettings,
       });
 
       if (!approveResult?.success) {
-        setStatus(OrderDepositStatus.ERROR_APPROVE);
+        setStatus(PositionDepositStatus.ERROR_APPROVE);
         return;
       }
 
-      setStatus(OrderDepositStatus.LOADING_APPROVE);
+      setStatus(PositionDepositStatus.LOADING_APPROVE);
 
       const approveReceipt = await publicClient.waitForTransactionReceipt({
         hash: approveResult.hash,
       });
 
       if (approveReceipt.status !== "success") {
-        setStatus(OrderDepositStatus.ERROR_APPROVE);
+        setStatus(PositionDepositStatus.ERROR_APPROVE);
         return;
       }
 
-      setStatus(OrderDepositStatus.PENDING_DEPOSIT);
+      setStatus(PositionDepositStatus.PENDING_DEPOSIT);
 
       const depositOrderHash = await walletClient.writeContract({
         abi: MARGIN_MODULE_ABI,
@@ -84,14 +84,14 @@ export default function usePositionDeposit({
         ],
         account: undefined,
       });
-      setStatus(OrderDepositStatus.LOADING_DEPOSIT);
+      setStatus(PositionDepositStatus.LOADING_DEPOSIT);
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
 
       if (receipt.status === "success") {
-        setStatus(OrderDepositStatus.SUCCESS);
+        setStatus(PositionDepositStatus.SUCCESS);
       } else {
-        setStatus(OrderDepositStatus.ERROR_DEPOSIT);
+        setStatus(PositionDepositStatus.ERROR_DEPOSIT);
       }
       console.log(receipt);
 

@@ -1,6 +1,6 @@
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 
 import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
@@ -9,11 +9,19 @@ import {
   OrderDepositStatus,
   useDepositOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
+import { OrderWithdrawStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useWithdrawOrderStatusStore";
 import usePositionDeposit from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionDeposit";
+import {
+  PositionDepositStatus,
+  useDepositPositionStatusStore,
+} from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionDepositStatusStore";
+import { PositionWithdrawStatus } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionWithdrawStatusStore";
 import { ReadonlyTokenAmountCard } from "@/app/[locale]/swap/components/ConfirmConvertDialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input from "@/components/atoms/Input";
+import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import OperationStepRow, {
@@ -34,9 +42,9 @@ type StepTextMap = {
 type OperationStepConfig = {
   iconName: IconName;
   textMap: StepTextMap;
-  pending: OrderDepositStatus;
-  loading: OrderDepositStatus;
-  error: OrderDepositStatus;
+  pending: PositionDepositStatus;
+  loading: PositionDepositStatus;
+  error: PositionDepositStatus;
 };
 
 function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, string> {
@@ -53,16 +61,16 @@ function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, str
 const depositOrderSteps: OperationStepConfig[] = [
   {
     iconName: "done",
-    pending: OrderDepositStatus.PENDING_APPROVE,
-    loading: OrderDepositStatus.LOADING_APPROVE,
-    error: OrderDepositStatus.ERROR_APPROVE,
+    pending: PositionDepositStatus.PENDING_APPROVE,
+    loading: PositionDepositStatus.LOADING_APPROVE,
+    error: PositionDepositStatus.ERROR_APPROVE,
     textMap: getApproveTextMap("DAI"),
   },
   {
     iconName: "deposit",
-    pending: OrderDepositStatus.PENDING_DEPOSIT,
-    loading: OrderDepositStatus.LOADING_DEPOSIT,
-    error: OrderDepositStatus.ERROR_DEPOSIT,
+    pending: PositionDepositStatus.PENDING_DEPOSIT,
+    loading: PositionDepositStatus.LOADING_DEPOSIT,
+    error: PositionDepositStatus.ERROR_DEPOSIT,
     textMap: {
       [OperationStepStatus.IDLE]: "Deposit funds",
       [OperationStepStatus.AWAITING_SIGNATURE]: "Deposit funds",
@@ -89,9 +97,9 @@ function PositionDepositActionButton({
     amount: amountToDeposit,
   });
 
-  const { status, approveHash, depositHash } = useDepositOrderStatusStore();
+  const { status, approveHash, depositHash } = useDepositPositionStatusStore();
 
-  if (status !== OrderDepositStatus.INITIAL) {
+  if (status !== PositionDepositStatus.INITIAL) {
     return (
       <OperationRows>
         {depositOrderSteps.map((step, index) => (
@@ -107,7 +115,7 @@ function PositionDepositActionButton({
               pendingStep: step.pending,
               loadingStep: step.loading,
               errorStep: step.error,
-              successStep: OrderDepositStatus.SUCCESS,
+              successStep: PositionDepositStatus.SUCCESS,
             })}
             isFirstStep={index === 0}
           />
@@ -133,35 +141,31 @@ export default function PositionDepositDialog({
   position: MarginPosition;
 }) {
   const [isEditApproveActive, setEditApproveActive] = useState(false);
-  // const {
-  //   balance: { erc20Balance: tokenA0Balance, erc223Balance: tokenA1Balance },
-  //   refetch: refetchABalance,
-  // } = useTokenBalances(order.baseAsset);
 
-  const { status, setStatus } = useDepositOrderStatusStore();
+  const { status, setStatus } = useDepositPositionStatusStore();
   const [amountToDeposit, setAmountToDeposit] = useState("");
 
   const [amountToApprove, setAmountToApprove] = useState("");
 
   const [isAmountToApproveModified, setAmountToApproveModified] = useState(false);
-  // useEffect(() => {
-  //   if (
-  //     parseUnits(amountToApprove, order.baseAsset.decimals) <
-  //     parseUnits(amountToDeposit, order.baseAsset.decimals)
-  //   ) {
-  //     setAmountToApprove(amountToDeposit);
-  //   }
-  // }, [amountToApprove, amountToDeposit, order.baseAsset.decimals]);
+
+  const isInitialStatus = useMemo(() => status === PositionDepositStatus.INITIAL, [status]);
+  const isFinalStatus = useMemo(
+    () =>
+      status === PositionDepositStatus.SUCCESS ||
+      status === PositionDepositStatus.ERROR_DEPOSIT ||
+      status === PositionDepositStatus.ERROR_APPROVE,
+    [status],
+  );
+  const isLoadingStatus = useMemo(
+    () => !isInitialStatus && !isFinalStatus,
+    [isFinalStatus, isInitialStatus],
+  );
 
   useEffect(() => {
-    if (
-      (status === OrderDepositStatus.ERROR_APPROVE ||
-        status === OrderDepositStatus.ERROR_DEPOSIT ||
-        status === OrderDepositStatus.SUCCESS) &&
-      !isOpen
-    ) {
+    if (isFinalStatus && !isOpen) {
       setTimeout(() => {
-        setStatus(OrderDepositStatus.INITIAL);
+        setStatus(PositionDepositStatus.INITIAL);
       }, 400);
     }
   }, [isOpen, setStatus, status]);
@@ -170,7 +174,7 @@ export default function PositionDepositDialog({
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title="Deposit" />
       <div className="w-[600px] card-spacing-x card-spacing-b">
-        {status === OrderDepositStatus.INITIAL ? (
+        {isInitialStatus && (
           <>
             <p className="text-secondary-text mb-4">
               You will increase the available balance of your lending order by making a deposit
@@ -303,17 +307,50 @@ export default function PositionDepositDialog({
               </div>
             </div>
           </>
-        ) : (
+        )}
+
+        {isLoadingStatus && (
           <>
             <ReadonlyTokenAmountCard
-              token={undefined}
-              amount={"12"}
-              amountUSD={""}
-              standard={Standard.ERC223}
-              title={"Deposit amount"}
+              token={position.loanAsset}
+              amount={"Unknown"}
+              amountUSD={"0"}
+              standard={Standard.ERC20}
+              title={"Withdraw amount"}
             />
             <div className="h-px bg-secondary-border my-4" />
           </>
+        )}
+
+        {isFinalStatus && (
+          <div className="pb-1">
+            <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
+              {status === PositionDepositStatus.ERROR_DEPOSIT && (
+                <EmptyStateIcon iconName="warning" />
+              )}
+
+              {status === PositionDepositStatus.SUCCESS && (
+                <>
+                  <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
+                  <Svg
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
+                    iconName={"success"}
+                    size={65}
+                  />
+                </>
+              )}
+            </div>
+
+            {status === PositionDepositStatus.SUCCESS && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 ">Successfully deposited</h2>
+                <p className="text-center mb-1">
+                  {amountToDeposit} {position.loanAsset.symbol}
+                </p>
+              </div>
+            )}
+            <div className="my-4 border-b border-secondary-border w-full" />
+          </div>
         )}
 
         <PositionDepositActionButton

@@ -252,6 +252,8 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
+  console.log("STANDARD", standard);
+
   const { data: isWrapper } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: "isWrapper",
@@ -326,7 +328,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
 
   const { erc20AddressToImport, erc223AddressToImport, isErc20Exist, isErc223Exist } =
     useMemo(() => {
-      if (standard === 223) {
+      if (standard && +standard === 223) {
         return {
           erc20AddressToImport: predictedOtherAddress,
           erc223AddressToImport: tokenAddressToImport,
