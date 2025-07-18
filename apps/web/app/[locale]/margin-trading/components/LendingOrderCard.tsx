@@ -1,12 +1,13 @@
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import Link from "next/link";
+import React from "react";
 import { formatUnits } from "viem";
 
 import { LendingPositionCard } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import { Link } from "@/i18n/routing";
 
 function LendingOrderInfoCard({ label, value }: { label: string; value: string }) {
   return (
@@ -70,12 +71,21 @@ export default function LendingOrderCard({
             View lending order details
             <Svg iconName="next" />
           </Link>
-          <span className="text-green flex items-center gap-3 ">
-            <div className="min-w-[115px] text-green flex items-center gap-2 justify-end">
-              Active
-              <span className="block w-2 h-2 rounded-2 bg-green" />
-            </div>
-          </span>
+          {order.alive ? (
+            <span className="text-green flex items-center gap-3 ">
+              <div className="min-w-[115px] text-green flex items-center gap-2 justify-end">
+                Active
+                <span className="block w-2 h-2 rounded-2 bg-green" />
+              </div>
+            </span>
+          ) : (
+            <span className="text-tertiary-text flex items-center gap-3 ">
+              <div className="min-w-[115px] flex items-center gap-2 justify-end">
+                Closed
+                <Svg iconName="closed" />
+              </div>
+            </span>
+          )}
         </div>
         <div className="grid grid-cols-[5fr_5fr] gap-3">
           <div className="grid grid-cols-[auto_min-content] gap-3">
@@ -169,7 +179,7 @@ export default function LendingOrderCard({
       <div className="grid gap-5 grid-cols-[80px_1fr]">
         {!!order.positions?.length &&
           order.positions.map((position, index) => (
-            <>
+            <React.Fragment key={position.id}>
               <div
                 className={clsx(
                   "relative -top-[68px]",
@@ -191,15 +201,8 @@ export default function LendingOrderCard({
                 </svg>
               </div>
 
-              <LendingPositionCard
-                totalBalance={2}
-                expectedBalance={10}
-                liquidationFee={2}
-                liquidationCost={10}
-                position={position}
-                order={order}
-              />
-            </>
+              <LendingPositionCard position={position} order={order} />
+            </React.Fragment>
           ))}
       </div>
     </>

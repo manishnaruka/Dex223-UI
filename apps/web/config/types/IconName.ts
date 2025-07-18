@@ -142,6 +142,7 @@ export const svgIconsNames = [
   "youtube",
   "crypto-exchange",
   "lending",
+  "open-order",
 ] as const;
 
 export const socialIconNames = [""] as const;

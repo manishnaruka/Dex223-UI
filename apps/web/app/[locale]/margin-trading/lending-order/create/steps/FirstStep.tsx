@@ -1,6 +1,5 @@
 import { Formik } from "formik";
-import React, { useState } from "react";
-import { parseUnits } from "viem";
+import React, { useMemo, useState } from "react";
 import * as Yup from "yup";
 
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
@@ -11,14 +10,10 @@ import {
   LendingOrderPeriodType,
   PerpetualPeriodType,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
-import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
-import {
-  CreateOrderStep,
-  useCreateOrderStepStore,
-} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
+import { FirstStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
+import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonSize } from "@/components/buttons/Button";
-import { formatFloat } from "@/functions/formatFloat";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
@@ -67,27 +62,6 @@ const periodSchema = Yup.lazy((value: any) => {
     return perpetualPeriodSchema;
   }
   return Yup.mixed().notRequired(); // fallback
-});
-
-const schema = Yup.object({
-  loanToken: Yup.object().default(undefined).required("Please select a token"),
-
-  loanAmount: Yup.number()
-    .typeError("Loan amount must be a number")
-    .required("Loan amount is required")
-    .positive("Loan amount must be greater than zero"),
-
-  interestRatePerMonth: Yup.number()
-    .typeError("Interest rate must be a number")
-    .required("Please provide interest rate per month")
-    .min(0, "Interest rate cannot be negative")
-    .max(9999, "Maximum interest rate is 9999%"),
-
-  loanTokenStandard: Yup.string()
-    .oneOf([Standard.ERC20, Standard.ERC223])
-    .required("Token standard is required"),
-
-  period: periodSchema, // your conditional schema from previous step
 });
 
 export function calculateFinalAmount({
@@ -149,10 +123,17 @@ function getTokenOrAmountError({
   return errors;
 }
 
-export default function FirstStep() {
-  const { setStep } = useCreateOrderStepStore();
-
-  const { firstStepValues, setFirstStepValues } = useCreateOrderConfigStore();
+export default function FirstStep({
+  mode,
+  setStep,
+  firstStepValues,
+  setFirstStepValues,
+}: {
+  mode: OrderActionMode;
+  firstStepValues: FirstStepValues;
+  setFirstStepValues: (firstStep: FirstStepValues) => void;
+  setStep: (step: OrderActionStep) => void;
+}) {
   const {
     balance: { erc20Balance: token0Balance, erc223Balance: token1Balance },
     refetch: refetchBalance,
@@ -160,8 +141,37 @@ export default function FirstStep() {
 
   const [isEnoughBalance, setIsEnoughBalance] = useState<boolean>(true);
 
+  const schema = useMemo(() => {
+    return Yup.object({
+      loanToken: Yup.object().default(undefined).required("Please select a token"),
+
+      loanAmount: Yup.number().when([], {
+        is: () => mode === OrderActionMode.CREATE,
+        then: (schema) =>
+          schema
+            .typeError("Loan amount must be a number")
+            .required("Loan amount is required")
+            .positive("Loan amount must be greater than zero"),
+        otherwise: (schema) => schema.strip(), // completely removes the field
+      }),
+
+      interestRatePerMonth: Yup.number()
+        .typeError("Interest rate must be a number")
+        .required("Please provide interest rate per month")
+        .min(0, "Interest rate cannot be negative")
+        .max(9999, "Maximum interest rate is 9999%"),
+
+      loanTokenStandard: Yup.string()
+        .oneOf([Standard.ERC20, Standard.ERC223])
+        .required("Token standard is required"),
+
+      period: periodSchema, // your conditional schema from previous step
+    });
+  }, [mode]);
+
   return (
     <Formik
+      enableReinitialize={mode === OrderActionMode.EDIT}
       initialValues={{
         interestRatePerMonth: firstStepValues.interestRatePerMonth,
         period: firstStepValues.period,
@@ -172,7 +182,7 @@ export default function FirstStep() {
       validationSchema={schema}
       onSubmit={async (values) => {
         setFirstStepValues(values);
-        setStep(CreateOrderStep.SECOND);
+        setStep(OrderActionStep.SECOND);
       }}
     >
       {(props) => (
@@ -193,15 +203,22 @@ export default function FirstStep() {
             setStandard={async (standard: Standard) => {
               await props.setFieldValue("loanTokenStandard", standard);
             }}
-            errors={getTokenOrAmountError({
-              touchedAmount: props.touched.loanAmount,
-              touchedToken: props.touched.loanToken,
-              tokenError: props.errors.loanToken,
-              amountError: props.errors.loanAmount,
-              isEnoughBalance,
-            })}
+            errors={
+              mode === OrderActionMode.CREATE
+                ? getTokenOrAmountError({
+                    touchedAmount: props.touched.loanAmount,
+                    touchedToken: props.touched.loanToken,
+                    tokenError: props.errors.loanToken,
+                    amountError: props.errors.loanAmount,
+                    isEnoughBalance,
+                  })
+                : []
+            }
             setIsEnoughBalance={setIsEnoughBalance}
           />
+          {/*<pre>{JSON.stringify(props.values, null, 2)}</pre>*/}
+          {/*<pre>{JSON.stringify(props.errors, null, 2)}</pre>*/}
+
           <LendingOrderPeriodConfig
             setValues={(values: LendingOrderPeriod) => props.setFieldValue("period", values)}
             values={props.values.period}
@@ -231,9 +248,6 @@ export default function FirstStep() {
               value={<span className="text-red">TODO</span>}
             />
           </div>
-          {/*<pre>{JSON.stringify(props.touched, null, 2)}</pre>*/}
-          {/*<pre>{JSON.stringify(props.errors, null, 2)}</pre>*/}
-          {/*<pre>{JSON.stringify(props.values, null, 2)}</pre>*/}
 
           <Button
             disabled={

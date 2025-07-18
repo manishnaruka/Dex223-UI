@@ -5,6 +5,10 @@ import { usePublicClient, useWalletClient } from "wagmi";
 
 import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useEditOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderConfigStore";
+import {
+  EditOrderStatus,
+  useEditOrderStatusStore,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
 import { TradingTokensInputMode } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import {
   CreateOrderStatus,
@@ -75,8 +79,7 @@ export default function useEditOrder() {
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
 
-  const { setStatus, setApproveHash, setDepositHash, setConfirmOrderHash, setErrorType } =
-    useCreateOrderStatusStore();
+  const { setStatus, setModifyOrderHash } = useEditOrderStatusStore();
 
   const {
     isAllowed: isAllowedA,
@@ -122,12 +125,12 @@ export default function useEditOrder() {
   }, [baseFee, chainId, gasPrice, priorityFee, gasPriceOption, gasPriceSettings]);
 
   useEffect(() => {
-    setStatus(CreateOrderStatus.INITIAL);
+    setStatus(EditOrderStatus.INITIAL);
   }, [setStatus]);
 
   const handleEditOrder = useCallback(
     async (amountToApprove: string, order: LendingOrder) => {
-      setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
+      setStatus(EditOrderStatus.PENDING_MODIFY);
 
       if (
         !params.loanToken ||
@@ -193,19 +196,20 @@ export default function useEditOrder() {
           args: args as any,
           account: undefined,
         });
-        setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+        setStatus(EditOrderStatus.LOADING_MODIFY);
+        setModifyOrderHash(modifyOrderHash);
 
         const createOrderReceipt = await publicClient.waitForTransactionReceipt({
           hash: modifyOrderHash,
         });
 
-        setStatus(CreateOrderStatus.SUCCESS);
+        setStatus(EditOrderStatus.SUCCESS);
 
         // console.log("Receipt", receipt);
       } catch (e) {
         console.log(e);
         addToast("Unexpected error", "error");
-        setStatus(CreateOrderStatus.INITIAL);
+        setStatus(EditOrderStatus.INITIAL);
       }
 
       // await handleRunStep({
@@ -318,24 +322,19 @@ export default function useEditOrder() {
       // });
     },
     [
-      approveA,
       chainId,
-      collateralTokens,
-      gasSettings,
-      includeERC223Collateral,
       interestRatePerMonth,
       leverage,
       liquidationFeeForLiquidator,
       liquidationFeeToken,
-      loanAmount,
       loanToken,
-      loanTokenStandard,
       minimumBorrowingAmount,
       orderCurrencyLimit,
       params.loanToken,
       period.lendingOrderDeadline,
       period.positionDuration,
       publicClient,
+      setModifyOrderHash,
       setStatus,
       tradingTokens.allowedTokens,
       tradingTokens.includeERC223Trading,

@@ -1,4 +1,5 @@
 import React from "react";
+import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import MarginPositionCard from "@/app/[locale]/margin-trading/components/MarginPositionCard";
@@ -21,14 +22,7 @@ export default function MarginPositionsTab() {
       <div className="flex flex-col gap-5">
         {!!positions?.length &&
           positions.map((position, index) => (
-            <MarginPositionCard
-              key={position.id}
-              expectedBalance={100}
-              totalBalance={150}
-              liquidationFee={10}
-              liquidationCost={2}
-              position={position}
-            />
+            <MarginPositionCard key={position.id} position={position} />
           ))}
       </div>
     </>

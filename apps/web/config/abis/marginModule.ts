@@ -11,12 +11,37 @@ export const MARGIN_MODULE_ABI = [
     anonymous: false,
     inputs: [
       { indexed: true, internalType: "uint256", name: "positionId", type: "uint256" },
+      { indexed: true, internalType: "uint256", name: "orderId", type: "uint256" },
+      { indexed: true, internalType: "address", name: "liquidator", type: "address" },
+    ],
+    name: "Liquidation",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "uint256", name: "positionId", type: "uint256" },
       { indexed: false, internalType: "address", name: "assetIn", type: "address" },
       { indexed: false, internalType: "address", name: "assetOut", type: "address" },
       { indexed: false, internalType: "uint256", name: "amountIn", type: "uint256" },
       { indexed: false, internalType: "uint256", name: "amountOut", type: "uint256" },
     ],
     name: "MarginSwap",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "uint256", name: "orderId", type: "uint256" },
+      { indexed: false, internalType: "bool", name: "alive", type: "bool" },
+    ],
+    name: "OrderAliveStatus",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [{ indexed: false, internalType: "address[]", name: "collaterals", type: "address[]" }],
+    name: "OrderCollateralsSet",
     type: "event",
   },
   {
@@ -51,11 +76,11 @@ export const MARGIN_MODULE_ABI = [
       { indexed: true, internalType: "uint256", name: "orderId", type: "uint256" },
       { indexed: true, internalType: "address", name: "owner", type: "address" },
       { indexed: true, internalType: "address", name: "baseAsset", type: "address" },
+      { indexed: false, internalType: "bytes32", name: "tokenWhitelist", type: "bytes32" },
       { indexed: false, internalType: "uint256", name: "interestRate", type: "uint256" },
       { indexed: false, internalType: "uint256", name: "duration", type: "uint256" },
       { indexed: false, internalType: "uint256", name: "minLoan", type: "uint256" },
       { indexed: false, internalType: "uint8", name: "leverage", type: "uint8" },
-      { indexed: false, internalType: "bool", name: "alive", type: "bool" },
       { indexed: false, internalType: "address", name: "oracle", type: "address" },
     ],
     name: "OrderModified",
@@ -69,6 +94,15 @@ export const MARGIN_MODULE_ABI = [
       { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
     ],
     name: "OrderWithdraw",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "uint256", name: "positionId", type: "uint256" },
+      { indexed: false, internalType: "address", name: "closedBy", type: "address" },
+    ],
+    name: "PositionClosed",
     type: "event",
   },
   {
@@ -115,22 +149,22 @@ export const MARGIN_MODULE_ABI = [
   {
     anonymous: false,
     inputs: [
+      { indexed: true, internalType: "uint256", name: "positionId", type: "uint256" },
+      { indexed: true, internalType: "address", name: "asset", type: "address" },
+      { indexed: false, internalType: "uint256", name: "quantity", type: "uint256" },
+    ],
+    name: "PositionWithdrawal",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
       { indexed: true, internalType: "bytes32", name: "hash", type: "bytes32" },
       { indexed: false, internalType: "bool", name: "is_contract", type: "bool" },
       { indexed: false, internalType: "address[]", name: "tokens", type: "address[]" },
     ],
     name: "TokenlistAdded",
     type: "event",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "_orderId", type: "uint256" },
-      { internalType: "address[]", name: "collateral", type: "address[]" },
-    ],
-    name: "activateOrder",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
   },
   {
     inputs: [
@@ -381,6 +415,16 @@ export const MARGIN_MODULE_ABI = [
     name: "orderDepositWETH9",
     outputs: [],
     stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "_orderId", type: "uint256" },
+      { internalType: "address[]", name: "collateral", type: "address[]" },
+    ],
+    name: "orderSetCollaterals",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

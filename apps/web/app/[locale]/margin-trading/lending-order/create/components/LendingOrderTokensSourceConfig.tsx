@@ -6,8 +6,8 @@ import {
   LendingOrderTradingTokens,
   TradingTokensInputMode,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
-import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokenListsDialogOpened";
-import { useAllowedTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokensDialogOpened";
+import { useAllowedTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
+import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { InputSize } from "@/components/atoms/Input";
 import { InputLabel } from "@/components/atoms/TextField";
 import IconButton from "@/components/buttons/IconButton";

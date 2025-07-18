@@ -5,17 +5,15 @@ import { Formik } from "formik";
 import Image from "next/image";
 import React, { use, useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
-import { useChainId, usePublicClient } from "wagmi";
+import { usePublicClient } from "wagmi";
 import * as Yup from "yup";
 
 import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import ReviewBorrowDialog from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/components/ReviewBorrowDialog";
-import useOrderByIdFromNode from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useOrderByIdFromNode";
-import useTokenFromNode from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useTokenFromNode";
-import { useConfirmCreateMarginPositionDialogStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useConfirmCreateMarginPositionDialogOpened";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import LendingOrderTokenSelect from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderTokenSelect";
+import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { useBorrowRecentTransactionsStore } from "@/app/[locale]/margin-trading/stores/useBorrowRecentTransactionsStore";
 import Collapse from "@/components/atoms/Collapse";
 import { InputSize } from "@/components/atoms/Input";
@@ -25,13 +23,11 @@ import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { ORACLE_ABI } from "@/config/abis/oracle";
-import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
-import { DexChainId } from "@/sdk_bi/chains";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 
@@ -143,7 +139,7 @@ export default function BorrowPage({
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useBorrowRecentTransactionsStore();
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
-  const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
+  const { setIsOpen } = useConfirmBorrowPositionDialogStore();
 
   const { values: savedValues, setValues } = useCreateMarginPositionConfigStore();
 
@@ -164,6 +160,11 @@ export default function BorrowPage({
         return;
       }
 
+      if (order.baseAsset.equals(savedValues.collateralToken)) {
+        setRatio(1);
+        return;
+      }
+
       console.log([
         order.baseAsset.wrapped.address0,
         savedValues.collateralToken.wrapped.address0,
@@ -175,14 +176,16 @@ export default function BorrowPage({
           abi: ORACLE_ABI,
           functionName: "getAmountOut",
           args: [
-            "0x8F5Ea3D9b780da2D0Ab6517ac4f6E697A948794f",
-            "0xEC5aa08386F4B20dE1ADF9Cdf225b71a133FfaBa",
+            order.baseAsset.wrapped.address0,
+            savedValues.collateralToken.wrapped.address0,
             BigInt(100),
             // parseUnits("1", order.baseAsset.decimals),
           ],
         });
         console.log(data);
-        const ratio = getPrice(parseUnits("1", order.baseAsset.decimals), data);
+        const ratio = getPrice(data, BigInt(100));
+        console.log(ratio);
+
         setRatio(ratio);
       } catch (e) {
         console.log(e);

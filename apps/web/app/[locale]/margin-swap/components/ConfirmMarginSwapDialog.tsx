@@ -8,9 +8,9 @@ import { Address, formatGwei, parseUnits } from "viem";
 import { useGasPrice } from "wagmi";
 
 import useMarginSwap from "@/app/[locale]/margin-swap/hooks/useMarginSwap";
-import { useConfirmMarginSwapDialogStore } from "@/app/[locale]/margin-swap/stores/useConfirmMarginSwapDialogOpened";
 import { useMarginSwapAmountsStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapAmountsStore";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
+import { useConfirmMarginSwapDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import {

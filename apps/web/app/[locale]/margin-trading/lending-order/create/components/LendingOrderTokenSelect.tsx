@@ -30,7 +30,7 @@ export default function LendingOrderTokenSelect({
   setAmount: (amount: string) => void;
   standard: Standard;
   setStandard: (standard: Standard) => Promise<void>;
-  errors?: string[];
+  errors: string[];
   label?: string;
   setIsEnoughBalance?: (isEnoughBalance: boolean) => void;
   tokens?: Currency[];
@@ -63,7 +63,7 @@ export default function LendingOrderTokenSelect({
     <div className="">
       <InputLabel inputSize={InputSize.LARGE} label={label} tooltipText="Tooltip text" />
       <TokenInput
-        isError={false}
+        isError={!!errors.length}
         handleClick={() => {
           setIsOpenedTokenPick(true);
         }}
@@ -88,7 +88,7 @@ export default function LendingOrderTokenSelect({
         availableTokens={tokens}
       />
       <div className="mb-4">
-        <HelperText helperText={helperText} />
+        <HelperText error={errors[0]} helperText={helperText} />
       </div>
     </div>
   );

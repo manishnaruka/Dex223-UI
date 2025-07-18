@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { parseUnits } from "viem";
 
+import { useEditOrderStatusStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import useCreateOrder, {
   useCreateOrderParams,
@@ -170,7 +171,7 @@ function CreateOrderActionButton({ amountToApprove }: { amountToApprove: string 
   );
 }
 
-export default function ReviewLendingOrderDialog({
+export default function ReviewCreateOrderDialog({
   isOpen,
   setIsOpen,
 }: {

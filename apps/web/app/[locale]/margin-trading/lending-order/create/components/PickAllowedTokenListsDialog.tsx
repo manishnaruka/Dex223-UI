@@ -1,6 +1,6 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 
-import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokenListsDialogOpened";
+import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { AutoListing } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import useAutoListingContracts from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import Dialog from "@/components/atoms/Dialog";

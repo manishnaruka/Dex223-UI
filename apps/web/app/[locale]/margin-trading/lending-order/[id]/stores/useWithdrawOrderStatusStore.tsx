@@ -1,6 +1,9 @@
 import { Address } from "viem";
 import { create } from "zustand";
 
+import { OrderDepositStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
+import { createOperationStatusStore } from "@/stores/factories/createOperationStatusStore";
+
 export enum OrderWithdrawStatus {
   INITIAL,
 
@@ -16,28 +19,8 @@ export enum SwapError {
   UNKNOWN,
 }
 
-interface WithdrawStatusStore {
-  status: OrderWithdrawStatus;
-  withdrawHash: Address | undefined;
-  errorType: SwapError;
-
-  setStatus: (status: OrderWithdrawStatus) => void;
-  setErrorType: (errorType: SwapError) => void;
-  setWithdrawHash: (hash: Address) => void;
-}
-
-export const useWithdrawOrderStatusStore = create<WithdrawStatusStore>((set, get) => ({
-  status: OrderWithdrawStatus.INITIAL,
-  withdrawHash: undefined,
+export const useWithdrawOrderStatusStore = createOperationStatusStore({
+  initialStatus: OrderWithdrawStatus.INITIAL,
+  operations: ["withdraw"],
   errorType: SwapError.UNKNOWN,
-
-  setStatus: (status) => {
-    if (status === OrderWithdrawStatus.INITIAL) {
-      set({ status, withdrawHash: undefined });
-    }
-
-    set({ status });
-  },
-  setErrorType: (errorType) => set({ errorType }),
-  setWithdrawHash: (hash) => set({ withdrawHash: hash }),
-}));
+});

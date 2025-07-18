@@ -12,7 +12,7 @@ import {
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 
-type FirstStepValues = {
+export type FirstStepValues = {
   interestRatePerMonth: string;
   period: LendingOrderPeriod;
   loanToken: Currency | undefined;
@@ -20,7 +20,7 @@ type FirstStepValues = {
   loanTokenStandard: Standard;
 };
 
-type SecondStepValues = {
+export type SecondStepValues = {
   leverage: number;
   collateralTokens: Currency[];
   includeERC223Collateral: boolean;
@@ -85,7 +85,7 @@ export const useCreateOrderConfigStore = create<CreateOrderConfig>((set, get) =>
     orderCurrencyLimit: "",
     liquidationFeeToken: undefined,
     liquidationFeeForLiquidator: "",
-    liquidationFeeForLender: "",
+    liquidationFeeForLender: "0",
     priceSource: "",
   },
 

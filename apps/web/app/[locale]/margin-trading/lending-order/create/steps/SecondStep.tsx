@@ -11,28 +11,31 @@ import LendingOrderTokensSourceConfig from "@/app/[locale]/margin-trading/lendin
 import PickAllowedTokenListsDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickAllowedTokenListsDialog";
 import PickAllowedTokensDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickAllowedTokensDialog";
 import PickCollateralTokensDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickCollateralTokensDialog";
+import { LendingOrderTradingTokens } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import {
-  LendingOrderPeriod,
-  LendingOrderTradingTokens,
-} from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
-import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokenListsDialogOpened";
-import { useAllowedTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokensDialogOpened";
-import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCollateralTokensDialogOpened";
-import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
-import {
-  CreateOrderStep,
-  useCreateOrderStepStore,
-} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
-import { values } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
+  FirstStepValues,
+  SecondStepValues,
+} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
+import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
+import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import { InputSize } from "@/components/atoms/Input";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 
-export default function SecondStep() {
-  const { setStep } = useCreateOrderStepStore();
-
-  const { firstStepValues, secondStepValues, setSecondStepValues } = useCreateOrderConfigStore();
+export default function SecondStep({
+  mode,
+  setStep,
+  firstStepValues,
+  secondStepValues,
+  setSecondStepValues,
+}: {
+  mode: OrderActionMode;
+  firstStepValues: FirstStepValues;
+  secondStepValues: SecondStepValues;
+  setSecondStepValues: (secondStep: SecondStepValues) => void;
+  setStep: (step: OrderActionStep) => void;
+}) {
   const { setIsOpen: setCollateralDialogOpened } = useCollateralTokensDialogOpenedStore();
 
   return (
@@ -46,7 +49,7 @@ export default function SecondStep() {
         // const errors = await validateForm(values);
         // console.log(errors);
         setSecondStepValues(values);
-        setStep(CreateOrderStep.THIRD);
+        setStep(OrderActionStep.THIRD);
       }}
     >
       {(props) => (
@@ -199,7 +202,7 @@ export default function SecondStep() {
           <div className="grid grid-cols-2 gap-2 mt-4">
             <Button
               colorScheme={ButtonColor.LIGHT_GREEN}
-              onClick={() => setStep(CreateOrderStep.FIRST)}
+              onClick={() => setStep(OrderActionStep.FIRST)}
               size={ButtonSize.EXTRA_LARGE}
               fullWidth
             >

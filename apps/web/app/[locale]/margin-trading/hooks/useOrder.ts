@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
 import gql from "graphql-tag";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Address } from "viem";
 
 import { GqlToken, gqlTokenToCurrency } from "@/app/[locale]/margin-trading/hooks/helpers";
@@ -9,6 +9,7 @@ import daysToSeconds from "@/functions/daysToSeconds";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useMarginModuleApolloClient from "@/hooks/useMarginModuleApolloClient";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { NativeCoin } from "@/sdk_bi/entities/ether";
@@ -169,6 +170,7 @@ const queryId = gql(`
       deadline
       duration
       id
+      alive
       interestRate
       liquidationRewardAmount
       liquidationRewardAsset
@@ -191,6 +193,26 @@ const queryId = gql(`
          symbol
        }
      }
+      positions {
+        deadline
+        loanAmount
+        owner
+        id
+        createdAt
+        assets {
+          address
+          balance
+          id
+        }
+        assetsTokens {
+          addressERC20
+          addressERC223
+          decimals
+          id
+          name
+          symbol
+        }
+      }
     }
   }
 `);
@@ -213,6 +235,8 @@ export type MarginPosition = {
   isAllowedErc223Trading: boolean;
   orderId: number;
   createdAt: number;
+  liquidationRewardAmount: bigint;
+  liquidationRewardAsset: Currency;
 };
 
 export type LendingOrder = {
@@ -241,16 +265,21 @@ export type LendingOrder = {
   baseAsset: Currency;
 
   positions?: MarginPosition[];
+
+  alive: boolean;
 };
 
 export function useOrder({ id }: { id: number }): {
   loading: boolean;
   order: LendingOrder | undefined;
+  refetch: any;
 } {
   const apolloClient = useMarginModuleApolloClient();
   const chainId = useCurrentChainId();
 
-  const { data, loading } = useQuery<any, any>(queryId, {
+  const { data: blockNumber } = useScopedBlockNumber();
+
+  const { data, loading, refetch } = useQuery<any, any>(queryId, {
     variables: {
       id,
     },
@@ -258,6 +287,11 @@ export function useOrder({ id }: { id: number }): {
     pollInterval: 30000,
     client: apolloClient || chainToApolloClient[DexChainId.SEPOLIA],
   });
+
+  // useEffect(() => {
+  //   console.log("REFETCHING...");
+  //   refetch();
+  // }, [blockNumber, refetch]);
 
   const order = useMemo(() => {
     if (!data) {
@@ -275,10 +309,12 @@ export function useOrder({ id }: { id: number }): {
       interestRate,
       currencyLimit,
       balance,
+      alive,
     } = data.order;
 
     return {
       id,
+      alive,
       owner,
       leverage,
       minLoan,
@@ -301,10 +337,24 @@ export function useOrder({ id }: { id: number }): {
         data.order.liquidationRewardAsset === data.order.liquidationRewardAssetToken.addressERC20
           ? Standard.ERC20
           : Standard.ERC223,
+      positions: data.order.positions.map((position: any) => {
+        return {
+          id: position.id,
+          owner: position.owner,
+          loanAmount: position.loanAmount,
+          loanAsset: gqlTokenToCurrency(data.order.baseAssetToken, chainId),
+          deadline: position.deadline,
+          createdAt: position.createdAt,
+          assetAddresses: position.assets,
+          assets: position.assetsTokens.map((tradingToken: GqlToken) =>
+            gqlTokenToCurrency(tradingToken, chainId),
+          ),
+        };
+      }),
     };
   }, [chainId, data]);
 
-  return { loading, order };
+  return { loading, order, refetch };
 }
 
 export function useOrders({

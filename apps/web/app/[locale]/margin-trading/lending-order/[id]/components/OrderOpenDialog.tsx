@@ -3,21 +3,9 @@ import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import React, { useEffect, useMemo } from "react";
 import { formatEther, formatGwei, formatUnits } from "viem";
-import { useReadContract, useWalletClient } from "wagmi";
 
-import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
-import useOrderClose from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderClose";
-import useOrderDeposit from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderDeposit";
-import {
-  OrderCloseStatus,
-  useCloseOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useCloseOrderStatusStore";
-import {
-  OrderDepositStatus,
-  useDepositOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
-import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
+import useOrderOpen from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderOpen";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -28,11 +16,10 @@ import OperationStepRow, {
   operationStatusToStepStatus,
   OperationStepStatus,
 } from "@/components/common/OperationStepRow";
-import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { IconName } from "@/config/types/IconName";
 import { formatFloat } from "@/functions/formatFloat";
-import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
-import { DexChainId } from "@/sdk_bi/chains";
+
+import { OpenOrderStatus, useOpenOrderStatusStore } from "../stores/useOpenOrderStatusStore";
 
 type StepTextMap = {
   [key in OperationStepStatus]: string;
@@ -41,24 +28,24 @@ type StepTextMap = {
 type OperationStepConfig = {
   iconName: IconName;
   textMap: StepTextMap;
-  pending: OrderCloseStatus;
-  loading: OrderCloseStatus;
-  error: OrderCloseStatus;
+  pending: OpenOrderStatus;
+  loading: OpenOrderStatus;
+  error: OpenOrderStatus;
 };
 
 function composeDepositOrderSteps(): OperationStepConfig[] {
   return [
     {
-      iconName: "closed",
-      pending: OrderCloseStatus.PENDING_CLOSE_ORDER,
-      loading: OrderCloseStatus.LOADING_CLOSE_ORDER,
-      error: OrderCloseStatus.ERROR_CLOSE_ORDER,
+      iconName: "open-order",
+      pending: OpenOrderStatus.PENDING_OPEN_ORDER,
+      loading: OpenOrderStatus.LOADING_OPEN_ORDER,
+      error: OpenOrderStatus.ERROR_OPEN_ORDER,
       textMap: {
-        [OperationStepStatus.IDLE]: "Close lending order",
-        [OperationStepStatus.AWAITING_SIGNATURE]: "Close lending order",
-        [OperationStepStatus.LOADING]: "Closing lending order",
-        [OperationStepStatus.STEP_COMPLETED]: "Lending order closed successfully",
-        [OperationStepStatus.STEP_FAILED]: "Failed to close lending order",
+        [OperationStepStatus.IDLE]: "Open lending order",
+        [OperationStepStatus.AWAITING_SIGNATURE]: "Open lending order",
+        [OperationStepStatus.LOADING]: "Openin lending order",
+        [OperationStepStatus.STEP_COMPLETED]: "Lending order opened successfully",
+        [OperationStepStatus.STEP_FAILED]: "Failed to open lending order",
         [OperationStepStatus.OPERATION_COMPLETED]: "Lending order closed successfully",
       },
     },
@@ -66,17 +53,17 @@ function composeDepositOrderSteps(): OperationStepConfig[] {
 }
 
 function OrderCloseActionButton({ order }: { order: LendingOrder }) {
-  const { status, closeOrderHash } = useCloseOrderStatusStore();
-  const { handleOrderClose } = useOrderClose();
+  const { status, openOrderHash } = useOpenOrderStatusStore();
+  const { handleOrderOpen } = useOrderOpen();
 
-  if (status !== OrderCloseStatus.INITIAL) {
+  if (status !== OpenOrderStatus.INITIAL) {
     return (
       <OperationRows>
         {composeDepositOrderSteps().map((step, index) => (
           <OperationStepRow
             key={index}
             iconName={step.iconName}
-            hash={[closeOrderHash][index]}
+            hash={[openOrderHash][index]}
             statusTextMap={step.textMap}
             status={operationStatusToStepStatus({
               currentStatus: status,
@@ -89,7 +76,7 @@ function OrderCloseActionButton({ order }: { order: LendingOrder }) {
               pendingStep: step.pending,
               loadingStep: step.loading,
               errorStep: step.error,
-              successStep: OrderCloseStatus.SUCCESS,
+              successStep: OpenOrderStatus.SUCCESS,
             })}
             isFirstStep={index === 0}
           />
@@ -99,13 +86,13 @@ function OrderCloseActionButton({ order }: { order: LendingOrder }) {
   }
 
   return (
-    <Button onClick={() => handleOrderClose(order.id)} fullWidth>
-      Close order
+    <Button onClick={async () => await handleOrderOpen(order.id)} fullWidth>
+      Open order
     </Button>
   );
 }
 
-export default function OrderCloseDialog({
+export default function OrderOpenDialog({
   isOpen,
   setIsOpen,
   orderId,
@@ -116,11 +103,11 @@ export default function OrderCloseDialog({
   orderId: number;
   order: LendingOrder;
 }) {
-  const { status, setStatus } = useCloseOrderStatusStore();
+  const { status, setStatus } = useOpenOrderStatusStore();
 
-  const isInitialStatus = useMemo(() => status === OrderCloseStatus.INITIAL, [status]);
+  const isInitialStatus = useMemo(() => status === OpenOrderStatus.INITIAL, [status]);
   const isFinalStatus = useMemo(
-    () => status === OrderCloseStatus.SUCCESS || status === OrderCloseStatus.ERROR_CLOSE_ORDER,
+    () => status === OpenOrderStatus.SUCCESS || status === OpenOrderStatus.ERROR_OPEN_ORDER,
     [status],
   );
   const isLoadingStatus = useMemo(
@@ -130,11 +117,11 @@ export default function OrderCloseDialog({
 
   useEffect(() => {
     if (
-      (status === OrderCloseStatus.ERROR_CLOSE_ORDER || status === OrderCloseStatus.SUCCESS) &&
+      (status === OpenOrderStatus.ERROR_OPEN_ORDER || status === OpenOrderStatus.SUCCESS) &&
       !isOpen
     ) {
       setTimeout(() => {
-        setStatus(OrderCloseStatus.INITIAL);
+        setStatus(OpenOrderStatus.INITIAL);
       }, 400);
     }
   }, [isOpen, setStatus, status]);
@@ -142,7 +129,7 @@ export default function OrderCloseDialog({
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title="Close lending order" />
-      <div className="card-spacing-x card-spacing-b min-w-[600px]">
+      <div className="card-spacing-x card-spacing-b w-[600px]">
         {isInitialStatus && (
           <>
             <div className="flex items-center justify-between gap-2 mb-4">
@@ -151,9 +138,9 @@ export default function OrderCloseDialog({
                 <span className="text-secondary-text text-18 font-bold">
                   {order.baseAsset.name}
                 </span>
-                <div className="flex items-center gap-3 text-green">
-                  Active
-                  <div className="w-2 h-2 rounded-full bg-green"></div>
+                <div className="flex items-center gap-1 text-tertiary-text">
+                  Closed
+                  <Svg iconName="closed" />
                 </div>
               </div>
               <div className="text-secondary-text text-12 py-2 px-4 rounded-2 bg-tertiary-bg">
@@ -194,22 +181,10 @@ export default function OrderCloseDialog({
               </GradientCard>
             </div>
 
-            <div className="flex flex-col gap-2 my-4">
-              <SwapDetailsRow
-                tooltipText="Tooltip text"
-                title="Max leverage"
-                value={`${order.leverage}x`}
-              />
-              <SwapDetailsRow
-                tooltipText="Tooltip text"
-                title="Interest rate per month"
-                value={`${order.interestRate / 100}%`}
-              />
-              <SwapDetailsRow
-                tooltipText="Tooltip text"
-                title="Deadline"
-                value={`${timestampToDateString(order.deadline)}`}
-              />
+            <div className="flex flex-col gap-2 my-4 text-secondary-text">
+              By confirming this action, you will reactivate the lending order, allowing it to
+              continue its terms as initially agreed. Please ensure that you review the details
+              before proceeding
             </div>
             <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3 flex-col xs:flex-row">
               <div className="text-12 xs:text-14 flex items-center gap-8 justify-between xs:justify-start max-xs:w-full">
@@ -252,9 +227,9 @@ export default function OrderCloseDialog({
                 <span className="text-secondary-text text-18 font-bold">
                   {order.baseAsset.name}
                 </span>
-                <div className="flex items-center gap-3 text-green">
-                  Active
-                  <div className="w-2 h-2 rounded-full bg-green"></div>
+                <div className="flex items-center gap-1 text-tertiary-text">
+                  Closed
+                  <Svg iconName="closed" />
                 </div>
               </div>
               <div className="text-secondary-text text-12 py-2 px-4 rounded-2 bg-tertiary-bg">
@@ -300,11 +275,9 @@ export default function OrderCloseDialog({
         {isFinalStatus && (
           <div className="pb-1">
             <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
-              {status === OrderCloseStatus.ERROR_CLOSE_ORDER && (
-                <EmptyStateIcon iconName="warning" />
-              )}
+              {status === OpenOrderStatus.ERROR_OPEN_ORDER && <EmptyStateIcon iconName="warning" />}
 
-              {status === OrderCloseStatus.SUCCESS && (
+              {status === OpenOrderStatus.SUCCESS && (
                 <>
                   <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
                   <Svg
@@ -316,7 +289,7 @@ export default function OrderCloseDialog({
               )}
             </div>
 
-            {status === OrderCloseStatus.SUCCESS && (
+            {status === OpenOrderStatus.SUCCESS && (
               <div>
                 <h2 className="text-center mb-1 font-bold text-20 ">
                   Lending order closed successfully

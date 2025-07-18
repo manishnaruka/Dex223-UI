@@ -9,16 +9,19 @@ import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import useCreateMarginPosition, {
   useCreatePositionApproveSteps,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
-import { useConfirmCreateMarginPositionDialogStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useConfirmCreateMarginPositionDialogOpened";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import {
   CreateMarginPositionStatus,
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
+import { EditOrderStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
+import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input, { InputSize } from "@/components/atoms/Input";
+import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
@@ -86,101 +89,116 @@ export default function ReviewBorrowDialog({
   orderId: string;
   order: LendingOrder;
 }) {
-  const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
+  const { isOpen, setIsOpen } = useConfirmBorrowPositionDialogStore();
   const { values, setValues } = useCreateMarginPositionConfigStore();
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
     useCreateMarginPositionStatusStore();
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
   const chainId = useCurrentChainId();
 
+  const isInitialStatus = useMemo(() => status === CreateMarginPositionStatus.INITIAL, [status]);
+  const isFinalStatus = useMemo(
+    () =>
+      status === CreateMarginPositionStatus.SUCCESS ||
+      status === CreateMarginPositionStatus.ERROR_BORROW ||
+      status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW ||
+      status === CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE,
+    [status],
+  );
+  const isLoadingStatus = useMemo(
+    () => !isInitialStatus && !isFinalStatus,
+    [isFinalStatus, isInitialStatus],
+  );
+
   useEffect(() => {
-    if (
-      (status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW ||
-        status === CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE ||
-        status === CreateMarginPositionStatus.ERROR_BORROW ||
-        status === CreateMarginPositionStatus.SUCCESS) &&
-      !isOpen
-    ) {
+    if (isFinalStatus && !isOpen) {
       setTimeout(() => {
         setStatus(CreateMarginPositionStatus.INITIAL);
       }, 400);
     }
-  }, [isOpen, setStatus, status]);
+  }, [isFinalStatus, isOpen, setStatus]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title={"Review borrow"} />
 
       <div className="card-spacing-x card-spacing-b min-w-[600px]">
-        <InputLabel inputSize={InputSize.LARGE} label="You send" />
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4 text-14">
-            <p className="text-secondary-text ">Collateral</p>
-            <div className="flex items-center gap-1 items-center my-1">
-              <Image
-                className="mr-1"
-                src={"/images/tokens/placeholder.svg"}
-                alt={values.collateralToken?.symbol || "Unknown"}
-                width={20}
-                height={20}
-              />
-              <span className="">{values.collateralAmount}</span>
-              <span className="text-secondary-text">
-                {values.collateralToken?.symbol || "Unknown"}
-              </span>
-              <Badge
-                size="small"
-                variant={BadgeVariant.STANDARD}
-                standard={values.collateralTokenStandard}
-              />
+        {!isFinalStatus && (
+          <>
+            <InputLabel inputSize={InputSize.LARGE} label="You send" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4 text-14">
+                <p className="text-secondary-text ">Collateral</p>
+                <div className="flex items-center gap-1 items-center my-1">
+                  <Image
+                    className="mr-1"
+                    src={"/images/tokens/placeholder.svg"}
+                    alt={values.collateralToken?.symbol || "Unknown"}
+                    width={20}
+                    height={20}
+                  />
+                  <span className="">{values.collateralAmount}</span>
+                  <span className="text-secondary-text">
+                    {values.collateralToken?.symbol || "Unknown"}
+                  </span>
+                  <Badge
+                    size="small"
+                    variant={BadgeVariant.STANDARD}
+                    standard={values.collateralTokenStandard}
+                  />
+                </div>
+              </div>
+              <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4 text-14">
+                <p className="text-secondary-text ">Liquidation fee</p>
+                <div className="flex items-center gap-1 items-center my-1">
+                  <Image
+                    className="mr-1"
+                    src={"/images/tokens/placeholder.svg"}
+                    alt={order.liquidationRewardAsset.symbol || "Unknown"}
+                    width={20}
+                    height={20}
+                  />
+                  <span className="">
+                    {formatUnits(
+                      order.liquidationRewardAmount,
+                      order.liquidationRewardAsset.decimals,
+                    )}
+                  </span>
+                  <span className="text-secondary-text">
+                    {order.liquidationRewardAsset.symbol || "Unknown"}
+                  </span>
+                  <Badge
+                    size="small"
+                    variant={BadgeVariant.STANDARD}
+                    standard={order.liquidationRewardAssetStandard}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4 text-14">
-            <p className="text-secondary-text ">Liquidation fee</p>
-            <div className="flex items-center gap-1 items-center my-1">
-              <Image
-                className="mr-1"
-                src={"/images/tokens/placeholder.svg"}
-                alt={order.liquidationRewardAsset.symbol || "Unknown"}
-                width={20}
-                height={20}
-              />
-              <span className="">
-                {formatUnits(order.liquidationRewardAmount, order.liquidationRewardAsset.decimals)}
-              </span>
-              <span className="text-secondary-text">
-                {order.liquidationRewardAsset.symbol || "Unknown"}
-              </span>
-              <Badge
-                size="small"
-                variant={BadgeVariant.STANDARD}
-                standard={order.liquidationRewardAssetStandard}
-              />
+            <InputLabel inputSize={InputSize.LARGE} label="You receive" />
+            <div className="bg-tertiary-bg rounded-3 py-[14px] px-5 mb-4 text-14 flex items-center justify-between">
+              <p className="text-secondary-text ">Borrow</p>
+              <div className="flex items-center gap-1 items-center">
+                <Image
+                  className="mr-1"
+                  src={"/images/tokens/placeholder.svg"}
+                  alt={order.baseAsset?.symbol || "Unknown"}
+                  width={20}
+                  height={20}
+                />
+                <span className="">{values.borrowAmount}</span>
+                <span className="text-secondary-text">{order.baseAsset?.symbol || "Unknown"}</span>
+                {/*<Badge*/}
+                {/*  size="small"*/}
+                {/*  variant={BadgeVariant.STANDARD}*/}
+                {/*  standard={values.collateralTokenStandard}*/}
+                {/*/>*/}
+              </div>
             </div>
-          </div>
-        </div>
-        <InputLabel inputSize={InputSize.LARGE} label="You receive" />
-        <div className="bg-tertiary-bg rounded-3 py-[14px] px-5 mb-4 text-14 flex items-center justify-between">
-          <p className="text-secondary-text ">Borrow</p>
-          <div className="flex items-center gap-1 items-center">
-            <Image
-              className="mr-1"
-              src={"/images/tokens/placeholder.svg"}
-              alt={order.baseAsset?.symbol || "Unknown"}
-              width={20}
-              height={20}
-            />
-            <span className="">{values.borrowAmount}</span>
-            <span className="text-secondary-text">{order.baseAsset?.symbol || "Unknown"}</span>
-            {/*<Badge*/}
-            {/*  size="small"*/}
-            {/*  variant={BadgeVariant.STANDARD}*/}
-            {/*  standard={values.collateralTokenStandard}*/}
-            {/*/>*/}
-          </div>
-        </div>
+          </>
+        )}
 
-        {status === CreateMarginPositionStatus.INITIAL && (
+        {isInitialStatus && (
           <>
             <div className="flex flex-col gap-2 mb-5">
               <LendingOrderDetailsRow
@@ -382,6 +400,44 @@ export default function ReviewBorrowDialog({
               </div>
             </div>
           </>
+        )}
+        {isFinalStatus && (
+          <div className="pb-3 border-b border-secondary-border mb-4">
+            <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
+              {status === CreateMarginPositionStatus.ERROR_BORROW && (
+                <EmptyStateIcon iconName="warning" />
+              )}
+              {status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && (
+                <EmptyStateIcon iconName="warning" />
+              )}
+              {status === CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE && (
+                <EmptyStateIcon iconName="warning" />
+              )}
+
+              {status === CreateMarginPositionStatus.SUCCESS && (
+                <>
+                  <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
+                  <Svg
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
+                    iconName={"success"}
+                    size={65}
+                  />
+                </>
+              )}
+            </div>
+
+            {status === CreateMarginPositionStatus.SUCCESS && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 ">Successfully borrowed</h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+                <div className="flex justify-center">
+                  <ExternalTextLink text="View my position" href={"#"} />
+                </div>
+              </div>
+            )}
+          </div>
         )}
         <CreateMarginPositionActionButton orderId={orderId} order={order} />
       </div>

@@ -97,6 +97,7 @@ export default function LiquidationFeeConfig({
         error={touched.liquidationFeeForLiquidator && errors.liquidationFeeForLiquidator}
       />
       <TextField
+        disabled
         label="Liquidation fee (for lender)"
         tooltipText="Tooltip text"
         placeholder="Liquidation fee (for lender)"

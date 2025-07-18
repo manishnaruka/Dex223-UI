@@ -33,6 +33,14 @@ const queryOwner = gql(`
       createdAt
       order {
         id
+        baseAssetToken {
+          addressERC20
+          addressERC223
+          decimals
+          id
+          name
+          symbol
+        }
         currencyLimit
         whitelist {
           allowedForTrading
@@ -45,6 +53,15 @@ const queryOwner = gql(`
             symbol
           }
         }
+        liquidationRewardAssetToken {
+          addressERC20
+          addressERC223
+          decimals
+          id
+          name
+          symbol
+        }
+        liquidationRewardAmount
       }
     }
   }
@@ -73,6 +90,14 @@ const queryById = gql(`
       createdAt
       order {
         id
+        baseAssetToken {
+          addressERC20
+          addressERC223
+          decimals
+          id
+          name
+          symbol
+        }
         currencyLimit
         whitelist {
           allowedForTrading
@@ -85,6 +110,15 @@ const queryById = gql(`
             symbol
           }
         }
+        liquidationRewardAssetToken {
+          addressERC20
+          addressERC223
+          decimals
+          id
+          name
+          symbol
+        }
+        liquidationRewardAmount
       }
     }
   }
@@ -118,6 +152,7 @@ export function usePositionsByOwner({ owner }: { owner: Address | undefined }): 
       return {
         owner,
         deadline,
+        loanAsset: gqlTokenToCurrency(order.baseAssetToken, chainId),
         loanAmount,
         assetAddresses: assets,
         assets: assetsTokens.map((tradingToken: GqlToken) =>
@@ -133,6 +168,8 @@ export function usePositionsByOwner({ owner }: { owner: Address | undefined }): 
         ),
         currencyLimit: order.currencyLimit,
         createdAt,
+        liquidationRewardAmount: BigInt(order.liquidationRewardAmount),
+        liquidationRewardAsset: gqlTokenToCurrency(order.liquidationRewardAssetToken, chainId),
       };
     });
   }, [chainId, data]);
@@ -168,6 +205,7 @@ export default function useMarginPositionById({ id }: { id: string }): {
       owner,
       deadline,
       loanAmount,
+      loanAsset: gqlTokenToCurrency(order.baseAssetToken, chainId),
       assetAddresses: assets,
       assets: assetsTokens.map((tradingToken: GqlToken) =>
         gqlTokenToCurrency(tradingToken, chainId),
@@ -182,6 +220,8 @@ export default function useMarginPositionById({ id }: { id: string }): {
       currencyLimit: order.currencyLimit,
       orderId: order.id,
       createdAt,
+      liquidationRewardAmount: BigInt(order.liquidationRewardAmount),
+      liquidationRewardAsset: gqlTokenToCurrency(order.liquidationRewardAssetToken, chainId),
     };
   }, [chainId, data]);
 

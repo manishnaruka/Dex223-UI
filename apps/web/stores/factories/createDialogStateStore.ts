@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
-interface ConfirmCreateOrderDialogStore {
+export interface DialogStateStore {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export const useConfirmCreateOrderDialogStore = create<ConfirmCreateOrderDialogStore>(
-  (set, get) => ({
+export function createDialogStateStore() {
+  return create<DialogStateStore>((set) => ({
     isOpen: false,
     setIsOpen: (isOpen) => set({ isOpen }),
-  }),
-);
+  }));
+}

@@ -20,7 +20,7 @@ export default function useOrderWithdraw({
   currency: Currency;
   amountToWithdraw: string;
 }) {
-  const { setStatus } = useWithdrawOrderStatusStore();
+  const { setStatus, setWithdrawHash } = useWithdrawOrderStatusStore();
   const chainId = useCurrentChainId();
   const { data: walletClient } = useWalletClient();
 
@@ -33,7 +33,7 @@ export default function useOrderWithdraw({
 
     setStatus(OrderWithdrawStatus.PENDING_WITHDRAW);
 
-    const depositOrderHash = await walletClient.writeContract({
+    const withdrawHash = await walletClient.writeContract({
       abi: MARGIN_MODULE_ABI,
       address: MARGIN_TRADING_ADDRESS[chainId],
       functionName: "orderWithdraw",
@@ -42,7 +42,8 @@ export default function useOrderWithdraw({
     });
     setStatus(OrderWithdrawStatus.LOADING_WITHDRAW);
 
-    const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
+    setWithdrawHash(withdrawHash);
+    const receipt = await publicClient.waitForTransactionReceipt({ hash: withdrawHash });
 
     if (receipt.status === "success") {
       setStatus(OrderWithdrawStatus.SUCCESS);
@@ -55,10 +56,10 @@ export default function useOrderWithdraw({
     amountToWithdraw,
     chainId,
     currency.decimals,
-    currency.wrapped.address0,
     orderId,
     publicClient,
     setStatus,
+    setWithdrawHash,
     walletClient,
   ]);
 

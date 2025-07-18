@@ -11,17 +11,13 @@ import {
   LiquidationMode,
   LiquidationType,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
-import { useConfirmCreateOrderDialogStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useConfirmCreateOrderDialogOpened";
-import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
-import {
-  CreateOrderStep,
-  useCreateOrderStepStore,
-} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
+import { ThirdStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
+import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
-import { NativeCurrency } from "@/sdk_bi/entities/nativeCurrency";
+
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 export const thirdStepSchema = Yup.object().shape({
@@ -56,22 +52,33 @@ export const thirdStepSchema = Yup.object().shape({
     .required("Fee for lender is required"),
 });
 
-export default function ThirdStep() {
-  const { setIsOpen } = useConfirmCreateOrderDialogStore();
-  const { setStep } = useCreateOrderStepStore();
-  const { firstStepValues, secondStepValues, thirdStepValues, setThirdStepValues } =
-    useCreateOrderConfigStore();
+export default function ThirdStep({
+  mode,
+  openPreviewDialog,
+  setStep,
+  thirdStepValues,
+  setThirdStepValues,
+}: {
+  mode: OrderActionMode;
+  openPreviewDialog: () => void;
+  thirdStepValues: ThirdStepValues;
+  setThirdStepValues: (thirdStep: ThirdStepValues) => void;
+  setStep: (step: OrderActionStep) => void;
+}) {
   const nativeCurrency = useNativeCurrency();
-  console.log(firstStepValues, secondStepValues);
   return (
     <Formik
-      initialValues={{ ...thirdStepValues, liquidationFeeToken: nativeCurrency }}
+      initialValues={{
+        ...thirdStepValues,
+        liquidationFeeToken:
+          mode === OrderActionMode.CREATE ? nativeCurrency : thirdStepValues.liquidationFeeToken,
+      }}
       validationSchema={thirdStepSchema}
       onSubmit={async (values, { validateForm }) => {
         // const errors = await validateForm(values);
         // console.log(errors);
         setThirdStepValues(values);
-        setIsOpen(true);
+        openPreviewDialog();
       }}
     >
       {({ handleSubmit, values, errors, touched, setFieldValue }) => (
@@ -145,7 +152,7 @@ export default function ThirdStep() {
             <Button
               type="button"
               colorScheme={ButtonColor.LIGHT_GREEN}
-              onClick={() => setStep(CreateOrderStep.SECOND)}
+              onClick={() => setStep(OrderActionStep.SECOND)}
               size={ButtonSize.EXTRA_LARGE}
               fullWidth
             >
@@ -157,7 +164,7 @@ export default function ThirdStep() {
               type="submit"
               disabled={Object.keys(touched).length > 0 && Object.keys(errors).length > 0}
             >
-              Create lending order
+              {mode === OrderActionMode.CREATE ? "Create lending order" : "Edit lending order"}
             </Button>
           </div>
         </form>

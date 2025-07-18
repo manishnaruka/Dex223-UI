@@ -1,13 +1,15 @@
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import Link from "next/link";
 import React, { ReactNode, useMemo } from "react";
+import { formatUnits } from "viem";
 
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
 import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
+import { Link } from "@/i18n/routing";
 
 import PositionAsset from "./widgets/PositionAsset";
 
@@ -112,10 +114,12 @@ function MarginPositionBalanceCard({
   totalBalance,
   expectedBalance,
   balanceStatus,
+  symbol = "Unknown",
 }: {
   totalBalance: number;
   expectedBalance: number;
   balanceStatus: DangerStatus;
+  symbol?: string;
 }) {
   return (
     <GradientCard className="pt-1.5 pb-0.5 px-5" gradient={balanceCardBackgroundMap[balanceStatus]}>
@@ -130,7 +134,7 @@ function MarginPositionBalanceCard({
         <span className={balanceCardTextColorMap[balanceStatus]}>{totalBalance}</span>
         {"/"}
         <span className={balanceCardTextColorMap[balanceStatus]}>{expectedBalance}</span>
-        USDT
+        {symbol}
       </div>
     </GradientCard>
   );
@@ -146,10 +150,12 @@ function LiquidationInfo({
   label,
   value,
   liquidationFeeStatus,
+  symbol,
 }: {
   label: string;
-  value: number;
+  value: string;
   liquidationFeeStatus: DangerStatus;
+  symbol: string;
 }) {
   return (
     <div className="border-l-4 border-tertiary-bg rounded-1 pl-4 min-w-[185px]">
@@ -158,17 +164,13 @@ function LiquidationInfo({
       </div>
       <p className="relative -top-1 flex gap-1 items-center text-20 font-medium">
         <span className={liquidationInfoTextColorMap[liquidationFeeStatus]}>{value}</span>
-        <span className="">USDT</span>
+        <span className="">{symbol}</span>
       </p>
     </div>
   );
 }
 
 interface Props {
-  totalBalance: number;
-  expectedBalance: number;
-  liquidationFee: number;
-  liquidationCost: number;
   position: MarginPosition;
 }
 
@@ -191,60 +193,62 @@ const marginPositionCardBorderMap: Record<DangerStatus, string> = {
   [DangerStatus.DANGEROUS]: "border border-red-light shadow shadow-red-light/60",
 };
 
-export default function MarginPositionCard({
-  totalBalance,
-  expectedBalance,
-  liquidationFee,
-  liquidationCost,
-  position,
-}: Props) {
-  const balanceStatus: DangerStatus = useMemo(() => {
-    if (totalBalance < expectedBalance) {
-      return DangerStatus.DANGEROUS;
-    }
+export default function MarginPositionCard({ position }: Props) {
+  const liquidationFee = useMemo(() => {
+    return formatUnits(position.liquidationRewardAmount, position.liquidationRewardAsset.decimals);
+  }, [position.liquidationRewardAmount, position.liquidationRewardAsset.decimals]);
 
-    if (totalBalance < expectedBalance * 1.1) {
-      return DangerStatus.RISKY;
-    }
+  console.log("POSITION", position);
+
+  const nativeCurrency = useNativeCurrency();
+
+  const balanceStatus: DangerStatus = useMemo(() => {
+    // if (totalBalance < expectedBalance) {
+    //   return DangerStatus.DANGEROUS;
+    // }
+    //
+    // if (totalBalance < expectedBalance * 1.1) {
+    //   return DangerStatus.RISKY;
+    // }
 
     return DangerStatus.STABLE;
-  }, [expectedBalance, totalBalance]);
+  }, []);
 
   const liquidationFeeStatus: DangerStatus = useMemo(() => {
-    if (liquidationCost > liquidationFee) {
-      return DangerStatus.DANGEROUS;
-    }
-
-    if (liquidationCost * 1.1 > liquidationFee) {
-      return DangerStatus.RISKY;
-    }
+    // if (+liquidationCost > +liquidationFee) {
+    //   return DangerStatus.DANGEROUS;
+    // }
+    //
+    // if (+liquidationCost * 1.1 > +liquidationFee) {
+    //   return DangerStatus.RISKY;
+    // }
 
     return DangerStatus.STABLE;
-  }, [liquidationCost, liquidationFee]);
+  }, []);
 
   const cardStatus: DangerStatus = useMemo(() => {
-    if (
-      liquidationFeeStatus === DangerStatus.DANGEROUS ||
-      balanceStatus === DangerStatus.DANGEROUS
-    ) {
-      return DangerStatus.DANGEROUS;
-    }
-
-    if (liquidationFeeStatus === DangerStatus.RISKY || balanceStatus === DangerStatus.RISKY) {
-      return DangerStatus.RISKY;
-    }
+    // if (
+    //   liquidationFeeStatus === DangerStatus.DANGEROUS ||
+    //   balanceStatus === DangerStatus.DANGEROUS
+    // ) {
+    //   return DangerStatus.DANGEROUS;
+    // }
+    //
+    // if (liquidationFeeStatus === DangerStatus.RISKY || balanceStatus === DangerStatus.RISKY) {
+    //   return DangerStatus.RISKY;
+    // }
 
     return DangerStatus.STABLE;
   }, [balanceStatus, liquidationFeeStatus]);
 
   const buttonsColor: ButtonColor = useMemo(() => {
-    if (cardStatus === DangerStatus.DANGEROUS) {
-      return ButtonColor.LIGHT_RED;
-    }
-
-    if (cardStatus === DangerStatus.RISKY) {
-      return ButtonColor.LIGHT_YELLOW;
-    }
+    // if (cardStatus === DangerStatus.DANGEROUS) {
+    //   return ButtonColor.LIGHT_RED;
+    // }
+    //
+    // if (cardStatus === DangerStatus.RISKY) {
+    //   return ButtonColor.LIGHT_YELLOW;
+    // }
 
     return ButtonColor.LIGHT_GREEN;
   }, [cardStatus]);
@@ -257,7 +261,7 @@ export default function MarginPositionCard({
       )}
     >
       <div className="flex justify-between mb-3 min-h-10 items-center">
-        <Link className="flex items-center gap-2" href="#">
+        <Link className="flex items-center gap-2" href={`/margin-trading/position/${position.id}`}>
           View margin position details
           <Svg iconName="next" />
         </Link>
@@ -275,8 +279,9 @@ export default function MarginPositionCard({
       <div className="grid grid-cols-4 gap-3 mb-3">
         <MarginPositionBalanceCard
           balanceStatus={balanceStatus}
-          totalBalance={totalBalance}
-          expectedBalance={expectedBalance}
+          totalBalance={0}
+          expectedBalance={0}
+          symbol={position.loanAsset.symbol}
         />
       </div>
 
@@ -305,17 +310,21 @@ export default function MarginPositionCard({
             liquidationFeeStatus={liquidationFeeStatus}
             label="Liquidation fee"
             value={liquidationFee}
+            symbol={position.liquidationRewardAsset.symbol || "Unknown"}
           />
           <LiquidationInfo
             liquidationFeeStatus={liquidationFeeStatus}
             label="Liqudation cost"
-            value={liquidationCost}
+            value={"0"}
+            symbol={nativeCurrency.symbol || "Unknown"}
           />
         </div>
         <div className="grid grid-cols-4 gap-3">
-          <Button fullWidth colorScheme={buttonsColor}>
-            Trade
-          </Button>
+          <Link href={"/margin-swap"}>
+            <Button fullWidth colorScheme={buttonsColor}>
+              Trade
+            </Button>
+          </Link>
           <Button fullWidth colorScheme={buttonsColor}>
             Deposit
           </Button>
@@ -333,61 +342,61 @@ export default function MarginPositionCard({
   );
 }
 
-export function LendingPositionCard({
-  totalBalance,
-  expectedBalance,
-  liquidationFee,
-  liquidationCost,
-  position,
-  order,
-}: Props & { order: LendingOrder }) {
-  const balanceStatus: DangerStatus = useMemo(() => {
-    if (totalBalance < expectedBalance) {
-      return DangerStatus.DANGEROUS;
-    }
+export function LendingPositionCard({ position, order }: Props & { order: LendingOrder }) {
+  const liquidationFee = useMemo(() => {
+    return formatUnits(order.liquidationRewardAmount, order.liquidationRewardAsset.decimals);
+  }, [order.liquidationRewardAmount, order.liquidationRewardAsset.decimals]);
 
-    if (totalBalance < expectedBalance * 1.1) {
-      return DangerStatus.RISKY;
-    }
+  console.log(position);
+  const nativeCurrency = useNativeCurrency();
+
+  const balanceStatus: DangerStatus = useMemo(() => {
+    // if (totalBalance < expectedBalance) {
+    //   return DangerStatus.DANGEROUS;
+    // }
+    //
+    // if (totalBalance < expectedBalance * 1.1) {
+    //   return DangerStatus.RISKY;
+    // }
 
     return DangerStatus.STABLE;
-  }, [expectedBalance, totalBalance]);
+  }, []);
 
   const liquidationFeeStatus: DangerStatus = useMemo(() => {
-    if (liquidationCost > liquidationFee) {
-      return DangerStatus.DANGEROUS;
-    }
-
-    if (liquidationCost * 1.1 > liquidationFee) {
-      return DangerStatus.RISKY;
-    }
+    // if (+liquidationCost > +liquidationFee) {
+    //   return DangerStatus.DANGEROUS;
+    // }
+    //
+    // if (+liquidationCost * 1.1 > +liquidationFee) {
+    //   return DangerStatus.RISKY;
+    // }
 
     return DangerStatus.STABLE;
-  }, [liquidationCost, liquidationFee]);
+  }, []);
 
   const cardStatus: DangerStatus = useMemo(() => {
-    if (
-      liquidationFeeStatus === DangerStatus.DANGEROUS ||
-      balanceStatus === DangerStatus.DANGEROUS
-    ) {
-      return DangerStatus.DANGEROUS;
-    }
-
-    if (liquidationFeeStatus === DangerStatus.RISKY || balanceStatus === DangerStatus.RISKY) {
-      return DangerStatus.RISKY;
-    }
+    // if (
+    //   liquidationFeeStatus === DangerStatus.DANGEROUS ||
+    //   balanceStatus === DangerStatus.DANGEROUS
+    // ) {
+    //   return DangerStatus.DANGEROUS;
+    // }
+    //
+    // if (liquidationFeeStatus === DangerStatus.RISKY || balanceStatus === DangerStatus.RISKY) {
+    //   return DangerStatus.RISKY;
+    // }
 
     return DangerStatus.STABLE;
   }, [balanceStatus, liquidationFeeStatus]);
 
   const buttonsColor: ButtonColor = useMemo(() => {
-    if (cardStatus === DangerStatus.DANGEROUS) {
-      return ButtonColor.LIGHT_RED;
-    }
-
-    if (cardStatus === DangerStatus.RISKY) {
-      return ButtonColor.LIGHT_YELLOW;
-    }
+    // if (cardStatus === DangerStatus.DANGEROUS) {
+    //   return ButtonColor.LIGHT_RED;
+    // }
+    //
+    // if (cardStatus === DangerStatus.RISKY) {
+    //   return ButtonColor.LIGHT_YELLOW;
+    // }
 
     return ButtonColor.LIGHT_GREEN;
   }, [cardStatus]);
@@ -400,7 +409,7 @@ export function LendingPositionCard({
       )}
     >
       <div className="flex justify-between mb-3 min-h-10 items-center">
-        <Link className="flex items-center gap-2" href="#">
+        <Link className="flex items-center gap-2" href={`/margin-trading/position/${position.id}`}>
           View margin position details
           <Svg iconName="next" />
         </Link>
@@ -418,12 +427,10 @@ export function LendingPositionCard({
       <div className="grid grid-cols-4 gap-3 mb-3">
         <MarginPositionBalanceCard
           balanceStatus={balanceStatus}
-          totalBalance={totalBalance}
-          expectedBalance={expectedBalance}
+          totalBalance={0}
+          expectedBalance={0}
+          symbol={order.baseAsset.symbol}
         />
-        {/*<MarginPositionInfoCard />*/}
-        {/*<MarginPositionInfoCard />*/}
-        {/*<MarginPositionInfoCard />*/}
       </div>
 
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">
@@ -455,12 +462,14 @@ export function LendingPositionCard({
             liquidationFeeStatus={liquidationFeeStatus}
             label="Liquidation fee"
             value={liquidationFee}
+            symbol={order.liquidationRewardAsset.symbol || "Unknown"}
           />
           <div></div>
           <LiquidationInfo
             liquidationFeeStatus={liquidationFeeStatus}
             label="Liqudation cost"
-            value={liquidationCost}
+            value={"0"}
+            symbol={nativeCurrency.symbol || "Unknown"}
           />
         </div>
         <div className="grid grid-cols-3 gap-3">

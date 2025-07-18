@@ -16,6 +16,7 @@ import {
 import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import OrderCloseDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderCloseDialog";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
+import OrderOpenDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderOpenDialog";
 import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -58,11 +59,12 @@ export default function LendingOrder({
 }) {
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
   const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
+  const [isOpenDialogOpened, setIsOpenDialogOpened] = useState(false);
   const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
   const { id } = use(params);
   const { address } = useAccount();
 
-  const { order, loading } = useOrder({ id: +id });
+  const { order, loading, refetch } = useOrder({ id: +id });
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
   const chainId = useCurrentChainId();
 
@@ -110,21 +112,39 @@ export default function LendingOrder({
             <div className="flex items-center gap-2">
               <Image width={32} height={32} src="/images/tokens/placeholder.svg" alt="" />
               <span className="text-secondary-text text-18 font-bold">{order.baseAsset.name}</span>
-              <div className="flex items-center gap-3 text-green">
-                Active
-                <div className="w-2 h-2 rounded-full bg-green"></div>
-              </div>
+              {order.alive ? (
+                <div className="flex items-center gap-3 text-green">
+                  Active
+                  <div className="w-2 h-2 rounded-full bg-green"></div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-tertiary-text">
+                  Closed
+                  <Svg iconName="closed" />
+                </div>
+              )}
             </div>
 
             {isOwner ? (
               <div className="flex items-center gap-3">
-                <Button
-                  onClick={() => setIsCloseDialogOpened(true)}
-                  colorScheme={ButtonColor.LIGHT_GREEN}
-                >
-                  Close
-                </Button>
-                <Button>Edit</Button>
+                {order.alive ? (
+                  <Button
+                    onClick={() => setIsCloseDialogOpened(true)}
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                  >
+                    Close
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => setIsOpenDialogOpened(true)}
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                  >
+                    Open
+                  </Button>
+                )}
+                <Link href={`/margin-trading/lending-order/${order.id}/edit`}>
+                  <Button>Edit</Button>
+                </Link>
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -210,7 +230,7 @@ export default function LendingOrder({
               Number of margin positions
               <Tooltip text="Tooltip text" />
             </div>
-            <span className="text-20">5 margin positions</span>
+            <span className="text-20">{order.positions?.length} margin position(s)</span>
           </div>
           <Button colorScheme={ButtonColor.LIGHT_GREEN} endIcon="next">
             View margin positions
@@ -447,6 +467,12 @@ export default function LendingOrder({
         orderId={id}
         isOpen={isCloseDialogOpened}
         setIsOpen={setIsCloseDialogOpened}
+        order={order}
+      />
+      <OrderOpenDialog
+        orderId={id}
+        isOpen={isOpenDialogOpened}
+        setIsOpen={setIsOpenDialogOpened}
         order={order}
       />
       <DrawerDialog isOpen={!!tokenForPortfolio} setIsOpen={() => setTokenForPortfolio(null)}>

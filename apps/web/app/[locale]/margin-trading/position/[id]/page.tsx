@@ -5,7 +5,7 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import React, { use } from "react";
+import React, { use, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { lightlinkPegasus } from "viem/chains";
 
@@ -13,6 +13,7 @@ import { HeaderItem } from "@/app/[locale]/margin-trading/components/BorrowMarke
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
+import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
@@ -194,7 +195,9 @@ export default function MarginPosition({
   const { id: positionId } = use(params);
 
   const { position, loading } = useMarginPositionById({ id: positionId });
-
+  const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
+  const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
+  const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
   console.log(position);
 
   if (loading || !position) {
@@ -238,6 +241,12 @@ export default function MarginPosition({
                 Active
                 <div className="w-2 h-2 rounded-full bg-green" />
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button>Trade</Button>
+              <Button onClick={() => setIsDepositDialogOpened(true)}>Deposit</Button>
+              <Button>Withdraw</Button>
+              <Button>Close</Button>
             </div>
           </div>
 
@@ -369,6 +378,12 @@ export default function MarginPosition({
           </div>
         </div>
       </Container>
+
+      <PositionDepositDialog
+        isOpen={isDepositDialogOpened}
+        setIsOpen={setIsDepositDialogOpened}
+        position={position}
+      />
     </div>
   );
 }
