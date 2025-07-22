@@ -158,8 +158,8 @@ export default function FirstStep({
       interestRatePerMonth: Yup.number()
         .typeError("Interest rate must be a number")
         .required("Please provide interest rate per month")
-        .min(0, "Interest rate cannot be negative")
-        .max(9999, "Maximum interest rate is 9999%"),
+        .min(0, "Interest rate cannot be negative"),
+      // .max(9999, "Maximum interest rate is 9999%"),
 
       loanTokenStandard: Yup.string()
         .oneOf([Standard.ERC20, Standard.ERC223])
