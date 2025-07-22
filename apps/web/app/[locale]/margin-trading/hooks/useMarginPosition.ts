@@ -170,6 +170,10 @@ export function usePositionsByOwner({ owner }: { owner: Address | undefined }): 
         createdAt,
         liquidationRewardAmount: BigInt(order.liquidationRewardAmount),
         liquidationRewardAsset: gqlTokenToCurrency(order.liquidationRewardAssetToken, chainId),
+        assetsWithBalances: assetsTokens.map((tradingToken: GqlToken) => ({
+          asset: gqlTokenToCurrency(tradingToken, chainId),
+          balance: assets.find((asset: any) => asset.address === tradingToken.addressERC20).balance,
+        })),
       };
     });
   }, [chainId, data]);
@@ -222,6 +226,10 @@ export default function useMarginPositionById({ id }: { id: string }): {
       createdAt,
       liquidationRewardAmount: BigInt(order.liquidationRewardAmount),
       liquidationRewardAsset: gqlTokenToCurrency(order.liquidationRewardAssetToken, chainId),
+      assetsWithBalances: assetsTokens.map((tradingToken: GqlToken) => ({
+        asset: gqlTokenToCurrency(tradingToken, chainId),
+        balance: assets.find((asset: any) => asset.address === tradingToken.addressERC20).balance,
+      })),
     };
   }, [chainId, data]);
 

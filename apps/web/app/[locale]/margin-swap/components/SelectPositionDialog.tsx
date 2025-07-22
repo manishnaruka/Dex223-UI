@@ -1,5 +1,6 @@
 import Tooltip from "@repo/ui/tooltip";
 import React, { ReactNode, useState } from "react";
+import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { date } from "yup";
 
@@ -123,10 +124,10 @@ export function SelectedPositionInfo() {
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {marginSwapPosition.assets?.map((asset) => (
+            {marginSwapPosition.assetsWithBalances?.map(({ asset, balance }) => (
               <PositionAsset
                 key={asset.wrapped.address0}
-                amount={12.22}
+                amount={formatUnits(balance, asset.decimals)}
                 symbol={asset.symbol || "Unknown"}
               />
             ))}

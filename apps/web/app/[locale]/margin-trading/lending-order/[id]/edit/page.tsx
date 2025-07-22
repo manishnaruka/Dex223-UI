@@ -122,7 +122,6 @@ export default function EditLendingOrderPage({
       <OrderConfigurationPage
         {...config}
         openPreviewDialog={() => setIsOpen(true)}
-        order={order}
         mode={OrderActionMode.EDIT}
         step={step}
         setStep={setStep}

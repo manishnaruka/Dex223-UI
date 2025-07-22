@@ -76,6 +76,7 @@ const queryOwner = gql(`
       owner
       balance
       leverage
+      alive
       collateralTokens {
         addressERC20
         addressERC223
@@ -237,6 +238,10 @@ export type MarginPosition = {
   createdAt: number;
   liquidationRewardAmount: bigint;
   liquidationRewardAsset: Currency;
+  assetsWithBalances: {
+    asset: Currency;
+    balance: bigint;
+  }[];
 };
 
 export type LendingOrder = {
@@ -349,6 +354,12 @@ export function useOrder({ id }: { id: number }): {
           assets: position.assetsTokens.map((tradingToken: GqlToken) =>
             gqlTokenToCurrency(tradingToken, chainId),
           ),
+          assetsWithBalances: position.assetsTokens.map((tradingToken: GqlToken) => ({
+            asset: gqlTokenToCurrency(tradingToken, chainId),
+            balance: position.assets.find(
+              (asset: any) => asset.address === tradingToken.addressERC20,
+            ).balance,
+          })),
         };
       }),
     };
@@ -502,11 +513,13 @@ export function useOrdersByOwner({ owner }: { owner: Address | undefined }): {
         interestRate,
         currencyLimit,
         balance,
+        alive,
       } = order;
 
       return {
         id,
         owner,
+        alive,
         leverage,
         minLoan,
         deadline,
@@ -537,6 +550,12 @@ export function useOrdersByOwner({ owner }: { owner: Address | undefined }): {
             assets: position.assetsTokens.map((tradingToken: GqlToken) =>
               gqlTokenToCurrency(tradingToken, chainId),
             ),
+            assetsWithBalances: position.assetsTokens.map((tradingToken: GqlToken) => ({
+              asset: gqlTokenToCurrency(tradingToken, chainId),
+              balance: position.assets.find(
+                (asset: any) => asset.address === tradingToken.addressERC20,
+              ).balance,
+            })),
           };
         }),
       };

@@ -169,8 +169,13 @@ export default function LendingOrderCard({
               >
                 Withdraw
               </Button>
-              <Link href={`/margin-trading/lending-order/${order.id}/edit`}>
-                <Button colorScheme={ButtonColor.LIGHT_GREEN}> Edit</Button>
+              <Link
+                className="w-full block"
+                href={`/margin-trading/lending-order/${order.id}/edit`}
+              >
+                <Button fullWidth colorScheme={ButtonColor.LIGHT_GREEN}>
+                  Edit
+                </Button>
               </Link>
             </div>
           </div>

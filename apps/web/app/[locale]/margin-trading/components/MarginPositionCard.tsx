@@ -1,13 +1,17 @@
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import React, { ReactNode, useMemo } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 import { formatUnits } from "viem";
 
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
 import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
+import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
+import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Link } from "@/i18n/routing";
 
@@ -116,8 +120,8 @@ function MarginPositionBalanceCard({
   balanceStatus,
   symbol = "Unknown",
 }: {
-  totalBalance: number;
-  expectedBalance: number;
+  totalBalance: string;
+  expectedBalance: string;
   balanceStatus: DangerStatus;
   symbol?: string;
 }) {
@@ -198,7 +202,12 @@ export default function MarginPositionCard({ position }: Props) {
     return formatUnits(position.liquidationRewardAmount, position.liquidationRewardAsset.decimals);
   }, [position.liquidationRewardAmount, position.liquidationRewardAsset.decimals]);
 
+  const [positionToClose, setPositionToClose] = useState<MarginPosition | undefined>();
+  const [positionToDeposit, setPositionToDeposit] = useState<MarginPosition | undefined>();
+
   console.log("POSITION", position);
+
+  const { expectedBalance, actualBalance } = usePositionStatus(position);
 
   const nativeCurrency = useNativeCurrency();
 
@@ -279,8 +288,16 @@ export default function MarginPositionCard({ position }: Props) {
       <div className="grid grid-cols-4 gap-3 mb-3">
         <MarginPositionBalanceCard
           balanceStatus={balanceStatus}
-          totalBalance={0}
-          expectedBalance={0}
+          totalBalance={
+            actualBalance
+              ? formatFloat(formatUnits(actualBalance, position.loanAsset.decimals))
+              : "Loading..."
+          }
+          expectedBalance={
+            expectedBalance
+              ? formatFloat(formatUnits(expectedBalance, position.loanAsset.decimals))
+              : "Loading..."
+          }
           symbol={position.loanAsset.symbol}
         />
       </div>
@@ -298,13 +315,17 @@ export default function MarginPositionCard({ position }: Props) {
         </div>
 
         <div className="flex gap-2">
-          {position.assets.map((asset, index) => (
-            <PositionAsset amount={0.0} symbol={asset.symbol || "Unknown"} key={index} />
+          {position.assetsWithBalances.map(({ asset, balance }, index) => (
+            <PositionAsset
+              amount={formatUnits(balance, asset.decimals)}
+              symbol={asset.symbol || "Unknown"}
+              key={index}
+            />
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 flex items-center justify-between mb-5">
+      <div className="grid grid-cols-2 gap-3 flex items-center justify-between mb-5 w-full">
         <div className="grid grid-cols-3">
           <LiquidationInfo
             liquidationFeeStatus={liquidationFeeStatus}
@@ -325,19 +346,38 @@ export default function MarginPositionCard({ position }: Props) {
               Trade
             </Button>
           </Link>
-          <Button fullWidth colorScheme={buttonsColor}>
+          <Button
+            onClick={() => setPositionToDeposit(position)}
+            fullWidth
+            colorScheme={buttonsColor}
+          >
             Deposit
           </Button>
-          <Button fullWidth colorScheme={buttonsColor}>
+          <Button disabled fullWidth colorScheme={buttonsColor}>
             Withdraw
           </Button>
-          <Button fullWidth colorScheme={buttonsColor}>
+          <Button onClick={() => setPositionToClose(position)} fullWidth colorScheme={buttonsColor}>
             Close
           </Button>
         </div>
       </div>
 
       <PositionProgressBar position={position} />
+
+      {positionToClose && (
+        <PositionCloseDialog
+          isOpen={!!positionToClose}
+          position={positionToClose}
+          setIsOpen={() => setPositionToClose(undefined)}
+        />
+      )}
+      {positionToDeposit && (
+        <PositionDepositDialog
+          isOpen={!!positionToDeposit}
+          position={positionToDeposit}
+          setIsOpen={() => setPositionToDeposit(undefined)}
+        />
+      )}
     </div>
   );
 }
@@ -348,6 +388,9 @@ export function LendingPositionCard({ position, order }: Props & { order: Lendin
   }, [order.liquidationRewardAmount, order.liquidationRewardAsset.decimals]);
 
   console.log(position);
+
+  const { expectedBalance, actualBalance } = usePositionStatus(position);
+
   const nativeCurrency = useNativeCurrency();
 
   const balanceStatus: DangerStatus = useMemo(() => {
@@ -427,8 +470,16 @@ export function LendingPositionCard({ position, order }: Props & { order: Lendin
       <div className="grid grid-cols-4 gap-3 mb-3">
         <MarginPositionBalanceCard
           balanceStatus={balanceStatus}
-          totalBalance={0}
-          expectedBalance={0}
+          totalBalance={
+            actualBalance
+              ? formatFloat(formatUnits(actualBalance, position.loanAsset.decimals))
+              : "Loading..."
+          }
+          expectedBalance={
+            expectedBalance
+              ? formatFloat(formatUnits(expectedBalance, position.loanAsset.decimals))
+              : "Loading..."
+          }
           symbol={order.baseAsset.symbol}
         />
       </div>
@@ -446,10 +497,10 @@ export function LendingPositionCard({ position, order }: Props & { order: Lendin
         </div>
 
         <div className="flex gap-2">
-          {position.assets?.map((asset) => (
+          {position.assetsWithBalances?.map(({ asset, balance }) => (
             <PositionAsset
               key={asset.wrapped.address0}
-              amount={12.22}
+              amount={formatUnits(balance, asset.decimals)}
               symbol={asset.symbol || "Unknown"}
             />
           ))}

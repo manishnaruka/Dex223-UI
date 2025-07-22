@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import LendingOrderCard from "@/app/[locale]/margin-trading/components/LendingOrderCard";
 import { LendingOrder, useOrdersByOwner } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
+import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
 import { SearchInput } from "@/components/atoms/Input";
 
 import OrderCloseDialog from "../lending-order/[id]/components/OrderCloseDialog";
@@ -58,7 +59,7 @@ export default function LendingOrdersTab() {
         />
       )}
       {orderToWithdraw && (
-        <OrderDepositDialog
+        <OrderWithdrawDialog
           isOpen={Boolean(orderToWithdraw)}
           setIsOpen={() => setOrderToWithdraw(undefined)}
           orderId={orderToWithdraw.id}

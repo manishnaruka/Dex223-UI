@@ -3,6 +3,10 @@ import { usePublicClient, useWalletClient } from "wagmi";
 
 import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import {
+  PositionCloseStatus,
+  usePositionCloseStatusStore,
+} from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionCloseStatusStore";
+import {
   PositionWithdrawStatus,
   useWithdrawPositionStatusStore,
 } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionWithdrawStatusStore";
@@ -11,7 +15,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 
 export default function usePositionClose({ position }: { position: MarginPosition }) {
-  const { setStatus } = useWithdrawPositionStatusStore();
+  const { setStatus } = usePositionCloseStatusStore();
   const chainId = useCurrentChainId();
   const { data: walletClient } = useWalletClient();
 
@@ -22,7 +26,7 @@ export default function usePositionClose({ position }: { position: MarginPositio
       return;
     }
 
-    setStatus(PositionWithdrawStatus.PENDING_WITHDRAW);
+    setStatus(PositionCloseStatus.PENDING_CLOSE);
 
     const withdrawPositionHash = await walletClient.writeContract({
       abi: MARGIN_MODULE_ABI,
@@ -31,14 +35,14 @@ export default function usePositionClose({ position }: { position: MarginPositio
       args: [BigInt(position.id)],
       account: undefined,
     });
-    setStatus(PositionWithdrawStatus.LOADING_WITHDRAW);
+    setStatus(PositionCloseStatus.LOADING_CLOSE);
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash: withdrawPositionHash });
 
     if (receipt.status === "success") {
-      setStatus(PositionWithdrawStatus.SUCCESS);
+      setStatus(PositionCloseStatus.SUCCESS);
     } else {
-      setStatus(PositionWithdrawStatus.ERROR_WITHDRAW);
+      setStatus(PositionCloseStatus.ERROR_CLOSE);
     }
     console.log(receipt);
 
