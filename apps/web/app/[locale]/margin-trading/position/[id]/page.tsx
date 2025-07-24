@@ -171,14 +171,6 @@ function LiquidateOrderInfoBlock() {
   );
 }
 
-function TokenBadge() {
-  return (
-    <div className="bg-quaternary-bg text-tertiary-text px-2 py-1 rounded-2 flex gap-1 items-center">
-      <span className="text-secondary-text">122</span>USDT
-    </div>
-  );
-}
-
 export default function MarginPosition({
   params,
 }: {

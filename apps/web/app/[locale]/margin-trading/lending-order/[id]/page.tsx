@@ -46,10 +46,6 @@ function OrderInfoBlock({ title, cards }: { title: string; cards: Array<Position
   );
 }
 
-function TokenBadge() {
-  return <div className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2">USDT</div>;
-}
-
 export default function LendingOrder({
   params,
 }: {
