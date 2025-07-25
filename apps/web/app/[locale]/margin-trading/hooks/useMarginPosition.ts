@@ -16,6 +16,8 @@ const queryOwner = gql(`
       owner
       loanAmount
       deadline
+      isLiquidated
+      isClosed
       assets {
         address
         balance
@@ -147,10 +149,23 @@ export function usePositionsByOwner({ owner }: { owner: Address | undefined }): 
 
     return data.positions.map((position: any) => {
       console.log(position);
-      const { createdAt, owner, loanAmount, deadline, assets, assetsTokens, id, order } = position;
+      const {
+        createdAt,
+        owner,
+        loanAmount,
+        deadline,
+        assets,
+        assetsTokens,
+        id,
+        order,
+        isLiquidated,
+        isClosed,
+      } = position;
 
       return {
         owner,
+        isLiquidated,
+        isClosed,
         deadline,
         loanAsset: gqlTokenToCurrency(order.baseAssetToken, chainId),
         loanAmount,

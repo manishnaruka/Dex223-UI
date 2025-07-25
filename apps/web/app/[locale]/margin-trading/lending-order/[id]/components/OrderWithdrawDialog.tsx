@@ -150,7 +150,7 @@ export default function OrderWithdrawDialog({
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
-      <DialogHeader onClose={() => setIsOpen(false)} title="Deposit" />
+      <DialogHeader onClose={() => setIsOpen(false)} title="Withdraw" />
       <div className="w-[600px] card-spacing-x card-spacing-b">
         {isInitialStatus && (
           <>
@@ -161,7 +161,7 @@ export default function OrderWithdrawDialog({
             <TextField
               label="Withdraw amount"
               tooltipText="Tooltip text"
-              internalText="USDT"
+              internalText={order.baseAsset.symbol}
               placeholder="Withdraw amount"
               value={amountToWithdraw}
               onChange={(e) => setAmountToWithdraw(e.target.value)}

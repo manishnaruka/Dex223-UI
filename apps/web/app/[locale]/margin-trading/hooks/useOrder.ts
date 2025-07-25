@@ -242,6 +242,8 @@ export type MarginPosition = {
     asset: Currency;
     balance: bigint;
   }[];
+  isClosed: boolean;
+  isLiquidated: boolean;
 };
 
 export type LendingOrder = {
@@ -376,6 +378,8 @@ export function useOrders({
   duration_lte,
   duration_gte,
   interestRate_lte,
+  minLoanFormatted_gte,
+  balanceFormatted_gte,
 }: {
   sortingDirection: SortingType;
   orderBy: string;
@@ -384,6 +388,8 @@ export function useOrders({
   duration_lte?: string;
   duration_gte?: string;
   interestRate_lte?: string;
+  minLoanFormatted_gte?: string;
+  balanceFormatted_gte?: string;
 }): {
   loading: boolean;
   orders: LendingOrder[];
@@ -404,6 +410,12 @@ export function useOrders({
     const lev = toNum(leverage_lte);
     if (lev != null) f.leverage_lte = lev;
 
+    const minLoanF = toNum(minLoanFormatted_gte);
+    if (minLoanF != null) f.minLoanFormatted_gte = minLoanF;
+
+    const minBalanceF = toNum(balanceFormatted_gte);
+    if (minBalanceF != null) f.balanceFormatted_gte = minBalanceF;
+
     const curLim = toNum(currencyLimit_lte);
     if (curLim != null) f.currencyLimit_lte = curLim;
 
@@ -417,7 +429,15 @@ export function useOrders({
     if (ir != null) f.interestRate_lte = ir;
 
     return f;
-  }, [leverage_lte, currencyLimit_lte, duration_lte, duration_gte, interestRate_lte]);
+  }, [
+    leverage_lte,
+    minLoanFormatted_gte,
+    balanceFormatted_gte,
+    currencyLimit_lte,
+    duration_lte,
+    duration_gte,
+    interestRate_lte,
+  ]);
 
   const { data, loading } = useQuery<any, any>(queryAllOrders, {
     variables: {

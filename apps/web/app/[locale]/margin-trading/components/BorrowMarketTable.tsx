@@ -3,6 +3,7 @@ import Image from "next/image";
 import React, { useCallback, useRef, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 
 import { LendingOrder, useOrders } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useBorrowMarketFilterStore } from "@/app/[locale]/margin-trading/stores/useBorrowMarketFilterStore";
@@ -97,6 +98,8 @@ export default function BorrowMarketTable() {
     direction: SortingType.NONE,
   });
 
+  const { address } = useAccount();
+
   const handleSort = useCallback(
     (field: SortingField) => {
       if (field === sorting.field) {
@@ -138,6 +141,8 @@ export default function BorrowMarketTable() {
     interestRate_lte: maxInterestRatePerMonth
       ? (+maxInterestRatePerMonth * 100).toString()
       : undefined,
+    minLoanFormatted_gte: minLoanAmount,
+    balanceFormatted_gte: minOrderBalance,
   });
 
   const isDragging = useRef(false);
@@ -216,8 +221,12 @@ export default function BorrowMarketTable() {
                 >
                   <div className="pl-5 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2">
                     <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
-                    <span>{formatUnits(o.balance, o.baseAsset.decimals ?? 18)}</span>
-                    <span>{o.baseAsset.symbol}</span>
+                    <span
+                      className={clsx("font-medium", o.balance < o.minLoan && "text-yellow-light")}
+                    >
+                      {formatUnits(o.balance, o.baseAsset.decimals ?? 18)}
+                    </span>
+                    <span className="text-secondary-texts">{o.baseAsset.symbol}</span>
                   </div>
                   <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
                     {o.leverage}x
@@ -291,8 +300,13 @@ export default function BorrowMarketTable() {
                       )}
                     </span>
                   </div>
-                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2">
-                    {formatUnits(o.minLoan, o.baseAsset.decimals)} {o.baseAsset.symbol}
+                  <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2 gap-2">
+                    <span
+                      className={clsx("font-medium", o.balance < o.minLoan && "text-yellow-light")}
+                    >
+                      {formatUnits(o.minLoan, o.baseAsset.decimals ?? 18)}
+                    </span>
+                    <span className="text-secondary-texts">{o.baseAsset.symbol}</span>
                   </div>
                 </Link>
               );
@@ -310,19 +324,41 @@ export default function BorrowMarketTable() {
           {orders.map((o: LendingOrder) => {
             return (
               <div key={o.id} className="p-2 gap-2 flex items-center">
-                <Link className={"flex-shrink-0"} href={`/margin-swap`}>
-                  <Button size={ButtonSize.MEDIUM} colorScheme={ButtonColor.LIGHT_PURPLE}>
-                    Margin swap
-                  </Button>
-                </Link>
-                <Link
-                  className={"flex-shrink-0"}
-                  href={`/margin-trading/lending-order/${o.id}/borrow`}
-                >
-                  <Button size={ButtonSize.MEDIUM} colorScheme={ButtonColor.LIGHT_GREEN}>
-                    Borrow
-                  </Button>
-                </Link>
+                {o.owner.toLowerCase() === address?.toLowerCase() ? (
+                  <Link className={"flex-grow"} href={`/margin-trading/lending-order/${o.id}`}>
+                    <Button
+                      fullWidth
+                      size={ButtonSize.MEDIUM}
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                    >
+                      View my order
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link className={"flex-shrink-0"} href={`/margin-swap`}>
+                      <Button
+                        disabled={o.balance < o.minLoan}
+                        size={ButtonSize.MEDIUM}
+                        colorScheme={ButtonColor.LIGHT_PURPLE}
+                      >
+                        Margin swap
+                      </Button>
+                    </Link>
+                    <Link
+                      className={"flex-shrink-0"}
+                      href={`/margin-trading/lending-order/${o.id}/borrow`}
+                    >
+                      <Button
+                        disabled={o.balance < o.minLoan}
+                        size={ButtonSize.MEDIUM}
+                        colorScheme={ButtonColor.LIGHT_GREEN}
+                      >
+                        Borrow
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             );
           })}

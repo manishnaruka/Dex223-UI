@@ -2,7 +2,9 @@ import React from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
-import MarginPositionCard from "@/app/[locale]/margin-trading/components/MarginPositionCard";
+import MarginPositionCard, {
+  InactiveMarginPositionCard,
+} from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import { usePositionsByOwner } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import { SearchInput } from "@/components/atoms/Input";
 
@@ -21,9 +23,13 @@ export default function MarginPositionsTab() {
       </div>
       <div className="flex flex-col gap-5">
         {!!positions?.length &&
-          positions.map((position, index) => (
-            <MarginPositionCard key={position.id} position={position} />
-          ))}
+          positions.map((position, index) =>
+            position.isLiquidated || position.isClosed ? (
+              <InactiveMarginPositionCard key={position.id} position={position} />
+            ) : (
+              <MarginPositionCard key={position.id} position={position} />
+            ),
+          )}
       </div>
     </>
   );

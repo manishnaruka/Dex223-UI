@@ -1,23 +1,31 @@
 "use client";
 import ExternalTextLink from "@repo/ui/external-text-link";
-import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
+import GradientCard from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import React, { use, useState } from "react";
 import SimpleBar from "simplebar-react";
+import { formatUnits } from "viem";
 
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
+import {
+  OrderInfoBlock,
+  OrderInfoCard,
+} from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
+import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
 import PositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionWithdrawDialog";
+import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import { formatFloat } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
 
 function MarginPositionInfoCard() {
@@ -143,19 +151,6 @@ const testData: Order[] = [
   },
 ];
 
-function OrderInfoBlock() {
-  return (
-    <div>
-      <h3 className="text-20 font-medium mb-3">Parameters</h3>
-      <div className="grid gap-3">
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
-      </div>
-    </div>
-  );
-}
-
 function LiquidateOrderInfoBlock() {
   return (
     <div className="flex flex-col h-full">
@@ -171,7 +166,38 @@ function LiquidateOrderInfoBlock() {
   );
 }
 
-export default function MarginPosition({
+function BalanceCard({ position }: { position: MarginPosition }) {
+  const { expectedBalance, actualBalance } = usePositionStatus(position);
+
+  return (
+    <GradientCard className="px-5 py-3">
+      <div className="">
+        <div className="flex items-center gap-1 text-tertiary-text">
+          Total balance
+          <Tooltip text="Tooltip text" />
+          <span>/</span>
+          Expected balance
+          <Tooltip text="Tooltip text" />
+        </div>
+
+        <p className="font-medium text-20">
+          {actualBalance
+            ? formatFloat(formatUnits(actualBalance, position.loanAsset.decimals))
+            : "Loading..."}{" "}
+          /{" "}
+          {expectedBalance
+            ? formatFloat(formatUnits(expectedBalance, position.loanAsset.decimals))
+            : "Loading..."}
+          {/*{formatUnits(actualBalance, position.loanAsset.decimals)} /{" "}*/}
+          {/*{formatUnits(expectedBalance, position.loanAsset.decimals)}{" "}*/}
+          <span className="text-secondary-text"> {position.loanAsset.symbol}</span>
+        </p>
+      </div>
+    </GradientCard>
+  );
+}
+
+export default function MarginPositionPage({
   params,
 }: {
   params: Promise<{
@@ -252,47 +278,76 @@ export default function MarginPosition({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <GradientCard gradient={CardGradient.BLUE_LIGHT} className="px-5 py-3">
+            <BalanceCard position={position} />
+            <GradientCard className="px-5 py-3">
               <div className="">
-                <div className="items-center flex gap-1 text-tertiary-text">
-                  Total balance
+                <div className="flex items-center gap-1 text-tertiary-text">
+                  Liquidation fee
+                  <Tooltip text="Tooltip text" />
+                  <span>/</span>
+                  Liquidation cost
                   <Tooltip text="Tooltip text" />
                 </div>
 
                 <p className="font-medium text-20">
-                  1000.34 <span className="text-secondary-text">{position.loanAsset.symbol}</span>
-                </p>
-              </div>
-            </GradientCard>
-            <GradientCard className=" px-5 py-3 ">
-              <div className="">
-                <div className="items-center flex gap-1 text-tertiary-text">
-                  Expected balance
-                  <Tooltip text="Tooltip text" />
-                </div>
-
-                <p className="font-medium text-20">
-                  2233.34 <span className="text-secondary-text">{position.loanAsset.symbol}</span>
+                  {formatUnits(
+                    position.liquidationRewardAmount,
+                    position.liquidationRewardAsset.decimals,
+                  )}{" "}
+                  <span className="text-secondary-text">
+                    {position.liquidationRewardAsset.symbol}
+                  </span>{" "}
+                  / 0 <span className="text-secondary-text">ETH</span>
                 </p>
               </div>
             </GradientCard>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-5">
-          <div className="rounded-5 gap-x-5 gap-y-4 bg-primary-bg px-10 pt-4 pb-5 mb-5">
-            <OrderInfoBlock />
-          </div>
-          <div className="rounded-5 gap-x-5 gap-y-4 bg-primary-bg px-10 pt-4 pb-5 mb-5">
-            <LiquidateOrderInfoBlock />
-          </div>
+        <div className="rounded-5 gap-x-5 gap-y-4 bg-primary-bg px-10 pt-4 pb-5 mb-5">
+          <OrderInfoBlock
+            title="Parameters"
+            cards={[
+              {
+                title: "Borrowed",
+                tooltipText: "Tooltip text",
+                value: "5%",
+                bg: "borrowed",
+              },
+              {
+                title: "Initial collateral",
+                tooltipText: "Tooltip text",
+                value: "15%",
+                bg: "collateral",
+              },
+              {
+                title: "Leverage",
+                tooltipText: "Tooltip text",
+                value: "15%",
+                bg: "leverage",
+              },
+            ]}
+          />
         </div>
 
         <div className="bg-primary-bg rounded-5 px-10 pt-4 pb-5 flex flex-col gap-3 mb-5">
           <h3 className="text-20 text-secondary-text font-medium">Time frame</h3>
           <div className="grid grid-cols-2 gap-3">
-            <MarginPositionInfoCard />
-            <MarginPositionInfoCard />
+            <OrderInfoCard
+              value={"7 days"}
+              title="Margin position duration"
+              tooltipText={"Tooltip text"}
+              bg="margin_positions_duration"
+            />
+            <OrderInfoCard
+              value={new Date(position.deadline * 1000)
+                .toLocaleString("en-GB")
+                .split("/")
+                .join(".")}
+              title="Lending order deadline"
+              tooltipText={"Tooltip text"}
+              bg="deadline"
+            />
           </div>
           <PositionProgressBar position={position} />
         </div>
@@ -318,10 +373,10 @@ export default function MarginPosition({
 
             <SimpleBar style={{ maxHeight: 216 }}>
               <div className="flex gap-1 flex-wrap">
-                {position.assets?.map((asset) => (
+                {position.assetsWithBalances?.map(({ asset, balance }) => (
                   <PositionAsset
                     key={asset.wrapped.address0}
-                    amount={12.22}
+                    amount={formatFloat(formatUnits(balance, asset.decimals))}
                     symbol={asset.symbol || "Unknown"}
                   />
                 ))}

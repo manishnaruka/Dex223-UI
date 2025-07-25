@@ -2,7 +2,6 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
-import { add } from "dexie";
 import Image from "next/image";
 import React, { use, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
@@ -10,9 +9,9 @@ import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import {
+  OrderInfoBlock,
   OrderInfoCard,
-  PositionInfoCardProps,
-} from "@/app/[locale]/margin-trading/components/MarginPositionCard";
+} from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
 import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import OrderCloseDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderCloseDialog";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
@@ -32,19 +31,6 @@ import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/i18n/routing";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Token } from "@/sdk_bi/entities/token";
-
-function OrderInfoBlock({ title, cards }: { title: string; cards: Array<PositionInfoCardProps> }) {
-  return (
-    <div>
-      <h3 className="text-20 font-medium mb-3 text-secondary-text">{title}</h3>
-      <div className="grid grid-cols-2 gap-3">
-        {cards.map((card, index) => (
-          <OrderInfoCard {...card} key={index} />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function LendingOrder({
   params,
