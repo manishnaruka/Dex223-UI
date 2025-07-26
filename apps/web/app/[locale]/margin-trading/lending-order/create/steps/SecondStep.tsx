@@ -98,7 +98,6 @@ export default function SecondStep({
           </div>
 
           <div className="bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col gap-2 mb-5">
-            <LendingOrderDetailsRow title={"LTV"} value={<span className="text-red">TODO</span>} />
             <LendingOrderDetailsRow
               title={"You will receive for the entire period"}
               value={<span className="text-red">TODO</span>}

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 
 interface MarginSwapPositionStore {
   marginSwapPosition: MarginPosition | undefined;

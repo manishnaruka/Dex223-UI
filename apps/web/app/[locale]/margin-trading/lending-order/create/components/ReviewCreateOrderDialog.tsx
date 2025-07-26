@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { parseUnits } from "viem";
 
 import { useEditOrderStatusStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
+import { AssetsPreview } from "@/app/[locale]/margin-trading/lending-order/create/components/AssetsPreview";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import useCreateOrder, {
   useCreateOrderParams,
@@ -325,100 +326,15 @@ export default function ReviewCreateOrderDialog({
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
-                title="LTV"
-                value={<span className="text-red">TODO</span>}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
                 title="Accepted collateral tokens"
-                value={
-                  <span className="flex gap-2">
-                    {collateralTokens.length > 2 ? (
-                      <>
-                        {collateralTokens.slice(0, 2).map((token) => (
-                          <span
-                            key={token.wrapped.address0}
-                            className="rounded-1 flex items-center gap-1 border border-secondary-border text-14 py-0.5 pl-1 pr-3"
-                          >
-                            <Image
-                              width={16}
-                              height={16}
-                              src={token.wrapped.logoURI || "/images/tokens/placeholder.svg"}
-                              alt={""}
-                            />
-                            {token.symbol}
-                          </span>
-                        ))}
-                        <span className="p-0.5 text-14">{"..."}</span>
-
-                        <span className="rounded-1 border border-secondary-border text-14 font-medium py-0.5 px-1 min-w-6 flex items-center justify-center">
-                          {collateralTokens.length - 2}
-                        </span>
-                      </>
-                    ) : (
-                      collateralTokens.map((token) => (
-                        <span
-                          key={token.wrapped.address0}
-                          className="rounded-1 flex items-center gap-1 border border-secondary-border text-14 py-0.5 pl-1 pr-3"
-                        >
-                          <Image
-                            width={16}
-                            height={16}
-                            src={token.wrapped.logoURI || "/images/tokens/placeholder.svg"}
-                            alt={""}
-                          />
-                          {token.symbol}
-                        </span>
-                      ))
-                    )}
-                  </span>
-                }
+                value={<AssetsPreview assets={collateralTokens} />}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
                 title="Tokens allowed for trading"
                 value={
                   tradingTokens.inputMode === TradingTokensInputMode.MANUAL ? (
-                    <span className="flex gap-2">
-                      {tradingTokens.allowedTokens.length > 2 ? (
-                        <>
-                          {tradingTokens.allowedTokens.slice(0, 2).map((token) => (
-                            <span
-                              key={token.wrapped.address0}
-                              className="rounded-1 flex items-center gap-1 border border-secondary-border text-14 py-0.5 pl-1 pr-3"
-                            >
-                              <Image
-                                width={16}
-                                height={16}
-                                src={token.wrapped.logoURI || "/images/tokens/placeholder.svg"}
-                                alt={""}
-                              />
-                              {token.symbol}
-                            </span>
-                          ))}
-                          <span className="p-0.5 text-14">{"..."}</span>
-
-                          <span className="rounded-1 border border-secondary-border text-14 font-medium py-0.5 px-1 min-w-6 flex items-center justify-center">
-                            {tradingTokens.allowedTokens.length - 2}
-                          </span>
-                        </>
-                      ) : (
-                        tradingTokens.allowedTokens.map((token) => (
-                          <span
-                            key={token.wrapped.address0}
-                            className="rounded-1 flex items-center gap-1 border border-secondary-border text-14 py-0.5 pl-1 pr-3"
-                          >
-                            <Image
-                              width={16}
-                              height={16}
-                              src={token.wrapped.logoURI || "/images/tokens/placeholder.svg"}
-                              alt={""}
-                            />
-                            {token.symbol}
-                          </span>
-                        ))
-                      )}
-                    </span>
+                    <AssetsPreview assets={tradingTokens.allowedTokens} />
                   ) : (
                     <span className="flex items-center gap-2">
                       Autolisting{" "}

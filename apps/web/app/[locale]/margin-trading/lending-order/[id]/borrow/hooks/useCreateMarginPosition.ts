@@ -2,12 +2,12 @@ import { useCallback, useMemo } from "react";
 import { parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 
-import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import {
   CreateMarginPositionStatus,
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { OperationStepStatus } from "@/components/common/OperationStepRow";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { IconName } from "@/config/types/IconName";
@@ -64,7 +64,7 @@ export function useCreatePositionApproveSteps(order: LendingOrder): {
           error: CreateMarginPositionStatus.ERROR_APPROVE_BORROW,
           textMap: getApproveTextMap(order.liquidationRewardAsset.symbol!),
           amount:
-            order.liquidationRewardAmount +
+            order.liquidationRewardAmount.value +
             parseUnits(values.collateralAmount.toString(), values.collateralToken?.decimals ?? 18),
           token: values.collateralToken,
         },
@@ -90,7 +90,7 @@ export function useCreatePositionApproveSteps(order: LendingOrder): {
         loading: CreateMarginPositionStatus.LOADING_APPROVE_LIQUIDATION_FEE,
         error: CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE,
         textMap: getApproveTextMap(order.liquidationRewardAsset.symbol!),
-        amount: order.liquidationRewardAmount,
+        amount: order.liquidationRewardAmount.value,
         token: order.liquidationRewardAsset,
       },
     ];
@@ -136,7 +136,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
     token: values.collateralToken,
     contractAddress: MARGIN_TRADING_ADDRESS[chainId],
     amountToCheck: isEqualFeeAndCollateralAssets // we check here if we will only need one approval for collateral and liquidation
-      ? order.liquidationRewardAmount +
+      ? order.liquidationRewardAmount.value +
         parseUnits(values.collateralAmount.toString(), values.collateralToken?.decimals ?? 18)
       : parseUnits(values.collateralAmount.toString(), values.collateralToken?.decimals ?? 18),
   });
@@ -144,7 +144,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
   const { isAllowed: isAllowedB, writeTokenApprove: approveB } = useStoreAllowance({
     token: isEqualFeeAndCollateralAssets ? undefined : order.liquidationRewardAsset, // set token to undefined so hook won't run when tokens are equal. Approval will be handled by upper hook
     contractAddress: MARGIN_TRADING_ADDRESS[chainId],
-    amountToCheck: order.liquidationRewardAmount,
+    amountToCheck: order.liquidationRewardAmount.value,
   });
 
   const handleCreateMarginPosition = useCallback(

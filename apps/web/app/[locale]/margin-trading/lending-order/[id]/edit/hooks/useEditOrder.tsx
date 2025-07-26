@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import { Address, encodeAbiParameters, Hash, keccak256, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 
-import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useEditOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderConfigStore";
 import {
   EditOrderStatus,
@@ -11,13 +10,10 @@ import {
 } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
 import { TradingTokensInputMode } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import {
-  CreateOrderStatus,
-  useCreateOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStatusStore";
-import {
   useCreateOrderGasLimitStore,
   useCreateOrderGasPriceStore,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useSwapGasSettingsStore";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { getGasSettings } from "@/functions/gasSettings";
 import { useStoreAllowance } from "@/hooks/useAllowance";

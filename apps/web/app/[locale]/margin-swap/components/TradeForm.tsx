@@ -941,7 +941,7 @@ export default function TradeForm() {
         availableTokens={
           currentlyPicking === "tokenA"
             ? marginSwapPosition?.assets
-            : marginSwapPosition?.allowedForTradingTokens
+            : marginSwapPosition?.order.allowedTradingAssets
         }
       />
       <SwapSettingsDialog />

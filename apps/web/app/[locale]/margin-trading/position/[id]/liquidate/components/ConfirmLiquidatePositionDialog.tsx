@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { parseUnits } from "viem";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useEditOrderStatusStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import useCreateOrder, {
@@ -22,6 +21,7 @@ import {
   PositionLiquidateStatus,
   usePositionLiquidateStatusStore,
 } from "@/app/[locale]/margin-trading/position/[id]/liquidate/stores/usePositionLiquidateStatusStore";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";

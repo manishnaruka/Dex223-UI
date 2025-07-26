@@ -8,7 +8,7 @@ import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/us
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import PositionDetailCard from "@/app/[locale]/margin-trading/components/widgets/PositionDetailCard";
 import { usePositionsByOwner } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
@@ -77,7 +77,8 @@ function PositionSelectItem({
 
       <div className="bg-primary-bg rounded-3 p-5 flex flex-wrap gap-2">
         <div className="flex items-center gap-1">
-          <Tooltip text="Tooltip text" /> Assets {position.assets.length}/{position.currencyLimit}
+          <Tooltip text="Tooltip text" /> Assets {position.assets.length}/
+          {position.order.currencyLimit}
         </div>
         {position.assets?.map((asset) => (
           <PositionAsset
@@ -120,14 +121,14 @@ export function SelectedPositionInfo() {
           <div className="flex items-center gap-1 w-full text-tertiary-text mb-2">
             <Tooltip text="Tooltip text" /> <span>Assets:</span>
             <span className="text-secondary-text">
-              {marginSwapPosition.assets.length || 0} / {marginSwapPosition.currencyLimit}
+              {marginSwapPosition.assets.length || 0} / {marginSwapPosition.order.currencyLimit}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {marginSwapPosition.assetsWithBalances?.map(({ asset, balance }) => (
               <PositionAsset
                 key={asset.wrapped.address0}
-                amount={formatUnits(balance, asset.decimals)}
+                amount={formatUnits(balance || BigInt(0), asset.decimals)}
                 symbol={asset.symbol || "Unknown"}
               />
             ))}

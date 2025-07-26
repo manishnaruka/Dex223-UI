@@ -7,10 +7,10 @@ import { formatUnits } from "viem";
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
 import { OrderInfoCard } from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
 import PositionDetailCard from "@/app/[locale]/margin-trading/components/widgets/PositionDetailCard";
-import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
 import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
+import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
@@ -154,10 +154,6 @@ export function InactiveMarginPositionCard({ position }: Props) {
 }
 
 export default function MarginPositionCard({ position }: Props) {
-  const liquidationFee = useMemo(() => {
-    return formatUnits(position.liquidationRewardAmount, position.liquidationRewardAsset.decimals);
-  }, [position.liquidationRewardAmount, position.liquidationRewardAsset.decimals]);
-
   const [positionToClose, setPositionToClose] = useState<MarginPosition | undefined>();
   const [positionToDeposit, setPositionToDeposit] = useState<MarginPosition | undefined>();
 
@@ -265,7 +261,7 @@ export default function MarginPositionCard({ position }: Props) {
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">
         <div className="flex justify-between">
           <span className="text-tertiary-text flex items-center gap-2">
-            Assets: {position.assets.length} / {position.currencyLimit} tokens
+            Assets: {position.assets.length} / {position.order.currencyLimit} tokens
             <Tooltip text="Tooltip text" />
           </span>
           <span className="flex items-center gap-2 py-2 text-secondary-text">
@@ -277,7 +273,7 @@ export default function MarginPositionCard({ position }: Props) {
         <div className="flex gap-2">
           {position.assetsWithBalances.map(({ asset, balance }, index) => (
             <PositionAsset
-              amount={formatUnits(balance, asset.decimals)}
+              amount={formatUnits(balance || BigInt(0), asset.decimals)}
               symbol={asset.symbol || "Unknown"}
               key={index}
             />
@@ -290,8 +286,8 @@ export default function MarginPositionCard({ position }: Props) {
           <LiquidationInfo
             liquidationFeeStatus={liquidationFeeStatus}
             label="Liquidation fee"
-            value={liquidationFee}
-            symbol={position.liquidationRewardAsset.symbol || "Unknown"}
+            value={position.order.liquidationRewardAmount.formatted}
+            symbol={position.order.liquidationRewardAsset.symbol || "Unknown"}
           />
           <LiquidationInfo
             liquidationFeeStatus={liquidationFeeStatus}
@@ -342,13 +338,7 @@ export default function MarginPositionCard({ position }: Props) {
   );
 }
 
-export function LendingPositionCard({ position, order }: Props & { order: LendingOrder }) {
-  const liquidationFee = useMemo(() => {
-    return formatUnits(order.liquidationRewardAmount, order.liquidationRewardAsset.decimals);
-  }, [order.liquidationRewardAmount, order.liquidationRewardAsset.decimals]);
-
-  console.log(position);
-
+export function LendingPositionCard({ position }: Props) {
   const { expectedBalance, actualBalance } = usePositionStatus(position);
 
   const nativeCurrency = useNativeCurrency();
@@ -444,14 +434,14 @@ export function LendingPositionCard({ position, order }: Props & { order: Lendin
               ? formatFloat(formatUnits(expectedBalance, position.loanAsset.decimals))
               : "Loading..."
           }
-          symbol={order.baseAsset.symbol}
+          symbol={position.loanAsset.symbol}
         />
       </div>
 
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">
         <div className="flex justify-between">
           <span className="text-tertiary-text flex items-center gap-2">
-            Assets: {position.assets.length} / {order.currencyLimit}
+            Assets: {position.assets.length} / {position.order.currencyLimit}
             <Tooltip text="Tooltip text" />
           </span>
           <span className="flex items-center gap-2 py-2 text-secondary-text">
@@ -464,7 +454,7 @@ export function LendingPositionCard({ position, order }: Props & { order: Lendin
           {position.assetsWithBalances?.map(({ asset, balance }) => (
             <PositionAsset
               key={asset.wrapped.address0}
-              amount={formatUnits(balance, asset.decimals)}
+              amount={formatUnits(balance || BigInt(0), asset.decimals)}
               symbol={asset.symbol || "Unknown"}
             />
           ))}
@@ -476,8 +466,8 @@ export function LendingPositionCard({ position, order }: Props & { order: Lendin
           <LiquidationInfo
             liquidationFeeStatus={liquidationFeeStatus}
             label="Liquidation fee"
-            value={liquidationFee}
-            symbol={order.liquidationRewardAsset.symbol || "Unknown"}
+            value={position.order.liquidationRewardAmount.formatted}
+            symbol={position.order.liquidationRewardAsset.symbol || "Unknown"}
           />
           <div></div>
           <LiquidationInfo

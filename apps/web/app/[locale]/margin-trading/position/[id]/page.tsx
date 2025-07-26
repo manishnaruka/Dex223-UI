@@ -16,11 +16,11 @@ import {
 } from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
 import PositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionWithdrawDialog";
 import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
@@ -151,21 +151,6 @@ const testData: Order[] = [
   },
 ];
 
-function LiquidateOrderInfoBlock() {
-  return (
-    <div className="flex flex-col h-full">
-      <h3 className="text-20 font-medium mb-3">Liquidation detais</h3>
-      <div className="flex flex-col gap-3 flex-grow">
-        <MarginPositionInfoCard />
-        <MarginPositionInfoCard />
-        <div className="flex-grow flex items-end">
-          <Button fullWidth>Liquidate</Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function BalanceCard({ position }: { position: MarginPosition }) {
   const { expectedBalance, actualBalance } = usePositionStatus(position);
 
@@ -188,8 +173,6 @@ function BalanceCard({ position }: { position: MarginPosition }) {
           {expectedBalance
             ? formatFloat(formatUnits(expectedBalance, position.loanAsset.decimals))
             : "Loading..."}
-          {/*{formatUnits(actualBalance, position.loanAsset.decimals)} /{" "}*/}
-          {/*{formatUnits(expectedBalance, position.loanAsset.decimals)}{" "}*/}
           <span className="text-secondary-text"> {position.loanAsset.symbol}</span>
         </p>
       </div>
@@ -240,7 +223,7 @@ export default function MarginPositionPage({
             Margin position ID: <span className="text-secondary-text">{position.id}</span>
           </div>
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
-            Lending order ID: <ExternalTextLink text={position.orderId.toString()} href="#" />
+            Lending order ID: <ExternalTextLink text={position.order.id.toString()} href="#" />
           </div>
         </div>
 
@@ -290,12 +273,9 @@ export default function MarginPositionPage({
                 </div>
 
                 <p className="font-medium text-20">
-                  {formatUnits(
-                    position.liquidationRewardAmount,
-                    position.liquidationRewardAsset.decimals,
-                  )}{" "}
+                  {position.order.liquidationRewardAmount.formatted}{" "}
                   <span className="text-secondary-text">
-                    {position.liquidationRewardAsset.symbol}
+                    {position.order.liquidationRewardAsset.symbol}
                   </span>{" "}
                   / 0 <span className="text-secondary-text">ETH</span>
                 </p>
@@ -363,7 +343,7 @@ export default function MarginPositionPage({
                   <Tooltip text="Tooltip text" />
                 </h3>
                 <span className="text-20 font-medium text-secondary-text">
-                  {position.assets.length} / {position.currencyLimit} tokens
+                  {position.assets.length} / {position.order.currencyLimit} tokens
                 </span>
               </div>
               <div>
@@ -376,7 +356,7 @@ export default function MarginPositionPage({
                 {position.assetsWithBalances?.map(({ asset, balance }) => (
                   <PositionAsset
                     key={asset.wrapped.address0}
-                    amount={formatFloat(formatUnits(balance, asset.decimals))}
+                    amount={formatFloat(formatUnits(balance || BigInt(0), asset.decimals))}
                     symbol={asset.symbol || "Unknown"}
                   />
                 ))}

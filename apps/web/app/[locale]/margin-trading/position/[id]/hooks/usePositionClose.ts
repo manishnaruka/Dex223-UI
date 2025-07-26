@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { usePublicClient, useWalletClient } from "wagmi";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import {
   PositionCloseStatus,
   usePositionCloseStatusStore,
@@ -10,6 +9,7 @@ import {
   PositionWithdrawStatus,
   useWithdrawPositionStatusStore,
 } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionWithdrawStatusStore";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";

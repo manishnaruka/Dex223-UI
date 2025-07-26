@@ -88,14 +88,8 @@ export default function EditLendingOrderPage({
       liquidationFeeToken: order.liquidationRewardAsset,
       orderCurrencyLimit: order.currencyLimit.toString(),
       liquidationMode: { type: LiquidationType.ANYONE, whitelistedLiquidators: [] },
-      liquidationFeeForLender: formatUnits(
-        order.liquidationRewardAmount,
-        order.liquidationRewardAsset.decimals,
-      ),
-      liquidationFeeForLiquidator: formatUnits(
-        order.liquidationRewardAmount,
-        order.liquidationRewardAsset.decimals,
-      ),
+      liquidationFeeForLender: "0",
+      liquidationFeeForLiquidator: order.liquidationRewardAmount.formatted,
       priceSource: ORACLE_ADDRESS[DexChainId.SEPOLIA],
     });
 

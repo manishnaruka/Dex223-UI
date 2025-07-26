@@ -1,30 +1,27 @@
-import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import React, { useEffect, useState } from "react";
-import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
+import React, { useEffect, useMemo, useState } from "react";
+import { formatEther, formatGwei, parseUnits } from "viem";
 
-import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import useOrderDeposit from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderDeposit";
 import {
   OrderDepositStatus,
   useDepositOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
-import { CreateOrderStatus } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStatusStore";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { ReadonlyTokenAmountCard } from "@/app/[locale]/swap/components/ConfirmConvertDialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import { InputLabel } from "@/components/atoms/TextField";
+import TextField from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import OperationStepRow, {
   OperationRows,
   operationStatusToStepStatus,
   OperationStepStatus,
 } from "@/components/common/OperationStepRow";
-import TokenInput from "@/components/common/TokenInput";
 import { IconName } from "@/config/types/IconName";
 import { formatFloat } from "@/functions/formatFloat";
 import useTokenBalances from "@/hooks/useTokenBalances";
@@ -80,18 +77,18 @@ function composeDepositOrderSteps(symbol: string = "Unknown"): OperationStepConf
 }
 
 function OrderDepositActionButton({
-  orderId,
   order,
   amountToApprove,
   amountToDeposit,
+  disabled,
 }: {
-  orderId: number;
   order: LendingOrder;
   amountToApprove: string;
   amountToDeposit: string;
+  disabled: boolean;
 }) {
   const { handleOrderDeposit } = useOrderDeposit({
-    orderId,
+    orderId: order.id,
     currency: order.baseAsset,
     amount: amountToDeposit,
   });
@@ -128,7 +125,7 @@ function OrderDepositActionButton({
   }
 
   return (
-    <Button onClick={() => handleOrderDeposit(amountToApprove)} fullWidth>
+    <Button disabled={disabled} onClick={() => handleOrderDeposit(amountToApprove)} fullWidth>
       Deposit {order.baseAsset.symbol}
     </Button>
   );
@@ -137,12 +134,10 @@ function OrderDepositActionButton({
 export default function OrderDepositDialog({
   isOpen,
   setIsOpen,
-  orderId,
   order,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  orderId: number;
   order: LendingOrder;
 }) {
   const [isEditApproveActive, setEditApproveActive] = useState(false);
@@ -172,6 +167,18 @@ export default function OrderDepositDialog({
   }, [isOpen, setStatus, status]);
   console.log(order);
 
+  const error = useMemo(() => {
+    if (
+      tokenA0Balance &&
+      parseUnits(amountToDeposit, order.baseAsset.decimals) > tokenA0Balance.value
+    ) {
+      return `Available balance: ${
+        tokenA0Balance && Boolean(tokenA0Balance.value) ? formatFloat(tokenA0Balance.formatted) : 0
+      } ${order.baseAsset.symbol}`;
+    }
+
+    return undefined;
+  }, [amountToDeposit, order.baseAsset.decimals, order.baseAsset.symbol, tokenA0Balance]);
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title="Deposit" />
@@ -181,12 +188,14 @@ export default function OrderDepositDialog({
             <p className="text-secondary-text mb-4">
               You will increase the available balance of your lending order by making a deposit
             </p>
-            <InputLabel label="Deposit amount" tooltipText="Tooltip text" />
-            <TokenInput
-              handleClick={() => null}
-              token={order.baseAsset}
+            <TextField
+              label="Deposit amount"
+              internalText={order.baseAsset.symbol}
               value={amountToDeposit}
-              onInputChange={(value) => {
+              isNumeric
+              placeholder="Deposit amount"
+              onChange={(e) => {
+                const value = e.target.value;
                 setAmountToDeposit(value);
                 if (
                   parseUnits(value, order.baseAsset.decimals) >
@@ -197,24 +206,18 @@ export default function OrderDepositDialog({
                   setAmountToApproveModified(false);
                 }
               }}
-              balance0={
+              helperText={`Available balance: ${
                 tokenA0Balance && Boolean(tokenA0Balance.value)
                   ? formatFloat(tokenA0Balance.formatted)
-                  : "0"
-              }
-              balance1={
-                tokenA1Balance && Boolean(tokenA1Balance.value)
-                  ? formatFloat(tokenA1Balance.formatted)
-                  : "0"
-              }
-              standard={Standard.ERC20}
-              setStandard={() => null}
+                  : 0
+              } ${order.baseAsset.symbol}`}
+              error={error}
             />
 
             {order.baseAsset.isToken ? (
               <div
                 className={clsx(
-                  "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5",
+                  "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-4 gap-5",
                   parseUnits(amountToApprove, order.baseAsset.decimals) <
                     parseUnits(amountToDeposit, order.baseAsset.decimals) && "pb-[26px]",
                 )}
@@ -349,6 +352,20 @@ export default function OrderDepositDialog({
                     </p>
                   </div>
                 )}
+
+                {(status === OrderDepositStatus.ERROR_DEPOSIT ||
+                  status === OrderDepositStatus.ERROR_APPROVE) && (
+                  <div>
+                    <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                      {status === OrderDepositStatus.ERROR_DEPOSIT
+                        ? "Failed to deposit"
+                        : "Failed to approve"}
+                    </h2>
+                    <p className="text-center mb-1">
+                      {amountToDeposit} {order.baseAsset.symbol}
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <ReadonlyTokenAmountCard
@@ -365,7 +382,7 @@ export default function OrderDepositDialog({
         )}
 
         <OrderDepositActionButton
-          orderId={orderId}
+          disabled={isEditApproveActive || !amountToDeposit || !!error}
           order={order}
           amountToApprove={amountToApprove}
           amountToDeposit={amountToDeposit}

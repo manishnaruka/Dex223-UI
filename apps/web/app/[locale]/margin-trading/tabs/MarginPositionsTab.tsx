@@ -1,5 +1,4 @@
 import React from "react";
-import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import MarginPositionCard, {

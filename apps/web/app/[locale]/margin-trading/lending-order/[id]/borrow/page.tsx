@@ -360,11 +360,7 @@ export default function BorrowPage({
                 <div className="flex justify-between items-center bg-tertiary-bg py-3 px-5 rounded-3">
                   <div className="flex items-center gap-2">
                     <Image src="/images/tokens/placeholder.svg" alt="" width={24} height={24} />
-                    {formatUnits(
-                      order.liquidationRewardAmount,
-                      order.liquidationRewardAsset.decimals ?? 18,
-                    )}{" "}
-                    {order.liquidationRewardAsset.symbol}
+                    {order?.liquidationRewardAmount.formatted} {order.liquidationRewardAsset.symbol}
                   </div>
 
                   {order.liquidationRewardAsset?.isNative ? (

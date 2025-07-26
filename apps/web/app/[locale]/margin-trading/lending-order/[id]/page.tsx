@@ -27,6 +27,7 @@ import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolio
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/i18n/routing";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
@@ -39,6 +40,8 @@ export default function LendingOrder({
     id: number;
   }>;
 }) {
+  useRecentTransactionTracking();
+
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
   const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
   const [isOpenDialogOpened, setIsOpenDialogOpened] = useState(false);
@@ -159,15 +162,17 @@ export default function LendingOrder({
               {isOwner && (
                 <div className="flex items-center gap-3">
                   <Button
+                    disabled={!order.alive}
                     onClick={() => setIsDepositDialogOpened(true)}
-                    className="border-green"
+                    className="border-green disabled:bg-green-bg disabled:opacity-50"
                     colorScheme={ButtonColor.LIGHT_GREEN}
                   >
                     Deposit
                   </Button>
                   <Button
+                    disabled={!order.alive}
                     onClick={() => setIsWithdrawDialogOpened(true)}
-                    className="border-green"
+                    className="border-green disabled:bg-green-bg disabled:opacity-50"
                     colorScheme={ButtonColor.LIGHT_GREEN}
                   >
                     Withdraw
@@ -279,7 +284,7 @@ export default function LendingOrder({
               {
                 title: "Liquidation fee",
                 tooltipText: "Tooltip text",
-                value: `${formatUnits(order.liquidationRewardAmount, order.liquidationRewardAsset.decimals ?? 18)} ${order.liquidationRewardAsset.symbol}`,
+                value: `${order.liquidationRewardAmount.formatted} ${order.liquidationRewardAsset.symbol}`,
                 bg: "liquidation_fee",
               },
               {
@@ -434,25 +439,21 @@ export default function LendingOrder({
       </Container>
 
       <OrderDepositDialog
-        orderId={id}
         isOpen={isDepositDialogOpened}
         setIsOpen={setIsDepositDialogOpened}
         order={order}
       />
       <OrderWithdrawDialog
-        orderId={id}
         isOpen={isWithdrawDialogOpened}
         setIsOpen={setIsWithdrawDialogOpened}
         order={order}
       />
       <OrderCloseDialog
-        orderId={id}
         isOpen={isCloseDialogOpened}
         setIsOpen={setIsCloseDialogOpened}
         order={order}
       />
       <OrderOpenDialog
-        orderId={id}
         isOpen={isOpenDialogOpened}
         setIsOpen={setIsOpenDialogOpened}
         order={order}

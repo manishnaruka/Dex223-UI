@@ -3,20 +3,14 @@ import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import React, { useEffect, useMemo } from "react";
 import { formatEther, formatGwei, formatUnits } from "viem";
-import { useReadContract, useWalletClient } from "wagmi";
 
 import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
-import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import useOrderClose from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderClose";
-import useOrderDeposit from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderDeposit";
 import {
   OrderCloseStatus,
   useCloseOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useCloseOrderStatusStore";
-import {
-  OrderDepositStatus,
-  useDepositOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -67,7 +61,7 @@ function composeDepositOrderSteps(): OperationStepConfig[] {
 
 function OrderCloseActionButton({ order }: { order: LendingOrder }) {
   const { status, closeOrderHash } = useCloseOrderStatusStore();
-  const { handleOrderClose } = useOrderClose();
+  const { handleOrderClose } = useOrderClose({ order });
 
   if (status !== OrderCloseStatus.INITIAL) {
     return (
@@ -108,12 +102,10 @@ function OrderCloseActionButton({ order }: { order: LendingOrder }) {
 export default function OrderCloseDialog({
   isOpen,
   setIsOpen,
-  orderId,
   order,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  orderId: number;
   order: LendingOrder;
 }) {
   const { status, setStatus } = useCloseOrderStatusStore();
@@ -158,7 +150,7 @@ export default function OrderCloseDialog({
               </div>
               <div className="text-secondary-text text-12 py-2 px-4 rounded-2 bg-tertiary-bg">
                 <span className="text-tertiary-text">ID: </span>
-                {orderId}
+                {order.id}
               </div>
             </div>
 
@@ -259,7 +251,7 @@ export default function OrderCloseDialog({
               </div>
               <div className="text-secondary-text text-12 py-2 px-4 rounded-2 bg-tertiary-bg">
                 <span className="text-tertiary-text">ID: </span>
-                {orderId}
+                {order.id}
               </div>
             </div>
 
@@ -320,6 +312,17 @@ export default function OrderCloseDialog({
               <div>
                 <h2 className="text-center mb-1 font-bold text-20 ">
                   Lending order closed successfully
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol}{" "}
+                  <span className="text-tertiary-text">(ID: {order.id})</span>
+                </p>
+              </div>
+            )}
+            {status === OrderCloseStatus.ERROR_CLOSE_ORDER && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Failed to close lending order
                 </h2>
                 <p className="text-center mb-1">
                   {order.baseAsset.symbol}{" "}

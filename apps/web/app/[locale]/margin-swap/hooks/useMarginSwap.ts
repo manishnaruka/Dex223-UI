@@ -40,12 +40,12 @@ export default function useMarginSwap() {
         ),
       ), // assetId_1
       BigInt(
-        marginSwapPosition.allowedForTradingAddresses.findIndex(
+        marginSwapPosition.order.allowedTradingAddresses.findIndex(
           (_asset) => _asset.toLowerCase() === tokenA.wrapped.address0.toLowerCase(),
         ),
       ), //whitelistId_1
       BigInt(
-        marginSwapPosition.allowedForTradingAddresses.findIndex(
+        marginSwapPosition.order.allowedTradingAddresses.findIndex(
           (_asset) => _asset.toLowerCase() === tokenB.wrapped.address0.toLowerCase(),
         ), //whitelistId_1
       ),

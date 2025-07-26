@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 
 enum DangerStatus {
   STABLE,

@@ -2,11 +2,11 @@ import { useCallback } from "react";
 import { parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import {
   PositionDepositStatus,
   useDepositPositionStatusStore,
 } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionDepositStatusStore";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";

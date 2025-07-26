@@ -1,10 +1,9 @@
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import React from "react";
-import { formatUnits } from "viem";
 
 import { LendingPositionCard } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
-import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import { Link } from "@/i18n/routing";
@@ -128,14 +127,8 @@ export default function LendingOrderCard({
 
               <LiquidationInfo
                 symbol={order.liquidationRewardAsset.symbol || "Unknown"}
-                feeForLiquidator={formatUnits(
-                  order.liquidationRewardAmount,
-                  order.liquidationRewardAsset.decimals,
-                )}
-                feeForLender={formatUnits(
-                  order.liquidationRewardAmount,
-                  order.liquidationRewardAsset.decimals,
-                )}
+                feeForLiquidator={order.liquidationRewardAmount.formatted}
+                feeForLender={"0"}
                 label="Fee for liquidator"
               />
             </div>
@@ -206,7 +199,7 @@ export default function LendingOrderCard({
                 </svg>
               </div>
 
-              <LendingPositionCard position={position} order={order} />
+              <LendingPositionCard position={{ ...position, order }} />
             </React.Fragment>
           ))}
       </div>

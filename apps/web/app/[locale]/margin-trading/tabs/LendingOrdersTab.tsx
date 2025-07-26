@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { useAccount } from "wagmi";
 
 import LendingOrderCard from "@/app/[locale]/margin-trading/components/LendingOrderCard";
-import { LendingOrder, useOrdersByOwner } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { useOrdersByOwner } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
 import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { SearchInput } from "@/components/atoms/Input";
 
 import OrderCloseDialog from "../lending-order/[id]/components/OrderCloseDialog";
@@ -46,7 +47,6 @@ export default function LendingOrdersTab() {
         <OrderCloseDialog
           isOpen={Boolean(orderToToggle)}
           setIsOpen={() => setOrderToToggle(undefined)}
-          orderId={orderToToggle.id}
           order={orderToToggle}
         />
       )}
@@ -54,7 +54,6 @@ export default function LendingOrdersTab() {
         <OrderDepositDialog
           isOpen={Boolean(orderToDeposit)}
           setIsOpen={() => setOrderToDeposit(undefined)}
-          orderId={orderToDeposit.id}
           order={orderToDeposit}
         />
       )}
@@ -62,7 +61,6 @@ export default function LendingOrdersTab() {
         <OrderWithdrawDialog
           isOpen={Boolean(orderToWithdraw)}
           setIsOpen={() => setOrderToWithdraw(undefined)}
-          orderId={orderToWithdraw.id}
           order={orderToWithdraw}
         />
       )}

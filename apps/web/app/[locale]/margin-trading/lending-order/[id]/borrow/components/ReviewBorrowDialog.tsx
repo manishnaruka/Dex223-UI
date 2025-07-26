@@ -5,7 +5,6 @@ import Image from "next/image";
 import React, { PropsWithChildren, useEffect, useMemo } from "react";
 import { formatUnits } from "viem";
 
-import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import useCreateMarginPosition, {
   useCreatePositionApproveSteps,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
@@ -17,6 +16,7 @@ import {
 import { EditOrderStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -158,12 +158,7 @@ export default function ReviewBorrowDialog({
                     width={20}
                     height={20}
                   />
-                  <span className="">
-                    {formatUnits(
-                      order.liquidationRewardAmount,
-                      order.liquidationRewardAsset.decimals,
-                    )}
-                  </span>
+                  <span className="">{order.liquidationRewardAmount.formatted}</span>
                   <span className="text-secondary-text">
                     {order.liquidationRewardAsset.symbol || "Unknown"}
                   </span>

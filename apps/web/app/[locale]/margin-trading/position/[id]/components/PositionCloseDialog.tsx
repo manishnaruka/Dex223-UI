@@ -5,13 +5,12 @@ import React, { useMemo } from "react";
 import SimpleBar from "simplebar-react";
 import { formatEther, formatGwei, formatUnits } from "viem";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import usePositionClose from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionClose";
 import {
   PositionCloseStatus,
   usePositionCloseStatusStore,
 } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionCloseStatusStore";
-import { PositionDepositStatus } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionDepositStatusStore";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -158,21 +157,15 @@ export default function PositionCloseDialog({
               <div className="bg-quaternary-bg rounded-3 grid grid-cols-4 text-secondary-text py-3.5 px-5">
                 <div className="py-1">
                   <span className="text-primary-text">
-                    {formatUnits(
-                      position.liquidationRewardAmount,
-                      position.liquidationRewardAsset.decimals,
-                    )}
+                    {position.order.liquidationRewardAmount.formatted}
                   </span>{" "}
-                  {position.liquidationRewardAsset.symbol}
+                  {position.order.liquidationRewardAsset.symbol}
                 </div>
                 <div className="py-1">
                   <span className="text-green">
-                    {formatUnits(
-                      position.liquidationRewardAmount,
-                      position.liquidationRewardAsset.decimals,
-                    )}
+                    {position.order.liquidationRewardAmount.formatted}
                   </span>{" "}
-                  {position.liquidationRewardAsset.symbol}
+                  {position.order.liquidationRewardAsset.symbol}
                 </div>
                 <div className="py-1">Fee for liquidator</div>
                 <div className="py-1">Your address</div>

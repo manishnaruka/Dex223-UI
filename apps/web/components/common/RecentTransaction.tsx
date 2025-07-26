@@ -157,6 +157,30 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           </span>
         </span>
       );
+    case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="lending" />
+
+          <span className="font-medium inline-block text-16 align-top">Create lending order</span>
+        </span>
+      );
+    case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="closed" />
+
+          <span className="font-medium inline-block text-16 align-top">Close lending order</span>
+        </span>
+      );
+    case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="open-order" />
+
+          <span className="font-medium inline-block text-16 align-top">Open lending order</span>
+        </span>
+      );
   }
 }
 
@@ -169,6 +193,7 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.CONVERT:
     case RecentTransactionTitleTemplate.UNWRAP:
+    case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
       return (
         <span className="text-14 text-secondary-text">
           {t("single_subtitle", {
@@ -199,6 +224,11 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
       return (
         <span className="text-14 text-secondary-text">{`${title.symbol0} and ${title.symbol0} in "${title.autoListing}" list`}</span>
       );
+    case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
+      return (
+        <span className="text-14 text-secondary-text">{`${title.symbol} (ID: ${title.orderId})`}</span>
+      );
   }
 }
 
@@ -210,6 +240,9 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.LIST_SINGLE:
     case RecentTransactionTitleTemplate.CONVERT:
     case RecentTransactionTitleTemplate.UNWRAP:
+    case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
       return (
         <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
           <Image width={36} height={36} src={title.logoURI} alt="" />

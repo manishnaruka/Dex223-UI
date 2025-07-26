@@ -5,8 +5,9 @@ import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
-import { LendingOrder, useOrders } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import { useOrders } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useBorrowMarketFilterStore } from "@/app/[locale]/margin-trading/stores/useBorrowMarketFilterStore";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,

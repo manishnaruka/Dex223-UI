@@ -3,19 +3,12 @@ import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 
-import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
-import useOrderDeposit from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderDeposit";
-import {
-  OrderDepositStatus,
-  useDepositOrderStatusStore,
-} from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
-import { OrderWithdrawStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useWithdrawOrderStatusStore";
 import usePositionDeposit from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionDeposit";
 import {
   PositionDepositStatus,
   useDepositPositionStatusStore,
 } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionDepositStatusStore";
-import { PositionWithdrawStatus } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionWithdrawStatusStore";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { ReadonlyTokenAmountCard } from "@/app/[locale]/swap/components/ConfirmConvertDialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -32,7 +25,6 @@ import OperationStepRow, {
 import TokenInput from "@/components/common/TokenInput";
 import { IconName } from "@/config/types/IconName";
 import { formatFloat } from "@/functions/formatFloat";
-import useTokenBalances from "@/hooks/useTokenBalances";
 import { Standard } from "@/sdk_bi/standard";
 
 type StepTextMap = {

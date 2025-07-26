@@ -70,6 +70,11 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
       return (
         <NotificationSubtitleText>{`${title.symbol0} and ${title.symbol0} in "${title.autoListing}" list`}</NotificationSubtitleText>
       );
+    case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
+      return (
+        <NotificationSubtitleText>{`${title.symbol} (ID: ${title.orderId})`}</NotificationSubtitleText>
+      );
   }
 }
 
@@ -180,6 +185,22 @@ function NotificationTitle({
           {status === RecentTransactionStatus.SUCCESS
             ? t("list_double_success_notification")
             : t("list_double_revert_notification")}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Lending order opened successfully"
+            : "Failed to open lending order"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Lending order closed successfully"
+            : "Failed to close lending order"}
         </NotificationTitleText>
       );
   }

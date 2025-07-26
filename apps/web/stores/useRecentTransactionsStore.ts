@@ -25,15 +25,17 @@ export enum RecentTransactionTitleTemplate {
   LIST_DOUBLE,
   CONVERT,
   UNWRAP,
-}
+  CREATE_LENDING_ORDER,
+  EDIT_LENDING_ORDER,
+  OPEN_LENDING_ORDER,
+  CLOSE_LENDING_ORDER,
 
-type CommonRecentTransaction = {
-  hash: Address;
-  chainId: number;
-  status: RecentTransactionStatus;
-  nonce: number;
-  gasFeeModel: GasFeeModel;
-};
+  CREATE_MARGIN_POSITION,
+  CLOSE_MARGIN_POSITION,
+  FREEZE_MARGIN_POSITION,
+  LIQUIDATE_MARGIN_POSITION,
+  MARGIN_SWAP,
+}
 
 type RecentTransactionGasLimit =
   | {
@@ -45,6 +47,17 @@ type RecentTransactionGasLimit =
       model: GasFeeModel.LEGACY;
       gasPrice: string;
     };
+
+type MarginPositionTitle = {
+  symbol: string;
+  positionId: number;
+};
+
+type MarginOrderTitle = {
+  symbol: string;
+  orderId: number;
+  logoURI: string;
+};
 
 type SingleTokenTransactionTitle = {
   symbol: string;
@@ -102,7 +115,16 @@ export type IRecentTransactionTitle =
     } & Omit<TwoTokensTransactionTitle, "amount0" | "amount1"> & { autoListing: string })
   | ({
       template: RecentTransactionTitleTemplate.ADD;
-    } & TwoTokensTransactionTitle);
+    } & TwoTokensTransactionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CREATE_LENDING_ORDER;
+    } & SingleTokenTransactionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.OPEN_LENDING_ORDER;
+    } & MarginOrderTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER;
+    } & MarginOrderTitle);
 
 export type IRecentTransaction = {
   id: Address;

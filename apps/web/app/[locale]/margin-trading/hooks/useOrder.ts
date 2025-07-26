@@ -1,70 +1,32 @@
 import { useQuery } from "@apollo/client";
 import gql from "graphql-tag";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Address } from "viem";
 
-import { GqlToken, gqlTokenToCurrency } from "@/app/[locale]/margin-trading/hooks/helpers";
+import {
+  GqlOrder,
+  GqlPosition,
+  serializeGqlOrder,
+  serializeGqlPosition,
+} from "@/app/[locale]/margin-trading/hooks/helpers";
+import {
+  GQL_ORDER_FIELDS,
+  GQL_POSITION_FIELDS,
+} from "@/app/[locale]/margin-trading/hooks/queryParts";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { SortingType } from "@/components/buttons/IconButton";
 import daysToSeconds from "@/functions/daysToSeconds";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useMarginModuleApolloClient from "@/hooks/useMarginModuleApolloClient";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { DexChainId } from "@/sdk_bi/chains";
-import { Currency } from "@/sdk_bi/entities/currency";
-import { NativeCoin } from "@/sdk_bi/entities/ether";
-import { Token } from "@/sdk_bi/entities/token";
-import { wrappedTokens } from "@/sdk_bi/entities/weth9";
-import { Standard } from "@/sdk_bi/standard";
 
 const queryAllOrders = gql`
   query GetOrders($orderBy: String, $orderDirection: String, $where: Order_filter) {
     orders(orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
-      owner
-      balance
-      leverage
-      collateralTokens {
-        addressERC20
-        addressERC223
-        decimals
-        id
-        name
-        symbol
-      }
-      baseAssetToken {
-        id
-        decimals
-        addressERC223
-        addressERC20
-        name
-        symbol
-      }
-      collaterals
-      currencyLimit
-      deadline
-      duration
-      id
-      interestRate
-      liquidationRewardAmount
-      liquidationRewardAsset
-      liquidationRewardAssetToken {
-        addressERC20
-        addressERC223
-        decimals
-        id
-        name
-        symbol
-      }
-      minLoan
-      whitelist {
-        allowedForTradingTokens {
-          addressERC20
-          addressERC223
-          decimals
-          id
-          name
-          symbol
-        }
+      ${GQL_ORDER_FIELDS}
+      positions {
+        ${GQL_POSITION_FIELDS}
       }
     }
   }
@@ -73,73 +35,10 @@ const queryAllOrders = gql`
 const queryOwner = gql(`
   query GetOrders($owner: String!) {
     orders(where: {owner: $owner}) {
-      owner
-      balance
-      leverage
-      alive
-      collateralTokens {
-        addressERC20
-        addressERC223
-        decimals
-        id
-        name
-        symbol
-      }
-      baseAssetToken {
-        id
-        decimals
-        addressERC223
-        addressERC20
-        name
-        symbol
-      }
-      collaterals
-      currencyLimit
-      deadline
-      duration
-      id
-      interestRate
-      liquidationRewardAmount
-      liquidationRewardAsset
-      liquidationRewardAssetToken {
-        addressERC20
-        addressERC223
-        decimals
-        id
-        name
-        symbol
-      }
-      minLoan
+      ${GQL_ORDER_FIELDS}
       positions {
-        deadline
-        loanAmount
-        owner
-        id
-        createdAt
-        assets {
-          address
-          balance
-          id
-        }
-        assetsTokens {
-          addressERC20
-          addressERC223
-          decimals
-          id
-          name
-          symbol
-        }
+        ${GQL_POSITION_FIELDS}
       }
-      whitelist {
-       allowedForTradingTokens {
-         addressERC20
-         addressERC223
-         decimals
-         id
-         name
-         symbol
-       }
-     }
     }
   }
 `);
@@ -147,134 +46,13 @@ const queryOwner = gql(`
 const queryId = gql(`
   query GetOrders($id: Int!) {
     order(id: $id) {
-      owner
-      balance
-      leverage
-      collateralTokens {
-        addressERC20
-        addressERC223
-        decimals
-        id
-        name
-        symbol
-      }
-      baseAssetToken {
-        id
-        decimals
-        addressERC223
-        addressERC20
-        name
-        symbol
-      }
-      collaterals
-      currencyLimit
-      deadline
-      duration
-      id
-      alive
-      interestRate
-      liquidationRewardAmount
-      liquidationRewardAsset
-      liquidationRewardAssetToken {
-        addressERC20
-        addressERC223
-        decimals
-        id
-        name
-        symbol
-      }
-      minLoan,
-      whitelist {
-       allowedForTradingTokens {
-         addressERC20
-         addressERC223
-         decimals
-         id
-         name
-         symbol
-       }
-     }
+      ${GQL_ORDER_FIELDS}
       positions {
-        deadline
-        loanAmount
-        owner
-        id
-        createdAt
-        assets {
-          address
-          balance
-          id
-        }
-        assetsTokens {
-          addressERC20
-          addressERC223
-          decimals
-          id
-          name
-          symbol
-        }
+        ${GQL_POSITION_FIELDS}
       }
     }
   }
 `);
-
-export type MarginPosition = {
-  id: number;
-  owner: Address;
-  loanAmount: bigint;
-  loanAsset: Currency;
-  deadline: number;
-  assetAddresses: {
-    address: Address;
-    balance: bigint;
-    assetId: number;
-  }[];
-  assets: Currency[];
-  allowedForTradingAddresses: Address[];
-  allowedForTradingTokens: Currency[];
-  currencyLimit: number;
-  isAllowedErc223Trading: boolean;
-  orderId: number;
-  createdAt: number;
-  liquidationRewardAmount: bigint;
-  liquidationRewardAsset: Currency;
-  assetsWithBalances: {
-    asset: Currency;
-    balance: bigint;
-  }[];
-  isClosed: boolean;
-  isLiquidated: boolean;
-};
-
-export type LendingOrder = {
-  id: number;
-  owner: Address;
-  leverage: number;
-  minLoan: bigint;
-  positionDuration: number;
-  deadline: number;
-
-  liquidationRewardAmount: bigint;
-  liquidationRewardAsset: Currency;
-  liquidationRewardAssetStandard: Standard;
-
-  collateralAddresses: Address[];
-  allowedCollateralAssets: Currency[];
-  isErc223CollateralAllowed: boolean;
-
-  allowedTradingAssets: Currency[];
-  isErc223TradingAllowed: boolean;
-
-  interestRate: number;
-  currencyLimit: number;
-
-  balance: bigint;
-  baseAsset: Currency;
-
-  positions?: MarginPosition[];
-
-  alive: boolean;
-};
 
 export function useOrder({ id }: { id: number }): {
   loading: boolean;
@@ -283,8 +61,6 @@ export function useOrder({ id }: { id: number }): {
 } {
   const apolloClient = useMarginModuleApolloClient();
   const chainId = useCurrentChainId();
-
-  const { data: blockNumber } = useScopedBlockNumber();
 
   const { data, loading, refetch } = useQuery<any, any>(queryId, {
     variables: {
@@ -295,74 +71,15 @@ export function useOrder({ id }: { id: number }): {
     client: apolloClient || chainToApolloClient[DexChainId.SEPOLIA],
   });
 
-  // useEffect(() => {
-  //   console.log("REFETCHING...");
-  //   refetch();
-  // }, [blockNumber, refetch]);
-
   const order = useMemo(() => {
     if (!data) {
       return data;
     }
 
-    const {
-      id,
-      owner,
-      leverage,
-      minLoan,
-      duration,
-      deadline,
-      liquidationRewardAmount,
-      interestRate,
-      currencyLimit,
-      balance,
-      alive,
-    } = data.order;
-
     return {
-      id,
-      alive,
-      owner,
-      leverage,
-      minLoan,
-      deadline,
-      liquidationRewardAmount: BigInt(liquidationRewardAmount),
-      interestRate,
-      currencyLimit,
-      balance: BigInt(balance),
-      positionDuration: duration,
-      liquidationRewardAsset: gqlTokenToCurrency(data.order.liquidationRewardAssetToken, chainId),
-      baseAsset: gqlTokenToCurrency(data.order.baseAssetToken, chainId),
-      collateralAddresses: data.order.collaterals,
-      allowedCollateralAssets: data.order.collateralTokens.map((collateralToken: GqlToken) =>
-        gqlTokenToCurrency(collateralToken, chainId),
-      ),
-      allowedTradingAssets: data.order.whitelist.allowedForTradingTokens.map(
-        (tradingToken: GqlToken) => gqlTokenToCurrency(tradingToken, chainId),
-      ),
-      liquidationRewardAssetStandard:
-        data.order.liquidationRewardAsset === data.order.liquidationRewardAssetToken.addressERC20
-          ? Standard.ERC20
-          : Standard.ERC223,
-      positions: data.order.positions.map((position: any) => {
-        return {
-          id: position.id,
-          owner: position.owner,
-          loanAmount: position.loanAmount,
-          loanAsset: gqlTokenToCurrency(data.order.baseAssetToken, chainId),
-          deadline: position.deadline,
-          createdAt: position.createdAt,
-          assetAddresses: position.assets,
-          assets: position.assetsTokens.map((tradingToken: GqlToken) =>
-            gqlTokenToCurrency(tradingToken, chainId),
-          ),
-          assetsWithBalances: position.assetsTokens.map((tradingToken: GqlToken) => ({
-            asset: gqlTokenToCurrency(tradingToken, chainId),
-            balance: position.assets.find(
-              (asset: any) => asset.address === tradingToken.addressERC20,
-            ).balance,
-          })),
-        };
+      ...serializeGqlOrder(data.order, chainId),
+      positions: data.order.positions.map((position: GqlPosition) => {
+        return serializeGqlPosition(position, chainId);
       }),
     };
   }, [chainId, data]);
@@ -455,44 +172,14 @@ export function useOrders({
       return data;
     }
 
-    return data.orders.map((order: any) => {
-      const {
-        id,
-        owner,
-        leverage,
-        minLoan,
-        duration,
-        deadline,
-        liquidationRewardAmount,
-        interestRate,
-        currencyLimit,
-        balance,
-      } = order;
+    console.log(data.orders);
 
+    return data.orders.map((order: GqlOrder) => {
       return {
-        id,
-        owner,
-        leverage,
-        minLoan,
-        deadline,
-        liquidationRewardAmount: BigInt(liquidationRewardAmount),
-        interestRate,
-        currencyLimit,
-        balance: BigInt(balance),
-        positionDuration: duration,
-        liquidationRewardAsset: gqlTokenToCurrency(order.liquidationRewardAssetToken, chainId),
-        baseAsset: gqlTokenToCurrency(order.baseAssetToken, chainId),
-        collateralAddresses: order.collaterals,
-        allowedCollateralAssets: order.collateralTokens.map((collateralToken: GqlToken) =>
-          gqlTokenToCurrency(collateralToken, chainId),
-        ),
-        allowedTradingAssets: order.whitelist.allowedForTradingTokens.map(
-          (tradingToken: GqlToken) => gqlTokenToCurrency(tradingToken, chainId),
-        ),
-        liquidationRewardAssetStandard:
-          order.liquidationRewardAsset === order.liquidationRewardAssetToken.addressERC20
-            ? Standard.ERC20
-            : Standard.ERC223,
+        ...serializeGqlOrder(order, chainId),
+        positions: order.positions.map((position: GqlPosition) => {
+          return serializeGqlPosition(position, chainId);
+        }),
       };
     });
   }, [chainId, data]);
@@ -521,62 +208,11 @@ export function useOrdersByOwner({ owner }: { owner: Address | undefined }): {
       return data;
     }
 
-    return data.orders.map((order: any) => {
-      const {
-        id,
-        owner,
-        leverage,
-        minLoan,
-        duration,
-        deadline,
-        liquidationRewardAmount,
-        interestRate,
-        currencyLimit,
-        balance,
-        alive,
-      } = order;
-
+    return data.orders.map((order: GqlOrder) => {
       return {
-        id,
-        owner,
-        alive,
-        leverage,
-        minLoan,
-        deadline,
-        liquidationRewardAmount: BigInt(liquidationRewardAmount),
-        interestRate,
-        currencyLimit,
-        balance: BigInt(balance),
-        positionDuration: duration,
-        liquidationRewardAsset: gqlTokenToCurrency(order.liquidationRewardAssetToken, chainId),
-        baseAsset: gqlTokenToCurrency(order.baseAssetToken, chainId),
-        collateralAddresses: order.collaterals,
-        allowedCollateralAssets: order.collateralTokens.map((collateralToken: GqlToken) =>
-          gqlTokenToCurrency(collateralToken, chainId),
-        ),
-        liquidationRewardAssetStandard:
-          order.liquidationRewardAsset === order.liquidationRewardAssetToken.addressERC20
-            ? Standard.ERC20
-            : Standard.ERC223,
-        positions: order.positions.map((position: any) => {
-          return {
-            id: position.id,
-            owner: position.owner,
-            loanAmount: position.loanAmount,
-            loanAsset: gqlTokenToCurrency(order.baseAssetToken, chainId),
-            deadline: position.deadline,
-            createdAt: position.createdAt,
-            assetAddresses: position.assets,
-            assets: position.assetsTokens.map((tradingToken: GqlToken) =>
-              gqlTokenToCurrency(tradingToken, chainId),
-            ),
-            assetsWithBalances: position.assetsTokens.map((tradingToken: GqlToken) => ({
-              asset: gqlTokenToCurrency(tradingToken, chainId),
-              balance: position.assets.find(
-                (asset: any) => asset.address === tradingToken.addressERC20,
-              ).balance,
-            })),
-          };
+        ...serializeGqlOrder(order, chainId),
+        positions: order.positions.map((position: GqlPosition) => {
+          return serializeGqlPosition(position, chainId);
         }),
       };
     });

@@ -4,9 +4,9 @@ import Tooltip from "@repo/ui/tooltip";
 import React, { useState } from "react";
 import { formatEther, formatGwei } from "viem";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import ConfirmLiquidatePositionDialog from "@/app/[locale]/margin-trading/position/[id]/liquidate/components/ConfirmLiquidatePositionDialog";
 import useLiquidatePosition from "@/app/[locale]/margin-trading/position/[id]/liquidate/hooks/useLiquidatePosition";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";

@@ -1,16 +1,24 @@
 import { useCallback } from "react";
-import { parseUnits } from "viem";
-import { usePublicClient, useWalletClient } from "wagmi";
+import { formatUnits, getAbiItem, parseUnits } from "viem";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import {
   OrderDepositStatus,
   useDepositOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
+import { ERC223_ABI } from "@/config/abis/erc223";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
+import {
+  GasFeeModel,
+  RecentTransactionTitleTemplate,
+  stringifyObject,
+  useRecentTransactionsStore,
+} from "@/stores/useRecentTransactionsStore";
 
 export default function useOrderDeposit({
   orderId,
@@ -21,11 +29,14 @@ export default function useOrderDeposit({
   currency: Currency;
   amount: string;
 }) {
-  const { setStatus } = useDepositOrderStatusStore();
+  const { setStatus, setDepositHash, setApproveHash } = useDepositOrderStatusStore();
   const chainId = useCurrentChainId();
   const { data: walletClient } = useWalletClient();
 
+  const { address } = useAccount();
   const publicClient = usePublicClient();
+
+  const { addRecentTransaction } = useRecentTransactionsStore();
 
   const {
     isAllowed: isAllowedA,
@@ -39,7 +50,7 @@ export default function useOrderDeposit({
 
   const handleOrderDeposit = useCallback(
     async (amountToApprove: string) => {
-      if (!walletClient || !publicClient) {
+      if (!walletClient || !publicClient || !address) {
         return;
       }
 
@@ -54,6 +65,7 @@ export default function useOrderDeposit({
           value: parseUnits(amount, currency.decimals ?? 18),
           account: undefined,
         });
+
         setStatus(OrderDepositStatus.LOADING_DEPOSIT);
 
         const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
@@ -64,72 +76,110 @@ export default function useOrderDeposit({
           setStatus(OrderDepositStatus.ERROR_DEPOSIT);
         }
       } else {
-        setStatus(OrderDepositStatus.PENDING_APPROVE);
-        const approveResult = await approveA({
-          customAmount: parseUnits(amountToApprove, currency.decimals ?? 18),
-          // customGasSettings: gasSettings,
-        });
+        if (!isAllowedA) {
+          setStatus(OrderDepositStatus.PENDING_APPROVE);
+          const approveResult = await approveA({
+            customAmount: parseUnits(amountToApprove, currency.decimals ?? 18),
+            // customGasSettings: gasSettings,
+          });
 
-        if (!approveResult?.success) {
-          setStatus(OrderDepositStatus.ERROR_APPROVE);
-          return;
-        }
+          if (!approveResult?.success) {
+            setStatus(OrderDepositStatus.ERROR_APPROVE);
+            return;
+          }
 
-        setStatus(OrderDepositStatus.LOADING_APPROVE);
+          setApproveHash(approveResult.hash);
+          setStatus(OrderDepositStatus.LOADING_APPROVE);
 
-        const approveReceipt = await publicClient.waitForTransactionReceipt({
-          hash: approveResult.hash,
-        });
+          const approveReceipt = await publicClient.waitForTransactionReceipt({
+            hash: approveResult.hash,
+          });
 
-        if (approveReceipt.status !== "success") {
-          setStatus(OrderDepositStatus.ERROR_APPROVE);
-          return;
+          if (approveReceipt.status !== "success") {
+            setStatus(OrderDepositStatus.ERROR_APPROVE);
+            return;
+          }
         }
 
         setStatus(OrderDepositStatus.PENDING_DEPOSIT);
 
-        const depositOrderHash = await walletClient.writeContract({
+        const params = {
           abi: MARGIN_MODULE_ABI,
           address: MARGIN_TRADING_ADDRESS[chainId],
-          functionName: "orderDepositToken",
-          args: [BigInt(orderId), parseUnits(amount, currency.decimals ?? 18)],
-          account: undefined,
-        });
-        setStatus(OrderDepositStatus.LOADING_DEPOSIT);
+          functionName: "orderDepositToken" as const,
+          args: [BigInt(orderId), parseUnits(amount, currency.decimals ?? 18)] as const,
+        };
 
-        const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
+        try {
+          const depositOrderHash = await walletClient.writeContract({
+            ...params,
+            account: undefined,
+          });
+          setStatus(OrderDepositStatus.LOADING_DEPOSIT);
 
-        if (receipt.status === "success") {
-          setStatus(OrderDepositStatus.SUCCESS);
-        } else {
+          setDepositHash(depositOrderHash);
+
+          const transaction = await getTransactionWithRetries({
+            hash: depositOrderHash,
+            publicClient,
+          });
+
+          const nonce = transaction.nonce;
+
+          addRecentTransaction(
+            {
+              hash: depositOrderHash,
+              nonce,
+              chainId,
+              gas: {
+                model: GasFeeModel.EIP1559,
+                gas: "0",
+                maxFeePerGas: undefined,
+                maxPriorityFeePerGas: undefined,
+              },
+              params: {
+                ...stringifyObject(params),
+                abi: [getAbiItem({ name: "orderDepositToken", abi: MARGIN_MODULE_ABI })],
+              },
+              title: {
+                symbol: currency.symbol!,
+                template: RecentTransactionTitleTemplate.DEPOSIT,
+                amount: amount,
+                logoURI: currency?.logoURI || "/images/tokens/placeholder.svg",
+              },
+            },
+            address,
+          );
+          const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
+          if (receipt.status === "success") {
+            setStatus(OrderDepositStatus.SUCCESS);
+          } else {
+            setStatus(OrderDepositStatus.ERROR_DEPOSIT);
+          }
+          console.log(receipt);
+        } catch (e) {
           setStatus(OrderDepositStatus.ERROR_DEPOSIT);
         }
-        console.log(receipt);
       }
-      //
-      // await sleep(1000);
-      // setStatus(OrderDepositStatus.LOADING_APPROVE);
-      // await sleep(4000);
-      //
-      // setStatus(OrderDepositStatus.PENDING_DEPOSIT);
-      // await sleep(4000);
-      //
-      // setStatus(OrderDepositStatus.LOADING_DEPOSIT);
-      // await sleep(4000);
-      //
-      // setStatus(OrderDepositStatus.SUCCESS);
 
       return;
     },
     [
+      addRecentTransaction,
+      address,
       amount,
       approveA,
       chainId,
       currency.decimals,
       currency.isNative,
+      currency?.logoURI,
+      currency.symbol,
       currency.wrapped.address0,
+      isAllowedA,
       orderId,
       publicClient,
+      setApproveHash,
+      setDepositHash,
       setStatus,
       walletClient,
     ],

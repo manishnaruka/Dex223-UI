@@ -1,6 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import { formatUnits, parseUnits } from "viem";
 
-import { LendingOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
+import dateToDateString from "@/app/[locale]/margin-trading/helpers/dateToDateString";
+import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import useEditOrder, {
   useEditOrderParams,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/hooks/useEditOrder";
@@ -8,7 +11,9 @@ import {
   EditOrderStatus,
   useEditOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
+import { AssetsPreview } from "@/app/[locale]/margin-trading/lending-order/create/components/AssetsPreview";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -20,7 +25,7 @@ import OperationStepRow, {
   OperationStepStatus,
 } from "@/components/common/OperationStepRow";
 import { IconName } from "@/config/types/IconName";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { Currency } from "@/sdk_bi/entities/currency";
 
 type StepTextMap = {
   [key in OperationStepStatus]: string;
@@ -99,6 +104,19 @@ function EditOrderActionButton({
   );
 }
 
+type FieldDiff<T> = {
+  label: string;
+  oldValue: string | number | ReactNode;
+  newValue: string | number | ReactNode;
+};
+
+type FieldConfig = {
+  label: string;
+  compare: () => boolean;
+  getOldValue: () => string | number | ReactNode;
+  getNewValue: () => string | number | ReactNode;
+};
+
 export default function ReviewEditOrderDialog({
   isOpen,
   setIsOpen,
@@ -151,18 +169,107 @@ export default function ReviewEditOrderDialog({
     leverage,
     priceSource,
   } = useEditOrderParams();
+  console.log(minimumBorrowingAmount);
+
+  const fieldConfigs: FieldConfig[] = useMemo(() => {
+    return [
+      {
+        id: "leverage",
+        label: "Leverage",
+        compare: () => leverage !== order.leverage,
+        getOldValue: () => order.leverage,
+        getNewValue: () => leverage,
+      },
+      {
+        id: "currency-limit",
+        label: "Order currency limit",
+        compare: () => orderCurrencyLimit !== order.currencyLimit.toString(),
+        getOldValue: () => order.currencyLimit,
+        getNewValue: () => orderCurrencyLimit,
+      },
+      {
+        id: "min-borrowing",
+        label: "Min borrowing",
+        compare: () =>
+          parseUnits(minimumBorrowingAmount.toString(), order.baseAsset.decimals) !==
+          BigInt(order.minLoan),
+        getOldValue: () => formatUnits(order.minLoan, order.baseAsset.decimals),
+        getNewValue: () => minimumBorrowingAmount,
+      },
+      {
+        id: "interest-rate",
+        label: "Interest rate per month",
+        compare: () => +interestRatePerMonth * 100 !== +order.interestRate,
+        getOldValue: () => order.interestRate / 100,
+        getNewValue: () => interestRatePerMonth,
+      },
+      {
+        id: "deadline",
+        label: "Lending order deadline",
+        compare: () =>
+          new Date(period.lendingOrderDeadline).getTime() !==
+          new Date(order.deadline * 1000).getTime(),
+        getOldValue: () => dateToDateString(period.lendingOrderDeadline),
+        getNewValue: () => timestampToDateString(order.deadline),
+      },
+      {
+        id: "allowed-collateral",
+        label: "Accepted collateral tokens",
+        compare: () => collateralTokens.length !== order.allowedCollateralAssets.length,
+        getOldValue: () => <AssetsPreview assets={order.allowedCollateralAssets} />,
+        getNewValue: () => <AssetsPreview assets={collateralTokens} />,
+      },
+      {
+        id: "allowed-for-trading",
+        label: "Tokens allowed for trading",
+        compare: () => tradingTokens.allowedTokens.length !== order.allowedTradingAssets.length,
+        getOldValue: () => <AssetsPreview assets={order.allowedTradingAssets} />,
+        getNewValue: () => <AssetsPreview assets={tradingTokens.allowedTokens} />,
+      },
+      {
+        id: "fee-for-liquidator",
+        label: "Liquidation fee (for liquidator)",
+        compare: () =>
+          !liquidationFeeToken!.equals(order.liquidationRewardAsset) ||
+          parseUnits(liquidationFeeForLiquidator, liquidationFeeToken!.decimals) !==
+            order.liquidationRewardAmount.value,
+        getOldValue: () =>
+          `${order.liquidationRewardAmount.formatted} ${order.liquidationRewardAsset.symbol}`,
+        getNewValue: () => `${liquidationFeeForLiquidator} ${liquidationFeeToken?.symbol}`,
+      },
+      // add more fields here...
+    ];
+  }, [
+    collateralTokens,
+    interestRatePerMonth,
+    leverage,
+    liquidationFeeForLiquidator,
+    liquidationFeeToken,
+    minimumBorrowingAmount,
+    order.allowedCollateralAssets,
+    order.allowedTradingAssets,
+    order.baseAsset.decimals,
+    order.currencyLimit,
+    order.deadline,
+    order.interestRate,
+    order.leverage,
+    order.liquidationRewardAmount.value,
+    order.liquidationRewardAsset,
+    order.minLoan,
+    orderCurrencyLimit,
+    period.lendingOrderDeadline,
+    tradingTokens.allowedTokens,
+  ]);
 
   const modifiedOrderProperties = useMemo(() => {
-    const _temp: Array<{ oldValue: string | number; newValue: string | number; label: string }> =
-      [];
-    if (leverage != order.leverage) {
-      _temp.push({ oldValue: order.leverage, newValue: leverage, label: "Leverage" });
-    } else {
-      _temp.filter((i) => i.label === "Leverage");
-    }
-
-    return _temp;
-  }, [leverage, order.leverage]);
+    return fieldConfigs
+      .filter((config) => config.compare())
+      .map<FieldDiff<any>>((config) => ({
+        label: config.label,
+        oldValue: config.getOldValue(),
+        newValue: config.getNewValue(),
+      }));
+  }, [fieldConfigs]);
 
   const [amountToApprove, setAmountToApprove] = useState(loanAmount);
 
@@ -176,7 +283,7 @@ export default function ReviewEditOrderDialog({
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title={"Review changes"} />
 
-      <div className="card-spacing-x card-spacing-b min-w-[600px]">
+      <div className="card-spacing-x card-spacing-b w-[600px]">
         {isFinalStatus && (
           <div className="pb-3 border-b border-secondary-border mb-4">
             <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
@@ -214,9 +321,9 @@ export default function ReviewEditOrderDialog({
                 return (
                   <LendingOrderDetailsRow
                     key={modifiedOrderProperty.label}
-                    title="Leverage"
+                    title={modifiedOrderProperty.label}
                     value={
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1 flex-wrap justify-end">
                         {modifiedOrderProperty.oldValue}{" "}
                         <Svg className="text-tertiary-text" size={20} iconName="next" />{" "}
                         {modifiedOrderProperty.newValue}

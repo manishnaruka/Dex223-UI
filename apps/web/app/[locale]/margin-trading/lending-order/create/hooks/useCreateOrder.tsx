@@ -296,122 +296,18 @@ export default function useCreateOrder() {
         addToast("Unexpected error", "error");
         setStatus(CreateOrderStatus.INITIAL);
       }
-
-      // await handleRunStep({
-      //   params,
-      //   gasSettings,
-      //   customGasLimit,
-      //   title: {
-      //     symbol: params.loanToken.symbol!,
-      //     template: RecentTransactionTitleTemplate.CONVERT,
-      //     amount: params.loanAmount,
-      //     logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
-      //     standard: params.loanTokenStandard,
-      //   },
-      //   onReceiptReceive: (receipt, gas) => {
-      //     updateAllowance();
-      //
-      //     if (receipt.status === "reverted") {
-      //       setStatus(CreateOrderStatus.ERROR_CONFIRM_ORDER);
-      //
-      //       const ninetyEightPercent = (gas * BigInt(98)) / BigInt(100);
-      //
-      //       if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gas) {
-      //         setErrorType(SwapError.OUT_OF_GAS);
-      //       } else {
-      //         setErrorType(SwapError.UNKNOWN);
-      //       }
-      //       return;
-      //     }
-      //   },
-      //   gasPriceSettings,
-      //   onHashReceive: (hash) => {
-      //     if (!hash) {
-      //       setStatus(CreateOrderStatus.INITIAL);
-      //       throw new Error("Hash not found!");
-      //     }
-      //
-      //     setConfirmOrderHash(hash);
-      //     setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      //   },
-      // });
-      //
-      // setStatus(CreateOrderStatus.PENDING_DEPOSIT);
-      //
-      // if (!isAllowedA && params.loanTokenStandard === Standard.ERC20 && params.loanToken.isToken) {
-      //   openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-      //
-      //   setStatus(CreateOrderStatus.PENDING_APPROVE);
-      //   const result = await approveA({
-      //     customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
-      //     customGasSettings: gasSettings,
-      //   });
-      //
-      //   if (!result?.success) {
-      //     setStatus(CreateOrderStatus.INITIAL);
-      //     closeConfirmInWalletAlert();
-      //     return;
-      //   } else {
-      //     setApproveHash(result.hash);
-      //     setStatus(CreateOrderStatus.LOADING_APPROVE);
-      //     closeConfirmInWalletAlert();
-      //
-      //     const approveReceipt = await publicClient.waitForTransactionReceipt({
-      //       hash: result.hash,
-      //     });
-      //
-      //     if (approveReceipt.status === "reverted") {
-      //       setStatus(CreateOrderStatus.ERROR_APPROVE);
-      //       return;
-      //     }
-      //   }
-      // }
-      //
-      // await handleRunStep({
-      //   params,
-      //   gasSettings,
-      //   customGasLimit,
-      //   title: {
-      //     symbol: params.loanToken.symbol!,
-      //     template: RecentTransactionTitleTemplate.CONVERT,
-      //     amount: params.loanAmount,
-      //     logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
-      //     standard: params.loanTokenStandard,
-      //   },
-      //   onReceiptReceive: (receipt, gas) => {
-      //     updateAllowance();
-      //
-      //     if (receipt.status === "reverted") {
-      //       setStatus(CreateOrderStatus.ERROR_CONFIRM_ORDER);
-      //
-      //       const ninetyEightPercent = (gas * BigInt(98)) / BigInt(100);
-      //
-      //       if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gas) {
-      //         setErrorType(SwapError.OUT_OF_GAS);
-      //       } else {
-      //         setErrorType(SwapError.UNKNOWN);
-      //       }
-      //       return;
-      //     }
-      //   },
-      //   gasPriceSettings,
-      //   onHashReceive: (hash) => {
-      //     if (!hash) {
-      //       setStatus(CreateOrderStatus.INITIAL);
-      //       throw new Error("Hash not found!");
-      //     }
-      //
-      //     setConfirmOrderHash(hash);
-      //     setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      //   },
-      // });
     },
     [
+      approveA,
       chainId,
+      collateralTokens,
+      gasSettings,
+      includeERC223Collateral,
       interestRatePerMonth,
       leverage,
       liquidationFeeForLiquidator,
       liquidationFeeToken,
+      loanAmount,
       loanToken,
       loanTokenStandard,
       minimumBorrowingAmount,
@@ -422,6 +318,9 @@ export default function useCreateOrder() {
       publicClient,
       setStatus,
       tradingTokens.allowedTokens,
+      tradingTokens.includeERC223Trading,
+      tradingTokens.inputMode,
+      tradingTokens.tradingTokensAutoListing,
       walletClient,
     ],
   );
