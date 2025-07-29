@@ -6,6 +6,7 @@ import Image from "next/image";
 import React from "react";
 import { number, object } from "yup";
 
+import { calculatePeriodInterestRateNum } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import LendingOrderTokensSourceConfig from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderTokensSourceConfig";
 import PickAllowedTokenListsDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickAllowedTokenListsDialog";
@@ -22,6 +23,7 @@ import { InputSize } from "@/components/atoms/Input";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
+import { formatFloat } from "@/functions/formatFloat";
 
 export default function SecondStep({
   mode,
@@ -99,8 +101,32 @@ export default function SecondStep({
 
           <div className="bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col gap-2 mb-5">
             <LendingOrderDetailsRow
-              title={"You will receive for the entire period"}
-              value={<span className="text-red">TODO</span>}
+              title="You will receive for the entire period"
+              value={
+                firstStepValues.interestRatePerMonth &&
+                firstStepValues.period.lendingOrderDeadline &&
+                firstStepValues.loanAmount &&
+                firstStepValues.loanToken?.symbol
+                  ? (() => {
+                      const loanAmount = parseFloat(firstStepValues.loanAmount);
+                      const interestRate = calculatePeriodInterestRateNum(
+                        +firstStepValues.interestRatePerMonth * 100,
+                        Math.max(
+                          0,
+                          (new Date(firstStepValues.period.lendingOrderDeadline).getTime() -
+                            Date.now()) /
+                            1000,
+                        ),
+                      );
+
+                      if (isNaN(loanAmount) || isNaN(interestRate)) return "—";
+
+                      const interest = (loanAmount * interestRate) / 100;
+
+                      return formatFloat(interest) + ` ${firstStepValues.loanToken.symbol}`;
+                    })() // or 2 decimals if needed
+                  : "—"
+              }
             />
           </div>
 
@@ -121,7 +147,7 @@ export default function SecondStep({
                 iconName={"edit"}
               />
             </div>
-            <div className="mb-3 bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start content-start flex flex-wrap gap-1">
+            <div className="bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start content-start flex flex-wrap gap-1">
               {props.values.collateralTokens.map((currency) => {
                 return (
                   <div
@@ -141,21 +167,6 @@ export default function SecondStep({
                   </div>
                 );
               })}
-            </div>
-            <div className="py-2">
-              <Checkbox
-                label="Allow ERC-223 trading"
-                tooltipText="Tooltip text"
-                labelClassName="text-secondary-text"
-                checked={props.values.includeERC223Collateral}
-                handleChange={() =>
-                  props.setFieldValue(
-                    "includeERC223Collateral",
-                    !props.values.includeERC223Collateral,
-                  )
-                }
-                id={"allow-223-collateral"}
-              />
             </div>
           </div>
           <LendingOrderTokensSourceConfig

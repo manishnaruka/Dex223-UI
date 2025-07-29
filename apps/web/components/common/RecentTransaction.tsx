@@ -181,6 +181,14 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           <span className="font-medium inline-block text-16 align-top">Open lending order</span>
         </span>
       );
+    case RecentTransactionTitleTemplate.EDIT_LENDING_ORDER:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="edit" />
+
+          <span className="font-medium inline-block text-16 align-top">Edit lending order</span>
+        </span>
+      );
   }
 }
 
@@ -226,6 +234,7 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
       );
     case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
     case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.EDIT_LENDING_ORDER:
       return (
         <span className="text-14 text-secondary-text">{`${title.symbol} (ID: ${title.orderId})`}</span>
       );
@@ -243,6 +252,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
     case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
     case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.EDIT_LENDING_ORDER:
       return (
         <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
           <Image width={36} height={36} src={title.logoURI} alt="" />

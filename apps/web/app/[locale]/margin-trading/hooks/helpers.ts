@@ -92,10 +92,11 @@ export function serializeGqlOrder(
   gqlOrder: GqlOrder,
   chainId: DexChainId,
 ): Omit<LendingOrder, "positions"> {
-  const { positions, duration, liquidationRewardAmount, balance, ...rest } = gqlOrder;
+  const { positions, duration, liquidationRewardAmount, balance, minLoan, ...rest } = gqlOrder;
 
   return {
     ...rest,
+    minLoan: BigInt(minLoan),
     liquidationRewardAmount: {
       value: BigInt(liquidationRewardAmount),
       formatted: formatUnits(liquidationRewardAmount, +gqlOrder.baseAssetToken.decimals),

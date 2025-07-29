@@ -124,6 +124,9 @@ export type IRecentTransactionTitle =
     } & MarginOrderTitle)
   | ({
       template: RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER;
+    } & MarginOrderTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.EDIT_LENDING_ORDER;
     } & MarginOrderTitle);
 
 export type IRecentTransaction = {

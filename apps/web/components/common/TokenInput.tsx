@@ -36,6 +36,7 @@ export default function TokenInput({
   colorScheme = ThemeColors.GREEN,
   isError,
   handleBlur,
+  allowedErc223 = true,
 }: {
   handleClick: () => void;
   token: Currency | undefined;
@@ -56,6 +57,7 @@ export default function TokenInput({
   isError?: boolean;
   colorScheme?: ThemeColors;
   handleBlur?: () => void;
+  allowedErc223?: boolean;
 }) {
   const t = useTranslations("Swap");
 
@@ -151,6 +153,7 @@ export default function TokenInput({
           gasERC20={gasERC20}
           gasERC223={gasERC223}
           colorScheme={colorScheme}
+          allowedErc223={allowedErc223}
         />
       )}
       {token && token.isNative && (

@@ -62,10 +62,12 @@ function EditOrderActionButton({
   amountToApprove,
   order,
   disabled,
+  recreateTokenList,
 }: {
   amountToApprove: string;
   order: LendingOrder;
   disabled?: boolean;
+  recreateTokenList: boolean;
 }) {
   const { handleEditOrder } = useEditOrder();
 
@@ -98,19 +100,21 @@ function EditOrderActionButton({
   }
 
   return (
-    <Button disabled={disabled} onClick={() => handleEditOrder(amountToApprove, order)} fullWidth>
+    <Button disabled={disabled} onClick={() => handleEditOrder(order, recreateTokenList)} fullWidth>
       {disabled ? "No changes were made" : "Save changes"}
     </Button>
   );
 }
 
 type FieldDiff<T> = {
+  id: string;
   label: string;
   oldValue: string | number | ReactNode;
   newValue: string | number | ReactNode;
 };
 
 type FieldConfig = {
+  id: string;
   label: string;
   compare: () => boolean;
   getOldValue: () => string | number | ReactNode;
@@ -177,8 +181,8 @@ export default function ReviewEditOrderDialog({
         id: "leverage",
         label: "Leverage",
         compare: () => leverage !== order.leverage,
-        getOldValue: () => order.leverage,
-        getNewValue: () => leverage,
+        getOldValue: () => `${order.leverage}x`,
+        getNewValue: () => `${leverage}x`,
       },
       {
         id: "currency-limit",
@@ -193,15 +197,16 @@ export default function ReviewEditOrderDialog({
         compare: () =>
           parseUnits(minimumBorrowingAmount.toString(), order.baseAsset.decimals) !==
           BigInt(order.minLoan),
-        getOldValue: () => formatUnits(order.minLoan, order.baseAsset.decimals),
-        getNewValue: () => minimumBorrowingAmount,
+        getOldValue: () =>
+          `${formatUnits(order.minLoan, order.baseAsset.decimals)} ${order.baseAsset.symbol}`,
+        getNewValue: () => `${minimumBorrowingAmount} ${order.baseAsset.symbol}`,
       },
       {
         id: "interest-rate",
         label: "Interest rate per month",
         compare: () => +interestRatePerMonth * 100 !== +order.interestRate,
-        getOldValue: () => order.interestRate / 100,
-        getNewValue: () => interestRatePerMonth,
+        getOldValue: () => order.interestRate / 100 + "%",
+        getNewValue: () => interestRatePerMonth + "%",
       },
       {
         id: "deadline",
@@ -230,8 +235,8 @@ export default function ReviewEditOrderDialog({
         id: "fee-for-liquidator",
         label: "Liquidation fee (for liquidator)",
         compare: () =>
-          !liquidationFeeToken!.equals(order.liquidationRewardAsset) ||
-          parseUnits(liquidationFeeForLiquidator, liquidationFeeToken!.decimals) !==
+          !liquidationFeeToken?.equals(order.liquidationRewardAsset) ||
+          parseUnits(liquidationFeeForLiquidator, liquidationFeeToken?.decimals ?? 18) !==
             order.liquidationRewardAmount.value,
         getOldValue: () =>
           `${order.liquidationRewardAmount.formatted} ${order.liquidationRewardAsset.symbol}`,
@@ -249,10 +254,12 @@ export default function ReviewEditOrderDialog({
     order.allowedCollateralAssets,
     order.allowedTradingAssets,
     order.baseAsset.decimals,
+    order.baseAsset.symbol,
     order.currencyLimit,
     order.deadline,
     order.interestRate,
     order.leverage,
+    order.liquidationRewardAmount.formatted,
     order.liquidationRewardAmount.value,
     order.liquidationRewardAsset,
     order.minLoan,
@@ -265,6 +272,7 @@ export default function ReviewEditOrderDialog({
     return fieldConfigs
       .filter((config) => config.compare())
       .map<FieldDiff<any>>((config) => ({
+        id: config.id,
         label: config.label,
         oldValue: config.getOldValue(),
         newValue: config.getNewValue(),
@@ -312,6 +320,17 @@ export default function ReviewEditOrderDialog({
                 </p>
               </div>
             )}
+            {status === EditOrderStatus.ERROR_MODIFY && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Failed to edit lending order
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol}{" "}
+                  <span className="text-tertiary-text">(ID: {order.id})</span>
+                </p>
+              </div>
+            )}
           </div>
         )}
         {(isInitialStatus || isLoadingStatus) && (
@@ -342,6 +361,9 @@ export default function ReviewEditOrderDialog({
           disabled={!modifiedOrderProperties.length}
           order={order}
           amountToApprove={amountToApprove}
+          recreateTokenList={Boolean(
+            modifiedOrderProperties.find((value) => value.id === "allowed-for-trading"),
+          )}
         />
       </div>
     </DrawerDialog>

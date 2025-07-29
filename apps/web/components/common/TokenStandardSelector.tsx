@@ -174,6 +174,7 @@ export default function TokenStandardSelector({
   gasERC20,
   gasERC223,
   colorScheme = ThemeColors.GREEN,
+  allowedErc223 = true,
 }: {
   selectedStandard: Standard;
   handleStandardSelect: (standard: Standard) => void;
@@ -184,6 +185,7 @@ export default function TokenStandardSelector({
   gasERC20?: string;
   gasERC223?: string;
   colorScheme?: ThemeColors;
+  allowedErc223?: boolean;
 }) {
   return (
     <>
@@ -213,7 +215,7 @@ export default function TokenStandardSelector({
                 handleStandardSelect={handleStandardSelect}
                 standard={standard}
                 selectedStandard={selectedStandard}
-                disabled={disabled}
+                disabled={disabled || (standard === Standard.ERC223 && !allowedErc223)}
               />
             );
           })}
@@ -224,7 +226,7 @@ export default function TokenStandardSelector({
           symbol={symbol}
           balance={balance1}
           gas={gasERC223}
-          disabled={disabled}
+          disabled={disabled || !allowedErc223}
           handleStandardSelect={handleStandardSelect}
           colorScheme={colorScheme}
         />

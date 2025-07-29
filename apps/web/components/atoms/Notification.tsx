@@ -72,6 +72,7 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
       );
     case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
     case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.EDIT_LENDING_ORDER:
       return (
         <NotificationSubtitleText>{`${title.symbol} (ID: ${title.orderId})`}</NotificationSubtitleText>
       );
@@ -201,6 +202,14 @@ function NotificationTitle({
           {status === RecentTransactionStatus.SUCCESS
             ? "Lending order closed successfully"
             : "Failed to close lending order"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.EDIT_LENDING_ORDER:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Lending order edited successfully"
+            : "Failed to edit lending order"}
         </NotificationTitleText>
       );
   }

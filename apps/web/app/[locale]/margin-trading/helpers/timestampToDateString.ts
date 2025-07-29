@@ -1,4 +1,7 @@
-export default function timestampToDateString(timestamp: number): string {
+export default function timestampToDateString(
+  timestamp: number,
+  noSeconds: boolean = false,
+): string {
   const date = new Date(timestamp * 1000);
 
   const day = String(date.getDate()).padStart(2, "0");
@@ -10,7 +13,9 @@ export default function timestampToDateString(timestamp: number): string {
   const seconds = String(date.getSeconds()).padStart(2, "0");
   const ampm = date.getHours() >= 12 ? "PM" : "AM";
 
-  const formattedTime = `${String(hours).padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
+  const formattedTime = noSeconds
+    ? `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`
+    : `${String(hours).padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
 
   return `${day}.${month}.${year} ${formattedTime}`;
 }

@@ -1,13 +1,22 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
-import { Address, encodeAbiParameters, Hash, keccak256, parseUnits } from "viem";
-import { usePublicClient, useWalletClient } from "wagmi";
+import {
+  Address,
+  encodeAbiParameters,
+  encodeFunctionData,
+  getAbiItem,
+  Hash,
+  keccak256,
+  parseUnits,
+} from "viem";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useEditOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderConfigStore";
 import {
   EditOrderStatus,
   useEditOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
+import { OrderDepositStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
 import { TradingTokensInputMode } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import {
   useCreateOrderGasLimitStore,
@@ -16,11 +25,18 @@ import {
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { getGasSettings } from "@/functions/gasSettings";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import addToast from "@/other/toast";
 import { MARGIN_TRADING_ADDRESS, ORACLE_ADDRESS } from "@/sdk_bi/addresses";
+import {
+  GasFeeModel,
+  RecentTransactionTitleTemplate,
+  stringifyObject,
+  useRecentTransactionsStore,
+} from "@/stores/useRecentTransactionsStore";
 
 export function useEditOrderParams() {
   const { firstStepValues, secondStepValues, thirdStepValues } = useEditOrderConfigStore();
@@ -87,6 +103,8 @@ export default function useEditOrder() {
     amountToCheck: parseUnits(params.loanAmount, params.loanToken?.decimals ?? 18),
   });
 
+  const { addRecentTransaction } = useRecentTransactionsStore();
+
   const { customGasLimit } = useCreateOrderGasLimitStore();
   const { gasPriceOption, gasPriceSettings } = useCreateOrderGasPriceStore();
   const { baseFee, priorityFee, gasPrice } = useFees();
@@ -120,12 +138,13 @@ export default function useEditOrder() {
     });
   }, [baseFee, chainId, gasPrice, priorityFee, gasPriceOption, gasPriceSettings]);
 
+  const { address } = useAccount();
   useEffect(() => {
     setStatus(EditOrderStatus.INITIAL);
   }, [setStatus]);
 
   const handleEditOrder = useCallback(
-    async (amountToApprove: string, order: LendingOrder) => {
+    async (order: LendingOrder, recreateTokenList: boolean) => {
       setStatus(EditOrderStatus.PENDING_MODIFY);
 
       if (
@@ -135,7 +154,8 @@ export default function useEditOrder() {
         !loanToken ||
         !liquidationFeeToken ||
         (tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING &&
-          !tradingTokens.tradingTokensAutoListing)
+          !tradingTokens.tradingTokensAutoListing) ||
+        !address
       ) {
         return;
       }
@@ -150,6 +170,39 @@ export default function useEditOrder() {
                   : [token.wrapped.address0],
               ),
             ) as Address[]);
+
+      const encodedAddTokenListParams = encodeFunctionData({
+        abi: MARGIN_MODULE_ABI,
+        functionName: "addTokenlist",
+        args: [sortedAddresses, tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING],
+      });
+
+      const whitelistId = getWhitelistId(
+        sortedAddresses,
+        tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING,
+      );
+
+      const encodedModifyOrderParams = encodeFunctionData({
+        abi: MARGIN_MODULE_ABI,
+        functionName: "modifyOrder",
+        args: [
+          BigInt(order.id), // _orderId
+          whitelistId, // _whitelist
+          calculateInterestRate(Number(interestRatePerMonth), Number(period.positionDuration)), // _interestRate
+          BigInt(Number(period.positionDuration) * 24 * 60 * 60), // _duration
+          parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals), // _minLoan
+          Number(orderCurrencyLimit), // _currencyLimit
+          leverage, // _leverage
+          ORACLE_ADDRESS[chainId], // _oracle
+          parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals), // _liquidationRewardAmount
+          liquidationFeeToken.wrapped.address0, // _liquidationRewardAsset
+          Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000), // _deadline
+        ],
+      });
+
+      const actionsToUpdate = recreateTokenList
+        ? [encodedAddTokenListParams, encodedModifyOrderParams]
+        : [encodedModifyOrderParams];
       //
       // const addTokenListHash = await walletClient.writeContract({
       //   abi: MARGIN_MODULE_ABI,
@@ -163,43 +216,59 @@ export default function useEditOrder() {
       // await publicClient.waitForTransactionReceipt({ hash: addTokenListHash });
       // setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
       //
-      const whitelistId = getWhitelistId(
-        sortedAddresses,
-        tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING,
-      );
-
-      const args = [
-        BigInt(order.id), // _orderId
-        whitelistId, // _whitelist
-        calculateInterestRate(Number(interestRatePerMonth), Number(period.positionDuration)), // _interestRate
-        BigInt(Number(period.positionDuration) * 24 * 60 * 60), // _duration
-        parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals), // _minLoan
-        Number(orderCurrencyLimit), // _currencyLimit
-        leverage, // _leverage
-        ORACLE_ADDRESS[chainId], // _oracle
-        parseUnits(liquidationFeeForLiquidator, liquidationFeeToken.decimals), // _liquidationRewardAmount
-        liquidationFeeToken.wrapped.address0, // _liquidationRewardAsset
-        Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000), // _deadline
-      ];
-
-      console.log(args);
 
       try {
         const modifyOrderHash = await walletClient.writeContract({
           abi: MARGIN_MODULE_ABI,
           address: MARGIN_TRADING_ADDRESS[chainId],
-          functionName: "modifyOrder",
-          args: args as any,
+          functionName: "multicall",
+          args: [actionsToUpdate],
           account: undefined,
         });
         setStatus(EditOrderStatus.LOADING_MODIFY);
         setModifyOrderHash(modifyOrderHash);
 
+        const transaction = await getTransactionWithRetries({
+          hash: modifyOrderHash,
+          publicClient,
+        });
+
+        const nonce = transaction.nonce;
+
+        addRecentTransaction(
+          {
+            hash: modifyOrderHash,
+            nonce,
+            chainId,
+            gas: {
+              model: GasFeeModel.EIP1559,
+              gas: "0",
+              maxFeePerGas: undefined,
+              maxPriorityFeePerGas: undefined,
+            },
+            params: {
+              ...stringifyObject(params),
+              abi: [getAbiItem({ name: "setOrderStatus", abi: MARGIN_MODULE_ABI })],
+            },
+            title: {
+              symbol: order.baseAsset.symbol!,
+              orderId: order.id,
+              template: RecentTransactionTitleTemplate.EDIT_LENDING_ORDER,
+              logoURI: order.baseAsset?.logoURI || "/images/tokens/placeholder.svg",
+            },
+          },
+          address,
+        );
+
         const createOrderReceipt = await publicClient.waitForTransactionReceipt({
           hash: modifyOrderHash,
         });
 
-        setStatus(EditOrderStatus.SUCCESS);
+        if (createOrderReceipt.status === "success") {
+          setStatus(EditOrderStatus.SUCCESS);
+        } else {
+          setStatus(EditOrderStatus.ERROR_MODIFY);
+        }
 
         // console.log("Receipt", receipt);
       } catch (e) {
@@ -207,117 +276,10 @@ export default function useEditOrder() {
         addToast("Unexpected error", "error");
         setStatus(EditOrderStatus.INITIAL);
       }
-
-      // await handleRunStep({
-      //   params,
-      //   gasSettings,
-      //   customGasLimit,
-      //   title: {
-      //     symbol: params.loanToken.symbol!,
-      //     template: RecentTransactionTitleTemplate.CONVERT,
-      //     amount: params.loanAmount,
-      //     logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
-      //     standard: params.loanTokenStandard,
-      //   },
-      //   onReceiptReceive: (receipt, gas) => {
-      //     updateAllowance();
-      //
-      //     if (receipt.status === "reverted") {
-      //       setStatus(CreateOrderStatus.ERROR_CONFIRM_ORDER);
-      //
-      //       const ninetyEightPercent = (gas * BigInt(98)) / BigInt(100);
-      //
-      //       if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gas) {
-      //         setErrorType(SwapError.OUT_OF_GAS);
-      //       } else {
-      //         setErrorType(SwapError.UNKNOWN);
-      //       }
-      //       return;
-      //     }
-      //   },
-      //   gasPriceSettings,
-      //   onHashReceive: (hash) => {
-      //     if (!hash) {
-      //       setStatus(CreateOrderStatus.INITIAL);
-      //       throw new Error("Hash not found!");
-      //     }
-      //
-      //     setConfirmOrderHash(hash);
-      //     setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      //   },
-      // });
-      //
-      // setStatus(CreateOrderStatus.PENDING_DEPOSIT);
-      //
-      // if (!isAllowedA && params.loanTokenStandard === Standard.ERC20 && params.loanToken.isToken) {
-      //   openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
-      //
-      //   setStatus(CreateOrderStatus.PENDING_APPROVE);
-      //   const result = await approveA({
-      //     customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
-      //     customGasSettings: gasSettings,
-      //   });
-      //
-      //   if (!result?.success) {
-      //     setStatus(CreateOrderStatus.INITIAL);
-      //     closeConfirmInWalletAlert();
-      //     return;
-      //   } else {
-      //     setApproveHash(result.hash);
-      //     setStatus(CreateOrderStatus.LOADING_APPROVE);
-      //     closeConfirmInWalletAlert();
-      //
-      //     const approveReceipt = await publicClient.waitForTransactionReceipt({
-      //       hash: result.hash,
-      //     });
-      //
-      //     if (approveReceipt.status === "reverted") {
-      //       setStatus(CreateOrderStatus.ERROR_APPROVE);
-      //       return;
-      //     }
-      //   }
-      // }
-      //
-      // await handleRunStep({
-      //   params,
-      //   gasSettings,
-      //   customGasLimit,
-      //   title: {
-      //     symbol: params.loanToken.symbol!,
-      //     template: RecentTransactionTitleTemplate.CONVERT,
-      //     amount: params.loanAmount,
-      //     logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
-      //     standard: params.loanTokenStandard,
-      //   },
-      //   onReceiptReceive: (receipt, gas) => {
-      //     updateAllowance();
-      //
-      //     if (receipt.status === "reverted") {
-      //       setStatus(CreateOrderStatus.ERROR_CONFIRM_ORDER);
-      //
-      //       const ninetyEightPercent = (gas * BigInt(98)) / BigInt(100);
-      //
-      //       if (receipt.gasUsed >= ninetyEightPercent && receipt.gasUsed <= gas) {
-      //         setErrorType(SwapError.OUT_OF_GAS);
-      //       } else {
-      //         setErrorType(SwapError.UNKNOWN);
-      //       }
-      //       return;
-      //     }
-      //   },
-      //   gasPriceSettings,
-      //   onHashReceive: (hash) => {
-      //     if (!hash) {
-      //       setStatus(CreateOrderStatus.INITIAL);
-      //       throw new Error("Hash not found!");
-      //     }
-      //
-      //     setConfirmOrderHash(hash);
-      //     setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      //   },
-      // });
     },
     [
+      addRecentTransaction,
+      address,
       chainId,
       interestRatePerMonth,
       leverage,
@@ -326,7 +288,7 @@ export default function useEditOrder() {
       loanToken,
       minimumBorrowingAmount,
       orderCurrencyLimit,
-      params.loanToken,
+      params,
       period.lendingOrderDeadline,
       period.positionDuration,
       publicClient,

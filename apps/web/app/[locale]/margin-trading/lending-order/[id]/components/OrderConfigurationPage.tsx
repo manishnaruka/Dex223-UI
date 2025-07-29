@@ -100,7 +100,9 @@ export default function OrderConfigurationPage({
       <div className="rounded-3 bg-primary-bg max-w-[600px] mx-auto my-10">
         <div className="py-1.5 px-6 flex justify-between items-center">
           <IconButton iconName="back" />
-          <h1 className="text-20 font-bold">New lending order</h1>
+          <h1 className="text-20 font-bold">
+            {mode === OrderActionMode.CREATE ? "New lending order" : "Edit lending order"}
+          </h1>
           <IconButton
             buttonSize={IconButtonSize.LARGE}
             active={false}

@@ -2,9 +2,11 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
-import React, { PropsWithChildren, useEffect, useMemo } from "react";
-import { formatUnits } from "viem";
+import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import SimpleBar from "simplebar-react";
+import { formatUnits, parseUnits } from "viem";
 
+import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import useCreateMarginPosition, {
   useCreatePositionApproveSteps,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
@@ -14,23 +16,26 @@ import {
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
 import { EditOrderStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
+import { calculatePeriodInterestRate } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import Input, { InputSize } from "@/components/atoms/Input";
+import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import ApproveAmountConfig from "@/components/common/ApproveAmountConfig";
 import OperationStepRow, {
   operationStatusToStepStatus,
 } from "@/components/common/OperationStepRow";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
+import { Token } from "@/sdk_bi/entities/token";
 
 function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
@@ -39,9 +44,13 @@ function Rows({ children }: PropsWithChildren<{}>) {
 function CreateMarginPositionActionButton({
   orderId,
   order,
+  amountToApprove,
+  feeAmountToApprove,
 }: {
   orderId: string;
   order: LendingOrder;
+  amountToApprove: string;
+  feeAmountToApprove: string;
 }) {
   const { handleCreateMarginPosition } = useCreateMarginPosition(order);
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
@@ -76,7 +85,10 @@ function CreateMarginPositionActionButton({
     );
   }
   return (
-    <Button fullWidth onClick={() => handleCreateMarginPosition(orderId)}>
+    <Button
+      fullWidth
+      onClick={() => handleCreateMarginPosition(orderId, amountToApprove, feeAmountToApprove)}
+    >
       Confirm borrow
     </Button>
   );
@@ -94,6 +106,29 @@ export default function ReviewBorrowDialog({
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
     useCreateMarginPositionStatusStore();
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
+  const [isEditApproveFeeActive, setEditApproveFeeActive] = React.useState(false);
+
+  const isFeeAndCollateralSame = useMemo(() => {
+    return values.collateralToken?.equals(order.liquidationRewardAsset);
+  }, [order.liquidationRewardAsset, values.collateralToken]);
+
+  const [amountToApprove, setAmountToApprove] = useState(values.collateralAmount);
+  const [feeAmountToApprove, setFeeAmountToApprove] = useState(
+    order.liquidationRewardAmount.formatted,
+  );
+
+  useEffect(() => {
+    if (values.collateralAmount && !isFeeAndCollateralSame) {
+      setAmountToApprove(values.collateralAmount);
+    }
+
+    if (isFeeAndCollateralSame) {
+      setAmountToApprove(
+        (+values.collateralAmount + +order.liquidationRewardAmount.formatted).toString(),
+      );
+    }
+  }, [isFeeAndCollateralSame, order.liquidationRewardAmount.formatted, values.collateralAmount]);
+
   const chainId = useCurrentChainId();
 
   const isInitialStatus = useMemo(() => status === CreateMarginPositionStatus.INITIAL, [status]);
@@ -117,6 +152,29 @@ export default function ReviewBorrowDialog({
       }, 400);
     }
   }, [isFinalStatus, isOpen, setStatus]);
+
+  const [formattedEndTime, setFormattedEndTime] = useState<string>("");
+
+  useEffect(() => {
+    if (!order) {
+      return;
+    }
+    // initial calculation
+    const calc = () => {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const endTimestamp = nowInSeconds + Number(order?.positionDuration);
+      const formatted = timestampToDateString(endTimestamp, true);
+      setFormattedEndTime(formatted);
+    };
+
+    calc(); // call immediately after mount
+
+    const interval = setInterval(() => {
+      calc(); // recalculate every minute
+    }, 60_000); // 60 seconds
+
+    return () => clearInterval(interval); // cleanup on unmount
+  }, [order, order?.positionDuration]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
@@ -202,8 +260,8 @@ export default function ReviewBorrowDialog({
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
-                title="Interest rate per entire period"
-                value={<span className="text-red">TODO</span>}
+                title="Interest rate for the entire period"
+                value={calculatePeriodInterestRate(order.interestRate, order.positionDuration)}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
@@ -217,13 +275,8 @@ export default function ReviewBorrowDialog({
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
-                title="LTV"
-                value={<span className="text-red">TODO</span>}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
                 title="Deadline"
-                value={new Date(order.deadline).toLocaleDateString("en-GB").split("/").join(".")}
+                value={formattedEndTime}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
@@ -246,154 +299,88 @@ export default function ReviewBorrowDialog({
                 tooltipText="Tooltip text"
               />
             </div>
-            <span className="text-red my-2 block">TODO: Tokens allowed for trading</span>
-            <div
-              className={clsx(
-                "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5 mb-5",
-                // parseUnits(amountToApprove, paymentToken.token.decimals) <
-                //   paymentToken.price * BigInt(tokensToList.length) && "pb-[26px]",
-              )}
-            >
-              <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                <Tooltip
-                  iconSize={20}
-                  text={
-                    " In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
-                  }
-                />
-                <span className="text-14">Approve amount</span>
+            <div className="bg-tertiary-bg rounded-3 px-5 pb-5 pt-3">
+              <div className="flex justify-between mb-3 items-center">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-tertiary-text flex items-center gap-1 text-14">
+                    <Tooltip text="Tooltip text" iconSize={20} />
+                    Tokens allowed for trading
+                  </h3>
+                </div>
+                <div>
+                  <SearchInput
+                    placeholder="Token name"
+                    className="h-8 text-14 w-[180px] rounded-2"
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-2 flex-grow justify-end">
-                {!isEditApproveActive ? (
-                  <span className="text-14">
-                    {1000} {"USDT"}
-                  </span>
-                ) : (
-                  <div className="flex-grow">
-                    <div className="relative w-full flex-grow">
-                      <Input
-                        // isError={
-                        //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                        //   paymentToken.price * BigInt(tokensToList.length)
-                        // }
-                        className="h-8 pl-3"
-                        // value={amountToApprove}
-                        // onChange={(e) => setAmountToApprove(e.target.value)}
-                        type="text"
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
-                        {"USDT"}
-                      </span>
-                    </div>
-                    {/*{parseUnits(amountToApprove, paymentToken.token.decimals) <*/}
-                    {/*  paymentToken.price * BigInt(tokensToList.length) && (*/}
-                    {/*  <span className="text-red-light absolute text-12 translate-y-0.5">*/}
-                    {/*    Must be higher or equal{" "}*/}
-                    {/*    {formatUnits(*/}
-                    {/*      paymentToken.price * BigInt(tokensToList.length),*/}
-                    {/*      paymentToken.token.decimals,*/}
-                    {/*    )}*/}
-                    {/*  </span>*/}
-                    {/*)}*/}
-                  </div>
-                )}
-                {!isEditApproveActive ? (
-                  <Button
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(true)}
-                  >
-                    Edit
-                  </Button>
-                ) : (
-                  <Button
-                    // disabled={
-                    //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                    //   paymentToken.price * BigInt(tokensToList.length)
-                    // }
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(false)}
-                  >
-                    Save
-                  </Button>
-                )}
-              </div>
-            </div>
 
-            <div
-              className={clsx(
-                "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5 mb-5",
-                // parseUnits(amountToApprove, paymentToken.token.decimals) <
-                //   paymentToken.price * BigInt(tokensToList.length) && "pb-[26px]",
-              )}
-            >
-              <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                <Tooltip
-                  iconSize={20}
-                  text={
-                    " In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
-                  }
-                />
-                <span className="text-14">Approve amount</span>
-              </div>
-              <div className="flex items-center gap-2 flex-grow justify-end">
-                {!isEditApproveActive ? (
-                  <span className="text-14">
-                    {1000} {"USDT"}
-                  </span>
-                ) : (
-                  <div className="flex-grow">
-                    <div className="relative w-full flex-grow">
-                      <Input
-                        // isError={
-                        //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                        //   paymentToken.price * BigInt(tokensToList.length)
-                        // }
-                        className="h-8 pl-3"
-                        // value={amountToApprove}
-                        // onChange={(e) => setAmountToApprove(e.target.value)}
-                        type="text"
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
-                        {"USDT"}
+              <SimpleBar style={{ maxHeight: 216 }}>
+                <div className="flex gap-1 flex-wrap">
+                  {order.allowedTradingAssets.map((tradingToken) => {
+                    return tradingToken.isToken ? (
+                      <span
+                        key={tradingToken.address0}
+                        className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
+                      >
+                        {tradingToken.symbol}
                       </span>
-                    </div>
-                    {/*{parseUnits(amountToApprove, paymentToken.token.decimals) <*/}
-                    {/*  paymentToken.price * BigInt(tokensToList.length) && (*/}
-                    {/*  <span className="text-red-light absolute text-12 translate-y-0.5">*/}
-                    {/*    Must be higher or equal{" "}*/}
-                    {/*    {formatUnits(*/}
-                    {/*      paymentToken.price * BigInt(tokensToList.length),*/}
-                    {/*      paymentToken.token.decimals,*/}
-                    {/*    )}*/}
-                    {/*  </span>*/}
-                    {/*)}*/}
-                  </div>
-                )}
-                {!isEditApproveActive ? (
-                  <Button
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(true)}
-                  >
-                    Edit
-                  </Button>
-                ) : (
-                  <Button
-                    // disabled={
-                    //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                    //   paymentToken.price * BigInt(tokensToList.length)
-                    // }
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(false)}
-                  >
-                    Save
-                  </Button>
-                )}
-              </div>
+                    ) : (
+                      <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
+                        {tradingToken.symbol}
+                      </div>
+                    );
+                  })}
+                </div>
+              </SimpleBar>
             </div>
+            {isFeeAndCollateralSame ? (
+              <>
+                {values.collateralToken && (
+                  <ApproveAmountConfig
+                    amountToApprove={amountToApprove}
+                    setAmountToApprove={setAmountToApprove}
+                    minAmount={
+                      parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18) +
+                      order.liquidationRewardAmount.value
+                    }
+                    isEditApproveActive={isEditApproveActive}
+                    setEditApproveActive={setEditApproveActive}
+                    asset={values.collateralToken}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                <>
+                  {values.collateralToken && (
+                    <ApproveAmountConfig
+                      amountToApprove={amountToApprove}
+                      setAmountToApprove={setAmountToApprove}
+                      minAmount={parseUnits(
+                        values.collateralAmount,
+                        values.collateralToken?.decimals ?? 18,
+                      )}
+                      isEditApproveActive={isEditApproveActive}
+                      setEditApproveActive={setEditApproveActive}
+                      asset={values.collateralToken}
+                    />
+                  )}
+                </>
+                <>
+                  {values.collateralToken && (
+                    <ApproveAmountConfig
+                      amountToApprove={feeAmountToApprove}
+                      setAmountToApprove={setFeeAmountToApprove}
+                      minAmount={order.liquidationRewardAmount.value}
+                      isEditApproveActive={isEditApproveFeeActive}
+                      setEditApproveActive={setEditApproveFeeActive}
+                      asset={order.liquidationRewardAsset}
+                    />
+                  )}
+                </>
+              </>
+            )}
           </>
         )}
         {isFinalStatus && (
@@ -434,7 +421,12 @@ export default function ReviewBorrowDialog({
             )}
           </div>
         )}
-        <CreateMarginPositionActionButton orderId={orderId} order={order} />
+        <CreateMarginPositionActionButton
+          orderId={orderId}
+          order={order}
+          amountToApprove={amountToApprove}
+          feeAmountToApprove={feeAmountToApprove}
+        />
       </div>
     </DrawerDialog>
   );

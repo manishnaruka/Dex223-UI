@@ -2,6 +2,10 @@ import { Formik } from "formik";
 import React, { useMemo, useState } from "react";
 import * as Yup from "yup";
 
+import {
+  calculatePeriodInterestRate,
+  calculatePeriodInterestRateNum,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import LendingOrderPeriodConfig from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderPeriodConfig";
 import LendingOrderTokenSelect from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderTokenSelect";
@@ -14,6 +18,7 @@ import { FirstStepValues } from "@/app/[locale]/margin-trading/lending-order/cre
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonSize } from "@/components/buttons/Button";
+import { formatFloat } from "@/functions/formatFloat";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
@@ -197,6 +202,7 @@ export default function FirstStep({
             setToken={async (token: Currency) => {
               await props.setFieldValue("loanToken", token);
             }}
+            allowedErc223={true}
             amount={props.values.loanAmount}
             setAmount={(loanAmount: string) => props.setFieldValue("loanAmount", loanAmount)}
             standard={props.values.loanTokenStandard}
@@ -240,12 +246,48 @@ export default function FirstStep({
 
           <div className="bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col gap-2 mb-5 mt-4">
             <LendingOrderDetailsRow
-              title={"Interest rate for the entire period"}
-              value={<span className="text-red">TODO</span>}
+              title="Interest rate for the entire period"
+              value={
+                props.values.interestRatePerMonth && props.values.period.lendingOrderDeadline
+                  ? calculatePeriodInterestRate(
+                      +props.values.interestRatePerMonth * 100,
+                      Math.max(
+                        0,
+                        (new Date(props.values.period.lendingOrderDeadline).getTime() -
+                          Date.now()) /
+                          1000,
+                      ),
+                    )
+                  : "—"
+              }
             />
             <LendingOrderDetailsRow
-              title={"You will receive for the entire period"}
-              value={<span className="text-red">TODO</span>}
+              title="You will receive for the entire period"
+              value={
+                props.values.interestRatePerMonth &&
+                props.values.period.lendingOrderDeadline &&
+                props.values.loanAmount &&
+                props.values.loanToken?.symbol
+                  ? (() => {
+                      const loanAmount = parseFloat(props.values.loanAmount);
+                      const interestRate = calculatePeriodInterestRateNum(
+                        +props.values.interestRatePerMonth * 100,
+                        Math.max(
+                          0,
+                          (new Date(props.values.period.lendingOrderDeadline).getTime() -
+                            Date.now()) /
+                            1000,
+                        ),
+                      );
+
+                      if (isNaN(loanAmount) || isNaN(interestRate)) return "—";
+
+                      const interest = (loanAmount * interestRate) / 100;
+
+                      return formatFloat(interest) + ` ${props.values.loanToken.symbol}`;
+                    })() // or 2 decimals if needed
+                  : "—"
+              }
             />
           </div>
 

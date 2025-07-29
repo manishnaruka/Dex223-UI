@@ -148,7 +148,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
   });
 
   const handleCreateMarginPosition = useCallback(
-    async (orderId: string) => {
+    async (orderId: string, amountToApprove: string, feeAmountToApprove: string) => {
       if (!values.collateralAmount || !walletClient || !publicClient) {
         return;
       }
@@ -158,7 +158,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
         setStatus(CreateMarginPositionStatus.PENDING_APPROVE_BORROW);
 
         const approveResult = await approveA({
-          // customAmount: parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18),
+          customAmount: parseUnits(amountToApprove, values.collateralToken?.decimals ?? 18),
           // customGasSettings: gasSettings,
         });
 
@@ -187,7 +187,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
         setStatus(CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE);
 
         const approveResult = await approveB({
-          // customAmount: parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18),
+          customAmount: parseUnits(feeAmountToApprove, order.liquidationRewardAsset.decimals),
           // customGasSettings: gasSettings,
         });
 
@@ -231,19 +231,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
 
       setStatus(CreateMarginPositionStatus.LOADING_BORROW);
       await publicClient.waitForTransactionReceipt({ hash: takeLoanHash });
-      // await sleep(5000);
-      // setStatus(CreateMarginPositionStatus.LOADING_APPROVE_BORROW);
-      // await sleep(5000);
-      // setStatus(CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE);
-      // await sleep(5000);
-      // setStatus(CreateMarginPositionStatus.LOADING_APPROVE_LIQUIDATION_FEE);
-      // await sleep(6000);
-      // setStatus(CreateMarginPositionStatus.PENDING_BORROW);
-      // await sleep(5000);
-      // setStatus(CreateMarginPositionStatus.LOADING_BORROW);
-      // await sleep(5000);
-      // setStatus(CreateMarginPositionStatus.ERROR_BORROW);
-      // return;
+
       setStatus(CreateMarginPositionStatus.SUCCESS);
     },
     [
@@ -252,6 +240,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
       chainId,
       isAllowedA,
       isAllowedB,
+      order.baseAsset.decimals,
       order.collateralAddresses,
       order.liquidationRewardAsset,
       publicClient,

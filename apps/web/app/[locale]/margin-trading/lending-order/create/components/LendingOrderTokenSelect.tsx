@@ -23,6 +23,7 @@ export default function LendingOrderTokenSelect({
   setIsEnoughBalance,
   tokens,
   helperText,
+  allowedErc223,
 }: {
   token: Currency | undefined;
   setToken: (token: Currency) => Promise<void>;
@@ -35,6 +36,7 @@ export default function LendingOrderTokenSelect({
   setIsEnoughBalance?: (isEnoughBalance: boolean) => void;
   tokens?: Currency[];
   helperText?: string;
+  allowedErc223: boolean;
 }) {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
@@ -80,6 +82,7 @@ export default function LendingOrderTokenSelect({
         }
         standard={standard}
         setStandard={setStandard}
+        allowedErc223={allowedErc223}
       />
       <PickTokenDialog
         handlePick={handlePick}
