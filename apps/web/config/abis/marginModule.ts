@@ -10,9 +10,19 @@ export const MARGIN_MODULE_ABI = [
   {
     anonymous: false,
     inputs: [
+      { indexed: false, internalType: "uint256", name: "positionId", type: "uint256" },
+      { indexed: false, internalType: "address", name: "asset", type: "address" },
+    ],
+    name: "AssetRemoved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
       { indexed: true, internalType: "uint256", name: "positionId", type: "uint256" },
       { indexed: true, internalType: "uint256", name: "orderId", type: "uint256" },
       { indexed: true, internalType: "address", name: "liquidator", type: "address" },
+      { indexed: false, internalType: "address", name: "feeReceiver", type: "address" },
     ],
     name: "Liquidation",
     type: "event",
@@ -32,6 +42,15 @@ export const MARGIN_MODULE_ABI = [
   {
     anonymous: false,
     inputs: [
+      { indexed: false, internalType: "uint256", name: "positionId", type: "uint256" },
+      { indexed: false, internalType: "address", name: "asset", type: "address" },
+    ],
+    name: "NewAsset",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
       { indexed: true, internalType: "uint256", name: "orderId", type: "uint256" },
       { indexed: false, internalType: "bool", name: "alive", type: "bool" },
     ],
@@ -40,7 +59,10 @@ export const MARGIN_MODULE_ABI = [
   },
   {
     anonymous: false,
-    inputs: [{ indexed: false, internalType: "address[]", name: "collaterals", type: "address[]" }],
+    inputs: [
+      { indexed: true, internalType: "uint256", name: "orderId", type: "uint256" },
+      { indexed: false, internalType: "address[]", name: "collaterals", type: "address[]" },
+    ],
     name: "OrderCollateralsSet",
     type: "event",
   },
@@ -307,6 +329,13 @@ export const MARGIN_MODULE_ABI = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "uint256", name: "_positionId", type: "uint256" }],
+    name: "getPositionTokenlistID",
+    outputs: [{ internalType: "bytes32", name: "_whitelistId", type: "bytes32" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "getPositionsLength",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
@@ -328,7 +357,10 @@ export const MARGIN_MODULE_ABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "positionId", type: "uint256" }],
+    inputs: [
+      { internalType: "uint256", name: "positionId", type: "uint256" },
+      { internalType: "address", name: "receiver", type: "address" },
+    ],
     name: "liquidate",
     outputs: [],
     stateMutability: "nonpayable",
@@ -561,6 +593,17 @@ export const MARGIN_MODULE_ABI = [
     inputs: [{ internalType: "uint256", name: "positionId", type: "uint256" }],
     name: "subjectToLiquidation",
     outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "positionId", type: "uint256" }],
+    name: "subjectToLiquidationExtended",
+    outputs: [
+      { internalType: "bool", name: "subjectToLiquidation", type: "bool" },
+      { internalType: "address", name: "liquidator", type: "address" },
+      { internalType: "uint256", name: "frozenTimestamp", type: "uint256" },
+    ],
     stateMutability: "view",
     type: "function",
   },

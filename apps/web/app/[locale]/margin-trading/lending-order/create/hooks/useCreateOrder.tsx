@@ -247,7 +247,7 @@ export default function useCreateOrder() {
           setStatus(CreateOrderStatus.PENDING_APPROVE);
           const approveResult = await approveA({
             customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
-            customGasSettings: gasSettings,
+            // customGasSettings: gasSettings,
           });
 
           if (!approveResult?.success) {
