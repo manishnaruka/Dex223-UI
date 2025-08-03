@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { parseUnits } from "viem";
-import { usePublicClient, useWalletClient } from "wagmi";
+import { getAbiItem, parseUnits } from "viem";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import {
@@ -11,10 +11,17 @@ import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { OperationStepStatus } from "@/components/common/OperationStepRow";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { IconName } from "@/config/types/IconName";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
+import {
+  GasFeeModel,
+  RecentTransactionTitleTemplate,
+  stringifyObject,
+  useRecentTransactionsStore,
+} from "@/stores/useRecentTransactionsStore";
 
 type StepTextMap = {
   [key in OperationStepStatus]: string;
@@ -120,12 +127,15 @@ export function useCreatePositionApproveSteps(order: LendingOrder): {
 }
 
 export default function useCreateMarginPosition(order: LendingOrder) {
-  const { setStatus } = useCreateMarginPositionStatusStore();
+  const { setStatus, setBorrowHash, setApproveBorrowHash, setConfirmOrderLiquidationFeeHash } =
+    useCreateMarginPositionStatusStore();
 
+  const { addRecentTransaction } = useRecentTransactionsStore();
   const { values } = useCreateMarginPositionConfigStore();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
+  const { address } = useAccount();
 
   const isEqualFeeAndCollateralAssets = useMemo(() => {
     return values.collateralToken?.equals(order.liquidationRewardAsset);
@@ -149,7 +159,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
 
   const handleCreateMarginPosition = useCallback(
     async (orderId: string, amountToApprove: string, feeAmountToApprove: string) => {
-      if (!values.collateralAmount || !walletClient || !publicClient) {
+      if (!values.collateralAmount || !walletClient || !publicClient || !address) {
         return;
       }
 
@@ -166,6 +176,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
           setStatus(CreateMarginPositionStatus.ERROR_APPROVE_BORROW);
           return;
         }
+        setApproveBorrowHash(approveResult.hash);
 
         setStatus(CreateMarginPositionStatus.LOADING_APPROVE_BORROW);
 
@@ -202,6 +213,8 @@ export default function useCreateMarginPosition(order: LendingOrder) {
           hash: approveResult.hash,
         });
 
+        setConfirmOrderLiquidationFeeHash(approveResult.hash);
+
         if (approveReceipt.status !== "success") {
           setStatus(CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE);
           return;
@@ -210,11 +223,10 @@ export default function useCreateMarginPosition(order: LendingOrder) {
 
       setStatus(CreateMarginPositionStatus.PENDING_BORROW);
 
-      console.log(values);
-      const takeLoanHash = await walletClient.writeContract({
+      const params = {
         abi: MARGIN_MODULE_ABI,
         address: MARGIN_TRADING_ADDRESS[chainId],
-        functionName: "takeLoan",
+        functionName: "takeLoan" as const,
         args: [
           BigInt(orderId),
           parseUnits(values.borrowAmount.toString(), order.baseAsset.decimals),
@@ -225,9 +237,51 @@ export default function useCreateMarginPosition(order: LendingOrder) {
             ),
           ),
           parseUnits(values.collateralAmount.toString(), values.collateralToken?.decimals ?? 18),
-        ],
+        ] as const,
+      };
+      console.log(values);
+      const takeLoanHash = await walletClient.writeContract({
+        ...params,
         account: undefined,
       });
+
+      setBorrowHash(takeLoanHash);
+
+      const transaction = await getTransactionWithRetries({
+        hash: takeLoanHash,
+        publicClient,
+      });
+
+      const nonce = transaction.nonce;
+
+      addRecentTransaction(
+        {
+          hash: takeLoanHash,
+          nonce,
+          chainId,
+          gas: {
+            model: GasFeeModel.EIP1559,
+            gas: "0",
+            maxFeePerGas: undefined,
+            maxPriorityFeePerGas: undefined,
+          },
+          params: {
+            ...stringifyObject(params),
+            abi: [getAbiItem({ name: "takeLoan", abi: MARGIN_MODULE_ABI })],
+          },
+          title: {
+            symbolBorrowed: order.baseAsset.symbol!,
+            symbolFee: order.liquidationRewardAsset.symbol!,
+            symbolCollateral: values.collateralToken!.symbol!,
+            amountBorrowed: values.borrowAmount,
+            amountFee: order.liquidationRewardAmount.formatted,
+            amountCollateral: values.collateralAmount,
+            template: RecentTransactionTitleTemplate.CREATE_MARGIN_POSITION,
+            logoURI: order.baseAsset?.logoURI || "/images/tokens/placeholder.svg",
+          },
+        },
+        address,
+      );
 
       setStatus(CreateMarginPositionStatus.LOADING_BORROW);
       await publicClient.waitForTransactionReceipt({ hash: takeLoanHash });
@@ -235,15 +289,23 @@ export default function useCreateMarginPosition(order: LendingOrder) {
       setStatus(CreateMarginPositionStatus.SUCCESS);
     },
     [
+      addRecentTransaction,
+      address,
       approveA,
       approveB,
       chainId,
       isAllowedA,
       isAllowedB,
       order.baseAsset.decimals,
+      order.baseAsset?.logoURI,
+      order.baseAsset.symbol,
       order.collateralAddresses,
+      order.liquidationRewardAmount.formatted,
       order.liquidationRewardAsset,
       publicClient,
+      setApproveBorrowHash,
+      setBorrowHash,
+      setConfirmOrderLiquidationFeeHash,
       setStatus,
       values,
       walletClient,

@@ -3,21 +3,12 @@ import clsx from "clsx";
 import React, { use, useEffect, useState } from "react";
 
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
-import ConfirmLiquidatePositionDialog from "@/app/[locale]/margin-trading/position/[id]/liquidate/components/ConfirmLiquidatePositionDialog";
 import LiquidateForm from "@/app/[locale]/margin-trading/position/[id]/liquidate/components/LiquidateForm";
-import ConfirmConvertDialog from "@/app/[locale]/swap/components/ConfirmConvertDialog";
-import TradeForm from "@/app/[locale]/swap/components/TradeForm";
-import TwoVersionsInfo from "@/app/[locale]/swap/components/TwoVersionsInfo";
-import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
-import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Container from "@/components/atoms/Container";
-import Button from "@/components/buttons/Button";
+import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
-import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
-import { useSwapSearchParams } from "@/hooks/useSwapSearchParams";
 
 export default function LiquidatePositionPage({
   params,

@@ -6,7 +6,7 @@ import {
   PositionWithdrawStatus,
   useWithdrawPositionStatusStore,
 } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionWithdrawStatusStore";
-import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/types";
+import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { ReadonlyTokenAmountCard } from "@/app/[locale]/swap/components/ConfirmConvertDialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";

@@ -10,10 +10,14 @@ import { useAccount } from "wagmi";
 import ConfirmMarginSwapDialog from "@/app/[locale]/margin-swap/components/ConfirmMarginSwapDialog";
 import { useMarginSwapAmountsStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapAmountsStore";
 import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapPositionStore";
+import { useMarginSwapSettingsDialogStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapSettingsDialogStore";
+import { useMarginSwapSettingsStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapSettingsStore";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import { useConfirmMarginSwapDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
-import SwapSettingsDialog from "@/app/[locale]/swap/components/SwapSettingsDialog";
+import SwapSettingsDialog, {
+  MarginSwapSettingsDialog,
+} from "@/app/[locale]/swap/components/SwapSettingsDialog";
 import { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
 import {
   useMarginTrade,
@@ -29,8 +33,6 @@ import {
   useSwapGasPriceStore,
 } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
-import { useSwapSettingsStore } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
-import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import SwapButton from "@/components/buttons/SwapButton";
@@ -38,7 +40,6 @@ import TokenInput from "@/components/common/TokenInput";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
-import { useTransactionSettingsDialogStore } from "@/components/dialogs/stores/useTransactionSettingsDialogStore";
 import { networks } from "@/config/networks";
 import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
@@ -261,7 +262,7 @@ export default function TradeForm() {
   const [isOpenedFee, setIsOpenedFee] = useState(false);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
-  const { setIsOpen } = useTransactionSettingsDialogStore();
+  const { setIsOpen } = useMarginSwapSettingsDialogStore();
   const {
     tokenA,
     tokenB,
@@ -272,8 +273,8 @@ export default function TradeForm() {
     setTokenAStandard,
     setTokenBStandard,
   } = useMarginSwapTokensStore();
-  const { computed } = useSwapSettingsStore();
-
+  const settingsStore = useMarginSwapSettingsStore();
+  const { computed } = settingsStore;
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
   const { setTypedValue, typedValue } = useMarginSwapAmountsStore();
@@ -304,7 +305,7 @@ export default function TradeForm() {
     return dependentAmount?.toSignificant() || "";
   }, [dependentAmount, tokenA, tokenB, typedValue]);
 
-  const { slippage } = useSwapSettingsStore();
+  const { slippage } = useMarginSwapSettingsStore();
 
   const minimumAmountOut = useMemo(() => {
     if (!trade) {
@@ -542,9 +543,6 @@ export default function TradeForm() {
       return { tokenA0Balance: "0" };
     }
 
-    console.log(marginSwapPosition);
-    console.log(tokenA);
-
     const tokenABalanceUnformatted = marginSwapPosition.assetAddresses.find(
       (asset) => asset.address.toLowerCase() === tokenA.wrapped.address0.toLowerCase(),
     );
@@ -604,7 +602,6 @@ export default function TradeForm() {
   const _isMobile = useMediaQuery({ query: "(max-width: 767px)" });
   const nativeCurrency = useNativeCurrency();
   const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
-  const { setIsOpen: setConfirmConvertDialogOpen } = useConfirmConvertDialogStore();
   const colorScheme = useColorScheme();
 
   return (
@@ -880,11 +877,7 @@ export default function TradeForm() {
 
           <Button
             onClick={() => {
-              if (tokenB && tokenA?.equals(tokenB)) {
-                setConfirmConvertDialogOpen(true);
-              } else {
-                setConfirmSwapDialogOpen(true);
-              }
+              setConfirmSwapDialogOpen(true);
             }}
             size={ButtonSize.EXTRA_SMALL}
           >
@@ -917,6 +910,7 @@ export default function TradeForm() {
           tokenB={tokenB}
           networkFee={computedGasSpendingETH}
           gasPrice={computedGasSpending}
+          settingsStore={settingsStore}
         />
       )}
 
@@ -944,7 +938,7 @@ export default function TradeForm() {
             : marginSwapPosition?.order.allowedTradingAssets
         }
       />
-      <SwapSettingsDialog />
+      <MarginSwapSettingsDialog />
       <ConfirmMarginSwapDialog trade={trade} />
     </div>
   );

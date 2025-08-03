@@ -18,6 +18,7 @@ import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/Posi
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
+import PositionLiquidateDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionLiquidateDialog";
 import PositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionWithdrawDialog";
 import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
@@ -27,22 +28,6 @@ import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
-
-function MarginPositionInfoCard() {
-  return (
-    <div className="flex flex-col justify-center px-5 bg-tertiary-bg rounded-3 py-3">
-      <div className="flex items-center gap-1">
-        <span className="text-14 flex items-center gap-1 text-secondary-text">
-          Borrowed
-          <Tooltip text="Tooltip text" />
-        </span>
-      </div>
-      <div className="relative flex gap-1">
-        <span>100</span> USDT
-      </div>
-    </div>
-  );
-}
 
 type Order = {
   token: {
@@ -193,6 +178,7 @@ export default function MarginPositionPage({
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
   const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
   const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
+  const [isLiquidateDialogOpened, setIsLiquidateDialogOpened] = useState(false);
   console.log(position);
 
   if (loading || !position) {
@@ -231,7 +217,9 @@ export default function MarginPositionPage({
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
               <Image width={32} height={32} src="/images/tokens/placeholder.svg" alt="" />
-              <span className="text-secondary-text text-18 font-bold">AAVE Token</span>
+              <span className="text-secondary-text text-18 font-bold">
+                {position.loanAsset.name}
+              </span>
               <div className="flex items-center gap-3 text-green">
                 Active
                 <div className="w-2 h-2 rounded-full bg-green" />
@@ -256,6 +244,12 @@ export default function MarginPositionPage({
                 onClick={() => setIsCloseDialogOpened(true)}
               >
                 Close
+              </Button>
+              <Button
+                colorScheme={ButtonColor.RED}
+                onClick={() => setIsLiquidateDialogOpened(true)}
+              >
+                Liquidate
               </Button>
             </div>
           </div>
@@ -431,6 +425,12 @@ export default function MarginPositionPage({
         isOpen={isCloseDialogOpened}
         position={position}
         setIsOpen={setIsCloseDialogOpened}
+      />
+
+      <PositionLiquidateDialog
+        isOpen={isLiquidateDialogOpened}
+        position={position}
+        setIsOpen={setIsLiquidateDialogOpened}
       />
     </div>
   );

@@ -11,6 +11,11 @@ import React, {
 } from "react";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
 
+import { useMarginSwapSettingsDialogStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapSettingsDialogStore";
+import {
+  MarginSwapSettingsStore,
+  useMarginSwapSettingsStore,
+} from "@/app/[locale]/margin-swap/stores/useMarginSwapSettingsStore";
 import {
   defaultTypes,
   SlippageType,
@@ -151,9 +156,14 @@ function getTitle(slippageType: SlippageType, value: string, t: any) {
   }
 }
 
-function SwapSettingsDialogContent() {
+function SwapSettingsDialogContent({
+  store,
+  setIsOpen,
+}: {
+  store: MarginSwapSettingsStore;
+  setIsOpen: (isOpen: boolean) => void;
+}) {
   const colorScheme = useColorScheme();
-  const { isOpen, setIsOpen } = useTransactionSettingsDialogStore();
 
   const t = useTranslations("Swap");
 
@@ -164,7 +174,7 @@ function SwapSettingsDialogContent() {
     slippage,
     slippageType: _slippageType,
     setSlippageType: _setSlippageType,
-  } = useSwapSettingsStore();
+  } = store;
 
   const [customSlippage, setCustomSlippage] = useState(
     _slippageType === SlippageType.CUSTOM ? slippage.toString() : "",
@@ -396,11 +406,25 @@ function SwapSettingsDialogContent() {
 export default function SwapSettingsDialog() {
   const { isOpen, setIsOpen } = useTransactionSettingsDialogStore();
   const t = useTranslations("Swap");
+  const store = useSwapSettingsStore();
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title={t("settings")} />
-      <SwapSettingsDialogContent />
+      <SwapSettingsDialogContent setIsOpen={setIsOpen} store={store} />
+    </DrawerDialog>
+  );
+}
+
+export function MarginSwapSettingsDialog() {
+  const { isOpen, setIsOpen } = useMarginSwapSettingsDialogStore();
+  const t = useTranslations("Swap");
+  const store = useMarginSwapSettingsStore();
+
+  return (
+    <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
+      <DialogHeader onClose={() => setIsOpen(false)} title={t("settings")} />
+      <SwapSettingsDialogContent setIsOpen={setIsOpen} store={store} />
     </DrawerDialog>
   );
 }

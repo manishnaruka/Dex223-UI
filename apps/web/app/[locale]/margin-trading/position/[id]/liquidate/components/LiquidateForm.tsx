@@ -1,9 +1,12 @@
 import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import Tooltip from "@repo/ui/tooltip";
+import { add } from "dexie";
 import React, { useState } from "react";
-import { formatEther, formatGwei } from "viem";
+import { formatEther, formatGwei, formatUnits } from "viem";
+import { useAccount } from "wagmi";
 
+import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
 import ConfirmLiquidatePositionDialog from "@/app/[locale]/margin-trading/position/[id]/liquidate/components/ConfirmLiquidatePositionDialog";
 import useLiquidatePosition from "@/app/[locale]/margin-trading/position/[id]/liquidate/hooks/useLiquidatePosition";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
@@ -57,26 +60,32 @@ enum ActionWithAssets {
 export default function LiquidateForm({ position }: { position: MarginPosition }) {
   const [isLiquidateDialogOpened, setIsLiquidateDialogOpened] = useState(false);
 
-  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
-    useSwapRecentTransactionsStore();
   const { handleLiquidatePosition } = useLiquidatePosition(position);
 
   const [checkedPrices, setCheckedPrices] = useState(false);
   const [checkedTerms, setCheckedTerms] = useState(false);
 
+  const { address } = useAccount();
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useSwapRecentTransactionsStore();
+
+  const { expectedBalance, actualBalance } = usePositionStatus(position);
+
   return (
     <div className="w-[600px] bg-primary-bg rounded-5 card-spacing-x card-spacing-b">
-      <div className="h-[60px] flex justify-between items-center mb-2.5">
-        <h3 className="font-bold text-20">Liquidation</h3>
-        <div className="flex items-center relative left-3">
-          <IconButton
-            buttonSize={IconButtonSize.LARGE}
-            active={showRecentTransactions}
-            iconName="recent-transactions"
-            onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-          />
+      {address?.toLowerCase() === position.order.owner.toLowerCase() && (
+        <div className="h-[60px] flex justify-between items-center mb-2.5">
+          <h3 className="font-bold text-20">Liquidation</h3>
+          <div className="flex items-center relative left-3">
+            <IconButton
+              buttonSize={IconButtonSize.LARGE}
+              active={showRecentTransactions}
+              iconName="recent-transactions"
+              onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+            />
+          </div>
         </div>
-      </div>
+      )}
       <p className="text-secondary-text mb-4">
         When an asset is liquidated, the proceeds from its sale are first used to pay off any
         outstanding debts and obligations. Once creditors have been settled, any remaining funds are
@@ -94,8 +103,16 @@ export default function LiquidateForm({ position }: { position: MarginPosition }
           </div>
 
           <PositionInfoCard
-            value1={"100"}
-            value2={"150"}
+            value1={
+              actualBalance
+                ? formatFloat(formatUnits(actualBalance, position.loanAsset.decimals))
+                : "Loading..."
+            }
+            value2={
+              expectedBalance
+                ? formatFloat(formatUnits(expectedBalance, position.loanAsset.decimals))
+                : "Loading..."
+            }
             currency={position.loanAsset}
             label1={"Total balance"}
             label2="Expected balance"
@@ -103,8 +120,8 @@ export default function LiquidateForm({ position }: { position: MarginPosition }
             tooltip2={"TOOLTIP_TEXT"}
           />
           <PositionInfoCard
-            value1={"100"}
-            value2={"150"}
+            value1={position.order.liquidationRewardAmount.formatted}
+            value2={"0"}
             currency={position.loanAsset}
             label1={"Liquidation fee"}
             label2="Liquidation cost"
@@ -113,31 +130,35 @@ export default function LiquidateForm({ position }: { position: MarginPosition }
           />
         </div>
 
-        <div className="bg-tertiary-bg rounded-3 flex flex-col gap-3 pb-5 px-5 pt-3">
-          <h2 className="text-secondary-text font-bold">Type of received assets</h2>
+        {address?.toLowerCase() === position.order.owner.toLowerCase() && (
+          <div className="bg-tertiary-bg rounded-3 flex flex-col gap-3 pb-5 px-5 pt-3">
+            <h2 className="text-secondary-text font-bold">Type of received assets</h2>
 
-          <div className="grid grid-cols-2 gap-3">
-            <RadioButton className="min-h-10 py-2 pr-4" isActive={true}>
-              Loaned currency
-            </RadioButton>
-            <RadioButton disabled className="min-h-10 py-2 pr-4" isActive={false}>
-              Borrower currencies
-            </RadioButton>
+            <div className="grid grid-cols-2 gap-3">
+              <RadioButton className="min-h-10 py-2 pr-4" isActive={true}>
+                Loaned currency
+              </RadioButton>
+              <RadioButton disabled className="min-h-10 py-2 pr-4" isActive={false}>
+                Borrower currencies
+              </RadioButton>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="bg-tertiary-bg rounded-3 flex flex-col gap-3 pb-5 px-5 pt-3">
-          <h2 className="text-secondary-text font-bold">Action with assets</h2>
+        {address?.toLowerCase() === position.order.owner.toLowerCase() && (
+          <div className="bg-tertiary-bg rounded-3 flex flex-col gap-3 pb-5 px-5 pt-3">
+            <h2 className="text-secondary-text font-bold">Action with assets</h2>
 
-          <div className="grid grid-cols-2 gap-3">
-            <RadioButton className="min-h-10 py-2 pr-4" isActive={true}>
-              Return to order
-            </RadioButton>
-            <RadioButton disabled className="min-h-10 py-2 pr-4" isActive={false}>
-              Send to address
-            </RadioButton>
+            <div className="grid grid-cols-2 gap-3">
+              <RadioButton className="min-h-10 py-2 pr-4" isActive={true}>
+                Return to order
+              </RadioButton>
+              <RadioButton disabled className="min-h-10 py-2 pr-4" isActive={false}>
+                Send to address
+              </RadioButton>
+            </div>
           </div>
-        </div>
+        )}
 
         <Alert
           text="The asset prices at the time of liquidation may not match the current prices"

@@ -51,6 +51,17 @@ type RecentTransactionGasLimit =
 type MarginPositionTitle = {
   symbol: string;
   positionId: number;
+  logoURI: string;
+};
+
+type TakeLoanTitle = {
+  logoURI: string;
+  symbolBorrowed: string;
+  amountBorrowed: string;
+  symbolCollateral: string;
+  amountCollateral: string;
+  symbolFee: string;
+  amountFee: string;
 };
 
 type MarginOrderTitle = {
@@ -127,7 +138,13 @@ export type IRecentTransactionTitle =
     } & MarginOrderTitle)
   | ({
       template: RecentTransactionTitleTemplate.EDIT_LENDING_ORDER;
-    } & MarginOrderTitle);
+    } & MarginOrderTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CREATE_MARGIN_POSITION;
+    } & TakeLoanTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CLOSE_MARGIN_POSITION;
+    } & MarginPositionTitle);
 
 export type IRecentTransaction = {
   id: Address;

@@ -220,8 +220,9 @@ export default function TradeForm() {
     setTokenBStandard,
     switchTokens,
   } = useSwapTokensStore();
-  const { computed } = useSwapSettingsStore();
+  const settingsStore = useSwapSettingsStore();
 
+  const { computed } = settingsStore;
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
   const { setTypedValue, typedValue } = useSwapAmountsStore();
@@ -804,6 +805,7 @@ export default function TradeForm() {
           tokenB={tokenB}
           networkFee={computedGasSpendingETH}
           gasPrice={computedGasSpending}
+          settingsStore={settingsStore}
         />
       )}
 

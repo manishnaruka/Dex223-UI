@@ -55,8 +55,12 @@ function CreateMarginPositionActionButton({
   const { handleCreateMarginPosition } = useCreateMarginPosition(order);
   const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
     useCreateMarginPositionStatusStore();
+  const { values } = useCreateMarginPositionConfigStore();
 
-  const orderedHashes = [approveBorrowHash, approveBorrowHash, borrowHash];
+  const orderedHashes =
+    values.collateralToken && order.liquidationRewardAsset.equals(values.collateralToken)
+      ? [approveBorrowHash, borrowHash]
+      : [approveBorrowHash, approveLiquidationFeeHash, borrowHash];
 
   const { allSteps: marginSteps } = useCreatePositionApproveSteps(order);
 

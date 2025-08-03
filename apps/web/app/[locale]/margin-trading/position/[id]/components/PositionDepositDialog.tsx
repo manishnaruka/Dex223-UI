@@ -15,7 +15,7 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import { InputLabel } from "@/components/atoms/TextField";
+import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import OperationStepRow, {
   OperationRows,
@@ -169,29 +169,41 @@ export default function PositionDepositDialog({
         {isInitialStatus && (
           <>
             <p className="text-secondary-text mb-4">
-              You will increase the available balance of your lending order by making a deposit
+              When you make a deposit, your collateral will increase and your leverage will
+              decrease. This adjustment helps to enhance your margin position&apos;s stability by
+              reducing the risk associated with high leverage
             </p>
-            <InputLabel label="Deposit amount" tooltipText="Tooltip text" />
-            <TokenInput
-              handleClick={() => null}
-              token={position.loanAsset}
-              value={amountToDeposit}
-              onInputChange={(value) => {
-                setAmountToDeposit(value);
-                if (
-                  parseUnits(value, position.loanAsset.decimals) >
-                    parseUnits(amountToApprove, position.loanAsset.decimals) ||
-                  !isAmountToApproveModified
-                ) {
-                  setAmountToApprove(value);
-                  setAmountToApproveModified(false);
-                }
-              }}
-              balance0={"0"}
-              balance1={"0"}
-              standard={Standard.ERC20}
-              setStandard={() => null}
-            />
+            <div className="bg-tertiary-bg rounded-3 px-5 pt-5 pb-4">
+              <div className="mb-4">
+                <InputLabel label="Deposit amount" tooltipText="Tooltip text" />
+                <TokenInput
+                  handleClick={() => null}
+                  token={position.loanAsset}
+                  value={amountToDeposit}
+                  onInputChange={(value) => {
+                    setAmountToDeposit(value);
+                    if (
+                      parseUnits(value, position.loanAsset.decimals) >
+                        parseUnits(amountToApprove, position.loanAsset.decimals) ||
+                      !isAmountToApproveModified
+                    ) {
+                      setAmountToApprove(value);
+                      setAmountToApproveModified(false);
+                    }
+                  }}
+                  balance0={"0"}
+                  balance1={"0"}
+                  standard={Standard.ERC20}
+                  setStandard={() => null}
+                />
+              </div>
+
+              <TextField
+                label="Leverage"
+                tooltipText="Tooltip text"
+                helperText={`Max leverage: ${position.order.leverage}x`}
+              />
+            </div>
 
             {position.loanAsset.isToken ? (
               <div

@@ -1,17 +1,15 @@
 "use client";
 import clsx from "clsx";
 import React from "react";
+import { useAccount } from "wagmi";
 
-import ConfirmMarginSwapDialog from "@/app/[locale]/margin-swap/components/ConfirmMarginSwapDialog";
 import SelectPositionDialog, {
   SelectedPositionInfo,
 } from "@/app/[locale]/margin-swap/components/SelectPositionDialog";
 import TradeForm from "@/app/[locale]/margin-swap/components/TradeForm";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
-import ConfirmConvertDialog from "@/app/[locale]/swap/components/ConfirmConvertDialog";
-import ConfirmSwapDialog from "@/app/[locale]/swap/components/ConfirmSwapDialog";
+import { usePositionsByOwner } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
-import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
@@ -22,15 +20,8 @@ export default function MarginSwapPage() {
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
   const { tokenA, tokenB, reset: resetTokens } = useMarginSwapTokensStore();
-
-  // const { data } = useReadContract({
-  //   abi: MARGIN_MODULE_ABI,
-  //   functionName: "getPositionAssets",
-  //   address: MARGIN_TRADING_ADDRESS[DexChainId.SEPOLIA],
-  //   args: [BigInt(0)],
-  // });
-  //
-  // console.log(data);
+  const { address } = useAccount();
+  const { loading, positions } = usePositionsByOwner({ owner: address });
 
   return (
     <ColorSchemeProvider value={ThemeColors.PURPLE}>
@@ -57,7 +48,7 @@ export default function MarginSwapPage() {
             <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
               <div className="flex flex-col gap-2 lg:gap-3">
                 <div className="flex justify-between items-center pl-4 pr-5 py-2 text-secondary-text border-l-4 bg-primary-bg rounded-2 border-purple">
-                  You have 12 positions
+                  You have {positions?.length} positions
                   <SelectPositionDialog />
                 </div>
               </div>
