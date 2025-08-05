@@ -15,6 +15,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { ThemeColors } from "@/config/theme/colors";
+import { formatFloat } from "@/functions/formatFloat";
 import { Link } from "@/i18n/routing";
 
 enum DangerStatus {
@@ -80,10 +81,10 @@ function PositionSelectItem({
           <Tooltip text="Tooltip text" /> Assets {position.assets.length}/
           {position.order.currencyLimit}
         </div>
-        {position.assets?.map((asset) => (
+        {position.assetsWithBalances?.map(({ asset, balance }) => (
           <PositionAsset
             key={asset.wrapped.address0}
-            amount={12.22}
+            amount={formatFloat(formatUnits(balance || BigInt(0), asset.decimals))}
             symbol={asset.symbol || "Unknown"}
           />
         ))}
@@ -128,7 +129,7 @@ export function SelectedPositionInfo() {
             {marginSwapPosition.assetsWithBalances?.map(({ asset, balance }) => (
               <PositionAsset
                 key={asset.wrapped.address0}
-                amount={formatUnits(balance || BigInt(0), asset.decimals)}
+                amount={formatFloat(formatUnits(balance || BigInt(0), asset.decimals))}
                 symbol={asset.symbol || "Unknown"}
               />
             ))}

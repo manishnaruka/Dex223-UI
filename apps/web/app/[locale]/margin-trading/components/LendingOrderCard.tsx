@@ -1,11 +1,18 @@
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import React from "react";
+import { formatEther, formatUnits } from "viem";
 
-import { LendingPositionCard } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
+import {
+  InactiveMarginPositionCard,
+  LendingPositionCard,
+} from "@/app/[locale]/margin-trading/components/MarginPositionCard";
+import { InfoBlockWithBorder } from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
+import calculateTotalOrderBalance from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculateTotalOrderBalance";
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
+import { formatFloat } from "@/functions/formatFloat";
 import { Link } from "@/i18n/routing";
 
 function LendingOrderInfoCard({ label, value }: { label: string; value: string }) {
@@ -107,7 +114,11 @@ export default function LendingOrderCard({
                   <Tooltip text="Tooltip text" />
                 </span>
                 <p className="text-20">
-                  1000 / 500 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                  {formatFloat(formatUnits(order.balance, order.baseAsset.decimals))} /{" "}
+                  {formatFloat(
+                    formatUnits(calculateTotalOrderBalance(order), order.baseAsset.decimals),
+                  )}{" "}
+                  <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                 </p>
               </div>
             </div>
@@ -125,11 +136,10 @@ export default function LendingOrderCard({
                 })}`}
               />
 
-              <LiquidationInfo
-                symbol={order.liquidationRewardAsset.symbol || "Unknown"}
-                feeForLiquidator={order.liquidationRewardAmount.formatted}
-                feeForLender={"0"}
-                label="Fee for liquidator"
+              <InfoBlockWithBorder
+                value={`${order.liquidationRewardAmount.formatted} / ${0} ${order.liquidationRewardAsset.symbol}`}
+                title="Fee for liquidator / for lender"
+                tooltipText={"Tooltip text"}
               />
             </div>
           </div>
@@ -198,8 +208,11 @@ export default function LendingOrderCard({
                   />
                 </svg>
               </div>
-
-              <LendingPositionCard position={{ ...position, order }} />
+              {position.isLiquidated || position.isClosed ? (
+                <InactiveMarginPositionCard key={position.id} position={{ ...position, order }} />
+              ) : (
+                <LendingPositionCard position={{ ...position, order }} />
+              )}
             </React.Fragment>
           ))}
       </div>

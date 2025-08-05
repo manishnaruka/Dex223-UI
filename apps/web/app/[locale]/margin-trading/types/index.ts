@@ -37,6 +37,7 @@ export type MarginPosition = {
   closedAt: number;
   isLiquidated: boolean;
   liquidatedAt: number;
+  liquidator: Address;
   order: Omit<LendingOrder, "positions">;
 };
 

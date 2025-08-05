@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useMemo } from "react";
 import { formatEther, formatGwei, formatUnits } from "viem";
 
+import calculateTotalOrderBalance from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculateTotalOrderBalance";
 import useOrderOpen from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderOpen";
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -173,7 +174,10 @@ export default function OrderOpenDialog({
                   </div>
 
                   <p className="font-medium text-20">
-                    2233.34 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                    {formatFloat(
+                      formatUnits(calculateTotalOrderBalance(order), order.baseAsset.decimals),
+                    )}{" "}
+                    <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                   </p>
                 </div>
               </GradientCard>
@@ -262,7 +266,10 @@ export default function OrderOpenDialog({
                   </div>
 
                   <p className="font-medium text-20">
-                    2233.34 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                    {formatFloat(
+                      formatUnits(calculateTotalOrderBalance(order), order.baseAsset.decimals),
+                    )}{" "}
+                    <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                   </p>
                 </div>
               </GradientCard>

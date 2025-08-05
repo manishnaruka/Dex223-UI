@@ -2,6 +2,9 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import React, { ReactNode } from "react";
 
+import Svg from "@/components/atoms/Svg";
+import { Link } from "@/i18n/routing";
+
 type MarginPositionCardBg =
   | "assets"
   | "borrowed"
@@ -32,7 +35,7 @@ export type PositionInfoCardProps = {
   title: string;
   tooltipText: string;
   value: string | ReactNode;
-  bg: MarginPositionCardBg;
+  bg?: MarginPositionCardBg;
 };
 
 const bgMap: Record<MarginPositionCardBg, string> = {
@@ -67,7 +70,7 @@ export function OrderInfoCard({ title, tooltipText, value, bg }: PositionInfoCar
     <div
       className={clsx(
         "flex flex-col justify-center px-5 bg-tertiary-bg rounded-3 py-3 bg-right-top bg-no-repeat bg-[length:120px_80px]",
-        bgMap[bg],
+        bg && bgMap[bg],
       )}
     >
       <div className="flex items-center gap-1">
@@ -96,6 +99,53 @@ export function OrderInfoBlock({
           <OrderInfoCard {...card} key={index} />
         ))}
       </div>
+    </div>
+  );
+}
+
+export function InfoBlockWithBorder({
+  title,
+  tooltipText,
+  value,
+}: {
+  title: string;
+  tooltipText: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="border-l-4 border-tertiary-bg rounded-1 pl-4 min-w-[185px]">
+      <div className="flex items-center gap-2 text-14 text-tertiary-text whitespace-nowrap">
+        {title} <Tooltip text={tooltipText} />
+      </div>
+      <p className="relative flex gap-1 items-center font-medium text-secondary-text">
+        <span className="">{value}</span>
+      </p>
+    </div>
+  );
+}
+
+export function SimpleInfoBlock({
+  title,
+  tooltipText,
+  value,
+}: {
+  title: string;
+  tooltipText: string;
+  value: ReactNode;
+}) {
+  return (
+    <div
+      className={clsx(
+        "flex flex-col justify-center px-5 bg-tertiary-bg rounded-3 py-3 bg-right-top bg-no-repeat bg-[length:120px_80px]",
+      )}
+    >
+      <div className="flex items-center gap-1">
+        <span className="flex items-center gap-1 text-14 text-tertiary-text">
+          {title}
+          <Tooltip text={tooltipText} />
+        </span>
+      </div>
+      <div className="relative flex gap-1 font-medium text-16 text-secondary-text">{value}</div>
     </div>
   );
 }

@@ -30,7 +30,7 @@ export default function useLiquidatePosition(position: MarginPosition) {
       abi: MARGIN_MODULE_ABI,
       address: MARGIN_TRADING_ADDRESS[chainId],
       functionName: "liquidate",
-      args: [BigInt(position.id)],
+      args: [BigInt(position.id), position.order.owner],
     });
     setStatus(PositionLiquidateStatus.LOADING_FREEZE);
     setPositionFreezeHash(positionFreezeHash);
@@ -42,7 +42,7 @@ export default function useLiquidatePosition(position: MarginPosition) {
         abi: MARGIN_MODULE_ABI,
         address: MARGIN_TRADING_ADDRESS[chainId],
         functionName: "liquidate",
-        args: [BigInt(position.id)],
+        args: [BigInt(position.id), position.order.owner],
       });
       setPositionLiquidateHash(positionLiquidateHash);
       setStatus(PositionLiquidateStatus.LOADING_LIQUIDATE);

@@ -3,10 +3,17 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { parseUnits } from "viem";
 
-import { useEditOrderStatusStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
+import {
+  calculatePeriodInterestRate,
+  calculatePeriodInterestRateNum,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
+import {
+  getApproveTextMap,
+  getTransferTextMap,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/getStepTexts";
 import { AssetsPreview } from "@/app/[locale]/margin-trading/lending-order/create/components/AssetsPreview";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import useCreateOrder, {
@@ -30,9 +37,11 @@ import OperationStepRow, {
   OperationStepStatus,
 } from "@/components/common/OperationStepRow";
 import { IconName } from "@/config/types/IconName";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { ORACLE_ADDRESS, ZERO_ADDRESS } from "@/sdk_bi/addresses";
+import { Standard } from "@/sdk_bi/standard";
 
 type StepTextMap = {
   [key in OperationStepStatus]: string;
@@ -46,19 +55,29 @@ type OperationStepConfig = {
   error: CreateOrderStatus;
 };
 
-function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, string> {
-  return {
-    [OperationStepStatus.IDLE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.AWAITING_SIGNATURE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.LOADING]: `Approving ${tokenSymbol}`,
-    [OperationStepStatus.STEP_COMPLETED]: `Approved ${tokenSymbol}`,
-    [OperationStepStatus.STEP_FAILED]: `Approve ${tokenSymbol} failed`,
-    [OperationStepStatus.OPERATION_COMPLETED]: `Approved ${tokenSymbol}`,
-  };
-}
+function createOrderSteps(
+  approveSymbol: string,
+  isNative: boolean,
+  baseAssetStandard: Standard,
+): OperationStepConfig[] {
+  if (!isNative) {
+    const secondStep =
+      baseAssetStandard === Standard.ERC20
+        ? ({
+            iconName: "done",
+            pending: CreateOrderStatus.PENDING_APPROVE,
+            loading: CreateOrderStatus.LOADING_APPROVE,
+            error: CreateOrderStatus.ERROR_APPROVE,
+            textMap: getApproveTextMap(approveSymbol),
+          } as const)
+        : ({
+            iconName: "transfer-to-contract",
+            pending: CreateOrderStatus.PENDING_TRANSFER,
+            loading: CreateOrderStatus.LOADING_TRANSFER,
+            error: CreateOrderStatus.ERROR_TRANSFER,
+            textMap: getTransferTextMap(approveSymbol),
+          } as const);
 
-function createOrderSteps(approveSymbol: string, isNative: boolean): OperationStepConfig[] {
-  if (!isNative)
     return [
       {
         iconName: "lending",
@@ -74,13 +93,7 @@ function createOrderSteps(approveSymbol: string, isNative: boolean): OperationSt
           [OperationStepStatus.OPERATION_COMPLETED]: "Lending order confirmed",
         },
       },
-      {
-        iconName: "done",
-        pending: CreateOrderStatus.PENDING_APPROVE,
-        loading: CreateOrderStatus.LOADING_APPROVE,
-        error: CreateOrderStatus.ERROR_APPROVE,
-        textMap: getApproveTextMap(approveSymbol),
-      },
+      secondStep,
       {
         iconName: "deposit",
         pending: CreateOrderStatus.PENDING_DEPOSIT,
@@ -96,6 +109,7 @@ function createOrderSteps(approveSymbol: string, isNative: boolean): OperationSt
         },
       },
     ];
+  }
 
   return [
     {
@@ -130,37 +144,62 @@ function createOrderSteps(approveSymbol: string, isNative: boolean): OperationSt
 }
 
 function CreateOrderActionButton({ amountToApprove }: { amountToApprove: string }) {
-  const t = useTranslations("Swap");
-
   const { handleCreateOrder } = useCreateOrder();
 
-  const { status, approveHash, depositHash, confirmOrderHash } = useCreateOrderStatusStore();
-  const { loanToken } = useCreateOrderParams();
+  const { status, approveHash, depositHash, createOrderHash, transferHash } =
+    useCreateOrderStatusStore();
+  const { loanToken, loanTokenStandard } = useCreateOrderParams();
+
+  const hashes = useMemo(() => {
+    if (loanToken?.isNative) {
+      return [createOrderHash, depositHash];
+    }
+
+    if (loanTokenStandard === Standard.ERC20) {
+      return [createOrderHash, approveHash, depositHash];
+    }
+
+    if (loanTokenStandard === Standard.ERC223) {
+      return [createOrderHash, transferHash, depositHash];
+    }
+
+    return [createOrderHash, approveHash, depositHash];
+  }, [
+    approveHash,
+    createOrderHash,
+    depositHash,
+    loanToken?.isNative,
+    loanTokenStandard,
+    transferHash,
+  ]);
 
   if (status !== CreateOrderStatus.INITIAL) {
     return (
       <OperationRows>
-        {createOrderSteps(loanToken?.symbol || "", !!loanToken?.isNative).map((step, index) => (
-          <OperationStepRow
-            key={index}
-            iconName={step.iconName}
-            hash={[confirmOrderHash, approveHash, depositHash][index]}
-            statusTextMap={step.textMap}
-            status={operationStatusToStepStatus({
-              currentStatus: status,
-              orderedSteps: createOrderSteps(
-                loanToken?.symbol || "",
-                !!loanToken?.isNative,
-              ).flatMap((s) => [s.pending, s.loading, s.error]),
-              stepIndex: index,
-              pendingStep: step.pending,
-              loadingStep: step.loading,
-              errorStep: step.error,
-              successStep: CreateOrderStatus.SUCCESS,
-            })}
-            isFirstStep={index === 0}
-          />
-        ))}
+        {createOrderSteps(loanToken?.symbol || "", !!loanToken?.isNative, loanTokenStandard).map(
+          (step, index) => (
+            <OperationStepRow
+              key={index}
+              iconName={step.iconName}
+              hash={hashes[index]}
+              statusTextMap={step.textMap}
+              status={operationStatusToStepStatus({
+                currentStatus: status,
+                orderedSteps: createOrderSteps(
+                  loanToken?.symbol || "",
+                  !!loanToken?.isNative,
+                  loanTokenStandard,
+                ).flatMap((s) => [s.pending, s.loading, s.error]),
+                stepIndex: index,
+                pendingStep: step.pending,
+                loadingStep: step.loading,
+                errorStep: step.error,
+                successStep: CreateOrderStatus.SUCCESS,
+              })}
+              isFirstStep={index === 0}
+            />
+          ),
+        )}
       </OperationRows>
     );
   }
@@ -312,12 +351,44 @@ export default function ReviewCreateOrderDialog({
               />
               <LendingOrderDetailsRow
                 title="Interest rate for the entire period"
-                value={<span className="text-red">TODO</span>}
+                value={
+                  interestRatePerMonth && period.lendingOrderDeadline
+                    ? calculatePeriodInterestRate(
+                        +interestRatePerMonth * 100,
+                        Math.max(
+                          0,
+                          (new Date(period.lendingOrderDeadline).getTime() - Date.now()) / 1000,
+                        ),
+                      )
+                    : "—"
+                }
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
                 title="You will receive for the entire period"
-                value={<span className="text-red">TODO</span>}
+                value={
+                  interestRatePerMonth &&
+                  period.lendingOrderDeadline &&
+                  loanAmount &&
+                  loanToken?.symbol
+                    ? (() => {
+                        const _loanAmount = parseFloat(loanAmount);
+                        const interestRate = calculatePeriodInterestRateNum(
+                          +interestRatePerMonth * 100,
+                          Math.max(
+                            0,
+                            (new Date(period.lendingOrderDeadline).getTime() - Date.now()) / 1000,
+                          ),
+                        );
+
+                        if (isNaN(_loanAmount) || isNaN(interestRate)) return "—";
+
+                        const interest = (_loanAmount * interestRate) / 100;
+
+                        return formatFloat(interest) + ` ${loanToken.symbol}`;
+                      })() // or 2 decimals if needed
+                    : "—"
+                }
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow

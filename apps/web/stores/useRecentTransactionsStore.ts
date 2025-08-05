@@ -32,6 +32,7 @@ export enum RecentTransactionTitleTemplate {
 
   CREATE_MARGIN_POSITION,
   CLOSE_MARGIN_POSITION,
+  TRANSFER,
   FREEZE_MARGIN_POSITION,
   LIQUIDATE_MARGIN_POSITION,
   MARGIN_SWAP,
@@ -104,6 +105,9 @@ export type IRecentTransactionTitle =
       template: RecentTransactionTitleTemplate.WITHDRAW;
     } & SingleTokenTransactionTitle)
   | ({
+      template: RecentTransactionTitleTemplate.TRANSFER;
+    } & SingleTokenTransactionTitle)
+  | ({
       template: RecentTransactionTitleTemplate.UNWRAP;
     } & SingleTokenTransactionTitle)
   | ({
@@ -129,7 +133,7 @@ export type IRecentTransactionTitle =
     } & TwoTokensTransactionTitle)
   | ({
       template: RecentTransactionTitleTemplate.CREATE_LENDING_ORDER;
-    } & SingleTokenTransactionTitle)
+    } & Omit<SingleTokenTransactionTitle, "amount">)
   | ({
       template: RecentTransactionTitleTemplate.OPEN_LENDING_ORDER;
     } & MarginOrderTitle)

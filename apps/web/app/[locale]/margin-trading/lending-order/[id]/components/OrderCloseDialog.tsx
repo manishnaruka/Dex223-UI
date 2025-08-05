@@ -5,6 +5,7 @@ import React, { useEffect, useMemo } from "react";
 import { formatEther, formatGwei, formatUnits } from "viem";
 
 import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
+import calculateTotalOrderBalance from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculateTotalOrderBalance";
 import useOrderClose from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderClose";
 import {
   OrderCloseStatus,
@@ -180,7 +181,10 @@ export default function OrderCloseDialog({
                   </div>
 
                   <p className="font-medium text-20">
-                    2233.34 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                    {formatFloat(
+                      formatUnits(calculateTotalOrderBalance(order), order.baseAsset.decimals),
+                    )}{" "}
+                    <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                   </p>
                 </div>
               </GradientCard>
@@ -281,7 +285,10 @@ export default function OrderCloseDialog({
                   </div>
 
                   <p className="font-medium text-20">
-                    2233.34 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                    {formatFloat(
+                      formatUnits(calculateTotalOrderBalance(order), order.baseAsset.decimals),
+                    )}{" "}
+                    <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                   </p>
                 </div>
               </GradientCard>

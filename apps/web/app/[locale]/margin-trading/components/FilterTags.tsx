@@ -6,7 +6,6 @@ import {
   useBorrowMarketFilterStore,
 } from "@/app/[locale]/margin-trading/stores/useBorrowMarketFilterStore";
 import Svg from "@/components/atoms/Svg";
-import IconButton from "@/components/buttons/IconButton";
 
 export default function FilterTags() {
   const {

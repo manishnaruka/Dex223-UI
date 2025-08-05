@@ -1,11 +1,13 @@
 "use client";
 import clsx from "clsx";
-import React, { use } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
+import DepositForm from "@/app/[locale]/margin-trading/position/[id]/deposit/components/DepositForm";
 import LiquidateForm from "@/app/[locale]/margin-trading/position/[id]/liquidate/components/LiquidateForm";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
+import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 
@@ -25,6 +27,8 @@ export default function LiquidatePositionPage({
 
   const { position, loading } = useMarginPositionById({ id: positionId });
 
+  console.log(loading);
+  console.log(position);
   if (loading || !position) {
     return "Loading";
   }
@@ -51,7 +55,7 @@ export default function LiquidatePositionPage({
           </div>
 
           <div className="flex justify-center grid-in-[right]">
-            <LiquidateForm position={position} />
+            <DepositForm position={position} />
           </div>
         </div>
       </Container>

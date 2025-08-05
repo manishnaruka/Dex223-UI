@@ -1,7 +1,16 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
-import { Address, decodeEventLog, encodeAbiParameters, Hash, keccak256, parseUnits } from "viem";
-import { usePublicClient, useWalletClient } from "wagmi";
+import {
+  Address,
+  encodeAbiParameters,
+  encodeFunctionData,
+  getAbiItem,
+  Hash,
+  keccak256,
+  parseEventLogs,
+  parseUnits,
+} from "viem";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { TradingTokensInputMode } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
@@ -13,14 +22,23 @@ import {
   useCreateOrderGasLimitStore,
   useCreateOrderGasPriceStore,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useSwapGasSettingsStore";
+import { ERC223_ABI } from "@/config/abis/erc223";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { getGasSettings } from "@/functions/gasSettings";
+import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import addToast from "@/other/toast";
 import { MARGIN_TRADING_ADDRESS, ORACLE_ADDRESS } from "@/sdk_bi/addresses";
-import { Standard } from "@/sdk_bi/standard";
+import { DexChainId } from "@/sdk_bi/chains";
+import { getTokenAddressForStandard, Standard } from "@/sdk_bi/standard";
+import {
+  GasFeeModel,
+  RecentTransactionTitleTemplate,
+  stringifyObject,
+  useRecentTransactionsStore,
+} from "@/stores/useRecentTransactionsStore";
 
 export function useCreateOrderParams() {
   const { firstStepValues, secondStepValues, thirdStepValues } = useCreateOrderConfigStore();
@@ -75,8 +93,14 @@ export default function useCreateOrder() {
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
 
-  const { setStatus, setApproveHash, setDepositHash, setConfirmOrderHash, setErrorType } =
-    useCreateOrderStatusStore();
+  const {
+    setStatus,
+    setApproveHash,
+    setDepositHash,
+    setCreateOrderHash,
+    setTransferHash,
+    setErrorType,
+  } = useCreateOrderStatusStore();
 
   const {
     isAllowed: isAllowedA,
@@ -88,6 +112,7 @@ export default function useCreateOrder() {
     amountToCheck: parseUnits(params.loanAmount, params.loanToken?.decimals ?? 18),
   });
 
+  const { address } = useAccount();
   const { customGasLimit } = useCreateOrderGasLimitStore();
   const { gasPriceOption, gasPriceSettings } = useCreateOrderGasPriceStore();
   const { baseFee, priorityFee, gasPrice } = useFees();
@@ -125,6 +150,8 @@ export default function useCreateOrder() {
     setStatus(CreateOrderStatus.INITIAL);
   }, [setStatus]);
 
+  const { addRecentTransaction } = useRecentTransactionsStore();
+
   const handleCreateOrder = useCallback(
     async (amountToApprove: string) => {
       setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
@@ -136,7 +163,8 @@ export default function useCreateOrder() {
         !loanToken ||
         !liquidationFeeToken ||
         (tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING &&
-          !tradingTokens.tradingTokensAutoListing)
+          !tradingTokens.tradingTokensAutoListing) ||
+        !address
       ) {
         return;
       }
@@ -152,90 +180,167 @@ export default function useCreateOrder() {
               ),
             ) as Address[]);
 
-      const addTokenListHash = await walletClient.writeContract({
-        abi: MARGIN_MODULE_ABI,
-        address: MARGIN_TRADING_ADDRESS[chainId],
-        functionName: "addTokenlist",
-        args: [sortedAddresses, tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING],
-        account: undefined,
-      });
-
-      setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      await publicClient.waitForTransactionReceipt({ hash: addTokenListHash });
-      setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
-
       const whitelistId = getWhitelistId(
         sortedAddresses,
         tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING,
       );
 
+      const encodedAddTokenListParams = encodeFunctionData({
+        abi: MARGIN_MODULE_ABI,
+        functionName: "addTokenlist",
+        args: [sortedAddresses, tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING],
+      });
+
+      const encodedCreateOrderParams = encodeFunctionData({
+        abi: MARGIN_MODULE_ABI,
+        functionName: "createOrder",
+        args: [
+          {
+            whitelistId: whitelistId,
+            interestRate: calculateInterestRate(
+              Number(interestRatePerMonth),
+              Number(period.positionDuration),
+            ),
+            duration: BigInt(Number(period.positionDuration) * 24 * 60 * 60), // positionDuration in seconds
+            minLoan: parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals),
+            liquidationRewardAmount: parseUnits(
+              liquidationFeeForLiquidator,
+              liquidationFeeToken.decimals,
+            ),
+            liquidationRewardAsset: liquidationFeeToken.wrapped.address0,
+            asset: getTokenAddressForStandard(loanToken, loanTokenStandard),
+            deadline: Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000),
+            currencyLimit: Number(orderCurrencyLimit),
+            leverage,
+            oracle: ORACLE_ADDRESS[chainId],
+            collateral: collateralTokens.flatMap((token) => {
+              if (includeERC223Collateral) {
+                return [token.wrapped.address0, token.wrapped.address1];
+              }
+              return [token.wrapped.address0];
+            }),
+          },
+        ],
+      });
+
+      const multicallParams = {
+        abi: MARGIN_MODULE_ABI,
+        address: MARGIN_TRADING_ADDRESS[chainId],
+        functionName: "multicall",
+        args: [[encodedAddTokenListParams, encodedCreateOrderParams]],
+      } as const;
+
+      const addTokenListAndCreateOrderHash = await walletClient.writeContract({
+        ...multicallParams,
+        account: undefined,
+      });
+
+      setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
+      setCreateOrderHash(addTokenListAndCreateOrderHash);
+
+      const transaction = await getTransactionWithRetries({
+        hash: addTokenListAndCreateOrderHash,
+        publicClient,
+      });
+
+      const nonce = transaction.nonce;
+
+      addRecentTransaction(
+        {
+          hash: addTokenListAndCreateOrderHash,
+          nonce,
+          chainId,
+          gas: {
+            model: GasFeeModel.EIP1559,
+            gas: "0",
+            maxFeePerGas: undefined,
+            maxPriorityFeePerGas: undefined,
+          },
+          params: {
+            ...stringifyObject(multicallParams),
+            abi: [getAbiItem({ name: "orderDepositWETH9", abi: MARGIN_MODULE_ABI })],
+          },
+          title: {
+            symbol: params.loanToken.symbol!,
+            template: RecentTransactionTitleTemplate.CREATE_LENDING_ORDER,
+            logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
+          },
+        },
+        address,
+      );
+
       try {
-        const createOrderHash = await walletClient.writeContract({
-          abi: MARGIN_MODULE_ABI,
-          address: MARGIN_TRADING_ADDRESS[chainId],
-          functionName: "createOrder",
-          args: [
-            {
-              whitelistId: whitelistId,
-              // interest rate for 30 days mutliplied by 100
-              interestRate: calculateInterestRate(
-                Number(interestRatePerMonth),
-                Number(period.positionDuration),
-              ),
-              duration: BigInt(Number(period.positionDuration) * 24 * 60 * 60), // positionDuration in seconds
-              minLoan: parseUnits(minimumBorrowingAmount.toString(), loanToken.decimals),
-              liquidationRewardAmount: parseUnits(
-                liquidationFeeForLiquidator,
-                liquidationFeeToken.decimals,
-              ),
-              liquidationRewardAsset: liquidationFeeToken.wrapped.address0,
-              asset:
-                loanTokenStandard === Standard.ERC20
-                  ? loanToken.wrapped.address0
-                  : loanToken.wrapped.address1,
-              deadline: Math.floor(new Date(period.lendingOrderDeadline).getTime() / 1000),
-              currencyLimit: Number(orderCurrencyLimit),
-              leverage,
-              oracle: ORACLE_ADDRESS[chainId],
-              collateral: collateralTokens.flatMap((token) => {
-                if (includeERC223Collateral) {
-                  return [token.wrapped.address0, token.wrapped.address1];
-                }
-                return [token.wrapped.address0];
-              }),
-            },
-            // whitelist id from tokens that are allowed for trading
-          ],
-          account: undefined,
-        });
-        setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-
         const createOrderReceipt = await publicClient.waitForTransactionReceipt({
-          hash: createOrderHash,
+          hash: addTokenListAndCreateOrderHash,
         });
 
-        const decodedLog = decodeEventLog({
+        const parsedEventLog = parseEventLogs({
           abi: MARGIN_MODULE_ABI,
-          eventName: "OrderCreated",
-          data: createOrderReceipt.logs[0].data,
-          topics: createOrderReceipt.logs[0].topics,
+          logs: createOrderReceipt.logs,
         });
 
-        console.log("Decoded log", decodedLog);
+        const createOrderLog = parsedEventLog.find((log) => log.eventName === "OrderCreated");
+
+        console.log(createOrderLog);
+        if (!createOrderLog) {
+          console.log("CREATE ORDER LOG NOT FOUND!");
+          return;
+        }
 
         if (params.loanToken.isNative) {
           setStatus(CreateOrderStatus.PENDING_DEPOSIT);
 
-          const depositOrderHash = await walletClient.writeContract({
+          const nativeParams = {
             abi: MARGIN_MODULE_ABI,
             address: MARGIN_TRADING_ADDRESS[chainId],
-            functionName: "orderDepositWETH9",
-            args: [decodedLog.args.orderId, params.loanToken.wrapped.address0],
+            functionName: "orderDepositWETH9" as const,
+            args: [
+              createOrderLog.args.orderId,
+              params.loanTokenStandard === Standard.ERC20
+                ? params.loanToken.wrapped.address0
+                : params.loanToken.wrapped.address1,
+            ] as const,
             value: parseUnits(loanAmount, params.loanToken.decimals ?? 18),
+          };
+
+          const depositOrderHash = await walletClient.writeContract({
+            ...nativeParams,
             account: undefined,
           });
           setStatus(CreateOrderStatus.LOADING_DEPOSIT);
+          setDepositHash(depositOrderHash);
 
+          const transaction = await getTransactionWithRetries({
+            hash: depositOrderHash,
+            publicClient,
+          });
+
+          const nonce = transaction.nonce;
+
+          addRecentTransaction(
+            {
+              hash: depositOrderHash,
+              nonce,
+              chainId,
+              gas: {
+                model: GasFeeModel.EIP1559,
+                gas: "0",
+                maxFeePerGas: undefined,
+                maxPriorityFeePerGas: undefined,
+              },
+              params: {
+                ...stringifyObject(nativeParams),
+                abi: [getAbiItem({ name: "orderDepositWETH9", abi: MARGIN_MODULE_ABI })],
+              },
+              title: {
+                symbol: params.loanToken.symbol!,
+                template: RecentTransactionTitleTemplate.DEPOSIT,
+                amount: params.loanAmount,
+                logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
+              },
+            },
+            address,
+          );
           const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
 
           if (receipt.status === "success") {
@@ -244,26 +349,89 @@ export default function useCreateOrder() {
             setStatus(CreateOrderStatus.ERROR_DEPOSIT);
           }
         } else {
-          setStatus(CreateOrderStatus.PENDING_APPROVE);
-          const approveResult = await approveA({
-            customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
-            // customGasSettings: gasSettings,
-          });
+          console.log(params.loanTokenStandard + "STANDARD!!!");
+          if (params.loanTokenStandard === Standard.ERC20) {
+            setStatus(CreateOrderStatus.PENDING_APPROVE);
+            const approveResult = await approveA({
+              customAmount: parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
+              // customGasSettings: gasSettings,
+            });
 
-          if (!approveResult?.success) {
-            setStatus(CreateOrderStatus.ERROR_APPROVE);
-            return;
-          }
+            if (!approveResult?.success) {
+              setStatus(CreateOrderStatus.ERROR_APPROVE);
+              return;
+            }
 
-          setStatus(CreateOrderStatus.LOADING_APPROVE);
+            setStatus(CreateOrderStatus.LOADING_APPROVE);
 
-          const approveReceipt = await publicClient.waitForTransactionReceipt({
-            hash: approveResult.hash,
-          });
+            const approveReceipt = await publicClient.waitForTransactionReceipt({
+              hash: approveResult.hash,
+            });
 
-          if (approveReceipt.status !== "success") {
-            setStatus(CreateOrderStatus.ERROR_APPROVE);
-            return;
+            if (approveReceipt.status !== "success") {
+              setStatus(CreateOrderStatus.ERROR_APPROVE);
+              return;
+            }
+          } else {
+            setStatus(CreateOrderStatus.PENDING_TRANSFER);
+            const _params = {
+              account: address as Address,
+              abi: ERC223_ABI,
+              functionName: "transfer" as const,
+              address: params.loanToken.wrapped.address1 as Address,
+              args: [
+                MARGIN_TRADING_ADDRESS[chainId as DexChainId],
+                parseUnits(amountToApprove, params.loanToken.decimals ?? 18),
+              ] as const,
+            };
+
+            const _firstDepositHash = await walletClient.writeContract({
+              ..._params,
+              account: undefined,
+            });
+            setStatus(CreateOrderStatus.LOADING_TRANSFER);
+            setTransferHash(_firstDepositHash);
+
+            const transaction = await getTransactionWithRetries({
+              hash: _firstDepositHash,
+              publicClient,
+            });
+
+            const nonce = transaction.nonce;
+
+            addRecentTransaction(
+              {
+                hash: _firstDepositHash,
+                nonce,
+                chainId,
+                gas: {
+                  model: GasFeeModel.EIP1559,
+                  gas: "0",
+                  maxFeePerGas: undefined,
+                  maxPriorityFeePerGas: undefined,
+                },
+                params: {
+                  ...stringifyObject(_params),
+                  abi: [getAbiItem({ name: "transfer", abi: ERC223_ABI })],
+                },
+                title: {
+                  symbol: params.loanToken.symbol!,
+                  template: RecentTransactionTitleTemplate.TRANSFER,
+                  amount: params.loanAmount,
+                  logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
+                },
+              },
+              address,
+            );
+
+            const receipt = await publicClient.waitForTransactionReceipt({
+              hash: _firstDepositHash,
+            });
+
+            if (receipt.status !== "success") {
+              setStatus(CreateOrderStatus.ERROR_TRANSFER);
+              return;
+            }
           }
 
           setStatus(CreateOrderStatus.PENDING_DEPOSIT);
@@ -273,14 +441,49 @@ export default function useCreateOrder() {
             address: MARGIN_TRADING_ADDRESS[chainId],
             functionName: "orderDepositToken",
             args: [
-              decodedLog.args.orderId,
+              createOrderLog.args.orderId,
               parseUnits(loanAmount, params.loanToken.decimals ?? 18),
             ],
             account: undefined,
           });
           setStatus(CreateOrderStatus.LOADING_DEPOSIT);
+          setDepositHash(depositOrderHash);
 
-          const receipt = await publicClient.waitForTransactionReceipt({ hash: depositOrderHash });
+          const transaction = await getTransactionWithRetries({
+            hash: depositOrderHash,
+            publicClient,
+          });
+
+          const nonce = transaction.nonce;
+
+          addRecentTransaction(
+            {
+              hash: depositOrderHash,
+              nonce,
+              chainId,
+              gas: {
+                model: GasFeeModel.EIP1559,
+                gas: "0",
+                maxFeePerGas: undefined,
+                maxPriorityFeePerGas: undefined,
+              },
+              params: {
+                ...stringifyObject(params),
+                abi: [getAbiItem({ name: "orderDepositToken", abi: MARGIN_MODULE_ABI })],
+              },
+              title: {
+                symbol: params.loanToken.symbol!,
+                template: RecentTransactionTitleTemplate.DEPOSIT,
+                amount: params.loanAmount,
+                logoURI: params.loanToken?.logoURI || "/images/tokens/placeholder.svg",
+              },
+            },
+            address,
+          );
+
+          const receipt = await publicClient.waitForTransactionReceipt({
+            hash: depositOrderHash,
+          });
 
           if (receipt.status === "success") {
             setStatus(CreateOrderStatus.SUCCESS);
@@ -298,10 +501,10 @@ export default function useCreateOrder() {
       }
     },
     [
+      address,
       approveA,
       chainId,
       collateralTokens,
-      gasSettings,
       includeERC223Collateral,
       interestRatePerMonth,
       leverage,
@@ -313,10 +516,13 @@ export default function useCreateOrder() {
       minimumBorrowingAmount,
       orderCurrencyLimit,
       params.loanToken,
+      params.loanTokenStandard,
       period.lendingOrderDeadline,
       period.positionDuration,
       publicClient,
+      setCreateOrderHash,
       setStatus,
+      setTransferHash,
       tradingTokens.allowedTokens,
       tradingTokens.includeERC223Trading,
       tradingTokens.inputMode,

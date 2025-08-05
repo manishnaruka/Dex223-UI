@@ -70,7 +70,7 @@ export default function Pagination({
 
   let lastPage = paginationRange[paginationRange.length - 1];
   return (
-    <ul className="flex items-center gap-2 justify-center">
+    <ul className={clsx("flex items-center gap-2 justify-center", className)}>
       {/* Left navigation arrow */}
       <li
         className={clsxMerge(

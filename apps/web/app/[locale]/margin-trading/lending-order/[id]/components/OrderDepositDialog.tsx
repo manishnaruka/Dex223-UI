@@ -3,6 +3,10 @@ import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei, parseUnits } from "viem";
 
+import {
+  getApproveTextMap,
+  getTransferTextMap,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/getStepTexts";
 import useOrderDeposit from "@/app/[locale]/margin-trading/lending-order/[id]/hooks/useOrderDeposit";
 import {
   OrderDepositStatus,
@@ -39,26 +43,49 @@ type OperationStepConfig = {
   error: OrderDepositStatus;
 };
 
-function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, string> {
-  return {
-    [OperationStepStatus.IDLE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.AWAITING_SIGNATURE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.LOADING]: `Approving ${tokenSymbol}`,
-    [OperationStepStatus.STEP_COMPLETED]: `Approved ${tokenSymbol}`,
-    [OperationStepStatus.STEP_FAILED]: `Approve ${tokenSymbol} failed`,
-    [OperationStepStatus.OPERATION_COMPLETED]: `Approved ${tokenSymbol}`,
-  };
-}
+function composeDepositOrderSteps(
+  symbol: string = "Unknown",
+  isNative: boolean,
+  standard = Standard.ERC20,
+): OperationStepConfig[] {
+  if (isNative) {
+    return [
+      {
+        iconName: "deposit",
+        pending: OrderDepositStatus.PENDING_DEPOSIT,
+        loading: OrderDepositStatus.LOADING_DEPOSIT,
+        error: OrderDepositStatus.ERROR_DEPOSIT,
+        textMap: {
+          [OperationStepStatus.IDLE]: "Deposit funds",
+          [OperationStepStatus.AWAITING_SIGNATURE]: "Deposit funds",
+          [OperationStepStatus.LOADING]: "Executing deposit",
+          [OperationStepStatus.STEP_COMPLETED]: "Deposited funds",
+          [OperationStepStatus.STEP_FAILED]: "Failed to deposit funds",
+          [OperationStepStatus.OPERATION_COMPLETED]: "Deposited funds",
+        },
+      },
+    ];
+  }
 
-function composeDepositOrderSteps(symbol: string = "Unknown"): OperationStepConfig[] {
+  const firstStep =
+    standard === Standard.ERC20
+      ? ({
+          iconName: "done",
+          pending: OrderDepositStatus.PENDING_APPROVE,
+          loading: OrderDepositStatus.LOADING_APPROVE,
+          error: OrderDepositStatus.ERROR_APPROVE,
+          textMap: getApproveTextMap(symbol),
+        } as const)
+      : ({
+          iconName: "transfer-to-contract",
+          pending: OrderDepositStatus.PENDING_TRANSFER,
+          loading: OrderDepositStatus.LOADING_TRANSFER,
+          error: OrderDepositStatus.ERROR_TRANSFER,
+          textMap: getTransferTextMap(symbol),
+        } as const);
+
   return [
-    {
-      iconName: "done",
-      pending: OrderDepositStatus.PENDING_APPROVE,
-      loading: OrderDepositStatus.LOADING_APPROVE,
-      error: OrderDepositStatus.ERROR_APPROVE,
-      textMap: getApproveTextMap(symbol),
-    },
+    firstStep,
     {
       iconName: "deposit",
       pending: OrderDepositStatus.PENDING_DEPOSIT,
@@ -91,26 +118,47 @@ function OrderDepositActionButton({
     orderId: order.id,
     currency: order.baseAsset,
     amount: amountToDeposit,
+    standard: order.baseAssetStandard,
   });
 
-  const { status, approveHash, depositHash } = useDepositOrderStatusStore();
+  const { status, approveHash, depositHash, transferHash } = useDepositOrderStatusStore();
+
+  const hashes = useMemo(() => {
+    if (order.baseAsset.isNative) {
+      return [depositHash];
+    }
+
+    if (order.baseAssetStandard === Standard.ERC20) {
+      return [approveHash, depositHash];
+    }
+
+    if (order.baseAssetStandard === Standard.ERC223) {
+      return [transferHash, depositHash];
+    }
+
+    return [approveHash, depositHash];
+  }, [approveHash, depositHash, order.baseAsset.isNative, order.baseAssetStandard, transferHash]);
 
   if (status !== OrderDepositStatus.INITIAL) {
     return (
       <OperationRows>
-        {composeDepositOrderSteps(order.baseAsset.symbol).map((step, index) => (
+        {composeDepositOrderSteps(
+          order.baseAsset.symbol,
+          order.baseAsset.isNative,
+          order.baseAssetStandard,
+        ).map((step, index) => (
           <OperationStepRow
             key={index}
             iconName={step.iconName}
-            hash={[approveHash, depositHash][index]}
+            hash={hashes[index]}
             statusTextMap={step.textMap}
             status={operationStatusToStepStatus({
               currentStatus: status,
-              orderedSteps: composeDepositOrderSteps(order.baseAsset.symbol).flatMap((s) => [
-                s.pending,
-                s.loading,
-                s.error,
-              ]),
+              orderedSteps: composeDepositOrderSteps(
+                order.baseAsset.symbol,
+                order.baseAsset.isNative,
+                order.baseAssetStandard,
+              ).flatMap((s) => [s.pending, s.loading, s.error]),
               stepIndex: index,
               pendingStep: step.pending,
               loadingStep: step.loading,
@@ -157,6 +205,7 @@ export default function OrderDepositDialog({
     if (
       (status === OrderDepositStatus.ERROR_APPROVE ||
         status === OrderDepositStatus.ERROR_DEPOSIT ||
+        status === OrderDepositStatus.ERROR_TRANSFER ||
         status === OrderDepositStatus.SUCCESS) &&
       !isOpen
     ) {
@@ -179,6 +228,26 @@ export default function OrderDepositDialog({
 
     return undefined;
   }, [amountToDeposit, order.baseAsset.decimals, order.baseAsset.symbol, tokenA0Balance]);
+
+  const currentBalance = useMemo(() => {
+    if (
+      tokenA0Balance &&
+      Boolean(tokenA0Balance.value) &&
+      order.baseAssetStandard === Standard.ERC20
+    ) {
+      return formatFloat(tokenA0Balance.formatted);
+    }
+    if (
+      tokenA1Balance &&
+      Boolean(tokenA1Balance.value) &&
+      order.baseAssetStandard === Standard.ERC223
+    ) {
+      return formatFloat(tokenA1Balance.formatted);
+    }
+
+    return "0";
+  }, [order.baseAssetStandard, tokenA0Balance, tokenA1Balance]);
+
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title="Deposit" />
@@ -206,15 +275,11 @@ export default function OrderDepositDialog({
                   setAmountToApproveModified(false);
                 }
               }}
-              helperText={`Available balance: ${
-                tokenA0Balance && Boolean(tokenA0Balance.value)
-                  ? formatFloat(tokenA0Balance.formatted)
-                  : 0
-              } ${order.baseAsset.symbol}`}
+              helperText={`Available balance: ${currentBalance} ${order.baseAsset.symbol}`}
               error={error}
             />
 
-            {order.baseAsset.isToken ? (
+            {order.baseAsset.isToken && order.baseAssetStandard === Standard.ERC20 ? (
               <div
                 className={clsx(
                   "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-4 gap-5",
@@ -324,11 +389,13 @@ export default function OrderDepositDialog({
           <>
             {status === OrderDepositStatus.SUCCESS ||
             status === OrderDepositStatus.ERROR_DEPOSIT ||
+            status === OrderDepositStatus.ERROR_TRANSFER ||
             status === OrderDepositStatus.ERROR_APPROVE ? (
               <div className="pb-1">
                 <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
                   {(status === OrderDepositStatus.ERROR_DEPOSIT ||
-                    status === OrderDepositStatus.ERROR_APPROVE) && (
+                    status === OrderDepositStatus.ERROR_APPROVE ||
+                    status === OrderDepositStatus.ERROR_TRANSFER) && (
                     <EmptyStateIcon iconName="warning" />
                   )}
 
@@ -354,7 +421,8 @@ export default function OrderDepositDialog({
                 )}
 
                 {(status === OrderDepositStatus.ERROR_DEPOSIT ||
-                  status === OrderDepositStatus.ERROR_APPROVE) && (
+                  status === OrderDepositStatus.ERROR_APPROVE ||
+                  status === OrderDepositStatus.ERROR_TRANSFER) && (
                   <div>
                     <h2 className="text-center mb-1 font-bold text-20 text-red-light">
                       {status === OrderDepositStatus.ERROR_DEPOSIT
@@ -372,7 +440,7 @@ export default function OrderDepositDialog({
                 token={order.baseAsset}
                 amount={amountToDeposit}
                 amountUSD={"0"}
-                standard={Standard.ERC20}
+                standard={order.baseAssetStandard}
                 title={"Deposit amount"}
               />
             )}

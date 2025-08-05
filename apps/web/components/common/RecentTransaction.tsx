@@ -91,6 +91,17 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           </span>
         </span>
       );
+    case RecentTransactionTitleTemplate.TRANSFER:
+      return (
+        <span className="mr-1 text-0">
+          <Svg
+            className="text-tertiary-text inline-block mr-1 align-top"
+            iconName="transfer-to-contract"
+          />
+
+          <span className="font-medium inline text-16">Transfer to contract</span>
+        </span>
+      );
     case RecentTransactionTitleTemplate.WITHDRAW:
       return (
         <span className="mr-1 text-0">
@@ -218,7 +229,7 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.CONVERT:
     case RecentTransactionTitleTemplate.UNWRAP:
-    case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
+    case RecentTransactionTitleTemplate.TRANSFER:
       return (
         <span className="text-14 text-secondary-text">
           {t("single_subtitle", {
@@ -263,6 +274,8 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
       return (
         <span className="text-14 text-secondary-text">{`${title.symbol} (ID: ${title.positionId})`}</span>
       );
+    case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
+      return <span className="text-14 text-secondary-text">{title.symbol}</span>;
   }
 }
 
@@ -279,6 +292,8 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:
     case RecentTransactionTitleTemplate.EDIT_LENDING_ORDER:
     case RecentTransactionTitleTemplate.CREATE_MARGIN_POSITION:
+    case RecentTransactionTitleTemplate.CLOSE_MARGIN_POSITION:
+    case RecentTransactionTitleTemplate.TRANSFER:
       return (
         <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
           <Image width={36} height={36} src={title.logoURI} alt="" />

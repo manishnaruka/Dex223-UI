@@ -1,7 +1,6 @@
 import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import Tooltip from "@repo/ui/tooltip";
-import { add } from "dexie";
 import React, { useState } from "react";
 import { formatEther, formatGwei, formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -73,19 +72,17 @@ export default function LiquidateForm({ position }: { position: MarginPosition }
 
   return (
     <div className="w-[600px] bg-primary-bg rounded-5 card-spacing-x card-spacing-b">
-      {address?.toLowerCase() === position.order.owner.toLowerCase() && (
-        <div className="h-[60px] flex justify-between items-center mb-2.5">
-          <h3 className="font-bold text-20">Liquidation</h3>
-          <div className="flex items-center relative left-3">
-            <IconButton
-              buttonSize={IconButtonSize.LARGE}
-              active={showRecentTransactions}
-              iconName="recent-transactions"
-              onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-            />
-          </div>
+      <div className="h-[60px] flex justify-between items-center mb-2.5">
+        <h3 className="font-bold text-20">Liquidation</h3>
+        <div className="flex items-center relative left-3">
+          <IconButton
+            buttonSize={IconButtonSize.LARGE}
+            active={showRecentTransactions}
+            iconName="recent-transactions"
+            onClick={() => setShowRecentTransactions(!showRecentTransactions)}
+          />
         </div>
-      )}
+      </div>
       <p className="text-secondary-text mb-4">
         When an asset is liquidated, the proceeds from its sale are first used to pay off any
         outstanding debts and obligations. Once creditors have been settled, any remaining funds are
@@ -236,15 +233,23 @@ export default function LiquidateForm({ position }: { position: MarginPosition }
           </div>
         </div>
 
-        <Button
-          fullWidth
-          onClick={() => {
-            setIsLiquidateDialogOpened(true);
-            handleLiquidatePosition();
-          }}
-        >
-          Liquidate position
-        </Button>
+        {!position.isLiquidated ? (
+          <Button
+            fullWidth
+            onClick={() => {
+              setIsLiquidateDialogOpened(true);
+              handleLiquidatePosition();
+            }}
+            disabled={!checkedTerms || !checkedPrices}
+            colorScheme={ButtonColor.RED}
+          >
+            Liquidate position
+          </Button>
+        ) : (
+          <Button fullWidth disabled>
+            Position already liquidated
+          </Button>
+        )}
       </div>
 
       <ConfirmLiquidatePositionDialog

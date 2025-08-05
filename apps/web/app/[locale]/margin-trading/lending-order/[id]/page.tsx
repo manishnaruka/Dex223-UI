@@ -17,6 +17,7 @@ import OrderCloseDialog from "@/app/[locale]/margin-trading/lending-order/[id]/c
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
 import OrderOpenDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderOpenDialog";
 import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
+import calculateTotalOrderBalance from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculateTotalOrderBalance";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -24,6 +25,7 @@ import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -189,7 +191,10 @@ export default function LendingOrder({
                   </div>
 
                   <p className="font-medium text-20">
-                    2233.34 <span className="text-secondary-text">{order.baseAsset.symbol}</span>
+                    {formatFloat(
+                      formatUnits(calculateTotalOrderBalance(order), order.baseAsset.decimals),
+                    )}{" "}
+                    <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                   </p>
                 </div>
               </GradientCard>

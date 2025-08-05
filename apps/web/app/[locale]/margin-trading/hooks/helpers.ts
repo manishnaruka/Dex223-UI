@@ -30,13 +30,14 @@ export type GqlPosition = {
     assetId: number;
   }[];
 
-  createdAt: number;
+  createdAt: string;
 
   isClosed: boolean;
-  closedAt: number;
+  closedAt: string;
   isLiquidated: boolean;
-  liquidatedAt: number;
+  liquidatedAt: string;
   order: GqlOrder;
+  liquidator: Address;
 };
 
 export type GqlOrder = {
@@ -99,7 +100,10 @@ export function serializeGqlOrder(
     minLoan: BigInt(minLoan),
     liquidationRewardAmount: {
       value: BigInt(liquidationRewardAmount),
-      formatted: formatUnits(liquidationRewardAmount, +gqlOrder.baseAssetToken.decimals),
+      formatted: formatUnits(
+        liquidationRewardAmount,
+        +gqlOrder.liquidationRewardAssetToken.decimals,
+      ),
     },
     balance: BigInt(balance),
     positionDuration: duration,
@@ -129,10 +133,24 @@ export function serializeGqlPosition(
   gqlPosition: GqlPosition,
   chainId: DexChainId,
 ): Omit<MarginPosition, "order"> {
-  const { assets, assetsTokens, baseAssetToken, order, ...rest } = gqlPosition;
+  const {
+    assets,
+    assetsTokens,
+    baseAssetToken,
+    order,
+    loanAmount,
+    liquidatedAt,
+    createdAt,
+    closedAt,
+    ...rest
+  } = gqlPosition;
 
   return {
     ...rest,
+    closedAt: +closedAt,
+    liquidatedAt: +liquidatedAt,
+    createdAt: +createdAt,
+    loanAmount: BigInt(loanAmount),
     loanAsset: gqlTokenToCurrency(baseAssetToken, chainId),
     assetAddresses: assets,
     assets: assetsTokens.map((tradingToken: GqlToken) => gqlTokenToCurrency(tradingToken, chainId)),

@@ -17,9 +17,9 @@ import {
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
-import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionDepositDialog";
 import PositionLiquidateDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionLiquidateDialog";
 import PositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionWithdrawDialog";
+import PositionDepositDialog from "@/app/[locale]/margin-trading/position/[id]/deposit/components/PositionDepositDialog";
 import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Container from "@/components/atoms/Container";
@@ -175,7 +175,6 @@ export default function MarginPositionPage({
   const { id: positionId } = use(params);
 
   const { position, loading } = useMarginPositionById({ id: positionId });
-  const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
   const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
   const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
   const [isLiquidateDialogOpened, setIsLiquidateDialogOpened] = useState(false);
@@ -227,12 +226,9 @@ export default function MarginPositionPage({
             </div>
             <div className="flex items-center gap-2">
               <Button colorScheme={ButtonColor.LIGHT_GREEN}>Trade</Button>
-              <Button
-                colorScheme={ButtonColor.LIGHT_GREEN}
-                onClick={() => setIsDepositDialogOpened(true)}
-              >
-                Deposit
-              </Button>
+              <Link href={`/margin-trading/position/${position.id}/deposit`}>
+                <Button colorScheme={ButtonColor.LIGHT_GREEN}>Deposit</Button>
+              </Link>
               <Button
                 colorScheme={ButtonColor.LIGHT_GREEN}
                 onClick={() => setIsWithdrawDialogOpened(true)}
@@ -408,12 +404,6 @@ export default function MarginPositionPage({
           </div>
         </div>
       </Container>
-
-      <PositionDepositDialog
-        isOpen={isDepositDialogOpened}
-        setIsOpen={setIsDepositDialogOpened}
-        position={position}
-      />
 
       <PositionWithdrawDialog
         isOpen={isWithdrawDialogOpened}

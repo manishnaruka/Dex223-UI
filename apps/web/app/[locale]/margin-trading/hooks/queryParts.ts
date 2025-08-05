@@ -26,6 +26,9 @@ export const GQL_POSITION_FIELDS = `
   }
   id
   createdAt
+  closedAt
+  liquidatedAt
+  liquidator
 `;
 
 export const GQL_ORDER_FIELDS = `

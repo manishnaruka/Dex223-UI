@@ -7,6 +7,10 @@ export enum OrderDepositStatus {
   LOADING_APPROVE,
   ERROR_APPROVE,
 
+  PENDING_TRANSFER,
+  LOADING_TRANSFER,
+  ERROR_TRANSFER,
+
   PENDING_DEPOSIT,
   LOADING_DEPOSIT,
   ERROR_DEPOSIT,
@@ -21,6 +25,6 @@ export enum SwapError {
 
 export const useDepositOrderStatusStore = createOperationStatusStore({
   initialStatus: OrderDepositStatus.INITIAL,
-  operations: ["approve", "deposit"],
+  operations: ["approve", "transfer", "deposit"],
   errorType: SwapError.UNKNOWN,
 });

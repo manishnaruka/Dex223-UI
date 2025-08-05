@@ -1,5 +1,6 @@
 import { Address } from "viem";
-import { create } from "zustand";
+
+import { createOperationStatusStore } from "@/stores/factories/createOperationStatusStore";
 
 // TODO: move to global and rename
 export enum CreateOrderStatus {
@@ -11,6 +12,10 @@ export enum CreateOrderStatus {
   PENDING_CONFIRM_ORDER,
   LOADING_CONFIRM_ORDER,
   ERROR_CONFIRM_ORDER,
+
+  PENDING_TRANSFER,
+  LOADING_TRANSFER,
+  ERROR_TRANSFER,
 
   PENDING_DEPOSIT,
   LOADING_DEPOSIT,
@@ -38,22 +43,8 @@ interface SwapStatusStore {
   setDepositHash: (hash: Address) => void;
 }
 
-export const useCreateOrderStatusStore = create<SwapStatusStore>((set, get) => ({
-  status: CreateOrderStatus.INITIAL,
-  approveHash: undefined,
-  confirmOrderHash: undefined,
-  depositHash: undefined,
+export const useCreateOrderStatusStore = createOperationStatusStore({
+  initialStatus: CreateOrderStatus.INITIAL,
+  operations: ["createOrder", "approve", "transfer", "deposit"],
   errorType: SwapError.UNKNOWN,
-
-  setStatus: (status) => {
-    if (status === CreateOrderStatus.INITIAL) {
-      set({ status, confirmOrderHash: undefined, approveHash: undefined, depositHash: undefined });
-    }
-
-    set({ status });
-  },
-  setErrorType: (errorType) => set({ errorType }),
-  setConfirmOrderHash: (hash) => set({ confirmOrderHash: hash }),
-  setDepositHash: (hash) => set({ depositHash: hash }),
-  setApproveHash: (hash) => set({ approveHash: hash }),
-}));
+});

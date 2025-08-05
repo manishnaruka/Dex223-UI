@@ -1,8 +1,9 @@
 import React from "react";
 import { useAccount } from "wagmi";
 
-import MarginPositionCard, {
+import {
   InactiveMarginPositionCard,
+  LendingPositionCard,
 } from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import { usePositionsByOwner } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import { SearchInput } from "@/components/atoms/Input";
@@ -26,7 +27,7 @@ export default function MarginPositionsTab() {
             position.isLiquidated || position.isClosed ? (
               <InactiveMarginPositionCard key={position.id} position={position} />
             ) : (
-              <MarginPositionCard key={position.id} position={position} />
+              <LendingPositionCard key={position.id} position={position} />
             ),
           )}
       </div>
