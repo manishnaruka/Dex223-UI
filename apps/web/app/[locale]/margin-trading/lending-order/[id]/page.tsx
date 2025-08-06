@@ -65,6 +65,8 @@ export default function LendingOrder({
     return address.toLowerCase() === order?.owner.toLowerCase();
   }, [address, order]);
 
+  console.log(order?.allowedCollateralAssets);
+
   if (loading || !order) {
     return <div className="text-24 p-5">Order is loading...</div>;
   }
@@ -320,9 +322,10 @@ export default function LendingOrder({
                 </div>
                 <div className="flex gap-1">
                   {order.allowedCollateralAssets.map((collateralToken) => {
+                    console.log(collateralToken.wrapped.address0);
                     return collateralToken.isToken ? (
                       <button
-                        key={collateralToken.address0}
+                        key={collateralToken.wrapped.address0}
                         onClick={() =>
                           setTokenForPortfolio(
                             new Token(
@@ -350,7 +353,10 @@ export default function LendingOrder({
                         {collateralToken.symbol}
                       </button>
                     ) : (
-                      <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
+                      <div
+                        key={collateralToken.wrapped.address0}
+                        className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1"
+                      >
                         {collateralToken.symbol}
                       </div>
                     );
@@ -409,7 +415,10 @@ export default function LendingOrder({
                       {tradingToken.symbol}
                     </button>
                   ) : (
-                    <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
+                    <div
+                      key={tradingToken.wrapped.address0}
+                      className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1"
+                    >
                       {tradingToken.symbol}
                     </div>
                   );

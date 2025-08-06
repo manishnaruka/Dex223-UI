@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, Hash } from "viem";
 
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
@@ -39,6 +39,9 @@ export type MarginPosition = {
   liquidatedAt: number;
   liquidator: Address;
   order: Omit<LendingOrder, "positions">;
+  txClosed: Hash;
+  txFrozen: Hash;
+  txLiquidated: Hash;
 };
 
 export type LendingOrder = {

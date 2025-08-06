@@ -11,7 +11,10 @@ export default function usePositionStatus(position: MarginPosition) {
     abi: MARGIN_MODULE_ABI,
     address: MARGIN_TRADING_ADDRESS[chainId],
     functionName: "getPositionStatus",
-    args: [BigInt(position.id)],
+    args: [BigInt(position?.id || 0)],
+    query: {
+      enabled: !!position,
+    },
   });
 
   console.log(data);

@@ -81,7 +81,6 @@ export default function EditLendingOrderPage({
         includeERC223Trading: false,
         tradingTokensAutoListing: undefined,
       },
-      includeERC223Collateral: false,
     });
 
     setThirdStepValues({

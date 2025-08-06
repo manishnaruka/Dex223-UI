@@ -1,10 +1,9 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
-import clsx from "clsx";
 import Image from "next/image";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
-import { formatUnits, parseUnits } from "viem";
+import { parseUnits } from "viem";
 
 import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import useCreateMarginPosition, {
@@ -15,7 +14,6 @@ import {
   CreateMarginPositionStatus,
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
-import { EditOrderStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStatusStore";
 import { calculatePeriodInterestRate } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
@@ -23,11 +21,11 @@ import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
+import { InputSize, SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import Button from "@/components/buttons/Button";
 import ApproveAmountConfig from "@/components/common/ApproveAmountConfig";
 import OperationStepRow, {
   operationStatusToStepStatus,
@@ -35,7 +33,7 @@ import OperationStepRow, {
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
-import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
 
 function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
@@ -53,14 +51,26 @@ function CreateMarginPositionActionButton({
   feeAmountToApprove: string;
 }) {
   const { handleCreateMarginPosition } = useCreateMarginPosition(order);
-  const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
-    useCreateMarginPositionStatusStore();
+  const {
+    status,
+    setStatus,
+    approveBorrowHash,
+    approveLiquidationFeeHash,
+    borrowHash,
+    transferHash,
+  } = useCreateMarginPositionStatusStore();
   const { values } = useCreateMarginPositionConfigStore();
 
   const orderedHashes =
-    values.collateralToken && order.liquidationRewardAsset.equals(values.collateralToken)
+    values.collateralToken &&
+    order.liquidationRewardAsset.equals(values.collateralToken) &&
+    values.collateralTokenStandard === Standard.ERC20
       ? [approveBorrowHash, borrowHash]
-      : [approveBorrowHash, approveLiquidationFeeHash, borrowHash];
+      : [
+          values.collateralTokenStandard === Standard.ERC20 ? approveBorrowHash : transferHash,
+          approveLiquidationFeeHash,
+          borrowHash,
+        ];
 
   const { allSteps: marginSteps } = useCreatePositionApproveSteps(order);
 

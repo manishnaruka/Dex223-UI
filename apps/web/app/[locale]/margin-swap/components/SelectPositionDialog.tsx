@@ -1,5 +1,5 @@
 import Tooltip from "@repo/ui/tooltip";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { date } from "yup";
@@ -149,7 +149,11 @@ export default function SelectPositionDialog() {
   const { address } = useAccount();
   const { loading, positions } = usePositionsByOwner({ owner: address });
 
-  if (loading || !positions) {
+  const openedPositions = useMemo(() => {
+    return positions?.filter((position) => !position.isLiquidated && !position.isClosed);
+  }, [positions]);
+
+  if (loading || !openedPositions) {
     return <div>Loading...</div>;
   }
 
@@ -165,7 +169,7 @@ export default function SelectPositionDialog() {
             onChange={(e) => setSearchValue(e.target.value)}
           />
           <div className="grid gap-5 mt-5">
-            {positions.map((position) => (
+            {openedPositions.map((position) => (
               <PositionSelectItem
                 key={position.id}
                 handleSelectedPosition={(position) => {

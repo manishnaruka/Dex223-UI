@@ -22,6 +22,7 @@ export default function DepositForm({ position }: { position: MarginPosition }) 
 
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
   const [assetToDeposit, setAssetToDeposit] = useState<Currency | undefined>(undefined);
+  const [assetToDepositStandard, setAssetToDepositStandard] = useState(Standard.ERC20);
 
   const handlePick = useCallback((token: Currency) => {
     setAssetToDeposit(token);
@@ -40,6 +41,8 @@ export default function DepositForm({ position }: { position: MarginPosition }) 
   const isCurrencyLimitReached = useMemo(() => {
     return position.assets.length === position.order.currencyLimit;
   }, [position.assets.length, position.order.currencyLimit]);
+
+  console.log(position.order);
 
   return (
     <div className="w-[600px] card-spacing-x card-spacing-b bg-primary-bg rounded-5">
@@ -68,6 +71,7 @@ export default function DepositForm({ position }: { position: MarginPosition }) 
               tooltipText="Tooltip text"
             />
             <TokenInput
+              allowedErc223={position.order.isErc223TradingAllowed}
               value={amountToDeposit}
               onInputChange={(value) => {
                 setAmountToDeposit(value);
@@ -86,18 +90,9 @@ export default function DepositForm({ position }: { position: MarginPosition }) 
                   ? formatFloat(tokenA1Balance.formatted)
                   : "0"
               }
-              standard={Standard.ERC20}
+              standard={assetToDepositStandard}
               setStandard={(standard) => {
-                // setTokenAStandard(standard);
-                //
-                // if (
-                //   standard === tokenBStandard &&
-                //   tokenA &&
-                //   tokenB &&
-                //   tokenA.wrapped.equals(tokenB.wrapped)
-                // ) {
-                //   setTokenBStandard(standard === Standard.ERC20 ? Standard.ERC223 : Standard.ERC20);
-                // }
+                setAssetToDepositStandard(standard);
               }}
             />
           </div>
@@ -158,6 +153,7 @@ export default function DepositForm({ position }: { position: MarginPosition }) 
             position={position}
             amountToDeposit={amountToDeposit}
             assetToDeposit={assetToDeposit}
+            assetToDepositStandard={assetToDepositStandard}
           />
         )}
 

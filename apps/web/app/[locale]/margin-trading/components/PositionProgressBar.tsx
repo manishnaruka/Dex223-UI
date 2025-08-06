@@ -22,12 +22,15 @@ export default function PositionProgressBar({
   position: MarginPosition;
   dangerStatus?: DangerStatus;
 }) {
+  console.log(position);
   const createdAtMs = position.createdAt * 1000;
-  const deadlineMs = position.deadline * 1000;
+  const deadlineMs = +position.deadline * 1000;
   const now = Date.now();
 
   const totalDuration = deadlineMs - createdAtMs;
   const elapsed = Math.min(Math.max(now - createdAtMs, 0), totalDuration); // clamp between 0 and total
+  console.log("Elapsed", elapsed);
+  console.log(totalDuration);
   const progress = (elapsed / totalDuration) * 100;
 
   const formatDateTime = (timestamp: number) => {

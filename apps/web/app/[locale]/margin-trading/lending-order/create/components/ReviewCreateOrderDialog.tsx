@@ -242,7 +242,6 @@ export default function ReviewCreateOrderDialog({
     loanTokenStandard,
     collateralTokens,
     loanAmount,
-    includeERC223Collateral,
     liquidationFeeToken,
     liquidationFeeForLiquidator,
     liquidationFeeForLender,

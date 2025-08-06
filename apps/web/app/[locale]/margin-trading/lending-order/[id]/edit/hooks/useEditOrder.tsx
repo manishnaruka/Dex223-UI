@@ -114,7 +114,6 @@ export default function useEditOrder() {
     loanTokenStandard,
     collateralTokens,
     loanAmount,
-    includeERC223Collateral,
     liquidationFeeToken,
     liquidationFeeForLiquidator,
     liquidationFeeForLender,
@@ -203,19 +202,6 @@ export default function useEditOrder() {
       const actionsToUpdate = recreateTokenList
         ? [encodedAddTokenListParams, encodedModifyOrderParams]
         : [encodedModifyOrderParams];
-      //
-      // const addTokenListHash = await walletClient.writeContract({
-      //   abi: MARGIN_MODULE_ABI,
-      //   address: MARGIN_TRADING_ADDRESS[chainId],
-      //   functionName: "addTokenlist",
-      //   args: [sortedAddresses, tradingTokens.inputMode === TradingTokensInputMode.AUTOLISTING],
-      //   account: undefined,
-      // });
-      //
-      // setStatus(CreateOrderStatus.LOADING_CONFIRM_ORDER);
-      // await publicClient.waitForTransactionReceipt({ hash: addTokenListHash });
-      // setStatus(CreateOrderStatus.PENDING_CONFIRM_ORDER);
-      //
 
       try {
         const modifyOrderHash = await walletClient.writeContract({

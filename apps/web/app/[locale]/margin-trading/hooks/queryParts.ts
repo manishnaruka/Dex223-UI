@@ -29,6 +29,9 @@ export const GQL_POSITION_FIELDS = `
   closedAt
   liquidatedAt
   liquidator
+  txClosed
+  txFrozen
+  txLiquidated
 `;
 
 export const GQL_ORDER_FIELDS = `

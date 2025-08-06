@@ -122,7 +122,6 @@ export default function useCreateOrder() {
     loanTokenStandard,
     collateralTokens,
     loanAmount,
-    includeERC223Collateral,
     liquidationFeeToken,
     liquidationFeeForLiquidator,
     liquidationFeeForLender,
@@ -214,7 +213,7 @@ export default function useCreateOrder() {
             leverage,
             oracle: ORACLE_ADDRESS[chainId],
             collateral: collateralTokens.flatMap((token) => {
-              if (includeERC223Collateral) {
+              if (tradingTokens.includeERC223Trading) {
                 return [token.wrapped.address0, token.wrapped.address1];
               }
               return [token.wrapped.address0];
@@ -505,7 +504,6 @@ export default function useCreateOrder() {
       approveA,
       chainId,
       collateralTokens,
-      includeERC223Collateral,
       interestRatePerMonth,
       leverage,
       liquidationFeeForLiquidator,

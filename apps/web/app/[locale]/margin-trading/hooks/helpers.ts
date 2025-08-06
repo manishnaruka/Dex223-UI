@@ -1,4 +1,4 @@
-import { Address, formatUnits } from "viem";
+import { Address, formatUnits, Hash } from "viem";
 
 import { LendingOrder, MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { DexChainId } from "@/sdk_bi/chains";
@@ -38,6 +38,9 @@ export type GqlPosition = {
   liquidatedAt: string;
   order: GqlOrder;
   liquidator: Address;
+  txClosed: Hash;
+  txFrozen: Hash;
+  txLiquidated: Hash;
 };
 
 export type GqlOrder = {
@@ -71,6 +74,29 @@ export type GqlOrder = {
   };
 
   alive: boolean;
+};
+
+type BaseGqlRecentTransaction = {
+  timestamp: string;
+  id: Hash;
+};
+
+export type GqlRecentTransaction = {
+  marginSwap: BaseGqlRecentTransaction;
+  positionOpened: BaseGqlRecentTransaction;
+  key:
+    | "PositionDeposit"
+    | "PositionWithdrawal"
+    | "PositionClosed"
+    | "PositionOpened"
+    | "MarginSwap"
+    | "PositionLiquidated";
+  id: Hash;
+  liquidation: BaseGqlRecentTransaction;
+  positionWithdrawal: BaseGqlRecentTransaction;
+  positionFrozen: BaseGqlRecentTransaction;
+  positionDeposit: BaseGqlRecentTransaction;
+  positionClosed: BaseGqlRecentTransaction;
 };
 
 export function gqlTokenToCurrency(gqlToken: GqlToken, chainId: DexChainId): Currency {
@@ -115,7 +141,9 @@ export function serializeGqlOrder(
         : Standard.ERC223,
     collateralAddresses: gqlOrder.collaterals,
     allowedTradingAddresses: gqlOrder.whitelist.allowedForTrading,
-    isErc223TradingAllowed: false,
+    isErc223TradingAllowed:
+      gqlOrder.whitelist.allowedForTrading.length >
+      gqlOrder.whitelist.allowedForTradingTokens.length,
     allowedCollateralAssets: gqlOrder.collateralTokens.map((collateralToken: GqlToken) =>
       gqlTokenToCurrency(collateralToken, chainId),
     ),
@@ -159,4 +187,59 @@ export function serializeGqlPosition(
       balance: assets.find((asset: any) => asset.address === tradingToken.addressERC20)?.balance,
     })),
   };
+}
+
+export enum MarginPositionTransactionType {
+  MARGIN_SWAP,
+  WITHDRAW,
+  FROZEN,
+  DEPOSIT,
+  CLOSED,
+  BORROW,
+  LIQUIDATED,
+}
+
+type BaseMarginPositionFields = {
+  hash: Hash;
+};
+
+export type MarginPositionRecentTransaction = BaseMarginPositionFields & {
+  type: MarginPositionTransactionType;
+  timestamp: string;
+};
+
+const keyToTransactionTypeMap = {
+  PositionDeposit: MarginPositionTransactionType.DEPOSIT,
+  PositionWithdrawal: MarginPositionTransactionType.WITHDRAW,
+  PositionClosed: MarginPositionTransactionType.CLOSED,
+  PositionOpened: MarginPositionTransactionType.BORROW,
+  MarginSwap: MarginPositionTransactionType.MARGIN_SWAP,
+  PositionLiquidated: MarginPositionTransactionType.LIQUIDATED,
+  PositionFrozen: MarginPositionTransactionType.FROZEN,
+};
+
+const keyToFieldNameMap = {
+  PositionDeposit: "positionDeposit",
+  PositionWithdrawal: "positionWithdrawal",
+  PositionClosed: "positionClosed",
+  PositionOpened: "positionOpened",
+  MarginSwap: "marginSwap",
+  PositionLiquidated: "liquidation",
+  PositionFrozen: "positionFrozen",
+};
+
+export function serializeGqlRecentTransactions(
+  gqlRecentTransactions: GqlRecentTransaction[],
+): MarginPositionRecentTransaction[] {
+  return gqlRecentTransactions.map((gqlTransaction) => {
+    const fieldName = keyToFieldNameMap[gqlTransaction.key] as keyof GqlRecentTransaction;
+
+    const fieldArray = gqlTransaction[fieldName] as unknown as { timestamp: string }[];
+    const timestamp = fieldArray[0]?.timestamp;
+    return {
+      type: keyToTransactionTypeMap[gqlTransaction.key],
+      hash: gqlTransaction.id,
+      timestamp,
+    };
+  });
 }

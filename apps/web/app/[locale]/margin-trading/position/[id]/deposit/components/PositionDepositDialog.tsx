@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { parseUnits } from "viem";
 
+import {
+  getApproveTextMap,
+  getTransferTextMap,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/getStepTexts";
+import { OrderDepositStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
 import usePositionDeposit from "@/app/[locale]/margin-trading/position/[id]/deposit/hooks/usePositionDeposit";
 import {
   PositionDepositStatus,
@@ -36,72 +41,101 @@ type OperationStepConfig = {
   error: PositionDepositStatus;
 };
 
-function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, string> {
-  return {
-    [OperationStepStatus.IDLE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.AWAITING_SIGNATURE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.LOADING]: `Approving ${tokenSymbol}`,
-    [OperationStepStatus.STEP_COMPLETED]: `Approved ${tokenSymbol}`,
-    [OperationStepStatus.STEP_FAILED]: `Approve ${tokenSymbol} failed`,
-    [OperationStepStatus.OPERATION_COMPLETED]: `Approved ${tokenSymbol}`,
-  };
-}
+function composeDepositOrderSteps(symbol: string, standard: Standard): OperationStepConfig[] {
+  const firstStep =
+    standard === Standard.ERC20
+      ? ({
+          iconName: "done",
+          pending: PositionDepositStatus.PENDING_APPROVE,
+          loading: PositionDepositStatus.LOADING_APPROVE,
+          error: PositionDepositStatus.ERROR_APPROVE,
+          textMap: getApproveTextMap(symbol),
+        } as const)
+      : ({
+          iconName: "transfer-to-contract",
+          pending: PositionDepositStatus.PENDING_TRANSFER,
+          loading: PositionDepositStatus.LOADING_TRANSFER,
+          error: PositionDepositStatus.ERROR_TRANSFER,
+          textMap: getTransferTextMap(symbol),
+        } as const);
 
-const depositOrderSteps: OperationStepConfig[] = [
-  {
-    iconName: "done",
-    pending: PositionDepositStatus.PENDING_APPROVE,
-    loading: PositionDepositStatus.LOADING_APPROVE,
-    error: PositionDepositStatus.ERROR_APPROVE,
-    textMap: getApproveTextMap("DAI"),
-  },
-  {
-    iconName: "deposit",
-    pending: PositionDepositStatus.PENDING_DEPOSIT,
-    loading: PositionDepositStatus.LOADING_DEPOSIT,
-    error: PositionDepositStatus.ERROR_DEPOSIT,
-    textMap: {
-      [OperationStepStatus.IDLE]: "Deposit funds",
-      [OperationStepStatus.AWAITING_SIGNATURE]: "Deposit funds",
-      [OperationStepStatus.LOADING]: "Executing deposit",
-      [OperationStepStatus.STEP_COMPLETED]: "Deposited funds",
-      [OperationStepStatus.STEP_FAILED]: "Failed to deposit funds",
-      [OperationStepStatus.OPERATION_COMPLETED]: "Deposited funds",
+  return [
+    firstStep,
+    {
+      iconName: "deposit",
+      pending: PositionDepositStatus.PENDING_DEPOSIT,
+      loading: PositionDepositStatus.LOADING_DEPOSIT,
+      error: PositionDepositStatus.ERROR_DEPOSIT,
+      textMap: {
+        [OperationStepStatus.IDLE]: "Deposit funds",
+        [OperationStepStatus.AWAITING_SIGNATURE]: "Deposit funds",
+        [OperationStepStatus.LOADING]: "Executing deposit",
+        [OperationStepStatus.STEP_COMPLETED]: "Deposited funds",
+        [OperationStepStatus.STEP_FAILED]: "Failed to deposit funds",
+        [OperationStepStatus.OPERATION_COMPLETED]: "Deposited funds",
+      },
     },
-  },
-];
+  ];
+}
 
 function PositionDepositActionButton({
   position,
   amountToApprove,
   amountToDeposit,
   disabled,
+  assetToDeposit,
+  assetToDepositStandard,
 }: {
   position: MarginPosition;
   amountToApprove: string;
   amountToDeposit: string;
   disabled: boolean;
+  assetToDeposit: Currency;
+  assetToDepositStandard: Standard;
 }) {
   const { handlePositionDeposit } = usePositionDeposit({
     position: position,
-    currency: position.loanAsset,
+    currency: assetToDeposit,
     amount: amountToDeposit,
+    standard: assetToDepositStandard,
   });
 
-  const { status, approveHash, depositHash } = useDepositPositionStatusStore();
+  const { status, approveHash, transferHash, depositHash } = useDepositPositionStatusStore();
+
+  const hashes = useMemo(() => {
+    if (assetToDeposit.isNative) {
+      return [depositHash];
+    }
+
+    if (assetToDepositStandard === Standard.ERC20) {
+      return [approveHash, depositHash];
+    }
+
+    if (assetToDepositStandard === Standard.ERC223) {
+      return [transferHash, depositHash];
+    }
+
+    return [approveHash, depositHash];
+  }, [approveHash, assetToDeposit.isNative, assetToDepositStandard, depositHash, transferHash]);
 
   if (status !== PositionDepositStatus.INITIAL) {
     return (
       <OperationRows>
-        {depositOrderSteps.map((step, index) => (
+        {composeDepositOrderSteps(
+          assetToDeposit.wrapped.symbol || "Unknown",
+          assetToDepositStandard,
+        ).map((step, index) => (
           <OperationStepRow
             key={index}
             iconName={step.iconName}
-            hash={[approveHash, depositHash][index]}
+            hash={hashes[index]}
             statusTextMap={step.textMap}
             status={operationStatusToStepStatus({
               currentStatus: status,
-              orderedSteps: depositOrderSteps.flatMap((s) => [s.pending, s.loading, s.error]),
+              orderedSteps: composeDepositOrderSteps(
+                assetToDeposit.wrapped.symbol || "Unknown",
+                assetToDepositStandard,
+              ).flatMap((s) => [s.pending, s.loading, s.error]),
               stepIndex: index,
               pendingStep: step.pending,
               loadingStep: step.loading,
@@ -128,11 +162,13 @@ export default function PositionDepositDialog({
   position,
   amountToDeposit,
   assetToDeposit,
+  assetToDepositStandard,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   position: MarginPosition;
   assetToDeposit: Currency;
+  assetToDepositStandard: Standard;
   amountToDeposit: string;
 }) {
   const { status, setStatus } = useDepositPositionStatusStore();
@@ -243,6 +279,8 @@ export default function PositionDepositDialog({
           amountToApprove={amountToApprove}
           amountToDeposit={amountToDeposit}
           disabled={isEditApproveActive}
+          assetToDeposit={assetToDeposit}
+          assetToDepositStandard={assetToDepositStandard}
         />
       </div>
     </DrawerDialog>

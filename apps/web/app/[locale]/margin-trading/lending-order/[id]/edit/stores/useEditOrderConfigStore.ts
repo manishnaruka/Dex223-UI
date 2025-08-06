@@ -24,7 +24,6 @@ type FirstStepValues = {
 type SecondStepValues = {
   leverage: number;
   collateralTokens: Currency[];
-  includeERC223Collateral: boolean;
   minimumBorrowingAmount: string;
   tradingTokens: LendingOrderTradingTokens;
 };
@@ -75,7 +74,6 @@ export const useEditOrderConfigStore = create<CreateOrderConfig>((set, get) => (
     leverage: 5,
     minimumBorrowingAmount: "",
     collateralTokens: [],
-    includeERC223Collateral: false,
 
     tradingTokens: {
       inputMode: TradingTokensInputMode.MANUAL,

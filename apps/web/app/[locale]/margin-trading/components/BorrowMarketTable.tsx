@@ -242,7 +242,7 @@ export default function BorrowMarketTable() {
                           o.balance < o.minLoan && "text-yellow-light",
                         )}
                       >
-                        {formatUnits(o.balance, o.baseAsset.decimals ?? 18)}
+                        {formatFloat(formatUnits(o.balance, o.baseAsset.decimals ?? 18))}
                       </span>
                       <span className="text-secondary-texts">{o.baseAsset.symbol}</span>
                     </div>

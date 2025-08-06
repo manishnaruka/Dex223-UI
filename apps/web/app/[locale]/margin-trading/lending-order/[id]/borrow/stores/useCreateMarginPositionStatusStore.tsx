@@ -1,12 +1,19 @@
 import { Address } from "viem";
 import { create } from "zustand";
 
+import { PositionDepositStatus } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionDepositStatusStore";
+import { createOperationStatusStore } from "@/stores/factories/createOperationStatusStore";
+
 // TODO: move to global and rename
 export enum CreateMarginPositionStatus {
   INITIAL,
   PENDING_APPROVE_BORROW,
   LOADING_APPROVE_BORROW,
   ERROR_APPROVE_BORROW,
+
+  PENDING_TRANSFER,
+  LOADING_TRANSFER,
+  ERROR_TRANSFER,
 
   PENDING_APPROVE_LIQUIDATION_FEE,
   LOADING_APPROVE_LIQUIDATION_FEE,
@@ -24,41 +31,8 @@ export enum SwapError {
   UNKNOWN,
 }
 
-interface SwapStatusStore {
-  status: CreateMarginPositionStatus;
-  approveBorrowHash: Address | undefined;
-  approveLiquidationFeeHash: Address | undefined;
-  borrowHash: Address | undefined;
-  errorType: SwapError;
-
-  setStatus: (status: CreateMarginPositionStatus) => void;
-  setErrorType: (errorType: SwapError) => void;
-  setApproveBorrowHash: (hash: Address) => void;
-  setConfirmOrderLiquidationFeeHash: (hash: Address) => void;
-  setBorrowHash: (hash: Address) => void;
-}
-
-export const useCreateMarginPositionStatusStore = create<SwapStatusStore>((set, get) => ({
-  status: CreateMarginPositionStatus.INITIAL,
-  approveBorrowHash: undefined,
-  approveLiquidationFeeHash: undefined,
-  borrowHash: undefined,
+export const useCreateMarginPositionStatusStore = createOperationStatusStore({
+  initialStatus: CreateMarginPositionStatus.INITIAL,
+  operations: ["approveBorrow", "approveLiquidationFee", "transfer", "borrow"],
   errorType: SwapError.UNKNOWN,
-
-  setStatus: (status) => {
-    if (status === CreateMarginPositionStatus.INITIAL) {
-      set({
-        status,
-        approveBorrowHash: undefined,
-        approveLiquidationFeeHash: undefined,
-        borrowHash: undefined,
-      });
-    }
-
-    set({ status });
-  },
-  setErrorType: (errorType) => set({ errorType }),
-  setApproveBorrowHash: (hash) => set({ approveBorrowHash: hash }),
-  setConfirmOrderLiquidationFeeHash: (hash) => set({ approveLiquidationFeeHash: hash }),
-  setBorrowHash: (hash) => set({ borrowHash: hash }),
-}));
+});

@@ -2,7 +2,7 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import React, { ReactNode, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
@@ -13,13 +13,16 @@ import {
 } from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
 import PositionHealthStatus from "@/app/[locale]/margin-trading/components/widgets/PositionHealthStatus";
 import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
+import usePositionLiquidationCost from "@/app/[locale]/margin-trading/hooks/usePositionLiquidationCost";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Link } from "@/i18n/routing";
 
@@ -128,6 +131,8 @@ const marginPositionCardBorderMap: Record<DangerStatus, string> = {
 
 export function InactiveMarginPositionCard({ position }: Props) {
   console.log(position);
+  const chainId = useCurrentChainId();
+
   return (
     <div className="bg-primary-bg rounded-3 px-5 pt-3 pb-5">
       <div className="grid grid-cols-3 gap-3 mb-3 h-10">
@@ -141,7 +146,10 @@ export function InactiveMarginPositionCard({ position }: Props) {
           {position.isLiquidated && (
             <span className="flex gap-1 items-center text-tertiary-text">
               Liquidated by:{" "}
-              <ExternalTextLink text={truncateMiddle(position.liquidator)} href={"#"} />
+              <ExternalTextLink
+                text={truncateMiddle(position.liquidator)}
+                href={getExplorerLink(ExplorerLinkType.ADDRESS, position.liquidator, chainId)}
+              />
             </span>
           )}
         </div>
@@ -189,7 +197,12 @@ export function InactiveMarginPositionCard({ position }: Props) {
             />
             <InfoBlockWithBorder
               title={"Closing"}
-              value={<ExternalTextLink text="Closing transaction" href="#" />}
+              value={
+                <ExternalTextLink
+                  text="Closing transaction"
+                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, position.txClosed, chainId)}
+                />
+              }
               tooltipText={"Tooltip text"}
             />
           </>
@@ -202,12 +215,26 @@ export function InactiveMarginPositionCard({ position }: Props) {
             />
             <InfoBlockWithBorder
               title={"Freezing"}
-              value={<ExternalTextLink text="Freezing transaction" href="#" />}
+              value={
+                <ExternalTextLink
+                  text="Freezing transaction"
+                  href={getExplorerLink(ExplorerLinkType.TRANSACTION, position.txFrozen, chainId)}
+                />
+              }
               tooltipText={"Tooltip text"}
             />
             <InfoBlockWithBorder
               title={"Liquidation"}
-              value={<ExternalTextLink text="Liquidation transaction" href="#" />}
+              value={
+                <ExternalTextLink
+                  text="Liquidation transaction"
+                  href={getExplorerLink(
+                    ExplorerLinkType.TRANSACTION,
+                    position.txLiquidated,
+                    chainId,
+                  )}
+                />
+              }
               tooltipText={"Tooltip text"}
             />
           </>
@@ -244,6 +271,8 @@ export function LendingPositionCard({ position }: Props) {
 
     return DangerStatus.STABLE;
   }, [actualBalance, expectedBalance]);
+
+  const { formatted } = usePositionLiquidationCost(position);
 
   const liquidationFeeStatus: DangerStatus = useMemo(() => {
     // if (+liquidationCost > +liquidationFee) {
@@ -291,6 +320,25 @@ export function LendingPositionCard({ position }: Props) {
 
     return Number(actualBalance) / Number(expectedBalance);
   }, [actualBalance, expectedBalance]);
+
+  const renderLiquidationInfoBlocks = useCallback(() => {
+    return (
+      <>
+        <LiquidationInfo
+          liquidationFeeStatus={liquidationFeeStatus}
+          label="Liquidation fee"
+          value={position.order.liquidationRewardAmount.formatted}
+          symbol={position.order.liquidationRewardAsset.symbol || "Unknown"}
+        />
+        <LiquidationInfo
+          liquidationFeeStatus={liquidationFeeStatus}
+          label="Liqudation cost"
+          value={formatted}
+          symbol={nativeCurrency.symbol || "Unknown"}
+        />
+      </>
+    );
+  }, []);
 
   return (
     <div
@@ -369,19 +417,7 @@ export function LendingPositionCard({ position }: Props) {
 
       {position.owner !== address?.toLowerCase() && (
         <div className="grid grid-cols-3">
-          <LiquidationInfo
-            liquidationFeeStatus={liquidationFeeStatus}
-            label="Liquidation fee"
-            value={position.order.liquidationRewardAmount.formatted}
-            symbol={position.order.liquidationRewardAsset.symbol || "Unknown"}
-          />
-          <LiquidationInfo
-            liquidationFeeStatus={liquidationFeeStatus}
-            label="Liqudation cost"
-            value={"0"}
-            symbol={nativeCurrency.symbol || "Unknown"}
-          />
-
+          {renderLiquidationInfoBlocks()}
           <div className="grid grid-cols-2 items-center gap-3">
             <div>
               {position.order.owner === address?.toLowerCase() &&
@@ -410,20 +446,7 @@ export function LendingPositionCard({ position }: Props) {
       )}
       {position.owner === address?.toLowerCase() && (
         <div className="grid grid-cols-2 gap-3 items-center mb-5 w-full">
-          <div className="grid grid-cols-3">
-            <LiquidationInfo
-              liquidationFeeStatus={liquidationFeeStatus}
-              label="Liquidation fee"
-              value={position.order.liquidationRewardAmount.formatted}
-              symbol={position.order.liquidationRewardAsset.symbol || "Unknown"}
-            />
-            <LiquidationInfo
-              liquidationFeeStatus={liquidationFeeStatus}
-              label="Liqudation cost"
-              value={"0"}
-              symbol={nativeCurrency.symbol || "Unknown"}
-            />
-          </div>
+          <div className="grid grid-cols-3">{renderLiquidationInfoBlocks()}</div>
           <div className="grid grid-cols-4 gap-3">
             <Link
               className={subjectToLiquidation ? "pointer-events-none" : ""}

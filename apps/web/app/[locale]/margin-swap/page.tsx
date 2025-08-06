@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import React from "react";
+import React, { useMemo } from "react";
 import { useAccount } from "wagmi";
 
 import SelectPositionDialog, {
@@ -22,6 +22,10 @@ export default function MarginSwapPage() {
   const { tokenA, tokenB, reset: resetTokens } = useMarginSwapTokensStore();
   const { address } = useAccount();
   const { loading, positions } = usePositionsByOwner({ owner: address });
+
+  const openedPositions = useMemo(() => {
+    return positions?.filter((position) => !position.isLiquidated && !position.isClosed);
+  }, [positions]);
 
   return (
     <ColorSchemeProvider value={ThemeColors.PURPLE}>
@@ -48,7 +52,7 @@ export default function MarginSwapPage() {
             <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
               <div className="flex flex-col gap-2 lg:gap-3">
                 <div className="flex justify-between items-center pl-4 pr-5 py-2 text-secondary-text border-l-4 bg-primary-bg rounded-2 border-purple">
-                  You have {positions?.length} positions
+                  You have {openedPositions?.length} positions
                   <SelectPositionDialog />
                 </div>
               </div>
