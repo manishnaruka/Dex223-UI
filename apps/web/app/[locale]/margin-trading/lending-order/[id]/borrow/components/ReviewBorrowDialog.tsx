@@ -31,6 +31,7 @@ import OperationStepRow, {
   operationStatusToStepStatus,
 } from "@/components/common/OperationStepRow";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Standard } from "@/sdk_bi/standard";
@@ -169,6 +170,14 @@ export default function ReviewBorrowDialog({
 
   const [formattedEndTime, setFormattedEndTime] = useState<string>("");
 
+  const [searchTradableTokenValue, setSearchTradableTokenValue] = useState("");
+
+  const [filteredTokens, isTokenFilterActive] = useMemo(() => {
+    return searchTradableTokenValue
+      ? [filterTokens(searchTradableTokenValue, order?.allowedTradingAssets || []), true]
+      : [order?.allowedTradingAssets || [], false];
+  }, [searchTradableTokenValue, order?.allowedTradingAssets]);
+
   useEffect(() => {
     if (!order) {
       return;
@@ -245,7 +254,7 @@ export default function ReviewBorrowDialog({
             <InputLabel inputSize={InputSize.LARGE} label="You receive" />
             <div className="bg-tertiary-bg rounded-3 py-[14px] px-5 mb-4 text-14 flex items-center justify-between">
               <p className="text-secondary-text ">Borrow</p>
-              <div className="flex items-center gap-1 items-center">
+              <div className="flex items-center gap-1">
                 <Image
                   className="mr-1"
                   src={"/images/tokens/placeholder.svg"}
@@ -323,30 +332,39 @@ export default function ReviewBorrowDialog({
                 </div>
                 <div>
                   <SearchInput
+                    value={searchTradableTokenValue}
+                    onChange={(e) => setSearchTradableTokenValue(e.target.value)}
                     placeholder="Token name"
                     className="h-8 text-14 w-[180px] rounded-2"
                   />
                 </div>
               </div>
 
-              <SimpleBar style={{ maxHeight: 216 }}>
-                <div className="flex gap-1 flex-wrap">
-                  {order.allowedTradingAssets.map((tradingToken) => {
-                    return tradingToken.isToken ? (
-                      <span
-                        key={tradingToken.address0}
-                        className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
-                      >
-                        {tradingToken.symbol}
-                      </span>
-                    ) : (
-                      <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
-                        {tradingToken.symbol}
-                      </div>
-                    );
-                  })}
+              {!!filteredTokens.length && (
+                <SimpleBar style={{ maxHeight: 216 }}>
+                  <div className="flex gap-1 flex-wrap">
+                    {filteredTokens.map((tradingToken) => {
+                      return tradingToken.isToken ? (
+                        <span
+                          key={tradingToken.address0}
+                          className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
+                        >
+                          {tradingToken.symbol}
+                        </span>
+                      ) : (
+                        <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
+                          {tradingToken.symbol}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </SimpleBar>
+              )}
+              {!filteredTokens.length && isTokenFilterActive && (
+                <div className="rounded-5 h-[76px] -mt-5 flex items-center justify-center text-secondary-text bg-empty-not-found-token bg-no-repeat bg-right-top bg-[length:64px_64px] -mr-5">
+                  Token not found
                 </div>
-              </SimpleBar>
+              )}
             </div>
             {isFeeAndCollateralSame ? (
               <>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { use, useMemo, useState } from "react";
 
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
+import ActivePositionAssetsBlock from "@/app/[locale]/margin-trading/position/[id]/components/ActivePositionAssetsBlock";
 import ActivePositionMainInfoBlock from "@/app/[locale]/margin-trading/position/[id]/components/ActivePositionMainInfoBlock";
 import ActivePositionParametersBlock from "@/app/[locale]/margin-trading/position/[id]/components/ActivePositionParametersBlock";
 import ActivePositionTimeframeBlock from "@/app/[locale]/margin-trading/position/[id]/components/ActivePositionTimeframeBlock";
@@ -15,7 +16,10 @@ import PositionLiquidateDialog from "@/app/[locale]/margin-trading/position/[id]
 import PositionTransactionHistoryBlock from "@/app/[locale]/margin-trading/position/[id]/components/PositionTransactionHistoryBlock";
 import PositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionWithdrawDialog";
 import Container from "@/components/atoms/Container";
+import DialogHeader from "@/components/atoms/DialogHeader";
+import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
+import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import truncateMiddle from "@/functions/truncateMiddle";
 
 export default function MarginPositionPage({
@@ -74,6 +78,7 @@ export default function MarginPositionPage({
               />
               <ActivePositionParametersBlock position={position} />
               <ActivePositionTimeframeBlock position={position} />
+              <ActivePositionAssetsBlock position={position} />
             </>
           )}
 

@@ -2,12 +2,17 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
+import clsx from "clsx";
 import Image from "next/image";
 import React, { use, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
+import {
+  InactiveMarginPositionCard,
+  LendingPositionCard,
+} from "@/app/[locale]/margin-trading/components/MarginPositionCard";
 import {
   OrderInfoBlock,
   OrderInfoCard,
@@ -27,6 +32,7 @@ import Button, { ButtonColor } from "@/components/buttons/Button";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
@@ -66,6 +72,14 @@ export default function LendingOrder({
   }, [address, order]);
 
   console.log(order?.allowedCollateralAssets);
+
+  const [searchTradableTokenValue, setSearchTradableTokenValue] = useState("");
+
+  const [filteredTokens, isTokenFilterActive] = useMemo(() => {
+    return searchTradableTokenValue
+      ? [filterTokens(searchTradableTokenValue, order?.allowedTradingAssets || []), true]
+      : [order?.allowedTradingAssets || [], false];
+  }, [searchTradableTokenValue, order?.allowedTradingAssets]);
 
   if (loading || !order) {
     return <div className="text-24 p-5">Order is loading...</div>;
@@ -378,53 +392,65 @@ export default function LendingOrder({
                 </span>
               </div>
               <div>
-                <SearchInput placeholder="Token name" className="bg-primary-bg" />
+                <SearchInput
+                  value={searchTradableTokenValue}
+                  onChange={(e) => setSearchTradableTokenValue(e.target.value)}
+                  placeholder="Token name"
+                  className="bg-primary-bg"
+                />
               </div>
             </div>
 
-            <SimpleBar style={{ maxHeight: 216 }}>
-              <div className="flex gap-1 flex-wrap">
-                {order.allowedTradingAssets.map((tradingToken) => {
-                  return tradingToken.isToken ? (
-                    <button
-                      key={tradingToken.address0}
-                      onClick={() =>
-                        setTokenForPortfolio(
-                          new Token(
-                            chainId,
-                            tradingToken.address0,
-                            tradingToken.address1,
-                            +tradingToken.decimals,
-                            tradingToken.symbol,
-                            tradingToken.name,
-                            "/images/tokens/placeholder.svg",
-                            tokenLists
-                              ?.filter((tokenList) => {
-                                return !!tokenList.list.tokens.find(
-                                  (t) =>
-                                    t.address0.toLowerCase() ===
-                                    tradingToken.address0.toLowerCase(),
-                                );
-                              })
-                              .map((t) => t.id),
-                          ),
-                        )
-                      }
-                      className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
-                    >
-                      {tradingToken.symbol}
-                    </button>
-                  ) : (
-                    <div
-                      key={tradingToken.wrapped.address0}
-                      className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1"
-                    >
-                      {tradingToken.symbol}
-                    </div>
-                  );
-                })}
+            {!!filteredTokens.length && (
+              <SimpleBar style={{ maxHeight: 216 }}>
+                <div className="flex gap-1 flex-wrap">
+                  {filteredTokens.map((tradingToken) => {
+                    return tradingToken.isToken ? (
+                      <button
+                        key={tradingToken.address0}
+                        onClick={() =>
+                          setTokenForPortfolio(
+                            new Token(
+                              chainId,
+                              tradingToken.address0,
+                              tradingToken.address1,
+                              +tradingToken.decimals,
+                              tradingToken.symbol,
+                              tradingToken.name,
+                              "/images/tokens/placeholder.svg",
+                              tokenLists
+                                ?.filter((tokenList) => {
+                                  return !!tokenList.list.tokens.find(
+                                    (t) =>
+                                      t.address0.toLowerCase() ===
+                                      tradingToken.address0.toLowerCase(),
+                                  );
+                                })
+                                .map((t) => t.id),
+                            ),
+                          )
+                        }
+                        className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
+                      >
+                        {tradingToken.symbol}
+                      </button>
+                    ) : (
+                      <div
+                        key={tradingToken.wrapped.address0}
+                        className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1"
+                      >
+                        {tradingToken.symbol}
+                      </div>
+                    );
+                  })}
+                </div>
+              </SimpleBar>
+            )}
+            {!filteredTokens.length && searchTradableTokenValue && (
+              <div className="rounded-5 h-[232px] -mt-5 flex items-center justify-center text-secondary-text bg-empty-not-found-token bg-no-repeat bg-right-top bg-[length:212px_212px] -mr-5">
+                Token not found
               </div>
-            </SimpleBar>
+            )}
           </div>
         </div>
 
@@ -449,6 +475,20 @@ export default function LendingOrder({
               tooltipText="Tooltip text"
             />
           </div>
+        </div>
+
+        <h2 className="text-32 text-secondary-text font-medium mb-5">Margin positions</h2>
+        <div className="grid gap-5">
+          {!!order.positions?.length &&
+            order.positions.map((position, index) => (
+              <React.Fragment key={position.id}>
+                {position.isLiquidated || position.isClosed ? (
+                  <InactiveMarginPositionCard key={position.id} position={{ ...position, order }} />
+                ) : (
+                  <LendingPositionCard position={{ ...position, order }} />
+                )}
+              </React.Fragment>
+            ))}
         </div>
       </Container>
 

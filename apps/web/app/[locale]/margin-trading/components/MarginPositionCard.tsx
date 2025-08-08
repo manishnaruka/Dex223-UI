@@ -327,7 +327,7 @@ export function LendingPositionCard({ position }: Props) {
         <LiquidationInfo
           liquidationFeeStatus={liquidationFeeStatus}
           label="Liquidation fee"
-          value={position.order.liquidationRewardAmount.formatted}
+          value={formatFloat(position.order.liquidationRewardAmount.formatted)}
           symbol={position.order.liquidationRewardAsset.symbol || "Unknown"}
         />
         <LiquidationInfo

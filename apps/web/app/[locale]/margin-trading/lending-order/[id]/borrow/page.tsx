@@ -32,6 +32,7 @@ import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolio
 import { ORACLE_ABI } from "@/config/abis/oracle";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
@@ -481,6 +482,14 @@ export default function BorrowPage({
     return () => clearInterval(interval); // cleanup on unmount
   }, [order, order?.positionDuration]);
 
+  const [searchTradableTokenValue, setSearchTradableTokenValue] = useState("");
+
+  const [filteredTokens, isTokenFilterActive] = useMemo(() => {
+    return searchTradableTokenValue
+      ? [filterTokens(searchTradableTokenValue, order?.allowedTradingAssets || []), true]
+      : [order?.allowedTradingAssets || [], false];
+  }, [searchTradableTokenValue, order?.allowedTradingAssets]);
+
   if (loading || !order) {
     return "Loading...";
   }
@@ -804,52 +813,61 @@ export default function BorrowPage({
                     </div>
                     <div>
                       <SearchInput
+                        value={searchTradableTokenValue}
+                        onChange={(e) => setSearchTradableTokenValue(e.target.value)}
                         placeholder="Token name"
                         className="h-8 text-14 w-[180px] rounded-2"
                       />
                     </div>
                   </div>
 
-                  <SimpleBar style={{ maxHeight: 216 }}>
-                    <div className="flex gap-1 flex-wrap">
-                      {order.allowedTradingAssets.map((tradingToken) => {
-                        return tradingToken.isToken ? (
-                          <button
-                            key={tradingToken.address0}
-                            onClick={() =>
-                              setTokenForPortfolio(
-                                new Token(
-                                  chainId,
-                                  tradingToken.address0,
-                                  tradingToken.address1,
-                                  +tradingToken.decimals,
-                                  tradingToken.symbol,
-                                  tradingToken.name,
-                                  "/images/tokens/placeholder.svg",
-                                  tokenLists
-                                    ?.filter((tokenList) => {
-                                      return !!tokenList.list.tokens.find(
-                                        (t) =>
-                                          t.address0.toLowerCase() ===
-                                          tradingToken.address0.toLowerCase(),
-                                      );
-                                    })
-                                    .map((t) => t.id),
-                                ),
-                              )
-                            }
-                            className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
-                          >
-                            {tradingToken.symbol}
-                          </button>
-                        ) : (
-                          <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
-                            {tradingToken.symbol}
-                          </div>
-                        );
-                      })}
+                  {!!filteredTokens.length && (
+                    <SimpleBar style={{ maxHeight: 216 }}>
+                      <div className="flex gap-1 flex-wrap">
+                        {filteredTokens.map((tradingToken) => {
+                          return tradingToken.isToken ? (
+                            <button
+                              key={tradingToken.address0}
+                              onClick={() =>
+                                setTokenForPortfolio(
+                                  new Token(
+                                    chainId,
+                                    tradingToken.address0,
+                                    tradingToken.address1,
+                                    +tradingToken.decimals,
+                                    tradingToken.symbol,
+                                    tradingToken.name,
+                                    "/images/tokens/placeholder.svg",
+                                    tokenLists
+                                      ?.filter((tokenList) => {
+                                        return !!tokenList.list.tokens.find(
+                                          (t) =>
+                                            t.address0.toLowerCase() ===
+                                            tradingToken.address0.toLowerCase(),
+                                        );
+                                      })
+                                      .map((t) => t.id),
+                                  ),
+                                )
+                              }
+                              className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
+                            >
+                              {tradingToken.symbol}
+                            </button>
+                          ) : (
+                            <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
+                              {tradingToken.symbol}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </SimpleBar>
+                  )}
+                  {!filteredTokens.length && searchTradableTokenValue && (
+                    <div className="rounded-5 h-[100px] -mt-5 flex items-center justify-center text-secondary-text bg-empty-not-found-token bg-no-repeat bg-right-top bg-[length:64px_64px] -mr-5">
+                      Token not found
                     </div>
-                  </SimpleBar>
+                  )}
                 </div>
               </div>
             </Collapse>

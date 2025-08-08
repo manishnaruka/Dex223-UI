@@ -1,4 +1,5 @@
 import { useQuery } from "@apollo/client";
+import { add } from "dexie";
 import gql from "graphql-tag";
 import { useMemo } from "react";
 import { Address } from "viem";
@@ -87,6 +88,21 @@ export function useOrder({ id }: { id: number }): {
   return { loading, order, refetch };
 }
 
+type OrdersWhere = {
+  leverage_lte?: number;
+  minLoanFormatted_gte?: number;
+  balanceFormatted_gte?: number;
+  currencyLimit_lte?: number;
+  duration_lte?: number;
+  duration_gte?: number;
+  interestRate_lte?: number;
+  baseAsset_in?: Address[];
+  or?: { collaterals_contains?: Address[] }[]; // SINGLE Address
+  whitelist_?: {
+    or?: { allowedForTrading_contains?: Address[] }[]; // SINGLE Address
+  };
+};
+
 export function useOrders({
   sortingDirection,
   orderBy,
@@ -97,6 +113,9 @@ export function useOrders({
   interestRate_lte,
   minLoanFormatted_gte,
   balanceFormatted_gte,
+  baseAsset_in,
+  collateralAssets_filter,
+  tradableAssets_filter,
 }: {
   sortingDirection: SortingType;
   orderBy: string;
@@ -107,16 +126,20 @@ export function useOrders({
   interestRate_lte?: string;
   minLoanFormatted_gte?: string;
   balanceFormatted_gte?: string;
+  baseAsset_in?: Address[];
+  collateralAssets_filter?: Address[];
+  tradableAssets_filter?: Address[];
 }): {
   loading: boolean;
   orders: LendingOrder[];
+  isFilterActive: boolean;
 } {
   const apolloClient = useMarginModuleApolloClient();
   const chainId = useCurrentChainId();
 
+  console.log(baseAsset_in);
   const where = useMemo(() => {
-    const f: Record<string, number> = {};
-
+    const f: OrdersWhere = {};
     // helper to turn "" or undefined into undefined, else +string
     const toNum = (raw?: string) => {
       if (!raw || raw.trim() === "") return undefined;
@@ -145,6 +168,22 @@ export function useOrders({
     const ir = toNum(interestRate_lte);
     if (ir != null) f.interestRate_lte = ir;
 
+    if (baseAsset_in?.length) f.baseAsset_in = baseAsset_in;
+
+    if (collateralAssets_filter?.length) {
+      f.or = collateralAssets_filter.map((address) => ({
+        collaterals_contains: [address],
+      }));
+    }
+
+    if (tradableAssets_filter?.length) {
+      f.whitelist_ = {
+        or: tradableAssets_filter.map((address) => ({
+          allowedForTrading_contains: [address],
+        })),
+      };
+    }
+
     return f;
   }, [
     leverage_lte,
@@ -154,7 +193,12 @@ export function useOrders({
     duration_lte,
     duration_gte,
     interestRate_lte,
+    baseAsset_in,
+    collateralAssets_filter,
+    tradableAssets_filter,
   ]);
+
+  console.log(where);
 
   const { data, loading } = useQuery<any, any>(queryAllOrders, {
     variables: {
@@ -184,7 +228,7 @@ export function useOrders({
     });
   }, [chainId, data]);
 
-  return { loading, orders };
+  return { loading, orders, isFilterActive: Object.keys(where).length !== 0 };
 }
 
 export function useOrdersByOwner({ owner }: { owner: Address | undefined }): {

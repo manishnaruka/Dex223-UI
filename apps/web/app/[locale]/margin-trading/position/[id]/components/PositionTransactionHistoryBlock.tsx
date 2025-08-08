@@ -1,12 +1,17 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import clsx from "clsx";
 import React, { ReactNode } from "react";
+import { formatUnits } from "viem";
 
 import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
-import { MarginPositionTransactionType } from "@/app/[locale]/margin-trading/hooks/helpers";
+import {
+  MarginPositionRecentTransaction,
+  MarginPositionTransactionType,
+} from "@/app/[locale]/margin-trading/hooks/helpers";
 import useMarginPositionRecentTransactionsById from "@/app/[locale]/margin-trading/hooks/useMarginPositionTransactionHistory";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Svg from "@/components/atoms/Svg";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -30,6 +35,49 @@ const recentTransactionTextMap: Record<MarginPositionTransactionType, ReactNode>
   [MarginPositionTransactionType.WITHDRAW]: "Withdraw",
   [MarginPositionTransactionType.LIQUIDATED]: "Liquidated",
 };
+
+function PositionTransactionDescription({
+  transaction,
+}: {
+  transaction: MarginPositionRecentTransaction;
+}) {
+  switch (transaction.type) {
+    case MarginPositionTransactionType.BORROW:
+      return (
+        <div>
+          Borrowing {formatUnits(transaction.amount, transaction.assetToken.decimals)}{" "}
+          {transaction.assetToken.symbol}
+        </div>
+      );
+    case MarginPositionTransactionType.MARGIN_SWAP:
+      return (
+        <div>
+          {formatUnits(transaction.amountIn, transaction.assetInToken.decimals)}{" "}
+          {transaction.assetInToken.symbol} was swapped for {transaction.assetOutToken.symbol} at a
+          rate 1 {transaction.assetInToken.symbol} ={" "}
+          {formatFloat(
+            +formatUnits(transaction.amountIn, transaction.assetInToken.decimals) /
+              +formatUnits(transaction.amountOut, transaction.assetOutToken.decimals),
+          )}{" "}
+          {transaction.assetOutToken.symbol}
+        </div>
+      );
+    case MarginPositionTransactionType.DEPOSIT:
+      return (
+        <div>
+          Deposit {formatUnits(transaction.amount, transaction.assetToken.decimals)}{" "}
+          {transaction.assetToken.symbol}
+        </div>
+      );
+    case MarginPositionTransactionType.WITHDRAW:
+      return (
+        <div>
+          Deposit {formatUnits(transaction.amount, transaction.assetToken.decimals)}{" "}
+          {transaction.assetToken.symbol}
+        </div>
+      );
+  }
+}
 
 export default function PositionTransactionHistoryBlock({
   position,
@@ -92,7 +140,7 @@ export default function PositionTransactionHistoryBlock({
                   index % 2 !== 0 && "bg-tertiary-bg",
                 )}
               >
-                Borrowing 40 USDT
+                <PositionTransactionDescription transaction={o} />
               </div>
             </React.Fragment>
           );

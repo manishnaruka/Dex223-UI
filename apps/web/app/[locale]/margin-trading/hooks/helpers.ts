@@ -78,24 +78,47 @@ export type GqlOrder = {
 
 type BaseGqlRecentTransaction = {
   timestamp: string;
-  id: Hash;
+};
+
+type GqlMarginSwapFields = {
+  amountIn: string;
+  amountOut: string;
+  assetInToken: GqlToken;
+  assetOutToken: GqlToken;
+};
+
+type GqlPositionOpenFields = {
+  baseAssetToken: GqlToken;
+  loanAmount: string;
+};
+
+type GqlPositionWithdrawalFields = {
+  assetToken: GqlToken;
+  quantity: string;
+};
+
+type GqlPositionDepositFields = {
+  assetToken: GqlToken;
+  amount: string;
 };
 
 export type GqlRecentTransaction = {
-  marginSwap: BaseGqlRecentTransaction;
-  positionOpened: BaseGqlRecentTransaction;
+  marginSwap: BaseGqlRecentTransaction & GqlMarginSwapFields;
+  positionOpened: BaseGqlRecentTransaction & GqlPositionOpenFields;
   key:
     | "PositionDeposit"
     | "PositionWithdrawal"
     | "PositionClosed"
     | "PositionOpened"
     | "MarginSwap"
-    | "PositionLiquidated";
+    | "PositionLiquidated"
+    | "PositionFrozen";
   id: Hash;
-  liquidation: BaseGqlRecentTransaction;
-  positionWithdrawal: BaseGqlRecentTransaction;
+  timestamp: string;
+  positionLiquidated: BaseGqlRecentTransaction;
+  positionWithdrawal: BaseGqlRecentTransaction & GqlPositionWithdrawalFields;
   positionFrozen: BaseGqlRecentTransaction;
-  positionDeposit: BaseGqlRecentTransaction;
+  positionDeposit: BaseGqlRecentTransaction & GqlPositionDepositFields;
   positionClosed: BaseGqlRecentTransaction;
 };
 
@@ -199,14 +222,52 @@ export enum MarginPositionTransactionType {
   LIQUIDATED,
 }
 
-type BaseMarginPositionFields = {
-  hash: Hash;
+type MarginSwapFields = {
+  amountIn: bigint;
+  amountOut: bigint;
+  assetInToken: Currency;
+  assetOutToken: Currency;
 };
 
-export type MarginPositionRecentTransaction = BaseMarginPositionFields & {
-  type: MarginPositionTransactionType;
+type PositionOpenFields = {
+  assetToken: Currency;
+  amount: bigint;
+};
+
+type PositionWithdrawalFields = {
+  assetToken: Currency;
+  amount: bigint;
+};
+
+type BaseMarginPositionFields = {
+  hash: Hash;
   timestamp: string;
 };
+
+export type MarginPositionRecentTransaction =
+  | (BaseMarginPositionFields & {
+      type: MarginPositionTransactionType.WITHDRAW;
+    } & PositionWithdrawalFields)
+  | (BaseMarginPositionFields & {
+      type: MarginPositionTransactionType.MARGIN_SWAP;
+    } & MarginSwapFields)
+  | (BaseMarginPositionFields & {
+      type: MarginPositionTransactionType.DEPOSIT;
+      assetToken: Currency;
+      amount: bigint;
+    })
+  | (BaseMarginPositionFields & {
+      type: MarginPositionTransactionType.BORROW;
+    } & PositionOpenFields)
+  | (BaseMarginPositionFields & {
+      type: MarginPositionTransactionType.CLOSED;
+    })
+  | (BaseMarginPositionFields & {
+      type: MarginPositionTransactionType.FROZEN;
+    })
+  | (BaseMarginPositionFields & {
+      type: MarginPositionTransactionType.LIQUIDATED;
+    });
 
 const keyToTransactionTypeMap = {
   PositionDeposit: MarginPositionTransactionType.DEPOSIT,
@@ -224,22 +285,95 @@ const keyToFieldNameMap = {
   PositionClosed: "positionClosed",
   PositionOpened: "positionOpened",
   MarginSwap: "marginSwap",
-  PositionLiquidated: "liquidation",
+  PositionLiquidated: "positionLiquidated",
   PositionFrozen: "positionFrozen",
 };
 
 export function serializeGqlRecentTransactions(
   gqlRecentTransactions: GqlRecentTransaction[],
+  chainId: DexChainId,
 ): MarginPositionRecentTransaction[] {
-  return gqlRecentTransactions.map((gqlTransaction) => {
-    const fieldName = keyToFieldNameMap[gqlTransaction.key] as keyof GqlRecentTransaction;
+  console.log(gqlRecentTransactions);
+  return gqlRecentTransactions.map((gqlTx) => {
+    const fieldName = keyToFieldNameMap[gqlTx.key] as keyof GqlRecentTransaction;
+    const field = gqlTx[fieldName] as any;
+    const timestamp = gqlTx?.timestamp;
 
-    const fieldArray = gqlTransaction[fieldName] as unknown as { timestamp: string }[];
-    const timestamp = fieldArray[0]?.timestamp;
-    return {
-      type: keyToTransactionTypeMap[gqlTransaction.key],
-      hash: gqlTransaction.id,
-      timestamp,
-    };
+    console.log(field);
+    console.log(gqlTx.key);
+    console.log(gqlTx);
+
+    switch (gqlTx.key) {
+      case "MarginSwap": {
+        const { amountIn, amountOut, assetInToken, assetOutToken } =
+          field[0] as GqlMarginSwapFields;
+        return {
+          type: MarginPositionTransactionType.MARGIN_SWAP,
+          hash: gqlTx.id,
+          timestamp,
+          amountIn: BigInt(amountIn),
+          amountOut: BigInt(amountOut),
+          assetInToken: gqlTokenToCurrency(assetInToken, chainId),
+          assetOutToken: gqlTokenToCurrency(assetOutToken, chainId),
+        };
+      }
+      case "PositionWithdrawal": {
+        const { assetToken, quantity } = field[0] as GqlPositionWithdrawalFields;
+        return {
+          type: MarginPositionTransactionType.WITHDRAW,
+          hash: gqlTx.id,
+          timestamp,
+          assetToken: gqlTokenToCurrency(assetToken, chainId),
+          amount: BigInt(quantity),
+        };
+      }
+      case "PositionDeposit": {
+        const { assetToken, amount } = field[0] as GqlPositionDepositFields;
+        return {
+          type: MarginPositionTransactionType.DEPOSIT,
+          hash: gqlTx.id,
+          timestamp,
+          assetToken: gqlTokenToCurrency(assetToken, chainId),
+          amount: BigInt(amount),
+        };
+      }
+      case "PositionOpened": {
+        const { baseAssetToken, loanAmount } = field[0] as GqlPositionOpenFields;
+        console.log(baseAssetToken);
+        console.log(loanAmount);
+        return {
+          type: MarginPositionTransactionType.BORROW,
+          hash: gqlTx.id,
+          timestamp,
+          assetToken: gqlTokenToCurrency(baseAssetToken, chainId),
+          amount: BigInt(loanAmount),
+        };
+      }
+      case "PositionClosed":
+        return {
+          type: MarginPositionTransactionType.CLOSED,
+          hash: gqlTx.id,
+          timestamp,
+        };
+      case "PositionFrozen":
+        return {
+          type: MarginPositionTransactionType.FROZEN,
+          hash: gqlTx.id,
+          timestamp,
+        };
+      case "PositionLiquidated":
+        return {
+          type: MarginPositionTransactionType.LIQUIDATED,
+          hash: gqlTx.id,
+          timestamp,
+        };
+      default:
+        return {
+          type: MarginPositionTransactionType.LIQUIDATED,
+          hash: gqlTx.id,
+          timestamp,
+        };
+      // throw new Error(`Unsupported transaction key: ${gqlTx.key}`);
+    }
   });
 }

@@ -4,11 +4,10 @@ import { useMemo } from "react";
 
 import {
   MarginPositionRecentTransaction,
-  serializeGqlOrder,
-  serializeGqlPosition,
   serializeGqlRecentTransactions,
 } from "@/app/[locale]/margin-trading/hooks/helpers";
 import { chainToApolloClient } from "@/graphql/thegraph/apollo";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useMarginModuleApolloClient from "@/hooks/useMarginModuleApolloClient";
 import { DexChainId } from "@/sdk_bi/chains";
 
@@ -16,35 +15,73 @@ const queryById = gql(`
   query GetPosition($id: ID!) {
     position(id: $id) {
       transactions(orderBy: timestamp) {
-        marginSwap {
-          timestamp
-          id
-        }
-        positionOpened {
-          timestamp
-          id
-        }
-        key
         id
-        liquidation {
-          timestamp
+        timestamp
+        key
+        positionClosed {
           id
-        }
-        positionWithdrawal {
-          id
-          timestamp
-        }
-        positionFrozen {
-          id
-          timestamp
         }
         positionDeposit {
           id
-          timestamp
+          assetToken {
+            addressERC20
+            addressERC223
+            decimals
+            id
+            name
+            symbol
+          }
+          amount
         }
-        positionClosed {
+        positionFrozen {
           id
-          timestamp
+        }
+        positionLiquidated {
+          id
+        }
+        positionOpened {
+          id
+          baseAssetToken {
+            addressERC20
+            addressERC223
+            decimals
+            id
+            name
+            symbol
+          }
+          loanAmount
+        }
+        positionWithdrawal {
+          id
+          assetToken {
+            addressERC20
+            addressERC223
+            decimals
+            id
+            name
+            symbol
+          }
+          quantity
+        }
+        marginSwap {
+          amountIn
+          amountOut
+          assetInToken {
+            addressERC20
+            addressERC223
+            decimals
+            id
+            name
+            symbol
+          }
+          assetOutToken {
+            addressERC20
+            addressERC223
+            decimals
+            id
+            name
+            symbol
+          }
         }
       }
     }
@@ -56,7 +93,7 @@ export default function useMarginPositionRecentTransactionsById({ id }: { id: st
   recentTransactions: MarginPositionRecentTransaction[];
 } {
   const apolloClient = useMarginModuleApolloClient();
-  // const chainId = useCurrentChainId();
+  const chainId = useCurrentChainId();
 
   const { data, loading } = useQuery<any, any>(queryById, {
     variables: {
@@ -73,8 +110,8 @@ export default function useMarginPositionRecentTransactionsById({ id }: { id: st
       return data;
     }
 
-    return serializeGqlRecentTransactions(data.position.transactions);
-  }, [data]);
+    return serializeGqlRecentTransactions(data.position.transactions, chainId);
+  }, [chainId, data]);
 
   return { loading, recentTransactions };
 }
