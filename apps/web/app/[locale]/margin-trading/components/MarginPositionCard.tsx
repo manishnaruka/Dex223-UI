@@ -2,9 +2,9 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
-import React, { ReactNode, useCallback, useMemo, useState } from "react";
-import { formatUnits } from "viem";
-import { useAccount } from "wagmi";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { formatUnits, parseUnits } from "viem";
+import { useAccount, usePublicClient } from "wagmi";
 
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
 import {
@@ -19,12 +19,14 @@ import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import { ORACLE_ABI } from "@/config/abis/oracle";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Link } from "@/i18n/routing";
+import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 
 import PositionAsset from "./widgets/PositionAsset";
 
@@ -244,13 +246,131 @@ export function InactiveMarginPositionCard({ position }: Props) {
   );
 }
 
+function getPrice(inputAmount: bigint, outputAmount: bigint, scale: bigint = 10n ** 18n): number {
+  return Number((outputAmount * scale) / inputAmount) / Number(scale);
+}
+
+const ONE = 10n ** 18n;
+
+/**
+ * Calculate leverage given borrow & collateral amounts in smallest units (bigint).
+ *
+ * L = 1 + BorrowValue / CollateralValue
+ *
+ * @param borrowWei         bigint, borrow amount in smallest units (e.g. USDT wei)
+ * @param borrowDecimals    number of decimals for borrow token (e.g. 6 for USDT)
+ * @param collateralWei     bigint, collateral amount in smallest units (e.g. ETH wei)
+ * @param collateralDecimals number of decimals for collateral token (e.g. 18 for ETH)
+ * @param price             number price, e.g. 2500 (borrow tokens per 1 collateral token)
+ * @param leverageDecimals  how many decimals to format leverage with (default 6)
+ * @returns                 human string leverage, e.g. "2", "2.5"
+ */
+export function calcLeverageFormattedFromBigints({
+  borrowWei,
+  borrowDecimals,
+  collateralWei,
+  collateralDecimals,
+  price,
+  leverageDecimals = 18,
+}: {
+  borrowWei: bigint;
+  borrowDecimals: number;
+  collateralWei: bigint;
+  collateralDecimals: number;
+  price: number; // borrow tokens per 1 collateral token
+  leverageDecimals?: number;
+}): string {
+  if (collateralWei <= 0n || price <= 0) {
+    return formatUnits(ONE, leverageDecimals);
+  }
+
+  // scale factors for decimals
+  const scaleBorrow = 10n ** BigInt(borrowDecimals);
+  const scaleColl = 10n ** BigInt(collateralDecimals);
+
+  // convert price (number) → bigint Q18
+  const priceQ18 = parseUnits(String(price), 18);
+
+  // L18 = 1e18 + (B * 10^collDec * 1e36) / (C * priceQ18 * 10^borrowDec)
+  const numerator = borrowWei * scaleColl * ONE * ONE;
+  const denominator = collateralWei * priceQ18 * scaleBorrow;
+
+  const L18 = ONE + numerator / denominator;
+
+  return formatUnits(L18, leverageDecimals);
+}
+
 export function LendingPositionCard({ position }: Props) {
   const { expectedBalance, actualBalance } = usePositionStatus(position);
   const [positionToClose, setPositionToClose] = useState<MarginPosition | undefined>();
+  const publicClient = usePublicClient();
 
   const subjectToLiquidation = useMemo(() => {
     return actualBalance != null && expectedBalance != null && actualBalance <= expectedBalance;
   }, [actualBalance, expectedBalance]);
+  const [ratio, setRatio] = useState<number | undefined>();
+  const chainId = useCurrentChainId();
+
+  useEffect(() => {
+    (async () => {
+      console.log("Fired");
+
+      if (!position.order?.baseAsset || !position.collateralAsset || !publicClient) {
+        console.log("Returned: missing dependencies");
+        return;
+      }
+
+      const baseAsset = position.order.baseAsset.wrapped;
+      const collateralToken = position.collateralAsset.wrapped;
+
+      if (baseAsset.address0 === collateralToken.address0) {
+        setRatio(1); // 1:1 price
+        console.log("Same asset, ratio = 1");
+        return;
+      }
+
+      try {
+        const inputAmount = BigInt(10) ** BigInt(baseAsset.decimals); // 1 unit of base asset
+        console.log("Calling oracle with:", [
+          baseAsset.address0,
+          collateralToken.address0,
+          inputAmount,
+        ]);
+
+        const outputAmount = await publicClient.readContract({
+          address: ORACLE_ADDRESS[chainId],
+          abi: ORACLE_ABI,
+          functionName: "getAmountOut",
+          args: [baseAsset.address0, collateralToken.address0, inputAmount],
+        });
+
+        const ratio = getPrice(outputAmount as bigint, inputAmount); // output/base price
+        console.log("Oracle output:", outputAmount);
+        console.log("Computed ratio:", ratio);
+
+        setRatio(ratio);
+      } catch (e) {
+        console.error("Failed to fetch ratio:", e);
+      }
+    })();
+  }, [chainId, position, publicClient]);
+
+  const leverage = useMemo(() => {
+    if (ratio) {
+      return calcLeverageFormattedFromBigints({
+        borrowWei: position.loanAmount,
+        borrowDecimals: position.loanAsset.decimals,
+        collateralWei: position.collateralAmount,
+        collateralDecimals: position.collateralAsset.decimals,
+        price: ratio,
+      });
+    }
+    return "Loading...";
+  }, [position, ratio]);
+
+  const isCompleted = useMemo(() => {
+    return +position.deadline * 1000 < Date.now();
+  }, [position.deadline]);
 
   const nativeCurrency = useNativeCurrency();
 
@@ -338,7 +458,13 @@ export function LendingPositionCard({ position }: Props) {
         />
       </>
     );
-  }, []);
+  }, [
+    formatted,
+    liquidationFeeStatus,
+    nativeCurrency.symbol,
+    position.order.liquidationRewardAmount.formatted,
+    position.order.liquidationRewardAsset.symbol,
+  ]);
 
   return (
     <div
@@ -361,10 +487,17 @@ export function LendingPositionCard({ position }: Props) {
           <div className="flex items-center gap-3">
             {balanceStatus !== DangerStatus.STABLE && dangerIconsMap[balanceStatus]}
             {liquidationFeeStatus !== DangerStatus.STABLE && dangerIconsMap[liquidationFeeStatus]}
+            {isCompleted && address?.toLowerCase() === position.order.owner.toLowerCase() && (
+              <div className="w-10 h-10 flex justify-center items-center text-green rounded-2.5 border-greeb border relative before:absolute before:w-4 before:h-4 before:rounded-full before:blur-[9px] before:bg-green">
+                <Svg iconName="time" />
+              </div>
+            )}
           </div>
 
           <div className="min-w-[115px] text-green flex items-center gap-2 justify-end">
-            Active
+            {isCompleted && address?.toLowerCase() === position.order.owner.toLowerCase()
+              ? "Completed"
+              : "Active"}
             <span className="block w-2 h-2 rounded-2 bg-green" />
           </div>
         </div>
@@ -387,9 +520,17 @@ export function LendingPositionCard({ position }: Props) {
             symbol={position.loanAsset.symbol}
           />
         </div>
-        <SimpleInfoBlock title="Borrowed" tooltipText="Tooltip text" value="0" />
-        <SimpleInfoBlock title="Initial collateral" tooltipText="Tooltip text" value="0" />
-        <SimpleInfoBlock title="Leverage" tooltipText="Tooltip text" value="0" />
+        <SimpleInfoBlock
+          title="Borrowed"
+          tooltipText="Tooltip text"
+          value={`${formatUnits(position.loanAmount, position.loanAsset.decimals)} ${position.loanAsset.symbol}`}
+        />
+        <SimpleInfoBlock
+          title="Initial collateral"
+          tooltipText="Tooltip text"
+          value={`${formatUnits(position.collateralAmount, position.collateralAsset.decimals)} ${position.collateralAsset.symbol}`}
+        />
+        <SimpleInfoBlock title="Leverage" tooltipText="Tooltip text" value={leverage} />
       </div>
 
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">

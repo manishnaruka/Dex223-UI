@@ -1,10 +1,11 @@
 import Tooltip from "@repo/ui/tooltip";
 import React, { ReactNode, useMemo, useState } from "react";
+import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
-import { date } from "yup";
 
 import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapPositionStore";
+import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import PositionDetailCard from "@/app/[locale]/margin-trading/components/widgets/PositionDetailCard";
 import { usePositionsByOwner } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
@@ -14,6 +15,11 @@ import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
 import { Link } from "@/i18n/routing";
@@ -40,9 +46,11 @@ const dangerIconsMap: Record<Exclude<DangerStatus, DangerStatus.STABLE>, ReactNo
 function PositionSelectItem({
   position,
   handleSelectedPosition,
+  isSelected,
 }: {
   handleSelectedPosition: (position: MarginPosition) => void;
   position: MarginPosition;
+  isSelected: boolean;
 }) {
   return (
     <div className="p-5 rounded-3 bg-tertiary-bg">
@@ -64,15 +72,21 @@ function PositionSelectItem({
           {dangerIconsMap[DangerStatus.DANGEROUS]}
         </span>
         <div className="w-[210px]">
-          <Button
-            fullWidth
-            size={ButtonSize.MEDIUM}
-            colorScheme={ButtonColor.PURPLE}
-            className="flex-grow"
-            onClick={() => handleSelectedPosition(position)}
-          >
-            Select position
-          </Button>
+          {isSelected ? (
+            <div className="flex items-center gap-2 rounded-2 w-full border border-primary-border h-10 justify-center">
+              Position selected <Svg className="text-purple" iconName="check" />
+            </div>
+          ) : (
+            <Button
+              fullWidth
+              size={ButtonSize.MEDIUM}
+              colorScheme={ButtonColor.PURPLE}
+              className="flex-grow"
+              onClick={() => handleSelectedPosition(position)}
+            >
+              Select position
+            </Button>
+          )}
         </div>
       </div>
 
@@ -144,14 +158,45 @@ export default function SelectPositionDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const { setMarginSwapPosition } = useMarginSwapPositionStore();
+  const { setMarginSwapPosition, marginSwapPosition } = useMarginSwapPositionStore();
 
   const { address } = useAccount();
   const { loading, positions } = usePositionsByOwner({ owner: address });
 
+  const { tokenA, tokenB, setTokenA, setTokenB } = useMarginSwapTokensStore();
+
   const openedPositions = useMemo(() => {
     return positions?.filter((position) => !position.isLiquidated && !position.isClosed);
   }, [positions]);
+
+  const [matchingPositions, otherPositions] = useMemo(() => {
+    if (!tokenA && !tokenB) {
+      return [openedPositions, openedPositions];
+    }
+
+    const matching: MarginPosition[] = [];
+    const other: MarginPosition[] = [];
+
+    for (const position of positions) {
+      const hasA = tokenA && position.assets.some((asset) => asset.equals(tokenA));
+
+      const hasB =
+        tokenB && position.order.allowedTradingAssets.some((asset) => asset.equals(tokenB));
+
+      // If tokenA is provided → must match assets
+      // If tokenB is provided → must match allowedTradingAssets
+      // If both are provided → both must match
+      const matches = (!tokenA || hasA) && (!tokenB || hasB);
+
+      if (matches) {
+        matching.push(position);
+      } else {
+        other.push(position);
+      }
+    }
+
+    return [matching, other];
+  }, [openedPositions, positions, tokenA, tokenB]);
 
   if (loading || !openedPositions) {
     return <div>Loading...</div>;
@@ -168,26 +213,102 @@ export default function SelectPositionDialog() {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
-          <div className="grid gap-5 mt-5">
-            {openedPositions.map((position) => (
-              <PositionSelectItem
-                key={position.id}
-                handleSelectedPosition={(position) => {
-                  setMarginSwapPosition(position);
-                  setIsOpen(false);
-                }}
-                position={position}
-              />
-            ))}
-          </div>
+
+          {!!tokenA || !!tokenB ? (
+            <SimpleBar style={{ maxHeight: 670, paddingRight: 20, marginRight: -20 }}>
+              <div>
+                <div className="mt-3 flex items-center gap-3">
+                  <h2 className="text-18 font-bold mr-2">Matching positions</h2>
+                  {!!tokenA && (
+                    <div className="text-secondary-text pl-3 pr-2 py-1 flex items-center gap-1 rounded-2 bg-tertiary-bg">
+                      You pay: {tokenA.symbol}
+                      <IconButton
+                        variant={IconButtonVariant.CLOSE}
+                        iconSize={IconSize.REGULAR}
+                        buttonSize={IconButtonSize.EXTRA_SMALL}
+                        handleClose={() => setTokenA(undefined)}
+                      />
+                    </div>
+                  )}
+                  {!!tokenB && (
+                    <div className="text-secondary-text pl-3 pr-2 py-1 flex items-center gap-1 rounded-2 bg-tertiary-bg">
+                      You buy: {tokenB.symbol}
+                      <IconButton
+                        variant={IconButtonVariant.CLOSE}
+                        iconSize={IconSize.REGULAR}
+                        buttonSize={IconButtonSize.EXTRA_SMALL}
+                        handleClose={() => setTokenB(undefined)}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {matchingPositions?.length ? (
+                  <div className="grid gap-5 mt-5">
+                    {matchingPositions.map((position) => (
+                      <PositionSelectItem
+                        key={position.id}
+                        handleSelectedPosition={(position) => {
+                          setMarginSwapPosition(position);
+                          setIsOpen(false);
+                        }}
+                        position={position}
+                        isSelected={marginSwapPosition?.id === position.id}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-[112px] flex items-center justify-center bg-empty-not-found-lending-position-purple bg-[length:112px_112px] bg-right-top bg-no-repeat text-secondary-text">
+                    There are no matching positions
+                  </div>
+                )}
+              </div>
+              <div>
+                <h2 className="text-18 font-bold mt-3 border-t border-primary-border py-3.5">
+                  Positions without selected tokens
+                </h2>
+                <div className="grid gap-5">
+                  {otherPositions.map((position) => (
+                    <PositionSelectItem
+                      key={position.id}
+                      handleSelectedPosition={(position) => {
+                        setMarginSwapPosition(position);
+                        setIsOpen(false);
+                        setTokenA(undefined);
+                        setTokenB(undefined);
+                      }}
+                      position={position}
+                      isSelected={marginSwapPosition?.id === position.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            </SimpleBar>
+          ) : (
+            <SimpleBar style={{ maxHeight: 670, paddingRight: 20, marginRight: -20 }}>
+              <div className="grid gap-5 mt-5">
+                {openedPositions.map((position) => (
+                  <PositionSelectItem
+                    key={position.id}
+                    handleSelectedPosition={(position) => {
+                      setMarginSwapPosition(position);
+                      setIsOpen(false);
+                    }}
+                    position={position}
+                    isSelected={marginSwapPosition?.id === position.id}
+                  />
+                ))}
+              </div>
+            </SimpleBar>
+          )}
         </div>
       </DrawerDialog>
       <Button
         size={ButtonSize.MEDIUM}
         onClick={() => setIsOpen(true)}
-        colorScheme={ButtonColor.PURPLE}
+        colorScheme={!marginSwapPosition ? ButtonColor.PURPLE : ButtonColor.LIGHT_PURPLE}
       >
-        Select position
+        {marginSwapPosition ? "Change position" : "Select position"}
       </Button>
     </>
   );

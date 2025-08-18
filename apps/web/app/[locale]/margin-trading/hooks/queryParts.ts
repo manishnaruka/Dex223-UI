@@ -32,6 +32,10 @@ export const GQL_POSITION_FIELDS = `
   txClosed
   txFrozen
   txLiquidated
+  collateralAmount
+  collateralToken {
+    ${GQL_TOKEN_FIELDS}
+  }
 `;
 
 export const GQL_ORDER_FIELDS = `

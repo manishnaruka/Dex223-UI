@@ -41,6 +41,8 @@ export type GqlPosition = {
   txClosed: Hash;
   txFrozen: Hash;
   txLiquidated: Hash;
+  collateralToken: GqlToken;
+  collateralAmount: bigint;
 };
 
 export type GqlOrder = {
@@ -193,6 +195,8 @@ export function serializeGqlPosition(
     liquidatedAt,
     createdAt,
     closedAt,
+    collateralAmount,
+    collateralToken,
     ...rest
   } = gqlPosition;
 
@@ -209,6 +213,8 @@ export function serializeGqlPosition(
       asset: gqlTokenToCurrency(tradingToken, chainId),
       balance: assets.find((asset: any) => asset.address === tradingToken.addressERC20)?.balance,
     })),
+    collateralAsset: gqlTokenToCurrency(collateralToken, chainId),
+    collateralAmount: BigInt(collateralAmount),
   };
 }
 

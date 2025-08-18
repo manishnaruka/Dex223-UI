@@ -273,6 +273,7 @@ export default function TradeForm() {
     setTokenAStandard,
     setTokenBStandard,
   } = useMarginSwapTokensStore();
+
   const settingsStore = useMarginSwapSettingsStore();
   const { computed } = settingsStore;
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
