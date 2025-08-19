@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import React, { useCallback } from "react";
 
+import { useLendingOrderRecentTransactionsStore } from "@/app/[locale]/margin-trading/lending-order/create/hooks/useLendingOrderRecentTransactionsStore";
 import FirstStep from "@/app/[locale]/margin-trading/lending-order/create/steps/FirstStep";
 import SecondStep from "@/app/[locale]/margin-trading/lending-order/create/steps/SecondStep";
 import ThirdStep from "@/app/[locale]/margin-trading/lending-order/create/steps/ThirdStep";
@@ -10,6 +11,7 @@ import {
   ThirdStepValues,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 
@@ -95,9 +97,12 @@ export default function OrderConfigurationPage({
     thirdStepValues,
   ]);
 
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useLendingOrderRecentTransactionsStore();
+
   return (
     <>
-      <div className="rounded-3 bg-primary-bg max-w-[600px] mx-auto my-10">
+      <div className="rounded-3 bg-primary-bg w-[600px] mx-auto">
         <div className="py-1.5 px-6 flex justify-between items-center">
           <IconButton iconName="back" />
           <h1 className="text-20 font-bold">
@@ -105,9 +110,9 @@ export default function OrderConfigurationPage({
           </h1>
           <IconButton
             buttonSize={IconButtonSize.LARGE}
-            active={false}
+            active={showRecentTransactions}
             iconName="recent-transactions"
-            onClick={() => {}}
+            onClick={() => setShowRecentTransactions(!showRecentTransactions)}
           />
         </div>
         <div className="pb-10 px-10">

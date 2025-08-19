@@ -136,13 +136,13 @@ export function SimpleInfoBlock({
   return (
     <div
       className={clsx(
-        "flex flex-col justify-center px-5 bg-tertiary-bg rounded-3 py-3 bg-right-top bg-no-repeat bg-[length:120px_80px]",
+        "flex flex-col justify-center pl-5 pr-4 bg-tertiary-bg rounded-3 py-3 bg-right-top bg-no-repeat bg-[length:120px_80px]",
       )}
     >
       <div className="flex items-center gap-1">
         <span className="flex items-center gap-1 text-14 text-tertiary-text">
           {title}
-          <Tooltip text={tooltipText} />
+          <Tooltip iconSize={20} text={tooltipText} />
         </span>
       </div>
       <div className="relative flex gap-1 font-medium text-16 text-secondary-text">{value}</div>

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import React, { use, useEffect } from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -9,6 +10,8 @@ import OrderConfigurationPage from "@/app/[locale]/margin-trading/lending-order/
 import ReviewEditOrderDialog from "@/app/[locale]/margin-trading/lending-order/[id]/edit/components/ReviewEditOrderDialog";
 import { useEditOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderConfigStore";
 import { useEditOrderStepStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStepStore";
+import ReviewLendingOrderDialog from "@/app/[locale]/margin-trading/lending-order/create/components/ReviewCreateOrderDialog";
+import { useLendingOrderRecentTransactionsStore } from "@/app/[locale]/margin-trading/lending-order/create/hooks/useLendingOrderRecentTransactionsStore";
 import {
   LendingOrderPeriodType,
   LiquidationType,
@@ -17,6 +20,9 @@ import {
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import { useConfirmEditOrderDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { OrderActionMode } from "@/app/[locale]/margin-trading/types";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
+import Container from "@/components/atoms/Container";
+import RecentTransactions from "@/components/common/RecentTransactions";
 import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
@@ -32,6 +38,7 @@ export default function EditLendingOrderPage({
   const { id: orderId } = use(params);
   const { order, loading } = useOrder({ id: +orderId });
 
+  console.log(order);
   const { address } = useAccount();
   useRecentTransactionTracking();
 
@@ -102,6 +109,9 @@ export default function EditLendingOrderPage({
     setThirdStepValues,
   ]);
 
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useLendingOrderRecentTransactionsStore();
+
   if (!order || loading) {
     return "Loading...";
   }
@@ -111,16 +121,39 @@ export default function EditLendingOrderPage({
   }
 
   return (
-    <>
-      <OrderConfigurationPage
-        {...config}
-        openPreviewDialog={() => setIsOpen(true)}
-        mode={OrderActionMode.EDIT}
-        step={step}
-        setStep={setStep}
-      />
+    <Container>
+      <div
+        className={clsx(
+          "grid py-4 lg:py-[40px] grid-cols-1 mx-auto",
+          showRecentTransactions
+            ? "xl:grid-cols-[580px_600px] xl:max-w-[1200px] gap-4 xl:grid-areas-[left_right] grid-areas-[right,left]"
+            : "xl:grid-cols-[600px] xl:max-w-[600px] grid-areas-[right]",
+        )}
+      >
+        <div className="grid-in-[left] flex justify-center">
+          <div className="w-full sm:max-w-[600px] xl:max-w-full">
+            <RecentTransactions
+              showRecentTransactions={showRecentTransactions}
+              handleClose={() => setShowRecentTransactions(false)}
+              store={useSwapRecentTransactionsStore}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-center grid-in-[right]">
+          <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
+            <OrderConfigurationPage
+              {...config}
+              openPreviewDialog={() => setIsOpen(true)}
+              mode={OrderActionMode.EDIT}
+              step={step}
+              setStep={setStep}
+            />
+          </div>
+        </div>
+      </div>
 
       <ReviewEditOrderDialog isOpen={isOpen} setIsOpen={setIsOpen} order={order} />
-    </>
+    </Container>
   );
 }

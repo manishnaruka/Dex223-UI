@@ -89,7 +89,7 @@ export default function LendingOrder({
     <div className="py-10">
       <Container>
         <div className="mb-10">
-          <Link href="/" className="flex items-center gap-1">
+          <Link href="/margin-trading" className="flex items-center gap-1">
             <Svg iconName="back" />
             Back to lending orders
           </Link>
