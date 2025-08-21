@@ -2,21 +2,19 @@ import React, { useMemo } from "react";
 
 import BorrowMarketPageContent from "@/app/[locale]/margin-trading/components/BorrowMarketPageContent";
 
-export default function MarginTrading({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const defaultTab = useMemo(() => {
-    if (searchParams.tab === "lending-orders") {
-      return 1;
-    }
-    if (searchParams.tab === "margin-positions") {
-      return 2;
-    }
+type SP = Record<string, string | string[] | undefined>;
 
-    return 0;
-  }, [searchParams.tab]);
+export default async function MarginTrading({ searchParams }: { searchParams: Promise<SP> }) {
+  const sp = await searchParams;
+
+  let defaultTab = 0;
+
+  if (sp.tab === "lending-orders") {
+    defaultTab = 1;
+  }
+  if (sp.tab === "margin-positions") {
+    defaultTab = 2;
+  }
 
   return <BorrowMarketPageContent defaultTab={defaultTab} />;
 }

@@ -53,17 +53,9 @@ const withdrawPositionSteps: OperationStepConfig[] = [
   },
 ];
 
-function PositionDepositActionButton({
-  position,
-  amountToWithdraw,
-}: {
-  position: MarginPosition;
-  amountToWithdraw: string;
-}) {
+function PositionWithdrawActionButton({ position }: { position: MarginPosition }) {
   const { handlePositionWithdraw } = usePositionWithdraw({
     position: position,
-    currency: position.loanAsset,
-    amount: amountToWithdraw,
   });
 
   const { status, withdrawHash } = useWithdrawPositionStatusStore();
@@ -232,7 +224,7 @@ export default function PositionWithdrawDialog({
           </div>
         )}
 
-        <PositionDepositActionButton position={position} amountToWithdraw={amountToWithdraw} />
+        <PositionWithdrawActionButton position={position} />
       </div>
     </DrawerDialog>
   );
