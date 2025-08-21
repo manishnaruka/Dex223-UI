@@ -4,6 +4,7 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useFormik } from "formik";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import React, { use, useCallback, useEffect, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
@@ -170,6 +171,8 @@ export default function BorrowPage({
     id: string;
   }>;
 }) {
+  const locale = useLocale();
+
   const { id: orderId } = use(params);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useBorrowRecentTransactionsStore();
@@ -343,7 +346,7 @@ export default function BorrowPage({
         ]);
 
         const outputAmount = await publicClient.readContract({
-          address: ORACLE_ADDRESS[chainId],
+          address: order.oracle,
           abi: ORACLE_ABI,
           functionName: "getAmountOut",
           args: [baseAsset.address0, collateralToken.address0, inputAmount],
@@ -685,7 +688,10 @@ export default function BorrowPage({
             <span className="text-tertiary-text">
               Lending order id: <span className="text-secondary-text">{orderId}</span>
             </span>
-            <ExternalTextLink text="View details" href={"#"} />
+            <ExternalTextLink
+              text="View details"
+              href={`/${locale}/margin-trading/lending-order/${orderId}`}
+            />
           </div>
 
           <div className="bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3 flex-col xs:flex-row">

@@ -22,6 +22,7 @@ import OperationStepRow, {
 import TokenInput from "@/components/common/TokenInput";
 import { IconName } from "@/config/types/IconName";
 import { formatFloat } from "@/functions/formatFloat";
+import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 
 type StepTextMap = {
@@ -55,15 +56,13 @@ const withdrawPositionSteps: OperationStepConfig[] = [
 
 function PositionDepositActionButton({
   position,
-  amountToWithdraw,
+  handleSaveResults,
 }: {
   position: MarginPosition;
-  amountToWithdraw: string;
+  handleSaveResults: () => void;
 }) {
   const { handlePositionWithdraw } = usePositionWithdraw({
     position: position,
-    currency: position.loanAsset,
-    amount: amountToWithdraw,
   });
 
   const { status, withdrawHash } = useWithdrawPositionStatusStore();
@@ -94,13 +93,19 @@ function PositionDepositActionButton({
   }
 
   return (
-    <Button onClick={() => handlePositionWithdraw()} fullWidth>
-      Deposit {position.loanAsset.symbol}
+    <Button
+      onClick={async () => {
+        await handlePositionWithdraw();
+        handleSaveResults();
+      }}
+      fullWidth
+    >
+      Withdraw
     </Button>
   );
 }
 
-export default function PositionWithdrawDialog({
+export default function ClosedPositionWithdrawDialog({
   isOpen,
   setIsOpen,
   position,
@@ -110,7 +115,13 @@ export default function PositionWithdrawDialog({
   position: MarginPosition;
 }) {
   const { status, setStatus } = useWithdrawPositionStatusStore();
-  const [amountToWithdraw, setAmountToWithdraw] = useState("");
+
+  const [withdrawnAssets, setWithdrawnAssets] = useState<
+    {
+      asset: Currency;
+      balance: bigint | undefined;
+    }[]
+  >([]);
 
   const isInitialStatus = useMemo(() => status === PositionWithdrawStatus.INITIAL, [status]);
   const isFinalStatus = useMemo(
@@ -137,23 +148,25 @@ export default function PositionWithdrawDialog({
       <div className="w-[600px] card-spacing-x card-spacing-b">
         {isInitialStatus && (
           <>
-            <p className="text-secondary-text mb-4">
-              You will increase the available balance of your lending order by making a deposit
-            </p>
-            <InputLabel label="Deposit amount" tooltipText="Tooltip text" />
-            <TokenInput
-              handleClick={() => null}
-              token={position.loanAsset}
-              value={amountToWithdraw}
-              onInputChange={(value) => {
-                setAmountToWithdraw(value);
-              }}
-              balance0={"0"}
-              balance1={"0"}
-              standard={Standard.ERC20}
-              setStandard={() => null}
-            />
+            <InputLabel label="Tokens for withdrawal" tooltipText="Tooltip text" />
 
+            <div className="rounded-2 bg-tertiary-bg p-2 flex flex-wrap gap-2">
+              {position.assetsWithBalances
+                .filter((asset) => !!asset.balance)
+                .map((assetWithBalance) => {
+                  return (
+                    <div
+                      className="border border-primary-border rounded-2 py-1 px-2"
+                      key={assetWithBalance.asset.wrapped.address0}
+                    >
+                      {formatFloat(
+                        formatUnits(assetWithBalance.balance!, assetWithBalance.asset.decimals),
+                      )}{" "}
+                      <span className="text-secondary-text">{assetWithBalance.asset.symbol}</span>
+                    </div>
+                  );
+                })}
+            </div>
             <div className="mt-5 bg-tertiary-bg px-5 py-2 mb-5 flex justify-between items-center rounded-3 flex-col xs:flex-row">
               <div className="text-12 xs:text-14 flex items-center gap-8 justify-between xs:justify-start max-xs:w-full">
                 <p className="flex flex-col text-tertiary-text">
@@ -190,13 +203,25 @@ export default function PositionWithdrawDialog({
 
         {isLoadingStatus && (
           <>
-            <ReadonlyTokenAmountCard
-              token={position.loanAsset}
-              amount={"Unknown"}
-              amountUSD={"0"}
-              standard={Standard.ERC20}
-              title={"Withdraw amount"}
-            />
+            <InputLabel label="Tokens for withdrawal" tooltipText="Tooltip text" />
+
+            <div className="rounded-2 bg-tertiary-bg p-2 flex flex-wrap gap-2">
+              {position.assetsWithBalances
+                .filter((asset) => !!asset.balance)
+                .map((assetWithBalance) => {
+                  return (
+                    <div
+                      className="border border-primary-border rounded-2 py-1 px-2"
+                      key={assetWithBalance.asset.wrapped.address0}
+                    >
+                      {formatFloat(
+                        formatUnits(assetWithBalance.balance!, assetWithBalance.asset.decimals),
+                      )}{" "}
+                      <span className="text-secondary-text">{assetWithBalance.asset.symbol}</span>
+                    </div>
+                  );
+                })}
+            </div>
             <div className="h-px bg-secondary-border my-4" />
           </>
         )}
@@ -223,16 +248,52 @@ export default function PositionWithdrawDialog({
             {status === PositionWithdrawStatus.SUCCESS && (
               <div>
                 <h2 className="text-center mb-1 font-bold text-20 ">Successfully withdrawed</h2>
-                <p className="text-center mb-1">
-                  {amountToWithdraw} {position.loanAsset.symbol}
-                </p>
+                <p className="text-center mb-1">ID: {position.id}</p>
+              </div>
+            )}
+
+            {status === PositionWithdrawStatus.ERROR_WITHDRAW && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Failed to withdraw tokens
+                </h2>
+                <p className="text-center mb-1">ID: {position.id}</p>
               </div>
             )}
             <div className="my-4 border-b border-secondary-border w-full" />
           </div>
         )}
 
-        <PositionDepositActionButton position={position} amountToWithdraw={amountToWithdraw} />
+        <PositionDepositActionButton
+          position={position}
+          handleSaveResults={() => {
+            setWithdrawnAssets(position.assetsWithBalances);
+          }}
+        />
+
+        {status === PositionWithdrawStatus.SUCCESS && withdrawnAssets.length > 0 && (
+          <div className="mt-4">
+            <InputLabel label="Tokens withdwawn" tooltipText="Tooltip text" />
+
+            <div className="rounded-2 bg-tertiary-bg p-2 flex flex-wrap gap-2">
+              {withdrawnAssets
+                .filter((asset) => !!asset.balance)
+                .map((assetWithBalance) => {
+                  return (
+                    <div
+                      className="border border-primary-border rounded-2 py-1 px-2"
+                      key={assetWithBalance.asset.wrapped.address0}
+                    >
+                      {formatFloat(
+                        formatUnits(assetWithBalance.balance!, assetWithBalance.asset.decimals),
+                      )}{" "}
+                      <span className="text-secondary-text">{assetWithBalance.asset.symbol}</span>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
       </div>
     </DrawerDialog>
   );

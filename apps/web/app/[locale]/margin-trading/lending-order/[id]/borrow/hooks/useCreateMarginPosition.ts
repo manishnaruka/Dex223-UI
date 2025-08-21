@@ -11,6 +11,7 @@ import {
   getApproveTextMap,
   getTransferTextMap,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/getStepTexts";
+import { OrderDepositStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { OperationStepStatus } from "@/components/common/OperationStepRow";
 import { ERC223_ABI } from "@/config/abis/erc223";
@@ -204,7 +205,6 @@ export default function useCreateMarginPosition(order: LendingOrder) {
         !isAllowedA &&
         values.collateralTokenStandard === Standard.ERC20
       ) {
-        // TODO: Check why allowance won't work
         setStatus(CreateMarginPositionStatus.PENDING_APPROVE_BORROW);
 
         const approveResult = await approveA({
@@ -392,9 +392,13 @@ export default function useCreateMarginPosition(order: LendingOrder) {
       );
 
       setStatus(CreateMarginPositionStatus.LOADING_BORROW);
-      await publicClient.waitForTransactionReceipt({ hash: takeLoanHash });
+      const takeLoanReceipt = await publicClient.waitForTransactionReceipt({ hash: takeLoanHash });
 
-      setStatus(CreateMarginPositionStatus.SUCCESS);
+      if (takeLoanReceipt.status === "success") {
+        setStatus(CreateMarginPositionStatus.SUCCESS);
+      } else {
+        setStatus(CreateMarginPositionStatus.ERROR_BORROW);
+      }
     },
     [
       values,

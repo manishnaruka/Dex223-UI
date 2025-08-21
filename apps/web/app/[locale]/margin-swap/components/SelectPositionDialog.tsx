@@ -4,6 +4,10 @@ import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
+import {
+  Field,
+  useMarginSwapAmountsStore,
+} from "@/app/[locale]/margin-swap/stores/useMarginSwapAmountsStore";
 import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapPositionStore";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
@@ -162,6 +166,7 @@ export default function SelectPositionDialog() {
 
   const { address } = useAccount();
   const { loading, positions } = usePositionsByOwner({ owner: address });
+  const { setTypedValue, typedValue } = useMarginSwapAmountsStore();
 
   const { tokenA, tokenB, setTokenA, setTokenB } = useMarginSwapTokensStore();
 
@@ -276,6 +281,7 @@ export default function SelectPositionDialog() {
                         setIsOpen(false);
                         setTokenA(undefined);
                         setTokenB(undefined);
+                        setTypedValue({ typedValue: "", field: Field.CURRENCY_A });
                       }}
                       position={position}
                       isSelected={marginSwapPosition?.id === position.id}

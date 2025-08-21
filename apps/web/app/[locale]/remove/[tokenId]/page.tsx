@@ -39,7 +39,6 @@ import {
   usePositionFromTokenId,
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Link, useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
@@ -91,7 +90,6 @@ export default function DecreaseLiquidityPage({
 }) {
   const { tokenId: _tokenId } = use(params);
 
-  useRecentTransactionTracking();
   useRemoveLiquidityEstimatedGas();
 
   const [isOpen, setIsOpen] = useState(false);

@@ -272,6 +272,7 @@ export default function TradeForm() {
     tokenBStandard,
     setTokenAStandard,
     setTokenBStandard,
+    switchTokens,
   } = useMarginSwapTokensStore();
 
   const settingsStore = useMarginSwapSettingsStore();
@@ -539,7 +540,7 @@ export default function TradeForm() {
     return undefined;
   }, [baseFee, estimatedGas, gasPriceOption, gasPriceSettings, priorityFee]);
 
-  const { tokenA0Balance } = useMemo(() => {
+  const { tokenA0Balance, unformattedTokenA0Balance } = useMemo(() => {
     if (!marginSwapPosition || !tokenA) {
       return { tokenA0Balance: "0" };
     }
@@ -549,13 +550,16 @@ export default function TradeForm() {
     );
 
     if (tokenABalanceUnformatted) {
-      return { tokenA0Balance: formatUnits(tokenABalanceUnformatted.balance, tokenA.decimals) };
+      return {
+        tokenA0Balance: formatUnits(tokenABalanceUnformatted.balance, tokenA.decimals),
+        unformattedTokenA0Balance: tokenABalanceUnformatted.balance,
+      };
     }
 
-    return { tokenA0Balance: "0" };
+    return { tokenA0Balance: "0", unformattedTokenA0Balance: BigInt(0) };
   }, [marginSwapPosition, tokenA]);
 
-  const { tokenA1Balance } = useMemo(() => {
+  const { tokenA1Balance, unformattedTokenA1Balance } = useMemo(() => {
     if (!marginSwapPosition || !tokenA) {
       return { tokenA1Balance: "0" };
     }
@@ -564,10 +568,13 @@ export default function TradeForm() {
     );
 
     if (tokenABalanceUnformatted) {
-      return { tokenA1Balance: formatUnits(tokenABalanceUnformatted.balance, tokenA.decimals) };
+      return {
+        tokenA1Balance: formatUnits(tokenABalanceUnformatted.balance, tokenA.decimals),
+        unformattedTokenA1Balance: tokenABalanceUnformatted.balance,
+      };
     }
 
-    return { tokenA1Balance: "0" };
+    return { tokenA1Balance: "0", unformattedTokenA1Balance: BigInt(0) };
   }, [marginSwapPosition, tokenA]);
 
   const { tokenB0Balance } = useMemo(() => {
@@ -653,75 +660,77 @@ export default function TradeForm() {
         token={tokenA}
         balance0={tokenA0Balance}
         balance1={tokenA1Balance}
-        // setMax={
-        //   (Boolean(tokenA0Balance?.value) && tokenAStandard === Standard.ERC20) ||
-        //   (Boolean(tokenA1Balance?.value) && tokenAStandard === Standard.ERC223)
-        //     ? () => {
-        //         if (tokenA0Balance && tokenAStandard === Standard.ERC20) {
-        //           setTypedValue({
-        //             typedValue: tokenA0Balance.formatted,
-        //
-        //             field: Field.CURRENCY_A,
-        //           });
-        //         }
-        //         if (tokenA1Balance && tokenAStandard === Standard.ERC223) {
-        //           setTypedValue({
-        //             typedValue: tokenA1Balance.formatted,
-        //
-        //             field: Field.CURRENCY_A,
-        //           });
-        //         }
-        //       }
-        //     : undefined
-        // }
-        // setHalf={
-        //   (Boolean(tokenA0Balance?.value) && tokenAStandard === Standard.ERC20) ||
-        //   (Boolean(tokenA1Balance?.value) && tokenAStandard === Standard.ERC223)
-        //     ? () => {
-        //         if (tokenA0Balance && tokenAStandard === Standard.ERC20) {
-        //           setTypedValue({
-        //             typedValue: formatUnits(
-        //               tokenA0Balance.value / BigInt(2),
-        //               tokenA0Balance.decimals,
-        //             ),
-        //
-        //             field: Field.CURRENCY_A,
-        //           });
-        //         }
-        //         if (tokenA1Balance && tokenAStandard === Standard.ERC223) {
-        //           setTypedValue({
-        //             typedValue: formatUnits(
-        //               tokenA1Balance.value / BigInt(2),
-        //               tokenA1Balance.decimals,
-        //             ),
-        //
-        //             field: Field.CURRENCY_A,
-        //           });
-        //         }
-        //       }
-        //     : undefined
-        // }
-        // isHalf={
-        //   (tokenAStandard === Standard.ERC20 &&
-        //     tokenA0Balance &&
-        //     typedValue !== "0" &&
-        //     typedValue ===
-        //       formatUnits(tokenA0Balance.value / BigInt(2), tokenA0Balance.decimals)) ||
-        //   (tokenAStandard === Standard.ERC223 &&
-        //     typedValue !== "0" &&
-        //     tokenA1Balance &&
-        //     typedValue === formatUnits(tokenA1Balance.value / BigInt(2), tokenA1Balance.decimals))
-        // }
-        // isMax={
-        //   (tokenAStandard === Standard.ERC20 &&
-        //     typedValue !== "0" &&
-        //     tokenA0Balance &&
-        //     typedValue === tokenA0Balance.formatted) ||
-        //   (tokenAStandard === Standard.ERC223 &&
-        //     typedValue !== "0" &&
-        //     tokenA1Balance &&
-        //     typedValue === tokenA1Balance.formatted)
-        // }
+        setMax={
+          (Boolean(unformattedTokenA0Balance) && tokenAStandard === Standard.ERC20) ||
+          (Boolean(unformattedTokenA1Balance) && tokenAStandard === Standard.ERC223)
+            ? () => {
+                if (tokenA0Balance && tokenAStandard === Standard.ERC20) {
+                  setTypedValue({
+                    typedValue: tokenA0Balance,
+
+                    field: Field.CURRENCY_A,
+                  });
+                }
+                if (tokenA1Balance && tokenAStandard === Standard.ERC223) {
+                  setTypedValue({
+                    typedValue: tokenA1Balance,
+
+                    field: Field.CURRENCY_A,
+                  });
+                }
+              }
+            : undefined
+        }
+        setHalf={
+          (Boolean(unformattedTokenA0Balance) && tokenAStandard === Standard.ERC20) ||
+          (Boolean(unformattedTokenA1Balance) && tokenAStandard === Standard.ERC223)
+            ? () => {
+                if (unformattedTokenA0Balance && tokenAStandard === Standard.ERC20 && tokenA) {
+                  setTypedValue({
+                    typedValue: formatUnits(unformattedTokenA0Balance / BigInt(2), tokenA.decimals),
+
+                    field: Field.CURRENCY_A,
+                  });
+                }
+                if (unformattedTokenA1Balance && tokenAStandard === Standard.ERC223 && tokenA) {
+                  setTypedValue({
+                    typedValue: formatUnits(unformattedTokenA1Balance / BigInt(2), tokenA.decimals),
+
+                    field: Field.CURRENCY_A,
+                  });
+                }
+              }
+            : undefined
+        }
+        isHalf={
+          !!(
+            tokenAStandard === Standard.ERC20 &&
+            tokenA0Balance &&
+            unformattedTokenA0Balance &&
+            tokenA &&
+            typedValue !== "0" &&
+            typedValue === formatUnits(unformattedTokenA0Balance / BigInt(2), tokenA.decimals)
+          ) ||
+          !!(
+            tokenAStandard === Standard.ERC223 &&
+            typedValue !== "0" &&
+            unformattedTokenA1Balance &&
+            tokenA &&
+            typedValue === formatUnits(unformattedTokenA1Balance / BigInt(2), tokenA.decimals)
+          )
+        }
+        isMax={
+          !!(
+            (tokenAStandard === Standard.ERC20 &&
+              typedValue !== "0" &&
+              tokenA0Balance &&
+              typedValue === tokenA0Balance) ||
+            (tokenAStandard === Standard.ERC223 &&
+              typedValue !== "0" &&
+              tokenA1Balance &&
+              typedValue === tokenA1Balance)
+          )
+        }
         label={t("you_pay")}
         standard={tokenAStandard}
         setStandard={setTokenAStandard}
@@ -730,6 +739,7 @@ export default function TradeForm() {
         <SwapButton
           colorScheme={ThemeColors.PURPLE}
           onClick={() => {
+            switchTokens();
             setTypedValue({
               typedValue: dependentAmountValue,
               field: Field.CURRENCY_A,
@@ -888,17 +898,16 @@ export default function TradeForm() {
       )}
 
       <OpenConfirmDialogButton
-        isSufficientBalance={true}
-        // isSufficientBalance={
-        //   (tokenAStandard === Standard.ERC20 &&
-        //     (tokenA0Balance && tokenA
-        //       ? tokenA0Balance?.value >= parseUnits(typedValue, tokenA.decimals)
-        //       : false)) ||
-        //   (tokenAStandard === Standard.ERC223 &&
-        //     (tokenA1Balance && tokenA
-        //       ? tokenA1Balance?.value >= parseUnits(typedValue, tokenA.decimals)
-        //       : false))
-        // }
+        isSufficientBalance={
+          (tokenAStandard === Standard.ERC20 &&
+            (unformattedTokenA0Balance && tokenA
+              ? unformattedTokenA0Balance >= parseUnits(typedValue, tokenA.decimals)
+              : false)) ||
+          (tokenAStandard === Standard.ERC223 &&
+            (unformattedTokenA1Balance && tokenA
+              ? unformattedTokenA1Balance >= parseUnits(typedValue, tokenA.decimals)
+              : false))
+        }
         isSufficientPoolBalance={isSufficientPoolBalance}
         isTradeReady={Boolean(trade)}
         isTradeLoading={false}

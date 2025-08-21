@@ -57,12 +57,14 @@ export default function LendingOrderCard({
   order,
   setOrderToDeposit,
   setOrderToWithdraw,
-  setOrderToToggle,
+  setOrderToClose,
+  setOrderToOpen,
 }: {
   order: LendingOrder;
   setOrderToDeposit: (order: LendingOrder) => void;
   setOrderToWithdraw: (order: LendingOrder) => void;
-  setOrderToToggle: (order: LendingOrder) => void;
+  setOrderToClose: (order: LendingOrder) => void;
+  setOrderToOpen: (order: LendingOrder) => void;
 }) {
   console.log(order);
 
@@ -157,9 +159,19 @@ export default function LendingOrderCard({
               />
             </div>
             <div className="grid grid-cols-4 gap-3">
-              <Button onClick={() => setOrderToToggle(order)} colorScheme={ButtonColor.LIGHT_GREEN}>
-                Close
-              </Button>
+              {order.alive ? (
+                <Button
+                  onClick={() => setOrderToClose(order)}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                >
+                  Close
+                </Button>
+              ) : (
+                <Button onClick={() => setOrderToOpen(order)} colorScheme={ButtonColor.LIGHT_GREEN}>
+                  Open
+                </Button>
+              )}
+
               <Button
                 onClick={() => setOrderToDeposit(order)}
                 colorScheme={ButtonColor.LIGHT_GREEN}

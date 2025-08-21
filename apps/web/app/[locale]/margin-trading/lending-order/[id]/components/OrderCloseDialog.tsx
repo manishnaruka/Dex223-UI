@@ -107,10 +107,9 @@ export default function OrderCloseDialog({
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  order: LendingOrder;
+  order: LendingOrder | undefined;
 }) {
   const { status, setStatus } = useCloseOrderStatusStore();
-
   const isInitialStatus = useMemo(() => status === OrderCloseStatus.INITIAL, [status]);
   const isFinalStatus = useMemo(
     () => status === OrderCloseStatus.SUCCESS || status === OrderCloseStatus.ERROR_CLOSE_ORDER,
@@ -131,6 +130,10 @@ export default function OrderCloseDialog({
       }, 400);
     }
   }, [isOpen, setStatus, status]);
+
+  if (!order) {
+    return "No order provided";
+  }
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>

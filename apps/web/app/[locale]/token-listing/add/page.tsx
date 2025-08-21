@@ -52,7 +52,6 @@ import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
 import { PoolState, usePool } from "@/hooks/usePools";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useRouter } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
@@ -177,7 +176,6 @@ export default function ListTokenPage() {
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useTokenListingRecentTransactionsStore();
 
-  useRecentTransactionTracking();
   useListTokenEstimatedGas();
 
   const [isOpenedFee, setIsOpenedFee] = useState(false);

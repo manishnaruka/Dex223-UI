@@ -1,10 +1,5 @@
-import { Address } from "viem";
-import { create } from "zustand";
-
-import { PositionDepositStatus } from "@/app/[locale]/margin-trading/position/[id]/stores/usePositionDepositStatusStore";
 import { createOperationStatusStore } from "@/stores/factories/createOperationStatusStore";
 
-// TODO: move to global and rename
 export enum CreateMarginPositionStatus {
   INITIAL,
   PENDING_APPROVE_BORROW,

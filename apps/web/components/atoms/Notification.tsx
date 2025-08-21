@@ -49,6 +49,7 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
         </NotificationSubtitleText>
       );
     case RecentTransactionTitleTemplate.SWAP:
+    case RecentTransactionTitleTemplate.MARGIN_SWAP:
     case RecentTransactionTitleTemplate.REMOVE:
     case RecentTransactionTitleTemplate.COLLECT:
     case RecentTransactionTitleTemplate.ADD:
@@ -75,6 +76,18 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
     case RecentTransactionTitleTemplate.EDIT_LENDING_ORDER:
       return (
         <NotificationSubtitleText>{`${title.symbol} (ID: ${title.orderId})`}</NotificationSubtitleText>
+      );
+    case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
+      return <NotificationSubtitleText>{title.symbol}</NotificationSubtitleText>;
+    case RecentTransactionTitleTemplate.CREATE_MARGIN_POSITION:
+      return (
+        <NotificationSubtitleText>{`${title.amountCollateral} ${title.symbolCollateral} collateral and ${title.amountFee} ${title.symbolFee} fee`}</NotificationSubtitleText>
+      );
+    case RecentTransactionTitleTemplate.LIQUIDATE_MARGIN_POSITION:
+    case RecentTransactionTitleTemplate.WITHDRAW_FROM_CLOSED_POSITION:
+    case RecentTransactionTitleTemplate.CLOSE_MARGIN_POSITION:
+      return (
+        <NotificationSubtitleText>{`${title.symbol} (ID: ${title.positionId})`}</NotificationSubtitleText>
       );
   }
 }
@@ -148,6 +161,16 @@ function NotificationTitle({
           </NotificationTitleText>
         </div>
       );
+    case RecentTransactionTitleTemplate.MARGIN_SWAP:
+      return (
+        <div className="flex items-center gap-1">
+          <NotificationTitleText>
+            {status === RecentTransactionStatus.SUCCESS
+              ? "Margin swap successful"
+              : "Failed to margin swap"}
+          </NotificationTitleText>
+        </div>
+      );
     case RecentTransactionTitleTemplate.COLLECT:
       return (
         <NotificationTitleText>
@@ -210,6 +233,54 @@ function NotificationTitle({
           {status === RecentTransactionStatus.SUCCESS
             ? "Lending order edited successfully"
             : "Failed to edit lending order"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Lending order created successfully"
+            : "Failed to create lending order"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.CREATE_MARGIN_POSITION:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Margin position created successfully"
+            : "Failed to borrow funds"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.LIQUIDATE_MARGIN_POSITION:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Margin position liquidated successfully"
+            : "Failed to borrow funds"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.FREEZE_MARGIN_POSITION:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Margin position freezed successfully"
+            : "Failed to freeze position"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.WITHDRAW_FROM_CLOSED_POSITION:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Funds withdrawn successfully"
+            : "Failed to withdraw funds"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.CLOSE_MARGIN_POSITION:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Margin position closed successfully"
+            : "Failed to close margin position"}
         </NotificationTitleText>
       );
   }

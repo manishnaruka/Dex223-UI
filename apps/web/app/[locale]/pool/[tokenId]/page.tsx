@@ -47,7 +47,6 @@ import {
   usePositionPrices,
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { useRouter } from "@/i18n/routing";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
@@ -285,7 +284,6 @@ export default function PoolPage({
   }>;
 }) {
   const { tokenId } = use(params);
-  useRecentTransactionTracking();
   useCollectFeesEstimatedGas();
 
   const chainId = useCurrentChainId();

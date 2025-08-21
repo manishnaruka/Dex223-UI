@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import LendingOrderCard from "@/app/[locale]/margin-trading/components/LendingOrderCard";
 import { useOrdersByOwner } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
+import OrderOpenDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderOpenDialog";
 import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { SearchInput } from "@/components/atoms/Input";
@@ -16,7 +17,8 @@ export default function LendingOrdersTab() {
 
   const [orderToDeposit, setOrderToDeposit] = useState<LendingOrder | undefined>();
   const [orderToWithdraw, setOrderToWithdraw] = useState<LendingOrder | undefined>();
-  const [orderToToggle, setOrderToToggle] = useState<LendingOrder | undefined>();
+  const [orderToClose, setOrderToClose] = useState<LendingOrder | undefined>();
+  const [orderToOpen, setOrderToOpen] = useState<LendingOrder | undefined>();
 
   if (!orders) {
     return <div>Loading...</div>;
@@ -38,18 +40,22 @@ export default function LendingOrdersTab() {
             order={order}
             setOrderToDeposit={setOrderToDeposit}
             setOrderToWithdraw={setOrderToWithdraw}
-            setOrderToToggle={setOrderToToggle}
+            setOrderToClose={setOrderToClose}
+            setOrderToOpen={setOrderToOpen}
           />
         ))}
       </div>
 
-      {orderToToggle && (
-        <OrderCloseDialog
-          isOpen={Boolean(orderToToggle)}
-          setIsOpen={() => setOrderToToggle(undefined)}
-          order={orderToToggle}
-        />
-      )}
+      <OrderCloseDialog
+        isOpen={Boolean(orderToClose)}
+        setIsOpen={() => setOrderToClose(undefined)}
+        order={orderToClose}
+      />
+      <OrderOpenDialog
+        isOpen={Boolean(orderToOpen)}
+        setIsOpen={() => setOrderToOpen(undefined)}
+        order={orderToOpen}
+      />
       {orderToDeposit && (
         <OrderDepositDialog
           isOpen={Boolean(orderToDeposit)}

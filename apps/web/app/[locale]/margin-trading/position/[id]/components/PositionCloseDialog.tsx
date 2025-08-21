@@ -210,6 +210,18 @@ export default function PositionCloseDialog({
                         </p>
                       </div>
                     )}
+
+                    {status === PositionCloseStatus.ERROR_CLOSE && (
+                      <div>
+                        <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                          Failed to close position
+                        </h2>
+                        <p className="text-center mb-1">
+                          {position.loanAsset.symbol}{" "}
+                          <span className="text-secondary-text">(ID: {position.id})</span>
+                        </p>
+                      </div>
+                    )}
                     <div className="my-4 border-b border-secondary-border w-full" />
                   </div>
                 </>
@@ -334,7 +346,7 @@ export default function PositionCloseDialog({
               )}
               <PositionCloseActionButton position={position} />
             </div>
-            {isFinalStatus && (
+            {isFinalStatus && status === PositionCloseStatus.SUCCESS && (
               <>
                 <div className="pt-4 px-5 pb-5 bg-tertiary-bg rounded-3 mt-4">
                   <InputLabel

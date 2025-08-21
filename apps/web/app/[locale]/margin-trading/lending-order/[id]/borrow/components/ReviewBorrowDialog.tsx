@@ -451,6 +451,39 @@ export default function ReviewBorrowDialog({
                 </div>
               </div>
             )}
+
+            {status === CreateMarginPositionStatus.ERROR_BORROW && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Failed to confirm a borrowing
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+              </div>
+            )}
+
+            {status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Approve failed
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+              </div>
+            )}
+
+            {status === CreateMarginPositionStatus.ERROR_TRANSFER && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Transfer to contract failed
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+              </div>
+            )}
           </div>
         )}
         <CreateMarginPositionActionButton

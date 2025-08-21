@@ -78,4 +78,5 @@ export type LendingOrder = {
   positions: Omit<MarginPosition, "order">[];
 
   alive: boolean;
+  oracle: Address;
 };

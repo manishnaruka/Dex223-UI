@@ -12,7 +12,6 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Token } from "@/sdk_bi/entities/token";
 
 import { useActiveWalletsDeposites } from "../../stores/deposites.hooks";
@@ -42,7 +41,6 @@ export const Deposited = ({
   addressSearch: string;
   setAddressSearch: (value: string) => void;
 }) => {
-  useRecentTransactionTracking();
   const t = useTranslations("Portfolio");
   const [searchValue, setSearchValue] = useState("");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);

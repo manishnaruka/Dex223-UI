@@ -7,7 +7,6 @@ import LiquidateForm from "@/app/[locale]/margin-trading/position/[id]/liquidate
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 
 export default function LiquidatePositionPage({
   params,
@@ -16,8 +15,6 @@ export default function LiquidatePositionPage({
     id: string;
   }>;
 }) {
-  useRecentTransactionTracking();
-
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();
 

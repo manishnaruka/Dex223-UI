@@ -72,7 +72,7 @@ function PositionTransactionDescription({
     case MarginPositionTransactionType.WITHDRAW:
       return (
         <div>
-          Deposit {formatUnits(transaction.amount, transaction.assetToken.decimals)}{" "}
+          Withdraw {formatUnits(transaction.amount, transaction.assetToken.decimals)}{" "}
           {transaction.assetToken.symbol}
         </div>
       );

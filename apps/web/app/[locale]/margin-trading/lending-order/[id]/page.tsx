@@ -35,7 +35,6 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/i18n/routing";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
@@ -48,8 +47,6 @@ export default function LendingOrder({
     id: number;
   }>;
 }) {
-  useRecentTransactionTracking();
-
   const [isDepositDialogOpened, setIsDepositDialogOpened] = useState(false);
   const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
   const [isOpenDialogOpened, setIsOpenDialogOpened] = useState(false);

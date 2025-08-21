@@ -12,12 +12,10 @@ import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useSwapSearchParams } from "@/hooks/useSwapSearchParams";
 
 export default function SwapPage() {
   useSwapSearchParams();
-  useRecentTransactionTracking();
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useSwapRecentTransactionsStore();

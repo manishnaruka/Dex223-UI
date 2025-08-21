@@ -11,9 +11,7 @@ import {
   ThirdStepValues,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
-import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 
 type Props = {
   step: OrderActionStep;
@@ -50,8 +48,6 @@ export default function OrderConfigurationPage({
 
   openPreviewDialog,
 }: Props) {
-  useRecentTransactionTracking();
-
   const renderSteps = useCallback(() => {
     switch (step) {
       case OrderActionStep.FIRST:

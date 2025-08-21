@@ -76,6 +76,7 @@ export type GqlOrder = {
   };
 
   alive: boolean;
+  oracle: Address;
 };
 
 type BaseGqlRecentTransaction = {
@@ -207,7 +208,7 @@ export function serializeGqlPosition(
     createdAt: +createdAt,
     loanAmount: BigInt(loanAmount),
     loanAsset: gqlTokenToCurrency(baseAssetToken, chainId),
-    assetAddresses: assets,
+    assetAddresses: assets.map((asset) => ({ ...asset, balance: BigInt(asset.balance) })),
     assets: assetsTokens.map((tradingToken: GqlToken) => gqlTokenToCurrency(tradingToken, chainId)),
     assetsWithBalances: assetsTokens.map((tradingToken: GqlToken) => ({
       asset: gqlTokenToCurrency(tradingToken, chainId),

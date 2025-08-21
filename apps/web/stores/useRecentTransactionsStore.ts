@@ -36,6 +36,7 @@ export enum RecentTransactionTitleTemplate {
   FREEZE_MARGIN_POSITION,
   LIQUIDATE_MARGIN_POSITION,
   MARGIN_SWAP,
+  WITHDRAW_FROM_CLOSED_POSITION,
 }
 
 type RecentTransactionGasLimit =
@@ -148,7 +149,19 @@ export type IRecentTransactionTitle =
     } & TakeLoanTitle)
   | ({
       template: RecentTransactionTitleTemplate.CLOSE_MARGIN_POSITION;
-    } & MarginPositionTitle);
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.LIQUIDATE_MARGIN_POSITION;
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.FREEZE_MARGIN_POSITION;
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.WITHDRAW_FROM_CLOSED_POSITION;
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.MARGIN_SWAP;
+    } & TwoTokensTransactionTitle);
 
 export type IRecentTransaction = {
   id: Address;

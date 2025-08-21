@@ -11,9 +11,12 @@ import NetworkPicker from "@/components/common/NetworkPicker";
 import TokenListsSettings from "@/components/common/TokenListsSettings";
 import AccountDialog from "@/components/dialogs/AccountDialog";
 import { useMintTestTokensDialogStore } from "@/components/dialogs/stores/useMintTestTokensDialogStore";
+import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Link } from "@/i18n/routing";
 
 export default function Header() {
+  useRecentTransactionTracking();
+
   const { handleOpen } = useMintTestTokensDialogStore();
   return (
     <div>

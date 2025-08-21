@@ -23,7 +23,6 @@ import { OrderActionMode } from "@/app/[locale]/margin-trading/types";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Standard } from "@/sdk_bi/standard";
@@ -38,9 +37,7 @@ export default function EditLendingOrderPage({
   const { id: orderId } = use(params);
   const { order, loading } = useOrder({ id: +orderId });
 
-  console.log(order);
   const { address } = useAccount();
-  useRecentTransactionTracking();
 
   const { step, setStep } = useEditOrderStepStore();
 

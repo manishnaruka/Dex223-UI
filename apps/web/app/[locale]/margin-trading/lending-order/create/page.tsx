@@ -10,18 +10,11 @@ import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending
 import { useCreateOrderStepStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
 import { useConfirmCreateOrderDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { OrderActionMode } from "@/app/[locale]/margin-trading/types";
-import ConfirmConvertDialog from "@/app/[locale]/swap/components/ConfirmConvertDialog";
-import TradeForm from "@/app/[locale]/swap/components/TradeForm";
-import TwoVersionsInfo from "@/app/[locale]/swap/components/TwoVersionsInfo";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
-import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 
 export default function CreateLendingOrderPage() {
-  useRecentTransactionTracking();
-
   const { step, setStep } = useCreateOrderStepStore();
 
   const config = useCreateOrderConfigStore();

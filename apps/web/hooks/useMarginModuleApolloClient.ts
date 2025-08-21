@@ -9,7 +9,7 @@ const marginModuleUrlMap: Record<DexChainId, string> = {
   [DexChainId.MAINNET]:
     "https://gateway.thegraph.com/api/subgraphs/id/4Zk7s54TCuxMvJVWMzDax5QRsGVRTPoXmw58gKqzZGQi",
   [DexChainId.SEPOLIA]:
-    "https://api.studio.thegraph.com/query/56540/dex-223-subgraph-margin-module-sepolia/0.0.33",
+    "https://api.studio.thegraph.com/query/56540/dex-223-subgraph-margin-module-sepolia/0.0.34",
   [DexChainId.BSC_TESTNET]:
     "https://api.studio.thegraph.com/query/56540/dex223-auto-listing-chapel/version/latest/",
   [DexChainId.EOS]: "https://graph.dex223.io/subgraphs/name/dex223-auto-listing-eosevm/",

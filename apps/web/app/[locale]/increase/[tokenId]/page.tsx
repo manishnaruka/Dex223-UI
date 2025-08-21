@@ -33,7 +33,6 @@ import {
   usePositionPrices,
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { useRouter } from "@/i18n/routing";
 import { Standard } from "@/sdk_bi/standard";
 
@@ -51,7 +50,6 @@ export default function IncreaseLiquidityPage({
     tokenId: string;
   }>;
 }) {
-  useRecentTransactionTracking();
   const t = useTranslations("Liquidity");
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =

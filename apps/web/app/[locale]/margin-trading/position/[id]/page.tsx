@@ -10,6 +10,7 @@ import ActivePositionParametersBlock from "@/app/[locale]/margin-trading/positio
 import ActivePositionTimeframeBlock from "@/app/[locale]/margin-trading/position/[id]/components/ActivePositionTimeframeBlock";
 import ClosedPositionDateInfoBlock from "@/app/[locale]/margin-trading/position/[id]/components/ClosedPositionDateInfoBlock";
 import ClosedPositionInfoBlock from "@/app/[locale]/margin-trading/position/[id]/components/ClosedPositionInfoBlock";
+import ClosedPositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/ClosedPositionWithdrawDialog";
 import LiquidatedPositionInfoBlock from "@/app/[locale]/margin-trading/position/[id]/components/LiquidatedPositionInfoBlock";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import PositionLiquidateDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionLiquidateDialog";
@@ -86,7 +87,10 @@ export default function MarginPositionPage({
 
           {position.isClosed && (
             <>
-              <ClosedPositionInfoBlock position={position} />
+              <ClosedPositionInfoBlock
+                position={position}
+                setIsWithdrawDialogOpened={setIsWithdrawDialogOpened}
+              />
               <ClosedPositionDateInfoBlock position={position} />
             </>
           )}
@@ -95,7 +99,7 @@ export default function MarginPositionPage({
         </div>
       </Container>
 
-      <PositionWithdrawDialog
+      <ClosedPositionWithdrawDialog
         isOpen={isWithdrawDialogOpened}
         setIsOpen={setIsWithdrawDialogOpened}
         position={position}

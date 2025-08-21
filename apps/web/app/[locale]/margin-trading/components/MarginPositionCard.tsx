@@ -14,6 +14,7 @@ import {
 import PositionHealthStatus from "@/app/[locale]/margin-trading/components/widgets/PositionHealthStatus";
 import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import usePositionLiquidationCost from "@/app/[locale]/margin-trading/hooks/usePositionLiquidationCost";
+import ClosedPositionWithdrawDialog from "@/app/[locale]/margin-trading/position/[id]/components/ClosedPositionWithdrawDialog";
 import PositionCloseDialog from "@/app/[locale]/margin-trading/position/[id]/components/PositionCloseDialog";
 import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks/usePositionStatus";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
@@ -132,8 +133,74 @@ const marginPositionCardBorderMap: Record<DangerStatus, string> = {
 };
 
 export function InactiveMarginPositionCard({ position }: Props) {
-  console.log(position);
+  const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
+
+  const [ratio, setRatio] = useState<number | undefined>();
   const chainId = useCurrentChainId();
+  const publicClient = usePublicClient();
+
+  useEffect(() => {
+    (async () => {
+      console.log("Fired");
+
+      if (!position.order?.baseAsset || !position.collateralAsset || !publicClient) {
+        console.log("Returned: missing dependencies");
+        return;
+      }
+
+      const baseAsset = position.order.baseAsset.wrapped;
+      const collateralToken = position.collateralAsset.wrapped;
+
+      if (baseAsset.address0 === collateralToken.address0) {
+        setRatio(1); // 1:1 price
+        console.log("Same asset, ratio = 1");
+        return;
+      }
+
+      try {
+        const inputAmount = BigInt(10) ** BigInt(baseAsset.decimals); // 1 unit of base asset
+        console.log("Calling oracle with:", [
+          baseAsset.address0,
+          collateralToken.address0,
+          inputAmount,
+        ]);
+
+        const outputAmount = await publicClient.readContract({
+          address: ORACLE_ADDRESS[chainId],
+          abi: ORACLE_ABI,
+          functionName: "getAmountOut",
+          args: [baseAsset.address0, collateralToken.address0, inputAmount],
+        });
+
+        const ratio = getPrice(outputAmount as bigint, inputAmount); // output/base price
+        console.log("Oracle output:", outputAmount);
+        console.log("Computed ratio:", ratio);
+
+        setRatio(ratio);
+      } catch (e) {
+        console.error("Failed to fetch ratio:", e);
+      }
+    })();
+  }, [chainId, position, publicClient]);
+
+  const leverage = useMemo(() => {
+    if (ratio) {
+      return calcLeverageFormattedFromBigints({
+        borrowWei: position.loanAmount,
+        borrowDecimals: position.loanAsset.decimals,
+        collateralWei: position.collateralAmount,
+        collateralDecimals: position.collateralAsset.decimals,
+        price: ratio,
+      });
+    }
+    return "Loading...";
+  }, [position, ratio]);
+
+  const isTokensToWithdraw = useMemo(() => {
+    return position.assetsWithBalances.some((assetWithBalance) => {
+      return !!assetWithBalance.balance && assetWithBalance.balance > BigInt(0);
+    });
+  }, [position.assetsWithBalances]);
 
   return (
     <div className="bg-primary-bg rounded-3 px-5 pt-3 pb-5">
@@ -173,20 +240,36 @@ export function InactiveMarginPositionCard({ position }: Props) {
       <div className="grid grid-cols-3 gap-3 mb-3">
         {position.isClosed ? (
           <>
-            <SimpleInfoBlock title={"Borrowed / Profit"} tooltipText={"Tooltip text"} value="0" />
+            <SimpleInfoBlock
+              title={"Borrowed / Profit"}
+              tooltipText={"Tooltip text"}
+              value={`${formatFloat(formatUnits(position.loanAmount, position.loanAsset.decimals))} ${position.loanAsset.symbol} / -`}
+            />
             <SimpleInfoBlock
               title={"Initial collateral / Earning"}
               tooltipText={"Tooltip text"}
-              value="0"
+              value={`${formatFloat(formatUnits(position.collateralAmount, position.collateralAsset.decimals))} ${position.collateralAsset.symbol} / -`}
             />
           </>
         ) : (
           <>
-            <SimpleInfoBlock title={"Borrowed"} tooltipText={"Tooltip text"} value="0" />
-            <SimpleInfoBlock title={"Initial collateral"} tooltipText={"Tooltip text"} value="0" />
+            <SimpleInfoBlock
+              title={"Borrowed"}
+              tooltipText={"Tooltip text"}
+              value={`${formatFloat(formatUnits(position.loanAmount, position.loanAsset.decimals))} ${position.loanAsset.symbol}`}
+            />
+            <SimpleInfoBlock
+              title={"Initial collateral"}
+              tooltipText={"Tooltip text"}
+              value={`${formatFloat(formatUnits(position.collateralAmount, position.collateralAsset.decimals))} ${position.collateralAsset.symbol}`}
+            />
           </>
         )}
-        <SimpleInfoBlock title={"Leverage"} tooltipText={"Tooltip text"} value="0" />
+        <SimpleInfoBlock
+          title={"Leverage"}
+          tooltipText={"Tooltip text"}
+          value={formatFloat(leverage, { trimZero: true })}
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -207,6 +290,23 @@ export function InactiveMarginPositionCard({ position }: Props) {
               }
               tooltipText={"Tooltip text"}
             />
+
+            {isTokensToWithdraw && (
+              <>
+                <Button
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  onClick={() => setIsWithdrawDialogOpened(true)}
+                >
+                  Withdraw
+                </Button>
+
+                <ClosedPositionWithdrawDialog
+                  isOpen={isWithdrawDialogOpened}
+                  setIsOpen={setIsWithdrawDialogOpened}
+                  position={position}
+                />
+              </>
+            )}
           </>
         ) : (
           <>

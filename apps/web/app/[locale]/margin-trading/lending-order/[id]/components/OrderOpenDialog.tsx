@@ -34,7 +34,7 @@ type OperationStepConfig = {
   error: OpenOrderStatus;
 };
 
-function composeDepositOrderSteps(): OperationStepConfig[] {
+function composeOpenOrderSteps(): OperationStepConfig[] {
   return [
     {
       iconName: "open-order",
@@ -47,7 +47,7 @@ function composeDepositOrderSteps(): OperationStepConfig[] {
         [OperationStepStatus.LOADING]: "Opening lending order",
         [OperationStepStatus.STEP_COMPLETED]: "Lending order opened successfully",
         [OperationStepStatus.STEP_FAILED]: "Failed to open lending order",
-        [OperationStepStatus.OPERATION_COMPLETED]: "Lending order closed successfully",
+        [OperationStepStatus.OPERATION_COMPLETED]: "Lending order opened successfully",
       },
     },
   ];
@@ -60,7 +60,7 @@ function OrderCloseActionButton({ order }: { order: LendingOrder }) {
   if (status !== OpenOrderStatus.INITIAL) {
     return (
       <OperationRows>
-        {composeDepositOrderSteps().map((step, index) => (
+        {composeOpenOrderSteps().map((step, index) => (
           <OperationStepRow
             key={index}
             iconName={step.iconName}
@@ -68,11 +68,7 @@ function OrderCloseActionButton({ order }: { order: LendingOrder }) {
             statusTextMap={step.textMap}
             status={operationStatusToStepStatus({
               currentStatus: status,
-              orderedSteps: composeDepositOrderSteps().flatMap((s) => [
-                s.pending,
-                s.loading,
-                s.error,
-              ]),
+              orderedSteps: composeOpenOrderSteps().flatMap((s) => [s.pending, s.loading, s.error]),
               stepIndex: index,
               pendingStep: step.pending,
               loadingStep: step.loading,
@@ -100,7 +96,7 @@ export default function OrderOpenDialog({
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  order: LendingOrder;
+  order: LendingOrder | undefined;
 }) {
   const { status, setStatus } = useOpenOrderStatusStore();
 
@@ -115,19 +111,20 @@ export default function OrderOpenDialog({
   );
 
   useEffect(() => {
-    if (
-      (status === OpenOrderStatus.ERROR_OPEN_ORDER || status === OpenOrderStatus.SUCCESS) &&
-      !isOpen
-    ) {
+    if (isFinalStatus && !isOpen) {
       setTimeout(() => {
         setStatus(OpenOrderStatus.INITIAL);
       }, 400);
     }
-  }, [isOpen, setStatus, status]);
+  }, [isFinalStatus, isOpen, setStatus]);
+
+  if (!order) {
+    return "No order provided";
+  }
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
-      <DialogHeader onClose={() => setIsOpen(false)} title="Close lending order" />
+      <DialogHeader onClose={() => setIsOpen(false)} title="Open lending order" />
       <div className="card-spacing-x card-spacing-b w-[600px]">
         {isInitialStatus && (
           <>

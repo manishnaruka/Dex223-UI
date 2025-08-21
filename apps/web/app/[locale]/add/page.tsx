@@ -31,7 +31,6 @@ import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
@@ -45,7 +44,6 @@ import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStor
 
 export default function AddPoolPage() {
   usePoolsSearchParams();
-  useRecentTransactionTracking();
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useAddLiquidityRecentTransactionsStore();
