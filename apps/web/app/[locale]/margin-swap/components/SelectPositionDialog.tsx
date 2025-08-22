@@ -203,6 +203,10 @@ export default function SelectPositionDialog() {
     return [matching, other];
   }, [openedPositions, positions, tokenA, tokenB]);
 
+  const positionFromSearch = useMemo(() => {
+    return openedPositions?.find((position) => position.id.toString() === searchValue);
+  }, [openedPositions, searchValue]);
+
   if (loading || !openedPositions) {
     return <div>Loading...</div>;
   }
@@ -219,38 +223,100 @@ export default function SelectPositionDialog() {
             onChange={(e) => setSearchValue(e.target.value)}
           />
 
-          {!!tokenA || !!tokenB ? (
-            <SimpleBar style={{ maxHeight: 670, paddingRight: 20, marginRight: -20 }}>
-              <div>
-                <div className="mt-3 flex items-center gap-3">
-                  <h2 className="text-18 font-bold mr-2">Matching positions</h2>
-                  {!!tokenA && (
-                    <div className="text-secondary-text pl-3 pr-2 py-1 flex items-center gap-1 rounded-2 bg-tertiary-bg">
-                      You pay: {tokenA.symbol}
-                      <IconButton
-                        variant={IconButtonVariant.CLOSE}
-                        iconSize={IconSize.REGULAR}
-                        buttonSize={IconButtonSize.EXTRA_SMALL}
-                        handleClose={() => setTokenA(undefined)}
-                      />
-                    </div>
-                  )}
-                  {!!tokenB && (
-                    <div className="text-secondary-text pl-3 pr-2 py-1 flex items-center gap-1 rounded-2 bg-tertiary-bg">
-                      You buy: {tokenB.symbol}
-                      <IconButton
-                        variant={IconButtonVariant.CLOSE}
-                        iconSize={IconSize.REGULAR}
-                        buttonSize={IconButtonSize.EXTRA_SMALL}
-                        handleClose={() => setTokenB(undefined)}
-                      />
-                    </div>
-                  )}
+          {searchValue ? (
+            <div className="max-h-[670px] pt-5">
+              {positionFromSearch ? (
+                <PositionSelectItem
+                  handleSelectedPosition={(position) => {
+                    setMarginSwapPosition(position);
+                    setIsOpen(false);
+                  }}
+                  position={positionFromSearch}
+                  isSelected={marginSwapPosition?.id === positionFromSearch.id}
+                />
+              ) : (
+                <div className="h-[112px] flex items-center justify-center bg-empty-not-found-lending-position-purple bg-[length:112px_112px] bg-right-top bg-no-repeat text-secondary-text">
+                  There are no matching positions
                 </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {!!tokenA || !!tokenB ? (
+                <SimpleBar style={{ maxHeight: 670, paddingRight: 20, marginRight: -20 }}>
+                  <div>
+                    <div className="mt-3 flex items-center gap-3">
+                      <h2 className="text-18 font-bold mr-2">Matching positions</h2>
+                      {!!tokenA && (
+                        <div className="text-secondary-text pl-3 pr-2 py-1 flex items-center gap-1 rounded-2 bg-tertiary-bg">
+                          You pay: {tokenA.symbol}
+                          <IconButton
+                            variant={IconButtonVariant.CLOSE}
+                            iconSize={IconSize.REGULAR}
+                            buttonSize={IconButtonSize.EXTRA_SMALL}
+                            handleClose={() => setTokenA(undefined)}
+                          />
+                        </div>
+                      )}
+                      {!!tokenB && (
+                        <div className="text-secondary-text pl-3 pr-2 py-1 flex items-center gap-1 rounded-2 bg-tertiary-bg">
+                          You buy: {tokenB.symbol}
+                          <IconButton
+                            variant={IconButtonVariant.CLOSE}
+                            iconSize={IconSize.REGULAR}
+                            buttonSize={IconButtonSize.EXTRA_SMALL}
+                            handleClose={() => setTokenB(undefined)}
+                          />
+                        </div>
+                      )}
+                    </div>
 
-                {matchingPositions?.length ? (
+                    {matchingPositions?.length ? (
+                      <div className="grid gap-5 mt-5">
+                        {matchingPositions.map((position) => (
+                          <PositionSelectItem
+                            key={position.id}
+                            handleSelectedPosition={(position) => {
+                              setMarginSwapPosition(position);
+                              setIsOpen(false);
+                            }}
+                            position={position}
+                            isSelected={marginSwapPosition?.id === position.id}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-[112px] flex items-center justify-center bg-empty-not-found-lending-position-purple bg-[length:112px_112px] bg-right-top bg-no-repeat text-secondary-text">
+                        There are no matching positions
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="text-18 font-bold mt-3 border-t border-primary-border py-3.5">
+                      Positions without selected tokens
+                    </h2>
+                    <div className="grid gap-5">
+                      {otherPositions.map((position) => (
+                        <PositionSelectItem
+                          key={position.id}
+                          handleSelectedPosition={(position) => {
+                            setMarginSwapPosition(position);
+                            setIsOpen(false);
+                            setTokenA(undefined);
+                            setTokenB(undefined);
+                            setTypedValue({ typedValue: "", field: Field.CURRENCY_A });
+                          }}
+                          position={position}
+                          isSelected={marginSwapPosition?.id === position.id}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </SimpleBar>
+              ) : (
+                <SimpleBar style={{ maxHeight: 670, paddingRight: 20, marginRight: -20 }}>
                   <div className="grid gap-5 mt-5">
-                    {matchingPositions.map((position) => (
+                    {openedPositions.map((position) => (
                       <PositionSelectItem
                         key={position.id}
                         handleSelectedPosition={(position) => {
@@ -262,50 +328,9 @@ export default function SelectPositionDialog() {
                       />
                     ))}
                   </div>
-                ) : (
-                  <div className="h-[112px] flex items-center justify-center bg-empty-not-found-lending-position-purple bg-[length:112px_112px] bg-right-top bg-no-repeat text-secondary-text">
-                    There are no matching positions
-                  </div>
-                )}
-              </div>
-              <div>
-                <h2 className="text-18 font-bold mt-3 border-t border-primary-border py-3.5">
-                  Positions without selected tokens
-                </h2>
-                <div className="grid gap-5">
-                  {otherPositions.map((position) => (
-                    <PositionSelectItem
-                      key={position.id}
-                      handleSelectedPosition={(position) => {
-                        setMarginSwapPosition(position);
-                        setIsOpen(false);
-                        setTokenA(undefined);
-                        setTokenB(undefined);
-                        setTypedValue({ typedValue: "", field: Field.CURRENCY_A });
-                      }}
-                      position={position}
-                      isSelected={marginSwapPosition?.id === position.id}
-                    />
-                  ))}
-                </div>
-              </div>
-            </SimpleBar>
-          ) : (
-            <SimpleBar style={{ maxHeight: 670, paddingRight: 20, marginRight: -20 }}>
-              <div className="grid gap-5 mt-5">
-                {openedPositions.map((position) => (
-                  <PositionSelectItem
-                    key={position.id}
-                    handleSelectedPosition={(position) => {
-                      setMarginSwapPosition(position);
-                      setIsOpen(false);
-                    }}
-                    position={position}
-                    isSelected={marginSwapPosition?.id === position.id}
-                  />
-                ))}
-              </div>
-            </SimpleBar>
+                </SimpleBar>
+              )}
+            </>
           )}
         </div>
       </DrawerDialog>

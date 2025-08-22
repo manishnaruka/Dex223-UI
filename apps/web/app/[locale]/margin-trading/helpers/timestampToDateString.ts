@@ -17,5 +17,13 @@ export default function timestampToDateString(
     ? `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`
     : `${String(hours).padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
 
-  return `${day}.${month}.${year} ${formattedTime}`;
+  // Offset for the *given date* (handles DST)
+  const offsetMinutes = -date.getTimezoneOffset(); // east is positive
+  const sign = offsetMinutes >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMinutes);
+  const oh = String(Math.floor(abs / 60)).padStart(2, "0");
+  const om = String(abs % 60).padStart(2, "0");
+  const offset = `UTC${sign}${oh}:${om}`;
+
+  return `${day}.${month}.${year} ${formattedTime} (${offset})`;
 }
