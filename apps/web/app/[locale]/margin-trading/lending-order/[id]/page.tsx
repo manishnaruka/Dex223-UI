@@ -2,7 +2,6 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
-import clsx from "clsx";
 import Image from "next/image";
 import React, { use, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { getAbiItem } from "viem";
-import { useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import {
   OrderCloseStatus,

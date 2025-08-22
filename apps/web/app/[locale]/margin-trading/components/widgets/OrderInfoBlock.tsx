@@ -2,9 +2,6 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import React, { ReactNode } from "react";
 
-import Svg from "@/components/atoms/Svg";
-import { Link } from "@/i18n/routing";
-
 type MarginPositionCardBg =
   | "assets"
   | "borrowed"

@@ -4,12 +4,11 @@ import { Formik } from "formik";
 import React, { PropsWithChildren } from "react";
 
 import { useBorrowMarketFilterStore } from "@/app/[locale]/margin-trading/stores/useBorrowMarketFilterStore";
-import { values } from "@/app/[locale]/swap/stores/useSwapSettingsStore";
 import Drawer from "@/components/atoms/Drawer";
 import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
-import Button, { ButtonColor, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 
 function ButtonRow({ children }: PropsWithChildren) {

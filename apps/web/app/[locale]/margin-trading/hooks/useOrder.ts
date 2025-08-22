@@ -1,5 +1,4 @@
 import { useQuery } from "@apollo/client";
-import { add } from "dexie";
 import gql from "graphql-tag";
 import { useMemo } from "react";
 import { Address } from "viem";

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { formatEther, parseGwei } from "viem";
+import { formatEther } from "viem";
 
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { formatFloat } from "@/functions/formatFloat";

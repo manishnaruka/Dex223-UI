@@ -1,4 +1,3 @@
-import { fallback } from "viem";
 import { create } from "zustand";
 
 import {

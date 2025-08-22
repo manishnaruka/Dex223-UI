@@ -1,4 +1,3 @@
-import { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import React, { ReactNode, useMemo } from "react";
