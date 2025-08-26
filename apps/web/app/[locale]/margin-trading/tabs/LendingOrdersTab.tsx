@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 
 import LendingOrderCard from "@/app/[locale]/margin-trading/components/LendingOrderCard";
@@ -13,7 +14,12 @@ import OrderCloseDialog from "../lending-order/[id]/components/OrderCloseDialog"
 
 export default function LendingOrdersTab() {
   const { address } = useAccount();
-  const { orders } = useOrdersByOwner({ owner: address });
+
+  const [searchValue, setSearchValue] = useState("");
+
+  const { orders } = useOrdersByOwner({
+    owner: !!searchValue && isAddress(searchValue) ? searchValue : address,
+  });
 
   const [orderToDeposit, setOrderToDeposit] = useState<LendingOrder | undefined>();
   const [orderToWithdraw, setOrderToWithdraw] = useState<LendingOrder | undefined>();
@@ -21,7 +27,22 @@ export default function LendingOrdersTab() {
   const [orderToOpen, setOrderToOpen] = useState<LendingOrder | undefined>();
 
   if (!orders) {
-    return <div>Loading...</div>;
+    return (
+      <>
+        <div className="flex justify-between my-5 items-center">
+          <span className="text-20 text-tertiary-text">Loading...</span>
+          <div className="max-w-[460px] flex-grow">
+            <SearchInput
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Search address"
+              className="bg-primary-bg"
+            />
+          </div>
+        </div>
+        <div>Loading...</div>
+      </>
+    );
   }
 
   return (
@@ -29,7 +50,12 @@ export default function LendingOrdersTab() {
       <div className="flex justify-between my-5 items-center">
         <span className="text-20 text-tertiary-text">{orders.length} lending orders</span>
         <div className="max-w-[460px] flex-grow">
-          <SearchInput placeholder="Search address" className="bg-primary-bg" />
+          <SearchInput
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Search address"
+            className="bg-primary-bg"
+          />
         </div>
       </div>
 

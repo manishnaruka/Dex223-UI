@@ -30,6 +30,7 @@ import ApproveAmountConfig from "@/components/common/ApproveAmountConfig";
 import OperationStepRow, {
   operationStatusToStepStatus,
 } from "@/components/common/OperationStepRow";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -239,7 +240,7 @@ export default function ReviewBorrowDialog({
                     width={20}
                     height={20}
                   />
-                  <span className="">{order.liquidationRewardAmount.formatted}</span>
+                  <span className="">{formatFloat(order.liquidationRewardAmount.formatted)}</span>
                   <span className="text-secondary-text">
                     {order.liquidationRewardAsset.symbol || "Unknown"}
                   </span>
@@ -262,7 +263,7 @@ export default function ReviewBorrowDialog({
                   width={20}
                   height={20}
                 />
-                <span className="">{values.borrowAmount}</span>
+                <span className="">{formatFloat(values.borrowAmount)}</span>
                 <span className="text-secondary-text">{order.baseAsset?.symbol || "Unknown"}</span>
                 {/*<Badge*/}
                 {/*  size="small"*/}

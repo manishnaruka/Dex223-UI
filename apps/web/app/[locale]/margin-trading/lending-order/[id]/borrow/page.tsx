@@ -512,6 +512,27 @@ export default function BorrowPage({
           </div>
         </div>
 
+        {order.oracle.toLowerCase() === ORACLE_ADDRESS[chainId] ? (
+          <div className="flex justify-between shadow px-4 py-3 rounded-3 mb-2">
+            <div className="flex items-center gap-1">
+              <Svg iconName="done" className="text-green" />
+              Price oracle:
+            </div>
+            <span className="flex items-center gap-1 rounded-3">
+              Default DEX223 Oracle <Tooltip text="Tooltip text" />
+            </span>
+          </div>
+        ) : (
+          <div className="flex justify-between shadow shadow-red-light px-4 py-3 rounded-3 bg-red-bg mb-2">
+            <div className="flex items-center gap-1">
+              <Svg iconName="warning" className="text-red-light" />
+              Price oracle:
+            </div>
+            <span className="text-red-light flex items-center gap-1 rounded-3 ">
+              Unknown oracle <Svg iconName="info" />
+            </span>
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="bg-tertiary-bg rounded-3 p-5 mb-4">
             <LendingOrderTokenSelect

@@ -12,6 +12,7 @@ import {
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import { Link } from "@/i18n/routing";
 
 type Props = {
   step: OrderActionStep;
@@ -100,7 +101,9 @@ export default function OrderConfigurationPage({
     <>
       <div className="rounded-3 bg-primary-bg w-[600px] mx-auto">
         <div className="py-1.5 px-6 flex justify-between items-center">
-          <IconButton iconName="back" />
+          <Link href="/margin-trading">
+            <IconButton iconName="back" />
+          </Link>
           <h1 className="text-20 font-bold">
             {mode === OrderActionMode.CREATE ? "New lending order" : "Edit lending order"}
           </h1>

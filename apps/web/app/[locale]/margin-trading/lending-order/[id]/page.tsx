@@ -98,7 +98,7 @@ export default function LendingOrder({
             Owner:{" "}
             <ExternalTextLink
               text={truncateMiddle(order.owner, { charsFromEnd: 6, charsFromStart: 6 })}
-              href="#"
+              href={getExplorerLink(ExplorerLinkType.ADDRESS, order.owner, chainId)}
             />
           </div>
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 px-5 py-1 min-h-12 text-tertiary-text">
@@ -169,7 +169,7 @@ export default function LendingOrder({
                 </div>
 
                 <p className="font-medium text-20">
-                  {formatUnits(order.balance, order.baseAsset.decimals ?? 18)}{" "}
+                  {formatFloat(formatUnits(order.balance, order.baseAsset.decimals ?? 18))}{" "}
                   <span className="text-secondary-text">{order.baseAsset.symbol}</span>
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default function LendingOrder({
               {
                 title: "Margin positions duration",
                 tooltipText: "Tooltip text",
-                value: `${order.positionDuration / 24 / 60 / 60} days`,
+                value: `${formatFloat(order.positionDuration / 24 / 60 / 60)} days`,
                 bg: "margin_positions_duration",
               },
               {
@@ -301,7 +301,7 @@ export default function LendingOrder({
               {
                 title: "Liquidation fee",
                 tooltipText: "Tooltip text",
-                value: `${order.liquidationRewardAmount.formatted} ${order.liquidationRewardAsset.symbol}`,
+                value: `${formatFloat(order.liquidationRewardAmount.formatted)} ${order.liquidationRewardAsset.symbol}`,
                 bg: "liquidation_fee",
               },
               {

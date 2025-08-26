@@ -21,7 +21,9 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 export default function MarginPositionPage({
   params,
@@ -31,7 +33,7 @@ export default function MarginPositionPage({
   }>;
 }) {
   const { id: positionId } = use(params);
-
+  const chainId = useCurrentChainId();
   const { position, loading } = useMarginPositionById({ id: positionId });
   const [isCloseDialogOpened, setIsCloseDialogOpened] = useState(false);
   const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
@@ -58,7 +60,7 @@ export default function MarginPositionPage({
             Owner:{" "}
             <ExternalTextLink
               text={truncateMiddle(position.owner, { charsFromEnd: 6, charsFromStart: 6 })}
-              href="#"
+              href={getExplorerLink(ExplorerLinkType.ADDRESS, position.owner, chainId)}
             />
           </div>
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
@@ -91,6 +93,9 @@ export default function MarginPositionPage({
                 position={position}
                 setIsWithdrawDialogOpened={setIsWithdrawDialogOpened}
               />
+              {position.assetsWithBalances.some(
+                (asset) => asset.balance && Boolean(asset.balance > 0),
+              ) && <ActivePositionAssetsBlock position={position} />}
               <ClosedPositionDateInfoBlock position={position} />
             </>
           )}
