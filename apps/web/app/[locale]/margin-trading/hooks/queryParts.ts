@@ -36,6 +36,7 @@ export const GQL_POSITION_FIELDS = `
   collateralToken {
     ${GQL_TOKEN_FIELDS}
   }
+  leverage
 `;
 
 export const GQL_ORDER_FIELDS = `

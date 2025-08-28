@@ -34,16 +34,16 @@ export default function LiquidatedPositionInfoBlock({ position }: { position: Ma
           bg="collateral"
         />
         <OrderInfoCard
-          value={timestampToDateString(position.liquidatedAt)}
+          value={timestampToDateString(position.liquidatedAt, { withUTC: false })}
           title={"Liquidation date"}
           tooltipText="tooltip text"
           bg="leverage"
         />
         <OrderInfoCard
-          value={100}
-          title={"Leverage"}
+          value={position.initialLeverage}
+          title={"Initial leverage"}
           tooltipText="tooltip text"
-          bg="liquidation_date"
+          bg="leverage"
         />
       </div>
     </div>

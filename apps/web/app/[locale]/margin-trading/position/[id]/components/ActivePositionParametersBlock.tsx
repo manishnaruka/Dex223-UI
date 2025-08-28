@@ -1,8 +1,10 @@
 import React from "react";
+import { formatUnits } from "viem";
 
 import { OrderInfoBlock } from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
 import usePositionLiquidationCost from "@/app/[locale]/margin-trading/hooks/usePositionLiquidationCost";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
+import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 
 export default function ActivePositionParametersBlock({ position }: { position: MarginPosition }) {
@@ -14,19 +16,19 @@ export default function ActivePositionParametersBlock({ position }: { position: 
           {
             title: "Borrowed",
             tooltipText: "Tooltip text",
-            value: "5%",
+            value: `${formatFloat(formatUnits(position.loanAmount, position.loanAsset.decimals))} ${position.loanAsset.symbol}`,
             bg: "borrowed",
           },
           {
             title: "Initial collateral",
             tooltipText: "Tooltip text",
-            value: "15%",
+            value: `${formatFloat(formatUnits(position.collateralAmount, position.collateralAsset.decimals))} ${position.collateralAsset.symbol}`,
             bg: "collateral",
           },
           {
             title: "Leverage",
             tooltipText: "Tooltip text",
-            value: "15%",
+            value: `${position.initialLeverage}x`,
             bg: "leverage",
           },
         ]}

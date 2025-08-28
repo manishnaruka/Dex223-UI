@@ -1,6 +1,7 @@
 "use client";
 import ExternalTextLink from "@repo/ui/external-text-link";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import React, { use, useMemo, useState } from "react";
 
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
@@ -32,6 +33,7 @@ export default function MarginPositionPage({
     id: string;
   }>;
 }) {
+  const locale = useLocale();
   const { id: positionId } = use(params);
   const chainId = useCurrentChainId();
   const { position, loading } = useMarginPositionById({ id: positionId });
@@ -67,7 +69,11 @@ export default function MarginPositionPage({
             Margin position ID: <span className="text-secondary-text">{position.id}</span>
           </div>
           <div className="bg-primary-bg rounded-2 flex items-center gap-1 pl-5 pr-4 py-1 min-h-12 text-tertiary-text">
-            Lending order ID: <ExternalTextLink text={position.order.id.toString()} href="#" />
+            Lending order ID:{" "}
+            <ExternalTextLink
+              text={position.order.id.toString()}
+              href={`/${locale}/margin-trading/lending-order/${position.order.id.toString()}`}
+            />
           </div>
         </div>
 

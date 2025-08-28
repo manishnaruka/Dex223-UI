@@ -18,6 +18,7 @@ import {
   CreateOrderStatus,
   useCreateOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStatusStore";
+import { useNewlyCreatedOrderId } from "@/app/[locale]/margin-trading/lending-order/create/stores/useNewlyCreatedOrderId";
 import {
   useCreateOrderGasLimitStore,
   useCreateOrderGasPriceStore,
@@ -111,6 +112,7 @@ export default function useCreateOrder() {
     contractAddress: MARGIN_TRADING_ADDRESS[chainId],
     amountToCheck: parseUnits(params.loanAmount, params.loanToken?.decimals ?? 18),
   });
+  const { setOrderId } = useNewlyCreatedOrderId();
 
   const { address } = useAccount();
   const { customGasLimit } = useCreateOrderGasLimitStore();
@@ -285,6 +287,8 @@ export default function useCreateOrder() {
           console.log("CREATE ORDER LOG NOT FOUND!");
           return;
         }
+
+        setOrderId(Number(createOrderLog.args.orderId));
 
         if (params.loanToken.isNative) {
           setStatus(CreateOrderStatus.PENDING_DEPOSIT);

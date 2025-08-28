@@ -135,66 +135,7 @@ const marginPositionCardBorderMap: Record<DangerStatus, string> = {
 export function InactiveMarginPositionCard({ position }: Props) {
   const [isWithdrawDialogOpened, setIsWithdrawDialogOpened] = useState(false);
 
-  const [ratio, setRatio] = useState<number | undefined>();
   const chainId = useCurrentChainId();
-  const publicClient = usePublicClient();
-
-  useEffect(() => {
-    (async () => {
-      console.log("Fired");
-
-      if (!position.order?.baseAsset || !position.collateralAsset || !publicClient) {
-        console.log("Returned: missing dependencies");
-        return;
-      }
-
-      const baseAsset = position.order.baseAsset.wrapped;
-      const collateralToken = position.collateralAsset.wrapped;
-
-      if (baseAsset.address0 === collateralToken.address0) {
-        setRatio(1); // 1:1 price
-        console.log("Same asset, ratio = 1");
-        return;
-      }
-
-      try {
-        const inputAmount = BigInt(10) ** BigInt(baseAsset.decimals); // 1 unit of base asset
-        console.log("Calling oracle with:", [
-          baseAsset.address0,
-          collateralToken.address0,
-          inputAmount,
-        ]);
-
-        const outputAmount = await publicClient.readContract({
-          address: ORACLE_ADDRESS[chainId],
-          abi: ORACLE_ABI,
-          functionName: "getAmountOut",
-          args: [baseAsset.address0, collateralToken.address0, inputAmount],
-        });
-
-        const ratio = getPrice(outputAmount as bigint, inputAmount); // output/base price
-        console.log("Oracle output:", outputAmount);
-        console.log("Computed ratio:", ratio);
-
-        setRatio(ratio);
-      } catch (e) {
-        console.error("Failed to fetch ratio:", e);
-      }
-    })();
-  }, [chainId, position, publicClient]);
-
-  const leverage = useMemo(() => {
-    if (ratio) {
-      return calcLeverageFormattedFromBigints({
-        borrowWei: position.loanAmount,
-        borrowDecimals: position.loanAsset.decimals,
-        collateralWei: position.collateralAmount,
-        collateralDecimals: position.collateralAsset.decimals,
-        price: ratio,
-      });
-    }
-    return "Loading...";
-  }, [position, ratio]);
 
   const isTokensToWithdraw = useMemo(() => {
     return position.assetsWithBalances.some((assetWithBalance) => {
@@ -266,9 +207,9 @@ export function InactiveMarginPositionCard({ position }: Props) {
           </>
         )}
         <SimpleInfoBlock
-          title={"Leverage"}
+          title={"Initial leverage"}
           tooltipText={"Tooltip text"}
-          value={formatFloat(leverage, { trimZero: true })}
+          value={`${formatFloat(position.initialLeverage, { trimZero: true })}x`}
         />
       </div>
 
@@ -403,70 +344,10 @@ export function calcLeverageFormattedFromBigints({
 export function LendingPositionCard({ position }: Props) {
   const { expectedBalance, actualBalance } = usePositionStatus(position);
   const [positionToClose, setPositionToClose] = useState<MarginPosition | undefined>();
-  const publicClient = usePublicClient();
 
   const subjectToLiquidation = useMemo(() => {
     return actualBalance != null && expectedBalance != null && actualBalance <= expectedBalance;
   }, [actualBalance, expectedBalance]);
-  const [ratio, setRatio] = useState<number | undefined>();
-  const chainId = useCurrentChainId();
-
-  useEffect(() => {
-    (async () => {
-      console.log("Fired");
-
-      if (!position.order?.baseAsset || !position.collateralAsset || !publicClient) {
-        console.log("Returned: missing dependencies");
-        return;
-      }
-
-      const baseAsset = position.order.baseAsset.wrapped;
-      const collateralToken = position.collateralAsset.wrapped;
-
-      if (baseAsset.address0 === collateralToken.address0) {
-        setRatio(1); // 1:1 price
-        console.log("Same asset, ratio = 1");
-        return;
-      }
-
-      try {
-        const inputAmount = BigInt(10) ** BigInt(baseAsset.decimals); // 1 unit of base asset
-        console.log("Calling oracle with:", [
-          baseAsset.address0,
-          collateralToken.address0,
-          inputAmount,
-        ]);
-
-        const outputAmount = await publicClient.readContract({
-          address: ORACLE_ADDRESS[chainId],
-          abi: ORACLE_ABI,
-          functionName: "getAmountOut",
-          args: [baseAsset.address0, collateralToken.address0, inputAmount],
-        });
-
-        const ratio = getPrice(outputAmount as bigint, inputAmount); // output/base price
-        console.log("Oracle output:", outputAmount);
-        console.log("Computed ratio:", ratio);
-
-        setRatio(ratio);
-      } catch (e) {
-        console.error("Failed to fetch ratio:", e);
-      }
-    })();
-  }, [chainId, position, publicClient]);
-
-  const leverage = useMemo(() => {
-    if (ratio) {
-      return calcLeverageFormattedFromBigints({
-        borrowWei: position.loanAmount,
-        borrowDecimals: position.loanAsset.decimals,
-        collateralWei: position.collateralAmount,
-        collateralDecimals: position.collateralAsset.decimals,
-        price: ratio,
-      });
-    }
-    return "Loading...";
-  }, [position, ratio]);
 
   const isCompleted = useMemo(() => {
     return +position.deadline * 1000 < Date.now();
@@ -623,14 +504,18 @@ export function LendingPositionCard({ position }: Props) {
         <SimpleInfoBlock
           title="Borrowed"
           tooltipText="Tooltip text"
-          value={`${formatUnits(position.loanAmount, position.loanAsset.decimals)} ${position.loanAsset.symbol}`}
+          value={`${formatFloat(formatUnits(position.loanAmount, position.loanAsset.decimals))} ${position.loanAsset.symbol}`}
         />
         <SimpleInfoBlock
           title="Initial collateral"
           tooltipText="Tooltip text"
-          value={`${formatUnits(position.collateralAmount, position.collateralAsset.decimals)} ${position.collateralAsset.symbol}`}
+          value={`${formatFloat(formatUnits(position.collateralAmount, position.collateralAsset.decimals))} ${position.collateralAsset.symbol}`}
         />
-        <SimpleInfoBlock title="Leverage" tooltipText="Tooltip text" value={leverage} />
+        <SimpleInfoBlock
+          title="Initial leverage"
+          tooltipText="Tooltip text"
+          value={`${formatFloat(position.initialLeverage, { trimZero: true })}x`}
+        />
       </div>
 
       <div className="px-5 pb-5 bg-tertiary-bg rounded-3 mb-5">

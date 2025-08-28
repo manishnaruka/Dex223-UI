@@ -44,6 +44,7 @@ export type MarginPosition = {
   txLiquidated: Hash;
   collateralAmount: bigint;
   collateralAsset: Currency;
+  initialLeverage: number;
 };
 
 export type LendingOrder = {

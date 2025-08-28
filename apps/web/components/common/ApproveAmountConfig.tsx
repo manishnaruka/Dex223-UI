@@ -5,6 +5,7 @@ import { formatUnits, parseUnits } from "viem";
 
 import Input from "@/components/atoms/Input";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import { formatFloat } from "@/functions/formatFloat";
 import { Currency } from "@/sdk_bi/entities/currency";
 
 export default function ApproveAmountConfig({
@@ -41,7 +42,7 @@ export default function ApproveAmountConfig({
       <div className="flex items-center gap-2 flex-grow justify-end">
         {!isEditApproveActive ? (
           <span className="text-14">
-            {amountToApprove} {asset.symbol}
+            {formatFloat(amountToApprove)} {asset.symbol}
           </span>
         ) : (
           <div className="flex-grow">

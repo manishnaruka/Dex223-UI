@@ -2,7 +2,7 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 import { parseUnits } from "viem";
 
@@ -24,6 +24,7 @@ import {
   CreateOrderStatus,
   useCreateOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStatusStore";
+import { useNewlyCreatedOrderId } from "@/app/[locale]/margin-trading/lending-order/create/stores/useNewlyCreatedOrderId";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
@@ -219,8 +220,11 @@ export default function ReviewCreateOrderDialog({
   setIsOpen: (isOpen: boolean) => void;
 }) {
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
+  const locale = useLocale();
 
   const { status, setStatus } = useCreateOrderStatusStore();
+
+  const { orderId, setOrderId } = useNewlyCreatedOrderId();
 
   useEffect(() => {
     if (
@@ -232,9 +236,10 @@ export default function ReviewCreateOrderDialog({
     ) {
       setTimeout(() => {
         setStatus(CreateOrderStatus.INITIAL);
+        setOrderId(undefined);
       }, 400);
     }
-  }, [isOpen, setStatus, status]);
+  }, [isOpen, setOrderId, setStatus, status]);
 
   const {
     tradingTokens,
@@ -321,7 +326,12 @@ export default function ReviewCreateOrderDialog({
                   {loanAmount} {loanToken?.symbol}
                 </p>
                 <div className="flex justify-center">
-                  <ExternalTextLink text="View my order" href={"#"} />
+                  {orderId && (
+                    <ExternalTextLink
+                      text="View my order"
+                      href={`/${locale}/margin-trading/lending-order/${orderId}`}
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -407,9 +417,8 @@ export default function ReviewCreateOrderDialog({
                     <AssetsPreview assets={tradingTokens.allowedTokens} />
                   ) : (
                     <span className="flex items-center gap-2">
-                      Autolisting{" "}
                       <ExternalTextLink
-                        text="DEX223 Market"
+                        text={tradingTokens.tradingTokensAutoListing?.name || "Unknown"}
                         href={getExplorerLink(
                           ExplorerLinkType.ADDRESS,
                           tradingTokens.tradingTokensAutoListing?.id || ZERO_ADDRESS,

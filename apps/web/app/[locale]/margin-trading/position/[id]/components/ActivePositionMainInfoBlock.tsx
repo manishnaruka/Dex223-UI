@@ -1,7 +1,6 @@
 import GradientCard from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
-import Link from "next/link";
 import React, { useMemo } from "react";
 import { formatUnits } from "viem";
 
@@ -12,6 +11,7 @@ import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Button, { ButtonColor } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
+import { Link } from "@/i18n/routing";
 
 function BalanceCard({ position }: { position: MarginPosition }) {
   const { expectedBalance, actualBalance } = usePositionStatus(position);
@@ -83,9 +83,11 @@ export default function ActivePositionMainInfoBlock({
           <PositionHealthStatus health={health} />
         </div>
         <div className="flex items-center gap-2 justify-end">
-          <Button disabled={subjectToLiquidation} colorScheme={ButtonColor.LIGHT_GREEN}>
-            Trade
-          </Button>
+          <Link className={subjectToLiquidation ? "pointer-events-none" : ""} href={"/margin-swap"}>
+            <Button colorScheme={ButtonColor.LIGHT_GREEN} disabled={subjectToLiquidation} fullWidth>
+              Trade
+            </Button>
+          </Link>
           <Link href={`/margin-trading/position/${position.id}/deposit`}>
             <Button
               colorScheme={subjectToLiquidation ? ButtonColor.LIGHT_RED : ButtonColor.LIGHT_GREEN}

@@ -2,6 +2,7 @@ import React from "react";
 
 import PositionProgressBar from "@/app/[locale]/margin-trading/components/PositionProgressBar";
 import { OrderInfoCard } from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
+import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 
 export default function ActivePositionTimeframeBlock({ position }: { position: MarginPosition }) {
@@ -10,14 +11,14 @@ export default function ActivePositionTimeframeBlock({ position }: { position: M
       <h3 className="text-20 text-secondary-text font-medium">Time frame</h3>
       <div className="grid grid-cols-2 gap-3">
         <OrderInfoCard
-          value={"7 days"}
+          value={`${(position.deadline - position.createdAt) / 60 / 60 / 24} days`}
           title="Margin position duration"
           tooltipText={"Tooltip text"}
           bg="margin_positions_duration"
         />
         <OrderInfoCard
-          value={new Date(position.deadline * 1000).toLocaleString("en-GB").split("/").join(".")}
-          title="Lending order deadline"
+          value={timestampToDateString(position.deadline, { withUTC: false, withSeconds: true })}
+          title="Margin position deadline"
           tooltipText={"Tooltip text"}
           bg="deadline"
         />

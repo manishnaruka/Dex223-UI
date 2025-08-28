@@ -17,7 +17,7 @@ export default function ClosedPositionDateInfoBlock({ position }: { position: Ma
           {
             title: "Сlosing date",
             tooltipText: "Tooltip text",
-            value: timestampToDateString(position.closedAt),
+            value: timestampToDateString(position.closedAt, { withUTC: false, withSeconds: true }),
             bg: "liquidation_date",
           },
           {

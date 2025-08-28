@@ -36,7 +36,7 @@ export default function LiquidationOracleSelect() {
           <RadioButton
             type="button"
             key={_oracle}
-            className="min-h-10 py-0 items-center"
+            className="min-h-10 py-0 items-center bg-tertiary-bg"
             isActive={_oracle === oracle}
             onClick={() => setOracle(_oracle)}
           >

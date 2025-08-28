@@ -11,7 +11,11 @@ import useLiquidatePosition from "@/app/[locale]/margin-trading/position/[id]/li
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import IconButton, {
+  IconButtonSize,
+  IconButtonVariant,
+  IconSize,
+} from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 import { formatFloat } from "@/functions/formatFloat";
 import { Currency } from "@/sdk_bi/entities/currency";
@@ -72,7 +76,15 @@ export default function LiquidateForm({ position }: { position: MarginPosition }
 
   return (
     <div className="w-[600px] bg-primary-bg rounded-5 card-spacing-x card-spacing-b">
-      <div className="h-[60px] flex justify-between items-center mb-2.5">
+      <div className="h-[60px] mb-2.5 flex justify-between items-center -mx-3">
+        <IconButton
+          variant={IconButtonVariant.BACK}
+          iconSize={IconSize.REGULAR}
+          buttonSize={IconButtonSize.LARGE}
+          onClick={() => {
+            window.history.back();
+          }}
+        />
         <h3 className="font-bold text-20">Liquidation</h3>
         <div className="flex items-center relative left-3">
           <IconButton

@@ -55,7 +55,12 @@ export default function ClosedPositionInfoBlock({
           bg="borrowed"
         />
         <OrderInfoCard value={"-"} title={"Profit"} tooltipText="tooltip text" bg="borrowed" />
-        <OrderInfoCard value={"-"} title={"Leverage"} tooltipText="tooltip text" bg="borrowed" />
+        <OrderInfoCard
+          value={formatFloat(position.initialLeverage)}
+          title={"Initial leverage"}
+          tooltipText="tooltip text"
+          bg="borrowed"
+        />
       </div>
     </div>
   );

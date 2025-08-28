@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { parseUnits } from "viem";
 
 import { InputSize } from "@/components/atoms/Input";
@@ -56,6 +56,35 @@ export default function LendingOrderTokenSelect({
   } = useTokenBalances(token);
 
   const { data: blockNumber } = useScopedBlockNumber();
+
+  useEffect(() => {
+    if (!setIsEnoughBalance) {
+      return;
+    }
+
+    if (!amount || !token) {
+      setIsEnoughBalance(true);
+      return;
+    }
+
+    if (
+      !token0Balance ||
+      (token0Balance.value < parseUnits(amount, token.decimals) && standard === Standard.ERC20)
+    ) {
+      setIsEnoughBalance(false);
+      return;
+    }
+
+    if (
+      !token1Balance ||
+      (token1Balance.value < parseUnits(amount, token.decimals) && standard === Standard.ERC223)
+    ) {
+      setIsEnoughBalance(false);
+      return;
+    }
+
+    setIsEnoughBalance(true);
+  }, [amount, setIsEnoughBalance, standard, token, token0Balance, token1Balance]);
 
   useEffect(() => {
     refetchBalance();

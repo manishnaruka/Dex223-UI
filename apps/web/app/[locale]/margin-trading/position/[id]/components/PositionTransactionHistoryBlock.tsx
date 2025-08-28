@@ -121,7 +121,7 @@ export default function PositionTransactionHistoryBlock({
               <div
                 className={clsx(" h-[56px] flex items-center", index % 2 !== 0 && "bg-tertiary-bg")}
               >
-                {timestampToDateString(+o.timestamp)}
+                {timestampToDateString(+o.timestamp, { withUTC: false })}
               </div>
               <div
                 className={clsx(

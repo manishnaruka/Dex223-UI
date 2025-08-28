@@ -1,6 +1,6 @@
 export default function timestampToDateString(
   timestamp: number,
-  noSeconds: boolean = false,
+  { withSeconds = false, withUTC = true }: { withSeconds?: boolean; withUTC?: boolean } = {}, // default empty object
 ): string {
   const date = new Date(timestamp * 1000);
 
@@ -13,7 +13,7 @@ export default function timestampToDateString(
   const seconds = String(date.getSeconds()).padStart(2, "0");
   const ampm = date.getHours() >= 12 ? "PM" : "AM";
 
-  const formattedTime = noSeconds
+  const formattedTime = !withSeconds
     ? `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`
     : `${String(hours).padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
 
@@ -24,6 +24,10 @@ export default function timestampToDateString(
   const oh = String(Math.floor(abs / 60)).padStart(2, "0");
   const om = String(abs % 60).padStart(2, "0");
   const offset = `UTC${sign}${oh}:${om}`;
+
+  if (!withUTC) {
+    return `${day}.${month}.${year} ${formattedTime}`;
+  }
 
   return `${day}.${month}.${year} ${formattedTime} (${offset})`;
 }

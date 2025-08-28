@@ -187,7 +187,7 @@ export default function ReviewBorrowDialog({
     const calc = () => {
       const nowInSeconds = Math.floor(Date.now() / 1000);
       const endTimestamp = nowInSeconds + Number(order?.positionDuration);
-      const formatted = timestampToDateString(endTimestamp, true);
+      const formatted = timestampToDateString(endTimestamp, { withSeconds: true });
       setFormattedEndTime(formatted);
     };
 
@@ -204,7 +204,7 @@ export default function ReviewBorrowDialog({
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title={"Review borrow"} />
 
-      <div className="card-spacing-x card-spacing-b min-w-[600px]">
+      <div className="card-spacing-x card-spacing-b w-[600px]">
         {!isFinalStatus && (
           <>
             <InputLabel inputSize={InputSize.LARGE} label="You send" />
@@ -219,7 +219,7 @@ export default function ReviewBorrowDialog({
                     width={20}
                     height={20}
                   />
-                  <span className="">{values.collateralAmount}</span>
+                  <span className="">{formatFloat(values.collateralAmount)}</span>
                   <span className="text-secondary-text">
                     {values.collateralToken?.symbol || "Unknown"}
                   </span>

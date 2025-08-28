@@ -43,6 +43,7 @@ export type GqlPosition = {
   txLiquidated: Hash;
   collateralToken: GqlToken;
   collateralAmount: bigint;
+  leverage: number;
 };
 
 export type GqlOrder = {
@@ -147,6 +148,7 @@ export function serializeGqlOrder(
 ): Omit<LendingOrder, "positions"> {
   const { positions, duration, liquidationRewardAmount, balance, minLoan, ...rest } = gqlOrder;
 
+  console.log(gqlOrder);
   return {
     ...rest,
     minLoan: BigInt(minLoan),
@@ -168,8 +170,9 @@ export function serializeGqlOrder(
     collateralAddresses: gqlOrder.collaterals,
     allowedTradingAddresses: gqlOrder.whitelist.allowedForTrading,
     isErc223TradingAllowed:
+      gqlOrder.whitelist.allowedForTrading &&
       gqlOrder.whitelist.allowedForTrading.length >
-      gqlOrder.whitelist.allowedForTradingTokens.length,
+        gqlOrder.whitelist.allowedForTradingTokens.length,
     allowedCollateralAssets: gqlOrder.collateralTokens.map((collateralToken: GqlToken) =>
       gqlTokenToCurrency(collateralToken, chainId),
     ),
@@ -198,6 +201,7 @@ export function serializeGqlPosition(
     closedAt,
     collateralAmount,
     collateralToken,
+    leverage,
     ...rest
   } = gqlPosition;
 
@@ -216,6 +220,7 @@ export function serializeGqlPosition(
     })),
     collateralAsset: gqlTokenToCurrency(collateralToken, chainId),
     collateralAmount: BigInt(collateralAmount),
+    initialLeverage: +leverage,
   };
 }
 

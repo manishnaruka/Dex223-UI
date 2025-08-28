@@ -53,7 +53,7 @@ export function HeaderItem({
       }}
       className={clsx(
         "h-[60px] flex items-center relative mb-2  text-tertiary-text",
-        isFirst && "pl-6",
+        isFirst && "pl-3.5",
         handleSort && "-left-3",
       )}
     >
@@ -196,7 +196,7 @@ export default function BorrowMarketTable({
     <>
       {orders?.length ? (
         <>
-          <div className="grid grid-cols-[minmax(0,1fr)_300px] w-full rounded-t-2 overflow-hidden">
+          <div className="grid grid-cols-[minmax(0,1fr)_300px] w-full rounded-5 overflow-hidden">
             <SimpleBar
               autoHide={false}
               style={{ maxWidth: "100%", minWidth: "100%", width: "100%" }}
@@ -233,7 +233,7 @@ export default function BorrowMarketTable({
               }}
             >
               <div className="min-w-[1400px]">
-                <div className="grid overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(77px,1.33fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,2.67fr),_minmax(50px,2.67fr),_minmax(78px,1.67fr)] pb-2">
+                <div className="grid overflow-hidden bg-table-gradient grid-cols-[minmax(50px,2.67fr),_minmax(77px,1.33fr),_minmax(87px,1.33fr),_minmax(55px,1.33fr),_minmax(55px,1.33fr),_minmax(50px,2.67fr),_minmax(50px,2.67fr),_minmax(78px,1.67fr)] pb-2 px-2.5">
                   {headerColumns.map((columnData, index) => (
                     <HeaderItem
                       key={columnData.field}
@@ -261,7 +261,7 @@ export default function BorrowMarketTable({
                           }
                         }}
                       >
-                        <div className="pl-5 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2">
+                        <div className="pl-2.5 rounded-l-3 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2">
                           <Image
                             src="/images/tokens/placeholder.svg"
                             width={24}
@@ -350,7 +350,7 @@ export default function BorrowMarketTable({
                             )}
                           </span>
                         </div>
-                        <div className=" h-[56px] flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2 gap-2">
+                        <div className=" h-[56px] rounded-r-3 flex items-center group-hocus:bg-tertiary-bg duration-200 pr-2 gap-2">
                           <span
                             className={clsx(
                               "font-medium",
@@ -396,7 +396,8 @@ export default function BorrowMarketTable({
                         <>
                           <Link className={"flex-shrink-0"} href={`/margin-swap`}>
                             <Button
-                              disabled={o.balance < o.minLoan}
+                              // disabled={o.balance < o.minLoan}
+                              disabled
                               size={ButtonSize.MEDIUM}
                               colorScheme={ButtonColor.LIGHT_PURPLE}
                             >
