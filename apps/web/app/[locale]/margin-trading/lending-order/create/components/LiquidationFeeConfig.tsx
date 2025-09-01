@@ -88,6 +88,7 @@ export default function LiquidationFeeConfig({
       </SelectButton>
 
       <TextField
+        isNumeric
         label="Liquidation fee (for liquidator)"
         tooltipText="Tooltip text"
         placeholder="Liquidation fee (for liquidator)"

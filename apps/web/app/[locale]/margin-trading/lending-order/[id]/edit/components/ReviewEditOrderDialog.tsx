@@ -157,20 +157,15 @@ export default function ReviewEditOrderDialog({
 
   const {
     tradingTokens,
-    loanToken,
-    loanTokenStandard,
     collateralTokens,
     loanAmount,
     liquidationFeeToken,
     liquidationFeeForLiquidator,
-    liquidationFeeForLender,
-    liquidationMode,
     minimumBorrowingAmount,
     orderCurrencyLimit,
     period,
     interestRatePerMonth,
     leverage,
-    priceSource,
   } = useEditOrderParams();
   console.log(minimumBorrowingAmount);
 

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { Address, getAbiItem, parseUnits } from "viem";
+import { Address, getAbiItem, parseEventLogs, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
@@ -7,11 +7,11 @@ import {
   CreateMarginPositionStatus,
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
+import { useNewlyCreatedPositionId } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useNewlyCreatedPositionId";
 import {
   getApproveTextMap,
   getTransferTextMap,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/getStepTexts";
-import { OrderDepositStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useDepositOrderStatusStore";
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { OperationStepStatus } from "@/components/common/OperationStepRow";
 import { ERC223_ABI } from "@/config/abis/erc223";
@@ -164,6 +164,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
   const { address } = useAccount();
+  const { positionId, setPositionId } = useNewlyCreatedPositionId();
 
   const isEqualFeeAndCollateralAssets = useMemo(() => {
     return (
@@ -394,6 +395,17 @@ export default function useCreateMarginPosition(order: LendingOrder) {
       setStatus(CreateMarginPositionStatus.LOADING_BORROW);
       const takeLoanReceipt = await publicClient.waitForTransactionReceipt({ hash: takeLoanHash });
 
+      const parsedEventLog = parseEventLogs({
+        abi: MARGIN_MODULE_ABI,
+        logs: takeLoanReceipt.logs,
+      });
+
+      const createPositionLog = parsedEventLog.find((log) => log.eventName === "PositionOpened");
+
+      if (createPositionLog) {
+        setPositionId(Number(createPositionLog.args.positionId));
+      }
+
       if (takeLoanReceipt.status === "success") {
         setStatus(CreateMarginPositionStatus.SUCCESS);
       } else {
@@ -422,6 +434,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
       setTransferHash,
       approveB,
       setApproveLiquidationFeeHash,
+      setPositionId,
     ],
   );
 

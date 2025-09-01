@@ -456,7 +456,7 @@ export function LendingPositionCard({ position }: Props) {
     >
       <div className="grid grid-cols-5 gap-3 mb-3">
         <Link
-          className="col-start-1 col-end-3 flex items-center gap-2"
+          className="col-start-1 col-end-3 flex items-center gap-2 text-secondary-text hocus:ui-text-green duration-200"
           href={`/margin-trading/position/${position.id}`}
         >
           View margin position details

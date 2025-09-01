@@ -229,7 +229,9 @@ export default function ConfirmLiquidatePositionDialog({
             )}
             {status === PositionLiquidateStatus.ERROR_LIQUIDATE && (
               <div>
-                <h2 className="text-center mb-1 font-bold text-20 text-red">Liquidation failed</h2>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Liquidation failed
+                </h2>
                 <p className="text-center mb-1">
                   {position.loanAsset.symbol}{" "}
                   <span className="text-secondary-text">(ID: {position.id})</span>
@@ -238,7 +240,9 @@ export default function ConfirmLiquidatePositionDialog({
             )}
             {status === PositionLiquidateStatus.ERROR_FREEZE && (
               <div>
-                <h2 className="text-center mb-1 font-bold text-20 text-red">Freezing failed</h2>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Freezing failed
+                </h2>
                 <p className="text-center mb-1">
                   {position.loanAsset.symbol}{" "}
                   <span className="text-secondary-text">(ID: {position.id})</span>

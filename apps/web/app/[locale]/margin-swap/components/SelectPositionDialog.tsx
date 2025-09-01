@@ -182,7 +182,7 @@ export default function SelectPositionDialog() {
     const matching: MarginPosition[] = [];
     const other: MarginPosition[] = [];
 
-    for (const position of positions) {
+    for (const position of openedPositions) {
       const hasA = tokenA && position.assets.some((asset) => asset.equals(tokenA));
 
       const hasB =
@@ -295,22 +295,28 @@ export default function SelectPositionDialog() {
                     <h2 className="text-18 font-bold mt-3 border-t border-primary-border py-3.5">
                       Positions without selected tokens
                     </h2>
-                    <div className="grid gap-5">
-                      {otherPositions.map((position) => (
-                        <PositionSelectItem
-                          key={position.id}
-                          handleSelectedPosition={(position) => {
-                            setMarginSwapPosition(position);
-                            setIsOpen(false);
-                            setTokenA(undefined);
-                            setTokenB(undefined);
-                            setTypedValue({ typedValue: "", field: Field.CURRENCY_A });
-                          }}
-                          position={position}
-                          isSelected={marginSwapPosition?.id === position.id}
-                        />
-                      ))}
-                    </div>
+                    {otherPositions?.length ? (
+                      <div className="grid gap-5">
+                        {otherPositions.map((position) => (
+                          <PositionSelectItem
+                            key={position.id}
+                            handleSelectedPosition={(position) => {
+                              setMarginSwapPosition(position);
+                              setIsOpen(false);
+                              setTokenA(undefined);
+                              setTokenB(undefined);
+                              setTypedValue({ typedValue: "", field: Field.CURRENCY_A });
+                            }}
+                            position={position}
+                            isSelected={marginSwapPosition?.id === position.id}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-[112px] flex items-center justify-center bg-empty-no-position-purple bg-[length:112px_112px] bg-right-top bg-no-repeat text-secondary-text">
+                        There are no matching positions
+                      </div>
+                    )}
                   </div>
                 </SimpleBar>
               ) : (
@@ -334,13 +340,21 @@ export default function SelectPositionDialog() {
           )}
         </div>
       </DrawerDialog>
-      <Button
-        size={ButtonSize.MEDIUM}
-        onClick={() => setIsOpen(true)}
-        colorScheme={!marginSwapPosition ? ButtonColor.PURPLE : ButtonColor.LIGHT_PURPLE}
-      >
-        {marginSwapPosition ? "Change position" : "Select position"}
-      </Button>
+      {!openedPositions?.length ? (
+        <Link href="/margin-trading">
+          <Button size={ButtonSize.MEDIUM} colorScheme={ButtonColor.PURPLE}>
+            Borrow now
+          </Button>
+        </Link>
+      ) : (
+        <Button
+          size={ButtonSize.MEDIUM}
+          onClick={() => setIsOpen(true)}
+          colorScheme={!marginSwapPosition ? ButtonColor.PURPLE : ButtonColor.LIGHT_PURPLE}
+        >
+          {marginSwapPosition ? "Change position" : "Select position"}
+        </Button>
+      )}
     </>
   );
 }

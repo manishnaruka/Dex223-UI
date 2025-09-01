@@ -13,6 +13,7 @@ import {
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import { ThirdStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
+import { InputWithArrows } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";

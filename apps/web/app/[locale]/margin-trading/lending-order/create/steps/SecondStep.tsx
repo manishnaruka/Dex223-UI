@@ -186,7 +186,7 @@ export default function SecondStep({
             onChange={(e) => props.setFieldValue("minimumBorrowingAmount", +e.target.value)}
             label="Minimum borrowing amount"
             placeholder="Minimum borrowing amount"
-            internalText="USDT"
+            internalText={firstStepValues.loanToken?.symbol}
             tooltipText="Tooltip text"
             error={props.touched.minimumBorrowingAmount && props.errors.minimumBorrowingAmount}
             isWarning={Boolean(
@@ -209,7 +209,7 @@ export default function SecondStep({
           {props.values.minimumBorrowingAmount &&
           props.values.minimumBorrowingAmount > firstStepValues.loanAmount ? (
             <Alert
-              text="Minimum borrowing amount exceeds specified order balance. Borrowers will not be able to take loans from this order."
+              text={`Minimum borrowing amount exceeds specified Available balance (${firstStepValues.loanAmount} ${firstStepValues.loanToken?.symbol}). Borrowers will not be able to take loans from this order.`}
               type="error"
             />
           ) : null}

@@ -36,7 +36,7 @@ export default function MarginSwapPage() {
     const matching: MarginPosition[] = [];
     const other: MarginPosition[] = [];
 
-    for (const position of positions) {
+    for (const position of openedPositions) {
       const hasA = tokenA && position.assets.some((asset) => asset.equals(tokenA));
 
       const hasB =
@@ -82,16 +82,22 @@ export default function MarginSwapPage() {
             <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
               <div className="flex flex-col gap-2 lg:gap-3">
                 <div className="flex justify-between items-center pl-4 pr-5 py-2 text-secondary-text border-l-4 bg-primary-bg rounded-2 border-purple">
-                  {!!(tokenA && !tokenB && matchingPositions?.length) &&
-                    `${matchingPositions?.length} positions with ${tokenA.symbol}`}
-                  {!!(tokenB && !tokenA && matchingPositions?.length) &&
-                    `${matchingPositions?.length} positions allowed for ${tokenB.symbol} trade`}
-                  {!!(tokenA && tokenB && matchingPositions?.length) &&
-                    `${matchingPositions?.length} positions with ${tokenA.symbol} allowed for ${tokenB.symbol} trade`}
-                  {(!!tokenA || !!tokenB) &&
-                    matchingPositions?.length === 0 &&
-                    "No positions for selected tokens"}
-                  {!tokenA && !tokenB && `You have ${openedPositions?.length} positions`}
+                  {!openedPositions?.length ? (
+                    "You don't have any active positions"
+                  ) : (
+                    <>
+                      {!!(tokenA && !tokenB && matchingPositions?.length) &&
+                        `${matchingPositions?.length} positions with ${tokenA.symbol}`}
+                      {!!(tokenB && !tokenA && matchingPositions?.length) &&
+                        `${matchingPositions?.length} positions allowed for ${tokenB.symbol} trade`}
+                      {!!(tokenA && tokenB && matchingPositions?.length) &&
+                        `${matchingPositions?.length} positions with ${tokenA.symbol} allowed for ${tokenB.symbol} trade`}
+                      {(!!tokenA || !!tokenB) &&
+                        matchingPositions?.length === 0 &&
+                        "No positions for selected tokens"}
+                      {!tokenA && !tokenB && `You have ${openedPositions?.length} position(s)`}
+                    </>
+                  )}
                   <SelectPositionDialog />
                 </div>
               </div>

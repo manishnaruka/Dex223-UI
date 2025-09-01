@@ -16,6 +16,7 @@ import {
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import { FirstStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
+import { InputWithArrows } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
 import Button, { ButtonSize } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
@@ -146,6 +147,8 @@ export default function FirstStep({
 
   const [isEnoughBalance, setIsEnoughBalance] = useState<boolean>(true);
 
+  const [value, setValue] = useState<string>("");
+
   const schema = useMemo(() => {
     return Yup.object({
       loanToken: Yup.object().default(undefined).required("Please select a token"),
@@ -244,6 +247,8 @@ export default function FirstStep({
             onChange={(e) => props.setFieldValue("interestRatePerMonth", e.target.value)}
           />
 
+          {/*<InputWithArrows value={value} onChange={(e) => setValue(e.target.value)} />*/}
+          {/**/}
           <div className="bg-tertiary-bg rounded-3 px-5 py-4 flex flex-col gap-2 mb-5 mt-4">
             <LendingOrderDetailsRow
               title="Interest rate for the entire period"

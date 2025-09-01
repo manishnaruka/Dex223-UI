@@ -394,7 +394,10 @@ export default function BorrowMarketTable({
                         </Link>
                       ) : (
                         <>
-                          <Link className={"flex-shrink-0"} href={`/margin-swap`}>
+                          <Link
+                            className={"flex-shrink-0 pointer-events-none"}
+                            href={`/margin-swap`}
+                          >
                             <Button
                               // disabled={o.balance < o.minLoan}
                               disabled

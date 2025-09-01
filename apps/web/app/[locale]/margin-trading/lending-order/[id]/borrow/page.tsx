@@ -11,10 +11,6 @@ import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
 import { usePublicClient } from "wagmi";
 import * as Yup from "yup";
 
-import SelectPositionDialog, {
-  SelectedPositionInfo,
-} from "@/app/[locale]/margin-swap/components/SelectPositionDialog";
-import TradeForm from "@/app/[locale]/margin-swap/components/TradeForm";
 import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import ReviewBorrowDialog from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/components/ReviewBorrowDialog";
@@ -24,7 +20,6 @@ import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/
 import LendingOrderTokenSelect from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderTokenSelect";
 import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { useBorrowRecentTransactionsStore } from "@/app/[locale]/margin-trading/stores/useBorrowRecentTransactionsStore";
-import { OrderActionMode } from "@/app/[locale]/margin-trading/types";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Collapse from "@/components/atoms/Collapse";
 import Container from "@/components/atoms/Container";
@@ -47,6 +42,7 @@ import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolio
 import { ORACLE_ABI } from "@/config/abis/oracle";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { IIFE } from "@/functions/iife";
 import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
@@ -284,25 +280,24 @@ export default function BorrowPage({
   const { values, touched, setFieldValue, errors, handleSubmit, validateForm } = formik;
 
   const updateFromCollateral = useCallback(
-    async (collateralAmount: string, leverage: string) => {
+    async (collateralAmount: string, leverage: string, ratioOverride?: number) => {
       const decimals = values.collateralToken?.decimals ?? 18;
 
       const collateralBigInt = parseUnits(collateralAmount, decimals);
       const leverageBigInt = parseUnits(leverage, 18);
-      const price = getFixedPrice(ratio!);
-      console.log(leverage);
-      console.log(price);
 
+      const effectiveRatio = ratioOverride ?? ratio;
+      if (!effectiveRatio) return; // protect against undefined
+
+      const price = getFixedPrice(effectiveRatio);
       const B = recalculateFromCollateralFixed(collateralBigInt, leverageBigInt, price);
       const formatted = formatUnits(B, order?.baseAsset.decimals ?? 18);
 
       await setFieldValue("collateralAmount", collateralAmount, false);
-
       await setFieldValue("borrowAmount", formatted, false);
-
       await validateForm();
     },
-    [order, ratio, setFieldValue, validateForm, values.collateralToken?.decimals],
+    [order?.baseAsset.decimals, ratio, setFieldValue, validateForm, values.collateralToken],
   );
 
   const updateFromBorrow = useCallback(
@@ -339,49 +334,75 @@ export default function BorrowPage({
     [order, ratio, setFieldValue, validateForm, values.collateralToken?.decimals, values.leverage],
   );
 
-  useEffect(() => {
-    (async () => {
-      console.log("Fired");
+  const getOracleRatio = useCallback(
+    async (base: Token, collateral: Token): Promise<number | undefined> => {
+      if (!publicClient) return undefined;
 
-      if (!order?.baseAsset || !values.collateralToken || !publicClient) {
-        console.log("Returned: missing dependencies");
-        return;
+      // same-asset: 1:1
+      if (base.address0.toLowerCase() === collateral.address0.toLowerCase()) {
+        return 1;
       }
 
-      const baseAsset = order.baseAsset.wrapped;
-      const collateralToken = values.collateralToken.wrapped;
+      const inputAmount = BigInt(10) ** BigInt(base.decimals); // 1 base unit
+      console.log("Calling oracle with:", [base.address0, collateral.address0, inputAmount]);
 
-      if (baseAsset.address0 === collateralToken.address0) {
-        setRatio(1); // 1:1 price
-        console.log("Same asset, ratio = 1");
-        return;
-      }
+      const outputAmount = await publicClient.readContract({
+        address: order!.oracle,
+        abi: ORACLE_ABI,
+        functionName: "getAmountOut",
+        args: [base.address0, collateral.address0, inputAmount],
+      });
 
-      try {
-        const inputAmount = BigInt(10) ** BigInt(baseAsset.decimals); // 1 unit of base asset
-        console.log("Calling oracle with:", [
-          baseAsset.address0,
-          collateralToken.address0,
-          inputAmount,
-        ]);
+      console.log("Oracle output:", outputAmount);
+      // output/base
+      return getPrice(outputAmount as bigint, inputAmount);
+    },
+    [order, publicClient],
+  );
 
-        const outputAmount = await publicClient.readContract({
-          address: order.oracle,
-          abi: ORACLE_ABI,
-          functionName: "getAmountOut",
-          args: [baseAsset.address0, collateralToken.address0, inputAmount],
-        });
-
-        const ratio = getPrice(outputAmount as bigint, inputAmount); // output/base price
-        console.log("Oracle output:", outputAmount);
-        console.log("Computed ratio:", ratio);
-
-        setRatio(ratio);
-      } catch (e) {
-        console.error("Failed to fetch ratio:", e);
-      }
-    })();
-  }, [chainId, order, values.collateralToken, publicClient]);
+  // useEffect(() => {
+  //   (async () => {
+  //     console.log("Fired");
+  //
+  //     if (!order?.baseAsset || !values.collateralToken || !publicClient) {
+  //       console.log("Returned: missing dependencies");
+  //       return;
+  //     }
+  //
+  //     const baseAsset = order.baseAsset.wrapped;
+  //     const collateralToken = values.collateralToken.wrapped;
+  //
+  //     if (baseAsset.address0 === collateralToken.address0) {
+  //       setRatio(1); // 1:1 price
+  //       console.log("Same asset, ratio = 1");
+  //       return;
+  //     }
+  //
+  //     try {
+  //       const inputAmount = BigInt(10) ** BigInt(baseAsset.decimals); // 1 unit of base asset
+  //       console.log("Calling oracle with:", [
+  //         baseAsset.address0,
+  //         collateralToken.address0,
+  //         inputAmount,
+  //       ]);
+  //
+  //       const outputAmount = await publicClient.readContract({
+  //         address: order.oracle,
+  //         abi: ORACLE_ABI,
+  //         functionName: "getAmountOut",
+  //         args: [baseAsset.address0, collateralToken.address0, inputAmount],
+  //       });
+  //
+  //       const ratio = getPrice(outputAmount as bigint, inputAmount); // output/base price
+  //       console.log("Oracle output:", outputAmount);
+  //       console.log("Computed ratio:", ratio);
+  //
+  //       setRatio(ratio);
+  //     } catch (e) {
+  //       console.error("Failed to fetch ratio:", e);
+  //     }
+  //   })();
+  // }, [chainId, order, values.collateralToken, publicClient]);
 
   const minCollateralAmount = useMemo(() => {
     if (
@@ -506,12 +527,20 @@ export default function BorrowPage({
   }, [order, order?.positionDuration]);
 
   const [searchTradableTokenValue, setSearchTradableTokenValue] = useState("");
-
+  //
   const [filteredTokens, isTokenFilterActive] = useMemo(() => {
     return searchTradableTokenValue
       ? [filterTokens(searchTradableTokenValue, order?.allowedTradingAssets || []), true]
       : [order?.allowedTradingAssets || [], false];
   }, [searchTradableTokenValue, order?.allowedTradingAssets]);
+
+  useEffect(() => {
+    (async () => {
+      if (!order?.baseAsset || !values.collateralToken) return;
+      const r = await getOracleRatio(order.baseAsset.wrapped, values.collateralToken.wrapped);
+      if (r !== undefined) setRatio(r);
+    })();
+  }, [chainId, order, values.collateralToken, getOracleRatio]);
 
   if (loading || !order) {
     return "Loading...";
@@ -593,6 +622,21 @@ export default function BorrowPage({
                     token={values.collateralToken}
                     setToken={async (token: Currency) => {
                       await setFieldValue("collateralToken", token);
+
+                      // fetch fresh ratio right away and store it
+                      if (order?.baseAsset) {
+                        const r = await getOracleRatio(order.baseAsset.wrapped, token.wrapped);
+                        if (r !== undefined) setRatio(r);
+
+                        // if we already have inputs, recompute borrow using the fresh ratio
+                        if (values.collateralAmount && values.leverage && r !== undefined) {
+                          await updateFromCollateral(
+                            values.collateralAmount.toString(),
+                            values.leverage.toString(),
+                            r,
+                          );
+                        }
+                      }
                     }}
                     amount={values.collateralAmount}
                     setAmount={async (collateralAmount: string) => {

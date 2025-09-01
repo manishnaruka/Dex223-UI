@@ -150,17 +150,23 @@ export function TokenPortfolioDialogContent({
       <p className="text-secondary-text card-spacing-x py-3">
         {t("found_in", { amount: token.lists?.length })}
       </p>
-      <ScrollbarContainer height="full" className="max-h-[340px] overflow-y-auto -pr-1 mr-1">
-        <div className="flex flex-col gap-3 card-spacing">
-          {token.lists?.map((listId) => {
-            return (
-              <div className="flex gap-3 items-center justify-between flex-col" key={listId}>
-                <TokenListInfo onManageListAction={onManageListAction} listId={listId} />
-              </div>
-            );
-          })}
+      {token.lists?.length ? (
+        <ScrollbarContainer height="full" className="max-h-[340px] overflow-y-auto -pr-1 mr-1">
+          <div className="flex flex-col gap-3 card-spacing">
+            {token.lists?.map((listId) => {
+              return (
+                <div className="flex gap-3 items-center justify-between flex-col" key={listId}>
+                  <TokenListInfo onManageListAction={onManageListAction} listId={listId} />
+                </div>
+              );
+            })}
+          </div>
+        </ScrollbarContainer>
+      ) : (
+        <div className="text-secondary-text min-h-[340px] bg-empty-list bg-right flex items-center card-spacing-x bg-no-repeat justify-center">
+          Token not found in any token list
         </div>
-      </ScrollbarContainer>
+      )}
     </div>
   );
 }

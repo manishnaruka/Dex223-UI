@@ -1,6 +1,7 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { parseUnits } from "viem";
@@ -14,6 +15,7 @@ import {
   CreateMarginPositionStatus,
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
+import { useNewlyCreatedPositionId } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useNewlyCreatedPositionId";
 import { calculatePeriodInterestRate } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
 import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
@@ -117,12 +119,15 @@ export default function ReviewBorrowDialog({
   orderId: string;
   order: LendingOrder;
 }) {
+  const locale = useLocale();
+
   const { isOpen, setIsOpen } = useConfirmBorrowPositionDialogStore();
   const { values, setValues } = useCreateMarginPositionConfigStore();
-  const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
-    useCreateMarginPositionStatusStore();
+  const { status, setStatus } = useCreateMarginPositionStatusStore();
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
   const [isEditApproveFeeActive, setEditApproveFeeActive] = React.useState(false);
+
+  const { positionId, setPositionId } = useNewlyCreatedPositionId();
 
   const isFeeAndCollateralSame = useMemo(() => {
     return values.collateralToken?.equals(order.liquidationRewardAsset);
@@ -165,9 +170,10 @@ export default function ReviewBorrowDialog({
     if (isFinalStatus && !isOpen) {
       setTimeout(() => {
         setStatus(CreateMarginPositionStatus.INITIAL);
+        setPositionId(undefined);
       }, 400);
     }
-  }, [isFinalStatus, isOpen, setStatus]);
+  }, [isFinalStatus, isOpen, setPositionId, setStatus]);
 
   const [formattedEndTime, setFormattedEndTime] = useState<string>("");
 
@@ -448,7 +454,10 @@ export default function ReviewBorrowDialog({
                   {order.baseAsset.symbol} {values.borrowAmount}
                 </p>
                 <div className="flex justify-center">
-                  <ExternalTextLink text="View my position" href={"#"} />
+                  <ExternalTextLink
+                    text="View my position"
+                    href={`/${locale}/margin-trading/position/${positionId}`}
+                  />
                 </div>
               </div>
             )}

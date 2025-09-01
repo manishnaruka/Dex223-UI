@@ -49,10 +49,10 @@ export default function MarginPositionPage({
     <div className="py-10">
       <Container>
         <div className="mb-10">
-          <Link href="/" className="flex items-center gap-1">
+          <button onClick={() => window.history.back()} className="flex items-center gap-1">
             <Svg iconName="back" />
             Back to margin positions
-          </Link>
+          </button>
         </div>
 
         <h1 className="text-40 font-medium mb-3">Margin position details</h1>

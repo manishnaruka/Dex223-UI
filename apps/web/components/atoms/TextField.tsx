@@ -107,15 +107,17 @@ export default function TextField({
             (() => {
               const { isNumeric, ...rest } = props;
               return (
-                <NumericFormat
-                  inputMode="decimal"
-                  allowedDecimalSeparators={[","]}
-                  isError={Boolean(error) || isError}
-                  isWarning={Boolean(warning) || isWarning}
-                  customInput={Input}
-                  inputSize={inputSize}
-                  {...rest}
-                />
+                <>
+                  <NumericFormat
+                    inputMode="decimal"
+                    allowedDecimalSeparators={[","]}
+                    isError={Boolean(error) || isError}
+                    isWarning={Boolean(warning) || isWarning}
+                    customInput={Input}
+                    inputSize={inputSize}
+                    {...rest}
+                  />
+                </>
               );
             })()
           ) : (

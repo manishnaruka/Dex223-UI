@@ -147,8 +147,13 @@ export default function LendingOrder({
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link href={`/margin-trading/lending-order/${order.id}/borrow`}>
-                  <Button colorScheme={ButtonColor.LIGHT_PURPLE}>Margin swap</Button>
+                <Link
+                  className={"flex-shrink-0 pointer-events-none"}
+                  href={`/margin-trading/lending-order/${order.id}/borrow`}
+                >
+                  <Button disabled colorScheme={ButtonColor.LIGHT_PURPLE}>
+                    Margin swap
+                  </Button>
                 </Link>
                 <Link href={`/margin-trading/lending-order/${order.id}/borrow`}>
                   <Button>Borrow</Button>
@@ -236,9 +241,11 @@ export default function LendingOrder({
             </div>
             <span className="text-20">{order.positions?.length} margin position(s)</span>
           </div>
-          <Button colorScheme={ButtonColor.LIGHT_GREEN} endIcon="next">
-            View margin positions
-          </Button>
+          {!!order.positions?.length && (
+            <Button colorScheme={ButtonColor.LIGHT_GREEN} endIcon="next">
+              View margin positions
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-2 rounded-5 gap-x-5 gap-y-4 bg-primary-bg px-10 pt-4 pb-5 mb-5">
@@ -473,19 +480,26 @@ export default function LendingOrder({
           </div>
         </div>
 
-        <h2 className="text-32 text-secondary-text font-medium mb-5">Margin positions</h2>
-        <div className="grid gap-5">
-          {!!order.positions?.length &&
-            order.positions.map((position, index) => (
-              <React.Fragment key={position.id}>
-                {position.isLiquidated || position.isClosed ? (
-                  <InactiveMarginPositionCard key={position.id} position={{ ...position, order }} />
-                ) : (
-                  <LendingPositionCard position={{ ...position, order }} />
-                )}
-              </React.Fragment>
-            ))}
-        </div>
+        {!!order.positions?.length && (
+          <>
+            <h2 className="text-32 text-secondary-text font-medium mb-5">Margin positions</h2>
+            <div className="grid gap-5">
+              {!!order.positions?.length &&
+                order.positions.map((position, index) => (
+                  <React.Fragment key={position.id}>
+                    {position.isLiquidated || position.isClosed ? (
+                      <InactiveMarginPositionCard
+                        key={position.id}
+                        position={{ ...position, order }}
+                      />
+                    ) : (
+                      <LendingPositionCard position={{ ...position, order }} />
+                    )}
+                  </React.Fragment>
+                ))}
+            </div>
+          </>
+        )}
       </Container>
 
       <OrderDepositDialog

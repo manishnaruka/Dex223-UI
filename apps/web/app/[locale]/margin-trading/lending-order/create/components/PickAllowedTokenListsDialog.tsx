@@ -37,12 +37,20 @@ export default function PickAllowedTokenListsDialog({
   return (
     <Dialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title="Tokens allowed for trading" />
-      <div className="card-spacing-x flex flex-col gap-2 max-h-[500px] pb-5">
-        <SearchInput
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="Search autolisting"
-        />
+      <div className="flex flex-col gap-2 max-h-[640px] pb-5">
+        <div className="card-spacing-x ">
+          <SearchInput
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Search autolisting"
+          />
+        </div>
+
+        {searchValue && !filteredAutoListing?.length && (
+          <div className="h-[532px] flex items-center justify-center bg-empty-not-found-list bg-no-repeat bg-right-top -mt-2 flex-shrink-0">
+            Listing contract not found
+          </div>
+        )}
 
         {!!filteredAutoListing && filteredAutoListing?.length > 0 && (
           <>
@@ -50,7 +58,7 @@ export default function PickAllowedTokenListsDialog({
               return (
                 <div
                   key={autolisting.id}
-                  className="flex justify-between items-center min-h-[60px]"
+                  className="card-spacing-x flex justify-between items-center min-h-[60px] hocus:bg-tertiary-bg duration-200"
                   role="button"
                   onClick={() => {
                     setAutoListing(autolisting);

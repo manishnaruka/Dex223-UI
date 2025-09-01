@@ -364,6 +364,7 @@ export default function useCreateOrder() {
               setStatus(CreateOrderStatus.ERROR_APPROVE);
               return;
             }
+            setApproveHash(approveResult.hash);
 
             setStatus(CreateOrderStatus.LOADING_APPROVE);
 
