@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { Formik } from "formik";
 import Image from "next/image";
 import React from "react";
-import { number, object } from "yup";
+import { array, mixed, number, object } from "yup";
 
 import { calculatePeriodInterestRateNum } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
@@ -20,7 +20,7 @@ import {
 import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import { InputSize } from "@/components/atoms/Input";
-import TextField, { InputLabel } from "@/components/atoms/TextField";
+import TextField, { HelperText, InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { formatFloat } from "@/functions/formatFloat";
@@ -51,6 +51,21 @@ export default function SecondStep({
             0,
             `Must be greater than 0 ${firstStepValues.loanToken ? firstStepValues.loanToken.symbol : ""}`,
           ),
+        collateralTokens: array()
+          .of(mixed().required())
+          .min(1, "Pick at least one collateral token")
+          .required("Pick at least one collateral token"),
+        tradingTokens: object({
+          tradingTokensAutoListing: mixed().nullable(), // boolean or array of selected lists
+          allowedTokens: array()
+            .of(mixed().required())
+            .when("tradingTokensAutoListing", (auto: unknown, schema) => {
+              // If token list mode is OFF/empty → require tokens; else skip validation
+              const isOff =
+                auto === false || auto == null || (Array.isArray(auto) && auto.length === 0); // handles "array of lists" case
+              return isOff ? schema.min(1, "Pick at least one token allowed for trading") : schema; // no requirement when list(s) selected
+            }),
+        }),
       })}
       onSubmit={async (values, { validateForm }) => {
         // const errors = await validateForm(values);
@@ -173,6 +188,13 @@ export default function SecondStep({
                 );
               })}
             </div>
+            {/*<HelperText*/}
+            {/*  error={*/}
+            {/*    props.touched.collateralTokens && props.errors.collateralTokens*/}
+            {/*      ? props.errors.collateralTokens*/}
+            {/*      : undefined*/}
+            {/*  }*/}
+            {/*/>*/}
           </div>
           <LendingOrderTokensSourceConfig
             values={props.values.tradingTokens}

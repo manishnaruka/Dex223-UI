@@ -73,7 +73,7 @@ export default function MarginPositionsTab() {
         )}
       {!isConnected && !loading && (!searchValue || !isAddress(searchValue)) && (
         <div className="bg-primary-bg rounded-5 h-[340px] bg-empty-wallet bg-no-repeat bg-right-top max-md:bg-size-180 flex items-center gap-2 justify-center text-secondary-text">
-          Search by address or connect wallet to view lending orders
+          Search by address or connect wallet to view margin positions
         </div>
       )}
     </>

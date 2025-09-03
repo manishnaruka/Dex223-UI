@@ -6,6 +6,7 @@ import {
   OrderWithdrawStatus,
   useWithdrawOrderStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useWithdrawOrderStatusStore";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -19,11 +20,11 @@ import {
 } from "@/stores/useRecentTransactionsStore";
 
 export default function useOrderWithdraw({
-  orderId,
+  order,
   currency,
   amountToWithdraw,
 }: {
-  orderId: number;
+  order: LendingOrder;
   currency: Currency;
   amountToWithdraw: string;
 }) {
@@ -46,7 +47,7 @@ export default function useOrderWithdraw({
       abi: MARGIN_MODULE_ABI,
       address: MARGIN_TRADING_ADDRESS[chainId],
       functionName: "orderWithdraw" as const,
-      args: [BigInt(orderId), parseUnits(amountToWithdraw, currency.decimals ?? 18)] as const,
+      args: [BigInt(order.id), parseUnits(amountToWithdraw, currency.decimals ?? 18)] as const,
     };
 
     try {
@@ -85,6 +86,7 @@ export default function useOrderWithdraw({
             template: RecentTransactionTitleTemplate.WITHDRAW,
             amount: amountToWithdraw,
             logoURI: currency?.logoURI || "/images/tokens/placeholder.svg",
+            standard: order.baseAssetStandard,
           },
         },
         address,
@@ -110,7 +112,7 @@ export default function useOrderWithdraw({
     currency.decimals,
     currency?.logoURI,
     currency.symbol,
-    orderId,
+    order,
     publicClient,
     setStatus,
     setWithdrawHash,

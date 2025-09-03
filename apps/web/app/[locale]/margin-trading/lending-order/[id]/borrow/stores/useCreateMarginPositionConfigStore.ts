@@ -27,7 +27,7 @@ export const useCreateMarginPositionConfigStore = create<CreateMarginPositionCon
       collateralAmount: "",
       collateralToken: undefined,
       collateralTokenStandard: Standard.ERC20,
-      leverage: "1.01",
+      leverage: "2",
       liquidationFeeStandard: Standard.ERC20,
     },
 

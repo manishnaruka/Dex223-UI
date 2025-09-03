@@ -6,8 +6,10 @@ import {
   LendingOrderTradingTokens,
   TradingTokensInputMode,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
-import { useAllowedTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
-import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
+import {
+  useAllowedTokenListsDialogOpenedStore,
+  useAllowedTokensDialogOpenedStore,
+} from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { InputSize } from "@/components/atoms/Input";
 import { InputLabel } from "@/components/atoms/TextField";
 import IconButton from "@/components/buttons/IconButton";
@@ -30,7 +32,7 @@ export default function LendingOrderTokensSourceConfig({
 
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4">
-      <InputLabel label="Token source type" />
+      <InputLabel inputSize={InputSize.LARGE} label="Token source type" />
       <div className="grid grid-cols-2 gap-2 mb-4 mt-1">
         {[TradingTokensInputMode.MANUAL, TradingTokensInputMode.AUTOLISTING].map((_source) => {
           return (

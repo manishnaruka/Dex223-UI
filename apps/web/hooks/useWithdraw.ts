@@ -14,6 +14,7 @@ import useDeepEffect from "@/hooks/useDeepEffect";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,
@@ -188,6 +189,7 @@ export default function useWithdraw({
               template: RecentTransactionTitleTemplate.WITHDRAW,
               amount: formatUnits(amount, token.decimals),
               logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
+              standard: Standard.ERC223,
             },
           },
           address,

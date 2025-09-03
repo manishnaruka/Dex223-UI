@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
 import gql from "graphql-tag";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Address } from "viem";
 
 import {
@@ -100,6 +100,8 @@ type OrdersWhere = {
   whitelist_?: {
     or?: { allowedForTrading_contains?: Address[] }[]; // SINGLE Address
   };
+  alive: boolean;
+  deadline_gt: number;
 };
 
 export function useOrders({
@@ -135,10 +137,13 @@ export function useOrders({
 } {
   const apolloClient = useMarginModuleApolloClient();
   const chainId = useCurrentChainId();
+  const requestTimeRef = useRef<number>(Date.now());
 
-  console.log(baseAsset_in);
   const where = useMemo(() => {
-    const f: OrdersWhere = {};
+    const f: OrdersWhere = {
+      alive: true,
+      deadline_gt: +(requestTimeRef.current / 1000).toFixed(0),
+    };
     // helper to turn "" or undefined into undefined, else +string
     const toNum = (raw?: string) => {
       if (!raw || raw.trim() === "") return undefined;

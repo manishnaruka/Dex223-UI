@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Address } from "viem";
 
+import { InputSize } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import { InputLabel } from "@/components/atoms/TextField";
 import RadioButton from "@/components/buttons/RadioButton";
@@ -30,7 +31,7 @@ export default function LiquidationOracleSelect() {
   const [oracle, setOracle] = useState<LiquidationOracle>("dex223");
   return (
     <div className="mb-[34px]">
-      <InputLabel label="Liquidation price source" />
+      <InputLabel inputSize={InputSize.LARGE} label="Liquidation price source" />
       <div className="grid gap-2 mb-4 mt-1">
         {oracles.map((_oracle) => (
           <RadioButton

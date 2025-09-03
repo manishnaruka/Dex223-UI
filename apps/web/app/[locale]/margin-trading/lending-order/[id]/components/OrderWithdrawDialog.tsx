@@ -65,7 +65,7 @@ function OrderWithdrawActionButton({
   disabled?: boolean;
 }) {
   const { handleOrderWithdraw } = useOrderWithdraw({
-    orderId: order.id,
+    order,
     amountToWithdraw,
     currency: order.baseAsset,
   });
@@ -128,15 +128,12 @@ export default function OrderWithdrawDialog({
   );
 
   useEffect(() => {
-    if (
-      (status === OrderWithdrawStatus.ERROR_WITHDRAW || status === OrderWithdrawStatus.SUCCESS) &&
-      !isOpen
-    ) {
+    if (isFinalStatus && !isOpen && !isOpen) {
       setTimeout(() => {
         setStatus(OrderWithdrawStatus.INITIAL);
       }, 400);
     }
-  }, [isOpen, setStatus, status]);
+  }, [isFinalStatus, isOpen, setStatus]);
 
   const error = useMemo(() => {
     if (parseUnits(amountToWithdraw, order.baseAsset.decimals) > order.balance)
@@ -175,7 +172,7 @@ export default function OrderWithdrawDialog({
                   return (
                     <RadioButton
                       key={st}
-                      className="min-h-10 py-2"
+                      className="min-h-10 py-2 bg-tertiary-bg"
                       isActive={st === order.baseAssetStandard}
                       disabled={st !== order.baseAssetStandard}
                     >

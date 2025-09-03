@@ -8,6 +8,7 @@ import { useAccount } from "wagmi";
 import { useOrders } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import { useBorrowMarketFilterStore } from "@/app/[locale]/margin-trading/stores/useBorrowMarketFilterStore";
 import { LendingOrder } from "@/app/[locale]/margin-trading/types";
+import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
@@ -71,20 +72,6 @@ export function HeaderItem({
 }
 
 const PAGE_SIZE = 10;
-
-type Order = {
-  token: {
-    minAmount: number;
-    maxAmount: number;
-    name: string;
-  };
-  interest: number;
-  leverage: number;
-  limit: number;
-  collateralTokens: number;
-  tradableTokens: number;
-  period: number | [number, number];
-};
 
 const headerColumns: Array<{ field: SortingField; title: string; sortable: boolean }> = [
   { field: "balance", title: "Order balance", sortable: true },
@@ -188,6 +175,10 @@ export default function BorrowMarketTable({
     return orders?.slice(firstPageIndex, lastPageIndex) || [];
   }, [orders, currentPage]);
 
+  const currentTimestamp = useMemo(() => {
+    return Date.now() / 1000;
+  }, []);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -262,6 +253,9 @@ export default function BorrowMarketTable({
                         }}
                       >
                         <div className="pl-2.5 rounded-l-3 h-[56px] flex items-center gap-2 group-hocus:bg-tertiary-bg duration-200 pr-2">
+                          {o.allowedTradingAssets.length === 0 && (
+                            <Svg iconName="warning" className="text-red-light" />
+                          )}
                           <Image
                             src="/images/tokens/placeholder.svg"
                             width={24}
@@ -408,11 +402,21 @@ export default function BorrowMarketTable({
                             </Button>
                           </Link>
                           <Link
-                            className={"flex-shrink-0"}
+                            className={clsx(
+                              "flex-shrink-0",
+                              (o.balance < o.minLoan ||
+                                currentTimestamp > o.deadline ||
+                                o.allowedTradingAssets.length === 0) &&
+                                "pointer-events-none",
+                            )}
                             href={`/margin-trading/lending-order/${o.id}/borrow`}
                           >
                             <Button
-                              disabled={o.balance < o.minLoan}
+                              disabled={
+                                o.balance < o.minLoan ||
+                                currentTimestamp > o.deadline ||
+                                o.allowedTradingAssets.length === 0
+                              }
                               size={ButtonSize.MEDIUM}
                               colorScheme={ButtonColor.LIGHT_GREEN}
                             >

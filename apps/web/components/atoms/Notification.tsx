@@ -128,7 +128,7 @@ function NotificationTitle({
               ? t("withdraw_success_notification", { symbol: title.symbol })
               : t("withdraw_revert_notification", { symbol: title.symbol })}
           </NotificationTitleText>
-          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
+          <Badge variant={BadgeVariant.STANDARD} standard={title.standard} />
         </div>
       );
     case RecentTransactionTitleTemplate.CONVERT:

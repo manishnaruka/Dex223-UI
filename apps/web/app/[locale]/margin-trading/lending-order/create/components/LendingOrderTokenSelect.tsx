@@ -68,16 +68,16 @@ export default function LendingOrderTokenSelect({
     }
 
     if (
-      !token0Balance ||
-      (token0Balance.value < parseUnits(amount, token.decimals) && standard === Standard.ERC20)
+      standard === Standard.ERC20 &&
+      (!token0Balance || token0Balance.value < parseUnits(amount, token.decimals))
     ) {
       setIsEnoughBalance(false);
       return;
     }
 
     if (
-      !token1Balance ||
-      (token1Balance.value < parseUnits(amount, token.decimals) && standard === Standard.ERC223)
+      standard === Standard.ERC223 &&
+      (!token1Balance || token1Balance.value < parseUnits(amount, token.decimals))
     ) {
       setIsEnoughBalance(false);
       return;

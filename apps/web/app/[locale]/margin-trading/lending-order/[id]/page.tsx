@@ -3,7 +3,7 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import GradientCard, { CardGradient } from "@repo/ui/gradient-card";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
-import React, { use, useMemo, useState } from "react";
+import React, { use, useMemo, useRef, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -68,6 +68,7 @@ export default function LendingOrder({
   }, [address, order]);
 
   console.log(order?.allowedCollateralAssets);
+  const requestTimeRef = useRef<number>(Date.now());
 
   const [searchTradableTokenValue, setSearchTradableTokenValue] = useState("");
 
@@ -146,19 +147,40 @@ export default function LendingOrder({
                 </Link>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  className={"flex-shrink-0 pointer-events-none"}
-                  href={`/margin-trading/lending-order/${order.id}/borrow`}
-                >
-                  <Button disabled colorScheme={ButtonColor.LIGHT_PURPLE}>
-                    Margin swap
-                  </Button>
-                </Link>
-                <Link href={`/margin-trading/lending-order/${order.id}/borrow`}>
-                  <Button>Borrow</Button>
-                </Link>
-              </div>
+              <>
+                {order.alive && (
+                  <div className="flex items-center gap-3">
+                    <Link
+                      className={"flex-shrink-0 pointer-events-none"}
+                      href={`/margin-trading/lending-order/${order.id}/borrow`}
+                    >
+                      <Button disabled colorScheme={ButtonColor.LIGHT_PURPLE}>
+                        Margin swap
+                      </Button>
+                    </Link>
+                    <Link
+                      className={
+                        order.balance < order.minLoan ||
+                        requestTimeRef.current / 1000 > order.deadline ||
+                        order.allowedTradingAssets.length === 0
+                          ? "pointer-events-none"
+                          : ""
+                      }
+                      href={`/margin-trading/lending-order/${order.id}/borrow`}
+                    >
+                      <Button
+                        disabled={
+                          order.balance < order.minLoan ||
+                          requestTimeRef.current / 1000 > order.deadline ||
+                          order.allowedTradingAssets.length === 0
+                        }
+                      >
+                        Borrow
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

@@ -104,7 +104,7 @@ export type IRecentTransactionTitle =
     } & SingleTokenTransactionTitle)
   | ({
       template: RecentTransactionTitleTemplate.WITHDRAW;
-    } & SingleTokenTransactionTitle)
+    } & SingleTokenTransactionTitle & { standard: Standard })
   | ({
       template: RecentTransactionTitleTemplate.TRANSFER;
     } & SingleTokenTransactionTitle)

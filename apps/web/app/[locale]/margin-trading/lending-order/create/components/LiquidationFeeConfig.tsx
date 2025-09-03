@@ -3,6 +3,7 @@ import Image from "next/image";
 import React, { useCallback, useState } from "react";
 
 import { ThirdStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
+import { InputSize } from "@/components/atoms/Input";
 import Select from "@/components/atoms/Select";
 import SelectButton from "@/components/atoms/SelectButton";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
@@ -49,7 +50,7 @@ export default function LiquidationFeeConfig({
 
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mt-4 mb-6">
-      <InputLabel label="Pays the liquidation deposit" />
+      <InputLabel inputSize={InputSize.LARGE} label="Pays the liquidation deposit" />
       <div className="grid grid-cols-2 gap-2 mb-4 mt-1">
         {feePayers.map((_feePayer) => {
           return (
@@ -68,7 +69,7 @@ export default function LiquidationFeeConfig({
         })}
       </div>
 
-      <InputLabel label="Liquidation fee token" />
+      <InputLabel inputSize={InputSize.LARGE} label="Liquidation fee token" />
       <SelectButton
         type="button"
         className="bg-quaternary-bg mb-6 pl-5"

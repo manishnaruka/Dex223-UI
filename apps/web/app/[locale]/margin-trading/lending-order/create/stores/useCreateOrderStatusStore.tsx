@@ -1,5 +1,3 @@
-import { Address } from "viem";
-
 import { createOperationStatusStore } from "@/stores/factories/createOperationStatusStore";
 
 // TODO: move to global and rename
@@ -27,20 +25,6 @@ export enum CreateOrderStatus {
 export enum SwapError {
   OUT_OF_GAS,
   UNKNOWN,
-}
-
-interface SwapStatusStore {
-  status: CreateOrderStatus;
-  approveHash: Address | undefined;
-  confirmOrderHash: Address | undefined;
-  depositHash: Address | undefined;
-  errorType: SwapError;
-
-  setStatus: (status: CreateOrderStatus) => void;
-  setErrorType: (errorType: SwapError) => void;
-  setApproveHash: (hash: Address) => void;
-  setConfirmOrderHash: (hash: Address) => void;
-  setDepositHash: (hash: Address) => void;
 }
 
 export const useCreateOrderStatusStore = createOperationStatusStore({
