@@ -1,5 +1,4 @@
 import Alert from "@repo/ui/alert";
-import Checkbox from "@repo/ui/checkbox";
 import clsx from "clsx";
 import { Formik } from "formik";
 import Image from "next/image";
