@@ -50,21 +50,21 @@ export default function SecondStep({
             0,
             `Must be greater than 0 ${firstStepValues.loanToken ? firstStepValues.loanToken.symbol : ""}`,
           ),
-        collateralTokens: array()
-          .of(mixed().required())
-          .min(1, "Pick at least one collateral token")
-          .required("Pick at least one collateral token"),
-        tradingTokens: object({
-          tradingTokensAutoListing: mixed().nullable(), // boolean or array of selected lists
-          allowedTokens: array()
-            .of(mixed().required())
-            .when("tradingTokensAutoListing", (auto: unknown, schema) => {
-              // If token list mode is OFF/empty → require tokens; else skip validation
-              const isOff =
-                auto === false || auto == null || (Array.isArray(auto) && auto.length === 0); // handles "array of lists" case
-              return isOff ? schema.min(1, "Pick at least one token allowed for trading") : schema; // no requirement when list(s) selected
-            }),
-        }),
+        // collateralTokens: array()
+        //   .of(mixed().required())
+        //   .min(1, "Pick at least one collateral token")
+        //   .required("Pick at least one collateral token"),
+        // tradingTokens: object({
+        //   tradingTokensAutoListing: mixed().nullable(), // boolean or array of selected lists
+        //   allowedTokens: array()
+        //     .of(mixed().required())
+        //     .when("tradingTokensAutoListing", (auto: unknown, schema) => {
+        //       // If token list mode is OFF/empty → require tokens; else skip validation
+        //       const isOff =
+        //         auto === false || auto == null || (Array.isArray(auto) && auto.length === 0); // handles "array of lists" case
+        //       return isOff ? schema.min(1, "Pick at least one token allowed for trading") : schema; // no requirement when list(s) selected
+        //     }),
+        // }),
       })}
       onSubmit={async (values, { validateForm }) => {
         // const errors = await validateForm(values);
