@@ -336,14 +336,15 @@ export default function BorrowPage({
 
   const getOracleRatio = useCallback(
     async (base: Token, collateral: Token): Promise<number | undefined> => {
-      if (!publicClient) return undefined;
+      if (!publicClient || !order) return undefined;
 
       // same-asset: 1:1
       if (base.address0.toLowerCase() === collateral.address0.toLowerCase()) {
         return 1;
       }
 
-      const inputAmount = BigInt(10) ** BigInt(base.decimals); // 1 base unit
+      const inputAmount = parseUnits("1", base.decimals); // 1 base unit
+      console.log("Oracle address: " + order.oracle);
       console.log("Calling oracle with:", [base.address0, collateral.address0, inputAmount]);
 
       const outputAmount = await publicClient.readContract({
@@ -352,6 +353,10 @@ export default function BorrowPage({
         functionName: "getAmountOut",
         args: [base.address0, collateral.address0, inputAmount],
       });
+
+      if (!outputAmount) {
+        return;
+      }
 
       console.log("Oracle output:", outputAmount);
       // output/base
@@ -623,19 +628,23 @@ export default function BorrowPage({
                     setToken={async (token: Currency) => {
                       await setFieldValue("collateralToken", token);
 
-                      // fetch fresh ratio right away and store it
-                      if (order?.baseAsset) {
-                        const r = await getOracleRatio(order.baseAsset.wrapped, token.wrapped);
-                        if (r !== undefined) setRatio(r);
+                      try {
+                        // fetch fresh ratio right away and store it
+                        if (order?.baseAsset) {
+                          const r = await getOracleRatio(order.baseAsset.wrapped, token.wrapped);
+                          if (r !== undefined) setRatio(r);
 
-                        // if we already have inputs, recompute borrow using the fresh ratio
-                        if (values.collateralAmount && values.leverage && r !== undefined) {
-                          await updateFromCollateral(
-                            values.collateralAmount.toString(),
-                            values.leverage.toString(),
-                            r,
-                          );
+                          // if we already have inputs, recompute borrow using the fresh ratio
+                          if (values.collateralAmount && values.leverage && r !== undefined) {
+                            await updateFromCollateral(
+                              values.collateralAmount.toString(),
+                              values.leverage.toString(),
+                              r,
+                            );
+                          }
                         }
+                      } catch (error) {
+                        console.log(error);
                       }
                     }}
                     amount={values.collateralAmount}
