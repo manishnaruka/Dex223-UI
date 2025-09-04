@@ -1,4 +1,5 @@
 "use client";
+import Alert from "@repo/ui/alert";
 import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
@@ -340,6 +341,7 @@ export default function BorrowPage({
 
       // same-asset: 1:1
       if (base.address0.toLowerCase() === collateral.address0.toLowerCase()) {
+        setOraclePriceError(undefined);
         return 1;
       }
 
@@ -347,67 +349,31 @@ export default function BorrowPage({
       console.log("Oracle address: " + order.oracle);
       console.log("Calling oracle with:", [base.address0, collateral.address0, inputAmount]);
 
-      const outputAmount = await publicClient.readContract({
-        address: order!.oracle,
-        abi: ORACLE_ABI,
-        functionName: "getAmountOut",
-        args: [base.address0, collateral.address0, inputAmount],
-      });
+      try {
+        const outputAmount = await publicClient.readContract({
+          address: order!.oracle,
+          abi: ORACLE_ABI,
+          functionName: "getAmountOut",
+          args: [base.address0, collateral.address0, inputAmount],
+        });
 
-      if (!outputAmount) {
-        return;
+        console.log(outputAmount);
+
+        if (!outputAmount) {
+          throw new Error("Error getting price with oracle");
+        }
+
+        console.log("Oracle output:", outputAmount);
+        // output/base
+        setOraclePriceError(undefined);
+        return getPrice(outputAmount as bigint, inputAmount);
+      } catch (e) {
+        setOraclePriceError("Oracle can't deliver price ratio");
+        return undefined;
       }
-
-      console.log("Oracle output:", outputAmount);
-      // output/base
-      return getPrice(outputAmount as bigint, inputAmount);
     },
     [order, publicClient],
   );
-
-  // useEffect(() => {
-  //   (async () => {
-  //     console.log("Fired");
-  //
-  //     if (!order?.baseAsset || !values.collateralToken || !publicClient) {
-  //       console.log("Returned: missing dependencies");
-  //       return;
-  //     }
-  //
-  //     const baseAsset = order.baseAsset.wrapped;
-  //     const collateralToken = values.collateralToken.wrapped;
-  //
-  //     if (baseAsset.address0 === collateralToken.address0) {
-  //       setRatio(1); // 1:1 price
-  //       console.log("Same asset, ratio = 1");
-  //       return;
-  //     }
-  //
-  //     try {
-  //       const inputAmount = BigInt(10) ** BigInt(baseAsset.decimals); // 1 unit of base asset
-  //       console.log("Calling oracle with:", [
-  //         baseAsset.address0,
-  //         collateralToken.address0,
-  //         inputAmount,
-  //       ]);
-  //
-  //       const outputAmount = await publicClient.readContract({
-  //         address: order.oracle,
-  //         abi: ORACLE_ABI,
-  //         functionName: "getAmountOut",
-  //         args: [baseAsset.address0, collateralToken.address0, inputAmount],
-  //       });
-  //
-  //       const ratio = getPrice(outputAmount as bigint, inputAmount); // output/base price
-  //       console.log("Oracle output:", outputAmount);
-  //       console.log("Computed ratio:", ratio);
-  //
-  //       setRatio(ratio);
-  //     } catch (e) {
-  //       console.error("Failed to fetch ratio:", e);
-  //     }
-  //   })();
-  // }, [chainId, order, values.collateralToken, publicClient]);
 
   const minCollateralAmount = useMemo(() => {
     if (
@@ -490,6 +456,8 @@ export default function BorrowPage({
 
   const [leverageInput, setLeverageInput] = useState(values.leverage?.toString() ?? "1.01");
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Token | null>(null);
+  const [oraclePriceError, setOraclePriceError] = useState<string | undefined>();
+
   const tokenLists = useTokenLists();
 
   const buttonText = useMemo(() => {
@@ -505,8 +473,12 @@ export default function BorrowPage({
       return getBalanceError;
     }
 
+    if (oraclePriceError) {
+      return oraclePriceError;
+    }
+
     return "Start borrowing now";
-  }, [getBalanceError, values.collateralAmount, values.collateralToken]);
+  }, [getBalanceError, oraclePriceError, values.collateralAmount, values.collateralToken]);
 
   const [formattedEndTime, setFormattedEndTime] = useState<string>("");
 
@@ -543,6 +515,7 @@ export default function BorrowPage({
     (async () => {
       if (!order?.baseAsset || !values.collateralToken) return;
       const r = await getOracleRatio(order.baseAsset.wrapped, values.collateralToken.wrapped);
+      console.log("Ratio from effect: " + r);
       if (r !== undefined) setRatio(r);
     })();
   }, [chainId, order, values.collateralToken, getOracleRatio]);
@@ -632,6 +605,8 @@ export default function BorrowPage({
                         // fetch fresh ratio right away and store it
                         if (order?.baseAsset) {
                           const r = await getOracleRatio(order.baseAsset.wrapped, token.wrapped);
+                          console.log("Ratio from token change: " + r);
+
                           if (r !== undefined) setRatio(r);
 
                           // if we already have inputs, recompute borrow using the fresh ratio
@@ -675,6 +650,7 @@ export default function BorrowPage({
                         : undefined
                     }
                   />
+
                   <InputLabel label="Leverage" tooltipText="Tooltip text" />
                   <div className="flex items-center gap-2">
                     <div className="mb-4 flex-grow">
@@ -759,6 +735,11 @@ export default function BorrowPage({
                     />
                   </div>
                 </div>
+                {oraclePriceError && (
+                  <div className="pb-4">
+                    <Alert text={oraclePriceError} type="error" />
+                  </div>
+                )}
 
                 <TextField
                   placeholder="Enter borrow amount"
@@ -822,7 +803,10 @@ export default function BorrowPage({
                   type="submit"
                   fullWidth
                   disabled={
-                    !!getBalanceError || !values.collateralToken || !values.collateralAmount
+                    !!getBalanceError ||
+                    !values.collateralToken ||
+                    !values.collateralAmount ||
+                    !!oraclePriceError
                   }
                 >
                   {buttonText}
