@@ -228,32 +228,33 @@ export default function PickMultipleTokensDialog({
                           })}
                         </div>
                       </ScrollbarContainer>
-                      <div className="grid grid-cols-2 gap-3 card-spacing-x border-t border-secondary-border py-5">
-                        <Button
-                          type="button"
-                          fullWidth
-                          colorScheme={ButtonColor.LIGHT_GREEN}
-                          onClick={() => {
-                            handleClose();
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          fullWidth
-                          onClick={() => {
-                            handlePick(internalTokens);
-                            handleClose();
-                          }}
-                        >
-                          Apply
-                        </Button>
-                      </div>
                     </>
                   )}
                 </div>
-
+                {Boolean(tokens.length) && (
+                  <div className="grid grid-cols-2 gap-3 card-spacing-x border-t border-secondary-border py-5">
+                    <Button
+                      type="button"
+                      fullWidth
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                      onClick={() => {
+                        handleClose();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      fullWidth
+                      onClick={() => {
+                        handlePick(internalTokens);
+                        handleClose();
+                      }}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                )}
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
                   <div
                     className={clsx(
