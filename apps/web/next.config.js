@@ -23,17 +23,6 @@ const nextConfig = {
       },
     ]
   },
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-        ],
-      },
-    ];
-  },
   images: {
     dangerouslyAllowSVG: true,
     domains: ['ipfs.io', 'cloudflare-ipfs.com', 'gateway.pinata.cloud'],
