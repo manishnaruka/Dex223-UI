@@ -7,9 +7,11 @@ import { Currency } from "@/sdk_bi/entities/currency";
 export default function PickCollateralTokensDialog({
   handlePick,
   allowedTokens,
+  restrictDisable,
 }: {
   handlePick: (tokens: Currency[]) => void;
   allowedTokens: Currency[];
+  restrictDisable?: Currency | undefined;
 }) {
   const { isOpen, setIsOpen } = useAllowedTokensDialogOpenedStore();
 
@@ -19,6 +21,7 @@ export default function PickCollateralTokensDialog({
       setIsOpen={setIsOpen}
       isOpen={isOpen}
       selectedTokens={allowedTokens}
+      restrictDisable={restrictDisable}
     />
   );
 }

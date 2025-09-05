@@ -11,7 +11,10 @@ import LendingOrderTokensSourceConfig from "@/app/[locale]/margin-trading/lendin
 import PickAllowedTokenListsDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickAllowedTokenListsDialog";
 import PickAllowedTokensDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickAllowedTokensDialog";
 import PickCollateralTokensDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickCollateralTokensDialog";
-import { LendingOrderTradingTokens } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
+import {
+  LendingOrderTradingTokens,
+  TradingTokensInputMode,
+} from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import {
   FirstStepValues,
   SecondStepValues,
@@ -23,6 +26,7 @@ import TextField, { HelperText, InputLabel } from "@/components/atoms/TextField"
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import { formatFloat } from "@/functions/formatFloat";
+import addToast from "@/other/toast";
 
 export default function SecondStep({
   mode,
@@ -50,21 +54,25 @@ export default function SecondStep({
             0,
             `Must be greater than 0 ${firstStepValues.loanToken ? firstStepValues.loanToken.symbol : ""}`,
           ),
-        // collateralTokens: array()
-        //   .of(mixed().required())
-        //   .min(1, "Pick at least one collateral token")
-        //   .required("Pick at least one collateral token"),
-        // tradingTokens: object({
-        //   tradingTokensAutoListing: mixed().nullable(), // boolean or array of selected lists
-        //   allowedTokens: array()
-        //     .of(mixed().required())
-        //     .when("tradingTokensAutoListing", (auto: unknown, schema) => {
-        //       // If token list mode is OFF/empty → require tokens; else skip validation
-        //       const isOff =
-        //         auto === false || auto == null || (Array.isArray(auto) && auto.length === 0); // handles "array of lists" case
-        //       return isOff ? schema.min(1, "Pick at least one token allowed for trading") : schema; // no requirement when list(s) selected
-        //     }),
-        // }),
+        collateralTokens: array()
+          .min(1, "Pick at least one collateral token")
+          .required("Pick at least one collateral token"),
+
+        tradingTokens: object({
+          allowedTokens: array().when("inputMode", {
+            is: TradingTokensInputMode.MANUAL,
+            then: (schema) =>
+              schema
+                .min(2, "Pick at least one more token for trading")
+                .required("Pick at least one more token for trading"),
+            otherwise: (schema) => schema.notRequired(),
+          }),
+          tradingTokensAutoListing: mixed().when("inputMode", {
+            is: TradingTokensInputMode.AUTOLISTING,
+            then: (s) => s.required("Auto-listing configuration is required"),
+            otherwise: (s) => s.notRequired(),
+          }),
+        }),
       })}
       onSubmit={async (values, { validateForm }) => {
         // const errors = await validateForm(values);
@@ -166,41 +174,64 @@ export default function SecondStep({
                 iconName={"edit"}
               />
             </div>
-            <div className="bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start content-start flex flex-wrap gap-1">
-              {props.values.collateralTokens.map((currency) => {
-                return (
-                  <div
-                    key={
-                      currency.isToken ? currency.address0 : `native-${currency.wrapped.address0}`
-                    }
-                    className="border pl-1 py-1 pr-3 flex items-center gap-2 rounded-1 border-secondary-border"
-                  >
-                    <Image
-                      className="flex-shrink-0"
-                      width={24}
-                      height={24}
-                      src={currency.logoURI || "/images/tokens/placeholder.svg"}
-                      alt={""}
-                    />
-                    <span>{currency.name}</span>
-                  </div>
-                );
-              })}
+            <div
+              className={clsx(
+                "bg-quaternary-bg rounded-3 min-h-[132px] p-2 items-start content-start flex flex-wrap gap-1",
+                props.touched.collateralTokens &&
+                  !!props.errors.collateralTokens &&
+                  "border-red-light border",
+              )}
+            >
+              {props.values.collateralTokens.length ? (
+                <>
+                  {props.values.collateralTokens.map((currency) => {
+                    return (
+                      <div
+                        key={
+                          currency.isToken
+                            ? currency.address0
+                            : `native-${currency.wrapped.address0}`
+                        }
+                        className="border pl-1 py-1 pr-3 flex items-center gap-2 rounded-2 border-primary-border"
+                      >
+                        <Image
+                          className="flex-shrink-0"
+                          width={24}
+                          height={24}
+                          src={currency.logoURI || "/images/tokens/placeholder.svg"}
+                          alt={""}
+                        />
+                        <span>{currency.name}</span>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                <span className="text-tertiary-text pl-3 pt-1">Tokens</span>
+              )}
             </div>
-            {/*<HelperText*/}
-            {/*  error={*/}
-            {/*    props.touched.collateralTokens && props.errors.collateralTokens*/}
-            {/*      ? props.errors.collateralTokens*/}
-            {/*      : undefined*/}
-            {/*  }*/}
-            {/*/>*/}
+            <HelperText
+              error={props.touched.collateralTokens && (props.errors.collateralTokens as string)}
+            />
           </div>
           <LendingOrderTokensSourceConfig
             values={props.values.tradingTokens}
             setValues={(values: LendingOrderTradingTokens) =>
               props.setFieldValue("tradingTokens", values)
             }
+            manualError={
+              !!props.touched.tradingTokens?.allowedTokens
+                ? (props.errors.tradingTokens?.allowedTokens as string)
+                : undefined
+            }
+            // error={undefined}
+            autoListingError={
+              !!props.touched.tradingTokens?.tradingTokensAutoListing
+                ? (props.errors.tradingTokens?.tradingTokensAutoListing as string)
+                : undefined
+            }
           />
+
           <TextField
             isNumeric
             value={props.values.minimumBorrowingAmount}
@@ -275,8 +306,12 @@ export default function SecondStep({
           <PickAllowedTokensDialog
             allowedTokens={props.values.tradingTokens.allowedTokens}
             handlePick={(allowedTokens) =>
-              props.setFieldValue("tradingTokens", { ...props.values.tradingTokens, allowedTokens })
+              props.setFieldValue("tradingTokens", {
+                ...props.values.tradingTokens,
+                allowedTokens,
+              })
             }
+            restrictDisable={firstStepValues.loanToken}
           />
         </form>
       )}

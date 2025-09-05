@@ -16,6 +16,7 @@ import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolio
 import { clsxMerge } from "@/functions/clsxMerge";
 import { filterTokens } from "@/functions/searchTokens";
 import { useTokens } from "@/hooks/useTokenLists";
+import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
 
 function TokenRowWithCheckbox({
@@ -90,11 +91,13 @@ export default function PickMultipleTokensDialog({
   setIsOpen,
   handlePick,
   selectedTokens,
+  restrictDisable,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handlePick: (tokens: Currency[]) => void;
   selectedTokens: Currency[];
+  restrictDisable?: Currency | undefined;
 }) {
   const t = useTranslations("ManageTokens");
 
@@ -194,6 +197,13 @@ export default function PickMultipleTokensDialog({
                                 );
 
                                 if (isInList) {
+                                  if (restrictDisable && restrictDisable.equals(token)) {
+                                    return addToast(
+                                      "You can't disable base order token",
+                                      "warning",
+                                    );
+                                  }
+
                                   setInternalTokens(
                                     internalTokens.filter((_token) => _token.name !== token.name),
                                   );

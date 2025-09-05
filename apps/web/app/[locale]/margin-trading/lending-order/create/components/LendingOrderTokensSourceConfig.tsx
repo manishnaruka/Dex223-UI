@@ -1,4 +1,5 @@
 import Checkbox from "@repo/ui/checkbox";
+import clsx from "clsx";
 import Image from "next/image";
 import React from "react";
 
@@ -11,7 +12,7 @@ import {
   useAllowedTokensDialogOpenedStore,
 } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { InputSize } from "@/components/atoms/Input";
-import { InputLabel } from "@/components/atoms/TextField";
+import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import IconButton from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
 
@@ -23,9 +24,13 @@ const labelsMap: Record<TradingTokensInputMode, string> = {
 export default function LendingOrderTokensSourceConfig({
   values,
   setValues,
+  manualError,
+  autoListingError,
 }: {
   values: LendingOrderTradingTokens;
   setValues: (values: LendingOrderTradingTokens) => void;
+  manualError?: string;
+  autoListingError?: string;
 }) {
   const { setIsOpen: setAllowedListingsOpened } = useAllowedTokenListsDialogOpenedStore();
   const { setIsOpen: setAllowedTokensDialogOpened } = useAllowedTokensDialogOpenedStore();
@@ -66,15 +71,20 @@ export default function LendingOrderTokensSourceConfig({
               iconName={"edit"}
             />
           </div>
-          <div className="mb-3">
-            <div className="bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start content-start flex flex-wrap gap-1">
+          <div>
+            <div
+              className={clsx(
+                "bg-quaternary-bg rounded-3 min-h-[132px] p-2 items-start flex flex-wrap gap-1 content-start",
+                manualError && "border border-red-light",
+              )}
+            >
               {values.allowedTokens.map((currency) => {
                 return (
                   <div
                     key={
                       currency.isToken ? currency.address0 : `native-${currency.wrapped.address0}`
                     }
-                    className="border pl-1 py-1 pr-3 flex items-center gap-2 rounded-1 border-secondary-border"
+                    className="border pl-1 py-1 pr-3 flex items-center gap-2 rounded-2 border-primary-border"
                   >
                     <Image
                       className="flex-shrink-0"
@@ -88,6 +98,8 @@ export default function LendingOrderTokensSourceConfig({
                 );
               })}
             </div>
+
+            <HelperText error={manualError} />
           </div>
 
           <div className="py-2">
@@ -123,7 +135,12 @@ export default function LendingOrderTokensSourceConfig({
               }}
             />
           </div>
-          <div className="bg-secondary-bg rounded-3 min-h-[132px] p-2 items-start flex flex-wrap gap-1">
+          <div
+            className={clsx(
+              "bg-quaternary-bg rounded-3 min-h-[132px] p-2 items-start flex flex-wrap gap-1",
+              autoListingError && "border border-red-light",
+            )}
+          >
             {values.tradingTokensAutoListing && (
               <div className="pb-1.5 pt-0.5 px-4 rounded-2.5 bg-primary-bg">
                 <p>{values.tradingTokensAutoListing.name}</p>
@@ -133,6 +150,7 @@ export default function LendingOrderTokensSourceConfig({
               </div>
             )}
           </div>
+          <HelperText error={autoListingError} />
         </>
       )}
     </div>

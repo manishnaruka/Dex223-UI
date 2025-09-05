@@ -164,7 +164,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
   const { address } = useAccount();
-  const { positionId, setPositionId } = useNewlyCreatedPositionId();
+  const { setPositionId } = useNewlyCreatedPositionId();
 
   const isEqualFeeAndCollateralAssets = useMemo(() => {
     return (
@@ -402,6 +402,7 @@ export default function useCreateMarginPosition(order: LendingOrder) {
 
       const createPositionLog = parsedEventLog.find((log) => log.eventName === "PositionOpened");
 
+      console.log(createPositionLog);
       if (createPositionLog) {
         setPositionId(Number(createPositionLog.args.positionId));
       }

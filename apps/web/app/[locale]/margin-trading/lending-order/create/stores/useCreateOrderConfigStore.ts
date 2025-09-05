@@ -87,7 +87,17 @@ export const useCreateOrderConfigStore = create<CreateOrderConfig>((set, get) =>
     priceSource: "",
   },
 
-  setFirstStepValues: (firstStepValues: FirstStepValues) => set({ firstStepValues }),
+  setFirstStepValues: (firstStepValues: FirstStepValues) =>
+    set({
+      firstStepValues,
+      secondStepValues: {
+        ...get().secondStepValues,
+        tradingTokens: {
+          ...get().secondStepValues.tradingTokens,
+          allowedTokens: [firstStepValues.loanToken!],
+        },
+      },
+    }),
   setSecondStepValues: (secondStepValues: SecondStepValues) => set({ secondStepValues }),
   setThirdStepValues: (thirdStepValues: ThirdStepValues) => set({ thirdStepValues }),
 }));

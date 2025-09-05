@@ -14,7 +14,10 @@ import {
   LendingOrderPeriodType,
   PerpetualPeriodType,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
-import { FirstStepValues } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
+import {
+  FirstStepValues,
+  SecondStepValues,
+} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
 import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import { InputWithArrows } from "@/components/atoms/Input";
 import TextField from "@/components/atoms/TextField";
