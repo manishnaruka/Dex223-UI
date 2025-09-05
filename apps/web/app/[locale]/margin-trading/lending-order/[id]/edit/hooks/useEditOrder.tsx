@@ -199,9 +199,23 @@ export default function useEditOrder() {
         ],
       });
 
+      const encodedCollateralTokens = encodeFunctionData({
+        abi: MARGIN_MODULE_ABI,
+        functionName: "orderSetCollaterals",
+        args: [
+          BigInt(order.id),
+          collateralTokens.flatMap((token) => {
+            if (tradingTokens.includeERC223Trading) {
+              return [token.wrapped.address0, token.wrapped.address1];
+            }
+            return [token.wrapped.address0];
+          }),
+        ],
+      });
+
       const actionsToUpdate = recreateTokenList
-        ? [encodedAddTokenListParams, encodedModifyOrderParams]
-        : [encodedModifyOrderParams];
+        ? [encodedAddTokenListParams, encodedModifyOrderParams, encodedCollateralTokens]
+        : [encodedModifyOrderParams, encodedCollateralTokens];
 
       try {
         const modifyOrderHash = await walletClient.writeContract({

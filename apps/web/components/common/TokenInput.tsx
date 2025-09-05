@@ -27,6 +27,7 @@ export default function TokenInput({
   setStandard,
   standard,
   readOnly = false,
+  readOnlyToken = false,
   isHalf = false,
   isMax = false,
   setHalf,
@@ -48,6 +49,7 @@ export default function TokenInput({
   standard: Standard;
   setStandard: (standard: Standard) => void;
   readOnly?: boolean;
+  readOnlyToken?: boolean;
   isHalf?: boolean;
   isMax?: boolean;
   setHalf?: () => void;
@@ -117,7 +119,7 @@ export default function TokenInput({
         </div>
         <SelectButton
           type="button"
-          className="flex-shrink-0"
+          className={clsx("flex-shrink-0", readOnlyToken && "pointer-events-none")}
           variant="rounded"
           onClick={handleClick}
           size="large"
@@ -146,7 +148,7 @@ export default function TokenInput({
         <TokenStandardSelector
           selectedStandard={standard}
           handleStandardSelect={(standard) => setStandard(standard)}
-          disabled={!token}
+          disabled={!token || readOnlyToken}
           symbol={token?.symbol}
           balance0={balance0}
           balance1={balance1}

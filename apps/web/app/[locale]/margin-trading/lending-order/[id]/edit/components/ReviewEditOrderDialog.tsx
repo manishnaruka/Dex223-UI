@@ -221,7 +221,9 @@ export default function ReviewEditOrderDialog({
       {
         id: "allowed-for-trading",
         label: "Tokens allowed for trading",
-        compare: () => tradingTokens.allowedTokens.length !== order.allowedTradingAssets.length,
+        compare: () =>
+          tradingTokens.allowedTokens.length !== order.allowedTradingAssets.length ||
+          tradingTokens.includeERC223Trading !== order.isErc223TradingAllowed,
         getOldValue: () => <AssetsPreview assets={order.allowedTradingAssets} />,
         getNewValue: () => <AssetsPreview assets={tradingTokens.allowedTokens} />,
       },

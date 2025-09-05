@@ -24,6 +24,7 @@ export default function LendingOrderTokenSelect({
   tokens,
   helperText,
   allowedErc223,
+  readonly,
 }: {
   token: Currency | undefined;
   setToken: (token: Currency) => Promise<void>;
@@ -37,6 +38,7 @@ export default function LendingOrderTokenSelect({
   tokens?: Currency[];
   helperText?: string;
   allowedErc223: boolean;
+  readonly?: boolean;
 }) {
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
 
@@ -94,6 +96,8 @@ export default function LendingOrderTokenSelect({
     <div className="">
       <InputLabel inputSize={InputSize.LARGE} label={label} tooltipText="Tooltip text" />
       <TokenInput
+        readOnly={readonly}
+        readOnlyToken={readonly}
         isError={!!errors.length}
         handleClick={() => {
           setIsOpenedTokenPick(true);

@@ -226,6 +226,7 @@ export default function FirstStep({
                   })
                 : []
             }
+            readonly={mode === OrderActionMode.EDIT}
             setIsEnoughBalance={setIsEnoughBalance}
           />
           {/*<pre>{JSON.stringify(props.values, null, 2)}</pre>*/}
