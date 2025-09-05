@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useLocale } from "next-intl";
 import React, { use, useCallback, useEffect, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
-import { formatEther, formatGwei, formatUnits, parseUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import { usePublicClient } from "wagmi";
 import * as Yup from "yup";
 
@@ -30,7 +30,7 @@ import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import TextField, { HelperText, InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import Button from "@/components/buttons/Button";
 import IconButton, {
   IconButtonSize,
   IconButtonVariant,
@@ -38,18 +38,14 @@ import IconButton, {
 } from "@/components/buttons/IconButton";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import RecentTransactions from "@/components/common/RecentTransactions";
-import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
 import { ORACLE_ABI } from "@/config/abis/oracle";
-import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { IIFE } from "@/functions/iife";
 import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokenLists } from "@/hooks/useTokenLists";
-import { Link } from "@/i18n/routing";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Token } from "@/sdk_bi/entities/token";
@@ -651,7 +647,11 @@ export default function BorrowPage({
                     }
                   />
 
-                  <InputLabel label="Leverage" tooltipText="Tooltip text" />
+                  <InputLabel
+                    inputSize={InputSize.LARGE}
+                    label="Leverage"
+                    tooltipText="Tooltip text"
+                  />
                   <div className="flex items-center gap-2">
                     <div className="mb-4 flex-grow">
                       <input

@@ -170,84 +170,88 @@ export default function PickMultipleTokensDialog({
                 </div>
                 <div className={clsxMerge("flex-grow flex min-h-0 overflow-hidden")}>
                   {Boolean(filteredTokens.length) && (
-                    <ScrollbarContainer
-                      scrollableNodeProps={{
-                        ref: parentRef,
-                      }}
-                      height="full"
-                    >
-                      <div
-                        className={clsx(
-                          "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2 pt-3 pl-2 pr-3",
-                        )}
-                        style={{
-                          paddingTop,
-                          paddingBottom,
+                    <>
+                      <ScrollbarContainer
+                        scrollableNodeProps={{
+                          ref: parentRef,
                         }}
+                        height="full"
                       >
-                        {items.map((item) => {
-                          const token = filteredTokens[item.index];
-                          // if (simpleForm)
-                          return (
-                            <TokenRowWithCheckbox
-                              setTokenForPortfolio={setTokenForPortfolio}
-                              setSelected={() => {
-                                const isInList = Boolean(
-                                  internalTokens.find((_token) => _token.name === token.name),
-                                );
-
-                                if (isInList) {
-                                  if (restrictDisable && restrictDisable.equals(token)) {
-                                    return addToast(
-                                      "You can't disable base order token",
-                                      "warning",
-                                    );
-                                  }
-
-                                  setInternalTokens(
-                                    internalTokens.filter((_token) => _token.name !== token.name),
+                        <div
+                          className={clsx(
+                            "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2 pt-3 pl-2 pr-3",
+                          )}
+                          style={{
+                            paddingTop,
+                            paddingBottom,
+                          }}
+                        >
+                          {items.map((item) => {
+                            const token = filteredTokens[item.index];
+                            // if (simpleForm)
+                            return (
+                              <TokenRowWithCheckbox
+                                setTokenForPortfolio={setTokenForPortfolio}
+                                setSelected={() => {
+                                  const isInList = Boolean(
+                                    internalTokens.find((_token) => _token.name === token.name),
                                   );
-                                } else {
-                                  setInternalTokens([...internalTokens, token]);
+
+                                  if (isInList) {
+                                    if (restrictDisable && restrictDisable.equals(token)) {
+                                      return addToast(
+                                        "You can't disable base order token",
+                                        "warning",
+                                      );
+                                    }
+
+                                    setInternalTokens(
+                                      internalTokens.filter((_token) => _token.name !== token.name),
+                                    );
+                                  } else {
+                                    setInternalTokens([...internalTokens, token]);
+                                  }
+                                }}
+                                key={
+                                  token.isToken
+                                    ? token.address0
+                                    : `native-${token.wrapped.address0}`
                                 }
-                              }}
-                              key={
-                                token.isToken ? token.address0 : `native-${token.wrapped.address0}`
-                              }
-                              currency={token}
-                              isSelected={
-                                !!internalTokens.find(
-                                  (_token) => _token.wrapped.address0 === token.wrapped.address0,
-                                )
-                              }
-                            />
-                          );
-                        })}
+                                currency={token}
+                                isSelected={
+                                  !!internalTokens.find(
+                                    (_token) => _token.wrapped.address0 === token.wrapped.address0,
+                                  )
+                                }
+                              />
+                            );
+                          })}
+                        </div>
+                      </ScrollbarContainer>
+                      <div className="grid grid-cols-2 gap-3 card-spacing-x border-t border-secondary-border py-5">
+                        <Button
+                          type="button"
+                          fullWidth
+                          colorScheme={ButtonColor.LIGHT_GREEN}
+                          onClick={() => {
+                            handleClose();
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          fullWidth
+                          onClick={() => {
+                            handlePick(internalTokens);
+                            handleClose();
+                          }}
+                        >
+                          Apply
+                        </Button>
                       </div>
-                    </ScrollbarContainer>
+                    </>
                   )}
-                </div>
-                <div className="grid grid-cols-2 gap-3 card-spacing-x border-t border-secondary-border py-5">
-                  <Button
-                    type="button"
-                    fullWidth
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => {
-                      handleClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    fullWidth
-                    onClick={() => {
-                      handlePick(internalTokens);
-                      handleClose();
-                    }}
-                  >
-                    Apply
-                  </Button>
                 </div>
 
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
