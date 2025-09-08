@@ -13,6 +13,7 @@ import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/us
 import { useMarginSwapSettingsDialogStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapSettingsDialogStore";
 import { useMarginSwapSettingsStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapSettingsStore";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
+import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import { useConfirmMarginSwapDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import SwapDetails from "@/app/[locale]/swap/components/SwapDetails";
 import SwapSettingsDialog, {
@@ -445,8 +446,6 @@ export default function TradeForm() {
   //   refetch: refetchBBalance,
   // } = useTokenBalances(tokenB);
 
-  const { data: blockNumber } = useScopedBlockNumber();
-
   // useEffect(() => {
   //   refetchABalance();
   //   refetchBBalance();
@@ -468,7 +467,21 @@ export default function TradeForm() {
   const { setIsOpen: setConfirmSwapDialogOpen } = useConfirmSwapDialogStore();
   const { baseFee, priorityFee, gasPrice } = useFees();
 
-  const { marginSwapPosition } = useMarginSwapPositionStore();
+  const { marginSwapPositionId } = useMarginSwapPositionStore();
+
+  const {
+    loading,
+    position: marginSwapPosition,
+    refetch,
+  } = useMarginPositionById({
+    id: marginSwapPositionId?.toString(),
+  });
+
+  const { data: blockNumber } = useScopedBlockNumber();
+
+  useEffect(() => {
+    refetch();
+  }, [blockNumber, refetch]);
 
   useEffect(() => {
     updateDefaultState(chainId);

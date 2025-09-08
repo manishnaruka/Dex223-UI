@@ -1,5 +1,5 @@
 import Tooltip from "@repo/ui/tooltip";
-import React, { ReactNode, useMemo, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -12,7 +12,9 @@ import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/us
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
 import PositionDetailCard from "@/app/[locale]/margin-trading/components/widgets/PositionDetailCard";
-import { usePositionsByOwner } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
+import useMarginPositionById, {
+  usePositionsByOwner,
+} from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -26,6 +28,7 @@ import IconButton, {
 } from "@/components/buttons/IconButton";
 import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { Link } from "@/i18n/routing";
 
 enum DangerStatus {
@@ -112,7 +115,21 @@ function PositionSelectItem({
 }
 
 export function SelectedPositionInfo() {
-  const { marginSwapPosition } = useMarginSwapPositionStore();
+  const { marginSwapPositionId } = useMarginSwapPositionStore();
+
+  const {
+    loading,
+    position: marginSwapPosition,
+    refetch,
+  } = useMarginPositionById({
+    id: marginSwapPositionId?.toString(),
+  });
+
+  const { data: blockNumber } = useScopedBlockNumber();
+
+  useEffect(() => {
+    refetch();
+  }, [blockNumber, refetch]);
 
   if (!marginSwapPosition) {
     return null;
@@ -162,7 +179,7 @@ export default function SelectPositionDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const { setMarginSwapPosition, marginSwapPosition } = useMarginSwapPositionStore();
+  const { setMarginSwapPositionId, marginSwapPositionId } = useMarginSwapPositionStore();
 
   const { address } = useAccount();
   const { loading, positions } = usePositionsByOwner({ owner: address });
@@ -201,7 +218,7 @@ export default function SelectPositionDialog() {
     }
 
     return [matching, other];
-  }, [openedPositions, positions, tokenA, tokenB]);
+  }, [openedPositions, tokenA, tokenB]);
 
   const positionFromSearch = useMemo(() => {
     return openedPositions?.find((position) => position.id.toString() === searchValue);
@@ -228,11 +245,11 @@ export default function SelectPositionDialog() {
               {positionFromSearch ? (
                 <PositionSelectItem
                   handleSelectedPosition={(position) => {
-                    setMarginSwapPosition(position);
+                    setMarginSwapPositionId(position.id);
                     setIsOpen(false);
                   }}
                   position={positionFromSearch}
-                  isSelected={marginSwapPosition?.id === positionFromSearch.id}
+                  isSelected={marginSwapPositionId === positionFromSearch.id}
                 />
               ) : (
                 <div className="h-[112px] flex items-center justify-center bg-empty-not-found-lending-position-purple bg-[length:112px_112px] bg-right-top bg-no-repeat text-secondary-text">
@@ -277,11 +294,11 @@ export default function SelectPositionDialog() {
                           <PositionSelectItem
                             key={position.id}
                             handleSelectedPosition={(position) => {
-                              setMarginSwapPosition(position);
+                              setMarginSwapPositionId(position.id);
                               setIsOpen(false);
                             }}
                             position={position}
-                            isSelected={marginSwapPosition?.id === position.id}
+                            isSelected={marginSwapPositionId === position.id}
                           />
                         ))}
                       </div>
@@ -301,14 +318,14 @@ export default function SelectPositionDialog() {
                           <PositionSelectItem
                             key={position.id}
                             handleSelectedPosition={(position) => {
-                              setMarginSwapPosition(position);
+                              setMarginSwapPositionId(position.id);
                               setIsOpen(false);
                               setTokenA(undefined);
                               setTokenB(undefined);
                               setTypedValue({ typedValue: "", field: Field.CURRENCY_A });
                             }}
                             position={position}
-                            isSelected={marginSwapPosition?.id === position.id}
+                            isSelected={marginSwapPositionId === position.id}
                           />
                         ))}
                       </div>
@@ -326,11 +343,11 @@ export default function SelectPositionDialog() {
                       <PositionSelectItem
                         key={position.id}
                         handleSelectedPosition={(position) => {
-                          setMarginSwapPosition(position);
+                          setMarginSwapPositionId(position.id);
                           setIsOpen(false);
                         }}
                         position={position}
-                        isSelected={marginSwapPosition?.id === position.id}
+                        isSelected={marginSwapPositionId === position.id}
                       />
                     ))}
                   </div>
@@ -350,9 +367,9 @@ export default function SelectPositionDialog() {
         <Button
           size={ButtonSize.MEDIUM}
           onClick={() => setIsOpen(true)}
-          colorScheme={!marginSwapPosition ? ButtonColor.PURPLE : ButtonColor.LIGHT_PURPLE}
+          colorScheme={!marginSwapPositionId ? ButtonColor.PURPLE : ButtonColor.LIGHT_PURPLE}
         >
-          {marginSwapPosition ? "Change position" : "Select position"}
+          {marginSwapPositionId ? "Change position" : "Select position"}
         </Button>
       )}
     </>

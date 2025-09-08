@@ -54,6 +54,7 @@ export type LendingOrder = {
   minLoan: bigint;
   positionDuration: number;
   deadline: number;
+  createdAt: number;
 
   liquidationRewardAmount: {
     value: bigint;

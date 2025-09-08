@@ -21,6 +21,7 @@ import OrderCloseDialog from "@/app/[locale]/margin-trading/lending-order/[id]/c
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
 import OrderOpenDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderOpenDialog";
 import OrderWithdrawDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderWithdrawDialog";
+import { calculatePeriodInterestRate } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import calculateTotalOrderBalance from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculateTotalOrderBalance";
 import Container from "@/components/atoms/Container";
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -277,13 +278,13 @@ export default function LendingOrder({
               {
                 title: "Per month",
                 tooltipText: "Tooltip text",
-                value: "5%",
+                value: `${order.interestRate / 100}%`,
                 bg: "percentage",
               },
               {
                 title: "Per entire period",
                 tooltipText: "Tooltip text",
-                value: "15%",
+                value: calculatePeriodInterestRate(order.interestRate, order.positionDuration),
                 bg: "percentage",
               },
             ]}

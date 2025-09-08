@@ -38,13 +38,15 @@ export type ThirdStepValues = {
 
 interface CreateOrderConfig {
   isInitialized: boolean;
+  initializedOrderId: number | null;
 
   firstStepValues: FirstStepValues;
   secondStepValues: SecondStepValues;
   thirdStepValues: ThirdStepValues;
 
   setIsInitialized: (isInitialized: boolean) => void;
-
+  setInitializedFor: (id: number) => void;
+  resetInitialization: () => void;
   setFirstStepValues: (firstStep: FirstStepValues) => void;
   setSecondStepValues: (secondStep: SecondStepValues) => void;
   setThirdStepValues: (thirdStep: ThirdStepValues) => void;
@@ -52,6 +54,13 @@ interface CreateOrderConfig {
 
 export const useEditOrderConfigStore = create<CreateOrderConfig>((set, get) => ({
   isInitialized: false,
+  initializedOrderId: null as number | null,
+  setInitializedFor(id: number) {
+    set({ isInitialized: true, initializedOrderId: id });
+  },
+  resetInitialization() {
+    set({ isInitialized: false, initializedOrderId: null });
+  },
 
   firstStepValues: {
     interestRatePerMonth: "",

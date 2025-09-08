@@ -1,13 +1,11 @@
 import { create } from "zustand";
 
-import { MarginPosition } from "@/app/[locale]/margin-trading/types";
-
 interface MarginSwapPositionStore {
-  marginSwapPosition: MarginPosition | undefined;
-  setMarginSwapPosition: (marginSwapPosition: MarginPosition) => void;
+  marginSwapPositionId: number | undefined;
+  setMarginSwapPositionId: (marginSwapPosition: number) => void;
 }
 
 export const useMarginSwapPositionStore = create<MarginSwapPositionStore>((set, get) => ({
-  marginSwapPosition: undefined,
-  setMarginSwapPosition: (marginSwapPosition: MarginPosition) => set({ marginSwapPosition }),
+  marginSwapPositionId: undefined,
+  setMarginSwapPositionId: (marginSwapPositionId) => set({ marginSwapPositionId }),
 }));

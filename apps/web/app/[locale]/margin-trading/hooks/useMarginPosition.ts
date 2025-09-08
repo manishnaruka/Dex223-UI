@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { ApolloQueryResult, useQuery } from "@apollo/client";
 import gql from "graphql-tag";
 import { useMemo } from "react";
 import { Address } from "viem";
@@ -72,14 +72,15 @@ export function usePositionsByOwner({ owner }: { owner: Address | undefined }): 
   return { loading, positions };
 }
 
-export default function useMarginPositionById({ id }: { id: string }): {
+export default function useMarginPositionById({ id }: { id: string | undefined }): {
   loading: boolean;
   position: MarginPosition;
+  refetch: (variables?: Partial<any> | undefined) => Promise<ApolloQueryResult<any>>;
 } {
   const apolloClient = useMarginModuleApolloClient();
   const chainId = useCurrentChainId();
 
-  const { data, loading } = useQuery<any, any>(queryById, {
+  const { data, loading, refetch } = useQuery<any, any>(queryById, {
     variables: {
       id,
     },
@@ -99,5 +100,5 @@ export default function useMarginPositionById({ id }: { id: string }): {
     };
   }, [chainId, data]);
 
-  return { loading, position };
+  return { loading, position, refetch };
 }

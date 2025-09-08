@@ -10,7 +10,6 @@ import OrderConfigurationPage from "@/app/[locale]/margin-trading/lending-order/
 import ReviewEditOrderDialog from "@/app/[locale]/margin-trading/lending-order/[id]/edit/components/ReviewEditOrderDialog";
 import { useEditOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderConfigStore";
 import { useEditOrderStepStore } from "@/app/[locale]/margin-trading/lending-order/[id]/edit/stores/useEditOrderStepStore";
-import ReviewLendingOrderDialog from "@/app/[locale]/margin-trading/lending-order/create/components/ReviewCreateOrderDialog";
 import { useLendingOrderRecentTransactionsStore } from "@/app/[locale]/margin-trading/lending-order/create/hooks/useLendingOrderRecentTransactionsStore";
 import {
   LendingOrderPeriodType,
@@ -43,13 +42,16 @@ export default function EditLendingOrderPage({
 
   const { isOpen, setIsOpen } = useConfirmEditOrderDialogStore();
 
-  const { setIsInitialized, isInitialized, ...config } = useEditOrderConfigStore();
+  const { setIsInitialized, isInitialized, initializedOrderId, setInitializedFor, ...config } =
+    useEditOrderConfigStore();
 
   const { setFirstStepValues, setSecondStepValues, setThirdStepValues } = config;
 
   useEffect(() => {
-    if (!order || isInitialized) {
-      console.log("No order, returning");
+    if (!order) {
+      return;
+    }
+    if (isInitialized && initializedOrderId === order.id) {
       return;
     }
 
@@ -96,11 +98,13 @@ export default function EditLendingOrderPage({
       priceSource: ORACLE_ADDRESS[DexChainId.SEPOLIA],
     });
 
-    setIsInitialized(true);
+    setInitializedFor(order.id);
   }, [
+    initializedOrderId,
     isInitialized,
     order,
     setFirstStepValues,
+    setInitializedFor,
     setIsInitialized,
     setSecondStepValues,
     setThirdStepValues,

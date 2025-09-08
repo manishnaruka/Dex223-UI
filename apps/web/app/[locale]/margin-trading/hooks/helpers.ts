@@ -56,6 +56,7 @@ export type GqlOrder = {
 
   baseAssetToken: GqlToken;
   baseAsset: Address;
+  createdAt: string;
 
   liquidationRewardAmount: bigint;
   liquidationRewardAsset: Address;
@@ -146,7 +147,8 @@ export function serializeGqlOrder(
   gqlOrder: GqlOrder,
   chainId: DexChainId,
 ): Omit<LendingOrder, "positions"> {
-  const { positions, duration, liquidationRewardAmount, balance, minLoan, ...rest } = gqlOrder;
+  const { positions, duration, liquidationRewardAmount, balance, minLoan, createdAt, ...rest } =
+    gqlOrder;
 
   console.log(gqlOrder);
   return {
@@ -183,6 +185,7 @@ export function serializeGqlOrder(
       gqlOrder.liquidationRewardAsset === gqlOrder.liquidationRewardAssetToken.addressERC20
         ? Standard.ERC20
         : Standard.ERC223,
+    createdAt: +createdAt,
   };
 }
 

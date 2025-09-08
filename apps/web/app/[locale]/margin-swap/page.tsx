@@ -55,7 +55,7 @@ export default function MarginSwapPage() {
     }
 
     return [matching, other];
-  }, [openedPositions, positions, tokenA, tokenB]);
+  }, [openedPositions, tokenA, tokenB]);
 
   return (
     <ColorSchemeProvider value={ThemeColors.PURPLE}>

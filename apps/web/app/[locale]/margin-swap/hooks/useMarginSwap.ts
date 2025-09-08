@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { getAbiItem, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
@@ -10,12 +10,14 @@ import {
   useMarginSwapStatusStore,
 } from "@/app/[locale]/margin-swap/stores/useMarginSwapStatusStore";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
+import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
 import { OrderCloseStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useCloseOrderStatusStore";
 import { useMarginTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { SwapError } from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
@@ -33,7 +35,21 @@ export default function useMarginSwap() {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const chainId = useCurrentChainId();
-  const { marginSwapPosition } = useMarginSwapPositionStore();
+  const { marginSwapPositionId } = useMarginSwapPositionStore();
+
+  const {
+    loading,
+    position: marginSwapPosition,
+    refetch,
+  } = useMarginPositionById({
+    id: marginSwapPositionId?.toString(),
+  });
+
+  const { data: blockNumber } = useScopedBlockNumber();
+
+  useEffect(() => {
+    refetch();
+  }, [blockNumber, refetch]);
   const { tokenA, tokenB, tokenAStandard } = useMarginSwapTokensStore();
   const { typedValue } = useMarginSwapAmountsStore();
   const { trade } = useMarginTrade();

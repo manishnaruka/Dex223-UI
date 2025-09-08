@@ -72,4 +72,5 @@ export const GQL_ORDER_FIELDS = `
     }
     minLoan
     oracle
+    createdAt
 `;
