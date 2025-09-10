@@ -182,6 +182,8 @@ export default function PositionDepositDialog({
       status === PositionDepositStatus.ERROR_APPROVE,
     [status],
   );
+
+  console.log(amountToDeposit);
   const isLoadingStatus = useMemo(
     () => !isInitialStatus && !isFinalStatus,
     [isFinalStatus, isInitialStatus],
@@ -196,6 +198,10 @@ export default function PositionDepositDialog({
   }, [isFinalStatus, isOpen, setStatus, status]);
 
   const [amountToApprove, setAmountToApprove] = useState(amountToDeposit);
+
+  useEffect(() => {
+    setAmountToApprove(amountToDeposit);
+  }, []);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>

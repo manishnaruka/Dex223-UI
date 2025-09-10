@@ -208,8 +208,16 @@ export default function ReviewEditOrderDialog({
         compare: () =>
           new Date(period.lendingOrderDeadline).getTime() !==
           new Date(order.deadline * 1000).getTime(),
-        getOldValue: () => dateToDateString(period.lendingOrderDeadline),
-        getNewValue: () => timestampToDateString(order.deadline),
+        getOldValue: () => timestampToDateString(order.deadline),
+        getNewValue: () =>
+          timestampToDateString(new Date(period.lendingOrderDeadline).getTime() / 1000),
+      },
+      {
+        id: "position-duration",
+        label: "Position duration",
+        compare: () => +period.positionDuration !== order.positionDuration / 60 / 24 / 60,
+        getOldValue: () => `${order.positionDuration / 60 / 24 / 60} days`,
+        getNewValue: () => `${period.positionDuration} days`,
       },
       {
         id: "allowed-collateral",
@@ -254,6 +262,7 @@ export default function ReviewEditOrderDialog({
     order.currencyLimit,
     order.deadline,
     order.interestRate,
+    order.isErc223TradingAllowed,
     order.leverage,
     order.liquidationRewardAmount.formatted,
     order.liquidationRewardAmount.value,
@@ -262,6 +271,7 @@ export default function ReviewEditOrderDialog({
     orderCurrencyLimit,
     period.lendingOrderDeadline,
     tradingTokens.allowedTokens,
+    tradingTokens.includeERC223Trading,
   ]);
 
   const modifiedOrderProperties = useMemo(() => {

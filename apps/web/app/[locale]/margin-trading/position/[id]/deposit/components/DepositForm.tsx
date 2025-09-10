@@ -138,7 +138,7 @@ export default function DepositForm({ position }: { position: MarginPosition }) 
 
         {assetToDeposit ? (
           <Button onClick={() => setIsDepositDialogOpened(true)} fullWidth>
-            Deposit {position.loanAsset.symbol}
+            Deposit {assetToDeposit.symbol}
           </Button>
         ) : (
           <Button disabled fullWidth>

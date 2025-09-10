@@ -231,7 +231,7 @@ export default function PickMultipleTokensDialog({
                     </>
                   )}
                 </div>
-                {Boolean(tokens.length) && (
+                {Boolean(filteredTokens.length) && (
                   <div className="grid grid-cols-2 gap-3 card-spacing-x border-t border-secondary-border py-5">
                     <Button
                       type="button"

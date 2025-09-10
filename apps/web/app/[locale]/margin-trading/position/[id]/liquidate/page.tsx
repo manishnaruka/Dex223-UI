@@ -48,7 +48,9 @@ export default function LiquidatePositionPage({
           </div>
 
           <div className="flex justify-center grid-in-[right]">
-            <LiquidateForm position={position} />
+            <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
+              <LiquidateForm position={position} />
+            </div>
           </div>
         </div>
       </Container>

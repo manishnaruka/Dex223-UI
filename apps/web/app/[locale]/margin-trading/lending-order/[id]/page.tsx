@@ -16,6 +16,7 @@ import {
   OrderInfoBlock,
   OrderInfoCard,
 } from "@/app/[locale]/margin-trading/components/widgets/OrderInfoBlock";
+import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import { useOrder } from "@/app/[locale]/margin-trading/hooks/useOrder";
 import OrderCloseDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderCloseDialog";
 import OrderDepositDialog from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderDepositDialog";
@@ -300,10 +301,7 @@ export default function LendingOrder({
               {
                 title: "Lending order deadline",
                 tooltipText: "Tooltip text",
-                value: new Date(order.deadline * 1000)
-                  .toLocaleDateString("en-GB")
-                  .split("/")
-                  .join("."),
+                value: timestampToDateString(order.deadline, { withUTC: false }),
                 bg: "deadline",
               },
             ]}
@@ -314,7 +312,7 @@ export default function LendingOrder({
               {
                 title: "Max leverage",
                 tooltipText: "Tooltip text",
-                value: `${order.leverage}%`,
+                value: `${order.leverage}x`,
                 bg: "leverage",
               },
               {

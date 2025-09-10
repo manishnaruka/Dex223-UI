@@ -18,7 +18,7 @@ import {
   TradingTokensInputMode,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import { useConfirmEditOrderDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
-import { OrderActionMode } from "@/app/[locale]/margin-trading/types";
+import { OrderActionMode, OrderActionStep } from "@/app/[locale]/margin-trading/types";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import Container from "@/components/atoms/Container";
 import RecentTransactions from "@/components/common/RecentTransactions";
@@ -112,6 +112,12 @@ export default function EditLendingOrderPage({
 
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useLendingOrderRecentTransactionsStore();
+
+  useEffect(() => {
+    return () => {
+      setStep(OrderActionStep.FIRST);
+    };
+  }, [setStep]);
 
   if (!order || loading) {
     return "Loading...";

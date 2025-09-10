@@ -247,7 +247,7 @@ export default function SecondStep({
             )}
             isError={Boolean(
               props.values.minimumBorrowingAmount &&
-                props.values.minimumBorrowingAmount > firstStepValues.loanAmount,
+                +props.values.minimumBorrowingAmount > +firstStepValues.loanAmount,
             )}
           />
 
@@ -259,7 +259,7 @@ export default function SecondStep({
             />
           ) : null}
           {props.values.minimumBorrowingAmount &&
-          props.values.minimumBorrowingAmount > firstStepValues.loanAmount ? (
+          +props.values.minimumBorrowingAmount > +firstStepValues.loanAmount ? (
             <Alert
               text={`Minimum borrowing amount exceeds specified Available balance (${firstStepValues.loanAmount} ${firstStepValues.loanToken?.symbol}). Borrowers will not be able to take loans from this order.`}
               type="error"
@@ -278,7 +278,7 @@ export default function SecondStep({
             <Button
               disabled={
                 (props.values.minimumBorrowingAmount &&
-                  props.values.minimumBorrowingAmount > firstStepValues.loanAmount) ||
+                  +props.values.minimumBorrowingAmount > +firstStepValues.loanAmount) ||
                 (Object.keys(props.touched).length > 0 && Object.keys(props.errors).length > 0)
               }
               size={ButtonSize.EXTRA_LARGE}

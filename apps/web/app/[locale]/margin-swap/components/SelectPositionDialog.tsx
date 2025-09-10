@@ -11,7 +11,9 @@ import {
 import { useMarginSwapPositionStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapPositionStore";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import PositionAsset from "@/app/[locale]/margin-trading/components/widgets/PositionAsset";
-import PositionDetailCard from "@/app/[locale]/margin-trading/components/widgets/PositionDetailCard";
+import PositionDetailCard, {
+  PositionDetailCardDialog,
+} from "@/app/[locale]/margin-trading/components/widgets/PositionDetailCard";
 import useMarginPositionById, {
   usePositionsByOwner,
 } from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
@@ -62,14 +64,18 @@ function PositionSelectItem({
   return (
     <div className="p-5 rounded-3 bg-tertiary-bg">
       <div className="flex items-center mb-3 gap-3">
-        <Link className="flex items-center gap-2 text-secondary-text" href="#">
+        <Link
+          target={"_blank"}
+          className="flex items-center gap-2 text-secondary-text"
+          href={`/margin-trading/position/${position.id}`}
+        >
           View position details
           <Svg iconName="next" />
         </Link>
         <div className="w-[178px]">
-          <PositionDetailCard title="ID" value={position.id} tooltipText="Tooltip text" />
+          <PositionDetailCardDialog title="ID" value={position.id} tooltipText="Tooltip text" />
         </div>
-        <PositionDetailCard
+        <PositionDetailCardDialog
           title="Deadline"
           value={new Date(position.deadline * 1000).toLocaleString("en-GB").split("/").join(".")}
           tooltipText="Tooltip text"
@@ -138,7 +144,11 @@ export function SelectedPositionInfo() {
   return (
     <div className="bg-primary-bg p-5 rounded-3">
       <div className="flex justify-between mb-3">
-        <Link className="flex items-center gap-2 text-secondary-text" href="#">
+        <Link
+          target={"_blank"}
+          className="flex items-center gap-2 text-secondary-text"
+          href={`/margin-trading/position/${marginSwapPositionId}`}
+        >
           View position details
           <Svg iconName="next" />
         </Link>

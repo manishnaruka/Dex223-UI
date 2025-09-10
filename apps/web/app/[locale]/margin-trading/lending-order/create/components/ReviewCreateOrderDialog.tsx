@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 import { parseUnits } from "viem";
 
+import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
 import {
   calculatePeriodInterestRate,
   calculatePeriodInterestRateNum,
@@ -347,10 +348,7 @@ export default function ReviewCreateOrderDialog({
               />
               <LendingOrderDetailsRow
                 title="Lending order deadline"
-                value={new Date(period.lendingOrderDeadline)
-                  .toLocaleDateString("en-GB")
-                  .split("/")
-                  .join(".")}
+                value={timestampToDateString(new Date(period.lendingOrderDeadline).getTime())}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
