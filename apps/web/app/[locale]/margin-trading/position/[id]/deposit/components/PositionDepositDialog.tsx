@@ -151,7 +151,7 @@ function PositionDepositActionButton({
 
   return (
     <Button disabled={disabled} onClick={() => handlePositionDeposit(amountToApprove)} fullWidth>
-      Deposit {position.loanAsset.symbol}
+      Deposit {assetToDeposit.symbol}
     </Button>
   );
 }
@@ -201,7 +201,7 @@ export default function PositionDepositDialog({
 
   useEffect(() => {
     setAmountToApprove(amountToDeposit);
-  }, []);
+  }, [amountToDeposit]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
