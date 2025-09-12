@@ -49,7 +49,7 @@ export default function SecondStep({
       validationSchema={object({
         leverage: number().required().min(1).max(100),
         minimumBorrowingAmount: number()
-          .required()
+          .required("This field is required")
           .moreThan(
             0,
             `Must be greater than 0 ${firstStepValues.loanToken ? firstStepValues.loanToken.symbol : ""}`,
