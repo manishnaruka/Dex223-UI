@@ -149,6 +149,7 @@ export const svgIconsNames = [
   "transfer-to-contract",
   "block",
   "time",
+  "deploy-token",
 ] as const;
 
 export const socialIconNames = [""] as const;

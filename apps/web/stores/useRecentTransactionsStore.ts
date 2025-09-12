@@ -37,6 +37,8 @@ export enum RecentTransactionTitleTemplate {
   LIQUIDATE_MARGIN_POSITION,
   MARGIN_SWAP,
   WITHDRAW_FROM_CLOSED_POSITION,
+
+  DEPLOY_TOKEN,
 }
 
 type RecentTransactionGasLimit =
@@ -113,6 +115,9 @@ export type IRecentTransactionTitle =
     } & SingleTokenTransactionTitle)
   | ({
       template: RecentTransactionTitleTemplate.CONVERT;
+    } & SingleTokenTransactionTitle & { standard: Standard })
+  | ({
+      template: RecentTransactionTitleTemplate.DEPLOY_TOKEN;
     } & SingleTokenTransactionTitle & { standard: Standard })
   | ({
       template: RecentTransactionTitleTemplate.SWAP;

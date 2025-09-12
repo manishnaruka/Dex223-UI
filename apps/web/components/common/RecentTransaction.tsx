@@ -122,6 +122,14 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           </span>
         </span>
       );
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="deploy-token" />
+
+          <span className="font-medium inline text-16">Create token</span>
+        </span>
+      );
     case RecentTransactionTitleTemplate.UNWRAP:
       return (
         <span className="mr-1 text-0">
@@ -238,6 +246,10 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
           })}
         </span>
       );
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
+      return (
+        <span className="text-14 text-secondary-text">{`${title.symbol} with ${18} decimals and ${title.amount} total supply`}</span>
+      );
     case RecentTransactionTitleTemplate.SWAP:
     case RecentTransactionTitleTemplate.REMOVE:
     case RecentTransactionTitleTemplate.COLLECT:
@@ -286,6 +298,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.LIST_SINGLE:
     case RecentTransactionTitleTemplate.CONVERT:
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
     case RecentTransactionTitleTemplate.UNWRAP:
     case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
     case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
@@ -296,7 +309,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.TRANSFER:
       return (
         <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
-          <Image width={36} height={36} src={title.logoURI} alt="" />
+          <Image className="rounded-full" width={36} height={36} src={title.logoURI} alt="" />
         </div>
       );
     case RecentTransactionTitleTemplate.SWAP:
