@@ -10,9 +10,10 @@ import Drawer from "@/components/atoms/Drawer";
 import LocaleSwitcher from "@/components/atoms/LocaleSwitcher";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
+import { isMarginModuleEnabled } from "@/config/modules";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
@@ -94,7 +95,7 @@ export function MobileLink({
         <Svg iconName={iconName} />
         {title}
       </Link>
-      {comingSoon && <Badge color="green_outline" text="Coming soon" />}
+      {comingSoon && !isMarginModuleEnabled && <Badge color="green_outline" text="Coming soon" />}
     </div>
   );
 }
@@ -253,10 +254,17 @@ export default function MobileMenu() {
                     title={t(title)}
                     handleClose={() => setMobileMenuOpened(false)}
                     isActive={pathname.includes(href)}
-                    disabled={!["/swap", "/pools", "/portfolio", "/token-listing"].includes(href)}
-                    comingSoon={title === "borrow_lend" || title === "margin_trading"}
+                    disabled={
+                      !["/swap", "/pools", "/portfolio", "/token-listing"].includes(href) &&
+                      !isMarginModuleEnabled
+                    }
+                    comingSoon={
+                      (title === "borrow_lend" || title === "margin_trading") &&
+                      !isMarginModuleEnabled
+                    }
                     className={
-                      title === "borrow_lend" || title === "margin_trading"
+                      (title === "borrow_lend" || title === "margin_trading") &&
+                      !isMarginModuleEnabled
                         ? "justify-between pr-4"
                         : ""
                     }

@@ -8,6 +8,7 @@ import Popover from "@/components/atoms/Popover";
 import Svg from "@/components/atoms/Svg";
 import { MobileLink } from "@/components/common/MobileMenu";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
+import { isMarginModuleEnabled } from "@/config/modules";
 import { IconName } from "@/config/types/IconName";
 import { usePathname } from "@/i18n/routing";
 
@@ -66,14 +67,14 @@ const menuItems: Array<
           className="min-w-[238px]"
         />
         <MobileLink
-          disabled
+          disabled={!isMarginModuleEnabled}
           isActive={pathname === "/margin-swap"}
           href="/margin-swap"
           iconName="margin-trading"
           title={t("margin_trading")}
           handleClose={handleClose}
-          className="min-w-[238px] pr-5"
-          comingSoon
+          className={clsx("min-w-[238px]", !isMarginModuleEnabled && "pr-5")}
+          comingSoon={!isMarginModuleEnabled}
         />
       </div>
     ),
