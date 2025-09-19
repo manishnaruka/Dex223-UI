@@ -18,6 +18,37 @@ const initialCreateTokenSettings = {
   createERC20: false,
 };
 
+import * as Yup from "yup";
+
+const isValidHttpsUrl = (value?: string) => {
+  try {
+    if (!value) return true; // handled by required on other fields
+    const url = new URL(value);
+    return url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const isValidIpfsUrl = (value?: string) => {
+  if (!value) return true;
+  return /^ipfs:\/\/.+/i.test(value);
+};
+
+const createTokenSchema = Yup.object({
+  name: Yup.string().trim().required("Token name is required"),
+  symbol: Yup.string().trim().required("Symbol is required"),
+  totalSupply: Yup.string().trim().required("Total supply is required"),
+  imageURL: Yup.string()
+    .trim()
+    .notRequired()
+    .test(
+      "ipfs-or-https",
+      "Must be a valid ipfs://… or https://… URL",
+      (val) => !val || isValidIpfsUrl(val) || isValidHttpsUrl(val),
+    ),
+});
+
 export default function CreateTokenForm() {
   const { isOpen, setIsOpen } = useCreateTokenDialogStore();
   const [createTokenSettings, setCreateTokenSettings] = useState(initialCreateTokenSettings);
@@ -30,6 +61,7 @@ export default function CreateTokenForm() {
           setIsOpen(true);
           setCreateTokenSettings(values);
         }}
+        validationSchema={createTokenSchema}
       >
         {(props) => (
           <form
@@ -44,6 +76,7 @@ export default function CreateTokenForm() {
                 tooltipText="tooltip_text"
                 placeholder="Name your token"
                 value={props.values.name}
+                error={props.touched.name && props.errors.name}
                 onChange={(e) => props.setFieldValue("name", e.target.value)}
               />
               <TextField
@@ -51,13 +84,16 @@ export default function CreateTokenForm() {
                 tooltipText="tooltip_text"
                 placeholder="Add token symbol (e.g. USDT)"
                 value={props.values.symbol}
+                error={props.touched.symbol && props.errors.symbol}
                 onChange={(e) => props.setFieldValue("symbol", e.target.value)}
               />
               <TextField
                 label="Total supply"
+                isNumeric
                 tooltipText="tooltip_text"
                 placeholder="Enter total supply"
                 value={props.values.totalSupply}
+                error={props.touched.totalSupply && props.errors.totalSupply}
                 onChange={(e) => props.setFieldValue("totalSupply", e.target.value)}
               />
               <TextField
@@ -65,6 +101,7 @@ export default function CreateTokenForm() {
                 tooltipText="tooltip_text"
                 placeholder="https:// "
                 value={props.values.imageURL}
+                error={props.touched.imageURL && props.errors.imageURL}
                 onChange={(e) => props.setFieldValue("imageURL", e.target.value)}
               />
             </div>
@@ -88,7 +125,14 @@ export default function CreateTokenForm() {
 
             <GasSettingsBlock />
 
-            <Button fullWidth>Create token</Button>
+            <Button
+              disabled={
+                Object.keys(props.touched).length > 0 && Object.keys(props.errors).length > 0
+              }
+              fullWidth
+            >
+              Create token
+            </Button>
           </form>
         )}
       </Formik>

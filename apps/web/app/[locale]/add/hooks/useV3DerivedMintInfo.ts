@@ -1,7 +1,5 @@
-import { tick } from "@apollo/client/testing";
 import { useMemo } from "react";
 
-import { useSortedTokens } from "@/app/[locale]/add/hooks/useSortedTokens";
 import { tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { FeeAmount } from "@/sdk_bi/constants";
@@ -87,31 +85,33 @@ export const useV3DerivedMintInfo = ({
     currencies[independentField],
   );
 
-  const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
-    // we wrap the currencies just to get the price in terms of the other token
-    const wrappedIndependentAmount = independentAmount?.wrapped;
-    const dependentCurrency = dependentField === Field.CURRENCY_B ? currencyB : currencyA;
-
+  const position: Position | undefined = useMemo(() => {
     if (
-      independentAmount &&
-      wrappedIndependentAmount &&
-      typeof tickLower === "number" &&
-      typeof tickUpper === "number" &&
-      poolForPosition
+      !poolForPosition ||
+      !independentAmount ||
+      !tokenA ||
+      !tokenB ||
+      typeof tickLower !== "number" ||
+      typeof tickUpper !== "number" ||
+      invalidRange
     ) {
-      // if price is out of range or invalid range - return 0 (single deposit will be independent)
-      if (outOfRange || invalidRange) {
-        return undefined;
-      }
-      const position: Position | undefined = wrappedIndependentAmount.currency.equals(
-        poolForPosition.token0.wrapped,
-      )
+      return undefined;
+    }
+
+    // Which pool token corresponds to the independent field?
+    const independentCurrency = currencies[independentField];
+    if (!independentCurrency) return undefined;
+
+    const independentIsToken0 = independentCurrency.wrapped.equals(poolForPosition.token0.wrapped);
+
+    try {
+      return independentIsToken0
         ? Position.fromAmount0({
             pool: poolForPosition,
             tickLower,
             tickUpper,
             amount0: independentAmount.quotient,
-            useFullPrecision: true, // we want full precision for the theoretical position
+            useFullPrecision: true,
           })
         : Position.fromAmount1({
             pool: poolForPosition,
@@ -119,39 +119,42 @@ export const useV3DerivedMintInfo = ({
             tickUpper,
             amount1: independentAmount.quotient,
           });
-
-      const dependentTokenAmount = wrappedIndependentAmount.currency.equals(
-        poolForPosition.token0.wrapped,
-      )
-        ? position.amount1
-        : position.amount0;
-      return (
-        dependentCurrency &&
-        CurrencyAmount.fromRawAmount(dependentCurrency, dependentTokenAmount.quotient)
-      );
+    } catch {
+      return undefined;
     }
-
-    return undefined;
   }, [
+    poolForPosition,
     independentAmount,
-    outOfRange,
-    dependentField,
-    currencyB,
-    currencyA,
+    tokenA,
+    tokenB,
     tickLower,
     tickUpper,
-    poolForPosition,
     invalidRange,
+    currencies,
+    independentField,
   ]);
 
-  const parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined } = useMemo(() => {
-    return {
-      [Field.CURRENCY_A]:
-        independentField === Field.CURRENCY_A ? independentAmount : dependentAmount,
-      [Field.CURRENCY_B]:
-        independentField === Field.CURRENCY_A ? dependentAmount : independentAmount,
-    };
-  }, [dependentAmount, independentAmount, independentField]);
+  const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
+    if (!position) return undefined;
+
+    const dependentCurrency = dependentField === Field.CURRENCY_B ? currencyB : currencyA;
+    if (!dependentCurrency) return undefined;
+
+    const { amount0, amount1 } = position.mintAmounts;
+    const isDepToken0 = dependentCurrency.wrapped.equals(position.pool.token0.wrapped);
+    const raw = isDepToken0 ? amount0 : amount1;
+
+    return CurrencyAmount.fromRawAmount(dependentCurrency, raw);
+  }, [position, dependentField, currencyA, currencyB]);
+
+  // const parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined } = useMemo(() => {
+  //   return {
+  //     [Field.CURRENCY_A]:
+  //       independentField === Field.CURRENCY_A ? independentAmount : dependentAmount,
+  //     [Field.CURRENCY_B]:
+  //       independentField === Field.CURRENCY_A ? dependentAmount : independentAmount,
+  //   };
+  // }, [dependentAmount, independentAmount, independentField]);
 
   // single deposit only if price is out of range
   const deposit0Disabled = Boolean(
@@ -176,54 +179,33 @@ export const useV3DerivedMintInfo = ({
     );
 
   // create position entity based on users selection
-  const position: Position | undefined = useMemo(() => {
-    if (
-      !poolForPosition ||
-      !tokenA ||
-      !tokenB ||
-      typeof tickLower !== "number" ||
-      typeof tickUpper !== "number" ||
-      invalidRange
-    ) {
-      return undefined;
-    }
 
-    // mark as 0 if disabled because out of range
-    const amount0 = !deposit0Disabled
-      ? parsedAmounts?.[tokenA.equals(poolForPosition.token0) ? Field.CURRENCY_A : Field.CURRENCY_B]
-          ?.quotient
-      : BIG_INT_ZERO;
-    const amount1 = !deposit1Disabled
-      ? parsedAmounts?.[tokenA.equals(poolForPosition.token0) ? Field.CURRENCY_B : Field.CURRENCY_A]
-          ?.quotient
-      : BIG_INT_ZERO;
-
-    if (amount0 !== undefined && amount1 !== undefined) {
-      return Position.fromAmounts({
-        pool: poolForPosition,
-        tickLower,
-        tickUpper,
-        amount0,
-        amount1,
-        useFullPrecision: true, // we want full precision for the theoretical position
-      });
-    } else {
-      return undefined;
+  const mintedParsed: { [field in Field]: CurrencyAmount<Currency> | undefined } = useMemo(() => {
+    if (!position || !poolForPosition) {
+      return { [Field.CURRENCY_A]: undefined, [Field.CURRENCY_B]: undefined };
     }
-  }, [
-    parsedAmounts,
-    poolForPosition,
-    tokenA,
-    tokenB,
-    deposit0Disabled,
-    deposit1Disabled,
-    invalidRange,
-    tickLower,
-    tickUpper,
-  ]);
+    const { amount0, amount1 } = position.mintAmounts;
+
+    const token0AsA =
+      currencies[Field.CURRENCY_A]?.wrapped &&
+      currencies[Field.CURRENCY_A]!.wrapped.equals(poolForPosition.token0.wrapped);
+
+    const amountForAraw = token0AsA ? amount0 : amount1;
+    const amountForBraw = token0AsA ? amount1 : amount0;
+
+    const amountA =
+      currencies[Field.CURRENCY_A] &&
+      CurrencyAmount.fromRawAmount(currencies[Field.CURRENCY_A]!, amountForAraw);
+
+    const amountB =
+      currencies[Field.CURRENCY_B] &&
+      CurrencyAmount.fromRawAmount(currencies[Field.CURRENCY_B]!, amountForBraw);
+
+    return { [Field.CURRENCY_A]: amountA, [Field.CURRENCY_B]: amountB };
+  }, [position, poolForPosition, currencies]);
 
   return {
-    parsedAmounts,
+    parsedAmounts: mintedParsed,
     position,
     currencies,
     noLiquidity,

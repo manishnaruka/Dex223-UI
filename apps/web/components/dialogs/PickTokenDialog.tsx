@@ -1,3 +1,6 @@
+import Alert from "@repo/ui/alert";
+import Checkbox from "@repo/ui/checkbox";
+import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
@@ -5,7 +8,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { Address, formatUnits } from "viem";
+import { Address, formatUnits, isAddress } from "viem";
 import { useAccount } from "wagmi";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -15,17 +18,23 @@ import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import { Check, rateToScore, TrustMarker, TrustRateCheck } from "@/components/badges/TrustBadge";
-import IconButton from "@/components/buttons/IconButton";
+import Button, { ButtonSize } from "@/components/buttons/Button";
+import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolioDialog";
+import { db } from "@/db/db";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
+import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import useDerivedTokenInfo from "@/hooks/useDerivedTokenInfo";
 import useTokenBalances from "@/hooks/useTokenBalances";
-import { useTokens } from "@/hooks/useTokenLists";
+import { useTokenLists, useTokens } from "@/hooks/useTokenLists";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
@@ -402,6 +411,13 @@ export default function PickTokenDialog({
     return tokensSearchValue ? [filterTokens(tokensSearchValue, tokens), true] : [tokens, false];
   }, [tokens, tokensSearchValue]);
 
+  const { token: derivedToken } = useDerivedTokenInfo({
+    tokenAddressToImport: tokensSearchValue as Address,
+    enabled: !!tokensSearchValue && isAddress(tokensSearchValue) && filteredTokens.length === 0,
+  });
+
+  console.log(derivedToken);
+
   const virtualizer = useVirtualizer({
     count: filteredTokens.length,
     getScrollElement: () => parentRef.current,
@@ -427,6 +443,8 @@ export default function PickTokenDialog({
       setEditActivated(false);
     }
   }, [isMobile, pinnedTokens.length]);
+  const [checkedUnderstand, setCheckedUnderstand] = useState<boolean>(false);
+  const tokenLists = useTokenLists();
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
@@ -549,13 +567,13 @@ export default function PickTokenDialog({
                     )}
                   </div>
                 </div>
-                <div
-                  className={clsxMerge(
-                    "flex-grow flex min-h-0",
-                    simpleForm && "overflow-hidden md:pb-5",
-                  )}
-                >
-                  {Boolean(filteredTokens.length) && (
+                {Boolean(filteredTokens.length) && (
+                  <div
+                    className={clsxMerge(
+                      "flex-grow flex min-h-0",
+                      simpleForm && "overflow-hidden md:pb-5",
+                    )}
+                  >
                     <ScrollbarContainer
                       scrollableNodeProps={{
                         ref: parentRef,
@@ -610,10 +628,142 @@ export default function PickTokenDialog({
                             })}
                       </div>
                     </ScrollbarContainer>
-                  )}
-                </div>
+                  </div>
+                )}
+                {Boolean(!filteredTokens.length && isTokenFilterActive) && derivedToken && (
+                  <div className="card-spacing-x flex-grow ">
+                    <div className="flex-grow">
+                      <div className="flex items-center gap-3 pb-2.5 mt-0.5 mb-3">
+                        <img
+                          className="w-12 h-12"
+                          width={48}
+                          height={48}
+                          src="/images/tokens/placeholder.svg"
+                          alt=""
+                        />
+                        <div className="flex flex-col text-16">
+                          <span className="text-primary-text">{derivedToken.symbol}</span>
+                          <span className="text-secondary-text">
+                            {derivedToken.name} (
+                            {t("decimals_amount", { decimals: derivedToken.decimals })})
+                          </span>
+                        </div>
+                      </div>
+                      {derivedToken.address0 && derivedToken.address1 && (
+                        <>
+                          <div className="mb-4 flex flex-col gap-4 pl-5 pr-3 pb-5 pt-4 bg-tertiary-bg rounded-3">
+                            <div className="grid grid-cols-[1fr_auto_32px] gap-y-1">
+                              <span className="text-secondary-text flex items-center gap-1">
+                                {t("address")}{" "}
+                                <Badge
+                                  variant={BadgeVariant.STANDARD}
+                                  standard={Standard.ERC20}
+                                />{" "}
+                              </span>
+                              <ExternalTextLink
+                                text={truncateMiddle(derivedToken.address0)}
+                                href={getExplorerLink(
+                                  ExplorerLinkType.ADDRESS,
+                                  derivedToken.address0,
+                                  chainId,
+                                )}
+                                className="justify-between"
+                              />
+                              <IconButton
+                                variant={IconButtonVariant.COPY}
+                                buttonSize={IconButtonSize.SMALL}
+                                text={derivedToken.address0}
+                              />
+                              <span className="text-secondary-text flex items-center gap-1">
+                                {t("address")}{" "}
+                                <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} />
+                              </span>
+                              {derivedToken.address1 && derivedToken.address1 && (
+                                <>
+                                  <ExternalTextLink
+                                    text={truncateMiddle(derivedToken.address1)}
+                                    href={getExplorerLink(
+                                      ExplorerLinkType.ADDRESS,
+                                      derivedToken.address1,
+                                      chainId,
+                                    )}
+                                    className="justify-between"
+                                  />
+                                  <IconButton
+                                    variant={IconButtonVariant.COPY}
+                                    buttonSize={IconButtonSize.SMALL}
+                                    text={derivedToken.address1}
+                                  />
+                                </>
+                              )}
+                              {/*{erc223AddressToImport && !isErc223Exist && (*/}
+                              {/*  <>*/}
+                              {/*    <span></span>*/}
+                              {/*    <span className="text-tertiary-text text-right flex w-8 items-center justify-center">*/}
+                              {/*      —*/}
+                              {/*    </span>*/}
+                              {/*  </>*/}
+                              {/*)}*/}
+                            </div>
+                          </div>
+                        </>
+                      )}
 
-                {Boolean(!filteredTokens.length && isTokenFilterActive) && (
+                      <Alert text={t("import_token_warning")} type="warning" />
+                    </div>
+
+                    <div className="flex flex-col gap-5 mt-5">
+                      {/*{!alreadyImported && (*/}
+                      <Checkbox
+                        checked={checkedUnderstand}
+                        handleChange={() => setCheckedUnderstand(!checkedUnderstand)}
+                        id="approve-list-import"
+                        label={t("i_understand")}
+                      />
+                      {/*)}*/}
+                      <Button
+                        fullWidth
+                        size={ButtonSize.LARGE}
+                        disabled={!checkedUnderstand}
+                        onClick={async () => {
+                          if (chainId && derivedToken) {
+                            const currentCustomList = tokenLists?.find(
+                              (t) => t.id === `custom-${chainId}`,
+                            );
+
+                            if (!currentCustomList) {
+                              await db.tokenLists.add({
+                                id: `custom-${chainId}`,
+                                enabled: true,
+                                chainId,
+                                list: {
+                                  name: "Custom token list",
+                                  version: {
+                                    minor: 0,
+                                    major: 0,
+                                    patch: 0,
+                                  },
+                                  tokens: [derivedToken],
+                                  logoURI: "/images/token-list-placeholder.svg",
+                                },
+                              });
+                            } else {
+                              (db.tokenLists as any).update(`custom-${chainId}`, {
+                                "list.tokens": [...currentCustomList.list.tokens, derivedToken],
+                              });
+                            }
+                          }
+                          // setContent("default");
+                          addToast(t("imported_successfully"));
+                        }}
+                      >
+                        {t("import_symbol", { symbol: derivedToken.symbol })}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {Boolean(!filteredTokens.length && isTokenFilterActive) && !derivedToken && (
                   <div
                     className={clsx(
                       "flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180",

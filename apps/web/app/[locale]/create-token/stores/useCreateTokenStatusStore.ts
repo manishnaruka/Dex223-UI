@@ -7,6 +7,10 @@ export enum CreateTokenStatus {
   LOADING_CREATE_TOKEN,
   ERROR_CREATE_TOKEN,
 
+  PENDING_CREATE_WRAPPER,
+  LOADING_CREATE_WRAPPER,
+  ERROR_CREATE_WRAPPER,
+
   SUCCESS,
 }
 
@@ -17,6 +21,6 @@ export enum SwapError {
 
 export const useCreateTokenStatusStore = createOperationStatusStore({
   initialStatus: CreateTokenStatus.INITIAL,
-  operations: ["createToken"],
+  operations: ["createToken", "createWrapper"],
   errorType: SwapError.UNKNOWN,
 });

@@ -60,6 +60,8 @@ export function useAddLiquidityParams({
     tokenB,
   });
 
+  console.log("LIQUIDITY PARAMS");
+
   const chainId = useCurrentChainId();
   const { address: accountAddress } = useAccount();
 
@@ -88,6 +90,9 @@ export function useAddLiquidityParams({
     // get amounts
     const { amount0: amount0Desired, amount1: amount1Desired } = position.mintAmounts;
 
+    console.log("DESIRED AMOUNTS");
+    console.log(amount0Desired);
+    console.log(amount1Desired);
     // adjust for slippage
     const minimumAmounts = position.mintAmountsWithSlippage(TEST_ALLOWED_SLIPPAGE); // options.slippageTolerance
     const amount0Min = toHex(minimumAmounts.amount0);
@@ -337,7 +342,7 @@ export const useAddLiquidity = ({
           chainId,
           addLiquidityParams,
         });
-        console.log("handleAddLiquidity: SOMESING UNDEFINED");
+        console.log("handleAddLiquidity: SOMETHING UNDEFINED");
         return;
       }
       setLiquidityStatus(AddLiquidityStatus.MINT_PENDING);

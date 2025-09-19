@@ -1,18 +1,17 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
-import { AddLiquidityStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { DexChainId } from "@/sdk_bi/chains";
+import truncateMiddle from "@/functions/truncateMiddle";
 import {
   IRecentTransaction,
   IRecentTransactionTitle,
@@ -248,7 +247,12 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
       );
     case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
       return (
-        <span className="text-14 text-secondary-text">{`${title.symbol} with ${18} decimals and ${title.amount} total supply`}</span>
+        <span className="text-14 text-secondary-text">
+          <ExternalTextLink
+            href={getExplorerLink(ExplorerLinkType.TOKEN, title.address, title.chainId)}
+            text={truncateMiddle(title.address)}
+          />
+        </span>
       );
     case RecentTransactionTitleTemplate.SWAP:
     case RecentTransactionTitleTemplate.REMOVE:

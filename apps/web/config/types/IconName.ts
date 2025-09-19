@@ -150,6 +150,7 @@ export const svgIconsNames = [
   "block",
   "time",
   "deploy-token",
+  "token-version",
 ] as const;
 
 export const socialIconNames = [""] as const;

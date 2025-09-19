@@ -51,6 +51,11 @@ export default function SwapDetails({
   const { slippage, deadline: _deadline, slippageType } = settingsStore;
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
 
+  const feeMultiplier = useMemo(() => {
+    const fee = trade?.swaps[0].route.pools[0].fee;
+    return fee ? fee / 100000 : 0.3;
+  }, [trade?.swaps]);
+
   const slippageValue = useMemo(() => {
     if (slippageType === SlippageType.AUTO) {
       return (
@@ -183,7 +188,7 @@ export default function SwapDetails({
             title={t("trading_fee")}
             value={
               typedValue && Boolean(+typedValue) && tokenA
-                ? `${(+typedValue * 0.3) / 100} ${tokenA.symbol}`
+                ? `${formatFloat((+typedValue * feeMultiplier) / 100)} ${tokenA.symbol}`
                 : "Loading..."
             }
             tooltipText={t("trading_fee_tooltip")}

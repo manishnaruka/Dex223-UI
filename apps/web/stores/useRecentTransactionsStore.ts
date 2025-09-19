@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
 import { db } from "@/db/db";
+import { DexChainId } from "@/sdk_bi/chains";
 import { Standard } from "@/sdk_bi/standard";
 export enum RecentTransactionStatus {
   PENDING,
@@ -118,7 +119,7 @@ export type IRecentTransactionTitle =
     } & SingleTokenTransactionTitle & { standard: Standard })
   | ({
       template: RecentTransactionTitleTemplate.DEPLOY_TOKEN;
-    } & SingleTokenTransactionTitle & { standard: Standard })
+    } & SingleTokenTransactionTitle & { standard: Standard; address: Address; chainId: DexChainId })
   | ({
       template: RecentTransactionTitleTemplate.SWAP;
     } & TwoTokensTransactionTitle)

@@ -200,7 +200,7 @@ export function useImportToken() {
 
       return token;
     },
-    [chainId, publicClient, tokenLists],
+    [publicClient, tokenLists],
   );
 
   return { handleImport };
