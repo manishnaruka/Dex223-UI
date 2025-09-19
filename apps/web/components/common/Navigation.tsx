@@ -66,12 +66,14 @@ const menuItems: Array<
           className="min-w-[238px]"
         />
         <MobileLink
+          disabled
           isActive={pathname === "/margin-swap"}
           href="/margin-swap"
           iconName="margin-trading"
           title={t("margin_trading")}
           handleClose={handleClose}
-          className="min-w-[238px]"
+          className="min-w-[238px] pr-5"
+          comingSoon
         />
       </div>
     ),

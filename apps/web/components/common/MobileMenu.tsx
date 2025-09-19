@@ -253,6 +253,13 @@ export default function MobileMenu() {
                     title={t(title)}
                     handleClose={() => setMobileMenuOpened(false)}
                     isActive={pathname.includes(href)}
+                    disabled={!["/swap", "/pools", "/portfolio", "/token-listing"].includes(href)}
+                    comingSoon={title === "borrow_lend" || title === "margin_trading"}
+                    className={
+                      title === "borrow_lend" || title === "margin_trading"
+                        ? "justify-between pr-4"
+                        : ""
+                    }
                   />
                 );
               }),
