@@ -295,7 +295,7 @@ export default function MobileMenu() {
                     href="/create-token"
                     iconName="list-tokens"
                     title="Create a new token"
-                    handleClose={() => setSubmenuOpened(false)}
+                    handleClose={() => setMobileMenuOpened(false)}
                     className="pr-5"
                   />
                   <MobileLink
