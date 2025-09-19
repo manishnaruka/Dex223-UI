@@ -12,6 +12,7 @@ interface Props {
   text: string | ReactNode;
   withIcon?: boolean;
   type?: AlertType;
+  className?: string;
 }
 
 const iconsMap: Record<AlertType, ReactNode> = {
@@ -22,7 +23,7 @@ const iconsMap: Record<AlertType, ReactNode> = {
   "info-border": <InfoIcon className="ui-flex-shrink-0"/>,
 };
 
-export default function Alert({ text, type = "success", withIcon = true }: Props) {
+export default function Alert({ text, type = "success", withIcon = true, className = "" }: Props) {
   return (
     <div
       className={clsxMerge(
@@ -45,6 +46,7 @@ export default function Alert({ text, type = "success", withIcon = true }: Props
         type === "warning" && "ui-outline-orange ui-bg-orange-bg ui-outline-1",
         type === "info" && "ui-outline-blue ui-bg-blue-bg ui-outline-1",
         type === "info-border" && "ui-border-l-4 ui-border-l-blue ui-outline-0 ui-bg-primary-bg ui-pl-4",
+        className
       )}
     >
       {withIcon && (

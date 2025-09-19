@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
 import { db } from "@/db/db";
+import { DexChainId } from "@/sdk_bi/chains";
 import { Standard } from "@/sdk_bi/standard";
 export enum RecentTransactionStatus {
   PENDING,
@@ -37,6 +38,8 @@ export enum RecentTransactionTitleTemplate {
   LIQUIDATE_MARGIN_POSITION,
   MARGIN_SWAP,
   WITHDRAW_FROM_CLOSED_POSITION,
+
+  DEPLOY_TOKEN,
 }
 
 type RecentTransactionGasLimit =
@@ -114,6 +117,9 @@ export type IRecentTransactionTitle =
   | ({
       template: RecentTransactionTitleTemplate.CONVERT;
     } & SingleTokenTransactionTitle & { standard: Standard })
+  | ({
+      template: RecentTransactionTitleTemplate.DEPLOY_TOKEN;
+    } & SingleTokenTransactionTitle & { standard: Standard; address: Address; chainId: DexChainId })
   | ({
       template: RecentTransactionTitleTemplate.SWAP;
     } & TwoTokensTransactionTitle)

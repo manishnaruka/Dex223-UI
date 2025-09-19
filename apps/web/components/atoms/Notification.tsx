@@ -1,3 +1,4 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren } from "react";
 
@@ -6,6 +7,8 @@ import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import { RecentTransactionLogo } from "@/components/common/RecentTransaction";
 import { formatFloat } from "@/functions/formatFloat";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import truncateMiddle from "@/functions/truncateMiddle";
 import { Standard } from "@/sdk_bi/standard";
 import {
   IRecentTransactionTitle,
@@ -47,6 +50,13 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
             symbol: title.symbol,
           })}
         </NotificationSubtitleText>
+      );
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
+      return (
+        <ExternalTextLink
+          href={getExplorerLink(ExplorerLinkType.TOKEN, title.address, title.chainId)}
+          text={truncateMiddle(title.address)}
+        />
       );
     case RecentTransactionTitleTemplate.SWAP:
     case RecentTransactionTitleTemplate.MARGIN_SWAP:
@@ -138,6 +148,16 @@ function NotificationTitle({
             {status === RecentTransactionStatus.SUCCESS
               ? t("conversion_success_notification", { standard: title.standard })
               : t("conversion_revert_notification")}
+          </NotificationTitleText>
+        </div>
+      );
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
+      return (
+        <div className="flex items-center gap-1">
+          <NotificationTitleText>
+            {status === RecentTransactionStatus.SUCCESS
+              ? "Token successfully created"
+              : "Failed to create token"}
           </NotificationTitleText>
         </div>
       );

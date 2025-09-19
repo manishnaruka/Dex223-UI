@@ -13,6 +13,7 @@ import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useDebounce } from "@/hooks/useDebounce";
 import { PoolsResult, PoolState, useStorePools } from "@/hooks/usePools";
+import { ZERO_ADDRESS } from "@/sdk_bi/addresses";
 import { FeeAmount, TradeType } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
@@ -141,7 +142,7 @@ export function useTradeComputation() {
             tier: pool.fee,
             chainId,
           });
-          if (!poolAddress || !address || !client) return null;
+          if (!poolAddress || !client) return null;
 
           const zeroForOne = tokenA.equals(pool.token0.wrapped);
           const sqrtLimit = zeroForOne
@@ -153,7 +154,7 @@ export function useTradeComputation() {
             abi: EXPERIMENTAL_POOL_ABI,
             functionName: "quoteSwap",
             args: [
-              address,
+              ZERO_ADDRESS,
               zeroForOne,
               parseUnits(debounced, tokenA.decimals),
               sqrtLimit,

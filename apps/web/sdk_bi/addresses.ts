@@ -66,3 +66,10 @@ export const ORACLE_ADDRESS: Record<DexChainId, Address> = {
   [DexChainId.BSC_TESTNET]: ZERO_ADDRESS,
   [DexChainId.EOS]: ZERO_ADDRESS,
 };
+
+export const ERC223_TOKEN_DEPLOYER_ADDRESS: Record<DexChainId, Address> = {
+  [DexChainId.MAINNET]: ZERO_ADDRESS,
+  [DexChainId.SEPOLIA]: "0xb4bC0561AA20b82f141Cc7883E961F4479725Bb2",
+  [DexChainId.BSC_TESTNET]: ZERO_ADDRESS,
+  [DexChainId.EOS]: ZERO_ADDRESS,
+};

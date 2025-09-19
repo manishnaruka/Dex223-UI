@@ -1,18 +1,17 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
-import { AddLiquidityStatus } from "@/app/[locale]/add/stores/useAddLiquidityStatusStore";
 import Svg from "@/components/atoms/Svg";
-import Badge from "@/components/badges/Badge";
 import IconButton from "@/components/buttons/IconButton";
 import { useTransactionSpeedUpDialogStore } from "@/components/dialogs/stores/useTransactionSpeedUpDialogStore";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
-import { DexChainId } from "@/sdk_bi/chains";
+import truncateMiddle from "@/functions/truncateMiddle";
 import {
   IRecentTransaction,
   IRecentTransactionTitle,
@@ -120,6 +119,14 @@ export function RecentTransactionTitle({ title }: { title: IRecentTransactionTit
           <span className="font-medium inline text-16">
             {t("conversion_title", { symbol: title.symbol })}
           </span>
+        </span>
+      );
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
+      return (
+        <span className="mr-1 text-0">
+          <Svg className="text-tertiary-text inline-block mr-1 align-top" iconName="deploy-token" />
+
+          <span className="font-medium inline text-16">Create token</span>
         </span>
       );
     case RecentTransactionTitleTemplate.UNWRAP:
@@ -238,6 +245,15 @@ export function RecentTransactionSubTitle({ title }: { title: IRecentTransaction
           })}
         </span>
       );
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
+      return (
+        <span className="text-14 text-secondary-text">
+          <ExternalTextLink
+            href={getExplorerLink(ExplorerLinkType.TOKEN, title.address, title.chainId)}
+            text={truncateMiddle(title.address)}
+          />
+        </span>
+      );
     case RecentTransactionTitleTemplate.SWAP:
     case RecentTransactionTitleTemplate.REMOVE:
     case RecentTransactionTitleTemplate.COLLECT:
@@ -286,6 +302,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.LIST_SINGLE:
     case RecentTransactionTitleTemplate.CONVERT:
+    case RecentTransactionTitleTemplate.DEPLOY_TOKEN:
     case RecentTransactionTitleTemplate.UNWRAP:
     case RecentTransactionTitleTemplate.CREATE_LENDING_ORDER:
     case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
@@ -296,7 +313,7 @@ export function RecentTransactionLogo({ title }: { title: IRecentTransactionTitl
     case RecentTransactionTitleTemplate.TRANSFER:
       return (
         <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
-          <Image width={36} height={36} src={title.logoURI} alt="" />
+          <Image className="rounded-full" width={36} height={36} src={title.logoURI} alt="" />
         </div>
       );
     case RecentTransactionTitleTemplate.SWAP:
