@@ -189,22 +189,6 @@ function NavigationMoreDropdown() {
           <div className="flex flex-col mt-2 mb-2">
             <MobileLink
               href="#"
-              iconName="list"
-              title="Token lists"
-              handleClose={() => setSubmenuOpened(false)}
-              className="pr-5"
-              disabled
-            />
-            <MobileLink
-              isExternal
-              href="https://blog.dex223.io/"
-              iconName="blog"
-              title="Blog"
-              handleClose={() => setSubmenuOpened(false)}
-              className="pr-5"
-            />
-            <MobileLink
-              href="#"
               iconName="star"
               title="Feedback"
               handleClose={() => setSubmenuOpened(false)}
@@ -213,6 +197,29 @@ function NavigationMoreDropdown() {
                 e.preventDefault();
                 setIsOpen(true);
               }}
+            />
+            <MobileLink
+              href="#"
+              iconName="list"
+              title="Token lists"
+              handleClose={() => setSubmenuOpened(false)}
+              className="pr-5"
+              disabled
+            />
+            <MobileLink
+              href="/create-token"
+              iconName="list-tokens"
+              title="Create a new token"
+              handleClose={() => setSubmenuOpened(false)}
+              className="pr-5"
+            />
+            <MobileLink
+              isExternal
+              href="https://blog.dex223.io/"
+              iconName="blog"
+              title="Blog"
+              handleClose={() => setSubmenuOpened(false)}
+              className="pr-5"
             />
             <MobileLink
               disabled

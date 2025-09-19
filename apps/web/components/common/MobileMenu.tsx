@@ -284,6 +284,13 @@ export default function MobileMenu() {
               <Collapse open={moreOpened}>
                 <div className="py-2 border-b border-secondary-border">
                   <MobileLink
+                    href="/create-token"
+                    iconName="list-tokens"
+                    title="Create a new token"
+                    handleClose={() => setSubmenuOpened(false)}
+                    className="pr-5"
+                  />
+                  <MobileLink
                     href="#"
                     iconName="list"
                     title="Token lists"

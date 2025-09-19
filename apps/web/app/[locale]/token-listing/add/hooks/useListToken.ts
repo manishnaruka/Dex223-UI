@@ -183,6 +183,8 @@ export default function useListToken() {
     tier: pool?.[1]?.fee,
   });
 
+  console.log(pool);
+
   const tokensToList = useTokensToList();
 
   const isFree = useMemo(() => {
