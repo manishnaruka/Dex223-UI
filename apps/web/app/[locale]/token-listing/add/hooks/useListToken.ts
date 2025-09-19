@@ -28,6 +28,7 @@ import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import { useFees } from "@/hooks/useFees";
+import { PoolState, useStorePools } from "@/hooks/usePools";
 import { DexChainId } from "@/sdk_bi/chains";
 import { ADDRESS_ZERO, FeeAmount } from "@/sdk_bi/constants";
 import { Token } from "@/sdk_bi/entities/token";
@@ -40,15 +41,26 @@ import {
   useRecentTransactionsStore,
 } from "@/stores/useRecentTransactionsStore";
 
+const poolsFees = [FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
+
 function useListParams() {
   const { tokenA, tokenB } = useListTokensStore();
   const { autoListingContract } = useAutoListingContractStore();
 
   const autoListing = useAutoListingContract(autoListingContract);
+
+  const pools = useStorePools(
+    poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
+  );
+
+  const pool = useMemo(() => {
+    return pools.find((pool) => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID);
+  }, [pools]);
+
   const { poolAddress } = useComputePoolAddressDex({
     tokenA,
     tokenB,
-    tier: FeeAmount.MEDIUM,
+    tier: pool?.[1]?.fee,
   });
 
   const isFree = useMemo(() => {
@@ -66,7 +78,7 @@ function useListParams() {
       address: autoListingContract,
       abi: AUTO_LISTING_ABI,
       functionName: "list",
-      args: [poolAddress, FeeAmount.MEDIUM],
+      args: [poolAddress, pool?.[1]?.fee],
     };
 
     if (isFree) {
@@ -86,7 +98,7 @@ function useListParams() {
 
       return { ...common, args: [...common.args, paymentToken.token.address] };
     }
-  }, [autoListingContract, isFree, paymentToken, poolAddress]);
+  }, [autoListingContract, isFree, paymentToken, pool, poolAddress]);
 }
 
 export function useListTokenEstimatedGas() {
@@ -157,10 +169,18 @@ export default function useListToken() {
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
   const publicClient = usePublicClient();
   const { address } = useAccount();
-  const { poolAddress, poolAddressLoading } = useComputePoolAddressDex({
+  const pools = useStorePools(
+    poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
+  );
+
+  const pool = useMemo(() => {
+    return pools.find((pool) => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID);
+  }, [pools]);
+
+  const { poolAddress } = useComputePoolAddressDex({
     tokenA,
     tokenB,
-    tier: FeeAmount.MEDIUM,
+    tier: pool?.[1]?.fee,
   });
 
   const tokensToList = useTokensToList();

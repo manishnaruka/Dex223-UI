@@ -51,7 +51,7 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFees } from "@/hooks/useFees";
-import { PoolState, usePool } from "@/hooks/usePools";
+import { PoolState, usePool, useStorePools } from "@/hooks/usePools";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useRouter } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
@@ -165,6 +165,9 @@ const gasOptionTitle: Record<GasOption, any> = {
   [GasOption.FAST]: "fast",
   [GasOption.CUSTOM]: "custom",
 };
+
+const poolsFees = [FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
+
 export default function ListTokenPage() {
   useAutoListingSearchParams();
   const t = useTranslations("Swap");
@@ -183,12 +186,18 @@ export default function ListTokenPage() {
   const { autoListing, paymentToken } = useAutoListing();
 
   const { tokenA, tokenB, setTokenA, setTokenB } = useListTokensStore();
-  const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
 
-  const isPoolExists = useMemo(
-    () => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID,
-    [pool],
+  const pools = useStorePools(
+    poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
   );
+
+  const pool = useMemo(() => {
+    return pools.find((pool) => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID);
+  }, [pools]);
+
+  // const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
+
+  const isPoolExists = useMemo(() => Boolean(pool), [pool]);
 
   const destination = useMemo(() => {
     const dest = params.get("dest");

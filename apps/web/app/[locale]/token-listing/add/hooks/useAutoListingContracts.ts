@@ -22,6 +22,7 @@ const AUTOLISTING_BLACKLIST = [
   "0x13ddc6460c705d29d37b18a906c7fe69fa9e711d",
   "0xbfbd1a95e551ba8de2dc1c84843d9df5c52619a3",
   "0xf851ffe03478f0bfebd4337287f315350cc311c2",
+  "0x063fd9a30f75c3b8a1ffb22167fc0984dfba1adf",
 ];
 
 const query = gql(`
