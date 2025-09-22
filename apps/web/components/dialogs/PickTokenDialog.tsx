@@ -1,6 +1,7 @@
 import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import ExternalTextLink from "@repo/ui/external-text-link";
+import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
@@ -411,7 +412,7 @@ export default function PickTokenDialog({
     return tokensSearchValue ? [filterTokens(tokensSearchValue, tokens), true] : [tokens, false];
   }, [tokens, tokensSearchValue]);
 
-  const { token: derivedToken } = useDerivedTokenInfo({
+  const { token: derivedToken, isLoading } = useDerivedTokenInfo({
     tokenAddressToImport: tokensSearchValue as Address,
     enabled: !!tokensSearchValue && isAddress(tokensSearchValue) && filteredTokens.length === 0,
   });
@@ -763,14 +764,22 @@ export default function PickTokenDialog({
                   </div>
                 )}
 
-                {Boolean(!filteredTokens.length && isTokenFilterActive) && !derivedToken && (
-                  <div
-                    className={clsx(
-                      "flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180",
-                      !pinnedTokens.length && "-mt-3",
-                    )}
-                  >
-                    <span className="text-secondary-text">{t("token_not_found")}</span>
+                {Boolean(!filteredTokens.length && isTokenFilterActive) &&
+                  !derivedToken &&
+                  !isLoading && (
+                    <div
+                      className={clsx(
+                        "flex items-center justify-center gap-2 flex-col h-full flex-grow w-full bg-empty-not-found-token bg-right-top bg-no-repeat max-md:bg-size-180",
+                        !pinnedTokens.length && "-mt-3",
+                      )}
+                    >
+                      <span className="text-secondary-text">{t("token_not_found")}</span>
+                    </div>
+                  )}
+
+                {isLoading && (
+                  <div className="flex items-center justify-center gap-2 flex-col h-full">
+                    <Preloader size={80} />
                   </div>
                 )}
                 {!simpleForm && (

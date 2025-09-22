@@ -25,7 +25,7 @@ type uniToken = {
 
 type UniData = {
   name: string;
-  version?: {
+  version: {
     major: number;
     minor: number;
     patch: number;
@@ -48,7 +48,7 @@ type dexToken = {
 
 type DexData = {
   name: string;
-  version?: {
+  version: {
     major: number;
     minor: number;
     patch: number;
@@ -118,7 +118,7 @@ function formatItem(token: uniToken, address223: string): Token {
   );
 }
 
-async function getList(url: string): Promise<UniData> {
+async function getList(url: string): Promise<UniData | undefined> {
   try {
     const response = await fetch(url);
     const data = await response.json();
@@ -127,7 +127,7 @@ async function getList(url: string): Promise<UniData> {
     return data;
   } catch (e) {
     console.log(e);
-    return <UniData>{};
+    return undefined;
   }
 }
 
@@ -136,14 +136,17 @@ async function getList(url: string): Promise<UniData> {
  * @param url URL of token list
  * @returns Promise with formatted Dex223 token list.
  */
-export async function convertList(url: string, chainId: DexChainId): Promise<any> {
+export async function convertList(url: string, chainId: DexChainId): Promise<DexData | undefined> {
   const data = await getList(url);
+
+  if (!data) {
+    return undefined;
+  }
 
   const list = data.tokens.filter((t) => t.chainId === chainId);
 
   if (list.length === 0) {
-    console.error("No data found");
-    return <DexData>{};
+    return undefined;
   }
 
   const convertedList: DexData = {
