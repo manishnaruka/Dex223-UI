@@ -1,1 +1,1 @@
-export const isMarginModuleEnabled = false;
+export const isMarginModuleEnabled = true;
