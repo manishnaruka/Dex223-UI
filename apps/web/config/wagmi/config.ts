@@ -65,7 +65,10 @@ export const config = createConfig({
       http(),
     ]),
     [sepolia.id]: fallback([
-      // webSocket("wss://eth-sepolia.g.alchemy.com/v2/kvidqVpyVu4aivBEb55XXIzCHDqMm7CO"),
+      webSocket("wss://lb.drpc.org/sepolia/AkwuSJ_nLEH3t2kOUJMm2iE4PlM4mHER8Lt2wg8TMB_n"),
+      http("https://lb.drpc.org/sepolia/AkwuSJ_nLEH3t2kOUJMm2iE4PlM4mHER8Lt2wg8TMB_n"),
+      webSocket("wss://ethereum-rpc.publicnode.com"),
+      webSocket("wss://eth-sepolia.g.alchemy.com/v2/kvidqVpyVu4aivBEb55XXIzCHDqMm7CO"),
       http("https://sepolia.infura.io/v3/6689c099b8d542589b1842e30dbc2027"),
       http("https://eth-sepolia.g.alchemy.com/v2/kvidqVpyVu4aivBEb55XXIzCHDqMm7CO"),
       http("https://rpc.ankr.com/eth_sepolia"),
