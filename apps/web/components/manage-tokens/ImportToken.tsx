@@ -252,8 +252,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  console.log("STANDARD", standard);
-
   const { data: isWrapper, isLoading: isLoadingWrapper } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: "isWrapper",

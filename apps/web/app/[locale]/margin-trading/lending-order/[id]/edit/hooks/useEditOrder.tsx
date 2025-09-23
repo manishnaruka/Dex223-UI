@@ -28,9 +28,9 @@ import { getGasSettings } from "@/functions/gasSettings";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
 import addToast from "@/other/toast";
 import { MARGIN_TRADING_ADDRESS, ORACLE_ADDRESS } from "@/sdk_bi/addresses";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,
@@ -107,7 +107,7 @@ export default function useEditOrder() {
 
   const { customGasLimit } = useCreateOrderGasLimitStore();
   const { gasPriceOption, gasPriceSettings } = useCreateOrderGasPriceStore();
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
   const {
     tradingTokens,
     loanToken,

@@ -1,56 +1,94 @@
 "use client";
 import Image from "next/image";
-import React, { useCallback, useMemo, useState } from "react";
-import { Address } from "viem";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
+import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
+import {
+  Field,
+  useLiquidityAmountsStore,
+} from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
+import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
+import { useLiquidityPriceRangeStore } from "@/app/[locale]/add/stores/useLiquidityPriceRangeStore";
+import { useLiquidityTierStore } from "@/app/[locale]/add/stores/useLiquidityTierStore";
+import Input from "@/components/atoms/Input";
 import SelectButton from "@/components/atoms/SelectButton";
 import Svg from "@/components/atoms/Svg";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
+import { tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useFetchPoolData } from "@/hooks/useFetchPoolsData";
-import { FeeAmount } from "@/sdk_bi/constants";
+import { FeeAmount, TICK_SPACINGS } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { Price } from "@/sdk_bi/entities/fractions/price";
+import { nearestUsableTick } from "@/sdk_bi/utils/nearestUsableTick";
+import { priceToClosestTick } from "@/sdk_bi/utils/priceTickConversions";
 import { PoolState, useStorePools } from "@/shared/hooks/usePools";
+import { usePrice } from "@/shared/hooks/usePrice";
+import { usePriceRange } from "@/shared/hooks/usePriceRange";
+import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 
 export default function DevPoolsPage() {
   const chainId = useCurrentChainId();
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
+  const { setTokenA: setStoreTokenA, setTokenB: setStoreTokenB } = useAddLiquidityTokensStore();
+  const { setTier } = useLiquidityTierStore();
+
+  const {
+    typedValue,
+    independentField,
+    dependentField,
+    setTypedValue, // якщо у твоєму сторі називається інакше — підстав актуальну дію
+  } = useLiquidityAmountsStore();
+
+  // розрахунок позиції/залежної суми
+
+  // значення для інпутів (керовані)
 
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
   const [tokenA, setTokenA] = useState<Currency>();
   const [tokenB, setTokenB] = useState<Currency>();
+
   const handlePick = useCallback(
     (token?: Currency, tokenPicking?: "tokenA" | "tokenB") => {
       const currentlyPickingToken = tokenPicking || currentlyPicking;
       if (currentlyPickingToken === "tokenA") {
         if (!token) {
           setTokenA(undefined);
+          setStoreTokenA(undefined);
         } else {
           if (token === tokenB) {
             setTokenB(tokenA);
+            setStoreTokenB(tokenA); // ← синхронізація
           }
-
           setTokenA(token);
+          setStoreTokenA(token); // ← синхронізація
         }
       }
 
       if (currentlyPickingToken === "tokenB") {
         if (!token) {
           setTokenB(undefined);
+          setStoreTokenB(undefined);
         } else {
           if (token === tokenA) {
             setTokenA(tokenB);
+            setStoreTokenA(tokenB); // ← синхронізація
           }
           setTokenB(token);
+          setStoreTokenB(token); // ← синхронізація
         }
       }
 
       setIsOpenedTokenPick(false);
     },
-    [currentlyPicking, setTokenA, setTokenB, tokenA, tokenB, setIsOpenedTokenPick],
+    [currentlyPicking, setStoreTokenA, tokenB, tokenA, setStoreTokenB],
   );
 
   const [fee, setFee] = useState<FeeAmount>(FeeAmount.MEDIUM);
+
+  useEffect(() => {
+    setTier(fee);
+  }, [fee, setTier]);
 
   const [enabled, setEnabled] = useState(true);
   const [refreshOnBlock, setRefreshOnBlock] = useState(true);
@@ -76,6 +114,89 @@ export default function DevPoolsPage() {
   });
 
   const [state, pool] = pools[0] ?? [PoolState.IDLE, null];
+
+  // ======== PRICE + RANGE (локально) ========
+  const { tier } = useLiquidityTierStore();
+  const tickSpacing = tier ? TICK_SPACINGS[tier] : undefined;
+
+  const { ticks, startPriceTypedValue, setTicks, setRangeTouched, setStartPriceTypedValue } =
+    useLiquidityPriceRangeStore();
+
+  // Готові похідні (ціна, ліміти, ціни на межах) — все без RPC
+  const { formattedPrice, price, leftPrice, rightPrice, tickSpaceLimits } = usePriceRange();
+
+  const noLiquidity = state === PoolState.NOT_EXISTS;
+  // контроль інпутів тік-діапазону
+  const lowerTick = typeof ticks?.LOWER === "number" ? ticks.LOWER : "";
+  const upperTick = typeof ticks?.UPPER === "number" ? ticks.UPPER : "";
+  const [lowerPriceInput, setLowerPriceInput] = useState("");
+  const [upperPriceInput, setUpperPriceInput] = useState("");
+
+  const onPriceChange = (bound: Bound) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (bound === Bound.LOWER) setLowerPriceInput(val);
+    if (bound === Bound.UPPER) setUpperPriceInput(val);
+
+    if (!tokenA || !tokenB) return;
+    const base = tokenA.wrapped;
+    const quote = tokenB.wrapped;
+
+    const parsed = tryParseCurrencyAmount(val, quote);
+    if (!parsed) return;
+
+    const baseAmount = tryParseCurrencyAmount("1", base);
+    if (!baseAmount) return;
+
+    const price = new Price(
+      baseAmount.currency.wrapped,
+      parsed.currency.wrapped,
+      baseAmount.quotient,
+      parsed.quotient,
+    );
+
+    const tick = priceToClosestTick(price);
+
+    setTicks({
+      [bound]: nearestUsableTick(tick, tickSpacing ?? 60),
+    });
+  };
+
+  const { parsedAmounts, position, outOfRange, depositADisabled, depositBDisabled } =
+    useV3DerivedMintInfo({
+      tokenA,
+      tokenB,
+      tier: fee, // fee зі сторінки
+      price, // з usePrice()
+    });
+
+  console.log(parsedAmounts);
+
+  const amountA =
+    independentField === Field.CURRENCY_A
+      ? typedValue
+      : parsedAmounts[Field.CURRENCY_A]?.toSignificant(6);
+
+  const amountB =
+    independentField === Field.CURRENCY_B
+      ? typedValue
+      : parsedAmounts[Field.CURRENCY_B]?.toSignificant(6);
+
+  // хендлери
+  const onAmountAChange = useCallback(
+    (v: string) => {
+      setTypedValue({ typedValue: v, field: Field.CURRENCY_A });
+    },
+    [setTypedValue],
+  );
+
+  const onAmountBChange = useCallback(
+    (v: string) => {
+      setTypedValue({ typedValue: v, field: Field.CURRENCY_B });
+    },
+    [setTypedValue],
+  );
+
+  console.log(pool);
 
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
@@ -167,7 +288,7 @@ export default function DevPoolsPage() {
                 />
               </span>
             ) : (
-              <span className="text-tertiary-text">{"Token"}</span>
+              <span className="text-terтіary-text">{"Token"}</span>
             )}
           </SelectButton>
         </div>
@@ -222,10 +343,138 @@ export default function DevPoolsPage() {
         </div>
       </div>
 
+      {/* ===== PRICE ===== */}
+      <div style={{ marginTop: 20, padding: 12, border: "1px solid #e5e7eb", borderRadius: 8 }}>
+        <h3 style={{ marginBottom: 10 }}>Price</h3>
+        {state === PoolState.EXISTS ? (
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <span>Mid price:</span>
+            <code>{formattedPrice}</code>
+            <span style={{ color: "#6b7280" }}>(read-only, from pool snapshot)</span>
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <label>
+              Start price (A/B)
+              <Input
+                type="number"
+                min={0}
+                step="any"
+                value={startPriceTypedValue ?? ""}
+                onChange={(e) => setStartPriceTypedValue(e.target.value)}
+                style={{ width: 200, marginLeft: 8 }}
+              />
+            </label>
+            <span style={{ color: "#6b7280" }}>Пул не існує — введи стартову ціну (без RPC)</span>
+          </div>
+        )}
+      </div>
+
+      {/* ===== RANGE IN TICKS ===== */}
+      <div style={{ marginTop: 16, padding: 12, border: "1px solid #e5e7eb", borderRadius: 8 }}>
+        <div>
+          <b>Range (prices)</b>
+        </div>
+        <label>
+          Lower price (A/B)
+          <Input
+            type="number"
+            value={lowerPriceInput}
+            onChange={onPriceChange(Bound.LOWER)}
+            style={{ width: 140, marginLeft: 8 }}
+          />
+        </label>
+        <label style={{ marginLeft: 12 }}>
+          Upper price (A/B)
+          <Input
+            type="number"
+            value={upperPriceInput}
+            onChange={onPriceChange(Bound.UPPER)}
+            style={{ width: 140, marginLeft: 8 }}
+          />
+        </label>
+
+        <div style={{ marginTop: 12, color: "#6b7280" }}>
+          Lower tick: {ticks?.LOWER ?? "—"} <br />
+          Upper tick: {ticks?.UPPER ?? "—"}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12, padding: 12, border: "1px solid #e5e7eb", borderRadius: 8 }}>
+        <h3 style={{ marginBottom: 10 }}>Amounts</h3>
+
+        <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+          <label>
+            Amount A
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={amountA}
+              onChange={(e) => onAmountAChange(e.target.value)}
+              placeholder="0.0"
+              style={{ width: 180, marginLeft: 8 }}
+            />
+          </label>
+
+          <label>
+            Amount B
+            <Input
+              type="number"
+              inputMode="decimal"
+              value={amountB}
+              onChange={(e) => onAmountBChange(e.target.value)}
+              placeholder="0.0"
+              style={{ width: 180, marginLeft: 8 }}
+            />
+          </label>
+
+          <div style={{ display: "flex", gap: 12, color: "#6b7280", flexWrap: "wrap" }}>
+            <span>
+              outOfRange: <b>{outOfRange ? "true" : "false"}</b>
+            </span>
+            <span>
+              depositA disabled: <b>{depositADisabled ? "true" : "false"}</b>
+            </span>
+            <span>
+              depositB disabled: <b>{depositBDisabled ? "true" : "false"}</b>
+            </span>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 8, color: "#6b7280" }}>
+          {position ? (
+            <div>
+              <div>
+                mintAmounts.amount0: <code>{position.mintAmounts.amount0.toString()}</code>
+              </div>
+              <div>
+                mintAmounts.amount1: <code>{position.mintAmounts.amount1.toString()}</code>
+              </div>
+              <div>
+                tickLower / tickUpper:{" "}
+                <code>
+                  {ticks?.LOWER ?? "—"} / {ticks?.UPPER ?? "—"}
+                </code>
+              </div>
+            </div>
+          ) : (
+            <div>position: —</div>
+          )}
+        </div>
+      </div>
+
+      <pre style={{ marginTop: 12, fontSize: 12, color: "#6b7280" }}>
+        {JSON.stringify(ticks, null, 2)}
+      </pre>
+
+      <pre style={{ fontSize: 12, color: "#888" }}>
+        {JSON.stringify({ independentField, typedValue }, null, 2)}
+      </pre>
+
       <p style={{ marginTop: 8, color: "#6b7280" }}>
         Сторінка навмисно накладає затримку на фетч пулу через <code>fetchOverride</code>, щоб можна
         було відслідкувати, що <b>in-flight dedup</b> і <b>refresh on block</b> працюють без
-        лавинних викликів.
+        лавинних викликів. Блоки <b>Price</b> і <b>Range</b> рахуються локально (без RPC).
       </p>
 
       <PickTokenDialog

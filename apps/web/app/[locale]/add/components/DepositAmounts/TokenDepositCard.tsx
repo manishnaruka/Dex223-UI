@@ -14,7 +14,6 @@ import truncateMiddle from "@/functions/truncateMiddle";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke, { useRevokeEstimatedGas } from "@/hooks/useRevoke";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useWithdraw, { useWithdrawEstimatedGas } from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
@@ -22,6 +21,7 @@ import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
@@ -396,7 +396,7 @@ export default function TokenDepositCard({
 
   const { address } = useAccount();
 
-  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
+  const { blockNumber } = useGlobalBlockNumber();
   const { data: token0Balance, refetch: refetchBalance0 } = useBalance({
     address: currency ? address : undefined,
     token: currency && !currency.isNative ? currency.address0 : undefined,

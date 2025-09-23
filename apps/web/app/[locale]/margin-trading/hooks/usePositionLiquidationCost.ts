@@ -3,7 +3,7 @@ import { formatEther } from "viem";
 
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { formatFloat } from "@/functions/formatFloat";
-import { useFees } from "@/hooks/useFees";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 const baseLiquidationGasAmount = 77_730;
 const baseSwapGasAmount = 222_000;
 
@@ -16,7 +16,7 @@ export default function usePositionLiquidationCost(position: MarginPosition | un
 
     return position?.assets.length || 0;
   }, [position?.assets, position?.loanAsset]);
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   console.log(baseFee, priorityFee, gasPrice);
 

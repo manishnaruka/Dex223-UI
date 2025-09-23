@@ -6,10 +6,10 @@ import { HelperText, InputLabel } from "@/components/atoms/TextField";
 import TokenInput from "@/components/common/TokenInput";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { formatFloat } from "@/functions/formatFloat";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 
 export default function LendingOrderTokenSelect({
   token,
@@ -57,7 +57,7 @@ export default function LendingOrderTokenSelect({
     refetch: refetchBalance,
   } = useTokenBalances(token);
 
-  const { data: blockNumber } = useScopedBlockNumber();
+  const { blockNumber } = useGlobalBlockNumber();
 
   useEffect(() => {
     if (!setIsEnoughBalance) {

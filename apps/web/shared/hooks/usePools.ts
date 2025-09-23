@@ -8,7 +8,7 @@ import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Pool } from "@/sdk_bi/entities/pool";
 import { getPoolAddressKey, useComputePoolAddressesDex } from "@/sdk_bi/utils/computePoolAddress";
-import { useBlockTicker } from "@/shared/services/blockTicker";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import { _usePoolsStore, usePoolAddresses } from "@/stores/usePoolsStore";
 
 export enum PoolState {
@@ -56,7 +56,7 @@ export function useStorePools(
   const { addresses } = usePoolAddresses();
 
   // підписуємось на блоки (глобально), беремо lastBlock у залежності
-  const { lastBlock } = useBlockTicker();
+  const { blockNumber } = useGlobalBlockNumber();
 
   const poolKeys = useMemo(() => {
     if (!chainId) return [];
@@ -135,7 +135,7 @@ export function useStorePools(
       // block-refresh: фетчимо максимум 1 раз на блок для цього ключа
       const lastFetchedBlock = lastFetchedBlockForKey.get(key);
       const shouldRefetchByBlock =
-        refreshOnBlock && lastBlock !== undefined && lastFetchedBlock !== lastBlock;
+        refreshOnBlock && blockNumber !== undefined && lastFetchedBlock !== blockNumber;
 
       if (inFlight.has(key)) return;
 
@@ -150,8 +150,8 @@ export function useStorePools(
         const { token0, token1, tier } = tokens;
 
         // Запам'ятати, що для цього ключа почали фетч в цьому блоці
-        if (refreshOnBlock && lastBlock !== undefined) {
-          lastFetchedBlockForKey.set(key, lastBlock);
+        if (refreshOnBlock && blockNumber !== undefined) {
+          lastFetchedBlockForKey.set(key, blockNumber);
         }
 
         const p = fetchPoolData(key, address, token0, token1, tier)
@@ -181,7 +181,7 @@ export function useStorePools(
     setStatus,
     fetchPoolData,
     refreshOnBlock,
-    lastBlock,
+    blockNumber,
   ]);
 
   return useDeepMemo(() => {

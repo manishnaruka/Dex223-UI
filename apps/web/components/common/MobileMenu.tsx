@@ -1,9 +1,8 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import { formatGwei } from "viem";
-import { useGasPrice } from "wagmi";
 
 import Collapse from "@/components/atoms/Collapse";
 import Drawer from "@/components/atoms/Drawer";
@@ -19,8 +18,9 @@ import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { Link, usePathname } from "@/i18n/routing";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 export function MobileLink({
   href,
   iconName,
@@ -223,15 +223,8 @@ export default function MobileMenu() {
 
   const chainId = useCurrentChainId();
 
-  const { data: gasData, refetch } = useGasPrice({
-    chainId: chainId || 1,
-  });
-
-  const { data: blockNumber } = useScopedBlockNumber();
-
-  useEffect(() => {
-    refetch();
-  }, [blockNumber, refetch]);
+  const { gasPrice } = useGlobalFees();
+  const { blockNumber } = useGlobalBlockNumber();
 
   return (
     <div className="xl:hidden">
@@ -395,7 +388,7 @@ export default function MobileMenu() {
                       className="text-green"
                       href={getExplorerLink(ExplorerLinkType.GAS_TRACKER, "", chainId)}
                     >
-                      {gasData ? formatFloat(formatGwei(gasData)) : ""} GWEI
+                      {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
                     </a>
                   </span>
                 </div>

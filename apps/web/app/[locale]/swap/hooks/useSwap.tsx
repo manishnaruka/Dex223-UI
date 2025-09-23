@@ -34,7 +34,6 @@ import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
-import { useFees } from "@/hooks/useFees";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
 import { CONVERTER_ADDRESS, ROUTER_ADDRESS } from "@/sdk_bi/addresses";
@@ -48,6 +47,7 @@ import { ONE } from "@/sdk_bi/internalConstants";
 import { getTokenAddressForStandard, Standard } from "@/sdk_bi/standard";
 import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
 import { TickMath } from "@/sdk_bi/utils/tickMath";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   RecentTransactionTitleTemplate,
@@ -336,7 +336,7 @@ export default function useSwap() {
   const { customGasLimit } = useSwapGasLimitStore();
   const { gasPriceOption, gasPriceSettings } = useSwapGasPriceStore();
 
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   const { typedValue } = useSwapAmountsStore();
   const { addRecentTransaction } = useRecentTransactionsStore();

@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { Address, formatGwei, parseUnits } from "viem";
-import { useGasPrice } from "wagmi";
 
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
@@ -44,6 +43,7 @@ import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 //TODO: refactor approve rows
@@ -469,7 +469,7 @@ export default function ConfirmConvertDialog() {
   }, [typedValue]);
 
   const { gasPriceSettings } = useSwapGasPriceStore();
-  const { data: baseFee } = useGasPrice();
+  const { baseFee } = useGlobalFees();
 
   const computedGasSpending = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {

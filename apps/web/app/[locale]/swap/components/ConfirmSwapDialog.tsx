@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { Address, formatEther, formatGwei, parseUnits } from "viem";
-import { useGasPrice } from "wagmi";
 
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
@@ -38,7 +37,6 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
@@ -47,6 +45,7 @@ import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { Trade } from "@/sdk_bi/entities/trade";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -491,8 +490,7 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
   }, [typedValue]);
 
   const { gasPriceSettings, gasPriceOption } = useSwapGasPriceStore();
-  // const { data: baseFee } = useGasPrice();
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   const computedGasSpending = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {

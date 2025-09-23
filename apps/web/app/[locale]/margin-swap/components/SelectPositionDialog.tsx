@@ -30,8 +30,8 @@ import IconButton, {
 } from "@/components/buttons/IconButton";
 import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { Link } from "@/i18n/routing";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 
 enum DangerStatus {
   STABLE,
@@ -131,7 +131,7 @@ export function SelectedPositionInfo() {
     id: marginSwapPositionId?.toString(),
   });
 
-  const { data: blockNumber } = useScopedBlockNumber();
+  const { blockNumber } = useGlobalBlockNumber();
 
   useEffect(() => {
     refetch();

@@ -380,6 +380,27 @@ export default function PickTokenDialog({
   prevToken = null,
   availableTokens,
 }: Props) {
+  return (
+    <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
+      <PickTokenDialogContent
+        handlePick={handlePick}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        availableTokens={availableTokens}
+        prevToken={prevToken}
+        simpleForm={simpleForm}
+      />
+    </DrawerDialog>
+  );
+}
+
+function PickTokenDialogContent({
+  setIsOpen,
+  handlePick,
+  simpleForm = false,
+  prevToken = null,
+  availableTokens,
+}: Props) {
   const currencies = useTokens();
   const tokens = availableTokens || currencies;
   const t = useTranslations("ManageTokens");
@@ -398,13 +419,6 @@ export default function PickTokenDialog({
   const [tokenForPortfolio, setTokenForPortfolio] = useState<Currency | null>(null);
   const [isEditActivated, setEditActivated] = useState<boolean>(false);
   const { setIsOpen: setManageOpened } = useManageTokensDialogStore();
-
-  const handleClose = useCallback(() => {
-    setIsOpen(false);
-    setTimeout(() => {
-      setTokenForPortfolio(null);
-    }, 400);
-  }, [setIsOpen]);
 
   const [tokensSearchValue, setTokensSearchValue] = useState("");
 
@@ -446,9 +460,15 @@ export default function PickTokenDialog({
   }, [isMobile, pinnedTokens.length]);
   const [checkedUnderstand, setCheckedUnderstand] = useState<boolean>(false);
   const tokenLists = useTokenLists();
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    setTimeout(() => {
+      setTokenForPortfolio(null);
+    }, 400);
+  }, [setIsOpen]);
 
   return (
-    <DrawerDialog isOpen={isOpen} setIsOpen={handleClose}>
+    <>
       {tokenForPortfolio ? (
         <>
           <DialogHeader
@@ -804,6 +824,6 @@ export default function PickTokenDialog({
           )}
         </>
       )}
-    </DrawerDialog>
+    </>
   );
 }

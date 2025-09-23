@@ -1,8 +1,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useState } from "react";
-import { formatGwei, parseUnits } from "viem";
-import { useGasPrice } from "wagmi";
+import React, { useEffect, useMemo } from "react";
+import { formatGwei } from "viem";
 
 import useMarginSwap from "@/app/[locale]/margin-swap/hooks/useMarginSwap";
 import { useMarginSwapAmountsStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapAmountsStore";
@@ -41,6 +40,7 @@ import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { Trade } from "@/sdk_bi/entities/trade";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 type StepTextMap = {
@@ -202,7 +202,7 @@ export default function ConfirmMarginSwapDialog({ trade }: { trade: Trade<any, a
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
 
   const { gasPriceSettings } = useSwapGasPriceStore();
-  const { data: baseFee } = useGasPrice();
+  const { baseFee } = useGlobalFees();
 
   const computedGasSpending = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {

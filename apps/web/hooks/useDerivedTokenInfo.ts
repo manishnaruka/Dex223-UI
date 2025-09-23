@@ -63,8 +63,6 @@ export default function useDerivedTokenInfo({
     },
   });
 
-  console.log("STANDARD", standard);
-
   const { data: isWrapper, isLoading: isLoadingWrapper } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: "isWrapper",

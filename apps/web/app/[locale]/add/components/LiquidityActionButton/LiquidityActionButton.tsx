@@ -8,11 +8,11 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useRevoke from "@/hooks/useRevoke";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useWithdraw from "@/hooks/useWithdraw";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
@@ -103,7 +103,7 @@ export const LiquidityActionButton = ({ increase = false }: { increase?: boolean
 
   const { approveTransactionsCount, approveTransactionsType } = useLiquidityApprove(parsedAmounts);
 
-  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
+  const { blockNumber } = useGlobalBlockNumber();
   const chainId = useCurrentChainId();
 
   const { currentAllowance: currentAllowanceA } = useRevoke({

@@ -37,18 +37,17 @@ import { networks } from "@/config/networks";
 import { formatFloat } from "@/functions/formatFloat";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { usePoolBalances } from "@/hooks/usePoolBalances";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { ROUTER_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
-import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -370,7 +369,7 @@ export default function TradeForm() {
     refetch: refetchBBalance,
   } = useTokenBalances(tokenB);
 
-  const { data: blockNumber } = useScopedBlockNumber();
+  const { blockNumber } = useGlobalBlockNumber();
 
   useEffect(() => {
     refetchABalance();
@@ -391,7 +390,7 @@ export default function TradeForm() {
   const { isLoadingSwap, isPendingSwap, isLoadingApprove, isPendingApprove } = useSwapStatus();
 
   const { setIsOpen: setConfirmSwapDialogOpen } = useConfirmSwapDialogStore();
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   useEffect(() => {
     updateDefaultState(chainId);

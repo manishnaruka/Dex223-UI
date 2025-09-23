@@ -5,7 +5,7 @@ import TextButton from "@/components/buttons/TextButton";
 import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
 import { ThemeColors } from "@/config/theme/colors";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -17,7 +17,7 @@ export default function ConfigureAutomatically({
   setFieldValue: any;
 }) {
   const chainId = useCurrentChainId();
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
   return (
     <div className="flex justify-between items-center pb-3 pt-3">
       <span>

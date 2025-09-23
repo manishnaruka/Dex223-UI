@@ -8,7 +8,6 @@ import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
@@ -17,6 +16,7 @@ import { FeeAmount } from "@/sdk_bi/constants";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { Position } from "@/sdk_bi/entities/position";
 import { toHex } from "@/sdk_bi/utils/calldata";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import { EstimatedGasId, useEstimatedGasStore } from "@/stores/useEstimatedGasStore";
 import {
   GasFeeModel,
@@ -266,7 +266,7 @@ export function useAddLiquidityEstimatedGas({
 
   const { setEstimatedGas } = useEstimatedGasStore();
   const publicClient = usePublicClient();
-  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
+  const { blockNumber } = useGlobalBlockNumber();
 
   useDeepEffect(() => {
     IIFE(async () => {
@@ -276,13 +276,17 @@ export function useAddLiquidityEstimatedGas({
 
       try {
         console.log("Trying to estimate");
-        const estimated = await publicClient?.estimateContractGas(addLiquidityParams);
-        if (estimated) {
-          setEstimatedGas({
-            estimatedGasId: EstimatedGasId.mint,
-            estimatedGas: estimated,
-          });
-        }
+        // const estimated = await publicClient?.estimateContractGas(addLiquidityParams);
+        // if (estimated) {
+        //   setEstimatedGas({
+        //     estimatedGasId: EstimatedGasId.mint,
+        //     estimatedGas: estimated,
+        //   });
+        // }
+        setEstimatedGas({
+          estimatedGasId: EstimatedGasId.mint,
+          estimatedGas: BigInt(530000),
+        });
         // console.log(estimated);
       } catch (error) {
         console.error("useAddLiquidityEstimatedGas ~ error:", error);
