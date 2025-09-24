@@ -173,7 +173,6 @@ export default function usePositionDeposit({
       } else {
         setStatus(PositionDepositStatus.ERROR_DEPOSIT);
       }
-      console.log(receipt);
 
       return;
     },

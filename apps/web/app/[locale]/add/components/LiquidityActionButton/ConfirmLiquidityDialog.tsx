@@ -614,7 +614,6 @@ const MintDialog = ({
           <Button
             onClick={() => {
               handleAddLiquidity({ updateAllowance });
-              // console.log("Clicked");
             }}
             fullWidth
           >

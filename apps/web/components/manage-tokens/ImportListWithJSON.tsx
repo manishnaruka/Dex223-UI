@@ -56,9 +56,7 @@ export default function ImportListWithJSON({ setContent }: Props) {
               setError("");
             }
 
-            console.log(parsedJson);
             const listChainId = parsedJson.tokens[0].chainId;
-            console.log(listChainId);
 
             console.log();
             if (listChainId) {

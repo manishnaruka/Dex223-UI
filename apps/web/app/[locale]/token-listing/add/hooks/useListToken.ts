@@ -150,7 +150,6 @@ export function useListTokenEstimatedGas() {
         } else {
           setEstimatedGas(BigInt(195000));
         }
-        // console.log(estimated);
       } catch (e) {
         console.log(e);
         setEstimatedGas(BigInt(195000));
@@ -182,8 +181,6 @@ export default function useListToken() {
     tokenB,
     tier: pool?.[1]?.fee,
   });
-
-  console.log(pool);
 
   const tokensToList = useTokensToList();
 

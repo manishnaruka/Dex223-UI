@@ -134,7 +134,6 @@ const PoolsTableDesktop = ({
         : tableData.map((o: any, index: number) => {
             let token0Symbol = o.token0.symbol;
             let token1Symbol = o.token1.symbol;
-            console.log(o);
 
             let token0Image = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(o.token0.id)}/logo.png`;
             let token1Image = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(o.token1.id)}/logo.png`;

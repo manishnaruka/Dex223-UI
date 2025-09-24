@@ -282,7 +282,6 @@ export default function useCreateOrder() {
 
         const createOrderLog = parsedEventLog.find((log) => log.eventName === "OrderCreated");
 
-        console.log(createOrderLog);
         if (!createOrderLog) {
           console.log("CREATE ORDER LOG NOT FOUND!");
           return;

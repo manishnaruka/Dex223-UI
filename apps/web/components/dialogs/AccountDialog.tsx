@@ -68,8 +68,6 @@ function PinnedTokenRow({
     }
   }, [price, totalBalance, isLoading, token, onPriceUpdate]);
 
-  console.log(price);
-
   return (
     <div key={token.symbol} className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3">
       <div className="flex justify-between items-center">

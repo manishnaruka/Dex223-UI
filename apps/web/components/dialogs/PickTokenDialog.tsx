@@ -431,8 +431,6 @@ function PickTokenDialogContent({
     enabled: !!tokensSearchValue && isAddress(tokensSearchValue) && filteredTokens.length === 0,
   });
 
-  console.log(derivedToken);
-
   const virtualizer = useVirtualizer({
     count: filteredTokens.length,
     getScrollElement: () => parentRef.current,

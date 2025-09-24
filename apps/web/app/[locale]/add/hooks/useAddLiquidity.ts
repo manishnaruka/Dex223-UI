@@ -59,8 +59,6 @@ export function useAddLiquidityParams({
     tokenB,
   });
 
-  console.log("LIQUIDITY PARAMS");
-
   const chainId = useCurrentChainId();
   const { address: accountAddress } = useAccount();
 
@@ -89,10 +87,6 @@ export function useAddLiquidityParams({
     // get amounts
     const { amount0: amount0Desired, amount1: amount1Desired } = position.mintAmounts;
 
-    console.log("DESIRED AMOUNTS");
-    console.log(amount0Desired);
-    console.log(amount1Desired);
-    // adjust for slippage
     const minimumAmounts = position.mintAmountsWithSlippage(TEST_ALLOWED_SLIPPAGE); // options.slippageTolerance
     const amount0Min = toHex(minimumAmounts.amount0);
     const amount1Min = toHex(minimumAmounts.amount1);
@@ -128,6 +122,7 @@ export function useAddLiquidityParams({
         deadline,
       };
 
+      console.log("MINT PARAMS (Pool Not Exists): ");
       console.log(mintParams);
 
       const encodedCreateParams = encodeFunctionData({
@@ -212,6 +207,9 @@ export function useAddLiquidityParams({
         recipient: accountAddress,
         deadline,
       };
+
+      console.log("MINT PARAMS (Pool Exists): ");
+      console.log(mintParams);
 
       const params: {
         address: Address;

@@ -202,8 +202,6 @@ export function useOrders({
     tradableAssets_filter,
   ]);
 
-  console.log(where);
-
   const { data, loading } = useQuery<any, any>(queryAllOrders, {
     variables: {
       orderBy: sortingDirection !== SortingType.NONE ? orderBy : undefined,
@@ -219,8 +217,6 @@ export function useOrders({
     if (!data) {
       return data;
     }
-
-    console.log(data.orders);
 
     return data.orders.map((order: GqlOrder) => {
       return {

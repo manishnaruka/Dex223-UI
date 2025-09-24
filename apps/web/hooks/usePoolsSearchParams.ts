@@ -134,7 +134,6 @@ export const usePoolsSearchParams = () => {
 
   useEffect(() => {
     if (isInitialized) {
-      console.log("INITIALIZED");
       if (currentPath !== updatedPath) {
         window.history.replaceState(null, "", updatedPath);
       }

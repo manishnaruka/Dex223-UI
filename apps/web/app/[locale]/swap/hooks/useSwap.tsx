@@ -398,8 +398,6 @@ export default function useSwap() {
         return;
       }
 
-      console.log("Starting swap");
-
       if (!isAllowedA && tokenAStandard === Standard.ERC20 && tokenA.isToken) {
         openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
@@ -458,7 +456,6 @@ export default function useSwap() {
 
       let hash;
 
-      console.log("Swap parameters:", swapParams);
       try {
         const estimatedGas = await publicClient.estimateContractGas({
           account: address,
@@ -494,7 +491,6 @@ export default function useSwap() {
         closeConfirmInWalletAlert();
 
         if (hash) {
-          console.log(hash);
           setSwapHash(hash);
           setSwapStatus(SwapStatus.LOADING);
 

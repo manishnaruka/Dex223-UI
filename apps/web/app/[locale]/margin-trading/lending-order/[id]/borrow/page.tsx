@@ -353,8 +353,6 @@ export default function BorrowPage({
           args: [base.address0, collateral.address0, inputAmount],
         });
 
-        console.log(outputAmount);
-
         if (!outputAmount) {
           throw new Error("Error getting price with oracle");
         }

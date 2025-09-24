@@ -432,8 +432,6 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
 
   const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
 
-  console.log("Trade", trade);
-
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);

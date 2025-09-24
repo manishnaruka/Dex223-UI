@@ -57,8 +57,6 @@ export function useStorePools(
 
   const { blockNumber } = useGlobalBlockNumber();
 
-  console.log("Pools updating...");
-
   const poolKeys = useMemo(() => {
     if (!chainId) return [];
     return poolsParams.map(({ currencyA, currencyB, tier }) => {

@@ -81,8 +81,6 @@ export default function useMarginSwap() {
       return;
     }
     try {
-      console.log(marginSwapPosition);
-
       const positionAssets = await publicClient.readContract({
         abi: MARGIN_MODULE_ABI,
         address: MARGIN_TRADING_ADDRESS[chainId],

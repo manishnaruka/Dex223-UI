@@ -161,8 +161,6 @@ export default function ConfirmMarginSwapDialog({ trade }: { trade: Trade<any, a
 
   const { isOpen, setIsOpen } = useConfirmMarginSwapDialogStore();
 
-  console.log("Trade", trade);
-
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);

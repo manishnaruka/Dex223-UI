@@ -60,8 +60,6 @@ export function useTradeComputation() {
     poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
   );
 
-  console.log(pools);
-
   const debounced = useDebounce(typedValue, 300);
   const client = usePublicClient();
   const { address } = useAccount();
@@ -95,7 +93,6 @@ export function useTradeComputation() {
   useEffect(() => {
     const validPools = filterPools(pools);
 
-    console.log(validPools);
     // 1) User cleared the field → clear trade & loading, but leave `error` alone
     if (!+typedValue) {
       setTrade(null);
@@ -233,8 +230,6 @@ export function useMarginTradeComputation() {
     poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
   );
 
-  console.log(pools);
-
   const debounced = useDebounce(typedValue, 300);
   const client = usePublicClient();
   const { address } = useAccount();
@@ -344,8 +339,6 @@ export function useMarginTradeComputation() {
         }),
       );
 
-      console.log(settled);
-
       if (!active) return;
 
       // collect only fulfilled + non-null results
@@ -364,10 +357,6 @@ export function useMarginTradeComputation() {
         return;
       }
 
-      console.log("QOUTES");
-      console.log(quotes);
-
-      // pick the best output
       const best = quotes.reduce((a, b) => (b.output > a.output ? b : a));
 
       const trade = Trade.createUncheckedTrade({

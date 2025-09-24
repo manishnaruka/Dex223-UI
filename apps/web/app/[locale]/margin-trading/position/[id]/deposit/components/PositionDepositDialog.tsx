@@ -183,7 +183,6 @@ export default function PositionDepositDialog({
     [status],
   );
 
-  console.log(amountToDeposit);
   const isLoadingStatus = useMemo(
     () => !isInitialStatus && !isFinalStatus,
     [isFinalStatus, isInitialStatus],

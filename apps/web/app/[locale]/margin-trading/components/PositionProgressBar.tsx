@@ -22,7 +22,6 @@ export default function PositionProgressBar({
   position: MarginPosition;
   dangerStatus?: DangerStatus;
 }) {
-  console.log(position);
   const createdAtMs = position.createdAt * 1000;
   const deadlineMs = +position.deadline * 1000;
   const now = Date.now();

@@ -235,11 +235,6 @@ export class Trade<
       amounts[0] = amount.wrapped;
       for (let i = 0; i < route.tokenPath.length - 1; i++) {
         const pool = route.pools[i];
-        console.log({
-          sqrtPriceX96: pool.sqrtRatioX96.toString(),
-          tick: pool.tickCurrent,
-          liquidity: pool.liquidity.toString(),
-        });
 
         const [outputAmount] = await pool.getOutputAmount(amounts[i]);
         amounts[i + 1] = outputAmount;

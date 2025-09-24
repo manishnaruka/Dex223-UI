@@ -78,7 +78,6 @@ export default function ThirdStep({
       validationSchema={thirdStepSchema}
       onSubmit={async (values, { validateForm }) => {
         // const errors = await validateForm(values);
-        // console.log(errors);
         setThirdStepValues(values);
         openPreviewDialog();
       }}

@@ -143,8 +143,6 @@ export function useImportToken() {
         args: [tokenAddressToImport as Address, standard !== 223],
       });
 
-      console.log(predictedOtherAddress);
-
       const { erc20AddressToImport, erc223AddressToImport } =
         standard === 223
           ? {
@@ -289,10 +287,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     return "getERC223WrapperFor";
   }, [otherAddressFunctionName, standard]);
 
-  console.log(otherAddressCheckFunctionName);
-  console.log(otherAddressFunctionName);
-  console.log(CONVERTER_ADDRESS[chainId]);
-  console.log("____");
   const { data: otherAddress, isLoading: isLoadingOtherAddress } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: otherAddressCheckFunctionName!,
@@ -306,7 +300,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
         Boolean(otherAddressCheckFunctionName),
     },
   });
-  console.log(otherAddress);
 
   const { data: predictedOtherAddress, isLoading: isLoadingOtherAddressFunction } = useReadContract(
     {
@@ -323,8 +316,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
       },
     },
   );
-
-  console.log(predictedOtherAddress);
 
   const { erc20AddressToImport, erc223AddressToImport, isErc20Exist, isErc223Exist } =
     useMemo(() => {
@@ -368,9 +359,6 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     isLoadingOtherAddressFunction,
     isLoadingStandard,
   ]);
-
-  console.log("IS TOKEN LOADING");
-  console.log(isTokenLoading);
 
   return (
     <>
