@@ -32,15 +32,14 @@ export type PoolsResult = PoolResult[];
 
 /** Додаткові опції (необов’язкові) */
 type UseStorePoolsOptions = {
-  enabled?: boolean; // за замовчуванням true
-  refreshOnBlock?: boolean; // за замовчуванням true
-  fetchOverride?: ReturnType<typeof useFetchPoolData>; // опційно підмінити фетчер (для тестів/затримок)
+  enabled?: boolean;
+  refreshOnBlock?: boolean;
+  ttlMs?: number | false;
+  fetchOverride?: ReturnType<typeof useFetchPoolData>;
 };
 
-// In-flight dedup: один реальний фетч на ключ одночасно
 const inFlight = new Map<string, Promise<void>>();
 
-// Який блок останнім разом фетчили по конкретному ключу (щоб не фетчити двічі в той самий блок)
 const lastFetchedBlockForKey = new Map<string, bigint | undefined>();
 
 export function useStorePools(
@@ -49,14 +48,16 @@ export function useStorePools(
 ): PoolsResult {
   const enabled = options?.enabled ?? true;
   const refreshOnBlock = options?.refreshOnBlock ?? true;
+  const ttlMs = options?.ttlMs ?? 60_000;
 
   const setStatus = _usePoolsStore((state) => state.setStatus);
   const pools = _usePoolsStore((state) => state.pools);
   const chainId = useCurrentChainId();
   const { addresses } = usePoolAddresses();
 
-  // підписуємось на блоки (глобально), беремо lastBlock у залежності
   const { blockNumber } = useGlobalBlockNumber();
+
+  console.log("Pools updating...");
 
   const poolKeys = useMemo(() => {
     if (!chainId) return [];
@@ -129,7 +130,8 @@ export function useStorePools(
       const poolRecord = pools[key];
 
       const isIdle = !poolRecord || poolRecord.status === PoolState.IDLE;
-      const isStale = !!poolRecord?.lastUpdated && poolRecord.lastUpdated < Date.now() - 60000; // TTL, як і було
+      const isStale =
+        ttlMs !== false && !!poolRecord?.lastUpdated && Date.now() - poolRecord.lastUpdated > ttlMs;
       const isLoading = poolRecord?.status === PoolState.LOADING;
 
       // block-refresh: фетчимо максимум 1 раз на блок для цього ключа
@@ -181,7 +183,9 @@ export function useStorePools(
     setStatus,
     fetchPoolData,
     refreshOnBlock,
+    refreshOnBlock ? blockNumber : undefined,
     blockNumber,
+    ttlMs,
   ]);
 
   return useDeepMemo(() => {

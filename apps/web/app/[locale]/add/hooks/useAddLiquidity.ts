@@ -19,7 +19,6 @@ import { toHex } from "@/sdk_bi/utils/calldata";
 import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import { EstimatedGasId, useEstimatedGasStore } from "@/stores/useEstimatedGasStore";
 import {
-  GasFeeModel,
   RecentTransactionTitleTemplate,
   stringifyObject,
   useRecentTransactionsStore,
@@ -128,6 +127,8 @@ export function useAddLiquidityParams({
         recipient: accountAddress,
         deadline,
       };
+
+      console.log(mintParams);
 
       const encodedCreateParams = encodeFunctionData({
         abi: NONFUNGIBLE_POSITION_MANAGER_ABI,

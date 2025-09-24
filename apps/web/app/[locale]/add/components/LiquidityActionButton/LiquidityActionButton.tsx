@@ -13,12 +13,12 @@ import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Standard } from "@/sdk_bi/standard";
 import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { usePriceRange } from "@/shared/hooks/usePriceRange";
+import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 import { useRevokeDialogStatusStore } from "@/stores/useRevokeDialogStatusStore";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { useLiquidityApprove } from "../../hooks/useLiquidityApprove";
-import { usePriceRange } from "../../hooks/usePrice";
-import { useV3DerivedMintInfo } from "../../hooks/useV3DerivedMintInfo";
 import {
   Field,
   useLiquidityAmountsStore,

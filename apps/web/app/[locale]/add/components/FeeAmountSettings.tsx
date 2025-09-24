@@ -107,7 +107,6 @@ export default function FeeAmountSettings({ isAllDisabled = false }: { isAllDisa
 
   const poolParams: PoolsParams = useMemo(
     () => [
-      // { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOWEST },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOW },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.HIGH },

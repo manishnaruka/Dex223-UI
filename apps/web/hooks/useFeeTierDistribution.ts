@@ -3,9 +3,10 @@ import { useMemo } from "react";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { useStorePools } from "@/shared/hooks/usePools";
 
 import useFeeTierDistributionQuery from "../graphql/thegraph/FeeTierDistributionQuery";
-import { PoolsParams, PoolState, useStorePools } from "./usePools";
+import { PoolsParams, PoolState } from "./usePools";
 
 // maximum number of blocks past which we consider the data stale
 const MAX_DATA_BLOCK_AGE = 20;
@@ -22,17 +23,17 @@ interface FeeTierDistribution {
 export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): FeeTierDistribution {
   const { isLoading, error, distributions } = usePoolTVL(tokenA, tokenB);
 
-  // fetch all pool states to determine pool state
   const poolParams: PoolsParams = useMemo(
     () => [
-      // { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOWEST },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOW },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.HIGH },
     ],
     [tokenA, tokenB],
   );
-  const [poolStateLow, poolStateMedium, poolStateHigh] = useStorePools(poolParams);
+  const [poolStateLow, poolStateMedium, poolStateHigh] = useStorePools(poolParams, {
+    refreshOnBlock: false,
+  });
 
   return useMemo(() => {
     if (isLoading || error || !distributions) {
@@ -55,15 +56,10 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
       !isLoading &&
       !error &&
       distributions &&
-      // poolStateVeryLow[0] !== PoolState.LOADING &&
       poolStateLow[0] !== PoolState.LOADING &&
       poolStateMedium[0] !== PoolState.LOADING &&
       poolStateHigh[0] !== PoolState.LOADING
         ? {
-            // [FeeAmount.LOWEST]:
-            //   poolStateVeryLow[0] === PoolState.EXISTS
-            //     ? (distributions[FeeAmount.LOWEST] ?? 0) * 100
-            //     : undefined,
             [FeeAmount.LOW]:
               poolStateLow[0] === PoolState.EXISTS
                 ? (distributions[FeeAmount.LOW] ?? 0) * 100
@@ -85,15 +81,7 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
       distributions: percentages,
       largestUsageFeeTier: largestUsageFeeTier === -1 ? undefined : largestUsageFeeTier,
     };
-  }, [
-    distributions,
-    error,
-    isLoading,
-    poolStateHigh,
-    poolStateLow,
-    poolStateMedium,
-    // poolStateVeryLow,
-  ]);
+  }, [distributions, error, isLoading, poolStateHigh, poolStateLow, poolStateMedium]);
 }
 
 function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {

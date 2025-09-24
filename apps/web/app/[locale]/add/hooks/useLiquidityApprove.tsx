@@ -20,9 +20,6 @@ import {
   useAddLiquidityStatusStore,
 } from "../stores/useAddLiquidityStatusStore";
 import { useAddLiquidityTokensStore } from "../stores/useAddLiquidityTokensStore";
-import { useLiquidityTierStore } from "../stores/useLiquidityTierStore";
-import { usePriceRange } from "./usePrice";
-import { useV3DerivedMintInfo } from "./useV3DerivedMintInfo";
 
 export type ApproveTransaction = {
   token: Currency;

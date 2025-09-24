@@ -34,12 +34,12 @@ import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { usePriceRange } from "@/shared/hooks/usePriceRange";
+import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "./components/LiquidityActionButton/ConfirmLiquidityDialog";
 import { PriceRange } from "./components/PriceRange/PriceRange";
-import { useV3DerivedMintInfo } from "./hooks/useV3DerivedMintInfo";
 import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStore";
 
 export default function AddPoolPage() {

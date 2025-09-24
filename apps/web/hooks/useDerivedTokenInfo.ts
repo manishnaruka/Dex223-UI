@@ -177,6 +177,7 @@ export default function useDerivedTokenInfo({
       isLoadingWrapper
     );
   }, [
+    enabled,
     isLoadingDecimals,
     isLoadingName,
     isLoadingOtherAddress,
