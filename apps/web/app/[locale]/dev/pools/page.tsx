@@ -22,6 +22,7 @@ import { Currency } from "@/sdk_bi/entities/currency";
 import { Price } from "@/sdk_bi/entities/fractions/price";
 import { nearestUsableTick } from "@/sdk_bi/utils/nearestUsableTick";
 import { priceToClosestTick } from "@/sdk_bi/utils/priceTickConversions";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { PoolState, useStorePools } from "@/shared/hooks/usePools";
 import { usePrice } from "@/shared/hooks/usePrice";
 import { usePriceRange } from "@/shared/hooks/usePriceRange";
@@ -196,11 +197,16 @@ export default function DevPoolsPage() {
     [setTypedValue],
   );
 
-  console.log(pool);
+  const { gasPrice, baseFee, priorityFee, timestamp } = useGlobalFees();
 
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
       <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pools Dev Monitor</h1>
+
+      <div>{gasPrice}</div>
+      <div>{baseFee}</div>
+      <div>{priorityFee}</div>
+      <div>{timestamp}</div>
 
       <div style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr 1fr" }}>
         <div className="flex w-full lg:w-auto gap-2 items-center ml-auto">

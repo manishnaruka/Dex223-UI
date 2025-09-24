@@ -58,7 +58,7 @@ async function fetchFeesOnce(
           ...st.byChain,
           [chainId]: {
             gasPrice,
-            baseFee: block?.baseFeePerGas,
+            baseFee: eip1559?.maxFeePerGas,
             priorityFee: eip1559?.maxPriorityFeePerGas,
             updatedAtBlock: blockNumber,
             timestamp: block?.timestamp,
