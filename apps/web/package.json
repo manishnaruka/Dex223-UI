@@ -17,6 +17,7 @@
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
     "@next/mdx": "^15.0.3",
+    "@onramp.money/onramp-web-sdk": "^1.7.0",
     "@repo/ui": "*",
     "@tanstack/react-query": "^5.59.14",
     "@tanstack/react-virtual": "^3.10.9",

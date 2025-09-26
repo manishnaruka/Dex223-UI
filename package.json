@@ -27,5 +27,8 @@
     "apps/*",
     "packages/*"
   ],
-  "packageManager": "yarn@1.22.18"
+  "packageManager": "yarn@1.22.18",
+  "dependencies": {
+    "@onramp.money/onramp-web-sdk": "^1.7.0"
+  }
 }
