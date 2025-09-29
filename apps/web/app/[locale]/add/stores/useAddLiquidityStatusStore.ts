@@ -6,6 +6,12 @@ export enum AddLiquidityStatus {
   APPROVE_LOADING,
   APPROVE_ERROR,
   MINT,
+  CREATE_WRAPPER_0_PENDING,
+  CREATE_WRAPPER_0_LOADING,
+  CREATE_WRAPPER_0_ERROR,
+  CREATE_WRAPPER_1_PENDING,
+  CREATE_WRAPPER_1_LOADING,
+  CREATE_WRAPPER_1_ERROR,
   MINT_PENDING,
   MINT_LOADING,
   MINT_ERROR,
@@ -29,6 +35,8 @@ interface AddLiquidityStatusStore {
   approve1Hash: Address | undefined;
   deposite0Hash: Address | undefined;
   deposite1Hash: Address | undefined;
+  createWrapper0Hash: Address | undefined;
+  createWrapper1Hash: Address | undefined;
   liquidityHash: Address | undefined;
 
   setStatus: (status: AddLiquidityStatus) => void;
@@ -41,6 +49,8 @@ interface AddLiquidityStatusStore {
   setDeposite0Hash: (hash: Address | undefined) => void;
   setDeposite1Hash: (hash: Address | undefined) => void;
   setLiquidityHash: (hash: Address) => void;
+  setCreateWrapper0Hash: (hash: Address | undefined) => void;
+  setCreateWrapper1Hash: (hash: Address | undefined) => void;
 }
 
 export const useAddLiquidityStatusStore = create<AddLiquidityStatusStore>((set, get) => ({
@@ -53,6 +63,8 @@ export const useAddLiquidityStatusStore = create<AddLiquidityStatusStore>((set, 
   approve1Hash: undefined,
   deposite0Hash: undefined,
   deposite1Hash: undefined,
+  createWrapper0Hash: undefined,
+  createWrapper1Hash: undefined,
   liquidityHash: undefined,
 
   setStatus: (status) => {
@@ -107,4 +119,6 @@ export const useAddLiquidityStatusStore = create<AddLiquidityStatusStore>((set, 
   setApprove1Hash: (hash) => set({ approve1Hash: hash }),
   setDeposite0Hash: (hash) => set({ deposite0Hash: hash }),
   setDeposite1Hash: (hash) => set({ deposite1Hash: hash }),
+  setCreateWrapper0Hash: (hash) => set({ createWrapper0Hash: hash }),
+  setCreateWrapper1Hash: (hash) => set({ createWrapper1Hash: hash }),
 }));

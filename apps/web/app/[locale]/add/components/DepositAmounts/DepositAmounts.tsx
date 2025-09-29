@@ -71,7 +71,6 @@ export const DepositAmounts = ({
         isOutOfRange={depositBDisabled}
         tokenStandardRatio={tokenBStandardRatio}
         setTokenStandardRatio={setTokenBStandardRatio}
-
         // gasPrice={gasPrice}
       />
     </div>

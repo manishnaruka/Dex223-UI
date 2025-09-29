@@ -1,23 +1,26 @@
 import { useCallback, useMemo } from "react";
-import { Abi, Address, encodeFunctionData, formatUnits, getAbiItem, parseUnits } from "viem";
+import { Abi, Address, encodeFunctionData, formatUnits, getAbiItem } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
+import useERC20WrapperExists from "@/app/[locale]/add/hooks/useERC20WrapperExists";
+import { useLiquidityAmountsStore } from "@/app/[locale]/add/stores/useAddLiquidityAmountsStore";
 import { useAddLiquidityTokensStore } from "@/app/[locale]/add/stores/useAddLiquidityTokensStore";
+import { CreateTokenStatus } from "@/app/[locale]/create-token/stores/useCreateTokenStatusStore";
 import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePositionManager";
+import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import useTransactionDeadline from "@/hooks/useTransactionDeadline";
 import addToast from "@/other/toast";
-import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
+import { CONVERTER_ADDRESS, NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { Position } from "@/sdk_bi/entities/position";
 import { toHex } from "@/sdk_bi/utils/calldata";
 import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
-import { EstimatedGasId, useEstimatedGasStore } from "@/stores/useEstimatedGasStore";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,
@@ -25,7 +28,10 @@ import {
 } from "@/stores/useRecentTransactionsStore";
 import { useTransactionSettingsStore } from "@/stores/useTransactionSettingsStore";
 
-import { useAddLiquidityGasSettings } from "../stores/useAddLiquidityGasSettings";
+import {
+  useAddLiquidityGasLimitStore,
+  useAddLiquidityGasSettings,
+} from "../stores/useAddLiquidityGasSettings";
 import {
   AddLiquidityStatus,
   useAddLiquidityStatusStore,
@@ -263,13 +269,14 @@ export function useAddLiquidityEstimatedGas({
     tokenId,
   });
 
-  const { setEstimatedGas } = useEstimatedGasStore();
+  const { setEstimatedGas } = useAddLiquidityGasLimitStore();
   const publicClient = usePublicClient();
   const { blockNumber } = useGlobalBlockNumber();
 
   useDeepEffect(() => {
     IIFE(async () => {
       if (!addLiquidityParams) {
+        console.log("No add liquidity params");
         return;
       }
 
@@ -282,17 +289,15 @@ export function useAddLiquidityEstimatedGas({
         //     estimatedGas: estimated,
         //   });
         // }
-        setEstimatedGas({
-          estimatedGasId: EstimatedGasId.mint,
-          estimatedGas: BigInt(530000),
-        });
+        if (createPool) {
+          setEstimatedGas(BigInt(530000));
+        } else {
+          setEstimatedGas(BigInt(330000));
+        }
         // console.log(estimated);
       } catch (error) {
         console.error("useAddLiquidityEstimatedGas ~ error:", error);
-        setEstimatedGas({
-          estimatedGasId: EstimatedGasId.mint,
-          estimatedGas: BigInt(530000),
-        });
+        setEstimatedGas(BigInt(530000));
       }
     });
   }, [publicClient, addLiquidityParams, blockNumber]);
@@ -317,6 +322,23 @@ export const useAddLiquidity = ({
 
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
+
+  const { tokenA, tokenB } = useAddLiquidityTokensStore();
+
+  const { tokenAStandardRatio, tokenBStandardRatio } = useLiquidityAmountsStore();
+
+  const { isErc20Exist: tokenAWrapperExists } = useERC20WrapperExists({
+    address: tokenA?.wrapped.address1,
+    enabled: !!tokenA && !tokenA.isNative && tokenAStandardRatio === 100,
+  });
+  const { isErc20Exist: tokenBWrapperExists } = useERC20WrapperExists({
+    address: tokenB?.wrapped.address1,
+    enabled: !!tokenB && !tokenB.isNative && tokenBStandardRatio === 100,
+  });
+
+  console.log("WRAPPERS EXISTING:");
+  console.log(tokenAWrapperExists);
+  console.log(tokenBWrapperExists);
 
   const { addLiquidityParams } = useAddLiquidityParams({
     position,
@@ -348,6 +370,38 @@ export const useAddLiquidity = ({
         console.log("handleAddLiquidity: SOMETHING UNDEFINED");
         return;
       }
+
+      if (tokenA && !tokenAWrapperExists) {
+        setLiquidityStatus(AddLiquidityStatus.MINT_PENDING);
+        const deployTokenParams = {
+          abi: TOKEN_CONVERTER_ABI,
+          address: CONVERTER_ADDRESS[chainId],
+          functionName: "createERC20Wrapper" as const,
+          args: [tokenA?.wrapped.address1],
+        } as const;
+
+        console.log("It should be here!");
+        const wrapperHash = await walletClient.writeContract(deployTokenParams);
+        setLiquidityStatus(AddLiquidityStatus.MINT_LOADING);
+        await publicClient.waitForTransactionReceipt({ hash: wrapperHash });
+      }
+
+      if (tokenB && !tokenBWrapperExists) {
+        setLiquidityStatus(AddLiquidityStatus.MINT_PENDING);
+
+        const deployTokenParams = {
+          abi: TOKEN_CONVERTER_ABI,
+          address: CONVERTER_ADDRESS[chainId],
+          functionName: "createERC20Wrapper" as const,
+          args: [tokenB?.wrapped.address1],
+        } as const;
+
+        const wrapperHash = await walletClient.writeContract(deployTokenParams);
+
+        setLiquidityStatus(AddLiquidityStatus.MINT_LOADING);
+        await publicClient.waitForTransactionReceipt({ hash: wrapperHash });
+      }
+
       setLiquidityStatus(AddLiquidityStatus.MINT_PENDING);
       try {
         const estimatedGas = await publicClient.estimateContractGas(addLiquidityParams);
@@ -422,17 +476,21 @@ export const useAddLiquidity = ({
       }
     },
     [
-      accountAddress,
+      position,
       publicClient,
       walletClient,
+      accountAddress,
       chainId,
-      addRecentTransaction,
       addLiquidityParams,
-      position,
-      setLiquidityHash,
+      tokenA,
+      tokenAWrapperExists,
+      tokenB,
+      tokenBWrapperExists,
       setLiquidityStatus,
-      gasSettings,
       customGasLimit,
+      gasSettings,
+      setLiquidityHash,
+      addRecentTransaction,
       gasModel,
     ],
   );

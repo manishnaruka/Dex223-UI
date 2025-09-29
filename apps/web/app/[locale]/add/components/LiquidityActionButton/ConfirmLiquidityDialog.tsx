@@ -358,13 +358,6 @@ const MintDialog = ({
     tokenId,
   });
 
-  useAddLiquidityEstimatedGas({
-    position,
-    increase,
-    createPool: noLiquidity,
-    tokenId,
-  });
-
   const { customGasLimit } = useAddLiquidityGasLimitStore();
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
   const gasToUse = customGasLimit ? customGasLimit : estimatedMintGas + BigInt(30000); // set custom gas here if user changed it
@@ -783,6 +776,14 @@ export default function ConfirmLiquidityDialog({
   const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
 
   const { status } = useAddLiquidityStatusStore();
+
+  useAddLiquidityEstimatedGas({
+    position,
+    increase,
+    createPool: noLiquidity,
+    tokenId,
+  });
+
   return (
     <DrawerDialog
       isOpen={isOpen}

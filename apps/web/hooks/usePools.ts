@@ -15,6 +15,7 @@ export enum PoolState {
   LOADING,
   NOT_EXISTS,
   EXISTS,
+  EXISTS_WITH_NO_LIQUIDITY,
   INVALID,
   IDLE,
 }
