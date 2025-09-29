@@ -65,8 +65,10 @@ export default function useERC20WrapperExists({
     },
   });
 
+  console.log("OTHER ADDRESS", address);
+
   return useMemo(() => {
-    if (!enabled) {
+    if (!enabled || !otherAddressCheckFunctionName) {
       return { isErc20Exist: true };
     }
 
