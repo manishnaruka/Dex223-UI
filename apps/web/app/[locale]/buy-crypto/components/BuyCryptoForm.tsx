@@ -1,20 +1,22 @@
 "use client";
 
+import { OnrampWebSDK } from "@onramp.money/onramp-web-sdk";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
-import { OnrampWebSDK } from "@onramp.money/onramp-web-sdk";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+
 import Select from "@/components/atoms/Select";
 import SelectButton from "@/components/atoms/SelectButton";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { ThemeColors } from "@/config/theme/colors";
-import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { Currency } from "@/sdk_bi/entities/currency";
-import OnrampSuccessModal from "./OnrampSuccessModal";
+
 import OnrampFailureModal from "./OnrampFailureModal";
+import OnrampSuccessModal from "./OnrampSuccessModal";
 
 const regions = [
   { value: "us", label: "🇺🇸 United States" },
@@ -25,7 +27,6 @@ const regions = [
   { value: "jp", label: "🇯🇵 Japan" },
   { value: "au", label: "🇦🇺 Australia" },
 ];
-
 
 export default function BuyCryptoForm() {
   const tWallet = useTranslations("Wallet");
@@ -43,13 +44,10 @@ export default function BuyCryptoForm() {
   const [isFailureModalOpen, setIsFailureModalOpen] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
-  const handlePick = useCallback(
-    (token: Currency) => {
-      setSelectedToken(token);
-      setIsTokenPickerOpen(false);
-    },
-    [],
-  );
+  const handlePick = useCallback((token: Currency) => {
+    setSelectedToken(token);
+    setIsTokenPickerOpen(false);
+  }, []);
 
   useEffect(() => {
     if (isConnected && address) {
@@ -57,7 +55,7 @@ export default function BuyCryptoForm() {
         merchantRecognitionId: address,
         appId: Number(process.env.NEXT_ONRAMP_APP_ID) || 2,
         flowType: 1, // Buy crypto
-        lang: 'en',
+        lang: "en",
         // sandbox: true,
         // coinCode: "USDT",
         // network: "polygon",
@@ -65,26 +63,26 @@ export default function BuyCryptoForm() {
       });
 
       // Set up event listeners
-      sdk.on('TX_EVENTS', (e: any) => {    
+      sdk.on("TX_EVENTS", (e: any) => {
         if (e.type === "ONRAMP_WIDGET_TX_COMPLETED") {
           const {
-            transactionHash, 
-            walletAddress, 
+            transactionHash,
+            walletAddress,
             fiatAmount,
-            cryptoAmount, 
-            coinCode, 
-            network, 
-            orderId, 
+            cryptoAmount,
+            coinCode,
+            network,
+            orderId,
             orderStatus,
-            networkData
+            networkData,
           } = e.data;
-          
+
           const record = {
             user_id: address || null,
             transactionHash,
             walletAddress,
             coinCode,
-            orderId, 
+            orderId,
             orderStatus,
             fromAmount: fiatAmount,
             toAmount: cryptoAmount,
@@ -92,42 +90,37 @@ export default function BuyCryptoForm() {
             networkId: networkData?.networkId,
             hashLink: networkData?.hashLink,
           };
-          
-          console.log('Transaction completed:', record);
-          
+
+          console.log("Transaction completed:", record);
+
           // Set transaction data and show success modal
           setTransactionData({
             transactionHash,
             fiatAmount,
             cryptoAmount,
             coinCode,
-            orderId
+            orderId,
           });
           setIsSuccessModalOpen(true);
           setIsWidgetShown(false);
         } else if (e.type === "ONRAMP_WIDGET_TX_FAILED") {
-          const {
-            fiatAmount,
-            coinCode,
-            orderId,
-            error
-          } = e.data || {};
-          
-          console.log('Transaction failed:', e.data);
-          
+          const { fiatAmount, coinCode, orderId, error } = e.data || {};
+
+          console.log("Transaction failed:", e.data);
+
           // Set transaction data and show failure modal
           setTransactionData({
             fiatAmount,
             coinCode,
             orderId,
-            errorMessage: error?.message || "Transaction failed"
+            errorMessage: error?.message || "Transaction failed",
           });
           setIsFailureModalOpen(true);
           setIsWidgetShown(false);
         }
       });
 
-      sdk.on('WIDGET_EVENTS', (e: any) => {
+      sdk.on("WIDGET_EVENTS", (e: any) => {
         if (e.type === "ONRAMP_WIDGET_CLOSE_REQUEST_CONFIRMED") {
           if (isWidgetShown) {
             sdk.close();
@@ -150,7 +143,7 @@ export default function BuyCryptoForm() {
         onrampInstance.show();
         setIsWidgetShown(true);
       } catch (error) {
-        console.error('Error showing OnRamp widget:', error);
+        console.error("Error showing OnRamp widget:", error);
       }
     }
   }, [onrampInstance, amount, selectedToken]);
@@ -161,7 +154,7 @@ export default function BuyCryptoForm() {
         onrampInstance.show();
         setIsWidgetShown(true);
       } catch (error) {
-        console.error('Error showing OnRamp widget:', error);
+        console.error("Error showing OnRamp widget:", error);
       }
     }
   }, [onrampInstance, amount, selectedToken]);
@@ -269,7 +262,7 @@ export default function BuyCryptoForm() {
           colorScheme={ButtonColor.PURPLE}
           disabled={!amount || !selectedToken || !selectedRegion}
         >
-          {selectedToken ? 'Continue' : 'Select Token'}
+          {selectedToken ? "Continue" : "Select Token"}
         </Button>
       )}
 

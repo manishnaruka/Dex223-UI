@@ -1,9 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
 import Dialog from "@/components/atoms/Dialog";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import DialogHeader from "@/components/atoms/DialogHeader";
+import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 
 interface OnrampFailureModalProps {
   isOpen: boolean;
@@ -40,16 +41,11 @@ export default function OnrampFailureModal({
 
   return (
     <Dialog isOpen={isOpen} setIsOpen={setIsOpen}>
-        <DialogHeader onClose={handleClose} title="Buy Crypto" />
+      <DialogHeader onClose={handleClose} title="Buy Crypto" />
       <div className="w-[500px] p-5 flex flex-col items-center text-center">
         {/* Error Icon */}
         <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4">
-          <svg
-            className="w-8 h-8 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -60,9 +56,7 @@ export default function OnrampFailureModal({
         </div>
 
         {/* Title */}
-        <h3 className="text-20 font-bold text-primary-text mb-2">
-          Transfer failed
-        </h3>
+        <h3 className="text-20 font-bold text-primary-text mb-2">Transfer failed</h3>
 
         {/* Description */}
         <p className="text-14 text-secondary-text mb-6">
@@ -112,7 +106,7 @@ export default function OnrampFailureModal({
           >
             Try again
           </Button>
-          
+
           <Button
             onClick={handleClose}
             fullWidth

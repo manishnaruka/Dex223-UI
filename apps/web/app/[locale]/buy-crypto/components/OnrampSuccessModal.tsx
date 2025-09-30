@@ -1,9 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
 import Dialog from "@/components/atoms/Dialog";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import DialogHeader from "@/components/atoms/DialogHeader";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
 interface OnrampSuccessModalProps {
   isOpen: boolean;
@@ -30,29 +31,17 @@ export default function OnrampSuccessModal({
 
   return (
     <Dialog isOpen={isOpen} setIsOpen={setIsOpen}>
-        <DialogHeader onClose={handleClose} title="Buy Crypto" />
+      <DialogHeader onClose={handleClose} title="Buy Crypto" />
       <div className="w-[500px] p-5 flex flex-col items-center text-center">
         {/* Success Icon */}
         <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center mb-4">
-          <svg
-            className="w-8 h-8 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
+          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
 
         {/* Title */}
-        <h3 className="text-20 font-bold text-primary-text mb-2">
-          Successfully transferred
-        </h3>
+        <h3 className="text-20 font-bold text-primary-text mb-2">Successfully transferred</h3>
 
         {/* Description */}
         <p className="text-14 text-secondary-text mb-6">

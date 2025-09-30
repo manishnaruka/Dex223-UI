@@ -1,25 +1,26 @@
 "use client";
 
+import { OnrampWebSDK } from "@onramp.money/onramp-web-sdk";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useAccount } from "wagmi";
-import { OnrampWebSDK } from "@onramp.money/onramp-web-sdk";
 
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import Select from "@/components/atoms/Select";
 import SelectButton from "@/components/atoms/SelectButton";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import TokenStandardSelector from "@/components/common/TokenStandardSelector";
+import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { ThemeColors } from "@/config/theme/colors";
-import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
+import { formatFloat } from "@/functions/formatFloat";
+import useTokenBalances from "@/hooks/useTokenBalances";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
-import useTokenBalances from "@/hooks/useTokenBalances";
-import { formatFloat } from "@/functions/formatFloat";
-import TokenStandardSelector from "@/components/common/TokenStandardSelector";
-import OnrampSuccessModal from "./OnrampSuccessModal";
+
 import OnrampFailureModal from "./OnrampFailureModal";
+import OnrampSuccessModal from "./OnrampSuccessModal";
 
 // Mock data for regions - in a real app this would come from an API or config
 const regions = [
@@ -51,15 +52,10 @@ export default function SellCryptoForm() {
     balance: { erc20Balance: token0Balance, erc223Balance: token1Balance },
   } = useTokenBalances(selectedToken);
 
-
-
-  const handlePick = useCallback(
-    (token: Currency) => {
-      setSelectedToken(token);
-      setIsTokenPickerOpen(false);
-    },
-    [],
-  );
+  const handlePick = useCallback((token: Currency) => {
+    setSelectedToken(token);
+    setIsTokenPickerOpen(false);
+  }, []);
 
   const handleSellCrypto = useCallback(async () => {
     if (!isConnected || !address || !selectedToken || !amount) {
@@ -76,11 +72,11 @@ export default function SellCryptoForm() {
         fiatType: 20,
         flowType: 2,
         walletAddress: address || "",
-        lang: 'en'
+        lang: "en",
       });
 
       // Set up event listeners
-      sdk.on('TX_EVENTS', (e: any) => {
+      sdk.on("TX_EVENTS", (e: any) => {
         console.log("Transaction event:", e);
         if (e.type === "ONRAMP_WIDGET_TX_COMPLETED") {
           const {
@@ -92,7 +88,7 @@ export default function SellCryptoForm() {
             network,
             orderId,
             orderStatus,
-            networkData
+            networkData,
           } = e.data;
 
           const record = {
@@ -107,37 +103,32 @@ export default function SellCryptoForm() {
             networkName: network,
             networkId: networkData?.networkId,
             hashLink: networkData?.hashLink,
-            type: 'sell'
+            type: "sell",
           };
 
-          console.log('Sell transaction completed:', record);
+          console.log("Sell transaction completed:", record);
           // Handle successful sell transaction
           setTransactionData({
             transactionHash,
             fiatAmount,
             cryptoAmount,
             coinCode,
-            orderId
+            orderId,
           });
           setIsSuccessModalOpen(true);
         } else if (e.type === "ONRAMP_WIDGET_TX_FAILED") {
-          const {
-            fiatAmount,
-            coinCode,
-            orderId,
-            error
-          } = e.data || {};
+          const { fiatAmount, coinCode, orderId, error } = e.data || {};
           setTransactionData({
             fiatAmount,
             coinCode,
             orderId,
-            errorMessage: error?.message || "Transaction failed"
+            errorMessage: error?.message || "Transaction failed",
           });
           setIsFailureModalOpen(true);
         }
       });
 
-      sdk.on('WIDGET_EVENTS', (e: any) => {
+      sdk.on("WIDGET_EVENTS", (e: any) => {
         console.log("Widget event:", e);
         if (e.type === "ONRAMP_WIDGET_CLOSE_REQUEST_CONFIRMED") {
           sdk.close();
@@ -147,7 +138,6 @@ export default function SellCryptoForm() {
 
       setOnrampInstance(sdk);
       sdk.show();
-
     } catch (error) {
       console.error("Error initializing sell crypto:", error);
     }
@@ -181,7 +171,7 @@ export default function SellCryptoForm() {
 
       <div className="p-5 bg-secondary-bg rounded-3 relative mb-5">
         <div className="flex justify-between items-center mb-5 h-[22px]">
-          <span className="text-14 block text-secondary-text">you're selling</span>
+          <span className="text-14 block text-secondary-text">you&apos;re selling</span>
           <ul className="text-12 inline-flex gap-2 text-tertiary-text ">
             <li className="p-1 bg-primary-bg rounded-1">$100</li>
             <li className="p-1 bg-primary-bg rounded-1">$300</li>
@@ -206,10 +196,15 @@ export default function SellCryptoForm() {
             />
             {selectedToken && (
               <div className="text-12 text-secondary-text mt-1">
-                Balance: {tokenStandard === Standard.ERC20
-                  ? (token0Balance && Boolean(token0Balance.value) ? formatFloat(token0Balance.formatted) : "0")
-                  : (token1Balance && Boolean(token1Balance.value) ? formatFloat(token1Balance.formatted) : "0")
-                } {selectedToken.symbol}
+                Balance:{" "}
+                {tokenStandard === Standard.ERC20
+                  ? token0Balance && Boolean(token0Balance.value)
+                    ? formatFloat(token0Balance.formatted)
+                    : "0"
+                  : token1Balance && Boolean(token1Balance.value)
+                    ? formatFloat(token1Balance.formatted)
+                    : "0"}{" "}
+                {selectedToken.symbol}
               </div>
             )}
           </div>

@@ -100,10 +100,6 @@ export default function useDerivedTokenInfo({
     return "getERC223WrapperFor";
   }, [otherAddressFunctionName, standard]);
 
-  console.log(otherAddressCheckFunctionName);
-  console.log(otherAddressFunctionName);
-  console.log(CONVERTER_ADDRESS[chainId]);
-  console.log("____");
   const { data: otherAddress, isLoading: isLoadingOtherAddress } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: otherAddressCheckFunctionName!,

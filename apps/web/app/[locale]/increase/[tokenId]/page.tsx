@@ -35,13 +35,13 @@ import {
 } from "@/hooks/usePositions";
 import { useRouter } from "@/i18n/routing";
 import { Standard } from "@/sdk_bi/standard";
+import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 
 import { DepositAmounts } from "../../add/components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "../../add/components/LiquidityActionButton/ConfirmLiquidityDialog";
 import { LiquidityActionButton } from "../../add/components/LiquidityActionButton/LiquidityActionButton";
 import { usePriceRange } from "../../add/hooks/usePrice";
 import { useSortedTokens } from "../../add/hooks/useSortedTokens";
-import { useV3DerivedMintInfo } from "../../add/hooks/useV3DerivedMintInfo";
 
 export default function IncreaseLiquidityPage({
   params,

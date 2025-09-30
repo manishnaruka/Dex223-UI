@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { Address, isAddress } from "viem";
 import { useReadContract } from "wagmi";
 
-import { ERC223_ABI } from "@/config/abis/erc223";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
@@ -77,5 +76,5 @@ export default function useERC20WrapperExists({
         otherAddress && isAddress(otherAddress) && !isZeroAddress(otherAddress),
       ),
     };
-  }, [enabled, otherAddress]);
+  }, [enabled, otherAddress, otherAddressCheckFunctionName]);
 }

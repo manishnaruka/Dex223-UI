@@ -28,8 +28,6 @@ import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Position } from "@/sdk_bi/entities/position";
 import { Standard } from "@/sdk_bi/standard";
-import { usePriceRange } from "@/shared/hooks/usePriceRange";
-import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 

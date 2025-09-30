@@ -76,7 +76,7 @@ const menuItems: Array<
           className={clsx("min-w-[238px]", !isMarginModuleEnabled && "pr-5")}
           comingSoon={!isMarginModuleEnabled}
         />
-         <MobileLink
+        <MobileLink
           isActive={pathname === "/buy-crypto"}
           href="/buy-crypto"
           iconName="margin-trading"
