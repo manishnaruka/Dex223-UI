@@ -3,6 +3,7 @@
     "trade": "Trade",
     "swap": "Swap",
     "margin_trading": "Margin trading",
+    "buy_crypto": "Buy crypto",
     "pools": "Pools",
     "borrow_lend": "Borrow/Lend",
     "portfolio": "Portfolio",
@@ -66,6 +67,18 @@
     "cancel": "Cancel",
     "speed_up": "Speed up",
     "queue": "Queue"
+  },
+  "BuyCrypto": {
+    "title": "Buy Crypto",
+    "description": "Purchase cryptocurrency with fiat currency using our secure onramp service",
+    "select_region": "Select your region",
+    "amount_label": "You're buying",
+    "minimum_amount_notice": "Minimum amount: ₹100",
+    "select_token": "Select token",
+    "select_token_placeholder": "Choose a cryptocurrency",
+    "buy_crypto_button": "Buy Crypto",
+    "connect_and_buy": "Connect Wallet",
+    "wallet_connection_notice": "Your wallet will be connected automatically when you proceed"
   },
   "Wallet": {
     "my_wallet": "My wallet",

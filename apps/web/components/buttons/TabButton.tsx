@@ -5,11 +5,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   size: 28 | 32 | 40 | 48 | 60;
   active: boolean;
   inactiveBackground?: "bg-secondary-bg" | "bg-primary-bg";
+  className?: string;
 }
 export default function TabButton({
   size,
   active,
   inactiveBackground = "bg-secondary-bg",
+  className,
   children,
   ...props
 }: PropsWithChildren<Props>) {
@@ -25,6 +27,7 @@ export default function TabButton({
         active
           ? "text-primary-text border-green bg-green-bg pointer-events-none"
           : "text-secondary-text border-transparent " + inactiveBackground,
+        className,
       )}
       {...props}
     >

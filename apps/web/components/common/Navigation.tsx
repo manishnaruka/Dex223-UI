@@ -75,9 +75,17 @@ const menuItems: Array<
           className="min-w-[238px] pr-5"
           comingSoon
         />
+         <MobileLink
+          isActive={pathname === "/buy-crypto"}
+          href="/buy-crypto"
+          iconName="margin-trading"
+          title={t("buy_crypto")}
+          handleClose={handleClose}
+          className="min-w-[238px]"
+        />
       </div>
     ),
-    activeFlags: ["/swap", "/margin-swap"],
+    activeFlags: ["/swap", "/margin-trading", "/buy-crypto"],
   },
   {
     label: "pools",
