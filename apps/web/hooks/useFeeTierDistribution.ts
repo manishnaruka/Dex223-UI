@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { useStorePools } from "@/shared/hooks/usePools";
 
 import useFeeTierDistributionQuery from "../graphql/thegraph/FeeTierDistributionQuery";
-import { PoolsParams, PoolState, useStorePools } from "./usePools";
+import { PoolsParams, PoolState } from "./usePools";
 
 // maximum number of blocks past which we consider the data stale
 const MAX_DATA_BLOCK_AGE = 20;
@@ -22,17 +23,17 @@ interface FeeTierDistribution {
 export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): FeeTierDistribution {
   const { isLoading, error, distributions } = usePoolTVL(tokenA, tokenB);
 
-  // fetch all pool states to determine pool state
   const poolParams: PoolsParams = useMemo(
     () => [
-      // { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOWEST },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOW },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM },
       { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.HIGH },
     ],
     [tokenA, tokenB],
   );
-  const [poolStateLow, poolStateMedium, poolStateHigh] = useStorePools(poolParams);
+  const [poolStateLow, poolStateMedium, poolStateHigh] = useStorePools(poolParams, {
+    refreshOnBlock: false,
+  });
 
   return useMemo(() => {
     if (isLoading || error || !distributions) {
@@ -55,15 +56,10 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
       !isLoading &&
       !error &&
       distributions &&
-      // poolStateVeryLow[0] !== PoolState.LOADING &&
       poolStateLow[0] !== PoolState.LOADING &&
       poolStateMedium[0] !== PoolState.LOADING &&
       poolStateHigh[0] !== PoolState.LOADING
         ? {
-            // [FeeAmount.LOWEST]:
-            //   poolStateVeryLow[0] === PoolState.EXISTS
-            //     ? (distributions[FeeAmount.LOWEST] ?? 0) * 100
-            //     : undefined,
             [FeeAmount.LOW]:
               poolStateLow[0] === PoolState.EXISTS
                 ? (distributions[FeeAmount.LOW] ?? 0) * 100
@@ -85,19 +81,11 @@ export function useFeeTierDistribution(tokenA?: Currency, tokenB?: Currency): Fe
       distributions: percentages,
       largestUsageFeeTier: largestUsageFeeTier === -1 ? undefined : largestUsageFeeTier,
     };
-  }, [
-    distributions,
-    error,
-    isLoading,
-    poolStateHigh,
-    poolStateLow,
-    poolStateMedium,
-    // poolStateVeryLow,
-  ]);
+  }, [distributions, error, isLoading, poolStateHigh, poolStateLow, poolStateMedium]);
 }
 
 function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
-  const { data: latestBlock } = useScopedBlockNumber({ watch: true });
+  const { blockNumber } = useGlobalBlockNumber();
 
   const { isLoading, error, data } = useFeeTierDistributionQuery(
     tokenA?.wrapped.address0,
@@ -107,15 +95,15 @@ function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
 
   const { asToken0, asToken1, _meta } = data ?? {};
   return useMemo(() => {
-    if (!latestBlock || !_meta || !asToken0 || !asToken1) {
+    if (!blockNumber || !_meta || !asToken0 || !asToken1) {
       return {
         isLoading,
         error,
       };
     }
 
-    if (latestBlock - BigInt(_meta?.block?.number ?? 0) > MAX_DATA_BLOCK_AGE) {
-      console.log(`Graph stale (latest block: ${latestBlock})`);
+    if (blockNumber - BigInt(_meta?.block?.number ?? 0) > MAX_DATA_BLOCK_AGE) {
+      console.log(`Graph stale (latest block: ${blockNumber})`);
       return {
         isLoading,
         error,
@@ -132,7 +120,6 @@ function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
         return acc;
       },
       {
-        // [FeeAmount.LOWEST]: [0, 0],
         [FeeAmount.LOW]: [0, 0],
         [FeeAmount.MEDIUM]: [0, 0],
         [FeeAmount.HIGH]: [0, 0],
@@ -157,7 +144,6 @@ function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
       tvl0 === 0 && tvl1 === 0 ? undefined : (tvl0 + tvl1) / (sumTvl0 + sumTvl1 || 1); // prevent divide by zero
 
     const distributions: Record<FeeAmount, number | undefined> = {
-      // [FeeAmount.LOWEST]: mean(...tvlByFeeTier[FeeAmount.LOWEST], sumToken0Tvl, sumToken1Tvl),
       [FeeAmount.LOW]: mean(...tvlByFeeTier[FeeAmount.LOW], sumToken0Tvl, sumToken1Tvl),
       [FeeAmount.MEDIUM]: mean(...tvlByFeeTier[FeeAmount.MEDIUM], sumToken0Tvl, sumToken1Tvl),
       [FeeAmount.HIGH]: mean(...tvlByFeeTier[FeeAmount.HIGH], sumToken0Tvl, sumToken1Tvl),
@@ -168,5 +154,5 @@ function usePoolTVL(tokenA?: Currency, tokenB?: Currency) {
       error,
       distributions,
     };
-  }, [_meta, asToken0, asToken1, isLoading, error, latestBlock]);
+  }, [_meta, asToken0, asToken1, isLoading, error, blockNumber]);
 }

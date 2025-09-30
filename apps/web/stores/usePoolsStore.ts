@@ -54,6 +54,7 @@ interface _PoolsStore {
   setStatus: (key: string, status: PoolState, pool?: Pool, error?: string) => void;
   getPool: (key: string) => PoolRecord | undefined;
 }
+
 export const _usePoolsStore = create<_PoolsStore>()(
   immer((set, get) => ({
     pools: {} as Record<string, PoolRecord>,

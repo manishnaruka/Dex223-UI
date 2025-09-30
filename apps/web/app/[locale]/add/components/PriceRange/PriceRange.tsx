@@ -63,7 +63,6 @@ export const PriceRange = ({
     setLeftRangeTypedValue,
     setRightRangeTypedValue,
     setStartPriceTypedValue,
-    resetPriceRangeValue,
     setTicks,
   } = useLiquidityPriceRangeStore();
   const { tier } = useLiquidityTierStore();

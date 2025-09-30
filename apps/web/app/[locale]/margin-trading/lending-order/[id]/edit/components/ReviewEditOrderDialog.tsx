@@ -167,7 +167,6 @@ export default function ReviewEditOrderDialog({
     interestRatePerMonth,
     leverage,
   } = useEditOrderParams();
-  console.log(minimumBorrowingAmount);
 
   const fieldConfigs: FieldConfig[] = useMemo(() => {
     return [

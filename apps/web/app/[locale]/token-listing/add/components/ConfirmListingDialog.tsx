@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Address, formatGwei, formatUnits, parseUnits } from "viem";
-import { useGasPrice } from "wagmi";
 
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapGasPriceStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
@@ -43,6 +42,7 @@ import { DexChainId } from "@/sdk_bi/chains";
 import { ADDRESS_ZERO } from "@/sdk_bi/constants";
 import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 function ApproveRow({
@@ -432,7 +432,7 @@ export default function ConfirmListingDialog() {
   ]);
 
   const { gasPriceSettings } = useSwapGasPriceStore();
-  const { data: baseFee } = useGasPrice();
+  const { baseFee } = useGlobalFees();
 
   const computedGasSpending = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {

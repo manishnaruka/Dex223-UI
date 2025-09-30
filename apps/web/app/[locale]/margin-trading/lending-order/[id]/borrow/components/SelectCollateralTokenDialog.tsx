@@ -25,8 +25,6 @@ export default function SelectCollateralTokenDialog({
     args: [BigInt(orderId)],
   });
 
-  console.log(data);
-
   return (
     <>
       <Button type="button" onClick={() => setIsOpen(true)}>

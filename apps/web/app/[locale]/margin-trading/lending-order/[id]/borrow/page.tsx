@@ -43,13 +43,13 @@ import { ORACLE_ABI } from "@/config/abis/oracle";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 
 function getTokenOrAmountError({
   touchedAmount,
@@ -353,8 +353,6 @@ export default function BorrowPage({
           args: [base.address0, collateral.address0, inputAmount],
         });
 
-        console.log(outputAmount);
-
         if (!outputAmount) {
           throw new Error("Error getting price with oracle");
         }
@@ -406,7 +404,7 @@ export default function BorrowPage({
     refetch: refetchFeeTokenBalance,
   } = useTokenBalances(order?.liquidationRewardAsset);
 
-  const { data: blockNumber } = useScopedBlockNumber();
+  const { blockNumber } = useGlobalBlockNumber();
 
   useEffect(() => {
     refetchBalance();

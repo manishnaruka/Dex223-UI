@@ -22,13 +22,13 @@ import { ThemeColors } from "@/config/theme/colors";
 import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
-import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { useColorScheme } from "@/lib/color-scheme";
 import addToast from "@/other/toast";
 import { DexChainId } from "@/sdk_bi/chains";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasOption, GasSettings } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
@@ -109,7 +109,7 @@ function NetworkFeeDialogContent({
   const chainId = useCurrentChainId();
   const colorScheme = useColorScheme();
 
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   useDeepEffect(() => {
     if (gasPriceOption === GasOption.CHEAP) {
@@ -300,6 +300,9 @@ function NetworkFeeDialogContent({
   );
 
   const { price } = useUSDPrice(wrappedTokens[chainId]?.address0);
+
+  console.log(price);
+  console.log(estimatedGas);
 
   return (
     <form className="max-md:h-[calc(100%-60px)]" onSubmit={handleSubmit}>

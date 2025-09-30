@@ -22,7 +22,7 @@ import { formatFloat } from "@/functions/formatFloat";
 import { formatNumberKilos } from "@/functions/formatFloat";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 
 import { usePoolsData } from "./hooks";
 
@@ -66,17 +66,15 @@ const PoolsTableDesktop = ({
   currentPage,
   sorting,
   handleSort,
-  openPoolHandler,
   isLoading = false,
 }: {
   tableData: any[];
   currentPage: number;
   sorting: SortingType;
   handleSort: () => any;
-  openPoolHandler: (id: Address) => any;
   isLoading?: boolean;
 }) => {
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const chainId = useCurrentChainId();
 
   return (
     <div className="hidden lg:grid pr-3 pl-2 rounded-3 overflow-hidden bg-table-gradient grid-cols-[_minmax(20px,0.5fr),minmax(50px,2.67fr),_minmax(87px,1.33fr),_minmax(30px,1fr),_minmax(30px,1fr),_minmax(30px,1fr)] pb-2">
@@ -136,7 +134,6 @@ const PoolsTableDesktop = ({
         : tableData.map((o: any, index: number) => {
             let token0Symbol = o.token0.symbol;
             let token1Symbol = o.token1.symbol;
-            console.log(o);
 
             let token0Image = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(o.token0.id)}/logo.png`;
             let token1Image = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(o.token1.id)}/logo.png`;
@@ -162,20 +159,16 @@ const PoolsTableDesktop = ({
             }
 
             return (
-              <React.Fragment key={o.id || index}>
-                <div
-                  onMouseEnter={() => setHoveredRow(index)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => openPoolHandler(o.id)}
-                  className={`h-[56px] cursor-pointer flex items-center rounded-l-4 justify-center text-secondary-text ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
-                >
+              <Link
+                href={`/pools/${chainId}/${o.id}`}
+                className="contents group"
+                key={o.id || index}
+              >
+                <div className="h-[56px] cursor-pointer flex items-center rounded-l-4 justify-center text-secondary-text group-hocus:bg-tertiary-bg">
                   {(currentPage - 1) * PAGE_SIZE + index + 1}
                 </div>
                 <div
-                  onMouseEnter={() => setHoveredRow(index)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => openPoolHandler(o.id)}
-                  className={`h-[56px] cursor-pointer flex pl-2 items-center  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                  className={`h-[56px] cursor-pointer flex pl-2 items-center group-hocus:bg-tertiary-bg`}
                 >
                   <div className="flex items-center ">
                     <span className="w-[26px] h-[26px] rounded-full bg-primary-bg flex items-center justify-center overflow-hidden">
@@ -208,41 +201,29 @@ const PoolsTableDesktop = ({
                     variant={BadgeVariant.PERCENTAGE}
                     percentage={`${(FEE_AMOUNT_DETAIL as any)[o.feeTier as any].label}%`}
                   />
-                  {hoveredRow === index && <Svg iconName="next" className="ml-1 text-green" />}
+                  <Svg iconName="next" className="ml-1 text-green group-hocus:block hidden" />
                 </div>
                 <div
-                  onMouseEnter={() => setHoveredRow(index)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => openPoolHandler(o.id)}
-                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text pr-3 group-hocus:bg-tertiary-bg`}
                 >
                   {formatNumberKilos(o.txCount, { significantDigits: 0 })}
                 </div>
                 <div
-                  onMouseEnter={() => setHoveredRow(index)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => openPoolHandler(o.id)}
-                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text group-hocus:bg-tertiary-bg`}
                 >
                   ${formatNumberKilos(o.totalValueLockedUSD)}
                 </div>
                 <div
-                  onMouseEnter={() => setHoveredRow(index)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => openPoolHandler(o.id)}
-                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center text-secondary-text group-hocus:bg-tertiary-bg`}
                 >
                   ${formatNumberKilos(parseFloat(o.poolDayData?.[0]?.volumeUSD) || 0)}
                 </div>
                 <div
-                  onMouseEnter={() => setHoveredRow(index)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => openPoolHandler(o.id)}
-                  className={`h-[56px] cursor-pointer flex justify-end items-center pr-4 rounded-r-4 text-secondary-text  ${hoveredRow === index ? "bg-tertiary-bg" : ""}`}
+                  className={`h-[56px] cursor-pointer flex justify-end items-center pr-4 rounded-r-4 text-secondary-text group-hocus:bg-tertiary-bg`}
                 >
                   {/* TODO still no way to get 7 day value */}${formatFloat(0)}
                 </div>
-              </React.Fragment>
+              </Link>
             );
           })}
     </div>
@@ -252,14 +233,14 @@ const PoolsTableDesktop = ({
 const PoolsTableItemMobile = ({
   // key,
   pool,
-  openPoolHandler,
   index,
 }: {
   // key: any;
   pool: any;
-  openPoolHandler: (id: Address) => any;
   index: number;
 }) => {
+  const chainId = useCurrentChainId();
+
   return (
     <React.Fragment key={index}>
       <div className="flex flex-col bg-primary-bg pt-3 px-4 pb-4 rounded-3 gap-3">
@@ -311,14 +292,15 @@ const PoolsTableItemMobile = ({
           </div>
         </div>
 
-        <Button
-          variant={ButtonVariant.CONTAINED}
-          colorScheme={ButtonColor.LIGHT_GREEN}
-          size={ButtonSize.MEDIUM}
-          onClick={() => openPoolHandler(pool.id)}
-        >
-          View pool
-        </Button>
+        <Link href={`/pools/${chainId}/${pool.id}`}>
+          <Button
+            variant={ButtonVariant.CONTAINED}
+            colorScheme={ButtonColor.LIGHT_GREEN}
+            size={ButtonSize.MEDIUM}
+          >
+            View pool
+          </Button>
+        </Link>
       </div>
     </React.Fragment>
   );
@@ -327,14 +309,12 @@ const PoolsTableItemMobile = ({
 const PoolsTableMobile = ({
   tableData,
   currentPage,
-  openPoolHandler,
   handleSort,
   sorting,
 }: {
   tableData: any[];
   currentPage: number;
   handleSort: () => any;
-  openPoolHandler: (id: Address) => any;
   sorting: SortingType;
 }) => {
   return (
@@ -358,7 +338,6 @@ const PoolsTableMobile = ({
               key={pool.id || index}
               index={(currentPage - 1) * PAGE_SIZE + index + 1}
               pool={pool}
-              openPoolHandler={openPoolHandler}
             />
           );
         })}
@@ -427,11 +406,6 @@ export default function PoolsTable({
     const lastPageIndex = firstPageIndex + PAGE_SIZE;
     return pools.slice(firstPageIndex, lastPageIndex);
   }, [pools, currentPage]);
-  const router = useRouter();
-
-  const openPoolHandler = (poolAddress: Address) => {
-    router.push(`/pools/${chainId}/${poolAddress}`);
-  };
 
   return (
     <>
@@ -445,14 +419,12 @@ export default function PoolsTable({
                 sorting={sorting}
                 currentPage={currentPage}
                 handleSort={handleSort}
-                openPoolHandler={openPoolHandler}
               />
               <PoolsTableMobile
                 tableData={currentTableData}
                 sorting={sorting}
                 currentPage={currentPage}
                 handleSort={handleSort}
-                openPoolHandler={openPoolHandler}
               />
             </>
           ) : (

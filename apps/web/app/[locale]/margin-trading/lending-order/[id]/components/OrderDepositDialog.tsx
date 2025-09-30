@@ -214,7 +214,6 @@ export default function OrderDepositDialog({
       }, 400);
     }
   }, [isOpen, setStatus, status]);
-  console.log(order);
 
   const error = useMemo(() => {
     if (

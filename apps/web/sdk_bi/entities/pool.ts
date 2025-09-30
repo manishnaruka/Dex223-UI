@@ -163,7 +163,6 @@ export class Pool {
       tickCurrent,
     } = await this.swap(zeroForOne, inputAmount.quotient, sqrtPriceLimitX96);
     const outputToken = zeroForOne ? this.token1.wrapped : this.token0.wrapped;
-    console.log("fifi", outputAmount);
     return [
       CurrencyAmount.fromRawAmount(outputToken, outputAmount * NEGATIVE_ONE),
       new Pool(
@@ -282,9 +281,6 @@ export class Pool {
       tick: this.tickCurrent,
       liquidity: this.liquidity,
     };
-
-    console.log(amountSpecified);
-    console.log(state.sqrtPriceX96);
 
     // start swap while loop
     while (state.amountSpecifiedRemaining !== ZERO && state.sqrtPriceX96 != sqrtPriceLimitX96) {

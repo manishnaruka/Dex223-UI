@@ -258,7 +258,6 @@ export default function useOrderDeposit({
           } else {
             setStatus(OrderDepositStatus.ERROR_DEPOSIT);
           }
-          console.log(receipt);
         } catch (e) {
           setStatus(OrderDepositStatus.ERROR_DEPOSIT);
         }

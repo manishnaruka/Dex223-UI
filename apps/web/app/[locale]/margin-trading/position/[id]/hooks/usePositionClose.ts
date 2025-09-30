@@ -86,10 +86,20 @@ export default function usePositionClose({ position }: { position: MarginPositio
     } else {
       setStatus(PositionCloseStatus.ERROR_CLOSE);
     }
-    console.log(receipt);
 
     return;
-  }, [chainId, position?.id, publicClient, setStatus, walletClient]);
+  }, [
+    addRecentTransaction,
+    address,
+    chainId,
+    position.id,
+    position.loanAsset?.logoURI,
+    position.loanAsset.symbol,
+    publicClient,
+    setPositionCloseHash,
+    setStatus,
+    walletClient,
+  ]);
 
   return { handlePositionClose };
 }

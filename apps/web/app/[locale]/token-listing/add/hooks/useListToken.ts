@@ -27,12 +27,12 @@ import { IIFE } from "@/functions/iife";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
-import { useFees } from "@/hooks/useFees";
 import { PoolState, useStorePools } from "@/hooks/usePools";
 import { DexChainId } from "@/sdk_bi/chains";
 import { ADDRESS_ZERO, FeeAmount } from "@/sdk_bi/constants";
 import { Token } from "@/sdk_bi/entities/token";
 import { useComputePoolAddressDex } from "@/sdk_bi/utils/computePoolAddress";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   GasFeeModel,
@@ -150,7 +150,6 @@ export function useListTokenEstimatedGas() {
         } else {
           setEstimatedGas(BigInt(195000));
         }
-        // console.log(estimated);
       } catch (e) {
         console.log(e);
         setEstimatedGas(BigInt(195000));
@@ -182,8 +181,6 @@ export default function useListToken() {
     tokenB,
     tier: pool?.[1]?.fee,
   });
-
-  console.log(pool);
 
   const tokensToList = useTokensToList();
 
@@ -220,7 +217,7 @@ export default function useListToken() {
     }
   }, [confirmDialogOpened, setListTokenStatus, listTokenStatus]);
 
-  const { gasPrice, priorityFee, baseFee } = useFees();
+  const { gasPrice, priorityFee, baseFee } = useGlobalFees();
   const { gasPriceOption, gasPriceSettings } = useListTokensGasPriceStore();
   const { customGasLimit } = useListTokensGasLimitStore();
 

@@ -11,25 +11,18 @@ import {
 } from "@/app/[locale]/margin-swap/stores/useMarginSwapStatusStore";
 import { useMarginSwapTokensStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapTokensStore";
 import useMarginPositionById from "@/app/[locale]/margin-trading/hooks/useMarginPosition";
-import { OrderCloseStatus } from "@/app/[locale]/margin-trading/lending-order/[id]/stores/useCloseOrderStatusStore";
 import { useMarginTrade } from "@/app/[locale]/swap/hooks/useTrade";
-import { SwapError } from "@/app/[locale]/swap/stores/useSwapStatusStore";
 import { MARGIN_MODULE_ABI } from "@/config/abis/marginModule";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { MARGIN_TRADING_ADDRESS } from "@/sdk_bi/addresses";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { ONE } from "@/sdk_bi/internalConstants";
 import { TickMath } from "@/sdk_bi/utils/tickMath";
-import {
-  GasFeeModel,
-  RecentTransactionTitleTemplate,
-  stringifyObject,
-  useRecentTransactionsStore,
-} from "@/stores/useRecentTransactionsStore";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
 export default function useMarginSwap() {
   const { data: walletClient } = useWalletClient();
@@ -45,7 +38,7 @@ export default function useMarginSwap() {
     id: marginSwapPositionId?.toString(),
   });
 
-  const { data: blockNumber } = useScopedBlockNumber();
+  const { blockNumber } = useGlobalBlockNumber();
 
   useEffect(() => {
     refetch();
@@ -88,8 +81,6 @@ export default function useMarginSwap() {
       return;
     }
     try {
-      console.log(marginSwapPosition);
-
       const positionAssets = await publicClient.readContract({
         abi: MARGIN_MODULE_ABI,
         address: MARGIN_TRADING_ADDRESS[chainId],

@@ -19,56 +19,58 @@ export default function useDerivedTokenInfo({
 }) {
   const chainId = useCurrentChainId();
 
-  const { data: tokenName, isFetched } = useReadContract({
+  const {
+    data: tokenName,
+    isFetched,
+    isLoading: isLoadingName,
+  } = useReadContract({
     abi: ERC20_ABI,
     functionName: "name",
     chainId,
     address: tokenAddressToImport! as Address,
     query: {
-      enabled,
+      enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
     },
   });
 
-  const { data: tokenSymbol } = useReadContract({
+  const { data: tokenSymbol, isLoading: isLoadingSymbol } = useReadContract({
     abi: ERC20_ABI,
     functionName: "symbol",
     address: tokenAddressToImport! as Address,
     chainId,
     query: {
-      enabled,
+      enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
     },
   });
 
-  const { data: tokenDecimals } = useReadContract({
+  const { data: tokenDecimals, isLoading: isLoadingDecimals } = useReadContract({
     abi: ERC20_ABI,
     functionName: "decimals",
     address: tokenAddressToImport! as Address,
     chainId,
     query: {
-      enabled,
+      enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
     },
   });
 
-  const { data: standard } = useReadContract({
+  const { data: standard, isLoading: isLoadingStandard } = useReadContract({
     abi: ERC223_ABI,
     functionName: "standard",
     address: tokenAddressToImport as Address,
     chainId,
     query: {
-      enabled,
+      enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
     },
   });
 
-  console.log("STANDARD", standard);
-
-  const { data: isWrapper } = useReadContract({
+  const { data: isWrapper, isLoading: isLoadingWrapper } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: "isWrapper",
     address: CONVERTER_ADDRESS[chainId],
     args: [tokenAddressToImport as Address],
     chainId,
     query: {
-      enabled,
+      enabled: !!tokenAddressToImport && isAddress(tokenAddressToImport),
     },
   });
 
@@ -98,28 +100,40 @@ export default function useDerivedTokenInfo({
     return "getERC223WrapperFor";
   }, [otherAddressFunctionName, standard]);
 
-  const { data: otherAddress } = useReadContract({
+  console.log(otherAddressCheckFunctionName);
+  console.log(otherAddressFunctionName);
+  console.log(CONVERTER_ADDRESS[chainId]);
+  console.log("____");
+  const { data: otherAddress, isLoading: isLoadingOtherAddress } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: otherAddressCheckFunctionName!,
     address: CONVERTER_ADDRESS[chainId],
     args: [tokenAddressToImport as Address],
     chainId,
     query: {
-      enabled: enabled && Boolean(otherAddressCheckFunctionName),
+      enabled:
+        !!tokenAddressToImport &&
+        isAddress(tokenAddressToImport) &&
+        Boolean(otherAddressCheckFunctionName),
     },
   });
   console.log(otherAddress);
 
-  const { data: predictedOtherAddress } = useReadContract({
-    abi: TOKEN_CONVERTER_ABI,
-    functionName: otherAddressFunctionName!,
-    address: CONVERTER_ADDRESS[chainId],
-    args: [tokenAddressToImport as Address, standard !== 223],
-    chainId,
-    query: {
-      enabled: enabled && Boolean(otherAddressFunctionName),
+  const { data: predictedOtherAddress, isLoading: isLoadingOtherAddressFunction } = useReadContract(
+    {
+      abi: TOKEN_CONVERTER_ABI,
+      functionName: otherAddressFunctionName!,
+      address: CONVERTER_ADDRESS[chainId],
+      args: [tokenAddressToImport as Address, standard !== 223],
+      chainId,
+      query: {
+        enabled:
+          !!tokenAddressToImport &&
+          isAddress(tokenAddressToImport) &&
+          Boolean(otherAddressFunctionName),
+      },
     },
-  });
+  );
 
   console.log(predictedOtherAddress);
 
@@ -142,6 +156,37 @@ export default function useDerivedTokenInfo({
       };
     }, [otherAddress, predictedOtherAddress, standard, tokenAddressToImport]);
 
+  const isTokenLoading = useMemo(() => {
+    console.log("isLoadingSymbol", isLoadingSymbol);
+    console.log("isLoadingDecimals", isLoadingDecimals);
+    console.log("isLoadingStandard", isLoadingStandard);
+    console.log("isLoadingName", isLoadingName);
+    console.log("isLoadingOtherAddressFunction", isLoadingOtherAddressFunction);
+
+    if (!enabled) {
+      return false;
+    }
+
+    return (
+      isLoadingStandard ||
+      isLoadingDecimals ||
+      isLoadingName ||
+      isLoadingOtherAddressFunction ||
+      isLoadingOtherAddress ||
+      isLoadingSymbol ||
+      isLoadingWrapper
+    );
+  }, [
+    enabled,
+    isLoadingDecimals,
+    isLoadingName,
+    isLoadingOtherAddress,
+    isLoadingOtherAddressFunction,
+    isLoadingStandard,
+    isLoadingSymbol,
+    isLoadingWrapper,
+  ]);
+
   const token = useMemo(() => {
     if (
       !tokenSymbol ||
@@ -149,7 +194,8 @@ export default function useDerivedTokenInfo({
       !tokenDecimals ||
       !enabled ||
       !erc20AddressToImport ||
-      !erc223AddressToImport
+      !erc223AddressToImport ||
+      isTokenLoading
     ) {
       console.log("Not enought data");
       return null;
@@ -169,10 +215,11 @@ export default function useDerivedTokenInfo({
     enabled,
     erc20AddressToImport,
     erc223AddressToImport,
+    isTokenLoading,
     tokenDecimals,
     tokenName,
     tokenSymbol,
   ]);
 
-  return { token };
+  return { token, isLoading: isTokenLoading };
 }

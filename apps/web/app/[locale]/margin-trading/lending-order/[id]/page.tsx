@@ -69,7 +69,6 @@ export default function LendingOrder({
     return address.toLowerCase() === order?.owner.toLowerCase();
   }, [address, order]);
 
-  console.log(order?.allowedCollateralAssets);
   const requestTimeRef = useRef<number>(Date.now());
 
   const [searchTradableTokenValue, setSearchTradableTokenValue] = useState("");
@@ -360,7 +359,6 @@ export default function LendingOrder({
                 </div>
                 <div className="flex gap-1">
                   {order.allowedCollateralAssets.map((collateralToken) => {
-                    console.log(collateralToken.wrapped.address0);
                     return collateralToken.isToken ? (
                       <button
                         key={collateralToken.wrapped.address0}

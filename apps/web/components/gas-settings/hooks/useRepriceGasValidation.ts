@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { parseGwei } from "viem";
 
-import { RecentTransaction } from "@/db/db";
 import { add10PercentsToBigInt } from "@/functions/addPercentsToBigInt";
-import { useFees } from "@/hooks/useFees";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasFeeModel, IRecentTransaction } from "@/stores/useRecentTransactionsStore";
 
 export default function useRepriceGasValidation({
@@ -15,7 +14,7 @@ export default function useRepriceGasValidation({
   maxPriorityFeePerGas: string;
   gasPrice: string;
 }) {
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   const maxFeePerGasError = useMemo(() => {
     return transaction?.gas.model === GasFeeModel.EIP1559 &&

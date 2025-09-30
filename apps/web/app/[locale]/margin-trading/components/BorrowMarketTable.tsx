@@ -133,8 +133,6 @@ export default function BorrowMarketTable({
     minPositionDuration,
   } = useBorrowMarketFilterStore();
 
-  console.log(borrowAssets);
-
   const { loading, orders, isFilterActive } = useOrders({
     sortingDirection: sorting.direction,
     orderBy: sorting.field,
@@ -160,8 +158,6 @@ export default function BorrowMarketTable({
       asset.wrapped.address1.toLowerCase() as Address,
     ]),
   });
-
-  console.log(isFilterActive && !orders?.length);
 
   const isDragging = useRef(false);
   const startX = useRef(0);

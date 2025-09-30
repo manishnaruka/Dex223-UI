@@ -67,8 +67,6 @@ export const Balances = ({
     setSearchValue: setAddressSearch,
   });
 
-  console.log(deposites);
-
   const currentTableData = tokenBalances
     .filter((value) => filterTable({ searchValue, value }))
     .map(({ token, amountERC20, amountERC223, amountFiat }) => ({

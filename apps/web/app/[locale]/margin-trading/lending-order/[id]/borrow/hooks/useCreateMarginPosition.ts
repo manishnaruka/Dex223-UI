@@ -348,7 +348,6 @@ export default function useCreateMarginPosition(order: LendingOrder) {
           parseUnits(values.collateralAmount.toString(), values.collateralToken?.decimals ?? 18),
         ] as const,
       };
-      console.log(values);
       const takeLoanHash = await walletClient.writeContract({
         ...params,
         account: undefined,
@@ -402,7 +401,6 @@ export default function useCreateMarginPosition(order: LendingOrder) {
 
       const createPositionLog = parsedEventLog.find((log) => log.eventName === "PositionOpened");
 
-      console.log(createPositionLog);
       if (createPositionLog) {
         setPositionId(Number(createPositionLog.args.positionId));
       }

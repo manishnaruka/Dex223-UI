@@ -50,14 +50,14 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
-import { PoolState, usePool, useStorePools } from "@/hooks/usePools";
+import { PoolState, useStorePools } from "@/hooks/usePools";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useRouter } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Token } from "@/sdk_bi/entities/token";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasFeeModel, GasOption } from "@/stores/factories/createGasPriceStore";
 
 function OpenConfirmListTokenButton({
@@ -307,7 +307,7 @@ export default function ListTokenPage() {
 
   const tokensToList = useTokensToList();
 
-  const { baseFee, gasPrice, priorityFee } = useFees();
+  const { baseFee, gasPrice } = useGlobalFees();
 
   const formattedGasPrice = useMemo(() => {
     if (gasPriceOption !== GasOption.CUSTOM) {

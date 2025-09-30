@@ -9,9 +9,9 @@ import { ERC20_ABI } from "@/config/abis/erc20";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useDeepEffect from "@/hooks/useDeepEffect";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,
@@ -76,13 +76,13 @@ export function useRevokeEstimatedGas({
       }
 
       try {
-        const estimated = await publicClient?.estimateContractGas(params as any);
+        // const estimated = await publicClient?.estimateContractGas(params as any);
 
-        if (estimated) {
-          setEstimatedGas(estimated + BigInt(10000));
-        } else {
-          setEstimatedGas(REVOKE_DEFAULT_GAS_LIMIT);
-        }
+        // if (estimated) {
+        //   setEstimatedGas(estimated + BigInt(10000));
+        // } else {
+        setEstimatedGas(REVOKE_DEFAULT_GAS_LIMIT);
+        // }
       } catch (e) {
         console.error(e);
         setEstimatedGas(REVOKE_DEFAULT_GAS_LIMIT);
@@ -126,7 +126,7 @@ export default function useRevoke({
     // watch: true,
   });
 
-  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
+  const { blockNumber } = useGlobalBlockNumber();
 
   const { gasSettings, customGasLimit, gasModel } = useRevokeGasSettings();
 

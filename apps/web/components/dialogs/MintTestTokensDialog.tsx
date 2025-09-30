@@ -20,10 +20,10 @@ import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
 import { formatFloat } from "@/functions/formatFloat";
 import { IIFE } from "@/functions/iife";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { useTokens } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 
 export default function MintTestTokensDialog() {
   const { isOpen, handleOpen, handleClose } = useMintTestTokensDialogStore();
@@ -93,11 +93,11 @@ export default function MintTestTokensDialog() {
     },
   });
 
-  const { data: latestBlock } = useScopedBlockNumber({ watch: isOpen });
+  const { blockNumber } = useGlobalBlockNumber();
 
   useEffect(() => {
     refetch();
-  }, [latestBlock, refetch]);
+  }, [blockNumber, refetch]);
 
   const handleMint = useCallback(() => {
     if (!tokenToMint || !walletClient || !publicClient) {

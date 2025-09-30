@@ -66,8 +66,6 @@ export default function LendingOrderCard({
   setOrderToClose: (order: LendingOrder) => void;
   setOrderToOpen: (order: LendingOrder) => void;
 }) {
-  console.log(order);
-
   return (
     <>
       <div className="border-4 border-green-bg rounded-5 pt-3 px-5 pb-5 bg-primary-bg">

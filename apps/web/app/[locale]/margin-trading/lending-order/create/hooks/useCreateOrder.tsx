@@ -29,11 +29,11 @@ import { getGasSettings } from "@/functions/gasSettings";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
 import addToast from "@/other/toast";
 import { MARGIN_TRADING_ADDRESS, ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { getTokenAddressForStandard, Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import {
   GasFeeModel,
   RecentTransactionTitleTemplate,
@@ -117,7 +117,7 @@ export default function useCreateOrder() {
   const { address } = useAccount();
   const { customGasLimit } = useCreateOrderGasLimitStore();
   const { gasPriceOption, gasPriceSettings } = useCreateOrderGasPriceStore();
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
   const {
     tradingTokens,
     loanToken,
@@ -282,7 +282,6 @@ export default function useCreateOrder() {
 
         const createOrderLog = parsedEventLog.find((log) => log.eventName === "OrderCreated");
 
-        console.log(createOrderLog);
         if (!createOrderLog) {
           console.log("CREATE ORDER LOG NOT FOUND!");
           return;
@@ -352,7 +351,6 @@ export default function useCreateOrder() {
             setStatus(CreateOrderStatus.ERROR_DEPOSIT);
           }
         } else {
-          console.log(params.loanTokenStandard + "STANDARD!!!");
           if (params.loanTokenStandard === Standard.ERC20) {
             setStatus(CreateOrderStatus.PENDING_APPROVE);
             const approveResult = await approveA({

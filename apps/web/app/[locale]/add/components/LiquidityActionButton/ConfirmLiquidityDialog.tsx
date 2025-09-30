@@ -28,6 +28,8 @@ import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Position } from "@/sdk_bi/entities/position";
 import { Standard } from "@/sdk_bi/standard";
+import { usePriceRange } from "@/shared/hooks/usePriceRange";
+import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 
@@ -37,9 +39,7 @@ import {
   ApproveTransactionType,
   useLiquidityApprove,
 } from "../../hooks/useLiquidityApprove";
-import { usePriceRange } from "../../hooks/usePrice";
 import { useSortedTokens } from "../../hooks/useSortedTokens";
-import { useV3DerivedMintInfo } from "../../hooks/useV3DerivedMintInfo";
 import { Field, useTokensStandards } from "../../stores/useAddLiquidityAmountsStore";
 import {
   useAddLiquidityGasLimitStore,
@@ -358,13 +358,6 @@ const MintDialog = ({
     tokenId,
   });
 
-  useAddLiquidityEstimatedGas({
-    position,
-    increase,
-    createPool: noLiquidity,
-    tokenId,
-  });
-
   const { customGasLimit } = useAddLiquidityGasLimitStore();
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
   const gasToUse = customGasLimit ? customGasLimit : estimatedMintGas + BigInt(30000); // set custom gas here if user changed it
@@ -614,7 +607,6 @@ const MintDialog = ({
           <Button
             onClick={() => {
               handleAddLiquidity({ updateAllowance });
-              // console.log("Clicked");
             }}
             fullWidth
           >
@@ -626,18 +618,16 @@ const MintDialog = ({
   );
 };
 
-const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
+const SuccessfulDialog = ({
+  isError = false,
+  parsedAmounts,
+}: {
+  isError?: boolean;
+  parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
+}) => {
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
-  const { tier } = useLiquidityTierStore();
-  const { price } = usePriceRange();
   const { liquidityHash } = useAddLiquidityStatusStore();
-  const { parsedAmounts } = useV3DerivedMintInfo({
-    tokenA,
-    tokenB,
-    tier,
-    price,
-  });
   const t = useTranslations("Liquidity");
   const chainId = useCurrentChainId();
 
@@ -784,6 +774,14 @@ export default function ConfirmLiquidityDialog({
   const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
 
   const { status } = useAddLiquidityStatusStore();
+
+  useAddLiquidityEstimatedGas({
+    position,
+    increase,
+    createPool: noLiquidity,
+    tokenId,
+  });
+
   return (
     <DrawerDialog
       isOpen={isOpen}
@@ -813,8 +811,12 @@ export default function ConfirmLiquidityDialog({
             updateAllowance={updateAllowance}
           />
         ) : null}
-        {[AddLiquidityStatus.SUCCESS].includes(status) ? <SuccessfulDialog /> : null}
-        {[AddLiquidityStatus.MINT_ERROR].includes(status) ? <SuccessfulDialog isError /> : null}
+        {[AddLiquidityStatus.SUCCESS].includes(status) ? (
+          <SuccessfulDialog parsedAmounts={parsedAmounts} />
+        ) : null}
+        {[AddLiquidityStatus.MINT_ERROR].includes(status) ? (
+          <SuccessfulDialog parsedAmounts={parsedAmounts} isError />
+        ) : null}
       </div>
     </DrawerDialog>
   );

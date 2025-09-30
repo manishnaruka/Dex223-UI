@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 
 import { useDerivedTokens } from "@/app/[locale]/add/hooks/useDerivedTokens";
-import { usePriceDirectionStore } from "@/app/[locale]/add/stores/usePriceDirectionStore";
 import { getTickToPrice, tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import { PoolState, usePool } from "@/hooks/usePools";
 import { TICK_SPACINGS } from "@/sdk_bi/constants";

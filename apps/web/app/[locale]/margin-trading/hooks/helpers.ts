@@ -308,15 +308,10 @@ export function serializeGqlRecentTransactions(
   gqlRecentTransactions: GqlRecentTransaction[],
   chainId: DexChainId,
 ): MarginPositionRecentTransaction[] {
-  console.log(gqlRecentTransactions);
   return gqlRecentTransactions.map((gqlTx) => {
     const fieldName = keyToFieldNameMap[gqlTx.key] as keyof GqlRecentTransaction;
     const field = gqlTx[fieldName] as any;
     const timestamp = gqlTx?.timestamp;
-
-    console.log(field);
-    console.log(gqlTx.key);
-    console.log(gqlTx);
 
     switch (gqlTx.key) {
       case "MarginSwap": {

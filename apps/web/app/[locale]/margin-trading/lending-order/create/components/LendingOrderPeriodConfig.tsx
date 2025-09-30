@@ -28,7 +28,6 @@ export default function LendingOrderPeriodConfig({
   setValues: (values: LendingOrderPeriod) => void;
   errors?: LendingOrderPeriodErrors;
 }) {
-  console.log(values);
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4">
       <InputLabel inputSize={InputSize.LARGE} label="Period type" />

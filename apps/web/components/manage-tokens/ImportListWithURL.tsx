@@ -1,5 +1,6 @@
 import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
+import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
@@ -39,15 +40,24 @@ export default function ImportListWithURL({ setContent }: Props) {
   const [tokenListToImport, setTokenListToImport] = useState<TokenList | null>(null);
   const [checkedUnderstand, setCheckedUnderstand] = useState<boolean>(false);
   const tokenLists = useTokenLists();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     IIFE(async () => {
       try {
         if (!isValidUrl(tokenListAddressToImport)) {
+          setTokenListToImport(null);
           return;
         }
 
+        setIsLoading(true);
+
         const data = await convertList(tokenListAddressToImport, chainId);
+
+        if (!data) {
+          setTokenListToImport(null);
+          return;
+        }
 
         const listChainId = data.tokens[0].chainId;
 
@@ -60,14 +70,18 @@ export default function ImportListWithURL({ setContent }: Props) {
             list: {
               ...data,
               tokens: filteredTokenList,
-              logoURI: data.logoURI.startsWith("ipfs://")
-                ? data.logoURI.replace("ipfs://", "https://ipfs.io/ipfs/")
-                : data.logoURI,
+              logoURI: data.logoURI!.startsWith("ipfs://")
+                ? (data.logoURI!.replace("ipfs://", "https://ipfs.io/ipfs/") as string)
+                : (data.logoURI as string),
             },
           });
+        } else {
+          setTokenListToImport(null);
         }
       } catch (e) {
         console.log(e);
+      } finally {
+        setIsLoading(false);
       }
     });
   }, [chainId, tokenListAddressToImport]);
@@ -84,9 +98,10 @@ export default function ImportListWithURL({ setContent }: Props) {
     return !!(
       tokenListAddressToImport &&
       isValidUrl(tokenListAddressToImport) &&
-      !tokenListToImport
+      !tokenListToImport &&
+      !isLoading
     );
-  }, [tokenListAddressToImport, tokenListToImport]);
+  }, [isLoading, tokenListAddressToImport, tokenListToImport]);
 
   const alreadyImportedList = useMemo(() => {
     return tokenLists?.find((tokenList) => {
@@ -106,7 +121,7 @@ export default function ImportListWithURL({ setContent }: Props) {
         error={error}
       />
 
-      {tokenListToImport && !alreadyImportedList && (
+      {tokenListToImport && !alreadyImportedList && !isLoading && (
         <>
           <div className="flex-grow">
             <div className="flex items-center gap-3 pb-2.5 mb-3">
@@ -155,7 +170,7 @@ export default function ImportListWithURL({ setContent }: Props) {
         </>
       )}
 
-      {tokenListToImport && !!alreadyImportedList && (
+      {tokenListToImport && !!alreadyImportedList && !isLoading && (
         <>
           <div className="flex-grow">
             <div className="flex justify-between items-center pb-2.5 mb-3">
@@ -200,13 +215,13 @@ export default function ImportListWithURL({ setContent }: Props) {
         </>
       )}
 
-      {!tokenListToImport && !tokenListAddressToImport && (
+      {!tokenListToImport && !tokenListAddressToImport && !isLoading && (
         <div className="flex-grow flex justify-center items-center flex-col gap-2 bg-empty-url bg-right-top bg-no-repeat max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
           <p className="text-secondary-text text-center">{t("to_import_through_URL")}</p>
         </div>
       )}
 
-      {tokenListAddressToImport && !isValidUrl(tokenListAddressToImport) && (
+      {tokenListAddressToImport && !isValidUrl(tokenListAddressToImport) && !isLoading && (
         <div className="flex-grow flex justify-center items-center flex-col gap-2">
           <EmptyStateIcon iconName="warning" />
           <p className="text-red-light text-center">Enter valid list location</p>
@@ -216,6 +231,12 @@ export default function ImportListWithURL({ setContent }: Props) {
       {isNotFound && (
         <div className="flex-grow flex justify-center items-center flex-col gap-2 bg-empty-not-found-list bg-right-top bg-no-repeat max-md:bg-size-180 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
           <p className="text-secondary-text text-center">List not found</p>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="flex-grow flex justify-center items-center flex-col gap-2 px-4 -mx-4 md:px-10 md:-mx-10 -mt-5 pt-5">
+          <Preloader size={80} />
         </div>
       )}
     </div>

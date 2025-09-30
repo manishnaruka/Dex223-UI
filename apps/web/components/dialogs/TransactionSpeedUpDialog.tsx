@@ -25,11 +25,11 @@ import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMu
 import { add10PercentsToBigInt } from "@/functions/addPercentsToBigInt";
 import { formatFloat } from "@/functions/formatFloat";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
@@ -106,7 +106,7 @@ export default function TransactionSpeedUpDialog() {
   const { data: walletClient } = useWalletClient();
 
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
-  const { priorityFee, baseFee, gasPrice } = useFees();
+  const { priorityFee, baseFee, gasPrice } = useGlobalFees();
 
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations("Swap");

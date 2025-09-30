@@ -51,8 +51,6 @@ export const useUSDPrice = (tokenAddress: Address | undefined) => {
       try {
         const priceData = await getPrices();
 
-        console.log("Price data");
-        console.log(priceData);
         const pricesObj: Record<string, number> = {};
 
         priceData.data?.tokens.forEach(

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { parseGwei } from "viem";
 
-import { useFees } from "@/hooks/useFees";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 
 export default function useNetworkFeeGasValidation({
   ...values
@@ -12,7 +12,7 @@ export default function useNetworkFeeGasValidation({
   gasLimit: string;
   estimatedGas: bigint;
 }) {
-  const { baseFee, priorityFee, gasPrice } = useFees();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   const maxFeePerGasError = useMemo(() => {
     return baseFee && parseGwei(values.maxFeePerGas) < baseFee
