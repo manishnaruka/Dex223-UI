@@ -5,6 +5,7 @@ import { PropsWithChildren, useState } from "react";
 import { WagmiProvider } from "wagmi";
 
 import { config } from "@/config/wagmi/config";
+import NuqsProvider from "./providers/NuqsAdapter";
 
 export default function Providers({
   initialState,
@@ -14,7 +15,9 @@ export default function Providers({
 
   return (
     <WagmiProvider config={config} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <NuqsProvider>{children}</NuqsProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
