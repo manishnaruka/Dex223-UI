@@ -374,8 +374,8 @@ const MintDialog = ({
   return (
     <>
       <DialogHeader onClose={() => setIsOpen(false)} title="Add liquidity" />
-      <div className="card-spacing-x  pb-4 md:pb-0 h-[60dvh] md:h-auto flex flex-col">
-        <div className="flex-grow overflow-y-auto">
+      <div className="card-spacing-x md:pb-0 h-[60dvh] md:h-auto flex flex-col">
+        <div className="flex-grow overflow-y-auto max-md:pb-4 -mr-2 pr-2">
           <div
             className={clsxMerge(
               "flex justify-between items-start",

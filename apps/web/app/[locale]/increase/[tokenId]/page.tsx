@@ -121,29 +121,25 @@ export default function IncreaseLiquidityPage({
 
   return (
     <Container>
-      <div className="lg:w-[1200px] mx-auto my-4 lg:my-[40px]">
+      <div className="lg:w-[1200px] mx-auto my-4 lg:my-10">
         <div className="flex justify-between items-center bg-primary-bg rounded-t-3 lg:rounded-t-5 py-1 lg:py-2.5 px-2 lg:px-6">
           <div className="w-[96px] md:w-[104px]">
             <IconButton
-              // onClick={() => router.push(`/pool/${use(params).tokenId}`)}
               onClick={() => router.push(`/pool/${localParams.tokenId}`)}
-              buttonSize={IconButtonSize.LARGE}
+              buttonSize={IconButtonSize.REGULAR}
               variant={IconButtonVariant.BACK}
-              // iconName="back"
-              iconSize={IconSize.LARGE}
-              // className="text-tertiary-text"
             />
           </div>
           <h2 className="text-18 md:text-20 font-bold">{t("increase_liquidity")}</h2>
           <div className="w-[96px] md:w-[104px] flex items-center gap-0 lg:gap-2 justify-end">
             <IconButton
-              buttonSize={IconButtonSize.LARGE}
+              buttonSize={IconButtonSize.REGULAR}
               iconName="recent-transactions"
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
               active={showRecentTransactions}
             />
             <IconButton
-              buttonSize={IconButtonSize.LARGE}
+              buttonSize={IconButtonSize.REGULAR}
               iconName="settings"
               onClick={() => setIsOpen(true)}
               className="text-tertiary-text"
