@@ -358,13 +358,6 @@ const MintDialog = ({
     tokenId,
   });
 
-  useAddLiquidityEstimatedGas({
-    position,
-    increase,
-    createPool: noLiquidity,
-    tokenId,
-  });
-
   const { customGasLimit } = useAddLiquidityGasLimitStore();
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
   const gasToUse = customGasLimit ? customGasLimit : estimatedMintGas + BigInt(30000); // set custom gas here if user changed it
@@ -625,18 +618,16 @@ const MintDialog = ({
   );
 };
 
-const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
+const SuccessfulDialog = ({
+  isError = false,
+  parsedAmounts,
+}: {
+  isError?: boolean;
+  parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
+}) => {
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
-  const { tier } = useLiquidityTierStore();
-  const { price } = usePriceRange();
   const { liquidityHash } = useAddLiquidityStatusStore();
-  const { parsedAmounts } = useV3DerivedMintInfo({
-    tokenA,
-    tokenB,
-    tier,
-    price,
-  });
   const t = useTranslations("Liquidity");
   const chainId = useCurrentChainId();
 
@@ -783,6 +774,14 @@ export default function ConfirmLiquidityDialog({
   const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
 
   const { status } = useAddLiquidityStatusStore();
+
+  useAddLiquidityEstimatedGas({
+    position,
+    increase,
+    createPool: noLiquidity,
+    tokenId,
+  });
+
   return (
     <DrawerDialog
       isOpen={isOpen}
@@ -812,8 +811,12 @@ export default function ConfirmLiquidityDialog({
             updateAllowance={updateAllowance}
           />
         ) : null}
-        {[AddLiquidityStatus.SUCCESS].includes(status) ? <SuccessfulDialog /> : null}
-        {[AddLiquidityStatus.MINT_ERROR].includes(status) ? <SuccessfulDialog isError /> : null}
+        {[AddLiquidityStatus.SUCCESS].includes(status) ? (
+          <SuccessfulDialog parsedAmounts={parsedAmounts} />
+        ) : null}
+        {[AddLiquidityStatus.MINT_ERROR].includes(status) ? (
+          <SuccessfulDialog parsedAmounts={parsedAmounts} isError />
+        ) : null}
       </div>
     </DrawerDialog>
   );

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { Bound } from "@/app/[locale]/add/components/PriceRange/LiquidityChartRangeInput/types";
 import {
@@ -16,15 +16,14 @@ import Svg from "@/components/atoms/Svg";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { tryParseCurrencyAmount } from "@/functions/tryParseTick";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFetchPoolData } from "@/hooks/useFetchPoolsData";
+import { PoolState } from "@/hooks/usePools";
 import { FeeAmount, TICK_SPACINGS } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Price } from "@/sdk_bi/entities/fractions/price";
 import { nearestUsableTick } from "@/sdk_bi/utils/nearestUsableTick";
 import { priceToClosestTick } from "@/sdk_bi/utils/priceTickConversions";
 import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
-import { PoolState, useStorePools } from "@/shared/hooks/usePools";
-import { usePrice } from "@/shared/hooks/usePrice";
+import { useStorePools } from "@/shared/hooks/usePools";
 import { usePriceRange } from "@/shared/hooks/usePriceRange";
 import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 
@@ -96,25 +95,38 @@ export default function DevPoolsPage() {
 
   const [delayMs, setDelayMs] = useState(800);
 
-  const baseFetcher = useFetchPoolData(chainId);
-
-  const delayedFetcher = useMemo(() => {
-    if (!baseFetcher) return undefined;
-    return async (...args: Parameters<typeof baseFetcher>) => {
-      if (delayMs > 0) {
-        await new Promise((r) => setTimeout(r, delayMs));
-      }
-      return baseFetcher(...args);
-    };
-  }, [baseFetcher, delayMs]);
+  // const baseFetcher = useFetchPoolData(chainId);
+  //
+  // const delayedFetcher = useMemo(() => {
+  //   if (!baseFetcher) return undefined;
+  //   return async (...args: Parameters<typeof baseFetcher>) => {
+  //     if (delayMs > 0) {
+  //       await new Promise((r) => setTimeout(r, delayMs));
+  //     }
+  //     return baseFetcher(...args);
+  //   };
+  // }, [baseFetcher, delayMs]);
 
   const pools = useStorePools([{ currencyA: tokenA, currencyB: tokenB, tier: fee }], {
     enabled,
     refreshOnBlock,
-    fetchOverride: delayedFetcher,
   });
 
+  const pools_ = useStorePools(
+    [
+      { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.LOW },
+      { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM },
+      { currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.HIGH },
+    ],
+    {
+      enabled,
+      refreshOnBlock,
+    },
+  );
+
   const [state, pool] = pools[0] ?? [PoolState.IDLE, null];
+
+  console.log(pools_);
 
   // ======== PRICE + RANGE (локально) ========
   const { tier } = useLiquidityTierStore();

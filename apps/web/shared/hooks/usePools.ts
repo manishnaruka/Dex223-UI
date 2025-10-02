@@ -4,20 +4,14 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useDeepEffect from "@/hooks/useDeepEffect";
 import useDeepMemo from "@/hooks/useDeepMemo";
 import { useFetchPoolData } from "@/hooks/useFetchPoolsData";
+import { PoolState } from "@/hooks/usePools";
+import { ZERO_ADDRESS } from "@/sdk_bi/addresses";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Pool } from "@/sdk_bi/entities/pool";
 import { getPoolAddressKey, useComputePoolAddressesDex } from "@/sdk_bi/utils/computePoolAddress";
 import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import { _usePoolsStore, usePoolAddresses } from "@/stores/usePoolsStore";
-
-export enum PoolState {
-  LOADING,
-  NOT_EXISTS,
-  EXISTS,
-  INVALID,
-  IDLE,
-}
 
 export type PoolParams = {
   currencyA: Currency | undefined;
@@ -73,6 +67,8 @@ export function useStorePools(
     });
   }, [poolsParams, chainId]);
 
+  console.log(poolKeys, "poolKeys");
+
   const poolTokens: ({ token0: Currency; token1: Currency; tier: FeeAmount } | undefined)[] =
     useMemo(() => {
       if (!chainId) return [...Array(poolsParams.length)];
@@ -108,6 +104,8 @@ export function useStorePools(
       };
     });
   }, [poolTokens]);
+
+  console.log(poolAddressesParams, "poolAddressesParams");
 
   useComputePoolAddressesDex(poolAddressesParams);
 
@@ -182,7 +180,7 @@ export function useStorePools(
     fetchPoolData,
     refreshOnBlock,
     refreshOnBlock ? blockNumber : undefined,
-    blockNumber,
+    // blockNumber,
     ttlMs,
   ]);
 
