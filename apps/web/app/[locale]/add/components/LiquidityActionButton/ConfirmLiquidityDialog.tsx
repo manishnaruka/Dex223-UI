@@ -28,8 +28,6 @@ import { Currency } from "@/sdk_bi/entities/currency";
 import { CurrencyAmount } from "@/sdk_bi/entities/fractions/currencyAmount";
 import { Position } from "@/sdk_bi/entities/position";
 import { Standard } from "@/sdk_bi/standard";
-import { usePriceRange } from "@/shared/hooks/usePriceRange";
-import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { EstimatedGasId, useEstimatedGasStoreById } from "@/stores/useEstimatedGasStore";
 
@@ -376,8 +374,8 @@ const MintDialog = ({
   return (
     <>
       <DialogHeader onClose={() => setIsOpen(false)} title="Add liquidity" />
-      <div className="card-spacing-x  pb-4 md:pb-0 h-[60dvh] md:h-auto flex flex-col">
-        <div className="flex-grow overflow-y-auto">
+      <div className="card-spacing-x md:pb-0 h-[60dvh] md:h-auto flex flex-col">
+        <div className="flex-grow overflow-y-auto max-md:pb-4 -mr-2 pr-2">
           <div
             className={clsxMerge(
               "flex justify-between items-start",

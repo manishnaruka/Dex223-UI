@@ -18,7 +18,12 @@ const initialCreateTokenSettings = {
   createERC20: false,
 };
 
+import { useTranslations } from "next-intl";
+import { useAccount } from "wagmi";
 import * as Yup from "yup";
+
+import ConnectWalletDialog from "@/components/dialogs/ConnectWalletDialog";
+import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 
 const isValidHttpsUrl = (value?: string) => {
   try {
@@ -36,15 +41,15 @@ const isValidIpfsUrl = (value?: string) => {
 };
 
 const createTokenSchema = Yup.object({
-  name: Yup.string().trim().required("Token name is required"),
-  symbol: Yup.string().trim().required("Symbol is required"),
-  totalSupply: Yup.string().trim().required("Total supply is required"),
+  name: Yup.string().trim().required("Please provide token name"),
+  symbol: Yup.string().trim().required("Please provide symbol"),
+  totalSupply: Yup.string().trim().required("Please provide total supply"),
   imageURL: Yup.string()
     .trim()
     .notRequired()
     .test(
       "ipfs-or-https",
-      "Must be a valid ipfs://… or https://… URL",
+      "Enter a link in the format https:// or ipfs://",
       (val) => !val || isValidIpfsUrl(val) || isValidHttpsUrl(val),
     ),
 });
@@ -52,6 +57,10 @@ const createTokenSchema = Yup.object({
 export default function CreateTokenForm() {
   const { isOpen, setIsOpen } = useCreateTokenDialogStore();
   const [createTokenSettings, setCreateTokenSettings] = useState(initialCreateTokenSettings);
+  const { isConnected } = useAccount();
+
+  const tWallet = useTranslations("Wallet");
+  const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
 
   return (
     <>
@@ -125,14 +134,20 @@ export default function CreateTokenForm() {
 
             <GasSettingsBlock />
 
-            <Button
-              disabled={
-                Object.keys(props.touched).length > 0 && Object.keys(props.errors).length > 0
-              }
-              fullWidth
-            >
-              Create token
-            </Button>
+            {isConnected ? (
+              <Button
+                disabled={
+                  Object.keys(props.touched).length > 0 && Object.keys(props.errors).length > 0
+                }
+                fullWidth
+              >
+                Create token
+              </Button>
+            ) : (
+              <Button type="button" onClick={() => setWalletConnectOpened(true)} fullWidth>
+                {tWallet("connect_wallet")}
+              </Button>
+            )}
           </form>
         )}
       </Formik>
