@@ -1,112 +1,39 @@
-"use client";
+import BuyCryptoPageClient from "./components/BuyCryptoPageClient";
 
-import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import { useAccount } from "wagmi";
-
-import Container from "@/components/atoms/Container";
-import TabButton from "@/components/buttons/TabButton";
-import { ThemeColors } from "@/config/theme/colors";
-import { ColorSchemeProvider } from "@/lib/color-scheme";
-
-import SwapPage from "../swap/page";
-import BuyCryptoForm from "./components/BuyCryptoForm";
-import BuyOnramp from "./components/BuyOnramp";
-import SellCryptoForm from "./components/SellCryptoForm";
-
-const platforms = ["OnRamp", "SimpleSwap"];
-const tabs = ["Swap Crypto", "Buy Crypto", "Sell Crypto"];
-const tabs1 = ["Swap Crypto", "Buy/Sell Crypto"];
-
-export default function BuyCryptoPage() {
-  const [selectedPlatform, setSelectedPlatform] = useState("OnRamp");
-  const [selectedTab, setSelectedTab] = useState("Swap Crypto");
-  const containerRef = useRef(null);
-  const [tabList, setTabList] = useState(tabs);
-  const tNav = useTranslations("Navigation");
-  const { address } = useAccount();
-
-  const handlePlatformSelect = (platform: string) => {
-    if (platform === "OnRamp") {
-      setTabList(tabs);
-    } else {
-      setTabList(tabs1);
-      setSelectedTab("Swap Crypto");
-    }
-    setSelectedPlatform(platform);
-  };
-
-  const handleTabSelect = (tab: string) => {
-    setSelectedTab(tab);
-  };
-
-  return (
-    <ColorSchemeProvider value={ThemeColors.PURPLE}>
-      <Container>
-        <div className="py-4 lg:py-[40px] flex justify-center">
-          <div className="w-full max-w-[600px]">
-            <div className="mt-5 w-full flex bg-primary-bg p-1 gap-1 rounded-3 overflow-x-auto mb-6">
-              {platforms.map((platform, index) => (
-                <TabButton
-                  key={platform}
-                  inactiveBackground="bg-secondary-bg"
-                  size={48}
-                  active={selectedPlatform === platform}
-                  onClick={() => handlePlatformSelect(platform)}
-                  className="w-full"
-                >
-                  <span className="text-nowrap text-16">{platform}</span>
-                </TabButton>
-              ))}
-            </div>
-
-            {/* Tab Navigation */}
-            {selectedPlatform === "OnRamp" && (
-              <Container className="bg-primary-bg rounded-5 p-6 mb-6">
-                <div className="w-full flex bg-primary-bg p-1 gap-1 rounded-3 overflow-x-auto mb-6">
-                  {tabList.map((tab, index) => (
-                    <TabButton
-                      key={tab}
-                      inactiveBackground="bg-secondary-bg"
-                      size={48}
-                      active={selectedTab === tab}
-                      onClick={() => handleTabSelect(tab)}
-                      className="w-full"
-                    >
-                      <span className="text-nowrap text-16">{tab}</span>
-                    </TabButton>
-                  ))}
-                </div>
-
-                <div className="bg-primary-bg rounded-5 p-6 mb-6">
-                  <div className="flex items-center justify-center py-8">
-                    <BuyOnramp userId={address} apiId={2} flowType={selectedTab} />
-                  </div>
-                </div>
-                <div className="flex justify-center items-center gap-8 py-6">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-24">⚡</div>
-                    <span className="text-14 text-secondary-text">Fast</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-24">🔒</div>
-                    <span className="text-14 text-secondary-text">Secure</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-24">💎</div>
-                    <span className="text-14 text-secondary-text">Best Rates</span>
-                  </div>
-                </div>
-              </Container>
-            )}
-            {selectedPlatform === "SimpleSwap" && (
-              <div className="flex items-center justify-center">
-                <SwapPage />
-              </div>
-            )}
-          </div>
-        </div>
-      </Container>
-    </ColorSchemeProvider>
+export default async function BuyCryptoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const res = await fetch(
+    `https://api.simpleswap.io/get_all_currencies?api_key=${process.env.SIMPLE_SWAP_API_KEY}`,
+    {
+      next: { revalidate: 60 },
+    },
   );
+
+  if (!res.ok) {
+    console.error("Failed to fetch initial tokens");
+    throw new Error("Failed to fetch initial tokens");
+  }
+
+  const initialTokensFrom = await res.json();
+
+  const params = await searchParams;
+  const exchangeId = params.exchangeId;
+  let dataExchange;
+
+  try {
+    const resExchange = await fetch(
+      `https://api.simpleswap.io/get_exchange?id=${exchangeId}&api_key=${process.env.SIMPLE_SWAP_API_KEY}`,
+    );
+
+    if (resExchange.ok) {
+      dataExchange = await resExchange.json();
+    }
+  } catch (e) {
+    console.log(e);
+  }
+
+  return <BuyCryptoPageClient tokens={initialTokensFrom} initialExchange={dataExchange} />;
 }
