@@ -48,6 +48,7 @@ function useListParams() {
   const { autoListingContract } = useAutoListingContractStore();
 
   const autoListing = useAutoListingContract(autoListingContract);
+  const tokensToList = useTokensToList();
 
   const pools = useStorePools(
     poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
@@ -69,6 +70,8 @@ function useListParams() {
 
   const { paymentToken } = usePaymentTokenStore();
 
+  console.log(paymentToken);
+
   return useMemo(() => {
     if (!poolAddress) {
       return;
@@ -89,16 +92,26 @@ function useListParams() {
       }
 
       if (isZeroAddress(paymentToken.token.address)) {
+        console.log({
+          ...common,
+          args: [...common.args, paymentToken.token.address],
+          value: tokensToList.length
+            ? paymentToken.price * BigInt(tokensToList.length)
+            : paymentToken.price,
+        });
+
         return {
           ...common,
           args: [...common.args, paymentToken.token.address],
-          value: paymentToken.price,
+          value: tokensToList.length
+            ? paymentToken.price * BigInt(tokensToList.length)
+            : paymentToken.price,
         };
       }
 
       return { ...common, args: [...common.args, paymentToken.token.address] };
     }
-  }, [autoListingContract, isFree, paymentToken, pool, poolAddress]);
+  }, [autoListingContract, isFree, paymentToken, pool, poolAddress, tokensToList.length]);
 }
 
 export function useListTokenEstimatedGas() {
@@ -204,6 +217,8 @@ export default function useListToken() {
 
   const listParams = useListParams();
 
+  console.log(listParams);
+
   useEffect(() => {
     if (
       (listTokenStatus === ListTokenStatus.SUCCESS ||
@@ -293,22 +308,27 @@ export default function useListToken() {
       let hash;
 
       try {
-        const estimatedGas = await publicClient.estimateContractGas({
-          account: address,
+        // const estimatedGas = await publicClient.estimateContractGas({
+        //   account: address,
+        //   ...listParams,
+        // } as any);
+        //
+        // // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
+        // const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
+        const gasToUse = BigInt(0);
+        //
+        // const { request } = await publicClient.simulateContract({
+        //   ...listParams,
+        //   account: address,
+        //   ...gasSettings,
+        //   gas: gasToUse,
+        // } as any);
+
+        hash = await walletClient.writeContract({
           ...listParams,
-        } as any);
-
-        // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
-        const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
-        const { request } = await publicClient.simulateContract({
-          ...listParams,
-          account: address,
-          ...gasSettings,
-          gas: gasToUse,
-        } as any);
-
-        hash = await walletClient.writeContract({ ...request, account: undefined });
+          // account: address,
+          account: undefined,
+        });
 
         closeConfirmInWalletAlert();
 
