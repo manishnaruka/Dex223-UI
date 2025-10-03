@@ -308,25 +308,24 @@ export default function useListToken() {
       let hash;
 
       try {
-        // const estimatedGas = await publicClient.estimateContractGas({
-        //   account: address,
-        //   ...listParams,
-        // } as any);
+        const estimatedGas = await publicClient.estimateContractGas({
+          account: address,
+          ...listParams,
+        } as any);
+
+        // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
+        const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
+        // const gasToUse = BigInt(0);
         //
-        // // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
-        // const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-        const gasToUse = BigInt(0);
-        //
-        // const { request } = await publicClient.simulateContract({
-        //   ...listParams,
-        //   account: address,
-        //   ...gasSettings,
-        //   gas: gasToUse,
-        // } as any);
+        const { request } = await publicClient.simulateContract({
+          ...listParams,
+          account: address,
+          ...gasSettings,
+          gas: gasToUse,
+        } as any);
 
         hash = await walletClient.writeContract({
-          ...listParams,
-          // account: address,
+          ...request,
           account: undefined,
         });
 
