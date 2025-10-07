@@ -1,4 +1,4 @@
-import { InputHTMLAttributes } from "react";
+import { InputHTMLAttributes, ReactNode } from "react";
 
 import { clsxMerge } from "../functions/clsxMerge";
 import CheckIcon from "../icons/CheckIcon";
@@ -8,7 +8,7 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   checked: boolean;
   handleChange: (event?: any) => void; // InputHTMLAttributes<HTMLInputElement>["onChange"]
   id: string;
-  label?: string;
+  label?: ReactNode;
   tooltipText?: string;
   labelClassName?: string;
 }
@@ -35,7 +35,7 @@ export default function Checkbox({
         checked={checked}
       />
       {label ? (
-        <div className="ui-flex ui-items-center ui-gap-1">
+        <div className="ui-flex ui-items-center ui-gap-1 ui-text-secondary-text">
           <label
             className={clsxMerge("ui-pl-2 ui-cursor-pointer", labelClassName)}
             htmlFor={id}

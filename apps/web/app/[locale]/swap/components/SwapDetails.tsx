@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 
+import { MarginSwapSettingsStore } from "@/app/[locale]/margin-swap/stores/useMarginSwapSettingsStore";
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import { TokenTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
@@ -28,12 +29,14 @@ export default function SwapDetails({
   tokenB,
   gasPrice,
   networkFee,
+  settingsStore,
 }: {
   trade: TokenTrade;
   tokenA: Currency;
   tokenB: Currency;
   gasPrice: string | undefined;
   networkFee: string | undefined;
+  settingsStore: MarginSwapSettingsStore;
 }) {
   const t = useTranslations("Swap");
   const nativeCurrency = useNativeCurrency();
@@ -45,8 +48,13 @@ export default function SwapDetails({
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
 
-  const { slippage, deadline: _deadline, slippageType } = useSwapSettingsStore();
+  const { slippage, deadline: _deadline, slippageType } = settingsStore;
   const { estimatedGas, customGasLimit } = useSwapGasLimitStore();
+
+  const feeMultiplier = useMemo(() => {
+    const fee = trade?.swaps[0].route.pools[0].fee;
+    return fee ? fee / 100000 : 0.3;
+  }, [trade?.swaps]);
 
   const slippageValue = useMemo(() => {
     if (slippageType === SlippageType.AUTO) {
@@ -180,7 +188,7 @@ export default function SwapDetails({
             title={t("trading_fee")}
             value={
               typedValue && Boolean(+typedValue) && tokenA
-                ? `${(+typedValue * 0.3) / 100} ${tokenA.symbol}`
+                ? `${formatFloat((+typedValue * feeMultiplier) / 100)} ${tokenA.symbol}`
                 : "Loading..."
             }
             tooltipText={t("trading_fee_tooltip")}

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { getFormattedGasPrice, getGasSettings } from "@/functions/gasSettings";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { createGasLimitStore } from "@/stores/factories/createGasLimitStore";
 import { createGasPriceStore } from "@/stores/factories/createGasPriceStore";
 import { createGasModeStore } from "@/stores/factories/createGasSettingsStore";
@@ -13,7 +13,7 @@ export const useAddLiquidityGasModeStore = createGasModeStore();
 
 // mb better move this hooks to separete file
 export const useAddLiquidityGasPrice = () => {
-  const { baseFee, gasPrice, priorityFee } = useFees();
+  const { baseFee, gasPrice, priorityFee } = useGlobalFees();
   const chainId = useCurrentChainId();
   const { gasPriceOption, gasPriceSettings } = useAddLiquidityGasPriceStore();
 
@@ -31,7 +31,7 @@ export const useAddLiquidityGasPrice = () => {
 
 export const useAddLiquidityGasSettings = () => {
   const chainId = useCurrentChainId();
-  const { baseFee, gasPrice, priorityFee } = useFees();
+  const { baseFee, gasPrice, priorityFee } = useGlobalFees();
   const { gasPriceOption, gasPriceSettings } = useAddLiquidityGasPriceStore();
   const { customGasLimit } = useAddLiquidityGasLimitStore();
 

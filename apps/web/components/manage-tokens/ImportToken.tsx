@@ -2,7 +2,7 @@ import { isZeroAddress } from "@ethereumjs/util";
 import Alert from "@repo/ui/alert";
 import Checkbox from "@repo/ui/checkbox";
 import ExternalTextLink from "@repo/ui/external-text-link";
-import { multicall } from "@wagmi/core";
+import Preloader from "@repo/ui/preloader";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 import { Address, isAddress } from "viem";
@@ -11,7 +11,6 @@ import { usePublicClient, useReadContract } from "wagmi";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
 import { InputSize } from "@/components/atoms/Input";
-import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonSize } from "@/components/buttons/Button";
@@ -21,11 +20,9 @@ import { ManageTokensDialogContent } from "@/components/manage-tokens/types";
 import { ERC20_ABI } from "@/config/abis/erc20";
 import { ERC223_ABI } from "@/config/abis/erc223";
 import { TOKEN_CONVERTER_ABI } from "@/config/abis/tokenConverter";
-import { config } from "@/config/wagmi/config";
 import { db } from "@/db/db";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
-import { ZERO_ADDRESS } from "@/hooks/useCollectFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import addToast from "@/other/toast";
@@ -75,15 +72,11 @@ function EmptyState({
 }
 
 export function useImportToken() {
-  const chainId = useCurrentChainId();
   const tokenLists = useTokenLists();
   const publicClient = usePublicClient();
 
   const handleImport = useCallback(
     async (tokenAddressToImport: Address, chainId: DexChainId) => {
-      console.log(tokenAddressToImport);
-      console.log(chainId);
-
       const calls = [
         {
           abi: ERC20_ABI,
@@ -129,7 +122,6 @@ export function useImportToken() {
       const decimals = res[2].result;
       const standard = res[3].result;
       const isWrapper = res[4].result;
-      console.log("RESULTS", res);
 
       const otherAddressFunctionName =
         isWrapper == null
@@ -146,8 +138,6 @@ export function useImportToken() {
         address: CONVERTER_ADDRESS[chainId],
         args: [tokenAddressToImport as Address, standard !== 223],
       });
-
-      console.log(predictedOtherAddress);
 
       const { erc20AddressToImport, erc223AddressToImport } =
         standard === 223
@@ -200,7 +190,7 @@ export function useImportToken() {
 
       return token;
     },
-    [chainId, publicClient, tokenLists],
+    [publicClient, tokenLists],
   );
 
   return { handleImport };
@@ -212,7 +202,11 @@ export default function ImportToken({ setContent, handleClose }: Props) {
   const chainId = useCurrentChainId();
   const tokenLists = useTokenLists();
 
-  const { data: tokenName, isFetched } = useReadContract({
+  const {
+    data: tokenName,
+    isFetched,
+    isLoading: isLoadingName,
+  } = useReadContract({
     abi: ERC20_ABI,
     functionName: "name",
     chainId,
@@ -222,7 +216,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  const { data: tokenSymbol } = useReadContract({
+  const { data: tokenSymbol, isLoading: isLoadingSymbol } = useReadContract({
     abi: ERC20_ABI,
     functionName: "symbol",
     address: tokenAddressToImport! as Address,
@@ -232,7 +226,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  const { data: tokenDecimals } = useReadContract({
+  const { data: tokenDecimals, isLoading: isLoadingDecimals } = useReadContract({
     abi: ERC20_ABI,
     functionName: "decimals",
     address: tokenAddressToImport! as Address,
@@ -242,7 +236,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  const { data: standard } = useReadContract({
+  const { data: standard, isLoading: isLoadingStandard } = useReadContract({
     abi: ERC223_ABI,
     functionName: "standard",
     address: tokenAddressToImport as Address,
@@ -252,7 +246,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     },
   });
 
-  const { data: isWrapper } = useReadContract({
+  const { data: isWrapper, isLoading: isLoadingWrapper } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: "isWrapper",
     address: CONVERTER_ADDRESS[chainId],
@@ -289,11 +283,7 @@ export default function ImportToken({ setContent, handleClose }: Props) {
     return "getERC223WrapperFor";
   }, [otherAddressFunctionName, standard]);
 
-  console.log(otherAddressCheckFunctionName);
-  console.log(otherAddressFunctionName);
-  console.log(CONVERTER_ADDRESS[chainId]);
-  console.log("____");
-  const { data: otherAddress } = useReadContract({
+  const { data: otherAddress, isLoading: isLoadingOtherAddress } = useReadContract({
     abi: TOKEN_CONVERTER_ABI,
     functionName: otherAddressCheckFunctionName!,
     address: CONVERTER_ADDRESS[chainId],
@@ -306,27 +296,26 @@ export default function ImportToken({ setContent, handleClose }: Props) {
         Boolean(otherAddressCheckFunctionName),
     },
   });
-  console.log(otherAddress);
 
-  const { data: predictedOtherAddress } = useReadContract({
-    abi: TOKEN_CONVERTER_ABI,
-    functionName: otherAddressFunctionName!,
-    address: CONVERTER_ADDRESS[chainId],
-    args: [tokenAddressToImport as Address, standard !== 223],
-    chainId,
-    query: {
-      enabled:
-        !!tokenAddressToImport &&
-        isAddress(tokenAddressToImport) &&
-        Boolean(otherAddressFunctionName),
+  const { data: predictedOtherAddress, isLoading: isLoadingOtherAddressFunction } = useReadContract(
+    {
+      abi: TOKEN_CONVERTER_ABI,
+      functionName: otherAddressFunctionName!,
+      address: CONVERTER_ADDRESS[chainId],
+      args: [tokenAddressToImport as Address, standard !== 223],
+      chainId,
+      query: {
+        enabled:
+          !!tokenAddressToImport &&
+          isAddress(tokenAddressToImport) &&
+          Boolean(otherAddressFunctionName),
+      },
     },
-  });
-
-  console.log(predictedOtherAddress);
+  );
 
   const { erc20AddressToImport, erc223AddressToImport, isErc20Exist, isErc223Exist } =
     useMemo(() => {
-      if (standard === 223) {
+      if (standard && +standard === 223) {
         return {
           erc20AddressToImport: predictedOtherAddress,
           erc223AddressToImport: tokenAddressToImport,
@@ -336,8 +325,8 @@ export default function ImportToken({ setContent, handleClose }: Props) {
       }
 
       return {
-        erc223AddressToImport: predictedOtherAddress,
         erc20AddressToImport: tokenAddressToImport,
+        erc223AddressToImport: predictedOtherAddress,
         isErc223Exist: otherAddress && isAddress(otherAddress) && !isZeroAddress(otherAddress),
         isErc20Exist: true,
       };
@@ -350,6 +339,22 @@ export default function ImportToken({ setContent, handleClose }: Props) {
   const alreadyImported = useMemo(() => {
     return !!(custom && custom?.[0]?.list.tokens.find((v) => v.address0 === tokenAddressToImport));
   }, [custom, tokenAddressToImport]);
+
+  const isTokenLoading = useMemo(() => {
+    return (
+      isLoadingStandard ||
+      isLoadingDecimals ||
+      isLoadingName ||
+      isLoadingOtherAddressFunction ||
+      isLoadingOtherAddress
+    );
+  }, [
+    isLoadingDecimals,
+    isLoadingName,
+    isLoadingOtherAddress,
+    isLoadingOtherAddressFunction,
+    isLoadingStandard,
+  ]);
 
   return (
     <>
@@ -374,13 +379,22 @@ export default function ImportToken({ setContent, handleClose }: Props) {
 
         <EmptyState
           tokenAddressToImport={tokenAddressToImport}
-          isFound={Boolean(
-            tokenName &&
-              typeof tokenDecimals !== "undefined" &&
-              tokenSymbol &&
-              predictedOtherAddress,
-          )}
+          isFound={
+            !isTokenLoading &&
+            Boolean(
+              tokenName &&
+                typeof tokenDecimals !== "undefined" &&
+                tokenSymbol &&
+                predictedOtherAddress,
+            )
+          }
         />
+
+        {isTokenLoading && (
+          <div>
+            <Preloader size={80} />
+          </div>
+        )}
 
         {tokenName &&
           typeof tokenDecimals !== "undefined" &&

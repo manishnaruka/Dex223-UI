@@ -10,6 +10,7 @@ type Ticks = {
   [Bound.LOWER]?: number;
   [Bound.UPPER]?: number;
 };
+
 interface LiquidityPriceRangeStore {
   leftRangeTypedValue: string | FullRange;
   rightRangeTypedValue: string | FullRange;
@@ -23,6 +24,8 @@ interface LiquidityPriceRangeStore {
   isFullRange: () => boolean;
   clearPriceRange: () => void;
   setTicks: (partial: Partial<Ticks>) => void;
+  rangeTouched: boolean;
+  setRangeTouched: () => void;
 }
 
 export const useLiquidityPriceRangeStore = create<LiquidityPriceRangeStore>((set, get) => ({
@@ -33,6 +36,9 @@ export const useLiquidityPriceRangeStore = create<LiquidityPriceRangeStore>((set
     [Bound.LOWER]: undefined,
     [Bound.UPPER]: undefined,
   },
+
+  rangeTouched: false,
+  setRangeTouched: () => set({ rangeTouched: true }),
 
   isFullRange: () => {
     const { leftRangeTypedValue, rightRangeTypedValue } = get();

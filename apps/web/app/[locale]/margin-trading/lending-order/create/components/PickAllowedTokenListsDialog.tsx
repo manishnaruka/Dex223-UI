@@ -1,10 +1,12 @@
 import ExternalTextLink from "@repo/ui/external-text-link";
+import { useMemo, useState } from "react";
 
-import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useAllowedTokenListsDialogOpened";
+import { useAllowedTokenListsDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { AutoListing } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import useAutoListingContracts from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import Dialog from "@/components/atoms/Dialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
+import { SearchInput } from "@/components/atoms/Input";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -17,43 +19,72 @@ export default function PickAllowedTokenListsDialog({
   const { isOpen, setIsOpen } = useAllowedTokenListsDialogOpenedStore();
   const autolistings = useAutoListingContracts();
   const chainId = useCurrentChainId();
+  const [searchValue, setSearchValue] = useState("");
+
+  const filteredAutoListing = useMemo(() => {
+    if (!searchValue) {
+      return autolistings;
+    }
+
+    return autolistings?.filter((autolisting) => {
+      return (
+        autolisting.id.toLowerCase().startsWith(searchValue.toLowerCase()) ||
+        autolisting.name.toLowerCase().startsWith(searchValue.toLowerCase())
+      );
+    });
+  }, [searchValue, autolistings]);
 
   return (
     <Dialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title="Tokens allowed for trading" />
+      <div className="flex flex-col gap-2 max-h-[640px] pb-5">
+        <div className="card-spacing-x ">
+          <SearchInput
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Search autolisting"
+          />
+        </div>
 
-      {!!autolistings && autolistings?.length > 0 && (
-        <div className="card-spacing-x">
-          {autolistings.map((autolisting) => {
-            return (
-              <div
-                key={autolisting.id}
-                className="flex justify-between items-center min-h-[60px]"
-                role="button"
-                onClick={() => {
-                  setAutoListing(autolisting);
-                  setIsOpen(false);
-                }}
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">{autolisting.name}</span>
-                  <span className="text-12 text-secondary-text">
-                    {autolisting.totalTokens} tokens
+        {searchValue && !filteredAutoListing?.length && (
+          <div className="h-[532px] flex items-center justify-center bg-empty-not-found-list bg-no-repeat bg-right-top -mt-2 flex-shrink-0">
+            Listing contract not found
+          </div>
+        )}
+
+        {!!filteredAutoListing && filteredAutoListing?.length > 0 && (
+          <>
+            {filteredAutoListing.map((autolisting) => {
+              return (
+                <div
+                  key={autolisting.id}
+                  className="card-spacing-x flex justify-between items-center min-h-[60px] hocus:bg-tertiary-bg duration-200"
+                  role="button"
+                  onClick={() => {
+                    setAutoListing(autolisting);
+                    setIsOpen(false);
+                  }}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">{autolisting.name}</span>
+                    <span className="text-12 text-secondary-text">
+                      {autolisting.totalTokens} tokens
+                    </span>
+                  </div>
+
+                  <span className="flex items-center gap-2">
+                    Description:
+                    <ExternalTextLink
+                      text={truncateMiddle(autolisting.id, { charsFromStart: 6, charsFromEnd: 6 })}
+                      href={getExplorerLink(ExplorerLinkType.ADDRESS, autolisting.id, chainId)}
+                    />
                   </span>
                 </div>
-
-                <span className="flex items-center gap-2">
-                  Description:
-                  <ExternalTextLink
-                    text={truncateMiddle(autolisting.id, { charsFromStart: 6, charsFromEnd: 6 })}
-                    href={getExplorerLink(ExplorerLinkType.ADDRESS, autolisting.id, chainId)}
-                  />
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </>
+        )}
+      </div>
     </Dialog>
   );
 }

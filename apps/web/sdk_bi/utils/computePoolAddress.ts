@@ -103,6 +103,8 @@ export const computePoolAddressDex = async ({
       functionName: "getPool",
       args: [addressTokenA, addressTokenB, tier],
     });
+
+    console.log("Pool contract from node: " + poolContract);
     cachedKeys.delete(key);
     return poolContract;
   } catch (e) {

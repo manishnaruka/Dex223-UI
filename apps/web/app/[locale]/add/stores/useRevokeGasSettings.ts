@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { getFormattedGasPrice, getGasSettings } from "@/functions/gasSettings";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { createGasLimitStore } from "@/stores/factories/createGasLimitStore";
 import { createGasPriceStore } from "@/stores/factories/createGasPriceStore";
 import { createGasModeStore } from "@/stores/factories/createGasSettingsStore";
@@ -14,7 +14,7 @@ export const useRevokeGasModeStore = createGasModeStore();
 
 // mb better move this hooks to separete file
 export const useRevokeGasPrice = () => {
-  const { baseFee, gasPrice, priorityFee } = useFees();
+  const { baseFee, gasPrice, priorityFee } = useGlobalFees();
   const chainId = useCurrentChainId();
   const { gasPriceOption, gasPriceSettings } = useRevokeGasPriceStore();
 
@@ -32,7 +32,7 @@ export const useRevokeGasPrice = () => {
 
 export const useRevokeGasSettings = () => {
   const chainId = useCurrentChainId();
-  const { baseFee, gasPrice, priorityFee } = useFees();
+  const { baseFee, gasPrice, priorityFee } = useGlobalFees();
   const { gasPriceOption, gasPriceSettings } = useRevokeGasPriceStore();
   const { customGasLimit } = useRevokeGasLimitStore();
 
@@ -52,7 +52,7 @@ export const useRevokeGasSettings = () => {
 
 export const useWithdrawGasSettings = () => {
   const chainId = useCurrentChainId();
-  const { baseFee, gasPrice, priorityFee } = useFees();
+  const { baseFee, gasPrice, priorityFee } = useGlobalFees();
   const { gasPriceOption, gasPriceSettings } = useRevokeGasPriceStore();
   const { customGasLimit } = useWithdrawGasLimitStore();
 

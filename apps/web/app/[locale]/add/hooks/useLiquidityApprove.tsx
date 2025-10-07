@@ -6,7 +6,6 @@ import { usePublicClient } from "wagmi";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useStoreDeposit } from "@/hooks/useDeposit";
-// import useDetectMetaMaskMobile from "@/hooks/useMetamaskMobile";
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESS } from "@/sdk_bi/addresses";
 import { DexChainId } from "@/sdk_bi/chains";
 import { Currency } from "@/sdk_bi/entities/currency";
@@ -21,9 +20,6 @@ import {
   useAddLiquidityStatusStore,
 } from "../stores/useAddLiquidityStatusStore";
 import { useAddLiquidityTokensStore } from "../stores/useAddLiquidityTokensStore";
-import { useLiquidityTierStore } from "../stores/useLiquidityTierStore";
-import { usePriceRange } from "./usePrice";
-import { useV3DerivedMintInfo } from "./useV3DerivedMintInfo";
 
 export type ApproveTransaction = {
   token: Currency;

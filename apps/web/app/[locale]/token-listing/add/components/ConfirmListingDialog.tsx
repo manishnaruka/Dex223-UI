@@ -1,352 +1,142 @@
-import Alert from "@repo/ui/alert";
+import { isZeroAddress } from "@ethereumjs/util";
 import ExternalTextLink from "@repo/ui/external-text-link";
-import Preloader from "@repo/ui/preloader";
-import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { Address, formatGwei, formatUnits, parseUnits } from "viem";
-import { useGasPrice } from "wagmi";
+import { Address, formatUnits } from "viem";
 
-import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
-import { useSwapGasPriceStore } from "@/app/[locale]/swap/stores/useSwapGasSettingsStore";
+import { getApproveTextMap } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/getStepTexts";
 import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import useListToken from "@/app/[locale]/token-listing/add/hooks/useListToken";
-import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
 import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
 import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
-import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
 import {
-  ListError,
+  ListTokenStatus,
   useListTokenStatusStore,
 } from "@/app/[locale]/token-listing/add/stores/useListTokenStatusStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
-import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import { InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton from "@/components/buttons/IconButton";
-import { clsxMerge } from "@/functions/clsxMerge";
+import Button from "@/components/buttons/Button";
+import ApproveAmountConfig from "@/components/common/ApproveAmountConfig";
+import OperationStepRow, {
+  OperationRows,
+  operationStatusToStepStatus,
+  OperationStepStatus,
+} from "@/components/common/OperationStepRow";
+import { IconName } from "@/config/types/IconName";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import { useStoreAllowance } from "@/hooks/useAllowance";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { DexChainId } from "@/sdk_bi/chains";
 import { ADDRESS_ZERO } from "@/sdk_bi/constants";
 import { Token } from "@/sdk_bi/entities/token";
 import { Standard } from "@/sdk_bi/standard";
-import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
-function ApproveRow({
-  logoURI = "",
-  isPending = false,
-  isLoading = false,
-  isSuccess = false,
-  isReverted = false,
-  hash,
-}: {
-  logoURI: string | undefined;
-  isLoading?: boolean;
-  isPending?: boolean;
-  isSuccess?: boolean;
-  isReverted?: boolean;
-  hash?: Address | undefined;
-}) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
+type StepTextMap = {
+  [key in OperationStepStatus]: string;
+};
 
-  return (
-    <div
-      className={clsx(
-        "grid grid-cols-[32px_auto_1fr] gap-2 h-10 before:absolute relative before:left-[15px] before:-bottom-4 before:w-0.5 before:h-3 before:rounded-1",
-        isSuccess ? "before:bg-green" : "before:bg-green-bg",
-      )}
-    >
-      <div className="flex items-center">
-        <Image
-          className={clsx(isSuccess && "", "rounded-full")}
-          src={logoURI}
-          alt=""
-          width={32}
-          height={32}
-        />
-      </div>
+type OperationStepConfig = {
+  iconName: IconName;
+  textMap: StepTextMap;
+  pending: ListTokenStatus;
+  loading: ListTokenStatus;
+  error: ListTokenStatus;
+};
 
-      <div className="flex flex-col justify-center">
-        <span className={isSuccess ? "text-secondary-text text-14" : "text-14"}>
-          {isSuccess && t("approved")}
-          {isPending && "Confirm in your wallet"}
-          {isLoading && "Approving"}
-          {!isSuccess && !isPending && !isReverted && !isLoading && "Approve"}
-          {isReverted && "Approve failed"}
-        </span>
-        {!isSuccess && <span className="text-green text-12">{t("why_do_i_have_to_approve")}</span>}
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {isPending && (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        )}
-        {isLoading && <Preloader size={20} />}
-        {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
-      </div>
-    </div>
-  );
+function composeListTokensSteps(
+  isPaymentTokenNative: boolean,
+  isFree: boolean,
+  paymentTokenSymbol?: string,
+): OperationStepConfig[] {
+  const approveStep: OperationStepConfig = {
+    iconName: "done",
+    pending: ListTokenStatus.PENDING_APPROVE,
+    loading: ListTokenStatus.LOADING_APPROVE,
+    error: ListTokenStatus.ERROR_APPROVE,
+    textMap: getApproveTextMap(paymentTokenSymbol || "Unknown"),
+  };
+
+  const listTokensStep: OperationStepConfig = {
+    iconName: "listing",
+    pending: ListTokenStatus.PENDING_LIST_TOKEN,
+    loading: ListTokenStatus.LOADING_LIST_TOKEN,
+    error: ListTokenStatus.ERROR_LIST_TOKEN,
+    textMap: {
+      [OperationStepStatus.IDLE]: "Listing token",
+      [OperationStepStatus.AWAITING_SIGNATURE]: "Confirm listing token",
+      [OperationStepStatus.LOADING]: "Executing listing token",
+      [OperationStepStatus.STEP_COMPLETED]: "Token successfully listed",
+      [OperationStepStatus.STEP_FAILED]: "Failed to list token",
+      [OperationStepStatus.OPERATION_COMPLETED]: "Token successfully listed",
+    },
+  };
+
+  return isPaymentTokenNative || isFree ? [listTokensStep] : [approveStep, listTokensStep];
 }
 
-function ListTokenRow({
-  isPending = false,
-  isLoading = false,
-  isSuccess = false,
-  isReverted = false,
-  isDisabled = false,
-  hash,
-}: {
-  isLoading?: boolean;
-  isPending?: boolean;
-  isSettled?: boolean;
-  isSuccess?: boolean;
-  isReverted?: boolean;
-  isDisabled?: boolean;
-  hash?: Address | undefined;
-}) {
-  const t = useTranslations("Swap");
-  const chainId = useCurrentChainId();
-
-  return (
-    <div className="grid grid-cols-[32px_auto_1fr] gap-2 h-10">
-      <div className="flex items-center h-full">
-        <div
-          className={clsxMerge(
-            "p-1 rounded-full h-8 w-8",
-            isDisabled ? "bg-tertiary-bg" : "bg-green-bg",
-            isReverted && "bg-red-bg",
-          )}
-        >
-          <Svg
-            className={clsxMerge(
-              isDisabled ? "text-tertiary-text" : "text-green",
-              isReverted && "text-red-light",
-            )}
-            iconName="listing"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center">
-        <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
-          {(isPending || (!isLoading && !isReverted && !isSuccess)) && "Confirm listing tokens"}
-          {isLoading && "Executing list tokens"}
-          {isReverted && "Failed to list tokens"}
-          {isSuccess && "Tokens listed"}
-        </span>
-        {(isPending || isLoading) && (
-          <span className="text-green text-12">Learn more about listing tokens</span>
-        )}
-      </div>
-      <div className="flex items-center gap-2 justify-end">
-        {hash && (
-          <a target="_blank" href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}>
-            <IconButton iconName="forward" />
-          </a>
-        )}
-        {isPending && (
-          <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">{t("proceed_in_your_wallet")}</span>
-          </>
-        )}
-        {isLoading && <Preloader size={20} />}
-        {isSuccess && <Svg className="text-green" iconName="done" size={20} />}
-        {isReverted && <Svg className="text-red-light" iconName="warning" size={20} />}
-      </div>
-    </div>
-  );
-}
-
-function Rows({ children }: PropsWithChildren<{}>) {
-  return <div className="flex flex-col gap-5">{children}</div>;
-}
-
-function ListActionButton({
+function ListTokensActionButton({
+  handleList,
+  isPaymentTokenNative,
+  paymentTokenSymbol,
   isFree,
-  amountToApprove,
-  isEditApproveActive,
+  disabled,
 }: {
+  handleList: () => Promise<void>;
+  isPaymentTokenNative: boolean;
   isFree: boolean;
-  amountToApprove: string;
-  isEditApproveActive: boolean;
+  paymentTokenSymbol?: string;
+  disabled: boolean;
 }) {
-  const t = useTranslations("Swap");
-  const { tokenA, tokenB } = useListTokensStore();
-  const { setIsOpen } = useConfirmSwapDialogStore();
+  const { status, approveHash, listTokenHash } = useListTokenStatusStore();
 
-  const { handleList } = useListToken();
-  const { listTokenHash, approveHash, errorType } = useListTokenStatusStore();
+  const hashes = useMemo(() => {
+    return isPaymentTokenNative || isFree ? [listTokenHash] : [approveHash, listTokenHash];
+  }, [approveHash, isFree, isPaymentTokenNative, listTokenHash]);
 
-  const {
-    isPendingApprove,
-    isLoadingApprove,
-    isPendingList,
-    isLoadingList,
-    isSuccessList,
-    isSettledList,
-    isRevertedList,
-    isRevertedApprove,
-  } = useListTokenStatus();
-
-  if (!tokenA || !tokenB) {
+  if (status !== ListTokenStatus.INITIAL) {
     return (
-      <Button fullWidth disabled>
-        {t("select_tokens")}
-      </Button>
-    );
-  }
-
-  if (!isFree) {
-    if (isPendingApprove) {
-      return (
-        <Rows>
-          <ApproveRow isPending logoURI={tokenA.logoURI} />
-          <ListTokenRow isDisabled />
-        </Rows>
-      );
-    }
-
-    if (isLoadingApprove) {
-      return (
-        <Rows>
-          <ApproveRow hash={approveHash} isLoading logoURI={tokenA.logoURI} />
-          <ListTokenRow isDisabled />
-        </Rows>
-      );
-    }
-    if (isRevertedApprove) {
-      return (
-        <>
-          <Rows>
-            <ApproveRow hash={approveHash} isReverted logoURI={tokenA.logoURI} />
-            <ListTokenRow isDisabled />
-          </Rows>
-          <div className="flex flex-col gap-5 mt-4">
-            <Alert
-              withIcon={false}
-              type="error"
-              text={
-                <span>
-                  Transaction failed due to lack of gas or an internal contract error. Try using
-                  higher slippage or gas to ensure your transaction is completed. If you still have
-                  issues, click{" "}
-                  <a href="#" className="text-green hocus:underline">
-                    common errors
-                  </a>
-                  .
-                </span>
-              }
+      <OperationRows>
+        {composeListTokensSteps(isPaymentTokenNative, isFree, paymentTokenSymbol).map(
+          (step, index) => (
+            <OperationStepRow
+              key={index}
+              iconName={step.iconName}
+              hash={hashes[index]}
+              statusTextMap={step.textMap}
+              status={operationStatusToStepStatus({
+                currentStatus: status,
+                orderedSteps: composeListTokensSteps(
+                  isPaymentTokenNative,
+                  isFree,
+                  paymentTokenSymbol,
+                ).flatMap((s) => [s.pending, s.loading, s.error]),
+                stepIndex: index,
+                pendingStep: step.pending,
+                loadingStep: step.loading,
+                errorStep: step.error,
+                successStep: ListTokenStatus.SUCCESS,
+              })}
+              isFirstStep={index === 0}
             />
-            <Button
-              fullWidth
-              onClick={() => {
-                setIsOpen(false);
-              }}
-            >
-              Try again
-            </Button>
-          </div>
-        </>
-      );
-    }
-  }
-
-  if (isPendingList) {
-    return (
-      <Rows>
-        {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
-        <ListTokenRow isPending />
-      </Rows>
-    );
-  }
-
-  if (isLoadingList) {
-    return (
-      <Rows>
-        {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
-        <ListTokenRow hash={listTokenHash} isLoading />
-      </Rows>
-    );
-  }
-
-  if (isSuccessList) {
-    return (
-      <Rows>
-        {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
-        <ListTokenRow hash={listTokenHash} isSettled isSuccess />
-      </Rows>
-    );
-  }
-
-  if (isRevertedList) {
-    return (
-      <>
-        <Rows>
-          {!isFree && <ApproveRow hash={approveHash} isSuccess logoURI={tokenA.logoURI} />}
-          <ListTokenRow hash={listTokenHash} isSettled isReverted />
-        </Rows>
-        <div className="flex flex-col gap-5 mt-4">
-          <Alert
-            withIcon={false}
-            type="error"
-            text={
-              errorType === ListError.UNKNOWN ? (
-                <span>
-                  Transaction failed due to lack of gas or an internal contract error. Try using
-                  higher slippage or gas to ensure your transaction is completed. If you still have
-                  issues, click{" "}
-                  <a href="#" className="text-green hocus:underline">
-                    common errors
-                  </a>
-                  .
-                </span>
-              ) : (
-                <span>
-                  Transaction failed due to lack of gas. Try increasing gas limit to ensure your
-                  transaction is completed. If you still have issues, contact support.
-                </span>
-              )
-            }
-          />
-          <Button
-            fullWidth
-            onClick={() => {
-              setIsOpen(false);
-            }}
-          >
-            Try again
-          </Button>
-        </div>
-      </>
+          ),
+        )}
+      </OperationRows>
     );
   }
 
   return (
-    <Button disabled={isEditApproveActive} onClick={() => handleList(amountToApprove)} fullWidth>
-      Confirm
+    <Button disabled={disabled} onClick={() => handleList()} fullWidth>
+      Confirm listing token
     </Button>
   );
 }
@@ -396,63 +186,32 @@ function SingleCard({
   );
 }
 export default function ConfirmListingDialog() {
-  const { reset: resetTokens } = useListTokensStore();
-
   const { autoListing } = useAutoListing();
-
   const { isOpen, setIsOpen } = useConfirmListTokenDialogStore();
+  const { status, setStatus } = useListTokenStatusStore();
 
-  const {
-    isPendingList,
-    isLoadingList,
-    isSuccessList,
-    isLoadingApprove,
-    isPendingApprove,
-    isRevertedList,
-    isSettledList,
-    isRevertedApprove,
-  } = useListTokenStatus();
+  const { handleList } = useListToken();
+  const isInitialStatus = useMemo(() => status === ListTokenStatus.INITIAL, [status]);
+  const isFinalStatus = useMemo(
+    () =>
+      status === ListTokenStatus.SUCCESS ||
+      status === ListTokenStatus.ERROR_APPROVE ||
+      status === ListTokenStatus.ERROR_LIST_TOKEN,
+    [status],
+  );
 
-  const isProcessing = useMemo(() => {
-    return (
-      isPendingList ||
-      isLoadingList ||
-      isSettledList ||
-      isLoadingApprove ||
-      isPendingApprove ||
-      isRevertedApprove
-    );
-  }, [
-    isLoadingApprove,
-    isLoadingList,
-    isPendingApprove,
-    isPendingList,
-    isRevertedApprove,
-    isSettledList,
-  ]);
+  const isLoadingStatus = useMemo(
+    () => !isInitialStatus && !isFinalStatus,
+    [isFinalStatus, isInitialStatus],
+  );
 
-  const { gasPriceSettings } = useSwapGasPriceStore();
-  const { data: baseFee } = useGasPrice();
-
-  const computedGasSpending = useMemo(() => {
-    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
-      return formatFloat(formatGwei(gasPriceSettings.gasPrice));
+  useEffect(() => {
+    if (isFinalStatus && !isOpen) {
+      setTimeout(() => {
+        setStatus(ListTokenStatus.INITIAL);
+      }, 400);
     }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      gasPriceSettings.maxFeePerGas &&
-      gasPriceSettings.maxPriorityFeePerGas &&
-      baseFee
-    ) {
-      const lowerFeePerGas =
-        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
-
-      return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
-    }
-
-    return "0";
-  }, [baseFee, gasPriceSettings]);
+  }, [isFinalStatus, isOpen, setStatus, status]);
 
   const tokensToList = useTokensToList();
 
@@ -503,90 +262,154 @@ export default function ConfirmListingDialog() {
 
   const isMobile = useMediaQuery({ query: "(max-width: 550px)" });
 
+  const nativeCurrency = useNativeCurrency();
+
   return (
     <DrawerDialog
       isOpen={isOpen}
       setIsOpen={(isOpen) => {
         setIsOpen(isOpen);
-        if (isSettledList) {
-          resetTokens();
-        }
       }}
     >
       <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
         <DialogHeader
           onClose={() => {
-            if (isSettledList) {
-              resetTokens();
-            }
             setIsOpen(false);
           }}
           title={"Review listing tokens"}
         />
         <div className="card-spacing">
-          {!isSettledList && !isRevertedApprove && (
-            <div className="mb-5">
-              {tokensToList.length === 1 && tokensToList[0] && (
-                <div className="grid grid-cols-[1fr_12px_1fr]">
-                  <SingleCard
-                    address={tokensToList[0].wrapped.address0}
-                    title={tokensToList[0].symbol!}
-                    underlineText="You list token"
-                  />
-                  <div className="relative">
-                    <div className="text-tertiary-text absolute top-1/2 -translate-x-1/2 -translate-y-1/2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
-                      <Svg iconName="arrow-in" />
+          {(isInitialStatus || isLoadingStatus) && (
+            <>
+              <div className="mb-5">
+                {tokensToList.length === 1 && tokensToList[0] && (
+                  <div className="grid grid-cols-[1fr_12px_1fr]">
+                    <SingleCard
+                      address={tokensToList[0].wrapped.address0}
+                      title={tokensToList[0].symbol!}
+                      underlineText="You list token"
+                    />
+                    <div className="relative">
+                      <div className="text-tertiary-text absolute top-1/2 -translate-x-1/2 -translate-y-1/2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
+                        <Svg iconName="arrow-in" />
+                      </div>
+                    </div>
+                    <SingleCard
+                      address={autoListing?.id!}
+                      title={autoListing?.name || "Unknown"}
+                      underlineText={
+                        isMobile ? "In the auto-listing" : "In the auto-listing сontract"
+                      }
+                    />
+                  </div>
+                )}
+                {tokensToList.length === 2 && tokensToList[0] && tokensToList[1] && (
+                  <>
+                    <div className="p-5 bg-tertiary-bg rounded-3">
+                      <div className="text-center text-secondary-text mb-3">You list tokens</div>
+                      <div className="grid grid-cols-[1fr_12px_1fr]">
+                        <SingleCard
+                          color="quaternary"
+                          address={tokensToList[0].wrapped.address0}
+                          title={tokensToList[0].symbol!}
+                        />
+                        <div />
+                        <SingleCard
+                          color="quaternary"
+                          address={tokensToList[1].wrapped.address0}
+                          title={tokensToList[1].symbol!}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="relative h-3">
+                      <div className="text-tertiary-text absolute  -translate-x-1/2 -bottom-2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
+                        <Svg className="rotate-90" iconName="arrow-in" />
+                      </div>
+                    </div>
+
+                    <SingleCard
+                      address={autoListing?.id!}
+                      title={autoListing?.name || "Unknown"}
+                      underlineText="In the auto-listing сontract"
+                    />
+                  </>
+                )}
+              </div>
+              {autoListing && !autoListing.isFree && paymentToken && (
+                <div className="mb-5">
+                  <div className="flex justify-between px-5 py-3.5 rounded-3 bg-tertiary-bg items-center">
+                    <span className="text-14 text-secondary-text">Payment for listing</span>
+
+                    <div className="flex items-center gap-1">
+                      <Image
+                        className="mr-1"
+                        src="/images/tokens/placeholder.svg"
+                        width={24}
+                        height={24}
+                        alt=""
+                      />
+                      <span className="font-medium text-14">
+                        {formatUnits(
+                          paymentToken.price * BigInt(tokensToList.length),
+                          paymentToken.token.decimals ?? 18,
+                        ).slice(0, 7) === "0.00000"
+                          ? truncateMiddle(
+                              formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18),
+                              {
+                                charsFromStart: 3,
+                                charsFromEnd: 2,
+                              },
+                            )
+                          : formatFloat(
+                              formatUnits(
+                                paymentToken.price,
+                                paymentToken.token.decimals != null
+                                  ? paymentToken.token.decimals
+                                  : 18,
+                              ),
+                            )}
+                      </span>
+                      <span className="flex items-center gap-2 text-14 text-secondary-text">
+                        {isZeroAddress(paymentToken.token.address)
+                          ? nativeCurrency.symbol
+                          : paymentToken.token.symbol}
+                        {!isZeroAddress(paymentToken.token.address) ? (
+                          <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
+                        ) : (
+                          <Badge variant={BadgeVariant.COLORED} color="green" text="Native" />
+                        )}
+                      </span>
                     </div>
                   </div>
-                  <SingleCard
-                    address={autoListing?.id!}
-                    title={autoListing?.name || "Unknown"}
-                    underlineText={
-                      isMobile ? "In the auto-listing" : "In the auto-listing сontract"
-                    }
-                  />
+
+                  {paymentToken?.token &&
+                    !isAllowed &&
+                    !isZeroAddress(paymentToken.token.address) &&
+                    !isLoadingStatus && (
+                      <ApproveAmountConfig
+                        amountToApprove={amountToApprove}
+                        setAmountToApprove={setAmountToApprove}
+                        minAmount={paymentToken.price * BigInt(tokensToList.length)}
+                        isEditApproveActive={isEditApproveActive}
+                        setEditApproveActive={setEditApproveActive}
+                        asset={paymentToken.token}
+                      />
+                    )}
                 </div>
               )}
-              {tokensToList.length === 2 && tokensToList[0] && tokensToList[1] && (
-                <>
-                  <div className="p-5 bg-tertiary-bg rounded-3">
-                    <div className="text-center text-secondary-text mb-3">You list tokens</div>
-                    <div className="grid grid-cols-[1fr_12px_1fr]">
-                      <SingleCard
-                        color="quaternary"
-                        address={tokensToList[0].wrapped.address0}
-                        title={tokensToList[0].symbol!}
-                      />
-                      <div />
-                      <SingleCard
-                        color="quaternary"
-                        address={tokensToList[1].wrapped.address0}
-                        title={tokensToList[1].symbol!}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="relative h-3">
-                    <div className="text-tertiary-text absolute  -translate-x-1/2 -bottom-2 left-1/2 flex justify-center items-center w-12 h-12 rounded-full bg-primary-bg">
-                      <Svg className="rotate-90" iconName="arrow-in" />
-                    </div>
-                  </div>
-
-                  <SingleCard
-                    address={autoListing?.id!}
-                    title={autoListing?.name || "Unknown"}
-                    underlineText="In the auto-listing сontract"
-                  />
-                </>
-              )}
-            </div>
+            </>
           )}
-          {(isSettledList || isRevertedApprove) && (
+
+          {isFinalStatus && (
             <div>
               <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
-                {(isRevertedList || isRevertedApprove) && <EmptyStateIcon iconName="warning" />}
+                {status === ListTokenStatus.ERROR_LIST_TOKEN ||
+                  (status === ListTokenStatus.ERROR_APPROVE && (
+                    <EmptyStateIcon iconName="warning" />
+                  ))}
 
-                {isSuccessList && (
+                {status === ListTokenStatus.SUCCESS && (
                   <>
                     <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
                     <Svg
@@ -600,126 +423,25 @@ export default function ConfirmListingDialog() {
 
               <div className="flex justify-center">
                 <span className="text-20 font-bold text-primary-text mb-1">
-                  {isRevertedList && "Failed to list token"}
-                  {isSuccessList && "Token successfully listed"}
-                  {isRevertedApprove && "Approve failed"}
+                  {status === ListTokenStatus.ERROR_LIST_TOKEN && "Failed to list token"}
+                  {status === ListTokenStatus.SUCCESS && "Token successfully listed"}
+                  {status === ListTokenStatus.ERROR_APPROVE && "Approve failed"}
                 </span>
               </div>
-            </div>
-          )}
-          {autoListing && !autoListing.isFree && paymentToken && (
-            <div className="mb-5">
-              <InputLabel
-                label="Payment for listing"
-                tooltipText="This amount will be delivered to the auto-listing contract. Different auto-listing contracts may require different payment thresholds. Make sure you are complying with the settings of the auto-listing contract you are going to list your token to."
-              />
-              <div className="h-12 rounded-2  w-full bg-tertiary-bg text-primary-text flex justify-between items-center px-5">
-                {formatUnits(
-                  paymentToken.price * BigInt(tokensToList.length),
-                  paymentToken.token.decimals ?? 18,
-                ).slice(0, 7) === "0.00000"
-                  ? truncateMiddle(
-                      formatUnits(paymentToken.price, paymentToken.token.decimals ?? 18),
-                      {
-                        charsFromStart: 3,
-                        charsFromEnd: 2,
-                      },
-                    )
-                  : formatFloat(
-                      formatUnits(
-                        paymentToken.price,
-                        paymentToken.token.decimals != null ? paymentToken.token.decimals : 18,
-                      ),
-                    )}
-                <span className="flex items-center gap-2">
-                  <Image src="/images/tokens/placeholder.svg" width={24} height={24} alt="" />
 
-                  {paymentToken.token.symbol}
-                  <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
-                </span>
-              </div>
-              {paymentToken?.token && !isAllowed && (
-                <div
-                  className={clsx(
-                    "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5",
-                    parseUnits(amountToApprove, paymentToken.token.decimals) <
-                      paymentToken.price * BigInt(tokensToList.length) && "pb-[26px]",
-                  )}
-                >
-                  <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                    <Tooltip
-                      text={
-                        " In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
-                      }
-                    />
-                    <span>Approve amount</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-grow justify-end">
-                    {!isEditApproveActive ? (
-                      <span>
-                        {amountToApprove} {paymentToken.token.symbol}
-                      </span>
-                    ) : (
-                      <div className="flex-grow">
-                        <div className="relative w-full flex-grow">
-                          <Input
-                            isError={
-                              parseUnits(amountToApprove, paymentToken.token.decimals) <
-                              paymentToken.price * BigInt(tokensToList.length)
-                            }
-                            className="h-8 pl-3"
-                            value={amountToApprove}
-                            onChange={(e) => setAmountToApprove(e.target.value)}
-                            type="text"
-                          />
-                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
-                            {paymentToken?.token.symbol}
-                          </span>
-                        </div>
-                        {parseUnits(amountToApprove, paymentToken.token.decimals) <
-                          paymentToken.price * BigInt(tokensToList.length) && (
-                          <span className="text-red-light absolute text-12 translate-y-0.5">
-                            Must be higher or equal{" "}
-                            {formatUnits(
-                              paymentToken.price * BigInt(tokensToList.length),
-                              paymentToken.token.decimals,
-                            )}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {!isEditApproveActive ? (
-                      <Button
-                        size={ButtonSize.EXTRA_SMALL}
-                        colorScheme={ButtonColor.LIGHT_GREEN}
-                        onClick={() => setEditApproveActive(true)}
-                      >
-                        Edit
-                      </Button>
-                    ) : (
-                      <Button
-                        disabled={
-                          parseUnits(amountToApprove, paymentToken.token.decimals) <
-                          paymentToken.price * BigInt(tokensToList.length)
-                        }
-                        size={ButtonSize.EXTRA_SMALL}
-                        colorScheme={ButtonColor.LIGHT_GREEN}
-                        onClick={() => setEditApproveActive(false)}
-                      >
-                        Save
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
+              <div className="h-px w-full bg-secondary-border mb-4 mt-5" />
             </div>
           )}
-          {isProcessing && <div className="h-px w-full bg-secondary-border mb-4 mt-5" />}
+
           {autoListing && (
-            <ListActionButton
-              isEditApproveActive={isEditApproveActive}
-              amountToApprove={amountToApprove}
-              isFree={autoListing.isFree}
+            <ListTokensActionButton
+              isPaymentTokenNative={Boolean(
+                paymentToken && isZeroAddress(paymentToken.token.address),
+              )}
+              paymentTokenSymbol={paymentToken?.token.symbol}
+              handleList={() => handleList(amountToApprove)}
+              isFree={isFree}
+              disabled={isEditApproveActive}
             />
           )}
         </div>

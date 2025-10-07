@@ -13,7 +13,7 @@ export function formatFloat(
       return "0";
     }
 
-    return (0).toFixed(maximumSignificantDigits);
+    return "< 0.0001";
   }
 
   if (numberValue < 1) {

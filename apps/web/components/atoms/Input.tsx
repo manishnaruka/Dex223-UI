@@ -101,3 +101,40 @@ export function SearchInput(props: Props) {
     </div>
   );
 }
+
+export function InputWithArrows(props: Props) {
+  const ref = useRef<HTMLInputElement | null>(null);
+
+  const handleIncrement = () => {
+    // if (props.onChange) {
+    //   props.onChange({
+    //     target: { value: +props.value + 1 },
+    //   } as ChangeEvent<HTMLInputElement>);
+    // }
+  };
+
+  const handleDecrement = () => {
+    // if (props.onChange) {
+    //   props.onChange({
+    //     target: { value: props.value - 1 },
+    //   } as ChangeEvent<HTMLInputElement>);
+    // }
+  };
+
+  return (
+    <div className="relative w-full">
+      <Input
+        className={clsxMerge("pr-12", props.className)}
+        style={props.style ? props.style : { paddingRight: "2.5rem" }}
+        ref={ref}
+        {...props}
+      />
+      <span className={clsx("absolute right-2 flex items-center justify-center h-full w-10 top-0")}>
+        <>
+          <IconButton iconName="add" className="text-tertiary-text" onClick={handleIncrement} />
+          <IconButton iconName="add" className="text-tertiary-text" onClick={handleDecrement} />
+        </>
+      </span>
+    </div>
+  );
+}

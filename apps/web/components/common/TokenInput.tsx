@@ -2,11 +2,11 @@ import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useMemo } from "react";
+import React from "react";
 import { NumericFormat } from "react-number-format";
 
 import SelectButton from "@/components/atoms/SelectButton";
-import Badge, { BadgeVariant } from "@/components/badges/Badge";
+import Badge from "@/components/badges/Badge";
 import InputButton from "@/components/buttons/InputButton";
 import TokenStandardSelector from "@/components/common/TokenStandardSelector";
 import { ThemeColors } from "@/config/theme/colors";
@@ -27,6 +27,7 @@ export default function TokenInput({
   setStandard,
   standard,
   readOnly = false,
+  readOnlyToken = false,
   isHalf = false,
   isMax = false,
   setHalf,
@@ -35,6 +36,8 @@ export default function TokenInput({
   gasERC223,
   colorScheme = ThemeColors.GREEN,
   isError,
+  handleBlur,
+  allowedErc223 = true,
 }: {
   handleClick: () => void;
   token: Currency | undefined;
@@ -46,6 +49,7 @@ export default function TokenInput({
   standard: Standard;
   setStandard: (standard: Standard) => void;
   readOnly?: boolean;
+  readOnlyToken?: boolean;
   isHalf?: boolean;
   isMax?: boolean;
   setHalf?: () => void;
@@ -54,6 +58,8 @@ export default function TokenInput({
   gasERC223?: string;
   isError?: boolean;
   colorScheme?: ThemeColors;
+  handleBlur?: () => void;
+  allowedErc223?: boolean;
 }) {
   const t = useTranslations("Swap");
 
@@ -95,6 +101,7 @@ export default function TokenInput({
               onInputChange(values.value);
             }}
             allowNegative={false}
+            onBlur={handleBlur}
           />
           <span className="text-12 block -mt-1 text-tertiary-text">
             ${price ? formatFloat(price * +value) : "0"}
@@ -112,7 +119,7 @@ export default function TokenInput({
         </div>
         <SelectButton
           type="button"
-          className="flex-shrink-0"
+          className={clsx("flex-shrink-0", readOnlyToken && "pointer-events-none")}
           variant="rounded"
           onClick={handleClick}
           size="large"
@@ -141,13 +148,14 @@ export default function TokenInput({
         <TokenStandardSelector
           selectedStandard={standard}
           handleStandardSelect={(standard) => setStandard(standard)}
-          disabled={!token}
+          disabled={!token || readOnlyToken}
           symbol={token?.symbol}
           balance0={balance0}
           balance1={balance1}
           gasERC20={gasERC20}
           gasERC223={gasERC223}
           colorScheme={colorScheme}
+          allowedErc223={allowedErc223}
         />
       )}
       {token && token.isNative && (

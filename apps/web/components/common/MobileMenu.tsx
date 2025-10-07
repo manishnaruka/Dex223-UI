@@ -1,25 +1,26 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import { formatGwei } from "viem";
-import { useGasPrice } from "wagmi";
 
 import Collapse from "@/components/atoms/Collapse";
 import Drawer from "@/components/atoms/Drawer";
 import LocaleSwitcher from "@/components/atoms/LocaleSwitcher";
 import Svg from "@/components/atoms/Svg";
 import Badge from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
+import { isMarginModuleEnabled } from "@/config/modules";
 import { IconName } from "@/config/types/IconName";
 import { clsxMerge } from "@/functions/clsxMerge";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import { Link, usePathname } from "@/i18n/routing";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 export function MobileLink({
   href,
   iconName,
@@ -28,6 +29,7 @@ export function MobileLink({
   isActive,
   disabled = false,
   className = "",
+  linkClassName = "",
   handleClick,
   isMenu = false,
   isExternal = false,
@@ -40,6 +42,7 @@ export function MobileLink({
   isActive?: boolean;
   disabled?: boolean;
   className?: string;
+  linkClassName?: string;
   handleClick?: (e: any) => void;
   isMenu?: boolean;
   isExternal?: boolean;
@@ -89,12 +92,13 @@ export function MobileLink({
           isActive && !isMenu && "text-green pointer-events-none",
           isActive && isMenu && "bg-navigation-active-mobile text-green pointer-events-none",
           disabled && "pointer-events-none opacity-50",
+          linkClassName,
         )}
       >
         <Svg iconName={iconName} />
         {title}
       </Link>
-      {comingSoon && <Badge color="green_outline" text="Coming soon" />}
+      {comingSoon && !isMarginModuleEnabled && <Badge color="green_outline" text="Coming soon" />}
     </div>
   );
 }
@@ -222,15 +226,8 @@ export default function MobileMenu() {
 
   const chainId = useCurrentChainId();
 
-  const { data: gasData, refetch } = useGasPrice({
-    chainId: chainId || 1,
-  });
-
-  const { data: blockNumber } = useScopedBlockNumber();
-
-  useEffect(() => {
-    refetch();
-  }, [blockNumber, refetch]);
+  const { gasPrice } = useGlobalFees();
+  const { blockNumber } = useGlobalBlockNumber();
 
   return (
     <div className="xl:hidden">
@@ -253,10 +250,17 @@ export default function MobileMenu() {
                     title={t(title)}
                     handleClose={() => setMobileMenuOpened(false)}
                     isActive={pathname.includes(href)}
-                    disabled={!["/swap", "/pools", "/portfolio", "/token-listing"].includes(href)}
-                    comingSoon={title === "borrow_lend" || title === "margin_trading"}
+                    disabled={
+                      !["/swap", "/pools", "/portfolio", "/token-listing"].includes(href) &&
+                      !isMarginModuleEnabled
+                    }
+                    comingSoon={
+                      (title === "borrow_lend" || title === "margin_trading") &&
+                      !isMarginModuleEnabled
+                    }
                     className={
-                      title === "borrow_lend" || title === "margin_trading"
+                      (title === "borrow_lend" || title === "margin_trading") &&
+                      !isMarginModuleEnabled
                         ? "justify-between pr-4"
                         : ""
                     }
@@ -283,6 +287,13 @@ export default function MobileMenu() {
               </button>
               <Collapse open={moreOpened}>
                 <div className="py-2 border-b border-secondary-border">
+                  <MobileLink
+                    href="/create-token"
+                    iconName="list-tokens"
+                    title="Create a new token"
+                    handleClose={() => setMobileMenuOpened(false)}
+                    className="pr-5"
+                  />
                   <MobileLink
                     href="#"
                     iconName="list"
@@ -380,7 +391,7 @@ export default function MobileMenu() {
                       className="text-green"
                       href={getExplorerLink(ExplorerLinkType.GAS_TRACKER, "", chainId)}
                     >
-                      {gasData ? formatFloat(formatGwei(gasData)) : ""} GWEI
+                      {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
                     </a>
                   </span>
                 </div>

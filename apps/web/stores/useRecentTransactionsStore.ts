@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
 import { db } from "@/db/db";
+import { DexChainId } from "@/sdk_bi/chains";
 import { Standard } from "@/sdk_bi/standard";
 export enum RecentTransactionStatus {
   PENDING,
@@ -25,15 +26,21 @@ export enum RecentTransactionTitleTemplate {
   LIST_DOUBLE,
   CONVERT,
   UNWRAP,
-}
+  CREATE_LENDING_ORDER,
+  EDIT_LENDING_ORDER,
+  OPEN_LENDING_ORDER,
+  CLOSE_LENDING_ORDER,
 
-type CommonRecentTransaction = {
-  hash: Address;
-  chainId: number;
-  status: RecentTransactionStatus;
-  nonce: number;
-  gasFeeModel: GasFeeModel;
-};
+  CREATE_MARGIN_POSITION,
+  CLOSE_MARGIN_POSITION,
+  TRANSFER,
+  FREEZE_MARGIN_POSITION,
+  LIQUIDATE_MARGIN_POSITION,
+  MARGIN_SWAP,
+  WITHDRAW_FROM_CLOSED_POSITION,
+
+  DEPLOY_TOKEN,
+}
 
 type RecentTransactionGasLimit =
   | {
@@ -45,6 +52,28 @@ type RecentTransactionGasLimit =
       model: GasFeeModel.LEGACY;
       gasPrice: string;
     };
+
+type MarginPositionTitle = {
+  symbol: string;
+  positionId: number;
+  logoURI: string;
+};
+
+type TakeLoanTitle = {
+  logoURI: string;
+  symbolBorrowed: string;
+  amountBorrowed: string;
+  symbolCollateral: string;
+  amountCollateral: string;
+  symbolFee: string;
+  amountFee: string;
+};
+
+type MarginOrderTitle = {
+  symbol: string;
+  orderId: number;
+  logoURI: string;
+};
 
 type SingleTokenTransactionTitle = {
   symbol: string;
@@ -78,6 +107,9 @@ export type IRecentTransactionTitle =
     } & SingleTokenTransactionTitle)
   | ({
       template: RecentTransactionTitleTemplate.WITHDRAW;
+    } & SingleTokenTransactionTitle & { standard: Standard })
+  | ({
+      template: RecentTransactionTitleTemplate.TRANSFER;
     } & SingleTokenTransactionTitle)
   | ({
       template: RecentTransactionTitleTemplate.UNWRAP;
@@ -85,6 +117,9 @@ export type IRecentTransactionTitle =
   | ({
       template: RecentTransactionTitleTemplate.CONVERT;
     } & SingleTokenTransactionTitle & { standard: Standard })
+  | ({
+      template: RecentTransactionTitleTemplate.DEPLOY_TOKEN;
+    } & SingleTokenTransactionTitle & { standard: Standard; address: Address; chainId: DexChainId })
   | ({
       template: RecentTransactionTitleTemplate.SWAP;
     } & TwoTokensTransactionTitle)
@@ -102,6 +137,36 @@ export type IRecentTransactionTitle =
     } & Omit<TwoTokensTransactionTitle, "amount0" | "amount1"> & { autoListing: string })
   | ({
       template: RecentTransactionTitleTemplate.ADD;
+    } & TwoTokensTransactionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CREATE_LENDING_ORDER;
+    } & Omit<SingleTokenTransactionTitle, "amount">)
+  | ({
+      template: RecentTransactionTitleTemplate.OPEN_LENDING_ORDER;
+    } & MarginOrderTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER;
+    } & MarginOrderTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.EDIT_LENDING_ORDER;
+    } & MarginOrderTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CREATE_MARGIN_POSITION;
+    } & TakeLoanTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.CLOSE_MARGIN_POSITION;
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.LIQUIDATE_MARGIN_POSITION;
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.FREEZE_MARGIN_POSITION;
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.WITHDRAW_FROM_CLOSED_POSITION;
+    } & MarginPositionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.MARGIN_SWAP;
     } & TwoTokensTransactionTitle);
 
 export type IRecentTransaction = {

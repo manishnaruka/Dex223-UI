@@ -38,6 +38,7 @@ export default function LiquidationInitiatorSelect({
             onClick={() => {
               setValue({ ...values, type: _initiator });
             }}
+            disabled={_initiator === LiquidationType.SPECIFIED}
           >
             {labelsMap[_initiator]}
           </RadioButton>

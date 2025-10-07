@@ -37,9 +37,7 @@ import {
   ApproveTransactionType,
   useLiquidityApprove,
 } from "../../hooks/useLiquidityApprove";
-import { usePriceRange } from "../../hooks/usePrice";
 import { useSortedTokens } from "../../hooks/useSortedTokens";
-import { useV3DerivedMintInfo } from "../../hooks/useV3DerivedMintInfo";
 import { Field, useTokensStandards } from "../../stores/useAddLiquidityAmountsStore";
 import {
   useAddLiquidityGasLimitStore,
@@ -358,13 +356,6 @@ const MintDialog = ({
     tokenId,
   });
 
-  useAddLiquidityEstimatedGas({
-    position,
-    increase,
-    createPool: noLiquidity,
-    tokenId,
-  });
-
   const { customGasLimit } = useAddLiquidityGasLimitStore();
   const estimatedMintGas = useEstimatedGasStoreById(EstimatedGasId.mint);
   const gasToUse = customGasLimit ? customGasLimit : estimatedMintGas + BigInt(30000); // set custom gas here if user changed it
@@ -383,8 +374,8 @@ const MintDialog = ({
   return (
     <>
       <DialogHeader onClose={() => setIsOpen(false)} title="Add liquidity" />
-      <div className="card-spacing-x  pb-4 md:pb-0 h-[60dvh] md:h-auto flex flex-col">
-        <div className="flex-grow overflow-y-auto">
+      <div className="card-spacing-x md:pb-0 max-h-[60dvh] md:h-auto flex flex-col">
+        <div className="flex-grow overflow-y-auto max-md:pb-4 -mr-2 pr-2">
           <div
             className={clsxMerge(
               "flex justify-between items-start",
@@ -566,7 +557,7 @@ const MintDialog = ({
       {/* divider line */}
       <div className="h-[1px] border-transparent md:hidden w-full bg-quaternary-bg" />
 
-      <div className="px-4 md:px-10 md:pb-10 h-[30dvh] md:h-auto flex flex-col">
+      <div className="px-4 pb-4 md:px-10 md:pb-10 md:h-auto flex flex-col">
         {/* GAS */}
         <div className="flex flex-col md:flex-row items-center gap-2 px-5 py-2 bg-tertiary-bg rounded-3 mb-2 md:mb-5 mt-4 md:mt-5">
           {/* First row container with custom 66.67% width */}
@@ -614,7 +605,6 @@ const MintDialog = ({
           <Button
             onClick={() => {
               handleAddLiquidity({ updateAllowance });
-              // console.log("Clicked");
             }}
             fullWidth
           >
@@ -626,18 +616,16 @@ const MintDialog = ({
   );
 };
 
-const SuccessfulDialog = ({ isError = false }: { isError?: boolean }) => {
+const SuccessfulDialog = ({
+  isError = false,
+  parsedAmounts,
+}: {
+  isError?: boolean;
+  parsedAmounts: { [field in Field]: CurrencyAmount<Currency> | undefined };
+}) => {
   const { setIsOpen } = useConfirmLiquidityDialogStore();
   const { tokenA, tokenB } = useAddLiquidityTokensStore();
-  const { tier } = useLiquidityTierStore();
-  const { price } = usePriceRange();
   const { liquidityHash } = useAddLiquidityStatusStore();
-  const { parsedAmounts } = useV3DerivedMintInfo({
-    tokenA,
-    tokenB,
-    tier,
-    price,
-  });
   const t = useTranslations("Liquidity");
   const chainId = useCurrentChainId();
 
@@ -784,6 +772,14 @@ export default function ConfirmLiquidityDialog({
   const { isOpen, setIsOpen } = useConfirmLiquidityDialogStore();
 
   const { status } = useAddLiquidityStatusStore();
+
+  useAddLiquidityEstimatedGas({
+    position,
+    increase,
+    createPool: noLiquidity,
+    tokenId,
+  });
+
   return (
     <DrawerDialog
       isOpen={isOpen}
@@ -813,8 +809,12 @@ export default function ConfirmLiquidityDialog({
             updateAllowance={updateAllowance}
           />
         ) : null}
-        {[AddLiquidityStatus.SUCCESS].includes(status) ? <SuccessfulDialog /> : null}
-        {[AddLiquidityStatus.MINT_ERROR].includes(status) ? <SuccessfulDialog isError /> : null}
+        {[AddLiquidityStatus.SUCCESS].includes(status) ? (
+          <SuccessfulDialog parsedAmounts={parsedAmounts} />
+        ) : null}
+        {[AddLiquidityStatus.MINT_ERROR].includes(status) ? (
+          <SuccessfulDialog parsedAmounts={parsedAmounts} isError />
+        ) : null}
       </div>
     </DrawerDialog>
   );

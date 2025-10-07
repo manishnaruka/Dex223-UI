@@ -39,7 +39,6 @@ import {
   usePositionFromTokenId,
   usePositionRangeStatus,
 } from "@/hooks/usePositions";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Link, useRouter } from "@/i18n/routing";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Percent } from "@/sdk_bi/entities/fractions/percent";
@@ -91,7 +90,6 @@ export default function DecreaseLiquidityPage({
 }) {
   const { tokenId: _tokenId } = use(params);
 
-  useRecentTransactionTracking();
   useRemoveLiquidityEstimatedGas();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -228,14 +226,14 @@ export default function DecreaseLiquidityPage({
     <Container>
       <div
         className={clsx(
-          "grid py-4 lg:py-[40px] grid-cols-1 mx-auto",
+          "grid py-4 lg:py-10 grid-cols-1 mx-auto",
           showRecentTransactions
             ? "xl:grid-cols-[580px_600px] xl:max-w-[1200px] gap-4 xl:grid-areas-[left_right] grid-areas-[right,left]"
             : "xl:grid-cols-[600px] xl:max-w-[600px] grid-areas-[right]",
         )}
       >
         <div className="grid-in-[left] flex justify-center">
-          <div className="w-full sm:max-w-[600px] xl:max-w-full mx-auto mt-[40px]">
+          <div className="w-full sm:max-w-[600px] xl:max-w-full mx-auto">
             <RecentTransactions
               filterFunction={[RecentTransactionTitleTemplate.REMOVE]}
               showRecentTransactions={showRecentTransactions}
@@ -246,13 +244,13 @@ export default function DecreaseLiquidityPage({
         </div>
 
         <div>
-          <div className="lg:w-[600px] bg-primary-bg mx-auto mt-[40px] mb-4 lg:mb-5 px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
-            <div className="grid grid-cols-3 py-1.5 -mx-3">
+          <div className="lg:w-[600px] bg-primary-bg mx-auto mb-4 lg:mb-5 px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
+            <div className="grid grid-cols-3 py-1 lg:py-2.5 -mx-3">
               <IconButton
                 onClick={() => router.push(`/pool/${_tokenId}`)}
-                buttonSize={IconButtonSize.LARGE}
+                buttonSize={IconButtonSize.REGULAR}
                 variant={IconButtonVariant.BACK}
-                iconSize={IconSize.LARGE}
+                iconSize={IconSize.REGULAR}
               />
               <h2 className="text-18 lg:text-20 font-bold flex justify-center items-center text-nowrap">
                 {t("remove_liquidity_title")}
@@ -260,7 +258,7 @@ export default function DecreaseLiquidityPage({
               <div className="flex items-center gap-2 justify-end">
                 <IconButton
                   onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-                  buttonSize={IconButtonSize.LARGE}
+                  buttonSize={IconButtonSize.REGULAR}
                   iconName="recent-transactions"
                   active={showRecentTransactions}
                 />

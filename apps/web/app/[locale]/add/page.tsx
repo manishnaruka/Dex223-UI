@@ -6,6 +6,7 @@ import React, { useCallback, useState } from "react";
 
 import { RevokeDialog } from "@/app/[locale]/add/components/DepositAmounts/RevokeDialog";
 import FeeAmountSettings from "@/app/[locale]/add/components/FeeAmountSettings";
+import { LiquidityActionButton } from "@/app/[locale]/add/components/LiquidityActionButton/LiquidityActionButton";
 import { useLiquidityApprove } from "@/app/[locale]/add/hooks/useLiquidityApprove";
 import {
   Field,
@@ -31,21 +32,18 @@ import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
 import PickTokenDialog from "@/components/dialogs/PickTokenDialog";
 import { AllowanceStatus } from "@/hooks/useAllowance";
 import { usePoolsSearchParams } from "@/hooks/usePoolsSearchParams";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { usePriceRange } from "@/shared/hooks/usePriceRange";
+import { useV3DerivedMintInfo } from "@/shared/hooks/useV3DerivedMintInfo";
 import { useRevokeStatusStore } from "@/stores/useRevokeStatusStore";
 
 import { DepositAmounts } from "./components/DepositAmounts/DepositAmounts";
 import ConfirmLiquidityDialog from "./components/LiquidityActionButton/ConfirmLiquidityDialog";
-import { LiquidityActionButton } from "./components/LiquidityActionButton/LiquidityActionButton";
 import { PriceRange } from "./components/PriceRange/PriceRange";
-import { usePriceRange } from "./hooks/usePrice";
-import { useV3DerivedMintInfo } from "./hooks/useV3DerivedMintInfo";
 import { useLiquidityPriceRangeStore } from "./stores/useLiquidityPriceRangeStore";
 
 export default function AddPoolPage() {
   usePoolsSearchParams();
-  useRecentTransactionTracking();
   const [isOpenedTokenPick, setIsOpenedTokenPick] = useState(false);
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useAddLiquidityRecentTransactionsStore();

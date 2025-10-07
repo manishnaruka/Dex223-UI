@@ -11,9 +11,10 @@ import { NONFUNGIBLE_POSITION_MANAGER_ABI } from "@/config/abis/nonfungiblePosit
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
 import { IIFE } from "@/functions/iife";
 import useDeepEffect from "@/hooks/useDeepEffect";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
 import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
+import { Standard } from "@/sdk_bi/standard";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
 import {
   RecentTransactionTitleTemplate,
   stringifyObject,
@@ -76,13 +77,13 @@ export function useWithdrawEstimatedGas({
       }
 
       try {
-        const estimated = await publicClient?.estimateContractGas(params as any);
+        // const estimated = await publicClient?.estimateContractGas(params as any);
 
-        if (estimated) {
-          setEstimatedGas(estimated + BigInt(10000));
-        } else {
-          setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
-        }
+        // if (estimated) {
+        //   setEstimatedGas(estimated + BigInt(10000));
+        // } else {
+        setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
+        // }
       } catch (e) {
         console.log(e);
         setEstimatedGas(WITHDRAW_DEFAULT_GAS_LIMIT);
@@ -121,7 +122,7 @@ export default function useWithdraw({
 
   const amountToWithdraw = currentDeposit.data as bigint;
 
-  const { data: blockNumber } = useScopedBlockNumber({ watch: true });
+  const { blockNumber } = useGlobalBlockNumber();
 
   useEffect(() => {
     currentDeposit.refetch();
@@ -188,6 +189,7 @@ export default function useWithdraw({
               template: RecentTransactionTitleTemplate.WITHDRAW,
               amount: formatUnits(amount, token.decimals),
               logoURI: token?.logoURI || "/images/tokens/placeholder.svg",
+              standard: Standard.ERC223,
             },
           },
           address,

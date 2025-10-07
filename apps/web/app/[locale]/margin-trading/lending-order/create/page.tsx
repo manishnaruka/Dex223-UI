@@ -1,91 +1,63 @@
 "use client";
 
 import clsx from "clsx";
-import React, { useCallback } from "react";
+import React from "react";
 
-import ReviewLendingOrderDialog from "@/app/[locale]/margin-trading/lending-order/create/components/ReviewLendingOrderDialog";
-import FirstStep from "@/app/[locale]/margin-trading/lending-order/create/steps/FirstStep";
-import SecondStep from "@/app/[locale]/margin-trading/lending-order/create/steps/SecondStep";
-import ThirdStep from "@/app/[locale]/margin-trading/lending-order/create/steps/ThirdStep";
-import { useConfirmCreateOrderDialogStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useConfirmCreateOrderDialogOpened";
-import {
-  CreateOrderStep,
-  useCreateOrderStepStore,
-} from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
-import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
-
-const stepsLabels: Record<CreateOrderStep, string> = {
-  [CreateOrderStep.FIRST]: "Loan",
-  [CreateOrderStep.SECOND]: "Parameters",
-  [CreateOrderStep.THIRD]: "Liquidation",
-};
+import OrderConfigurationPage from "@/app/[locale]/margin-trading/lending-order/[id]/components/OrderConfigurationPage";
+import ReviewLendingOrderDialog from "@/app/[locale]/margin-trading/lending-order/create/components/ReviewCreateOrderDialog";
+import { useLendingOrderRecentTransactionsStore } from "@/app/[locale]/margin-trading/lending-order/create/hooks/useLendingOrderRecentTransactionsStore";
+import { useCreateOrderConfigStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderConfigStore";
+import { useCreateOrderStepStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCreateOrderStepStore";
+import { useConfirmCreateOrderDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
+import { OrderActionMode } from "@/app/[locale]/margin-trading/types";
+import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
+import Container from "@/components/atoms/Container";
+import RecentTransactions from "@/components/common/RecentTransactions";
 
 export default function CreateLendingOrderPage() {
-  const { step } = useCreateOrderStepStore((state) => ({ step: state.step }));
+  const { step, setStep } = useCreateOrderStepStore();
+
+  const config = useCreateOrderConfigStore();
 
   const { isOpen, setIsOpen } = useConfirmCreateOrderDialogStore();
 
-  const renderSteps = useCallback(() => {
-    switch (step) {
-      case CreateOrderStep.FIRST:
-        return <FirstStep />;
-      case CreateOrderStep.SECOND:
-        return <SecondStep />;
-      case CreateOrderStep.THIRD:
-        return <ThirdStep />;
-    }
-  }, [step]);
+  const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
+    useLendingOrderRecentTransactionsStore();
 
   return (
-    <>
-      <div className="rounded-3 bg-primary-bg max-w-[600px] mx-auto my-10">
-        <div className="py-1.5 px-6 flex justify-between items-center">
-          <IconButton iconName="back" />
-          <h1 className="text-20 font-bold">New lending order</h1>
-          <IconButton
-            buttonSize={IconButtonSize.LARGE}
-            active={false}
-            iconName="recent-transactions"
-            onClick={() => {}}
-          />
-        </div>
-        <div className="pb-10 px-10">
-          <div className="flex justify-between mb-5 items-center gap-5">
-            {[CreateOrderStep.FIRST, CreateOrderStep.SECOND, CreateOrderStep.THIRD].map((_step) => {
-              return (
-                <React.Fragment key={_step}>
-                  <div className="flex items-center gap-2" key={_step}>
-                    <span
-                      className={clsx(
-                        "w-8 h-8  rounded-full text-18 flex items-center justify-center border  ",
-                        _step === step
-                          ? "border-green bg-green-bg"
-                          : "border-quaternary-bg bg-quaternary-bg text-tertiary-text",
-                      )}
-                    >
-                      {_step + 1}
-                    </span>
-                    <span
-                      className={clsx(
-                        "text-18",
-                        _step === step ? "text-primary-text" : "text-tertiary-text",
-                      )}
-                    >
-                      {stepsLabels[_step]}
-                    </span>
-                  </div>
-                  {_step !== CreateOrderStep.THIRD && (
-                    <div className="h-1 flex-grow bg-quaternary-bg" />
-                  )}
-                </React.Fragment>
-              );
-            })}
+    <Container>
+      <div
+        className={clsx(
+          "grid py-4 lg:py-[40px] grid-cols-1 mx-auto",
+          showRecentTransactions
+            ? "xl:grid-cols-[580px_600px] xl:max-w-[1200px] gap-4 xl:grid-areas-[left_right] grid-areas-[right,left]"
+            : "xl:grid-cols-[600px] xl:max-w-[600px] grid-areas-[right]",
+        )}
+      >
+        <div className="grid-in-[left] flex justify-center">
+          <div className="w-full sm:max-w-[600px] xl:max-w-full">
+            <RecentTransactions
+              showRecentTransactions={showRecentTransactions}
+              handleClose={() => setShowRecentTransactions(false)}
+              store={useSwapRecentTransactionsStore}
+            />
           </div>
-          {renderSteps()}
+        </div>
+
+        <div className="flex justify-center grid-in-[right]">
+          <div className="flex flex-col gap-4 md:gap-6 lg:gap-5 w-full sm:max-w-[600px] xl:max-w-full">
+            <OrderConfigurationPage
+              {...config}
+              openPreviewDialog={() => setIsOpen(true)}
+              setStep={setStep}
+              mode={OrderActionMode.CREATE}
+              step={step}
+            />
+          </div>
         </div>
       </div>
 
       <ReviewLendingOrderDialog isOpen={isOpen} setIsOpen={setIsOpen} />
-    </>
+    </Container>
   );
 }

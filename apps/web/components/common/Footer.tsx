@@ -2,9 +2,7 @@
 
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 import { formatGwei } from "viem";
-import { useGasPrice } from "wagmi";
 
 import Container from "@/components/atoms/Container";
 import Svg from "@/components/atoms/Svg";
@@ -12,7 +10,8 @@ import { IconName } from "@/config/types/IconName";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import useScopedBlockNumber from "@/hooks/useScopedBlockNumber";
+import { useGlobalBlockNumber } from "@/shared/hooks/useGlobalBlockNumber";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 
 type SocialLink = {
   title: any;
@@ -78,15 +77,8 @@ export default function Footer() {
 
   const chainId = useCurrentChainId();
 
-  const { data: gasData, refetch } = useGasPrice({
-    chainId: chainId || 1,
-  });
-
-  const { data: blockNumber } = useScopedBlockNumber();
-
-  useEffect(() => {
-    refetch();
-  }, [blockNumber, refetch]);
+  const { gasPrice } = useGlobalFees();
+  const { blockNumber } = useGlobalBlockNumber();
 
   return (
     <>
@@ -102,7 +94,7 @@ export default function Footer() {
                   className="text-green duration-200 hocus:text-green-hover"
                   href={getExplorerLink(ExplorerLinkType.GAS_TRACKER, "", chainId)}
                 >
-                  {gasData ? formatFloat(formatGwei(gasData)) : ""} GWEI
+                  {gasPrice ? formatFloat(formatGwei(gasPrice)) : ""} GWEI
                 </a>
               </span>
             </div>

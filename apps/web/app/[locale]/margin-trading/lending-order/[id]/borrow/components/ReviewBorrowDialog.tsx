@@ -1,93 +1,82 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
-import clsx from "clsx";
 import Image from "next/image";
-import React, { PropsWithChildren, useEffect } from "react";
+import { useLocale } from "next-intl";
+import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import SimpleBar from "simplebar-react";
+import { parseUnits } from "viem";
 
-import useCreateMarginPosition from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
-import { useConfirmCreateMarginPositionDialogStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useConfirmCreateMarginPositionDialogOpened";
+import timestampToDateString from "@/app/[locale]/margin-trading/helpers/timestampToDateString";
+import useCreateMarginPosition, {
+  useCreatePositionApproveSteps,
+} from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/hooks/useCreateMarginPosition";
 import { useCreateMarginPositionConfigStore } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionConfigStore";
 import {
   CreateMarginPositionStatus,
   useCreateMarginPositionStatusStore,
 } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useCreateMarginPositionStatusStore";
+import { useNewlyCreatedPositionId } from "@/app/[locale]/margin-trading/lending-order/[id]/borrow/stores/useNewlyCreatedPositionId";
+import { calculatePeriodInterestRate } from "@/app/[locale]/margin-trading/lending-order/[id]/helpers/calculatePeriodInterestRate";
 import LendingOrderDetailsRow from "@/app/[locale]/margin-trading/lending-order/create/components/LendingOrderDetailsRow";
+import { useConfirmBorrowPositionDialogStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
+import { LendingOrder } from "@/app/[locale]/margin-trading/types";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
-import Input from "@/components/atoms/Input";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIcon";
+import { InputSize, SearchInput } from "@/components/atoms/Input";
+import Svg from "@/components/atoms/Svg";
+import { InputLabel } from "@/components/atoms/TextField";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import Button from "@/components/buttons/Button";
+import ApproveAmountConfig from "@/components/common/ApproveAmountConfig";
 import OperationStepRow, {
   operationStatusToStepStatus,
-  OperationStepStatus,
 } from "@/components/common/OperationStepRow";
-import { IconName } from "@/config/types/IconName";
+import { formatFloat } from "@/functions/formatFloat";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
+import { filterTokens } from "@/functions/searchTokens";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 import { Standard } from "@/sdk_bi/standard";
 
 function Rows({ children }: PropsWithChildren<{}>) {
   return <div className="flex flex-col gap-5">{children}</div>;
 }
 
-type StepTextMap = {
-  [key in OperationStepStatus]: string;
-};
+function CreateMarginPositionActionButton({
+  orderId,
+  order,
+  amountToApprove,
+  feeAmountToApprove,
+}: {
+  orderId: string;
+  order: LendingOrder;
+  amountToApprove: string;
+  feeAmountToApprove: string;
+}) {
+  const { handleCreateMarginPosition } = useCreateMarginPosition(order);
+  const {
+    status,
+    setStatus,
+    approveBorrowHash,
+    approveLiquidationFeeHash,
+    borrowHash,
+    transferHash,
+  } = useCreateMarginPositionStatusStore();
+  const { values } = useCreateMarginPositionConfigStore();
 
-type OperationStepConfig = {
-  iconName: IconName;
-  textMap: StepTextMap;
-  pending: CreateMarginPositionStatus;
-  loading: CreateMarginPositionStatus;
-  error: CreateMarginPositionStatus;
-};
+  const orderedHashes =
+    values.collateralToken &&
+    order.liquidationRewardAsset.equals(values.collateralToken) &&
+    values.collateralTokenStandard === Standard.ERC20
+      ? [approveBorrowHash, borrowHash]
+      : [
+          values.collateralTokenStandard === Standard.ERC20 ? approveBorrowHash : transferHash,
+          approveLiquidationFeeHash,
+          borrowHash,
+        ];
 
-function getApproveTextMap(tokenSymbol: string): Record<OperationStepStatus, string> {
-  return {
-    [OperationStepStatus.IDLE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.AWAITING_SIGNATURE]: `Approve ${tokenSymbol}`,
-    [OperationStepStatus.LOADING]: `Approving ${tokenSymbol}`,
-    [OperationStepStatus.STEP_COMPLETED]: `Approved ${tokenSymbol}`,
-    [OperationStepStatus.STEP_FAILED]: `Approve ${tokenSymbol} failed`,
-    [OperationStepStatus.OPERATION_COMPLETED]: `Approved ${tokenSymbol}`,
-  };
-}
-
-const marginSteps: OperationStepConfig[] = [
-  {
-    iconName: "done",
-    pending: CreateMarginPositionStatus.PENDING_APPROVE_BORROW,
-    loading: CreateMarginPositionStatus.LOADING_APPROVE_BORROW,
-    error: CreateMarginPositionStatus.ERROR_APPROVE_BORROW,
-    textMap: getApproveTextMap("USDT"),
-  },
-  {
-    iconName: "done",
-    pending: CreateMarginPositionStatus.PENDING_APPROVE_LIQUIDATION_FEE,
-    loading: CreateMarginPositionStatus.LOADING_APPROVE_LIQUIDATION_FEE,
-    error: CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE,
-    textMap: getApproveTextMap("DAI"),
-  },
-  {
-    iconName: "borrow",
-    pending: CreateMarginPositionStatus.PENDING_BORROW,
-    loading: CreateMarginPositionStatus.LOADING_BORROW,
-    error: CreateMarginPositionStatus.ERROR_BORROW,
-    textMap: {
-      [OperationStepStatus.IDLE]: "Borrow",
-      [OperationStepStatus.AWAITING_SIGNATURE]: "Borrow",
-      [OperationStepStatus.LOADING]: "Borrowing",
-      [OperationStepStatus.STEP_COMPLETED]: "Successfully borrowed",
-      [OperationStepStatus.STEP_FAILED]: "Borrow failed",
-      [OperationStepStatus.OPERATION_COMPLETED]: "Successfully borrowed",
-    },
-  },
-  // Repeat for other steps
-];
-
-function CreateMarginPositionActionButton() {
-  const { handleCreateMarginPosition } = useCreateMarginPosition();
-  const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
-    useCreateMarginPositionStatusStore();
-
-  const orderedHashes = [approveBorrowHash, approveBorrowHash, borrowHash];
+  const { allSteps: marginSteps } = useCreatePositionApproveSteps(order);
 
   if (status !== CreateMarginPositionStatus.INITIAL) {
     return (
@@ -113,204 +102,406 @@ function CreateMarginPositionActionButton() {
       </Rows>
     );
   }
-  return <Button onClick={handleCreateMarginPosition}>Confirm borrow</Button>;
+  return (
+    <Button
+      fullWidth
+      onClick={() => handleCreateMarginPosition(orderId, amountToApprove, feeAmountToApprove)}
+    >
+      Confirm borrow
+    </Button>
+  );
 }
 
-export default function ReviewBorrowDialog() {
-  const { isOpen, setIsOpen } = useConfirmCreateMarginPositionDialogStore();
+export default function ReviewBorrowDialog({
+  orderId,
+  order,
+}: {
+  orderId: string;
+  order: LendingOrder;
+}) {
+  const locale = useLocale();
+
+  const { isOpen, setIsOpen } = useConfirmBorrowPositionDialogStore();
   const { values, setValues } = useCreateMarginPositionConfigStore();
-  const { status, setStatus, approveBorrowHash, approveLiquidationFeeHash, borrowHash } =
-    useCreateMarginPositionStatusStore();
+  const { status, setStatus } = useCreateMarginPositionStatusStore();
   const [isEditApproveActive, setEditApproveActive] = React.useState(false);
+  const [isEditApproveFeeActive, setEditApproveFeeActive] = React.useState(false);
+
+  const { positionId, setPositionId } = useNewlyCreatedPositionId();
+
+  const isFeeAndCollateralSame = useMemo(() => {
+    return values.collateralToken?.equals(order.liquidationRewardAsset);
+  }, [order.liquidationRewardAsset, values.collateralToken]);
+
+  const [amountToApprove, setAmountToApprove] = useState(values.collateralAmount);
+  const [feeAmountToApprove, setFeeAmountToApprove] = useState(
+    order.liquidationRewardAmount.formatted,
+  );
 
   useEffect(() => {
-    if (
-      (status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW ||
-        status === CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE ||
-        status === CreateMarginPositionStatus.ERROR_BORROW ||
-        status === CreateMarginPositionStatus.SUCCESS) &&
-      !isOpen
-    ) {
+    if (values.collateralAmount && !isFeeAndCollateralSame) {
+      setAmountToApprove(values.collateralAmount);
+    }
+
+    if (isFeeAndCollateralSame) {
+      setAmountToApprove(
+        (+values.collateralAmount + +order.liquidationRewardAmount.formatted).toString(),
+      );
+    }
+  }, [isFeeAndCollateralSame, order.liquidationRewardAmount.formatted, values.collateralAmount]);
+
+  const chainId = useCurrentChainId();
+
+  const isInitialStatus = useMemo(() => status === CreateMarginPositionStatus.INITIAL, [status]);
+  const isFinalStatus = useMemo(
+    () =>
+      status === CreateMarginPositionStatus.SUCCESS ||
+      status === CreateMarginPositionStatus.ERROR_BORROW ||
+      status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW ||
+      status === CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE,
+    [status],
+  );
+  const isLoadingStatus = useMemo(
+    () => !isInitialStatus && !isFinalStatus,
+    [isFinalStatus, isInitialStatus],
+  );
+
+  useEffect(() => {
+    if (isFinalStatus && !isOpen) {
       setTimeout(() => {
         setStatus(CreateMarginPositionStatus.INITIAL);
+        setPositionId(undefined);
       }, 400);
     }
-  }, [isOpen, setStatus, status]);
+  }, [isFinalStatus, isOpen, setPositionId, setStatus]);
+
+  const [formattedEndTime, setFormattedEndTime] = useState<string>("");
+
+  const [searchTradableTokenValue, setSearchTradableTokenValue] = useState("");
+
+  const [filteredTokens, isTokenFilterActive] = useMemo(() => {
+    return searchTradableTokenValue
+      ? [filterTokens(searchTradableTokenValue, order?.allowedTradingAssets || []), true]
+      : [order?.allowedTradingAssets || [], false];
+  }, [searchTradableTokenValue, order?.allowedTradingAssets]);
+
+  useEffect(() => {
+    if (!order) {
+      return;
+    }
+    // initial calculation
+    const calc = () => {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const endTimestamp = nowInSeconds + Number(order?.positionDuration);
+      const formatted = timestampToDateString(endTimestamp, { withSeconds: true });
+      setFormattedEndTime(formatted);
+    };
+
+    calc(); // call immediately after mount
+
+    const interval = setInterval(() => {
+      calc(); // recalculate every minute
+    }, 60_000); // 60 seconds
+
+    return () => clearInterval(interval); // cleanup on unmount
+  }, [order, order?.positionDuration]);
 
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
-      <DialogHeader onClose={() => setIsOpen(false)} title={"Review lending order"} />
+      <DialogHeader onClose={() => setIsOpen(false)} title={"Review borrow"} />
 
-      <div className="card-spacing-x card-spacing-b min-w-[600px]">
-        <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4">
-          <p className="text-secondary-text text-14">Loan amount</p>
-          <div className="flex justify-between items-center my-1">
-            <span className="font-medium text-20">1000</span>
-            <span className="flex items-center gap-2">
-              <Image src={"/images/tokens/placeholder.svg"} alt={"USDT"} width={32} height={32} />
-              <span>USDT</span>
-              <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} />
-            </span>
-          </div>
-          <p className="text-tertiary-text text-14">$1,000.00</p>
-        </div>
-        {status === CreateMarginPositionStatus.INITIAL && (
+      <div className="card-spacing-x card-spacing-b w-[600px]">
+        {!isFinalStatus && (
+          <>
+            <InputLabel inputSize={InputSize.LARGE} label="You send" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4 text-14">
+                <p className="text-secondary-text ">Collateral</p>
+                <div className="flex items-center gap-1 items-center my-1">
+                  <Image
+                    className="mr-1"
+                    src={"/images/tokens/placeholder.svg"}
+                    alt={values.collateralToken?.symbol || "Unknown"}
+                    width={20}
+                    height={20}
+                  />
+                  <span className="">{formatFloat(values.collateralAmount)}</span>
+                  <span className="text-secondary-text">
+                    {values.collateralToken?.symbol || "Unknown"}
+                  </span>
+                  <Badge
+                    size="small"
+                    variant={BadgeVariant.STANDARD}
+                    standard={values.collateralTokenStandard}
+                  />
+                </div>
+              </div>
+              <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4 text-14">
+                <p className="text-secondary-text ">Liquidation fee</p>
+                <div className="flex items-center gap-1 items-center my-1">
+                  <Image
+                    className="mr-1"
+                    src={"/images/tokens/placeholder.svg"}
+                    alt={order.liquidationRewardAsset.symbol || "Unknown"}
+                    width={20}
+                    height={20}
+                  />
+                  <span className="">{formatFloat(order.liquidationRewardAmount.formatted)}</span>
+                  <span className="text-secondary-text">
+                    {order.liquidationRewardAsset.symbol || "Unknown"}
+                  </span>
+                  <Badge
+                    size="small"
+                    variant={BadgeVariant.STANDARD}
+                    standard={order.liquidationRewardAssetStandard}
+                  />
+                </div>
+              </div>
+            </div>
+            <InputLabel inputSize={InputSize.LARGE} label="You receive" />
+            <div className="bg-tertiary-bg rounded-3 py-[14px] px-5 mb-4 text-14 flex items-center justify-between">
+              <p className="text-secondary-text ">Borrow</p>
+              <div className="flex items-center gap-1">
+                <Image
+                  className="mr-1"
+                  src={"/images/tokens/placeholder.svg"}
+                  alt={order.baseAsset?.symbol || "Unknown"}
+                  width={20}
+                  height={20}
+                />
+                <span className="">{formatFloat(values.borrowAmount)}</span>
+                <span className="text-secondary-text">{order.baseAsset?.symbol || "Unknown"}</span>
+                {/*<Badge*/}
+                {/*  size="small"*/}
+                {/*  variant={BadgeVariant.STANDARD}*/}
+                {/*  standard={values.collateralTokenStandard}*/}
+                {/*/>*/}
+              </div>
+            </div>
+          </>
+        )}
+
+        {isInitialStatus && (
           <>
             <div className="flex flex-col gap-2 mb-5">
               <LendingOrderDetailsRow
-                title="Margin positions duration"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Lending order deadline"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
                 title="Interest rate per month"
-                value={"30 days"}
+                value={`${order.interestRate / 100}%`}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
                 title="Interest rate for the entire period"
-                value={"30 days"}
+                value={calculatePeriodInterestRate(order.interestRate, order.positionDuration)}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
-                title="You will receive for the entire period"
-                value={"30 days"}
+                title="Max leverage"
+                value={`${order.leverage}x`}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
                 title="Leverage"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow title="LTV" value={"30 days"} tooltipText="Tooltip text" />
-              <LendingOrderDetailsRow
-                title="Accepted collateral tokens"
-                value={"30 days"}
+                value={`${values.leverage}x`}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
-                title="Tokens allowed for trading"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Minimum borrowing amount"
-                value={"30 days"}
+                title="Deadline"
+                value={formattedEndTime}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
                 title="Order currency limit"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="May initiate liquidation"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Pays the liquidation deposit"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Liquidation fee (for liquidator)"
-                value={"30 days"}
-                tooltipText="Tooltip text"
-              />
-              <LendingOrderDetailsRow
-                title="Liquidation fee (for lender)"
-                value={"30 days"}
+                value={order.currencyLimit}
                 tooltipText="Tooltip text"
               />
               <LendingOrderDetailsRow
                 title="Liquidation price source"
-                value={"30 days"}
+                value={
+                  <ExternalTextLink
+                    text="Dex223 Market"
+                    href={getExplorerLink(
+                      ExplorerLinkType.ADDRESS,
+                      ORACLE_ADDRESS[chainId],
+                      chainId,
+                    )}
+                  />
+                }
                 tooltipText="Tooltip text"
               />
             </div>
-            <div
-              className={clsx(
-                "bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2 min-h-12 mt-5 gap-5 mb-5",
-                // parseUnits(amountToApprove, paymentToken.token.decimals) <
-                //   paymentToken.price * BigInt(tokensToList.length) && "pb-[26px]",
-              )}
-            >
-              <div className="flex items-center gap-1 text-secondary-text whitespace-nowrap">
-                <Tooltip
-                  iconSize={20}
-                  text={
-                    " In order to make a swap with ERC-20 token you need to give the DEX contract permission to withdraw your tokens. All DEX'es require this operation. Here you are specifying the amount of tokens that you allow the contract to transfer on your behalf. Note that this amount never expires."
-                  }
-                />
-                <span className="text-14">Approve amount</span>
+            <div className="bg-tertiary-bg rounded-3 px-5 pb-5 pt-3">
+              <div className="flex justify-between mb-3 items-center">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-tertiary-text flex items-center gap-1 text-14">
+                    <Tooltip text="Tooltip text" iconSize={20} />
+                    Tokens allowed for trading
+                  </h3>
+                </div>
+                <div>
+                  <SearchInput
+                    value={searchTradableTokenValue}
+                    onChange={(e) => setSearchTradableTokenValue(e.target.value)}
+                    placeholder="Token name"
+                    className="h-8 text-14 w-[180px] rounded-2"
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-2 flex-grow justify-end">
-                {!isEditApproveActive ? (
-                  <span className="text-14">
-                    {1000} {"USDT"}
-                  </span>
-                ) : (
-                  <div className="flex-grow">
-                    <div className="relative w-full flex-grow">
-                      <Input
-                        // isError={
-                        //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                        //   paymentToken.price * BigInt(tokensToList.length)
-                        // }
-                        className="h-8 pl-3"
-                        // value={amountToApprove}
-                        // onChange={(e) => setAmountToApprove(e.target.value)}
-                        type="text"
-                      />
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text">
-                        {"USDT"}
-                      </span>
-                    </div>
-                    {/*{parseUnits(amountToApprove, paymentToken.token.decimals) <*/}
-                    {/*  paymentToken.price * BigInt(tokensToList.length) && (*/}
-                    {/*  <span className="text-red-light absolute text-12 translate-y-0.5">*/}
-                    {/*    Must be higher or equal{" "}*/}
-                    {/*    {formatUnits(*/}
-                    {/*      paymentToken.price * BigInt(tokensToList.length),*/}
-                    {/*      paymentToken.token.decimals,*/}
-                    {/*    )}*/}
-                    {/*  </span>*/}
-                    {/*)}*/}
+
+              {!!filteredTokens.length && (
+                <SimpleBar style={{ maxHeight: 216 }}>
+                  <div className="flex gap-1 flex-wrap">
+                    {filteredTokens.map((tradingToken) => {
+                      return tradingToken.isToken ? (
+                        <span
+                          key={tradingToken.address0}
+                          className="bg-quaternary-bg text-secondary-text px-2 py-1 rounded-2 hocus:bg-green-bg duration-200"
+                        >
+                          {tradingToken.symbol}
+                        </span>
+                      ) : (
+                        <div className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1">
+                          {tradingToken.symbol}
+                        </div>
+                      );
+                    })}
                   </div>
+                </SimpleBar>
+              )}
+              {!filteredTokens.length && isTokenFilterActive && (
+                <div className="rounded-5 h-[76px] -mt-5 flex items-center justify-center text-secondary-text bg-empty-not-found-token bg-no-repeat bg-right-top bg-[length:64px_64px] -mr-5">
+                  Token not found
+                </div>
+              )}
+            </div>
+            {isFeeAndCollateralSame ? (
+              <>
+                {values.collateralToken && (
+                  <ApproveAmountConfig
+                    amountToApprove={amountToApprove}
+                    setAmountToApprove={setAmountToApprove}
+                    minAmount={
+                      parseUnits(values.collateralAmount, values.collateralToken?.decimals ?? 18) +
+                      order.liquidationRewardAmount.value
+                    }
+                    isEditApproveActive={isEditApproveActive}
+                    setEditApproveActive={setEditApproveActive}
+                    asset={values.collateralToken}
+                  />
                 )}
-                {!isEditApproveActive ? (
-                  <Button
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(true)}
-                  >
-                    Edit
-                  </Button>
-                ) : (
-                  <Button
-                    // disabled={
-                    //   parseUnits(amountToApprove, paymentToken.token.decimals) <
-                    //   paymentToken.price * BigInt(tokensToList.length)
-                    // }
-                    size={ButtonSize.EXTRA_SMALL}
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => setEditApproveActive(false)}
-                  >
-                    Save
-                  </Button>
-                )}
-              </div>
-            </div>{" "}
+              </>
+            ) : (
+              <>
+                <>
+                  {values.collateralToken && (
+                    <ApproveAmountConfig
+                      amountToApprove={amountToApprove}
+                      setAmountToApprove={setAmountToApprove}
+                      minAmount={parseUnits(
+                        values.collateralAmount,
+                        values.collateralToken?.decimals ?? 18,
+                      )}
+                      isEditApproveActive={isEditApproveActive}
+                      setEditApproveActive={setEditApproveActive}
+                      asset={values.collateralToken}
+                    />
+                  )}
+                </>
+                <>
+                  {values.collateralToken && (
+                    <ApproveAmountConfig
+                      amountToApprove={feeAmountToApprove}
+                      setAmountToApprove={setFeeAmountToApprove}
+                      minAmount={order.liquidationRewardAmount.value}
+                      isEditApproveActive={isEditApproveFeeActive}
+                      setEditApproveActive={setEditApproveFeeActive}
+                      asset={order.liquidationRewardAsset}
+                    />
+                  )}
+                </>
+              </>
+            )}
           </>
         )}
+        {isFinalStatus && (
+          <div className="pb-3 border-b border-secondary-border mb-4">
+            <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
+              {status === CreateMarginPositionStatus.ERROR_BORROW && (
+                <EmptyStateIcon iconName="warning" />
+              )}
+              {status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && (
+                <EmptyStateIcon iconName="warning" />
+              )}
+              {status === CreateMarginPositionStatus.ERROR_APPROVE_LIQUIDATION_FEE && (
+                <EmptyStateIcon iconName="warning" />
+              )}
 
-        <CreateMarginPositionActionButton />
+              {status === CreateMarginPositionStatus.SUCCESS && (
+                <>
+                  <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
+                  <Svg
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
+                    iconName={"success"}
+                    size={65}
+                  />
+                </>
+              )}
+            </div>
+
+            {status === CreateMarginPositionStatus.SUCCESS && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 ">Successfully borrowed</h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+                <div className="flex justify-center">
+                  <ExternalTextLink
+                    text="View my position"
+                    href={`/${locale}/margin-trading/position/${positionId}`}
+                  />
+                </div>
+              </div>
+            )}
+
+            {status === CreateMarginPositionStatus.ERROR_BORROW && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Failed to confirm a borrowing
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+              </div>
+            )}
+
+            {status === CreateMarginPositionStatus.ERROR_APPROVE_BORROW && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Approve failed
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+              </div>
+            )}
+
+            {status === CreateMarginPositionStatus.ERROR_TRANSFER && (
+              <div>
+                <h2 className="text-center mb-1 font-bold text-20 text-red-light">
+                  Transfer to contract failed
+                </h2>
+                <p className="text-center mb-1">
+                  {order.baseAsset.symbol} {values.borrowAmount}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+        <CreateMarginPositionActionButton
+          orderId={orderId}
+          order={order}
+          amountToApprove={amountToApprove}
+          feeAmountToApprove={feeAmountToApprove}
+        />
       </div>
     </DrawerDialog>
   );

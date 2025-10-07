@@ -1,4 +1,3 @@
-import gql from "graphql-tag";
 import { useMemo } from "react";
 
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -16,6 +15,7 @@ export enum PoolState {
   LOADING,
   NOT_EXISTS,
   EXISTS,
+  EXISTS_WITH_NO_LIQUIDITY,
   INVALID,
   IDLE,
 }

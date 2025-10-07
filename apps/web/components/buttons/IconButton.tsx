@@ -9,9 +9,9 @@ import { copyToClipboard } from "@/functions/copyToClipboard";
 import addToast from "@/other/toast";
 
 export enum SortingType {
-  NONE,
-  ASCENDING,
-  DESCENDING,
+  NONE = "none",
+  ASCENDING = "asc",
+  DESCENDING = "desc",
 }
 export enum IconSize {
   SMALL = 20,

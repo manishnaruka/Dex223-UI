@@ -8,6 +8,7 @@ import Popover from "@/components/atoms/Popover";
 import Svg from "@/components/atoms/Svg";
 import { MobileLink } from "@/components/common/MobileMenu";
 import { useFeedbackDialogStore } from "@/components/dialogs/stores/useFeedbackDialogStore";
+import { isMarginModuleEnabled } from "@/config/modules";
 import { IconName } from "@/config/types/IconName";
 import { usePathname } from "@/i18n/routing";
 
@@ -66,18 +67,26 @@ const menuItems: Array<
           className="min-w-[238px]"
         />
         <MobileLink
-          disabled
-          isActive={pathname === "/margin-trading"}
-          href="/margin-trading"
+          disabled={!isMarginModuleEnabled}
+          isActive={pathname === "/margin-swap"}
+          href="/margin-swap"
           iconName="margin-trading"
           title={t("margin_trading")}
           handleClose={handleClose}
-          className="min-w-[238px] pr-5"
-          comingSoon
+          className={clsx("min-w-[238px]", !isMarginModuleEnabled && "pr-5")}
+          comingSoon={!isMarginModuleEnabled}
+        />
+        <MobileLink
+          isActive={pathname === "/buy-crypto"}
+          href="/buy-crypto"
+          iconName="wallet"
+          title={t("buy_crypto")}
+          handleClose={handleClose}
+          className="min-w-[238px]"
         />
       </div>
     ),
-    activeFlags: ["/swap", "/margin-trading"],
+    activeFlags: ["/swap", "/margin-trading", "/buy-crypto"],
   },
   {
     label: "pools",
@@ -85,7 +94,7 @@ const menuItems: Array<
   },
   {
     label: "borrow_lend",
-    href: "#",
+    href: "/margin-trading",
   },
   {
     label: "portfolio",
@@ -189,11 +198,29 @@ function NavigationMoreDropdown() {
           <div className="flex flex-col mt-2 mb-2">
             <MobileLink
               href="#"
+              iconName="star"
+              title="Feedback"
+              handleClose={() => setSubmenuOpened(false)}
+              handleClick={(e) => {
+                e.preventDefault();
+                setIsOpen(true);
+              }}
+              linkClassName="pr-10"
+            />
+            <MobileLink
+              href="#"
               iconName="list"
               title="Token lists"
               handleClose={() => setSubmenuOpened(false)}
               className="pr-5"
               disabled
+            />
+            <MobileLink
+              href="/create-token"
+              iconName="list-tokens"
+              title="Create a new token"
+              handleClose={() => setSubmenuOpened(false)}
+              linkClassName="pr-10"
             />
             <MobileLink
               isExternal
@@ -202,17 +229,6 @@ function NavigationMoreDropdown() {
               title="Blog"
               handleClose={() => setSubmenuOpened(false)}
               className="pr-5"
-            />
-            <MobileLink
-              href="#"
-              iconName="star"
-              title="Feedback"
-              handleClose={() => setSubmenuOpened(false)}
-              className="pr-5"
-              handleClick={(e) => {
-                e.preventDefault();
-                setIsOpen(true);
-              }}
             />
             <MobileLink
               disabled

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 
-import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCollateralTokensDialogOpened";
+import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import Dialog from "@/components/atoms/Dialog";
 import DialogHeader from "@/components/atoms/DialogHeader";
 import { SearchInput } from "@/components/atoms/Input";
@@ -16,6 +16,7 @@ import { TokenPortfolioDialogContent } from "@/components/dialogs/TokenPortfolio
 import { clsxMerge } from "@/functions/clsxMerge";
 import { filterTokens } from "@/functions/searchTokens";
 import { useTokens } from "@/hooks/useTokenLists";
+import addToast from "@/other/toast";
 import { Currency } from "@/sdk_bi/entities/currency";
 
 function TokenRowWithCheckbox({
@@ -90,11 +91,13 @@ export default function PickMultipleTokensDialog({
   setIsOpen,
   handlePick,
   selectedTokens,
+  restrictDisable,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handlePick: (tokens: Currency[]) => void;
   selectedTokens: Currency[];
+  restrictDisable?: Currency | undefined;
 }) {
   const t = useTranslations("ManageTokens");
 
@@ -167,79 +170,91 @@ export default function PickMultipleTokensDialog({
                 </div>
                 <div className={clsxMerge("flex-grow flex min-h-0 overflow-hidden")}>
                   {Boolean(filteredTokens.length) && (
-                    <ScrollbarContainer
-                      scrollableNodeProps={{
-                        ref: parentRef,
-                      }}
-                      height="full"
-                    >
-                      <div
-                        className={clsx(
-                          "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2 pt-3 pl-2 pr-3",
-                        )}
-                        style={{
-                          paddingTop,
-                          paddingBottom,
+                    <>
+                      <ScrollbarContainer
+                        scrollableNodeProps={{
+                          ref: parentRef,
                         }}
+                        height="full"
                       >
-                        {items.map((item) => {
-                          const token = filteredTokens[item.index];
-                          // if (simpleForm)
-                          return (
-                            <TokenRowWithCheckbox
-                              setTokenForPortfolio={setTokenForPortfolio}
-                              setSelected={() => {
-                                const isInList = Boolean(
-                                  internalTokens.find((_token) => _token.name === token.name),
-                                );
-
-                                if (isInList) {
-                                  setInternalTokens(
-                                    internalTokens.filter((_token) => _token.name !== token.name),
+                        <div
+                          className={clsx(
+                            "flex flex-col gap-2 md:gap-0 pl-4 md:pl-0 pr-4 md:pr-[11px] pb-2 pt-3 pl-2 pr-3",
+                          )}
+                          style={{
+                            paddingTop,
+                            paddingBottom,
+                          }}
+                        >
+                          {items.map((item) => {
+                            const token = filteredTokens[item.index];
+                            // if (simpleForm)
+                            return (
+                              <TokenRowWithCheckbox
+                                setTokenForPortfolio={setTokenForPortfolio}
+                                setSelected={() => {
+                                  const isInList = Boolean(
+                                    internalTokens.find((_token) => _token.name === token.name),
                                   );
-                                } else {
-                                  setInternalTokens([...internalTokens, token]);
+
+                                  if (isInList) {
+                                    if (restrictDisable && restrictDisable.equals(token)) {
+                                      return addToast(
+                                        "You can't disable base order token",
+                                        "warning",
+                                      );
+                                    }
+
+                                    setInternalTokens(
+                                      internalTokens.filter((_token) => _token.name !== token.name),
+                                    );
+                                  } else {
+                                    setInternalTokens([...internalTokens, token]);
+                                  }
+                                }}
+                                key={
+                                  token.isToken
+                                    ? token.address0
+                                    : `native-${token.wrapped.address0}`
                                 }
-                              }}
-                              key={
-                                token.isToken ? token.address0 : `native-${token.wrapped.address0}`
-                              }
-                              currency={token}
-                              isSelected={
-                                !!internalTokens.find(
-                                  (_token) => _token.wrapped.address0 === token.wrapped.address0,
-                                )
-                              }
-                            />
-                          );
-                        })}
-                      </div>
-                    </ScrollbarContainer>
+                                currency={token}
+                                isSelected={
+                                  !!internalTokens.find(
+                                    (_token) => _token.wrapped.address0 === token.wrapped.address0,
+                                  )
+                                }
+                              />
+                            );
+                          })}
+                        </div>
+                      </ScrollbarContainer>
+                    </>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-3 card-spacing-x border-t border-secondary-border py-5">
-                  <Button
-                    type="button"
-                    fullWidth
-                    colorScheme={ButtonColor.LIGHT_GREEN}
-                    onClick={() => {
-                      handleClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    fullWidth
-                    onClick={() => {
-                      handlePick(internalTokens);
-                      handleClose();
-                    }}
-                  >
-                    Apply
-                  </Button>
-                </div>
-
+                {Boolean(filteredTokens.length) && (
+                  <div className="grid grid-cols-2 gap-3 card-spacing-x border-t border-secondary-border py-5">
+                    <Button
+                      type="button"
+                      fullWidth
+                      colorScheme={ButtonColor.LIGHT_GREEN}
+                      onClick={() => {
+                        handleClose();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      fullWidth
+                      onClick={() => {
+                        handlePick(internalTokens);
+                        handleClose();
+                      }}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                )}
                 {Boolean(!filteredTokens.length && isTokenFilterActive) && (
                   <div
                     className={clsx(

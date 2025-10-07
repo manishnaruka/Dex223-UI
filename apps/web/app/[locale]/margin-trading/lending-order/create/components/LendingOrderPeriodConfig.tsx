@@ -8,6 +8,7 @@ import {
   PerpetualPeriodType,
 } from "@/app/[locale]/margin-trading/lending-order/create/steps/types";
 import DateTimePicker from "@/components/atoms/DateTimePicker";
+import { InputSize } from "@/components/atoms/Input";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import RadioButton from "@/components/buttons/RadioButton";
 import Tab from "@/components/tabs/Tab";
@@ -29,7 +30,7 @@ export default function LendingOrderPeriodConfig({
 }) {
   return (
     <div className="bg-tertiary-bg rounded-3 py-4 px-5 mb-4">
-      <InputLabel label="Period type" />
+      <InputLabel inputSize={InputSize.LARGE} label="Period type" />
       <div className="grid grid-cols-2 gap-2 mb-4 mt-1">
         {[LendingOrderPeriodType.FIXED, LendingOrderPeriodType.PERPETUAL].map((_period) => (
           <RadioButton
@@ -39,6 +40,7 @@ export default function LendingOrderPeriodConfig({
             onClick={() => {
               setValues({ ...values, type: _period });
             }}
+            disabled={_period === LendingOrderPeriodType.PERPETUAL}
           >
             {labelsMap[_period]}
           </RadioButton>

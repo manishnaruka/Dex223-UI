@@ -12,7 +12,7 @@ import {
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 
-type FirstStepValues = {
+export type FirstStepValues = {
   interestRatePerMonth: string;
   period: LendingOrderPeriod;
   loanToken: Currency | undefined;
@@ -20,10 +20,9 @@ type FirstStepValues = {
   loanTokenStandard: Standard;
 };
 
-type SecondStepValues = {
+export type SecondStepValues = {
   leverage: number;
   collateralTokens: Currency[];
-  includeERC223Collateral: boolean;
   minimumBorrowingAmount: string;
   tradingTokens: LendingOrderTradingTokens;
 };
@@ -68,7 +67,6 @@ export const useCreateOrderConfigStore = create<CreateOrderConfig>((set, get) =>
     leverage: 5,
     minimumBorrowingAmount: "",
     collateralTokens: [],
-    includeERC223Collateral: false,
 
     tradingTokens: {
       inputMode: TradingTokensInputMode.MANUAL,
@@ -85,11 +83,21 @@ export const useCreateOrderConfigStore = create<CreateOrderConfig>((set, get) =>
     orderCurrencyLimit: "",
     liquidationFeeToken: undefined,
     liquidationFeeForLiquidator: "",
-    liquidationFeeForLender: "",
+    liquidationFeeForLender: "0",
     priceSource: "",
   },
 
-  setFirstStepValues: (firstStepValues: FirstStepValues) => set({ firstStepValues }),
+  setFirstStepValues: (firstStepValues: FirstStepValues) =>
+    set({
+      firstStepValues,
+      secondStepValues: {
+        ...get().secondStepValues,
+        tradingTokens: {
+          ...get().secondStepValues.tradingTokens,
+          allowedTokens: [firstStepValues.loanToken!],
+        },
+      },
+    }),
   setSecondStepValues: (secondStepValues: SecondStepValues) => set({ secondStepValues }),
   setThirdStepValues: (thirdStepValues: ThirdStepValues) => set({ thirdStepValues }),
 }));

@@ -42,10 +42,6 @@ export const useFetchPoolData = (chainId: number) => {
   return useCallback(
     async (key: string, address: Address, token0: Currency, token1: Currency, tier: FeeAmount) => {
       try {
-        console.log(address);
-        console.log(token0);
-        console.log(tier);
-
         if (address === ZERO_ADDRESS) {
           return null;
         }

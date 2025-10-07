@@ -19,7 +19,6 @@ import ConfirmListingDialog from "@/app/[locale]/token-listing/add/components/Co
 import useAutoListing from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import { useAutoListingSearchParams } from "@/app/[locale]/token-listing/add/hooks/useAutolistingSearchParams";
 import { useListTokenEstimatedGas } from "@/app/[locale]/token-listing/add/hooks/useListToken";
-import { useListTokenStatus } from "@/app/[locale]/token-listing/add/hooks/useListTokenStatus";
 import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useChooseAutoListingDialogStore } from "@/app/[locale]/token-listing/add/stores/useChooseAutoListingDialogStore";
 import { useChoosePaymentDialogStore } from "@/app/[locale]/token-listing/add/stores/useChoosePaymentDialogStore";
@@ -30,6 +29,10 @@ import {
   useListTokensGasPriceStore,
 } from "@/app/[locale]/token-listing/add/stores/useListTokensGasSettings";
 import { useListTokensStore } from "@/app/[locale]/token-listing/add/stores/useListTokensStore";
+import {
+  ListTokenStatus,
+  useListTokenStatusStore,
+} from "@/app/[locale]/token-listing/add/stores/useListTokenStatusStore";
 import { usePaymentTokenStore } from "@/app/[locale]/token-listing/add/stores/usePaymentTokenStore";
 import { useTokenListingRecentTransactionsStore } from "@/app/[locale]/token-listing/add/stores/useTokenListingRecentTransactionsStore";
 import Container from "@/components/atoms/Container";
@@ -50,15 +53,16 @@ import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { useFees } from "@/hooks/useFees";
-import { PoolState, usePool } from "@/hooks/usePools";
-import { useRecentTransactionTracking } from "@/hooks/useRecentTransactionTracking";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
+import { PoolState, useStorePools } from "@/hooks/usePools";
 import { useTokens } from "@/hooks/useTokenLists";
 import { useRouter } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
 import { FeeAmount } from "@/sdk_bi/constants";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Token } from "@/sdk_bi/entities/token";
+import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { GasFeeModel, GasOption } from "@/stores/factories/createGasPriceStore";
 
 function OpenConfirmListTokenButton({
@@ -75,9 +79,8 @@ function OpenConfirmListTokenButton({
   const { tokenA, tokenB } = useListTokensStore();
 
   const { setIsOpen: setConfirmListTokenDialogOpened } = useConfirmListTokenDialogStore();
-
-  const { isLoadingList, isLoadingApprove, isPendingApprove, isPendingList } = useListTokenStatus();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
+  const { status } = useListTokenStatusStore();
 
   if (!isConnected) {
     return (
@@ -92,7 +95,7 @@ function OpenConfirmListTokenButton({
     );
   }
 
-  if (isLoadingList) {
+  if (status === ListTokenStatus.LOADING_LIST_TOKEN) {
     return (
       <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
@@ -103,7 +106,7 @@ function OpenConfirmListTokenButton({
     );
   }
 
-  if (isLoadingApprove) {
+  if (status === ListTokenStatus.LOADING_APPROVE) {
     return (
       <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
@@ -114,7 +117,7 @@ function OpenConfirmListTokenButton({
     );
   }
 
-  if (isPendingApprove || isPendingList) {
+  if (status === ListTokenStatus.PENDING_LIST_TOKEN || status === ListTokenStatus.PENDING_APPROVE) {
     return (
       <Button size={ButtonSize.EXTRA_LARGE} tabletSize={ButtonSize.LARGE} fullWidth isLoading>
         <span className="flex items-center gap-2">
@@ -166,6 +169,9 @@ const gasOptionTitle: Record<GasOption, any> = {
   [GasOption.FAST]: "fast",
   [GasOption.CUSTOM]: "custom",
 };
+
+const poolsFees = [FeeAmount.LOW, FeeAmount.MEDIUM, FeeAmount.HIGH];
+
 export default function ListTokenPage() {
   useAutoListingSearchParams();
   const t = useTranslations("Swap");
@@ -177,7 +183,6 @@ export default function ListTokenPage() {
   const { isOpened: showRecentTransactions, setIsOpened: setShowRecentTransactions } =
     useTokenListingRecentTransactionsStore();
 
-  useRecentTransactionTracking();
   useListTokenEstimatedGas();
 
   const [isOpenedFee, setIsOpenedFee] = useState(false);
@@ -185,12 +190,18 @@ export default function ListTokenPage() {
   const { autoListing, paymentToken } = useAutoListing();
 
   const { tokenA, tokenB, setTokenA, setTokenB } = useListTokensStore();
-  const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
 
-  const isPoolExists = useMemo(
-    () => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID,
-    [pool],
+  const pools = useStorePools(
+    poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
   );
+
+  const pool = useMemo(() => {
+    return pools.find((pool) => pool[0] !== PoolState.NOT_EXISTS && pool[0] !== PoolState.INVALID);
+  }, [pools]);
+
+  // const pool = usePool({ currencyA: tokenA, currencyB: tokenB, tier: FeeAmount.MEDIUM });
+
+  const isPoolExists = useMemo(() => Boolean(pool), [pool]);
 
   const destination = useMemo(() => {
     const dest = params.get("dest");
@@ -209,8 +220,7 @@ export default function ListTokenPage() {
   const [isPickTokenOpened, setPickTokenOpened] = useState(false);
   const [currentlyPicking, setCurrentlyPicking] = useState<"tokenA" | "tokenB">("tokenA");
 
-  const { isLoadingList, isLoadingApprove, isPendingApprove, isPendingList } = useListTokenStatus();
-
+  const { status } = useListTokenStatusStore();
   const {
     gasPriceOption,
     gasPriceSettings,
@@ -300,7 +310,7 @@ export default function ListTokenPage() {
 
   const tokensToList = useTokensToList();
 
-  const { baseFee, gasPrice, priorityFee } = useFees();
+  const { baseFee, gasPrice } = useGlobalFees();
 
   const formattedGasPrice = useMemo(() => {
     if (gasPriceOption !== GasOption.CUSTOM) {
@@ -351,6 +361,7 @@ export default function ListTokenPage() {
   const locale = useLocale();
 
   const isMobile = useMediaQuery({ query: "(max-width: 519px)" });
+  const nativeCurrency = useNativeCurrency();
 
   return (
     <>
@@ -596,7 +607,7 @@ export default function ListTokenPage() {
                                 alt=""
                               />
                               {paymentToken?.token && isZeroAddress(paymentToken.token.address)
-                                ? "ETH"
+                                ? nativeCurrency.symbol
                                 : paymentToken?.token.symbol}
                               <Badge
                                 variant={BadgeVariant.COLORED}
@@ -627,16 +638,21 @@ export default function ListTokenPage() {
                                   alt=""
                                 />
 
-                                {paymentToken?.token.symbol}
-                                <Badge
-                                  variant={BadgeVariant.COLORED}
-                                  color="green"
-                                  text={
-                                    paymentToken?.token && isZeroAddress(paymentToken.token.address)
-                                      ? "Native"
-                                      : "ERC-20"
-                                  }
-                                />
+                                {isZeroAddress(paymentToken.token.address)
+                                  ? nativeCurrency.symbol
+                                  : paymentToken.token.symbol}
+                                {!isZeroAddress(paymentToken.token.address) ? (
+                                  <Badge
+                                    variant={BadgeVariant.STANDARD}
+                                    standard={Standard.ERC20}
+                                  />
+                                ) : (
+                                  <Badge
+                                    variant={BadgeVariant.COLORED}
+                                    color="green"
+                                    text="Native"
+                                  />
+                                )}
                               </span>
                             </div>
                           )}
@@ -690,15 +706,26 @@ export default function ListTokenPage() {
                   </div>
                 </div>
 
-                {(isLoadingList || isPendingList || isPendingApprove || isLoadingApprove) && (
+                {[
+                  ListTokenStatus.PENDING_LIST_TOKEN,
+                  ListTokenStatus.PENDING_APPROVE,
+                  ListTokenStatus.LOADING_LIST_TOKEN,
+                  ListTokenStatus.LOADING_APPROVE,
+                ].includes(status) && (
                   <div className="flex justify-between px-5 py-3 rounded-2 bg-tertiary-bg mb-5">
                     <div className="flex items-center gap-2 text-14">
                       <Preloader size={20} />
 
-                      {isLoadingList && <span>List token processing</span>}
-                      {isPendingList && <span>{t("waiting_for_confirmation")}</span>}
-                      {isLoadingApprove && <span>{t("approving_in_progress")}</span>}
-                      {isPendingApprove && <span>{t("waiting_for_confirmation")}</span>}
+                      {status === ListTokenStatus.LOADING_LIST_TOKEN && (
+                        <span>List token processing</span>
+                      )}
+                      {status === ListTokenStatus.PENDING_LIST_TOKEN ||
+                        (status === ListTokenStatus.PENDING_APPROVE && (
+                          <span>{t("waiting_for_confirmation")}</span>
+                        ))}
+                      {status === ListTokenStatus.LOADING_APPROVE && (
+                        <span>{t("approving_in_progress")}</span>
+                      )}
                     </div>
 
                     <Button

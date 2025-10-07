@@ -36,7 +36,7 @@ export interface RecentTransaction {
 }
 
 export class DatabaseDexie extends Dexie {
-  // 'tokenLists' is added by dexie when declaring the stores()
+  // 'tokenLists' is added by dexie when declaring the hooks()
   // We just tell the typing system this is the case
   tokenLists!: Table<TokenList>;
   recentTransactions!: Table<RecentTransaction, string>;

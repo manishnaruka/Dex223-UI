@@ -6,12 +6,10 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { Address, formatGwei, parseUnits } from "viem";
-import { useGasPrice } from "wagmi";
+import { Address, formatEther, formatGwei, parseUnits } from "viem";
 
 import SwapDetailsRow from "@/app/[locale]/swap/components/SwapDetailsRow";
 import useSwap, { useSwapStatus } from "@/app/[locale]/swap/hooks/useSwap";
-import { useTrade } from "@/app/[locale]/swap/hooks/useTrade";
 import { useConfirmSwapDialogStore } from "@/app/[locale]/swap/stores/useConfirmSwapDialogOpened";
 import { useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import {
@@ -47,6 +45,8 @@ import { Percent } from "@/sdk_bi/entities/fractions/percent";
 import { Trade } from "@/sdk_bi/entities/trade";
 import { wrappedTokens } from "@/sdk_bi/entities/weth9";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
 import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 
 //TODO: refactor approve rows
@@ -432,8 +432,6 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
 
   const { isOpen, setIsOpen } = useConfirmSwapDialogStore();
 
-  console.log("Trade", trade);
-
   const dependentAmount: CurrencyAmount<Currency> | undefined = useMemo(() => {
     return trade?.outputAmount;
   }, [trade?.outputAmount]);
@@ -489,19 +487,24 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
     }
   }, [typedValue]);
 
-  const { gasPriceSettings } = useSwapGasPriceStore();
-  const { data: baseFee } = useGasPrice();
+  const { gasPriceSettings, gasPriceOption } = useSwapGasPriceStore();
+  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
 
   const computedGasSpending = useMemo(() => {
     if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
       return formatFloat(formatGwei(gasPriceSettings.gasPrice));
     }
 
+    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPrice) {
+      return formatFloat(formatGwei(gasPrice));
+    }
+
     if (
       gasPriceSettings.model === GasFeeModel.EIP1559 &&
       gasPriceSettings.maxFeePerGas &&
       gasPriceSettings.maxPriorityFeePerGas &&
-      baseFee
+      baseFee &&
+      gasPriceOption === GasOption.CUSTOM
     ) {
       const lowerFeePerGas =
         gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
@@ -509,8 +512,50 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
       return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
     }
 
+    if (
+      gasPriceSettings.model === GasFeeModel.EIP1559 &&
+      baseFee &&
+      priorityFee &&
+      gasPriceOption !== GasOption.CUSTOM
+    ) {
+      return formatFloat(formatGwei(baseFee + priorityFee));
+    }
+
     return "0";
-  }, [baseFee, gasPriceSettings]);
+  }, [baseFee, gasPrice, gasPriceOption, gasPriceSettings, priorityFee]);
+
+  const computedGasSpendingETH = useMemo(() => {
+    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
+      return formatFloat(formatEther(gasPriceSettings.gasPrice * estimatedGas));
+    }
+
+    if (
+      gasPriceSettings.model === GasFeeModel.EIP1559 &&
+      gasPriceSettings.maxFeePerGas &&
+      gasPriceSettings.maxPriorityFeePerGas &&
+      baseFee &&
+      gasPriceOption === GasOption.CUSTOM
+    ) {
+      const lowerFeePerGas =
+        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
+
+      return formatFloat(
+        formatEther((lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas) * estimatedGas),
+      );
+    }
+
+    if (
+      gasPriceSettings.model === GasFeeModel.EIP1559 &&
+      baseFee &&
+      priorityFee &&
+      gasPriceOption !== GasOption.CUSTOM
+    ) {
+      return formatFloat(formatEther((baseFee + priorityFee) * estimatedGas));
+    }
+
+    return "0";
+  }, [baseFee, estimatedGas, gasPriceOption, gasPriceSettings, priorityFee]);
+
   const isConversion = useMemo(() => tokenB && tokenA?.equals(tokenB), [tokenA, tokenB]);
 
   useEffect(() => {
@@ -547,6 +592,11 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
   const { price: priceB } = useUSDPrice(tokenB?.wrapped.address0);
 
   const { price: priceNative } = useUSDPrice(wrappedTokens[chainId]?.address0);
+
+  const feeMultiplier = useMemo(() => {
+    const fee = trade?.swaps[0].route.pools[0].fee;
+    return fee ? fee / 100000 : 0.3;
+  }, [trade?.swaps]);
 
   return (
     <DrawerDialog
@@ -639,7 +689,7 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
                       {computedGasSpending} GWEI
                     </span>{" "}
                     <span className="mr-1 text-14">
-                      {priceNative && `~$${formatFloat(priceNative * +computedGasSpending)}`}
+                      {priceNative && `~$${formatFloat(priceNative * +computedGasSpendingETH)}`}
                     </span>
                   </div>
                 }
@@ -665,7 +715,7 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
                 title={t("trading_fee")}
                 value={
                   typedValue && Boolean(+typedValue) && tokenA
-                    ? `${(+typedValue * 0.3) / 100} ${tokenA.symbol}`
+                    ? `${formatFloat((+typedValue * feeMultiplier) / 100)} ${tokenA.symbol}`
                     : "Loading..."
                 }
                 tooltipText={t("trading_fee_tooltip")}

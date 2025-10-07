@@ -46,6 +46,7 @@ function ListingVariantCard({
     </div>
   );
 }
+
 export default function TokenListingPage() {
   return (
     <>

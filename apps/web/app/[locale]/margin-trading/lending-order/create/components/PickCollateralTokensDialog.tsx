@@ -1,7 +1,7 @@
 import React from "react";
 
 import PickMultipleTokensDialog from "@/app/[locale]/margin-trading/lending-order/create/components/PickMultipleTokensDialog";
-import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/lending-order/create/stores/useCollateralTokensDialogOpened";
+import { useCollateralTokensDialogOpenedStore } from "@/app/[locale]/margin-trading/stores/dialogStates";
 import { Currency } from "@/sdk_bi/entities/currency";
 
 export default function PickCollateralTokensDialog({

@@ -79,7 +79,7 @@ export function HelperText({
           {helperText}
         </div>
       )}
-      {typeof error !== "undefined" && <p className="text-12 text-red-light h-4">{error}</p>}
+      {typeof error !== "undefined" && <p className="text-12 text-red-light h-4 mt-1">{error}</p>}
       {warning && <p className="text-12 text-orange mt-1 h-4">{warning}</p>}
     </div>
   );
@@ -107,15 +107,17 @@ export default function TextField({
             (() => {
               const { isNumeric, ...rest } = props;
               return (
-                <NumericFormat
-                  inputMode="decimal"
-                  allowedDecimalSeparators={[","]}
-                  isError={Boolean(error) || isError}
-                  isWarning={Boolean(warning) || isWarning}
-                  customInput={Input}
-                  inputSize={inputSize}
-                  {...rest}
-                />
+                <>
+                  <NumericFormat
+                    inputMode="decimal"
+                    allowedDecimalSeparators={[","]}
+                    isError={Boolean(error) || isError}
+                    isWarning={Boolean(warning) || isWarning}
+                    customInput={Input}
+                    inputSize={inputSize}
+                    {...rest}
+                  />
+                </>
               );
             })()
           ) : (

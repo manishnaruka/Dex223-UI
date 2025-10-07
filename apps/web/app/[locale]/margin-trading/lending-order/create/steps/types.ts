@@ -1,7 +1,6 @@
 import { Address } from "viem";
 
 import { AutoListing } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
-import { TokenList } from "@/db/db";
 import { Currency } from "@/sdk_bi/entities/currency";
 
 export enum LendingOrderPeriodType {

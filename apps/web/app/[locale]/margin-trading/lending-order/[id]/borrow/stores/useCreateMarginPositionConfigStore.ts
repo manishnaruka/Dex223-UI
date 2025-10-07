@@ -10,6 +10,7 @@ type MarginPositionValues = {
   collateralTokenStandard: Standard;
   leverage: string;
   liquidationFeeStandard: Standard;
+  collateralAssetId: number;
 };
 
 interface CreateMarginPositionConfig {
@@ -21,11 +22,12 @@ interface CreateMarginPositionConfig {
 export const useCreateMarginPositionConfigStore = create<CreateMarginPositionConfig>(
   (set, get) => ({
     values: {
+      collateralAssetId: 0,
       borrowAmount: "",
       collateralAmount: "",
       collateralToken: undefined,
       collateralTokenStandard: Standard.ERC20,
-      leverage: "1",
+      leverage: "2",
       liquidationFeeStandard: Standard.ERC20,
     },
 
