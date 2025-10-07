@@ -47,6 +47,7 @@ function useListParams() {
   const { autoListingContract } = useAutoListingContractStore();
 
   const autoListing = useAutoListingContract(autoListingContract);
+  const tokensToList = useTokensToList();
 
   const pools = useStorePools(
     poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
@@ -88,16 +89,26 @@ function useListParams() {
       }
 
       if (isZeroAddress(paymentToken.token.address)) {
+        console.log({
+          ...common,
+          args: [...common.args, paymentToken.token.address],
+          value: tokensToList.length
+            ? paymentToken.price * BigInt(tokensToList.length)
+            : paymentToken.price,
+        });
+
         return {
           ...common,
           args: [...common.args, paymentToken.token.address],
-          value: paymentToken.price,
+          value: tokensToList.length
+            ? paymentToken.price * BigInt(tokensToList.length)
+            : paymentToken.price,
         };
       }
 
       return { ...common, args: [...common.args, paymentToken.token.address] };
     }
-  }, [autoListingContract, isFree, paymentToken, pool, poolAddress]);
+  }, [autoListingContract, isFree, paymentToken, pool, poolAddress, tokensToList.length]);
 }
 
 export function useListTokenEstimatedGas() {
@@ -283,7 +294,8 @@ export default function useListToken() {
         } as any);
 
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
+        // const gasToUse = BigInt(0);
+        //
         const { request } = await publicClient.simulateContract({
           ...listParams,
           account: address,
@@ -291,7 +303,10 @@ export default function useListToken() {
           gas: gasToUse,
         } as any);
 
-        hash = await walletClient.writeContract({ ...request, account: undefined });
+        hash = await walletClient.writeContract({
+          ...request,
+          account: undefined,
+        });
 
         closeConfirmInWalletAlert();
 
