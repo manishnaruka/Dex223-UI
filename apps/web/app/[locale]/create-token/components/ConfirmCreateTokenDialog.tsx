@@ -182,7 +182,7 @@ export default function ConfirmCreateTokenDialog({
               <Card title="Symbol" value={createTokenSettings.symbol} />
             </div>
 
-            <div className="rounded-3 bg-tertiary-bg px-5 py-2 flex justify-between items-center">
+            <div className="rounded-3 bg-tertiary-bg px-5 py-3 flex justify-between items-center">
               <span className="text-14 text-secondary-text">Total supply</span>
 
               <div className="flex items-center gap-1">

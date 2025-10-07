@@ -399,16 +399,16 @@ export default function PoolPage({
           enableAnimation={false}
           // duration={5}
         >
-          <div className="flex justify-between items-center py-1.5 -mx-3">
+          <div className="flex justify-between items-center py-1 lg:py-2.5 -mx-3">
             <IconButton
-              buttonSize={IconButtonSize.LARGE}
+              buttonSize={IconButtonSize.REGULAR}
               variant={IconButtonVariant.BACK}
               // iconName="back"
               onClick={() => router.push("/pools/positions")}
             />
             <h2 className="text-18 lg:text-20 font-bold">{t("liquidity_position")}</h2>
             <IconButton
-              buttonSize={IconButtonSize.LARGE}
+              buttonSize={IconButtonSize.REGULAR}
               iconName="recent-transactions"
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
               active={showRecentTransactions}

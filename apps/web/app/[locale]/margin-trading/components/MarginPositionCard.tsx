@@ -20,14 +20,12 @@ import usePositionStatus from "@/app/[locale]/margin-trading/position/[id]/hooks
 import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import { ORACLE_ABI } from "@/config/abis/oracle";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { Link } from "@/i18n/routing";
-import { ORACLE_ADDRESS } from "@/sdk_bi/addresses";
 
 import PositionAsset from "./widgets/PositionAsset";
 

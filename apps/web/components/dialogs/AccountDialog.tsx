@@ -238,7 +238,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                 </ScrollbarContainer>
               </div>
             ) : (
-              <div className="flex flex-col justify-center h-[376px] overflow-auto gap-2 bg-empty-no-pinned-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+              <div className="flex flex-col justify-center h-[476px] overflow-auto gap-2 bg-empty-no-pinned-tokens bg-no-repeat bg-right-top -mx-4 px-4 lg:px-5 -mx-4 lg:-mx-5 -mt-3 pt-3 max-md:bg-size-180">
                 <button
                   onClick={() => {
                     console.log("clicked");
@@ -285,7 +285,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     <Svg iconName="delete" />
                   </button>
                 </div>
-                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={314}>
+                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-3.5 md:pr-3.5" height={414}>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {_transactions.map((transaction) => {
                       return <RecentTransaction transaction={transaction} key={transaction.hash} />;

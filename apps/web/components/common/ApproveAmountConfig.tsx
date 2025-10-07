@@ -3,6 +3,7 @@ import clsx from "clsx";
 import React from "react";
 import { formatUnits, parseUnits } from "viem";
 
+import { SingleAddressToken } from "@/app/[locale]/token-listing/add/hooks/useAutoListing";
 import Input from "@/components/atoms/Input";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { formatFloat } from "@/functions/formatFloat";
@@ -16,7 +17,7 @@ export default function ApproveAmountConfig({
   setAmountToApprove,
   minAmount,
 }: {
-  asset: Currency;
+  asset: Currency | SingleAddressToken;
   isEditApproveActive: boolean;
   setEditApproveActive: (value: boolean) => void;
   amountToApprove: string;
