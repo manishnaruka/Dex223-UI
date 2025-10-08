@@ -404,10 +404,10 @@ export default function ConfirmListingDialog() {
           {isFinalStatus && (
             <div>
               <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
-                {status === ListTokenStatus.ERROR_LIST_TOKEN ||
-                  (status === ListTokenStatus.ERROR_APPROVE && (
-                    <EmptyStateIcon iconName="warning" />
-                  ))}
+                {(status === ListTokenStatus.ERROR_LIST_TOKEN ||
+                  status === ListTokenStatus.ERROR_APPROVE) && (
+                  <EmptyStateIcon iconName="warning" />
+                )}
 
                 {status === ListTokenStatus.SUCCESS && (
                   <>
