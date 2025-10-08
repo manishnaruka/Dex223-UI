@@ -145,7 +145,7 @@ export default function VoteExisting() {
                             <h3 className="text-18 font-bold text-primary-text">Data</h3>
                             <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
                                 <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
-                                    {generateApproveData() || "Transaction data for approving will be displayed here"}
+                                    {generateApproveData() || "Data will be displayed here"}
                                 </div>
                             </div>
                         </div>
@@ -163,6 +163,7 @@ export default function VoteExisting() {
                                 Connect wallet
                             </Button>
                         ) : (
+                            currentTransaction.status !== "approved" && (
                             <div className="flex gap-3">
                                 <Button
                                     colorScheme={ButtonColor.RED}
@@ -179,7 +180,7 @@ export default function VoteExisting() {
                                     APPROVE TRANSACTION
                                 </Button>
                             </div>
-                        )}
+                        ))}
                     </div>
                 )}
                 {!loading && !currentTransaction && transactionId && (

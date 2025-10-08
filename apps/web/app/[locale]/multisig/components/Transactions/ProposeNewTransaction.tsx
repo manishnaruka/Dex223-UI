@@ -8,7 +8,7 @@ import { useAccount, usePublicClient } from "wagmi";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import useMultisigContract from "../../hooks/useMultisigContract";
 import { parseUnits, encodeFunctionData } from "viem";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 import { Currency } from "@/sdk_bi/entities/currency";
 import SelectButton from "@/components/atoms/SelectButton";
@@ -18,6 +18,7 @@ import { useTokens } from "@/hooks/useTokenLists";
 import SelectOption from "@/components/atoms/SelectOption";
 import Popover from "@/components/atoms/Popover";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
+import type { FormikProps } from "formik";
 
 
 const initialValues = {
@@ -54,6 +55,7 @@ export default function ProposeNewTransaction() {
     const [proposeData, setProposeData] = useState<string>("");
     const [estimatedDeadline, setEstimatedDeadline] = useState<string>("");
     const [hasSubmitted, setHasSubmitted] = useState(false);
+    const formikRef = useRef<FormikProps<typeof initialValues> | null>(null);
     const t = useTranslations("Swap");
 
     const {
@@ -150,10 +152,11 @@ export default function ProposeNewTransaction() {
     }, [fetchEstimatedDeadline]);
 
     useEffect(() => {
-        if (transactionStatus === "success" || transactionStatus === "failed" && isTransactionDialogOpen) {
+        if ((transactionStatus === "success" || transactionStatus === "failed") && isTransactionDialogOpen) {
             setSelectedToken(null);
             setProposeData("");
             setHasSubmitted(false);
+            formikRef.current?.resetForm();
             fetchEstimatedDeadline();
         }
     }, [transactionStatus, isTransactionDialogOpen, fetchEstimatedDeadline]);
@@ -170,6 +173,8 @@ export default function ProposeNewTransaction() {
                 validateOnMount={false}
             >
                 {(props) => {
+                    formikRef.current = props;
+                    
                     const newProposeData = generateProposeData(props.values);
                     if (newProposeData !== proposeData) {
                         setProposeData(newProposeData);
@@ -281,7 +286,7 @@ export default function ProposeNewTransaction() {
                                         <h3 className="text-18 font-bold text-primary-text">Data</h3>
                                         <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
                                             <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
-                                                {generateProposeData(props.values) || "Transaction data for approving will be displayed here"}
+                                                {generateProposeData(props.values) || "Data will be displayed here"}
                                             </div>
                                         </div>
                                     </div>

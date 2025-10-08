@@ -244,6 +244,7 @@ export default function Configure() {
                                         label="Deadline"
                                         tooltipText="Set transaction deadline"
                                         placeholder="DD.MM.YYYY HH:MM:ss aa"
+                                        // value={estimatedDeadline || Number(props?.values?.newDelay) / 60 || ""}
                                         value={estimatedDeadline}
                                         readOnly={true}
                                     />

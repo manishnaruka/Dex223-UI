@@ -2,7 +2,6 @@ import { SearchInput } from "@/components/atoms/Input";
 import Preloader from "@repo/ui/preloader";
 import { useEffect, useState, useCallback } from "react";
 import useMultisigTransactions, { TransactionDisplayData } from "../../hooks/useMultisigTransactions";
-import TextAreaField from "@/components/atoms/TextAreaField";
 import useMultisigContract from "../../hooks/useMultisigContract";
 import { TransactionInfoCard } from "../shared";
 
@@ -11,14 +10,12 @@ export default function Observe() {
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionDisplayData | null>(null);
     
     const {
-        transactions,
         loading,
-        error,
         loadTransaction,
         refreshTransactions
     } = useMultisigTransactions();
 
-    const { generateTransactionData, getAllTransactions } = useMultisigContract();
+    const { generateTransactionData } = useMultisigContract();
 
     const loadTransactionData = useCallback(async (txId: string) => {
         if (!txId) {
@@ -88,7 +85,7 @@ export default function Observe() {
                                 <h3 className="text-18 font-bold text-primary-text">Data</h3>
                                 <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
                                     <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
-                                        {generateApproveData() || "Transaction data for approving will be displayed here"}
+                                        {generateApproveData() || "Data will be displayed here"}
                                     </div>
                                 </div>
                             </div>

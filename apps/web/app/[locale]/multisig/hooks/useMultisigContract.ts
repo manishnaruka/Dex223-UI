@@ -217,7 +217,11 @@ export default function useMultisigContract() {
         [txId],
         "Approve Transaction",
         (hash) => {
-          txHash = hash;
+          // txHash = hash;
+          updateStatus("success", {
+            transactionId: txId.toString(),
+            transactionHash: hash,
+          });
         },
         (receipt) => {
           updateStatus("success", {
@@ -247,7 +251,11 @@ export default function useMultisigContract() {
         [txId],
         "Decline Transaction",
         (hash) => {
-          txHash = hash;
+          // txHash = hash;
+          updateStatus("success", {
+            transactionId: txId.toString(),
+            transactionHash: hash,
+          });
         },
         (receipt) => {
           updateStatus("success", {
@@ -276,7 +284,11 @@ export default function useMultisigContract() {
         [txId],
         "Execute Transaction",
         (hash) => {
-          txHash = hash;
+          // txHash = hash;
+          updateStatus("success", {
+            transactionId: txId.toString(),
+            transactionHash: hash,
+          });
         },
         (receipt) => {
           updateStatus("success", {
@@ -309,7 +321,10 @@ export default function useMultisigContract() {
         [to, value, data],
         "Propose Transaction",
         (hash) => {
-          txHash = hash;
+          updateStatus("success", {
+            transactionId: "proposed",
+            transactionHash: hash,
+          });
         },
         (receipt) => {
           updateStatus("success", {

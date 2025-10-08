@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RadioButton from "@/components/buttons/RadioButton";
 import VoteExisting from "./VoteExisting";
 import ProposeNewTransaction from "./ProposeNewTransaction";
+import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 
 export default function Transaction() {
     const [transactionType, setTransactionType] = useState("vote");
+    const { closeDialog } = useTransactionSendDialogStore();
+    useEffect(() => {
+        closeDialog();
+    }, [transactionType, closeDialog]);
 
     return (
         <div className="bg-primary-bg rounded-3 p-6">
