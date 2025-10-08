@@ -4,11 +4,12 @@ import Button, { ButtonVariant } from "@/components/buttons/Button";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import TextAreaField from "@/components/atoms/TextAreaField";
-import { useAccount } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import useMultisigContract from "../../hooks/useMultisigContract";
 import { parseUnits, encodeFunctionData } from "viem";
 import { useCallback, useState, useEffect } from "react";
+import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 import { Currency } from "@/sdk_bi/entities/currency";
 import SelectButton from "@/components/atoms/SelectButton";
 import Image from "next/image";
@@ -22,7 +23,6 @@ import { MULTISIG_ABI } from "@/config/abis/Multisig";
 const initialValues = {
     asset: "",
     amount: "",
-    deadline: "",
     sendTo: "",
     data: "",
 };
@@ -44,14 +44,22 @@ const schema = Yup.object({
 
 export default function ProposeNewTransaction() {
     const { isConnected } = useAccount();
+    const publicClient = usePublicClient();
     const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
     const [isOpenedAssetSelect, setIsOpenedAssetSelect] = useState(false);
-    const { proposeTransaction, generateTransactionData } = useMultisigContract();
+    const { proposeTransaction, generateTransactionData, getConfig } = useMultisigContract();
     const [loading, setLoading] = useState(false);
     const tokens = useTokens();
     const [selectedToken, setSelectedToken] = useState<Currency | null>(null);
     const [proposeData, setProposeData] = useState<string>("");
+    const [estimatedDeadline, setEstimatedDeadline] = useState<string>("");
+    const [hasSubmitted, setHasSubmitted] = useState(false);
     const t = useTranslations("Swap");
+
+    const {
+        isOpen: isTransactionDialogOpen,
+        status: transactionStatus,
+    } = useTransactionSendDialogStore();
 
     const getTokenBySymbol = useCallback((symbol: string) => {
         return tokens.find(token => token.symbol === symbol) || null;
@@ -94,6 +102,11 @@ export default function ProposeNewTransaction() {
     }, [getTokenBySymbol, generateTransactionDataForForm, generateTransactionData]);
 
     const handleSubmit = async (values: typeof initialValues) => {
+        if(!schema.isValidSync(values)) {
+            return;
+        }
+        setHasSubmitted(true);
+        
         if (!isConnected) {
             setWalletConnectOpened(true);
             return;
@@ -116,6 +129,35 @@ export default function ProposeNewTransaction() {
         }
     };
 
+    const fetchEstimatedDeadline = useCallback(async () => {
+        if (!publicClient) return;
+
+        try {
+            const config = await getConfig();
+            if (!config) return;
+
+            const currentBlock = await publicClient.getBlock({ blockTag: 'latest' });
+            const estimatedDeadlineTimestamp = currentBlock.timestamp + config.executionDelay;
+            const deadlineDate = new Date(Number(estimatedDeadlineTimestamp) * 1000);
+            setEstimatedDeadline(deadlineDate.toLocaleString());
+        } catch (error) {
+            console.error(error);
+        }
+    }, [publicClient, getConfig]);
+
+    useEffect(() => {
+        fetchEstimatedDeadline();
+    }, [fetchEstimatedDeadline]);
+
+    useEffect(() => {
+        if (transactionStatus === "success" || transactionStatus === "failed" && isTransactionDialogOpen) {
+            setSelectedToken(null);
+            setProposeData("");
+            setHasSubmitted(false);
+            fetchEstimatedDeadline();
+        }
+    }, [transactionStatus, isTransactionDialogOpen, fetchEstimatedDeadline]);
+
 
     return (
         <div className="flex flex-col gap-6">
@@ -123,6 +165,9 @@ export default function ProposeNewTransaction() {
                 initialValues={initialValues}
                 onSubmit={handleSubmit}
                 validationSchema={schema}
+                validateOnBlur={false}
+                validateOnChange={false}
+                validateOnMount={false}
             >
                 {(props) => {
                     const newProposeData = generateProposeData(props.values);
@@ -137,11 +182,10 @@ export default function ProposeNewTransaction() {
                                     e.preventDefault();
                                     props.handleSubmit();
                                 }}
-                                className="flex flex-col gap-6"
                             >
                                 <div className="flex flex-col gap-4">
                                     <div>
-                                        <InputLabel label="Select Asset" tooltipText="Select the asset to transfer" />
+                                        <InputLabel className="font-bold flex items-center gap-1 text-secondary-text text-16 mb-1" label="Select Asset" tooltipText="Select the asset to transfer" />
                                         <Popover
                                             isOpened={isOpenedAssetSelect}
                                             setIsOpened={setIsOpenedAssetSelect}
@@ -202,6 +246,9 @@ export default function ProposeNewTransaction() {
                                                 </div>
                                             </div>
                                         </Popover>
+                                        {hasSubmitted && props.errors.asset && (
+                                            <div className="text-red-light text-12 mt-1">{props.errors.asset}</div>
+                                        )}
                                     </div>
 
                                     <TextField
@@ -209,7 +256,7 @@ export default function ProposeNewTransaction() {
                                         tooltipText="Enter the amount to transfer"
                                         placeholder="Enter amount"
                                         value={props.values.amount}
-                                        error={props.touched.amount && props.errors.amount ? props.errors.amount : ""}
+                                        error={hasSubmitted && props.errors.amount ? props.errors.amount : ""}
                                         onChange={(e) => props.setFieldValue("amount", e.target.value)}
                                     />
 
@@ -218,33 +265,29 @@ export default function ProposeNewTransaction() {
                                         tooltipText="Enter the recipient wallet address"
                                         placeholder="Enter wallet address"
                                         value={props.values.sendTo}
-                                        error={props.touched.sendTo && props.errors.sendTo ? props.errors.sendTo : ""}
+                                        error={hasSubmitted && props.errors.sendTo ? props.errors.sendTo : ""}
                                         onChange={(e) => props.setFieldValue("sendTo", e.target.value)}
                                     />
 
                                     <TextField
                                         label="Deadline"
-                                        tooltipText=""
+                                        tooltipText="Set transaction deadline"
                                         placeholder="DD.MM.YYYY HH:MM:ss aa"
-                                        value={props.values.deadline}
-                                        error={props.touched.deadline && props.errors.deadline ? props.errors.deadline : ""}
-                                        onChange={(e) => props.setFieldValue("deadline", e.target.value)}
+                                        value={estimatedDeadline}
+                                        readOnly={true}
                                     />
 
-                                    <TextAreaField
-                                        id="data"
-                                        name="data"
-                                        onChange={(e) => props.setFieldValue("data", e.target.value)}
-                                        onBlur={() => { }}
-                                        label="Data"
-                                        rows={6}
-                                        value={generateProposeData(props.values)}
-                                        error={props.touched.data && props.errors.data ? props.errors.data : ""}
-                                        disabled={true}
-                                    />
+                                    <div className="flex flex-col gap-4">
+                                        <h3 className="text-18 font-bold text-primary-text">Data</h3>
+                                        <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
+                                            <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
+                                                {generateProposeData(props.values) || "Transaction data for approving will be displayed here"}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div className="border-t border-secondary-border pt-6">
+                                <div className="border-t border-secondary-border pt-6 mt-4">
                                     <GasSettingsBlock />
                                 </div>
 
@@ -262,7 +305,7 @@ export default function ProposeNewTransaction() {
                                         type="submit"
                                         variant={ButtonVariant.CONTAINED}
                                         fullWidth
-                                        disabled={loading}
+                                        disabled={loading || (hasSubmitted && Object.keys(props.errors).length > 0)}
                                     >
                                         {loading ? "Proposing..." : "Propose Transaction"}
                                     </Button>

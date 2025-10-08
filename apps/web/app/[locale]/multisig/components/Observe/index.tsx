@@ -84,18 +84,13 @@ export default function Observe() {
                                 <TransactionInfoCard transaction={selectedTransaction} />
                             </div>
 
-                        <div className="flex flex-col gap-4">
-                                <TextAreaField
-                                    id="approve-data"
-                                    name="approve-data"
-                                    onChange={() => { }}
-                                    onBlur={() => { }}
-                                    label="Data"
-                                    rows={4}
-                                    placeholder="Transaction data for approving will be displayed here"
-                                    value={generateApproveData()}
-                                    error=""
-                                />
+                            <div className="flex flex-col gap-4">
+                                <h3 className="text-18 font-bold text-primary-text">Data</h3>
+                                <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
+                                    <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
+                                        {generateApproveData() || "Transaction data for approving will be displayed here"}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}

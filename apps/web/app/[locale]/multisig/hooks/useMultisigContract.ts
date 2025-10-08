@@ -29,7 +29,7 @@ export interface MultisigConfig {
   numTxs: bigint;
 }
 
-const MULTISIG_CONTRACT_ADDRESS = "0x70Bd62719a6ebECeF19314950a7E92EC65DA9cC0" as const;
+const MULTISIG_CONTRACT_ADDRESS = process.env.MSIG_CONTRACT_ADDRESS as Address;
 
 export default function useMultisigContract() {
   const { address, chainId } = useAccount();
@@ -80,7 +80,7 @@ export default function useMultisigContract() {
     try {
 
       const estimatedGas = await publicClient.estimateContractGas({
-        account: "0x28703bce6EFada7d4652e77cB450CFd07cF25650",
+        account: address as Address,
         ...params,
       });
 
@@ -101,7 +101,7 @@ export default function useMultisigContract() {
 
       const hash = await walletClient.writeContract({
         ...params,
-        account: "0x28703bce6EFada7d4652e77cB450CFd07cF25650",
+        account: address as Address,
         ...gasSettings,
         gas: gasToUse,
       });
@@ -209,15 +209,19 @@ export default function useMultisigContract() {
   const approveTransaction = useCallback(async (txId: bigint) => {
     openDialog("sending", { transactionId: txId.toString() });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "approveTx",
         [txId],
         "Approve Transaction",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: txId.toString(),
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -235,15 +239,19 @@ export default function useMultisigContract() {
   const declineTransaction = useCallback(async (txId: bigint) => {
     openDialog("sending", { transactionId: txId.toString() });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "declineTx",
         [txId],
         "Decline Transaction",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: txId.toString(),
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -260,15 +268,19 @@ export default function useMultisigContract() {
   const executeTransaction = useCallback(async (txId: bigint) => {
     openDialog("sending", { transactionId: txId.toString() });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "executeTx",
         [txId],
         "Execute Transaction",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: txId.toString(),
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -289,15 +301,19 @@ export default function useMultisigContract() {
   ) => {
     openDialog("sending", { transactionId: "proposing" });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "proposeTx",
         [to, value, data],
         "Propose Transaction",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: "proposed",
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -315,15 +331,19 @@ export default function useMultisigContract() {
   const addOwner = useCallback(async (newOwner: Address) => {
     openDialog("sending", { transactionId: "adding_owner" });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "addOwner",
         [newOwner],
         "Add Owner",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: "owner_added",
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -341,15 +361,19 @@ export default function useMultisigContract() {
   const removeOwner = useCallback(async (owner: Address) => {
     openDialog("sending", { transactionId: "removing_owner" });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "removeOwner",
         [owner],
         "Remove Owner",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: "owner_removed",
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -367,15 +391,19 @@ export default function useMultisigContract() {
   const setupDelay = useCallback(async (newDelay: bigint) => {
     openDialog("sending", { transactionId: "setting_delay" });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "setupDelay",
         [newDelay],
         "Setup Delay",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: "delay_set",
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -393,15 +421,19 @@ export default function useMultisigContract() {
   const setupThreshold = useCallback(async (newThreshold: bigint) => {
     openDialog("sending", { transactionId: "setting_threshold" });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "setupThreshold",
         [newThreshold],
         "Setup Threshold",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: "threshold_set",
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -419,15 +451,19 @@ export default function useMultisigContract() {
   const reduceApprovalsThreshold = useCallback(async (txId: bigint) => {
     openDialog("sending", { transactionId: txId.toString() });
     
+    let txHash: string | undefined;
     try {
       const hash = await writeContract(
         "reduceApprovalsThreshold",
         [txId],
         "Reduce Approvals Threshold",
         (hash) => {
+          txHash = hash;
+        },
+        (receipt) => {
           updateStatus("success", {
             transactionId: txId.toString(),
-            transactionHash: hash,
+            transactionHash: txHash!,
           });
         }
       );
@@ -455,6 +491,15 @@ export default function useMultisigContract() {
     });
   }, []);
 
+  const getTransactionDeadline = useCallback(async (txId: bigint): Promise<bigint | null> => {
+    const [transaction, config] = await Promise.all([
+      getTransaction(txId),
+      getConfig(),
+    ]);
+    if (!transaction || !config) return null;
+    return transaction.proposed_timestamp + config.executionDelay;
+  }, [getTransaction, getConfig]);
+
   return {
     getTransaction,
     getAllTransactions,
@@ -472,5 +517,6 @@ export default function useMultisigContract() {
     reduceApprovalsThreshold,
     getTokenTransferData,
     generateTransactionData,
+    getTransactionDeadline,
   };
 }

@@ -1,7 +1,6 @@
 import { SearchInput } from "@/components/atoms/Input";
 import { useEffect, useState, useCallback } from "react";
 import Button, { ButtonVariant, ButtonColor } from "@/components/buttons/Button";
-import TextAreaField from "@/components/atoms/TextAreaField";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import { useAccount } from "wagmi";
 import Preloader from "@repo/ui/preloader";
@@ -99,6 +98,7 @@ export default function VoteExisting() {
     const generateApproveData = useCallback(() => {
         if (!transactionId) return "";
         return generateTransactionData("approveTx", [BigInt(transactionId)]);
+        
     }, [transactionId, generateTransactionData]);
 
     useEffect(() => {
@@ -106,6 +106,14 @@ export default function VoteExisting() {
             loadTransactionData(transactionId);
         }
     }, [transactionId, loadTransactionData]);
+
+    useEffect(() => {
+        if (transactionStatus === "success" || transactionStatus === "failed" && isTransactionDialogOpen) {
+            setTransactionId("");
+            setCurrentTransaction(null);
+            setError(null);
+        }
+    }, [transactionStatus, isTransactionDialogOpen]);
 
     return (
         <div className="flex flex-col gap-6">
@@ -134,17 +142,12 @@ export default function VoteExisting() {
                         </div>
 
                         <div className="flex flex-col gap-4">
-                            <TextAreaField
-                                id="approve-data"
-                                name="approve-data"
-                                onChange={(e) => { }}
-                                onBlur={() => { }}
-                                label="Data"
-                                rows={4}
-                                placeholder="Transaction data for approving will be displayed here"
-                                value={generateApproveData()}
-                                error=""
-                            />
+                            <h3 className="text-18 font-bold text-primary-text">Data</h3>
+                            <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
+                                <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
+                                    {generateApproveData() || "Transaction data for approving will be displayed here"}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="border-t border-secondary-border pt-6">

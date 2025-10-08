@@ -29,6 +29,7 @@ export default function useMultisigTransactions() {
     getAllTransactions,
     isOwner,
     isTransactionAllowed,
+    getTransactionDeadline,
   } = useMultisigContract();
 
   const tokens = useTokens();
@@ -153,6 +154,12 @@ export default function useMultisigTransactions() {
         ? "approved"
         : "pending";
 
+    const deadlineTimestamp = await getTransactionDeadline(BigInt(txId));
+    console.log("deadlineTimestamp", deadlineTimestamp);
+    const deadlineString = deadlineTimestamp 
+      ? new Date(Number(deadlineTimestamp) * 1000).toLocaleString()
+      : new Date(Number(tx.proposed_timestamp) * 1000).toLocaleString();
+
     return {
       id: txId.toString(),
       type,
@@ -162,14 +169,14 @@ export default function useMultisigTransactions() {
       creator: "0x0000000000000000000000000000000000000000",
       numberOfVotes: tx.num_approvals.toString(),
       requiredVotes: tx.required_approvals.toString(),
-      deadline: new Date(Number(tx.proposed_timestamp) * 1000).toLocaleString(),
+      deadline: deadlineString,
       status,
       executed: tx.executed,
       data: tx.data,
       canExecute,
       canVote,
     };
-  }, [isTransactionAllowed, isOwner, address, getTokenInfo]);
+  }, [isTransactionAllowed, isOwner, address, getTokenInfo, getTransactionDeadline]);
 
   const loadTransactions = useCallback(async () => {
     if (!getAllTransactions) return;
