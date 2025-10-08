@@ -5,7 +5,6 @@ interface TransactionInfoCardProps {
 }
 
 export default function TransactionInfoCard({ transaction }: TransactionInfoCardProps) {
-    console.log(transaction, "transaction");
     return (
         <div className="bg-tertiary-bg rounded-3 p-5 flex flex-col gap-4">
             <div className="flex justify-between items-center">

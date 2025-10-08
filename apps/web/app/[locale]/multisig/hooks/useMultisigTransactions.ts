@@ -208,6 +208,7 @@ export default function useMultisigTransactions() {
       if (!tx) return null;
 
       const formattedTx = await formatTransaction(tx, parseInt(txId));
+      console.log("formattedTx", formattedTx);
       return formattedTx;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load transaction");

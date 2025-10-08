@@ -29,7 +29,8 @@ export interface MultisigConfig {
   numTxs: bigint;
 }
 
-const MULTISIG_CONTRACT_ADDRESS = process.env.MSIG_CONTRACT_ADDRESS as Address;
+// const MULTISIG_CONTRACT_ADDRESS = process.env.MSIG_CONTRACT_ADDRESS as Address;
+const MULTISIG_CONTRACT_ADDRESS = "0x70Bd62719a6ebECeF19314950a7E92EC65DA9cC0" as Address;
 
 export default function useMultisigContract() {
   const { address, chainId } = useAccount();

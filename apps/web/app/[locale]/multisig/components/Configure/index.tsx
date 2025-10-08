@@ -172,7 +172,7 @@ export default function Configure() {
                 >
                     {(props) => {
                         const newData = generateTransactionDataForForm(props.values);
-                        console.log("newData", newData);
+                        
                         if (newData !== transactionData) {
                             setTransactionData(newData);
                         }
