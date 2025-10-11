@@ -155,7 +155,6 @@ export default function useMultisigTransactions() {
         : "pending";
 
     const deadlineTimestamp = await getTransactionDeadline(BigInt(txId));
-    console.log("deadlineTimestamp", deadlineTimestamp);
     const deadlineString = deadlineTimestamp 
       ? new Date(Number(deadlineTimestamp) * 1000).toLocaleString()
       : new Date(Number(tx.proposed_timestamp) * 1000).toLocaleString();
@@ -208,7 +207,6 @@ export default function useMultisigTransactions() {
       if (!tx) return null;
 
       const formattedTx = await formatTransaction(tx, parseInt(txId));
-      console.log("formattedTx", formattedTx);
       return formattedTx;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load transaction");
