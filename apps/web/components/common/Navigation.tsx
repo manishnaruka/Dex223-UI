@@ -79,7 +79,7 @@ const menuItems: Array<
         <MobileLink
           isActive={pathname === "/buy-crypto"}
           href="/buy-crypto"
-          iconName="wallet"
+          iconName="fiat"
           title={t("buy_crypto")}
           handleClose={handleClose}
           className="min-w-[238px]"
