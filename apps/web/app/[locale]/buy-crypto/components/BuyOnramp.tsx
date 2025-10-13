@@ -181,7 +181,7 @@ export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: Bu
   }, [onrampInstanceObj, error]);
 
   return (
-    <div>
+    <div className="w-full flex flex-col items-center justify-center">
       {error && <div className="text-red-500 text-sm mb-2 p-2 bg-red-50 rounded">{error}</div>}
       <Button
         onClick={handleClick}
