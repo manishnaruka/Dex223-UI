@@ -47,14 +47,14 @@ export default function BuyOnramp({ appId, userId, flowType, walletAddress }: Bu
       if (flowType === "Buy Crypto") {
         obj = {
           merchantRecognitionId: userId || effectiveWalletAddress,
-          appId: apiId,
+          appId: appId,
           flowType: flowTypeInNo,
           lang: "en",
           walletAddress: effectiveWalletAddress,
         };
       } else if (flowType === "Sell Crypto") {
         obj = {
-          appId: apiId,
+          appId: appId,
           flowType: flowTypeInNo,
           walletAddress: effectiveWalletAddress,
           lang: "en",
@@ -62,7 +62,7 @@ export default function BuyOnramp({ appId, userId, flowType, walletAddress }: Bu
       } else {
         obj = {
           merchantRecognitionId: userId || effectiveWalletAddress,
-          appId: apiId,
+          appId: appId,
           walletAddress: effectiveWalletAddress,
           flowType: flowTypeInNo,
           lang: "en",
