@@ -33,7 +33,10 @@ export default function BuyOnramp({ appId, userId, flowType, walletAddress }: Bu
   }, [onrampInstanceObj]);
 
   useEffect(() => {
-    if (!effectiveWalletAddress && (flowType === "Sell Crypto" || flowType === "Buy Crypto" || flowType === "Swap Crypto")) {
+    if (
+      !effectiveWalletAddress &&
+      (flowType === "Sell Crypto" || flowType === "Buy Crypto" || flowType === "Swap Crypto")
+    ) {
       setError("Please connect your wallet to proceed");
       return;
     }
