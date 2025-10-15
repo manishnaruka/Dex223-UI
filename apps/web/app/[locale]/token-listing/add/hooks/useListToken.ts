@@ -7,7 +7,6 @@ import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { useAutoListingContract } from "@/app/[locale]/token-listing/add/hooks/useAutoListingContracts";
 import useTokensToList from "@/app/[locale]/token-listing/add/hooks/useTokensToList";
 import { useAutoListingContractStore } from "@/app/[locale]/token-listing/add/stores/useAutoListingContractStore";
-import { useConfirmListTokenDialogStore } from "@/app/[locale]/token-listing/add/stores/useConfirmListTokenDialogOpened";
 import {
   useListTokensGasLimitStore,
   useListTokensGasPriceStore,
@@ -48,6 +47,7 @@ function useListParams() {
   const { autoListingContract } = useAutoListingContractStore();
 
   const autoListing = useAutoListingContract(autoListingContract);
+  const tokensToList = useTokensToList();
 
   const pools = useStorePools(
     poolsFees.map((fee) => ({ currencyA: tokenA, currencyB: tokenB, tier: fee })),
@@ -89,16 +89,26 @@ function useListParams() {
       }
 
       if (isZeroAddress(paymentToken.token.address)) {
+        console.log({
+          ...common,
+          args: [...common.args, paymentToken.token.address],
+          value: tokensToList.length
+            ? paymentToken.price * BigInt(tokensToList.length)
+            : paymentToken.price,
+        });
+
         return {
           ...common,
           args: [...common.args, paymentToken.token.address],
-          value: paymentToken.price,
+          value: tokensToList.length
+            ? paymentToken.price * BigInt(tokensToList.length)
+            : paymentToken.price,
         };
       }
 
       return { ...common, args: [...common.args, paymentToken.token.address] };
     }
-  }, [autoListingContract, isFree, paymentToken, pool, poolAddress]);
+  }, [autoListingContract, isFree, paymentToken, pool, poolAddress, tokensToList.length]);
 }
 
 export function useListTokenEstimatedGas() {
@@ -162,7 +172,6 @@ export default function useListToken() {
   const t = useTranslations("Swap");
   const { tokenA, tokenB } = useListTokensStore();
   const { autoListingContract } = useAutoListingContractStore();
-  const { isOpen: confirmDialogOpened } = useConfirmListTokenDialogStore();
 
   const autoListing = useAutoListingContract(autoListingContract);
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
@@ -195,7 +204,6 @@ export default function useListToken() {
     status: listTokenStatus,
     setStatus: setListTokenStatus,
     setApproveHash,
-    errorType,
     setErrorType,
     setListTokenHash,
   } = useListTokenStatusStore();
@@ -203,19 +211,6 @@ export default function useListToken() {
   const { addRecentTransaction } = useRecentTransactionsStore();
 
   const listParams = useListParams();
-
-  useEffect(() => {
-    if (
-      (listTokenStatus === ListTokenStatus.SUCCESS ||
-        listTokenStatus === ListTokenStatus.ERROR ||
-        listTokenStatus === ListTokenStatus.APPROVE_ERROR) &&
-      !confirmDialogOpened
-    ) {
-      setTimeout(() => {
-        setListTokenStatus(ListTokenStatus.INITIAL);
-      }, 400);
-    }
-  }, [confirmDialogOpened, setListTokenStatus, listTokenStatus]);
 
   const { gasPrice, priorityFee, baseFee } = useGlobalFees();
   const { gasPriceOption, gasPriceSettings } = useListTokensGasPriceStore();
@@ -277,7 +272,7 @@ export default function useListToken() {
           });
 
           if (approveReceipt.status === "reverted") {
-            setListTokenStatus(ListTokenStatus.APPROVE_ERROR);
+            setListTokenStatus(ListTokenStatus.ERROR_APPROVE);
             return;
           }
         }
@@ -287,7 +282,7 @@ export default function useListToken() {
         return;
       }
 
-      setListTokenStatus(ListTokenStatus.PENDING);
+      setListTokenStatus(ListTokenStatus.PENDING_LIST_TOKEN);
       openConfirmInWalletAlert(t("confirm_action_in_your_wallet_alert"));
 
       let hash;
@@ -298,9 +293,9 @@ export default function useListToken() {
           ...listParams,
         } as any);
 
-        // const gasToUse = estimatedGas + BigInt(30000); // set custom gas here if user changed it
         const gasToUse = customGasLimit ? customGasLimit : estimatedGas + BigInt(30000); // set custom gas here if user changed it
-
+        // const gasToUse = BigInt(0);
+        //
         const { request } = await publicClient.simulateContract({
           ...listParams,
           account: address,
@@ -308,7 +303,10 @@ export default function useListToken() {
           gas: gasToUse,
         } as any);
 
-        hash = await walletClient.writeContract({ ...request, account: undefined });
+        hash = await walletClient.writeContract({
+          ...request,
+          account: undefined,
+        });
 
         closeConfirmInWalletAlert();
 
@@ -320,7 +318,7 @@ export default function useListToken() {
           });
 
           const nonce = transaction.nonce;
-          setListTokenStatus(ListTokenStatus.LOADING);
+          setListTokenStatus(ListTokenStatus.LOADING_LIST_TOKEN);
 
           if (tokensToList.length) {
             addRecentTransaction(
@@ -364,7 +362,7 @@ export default function useListToken() {
           }
 
           if (receipt.status === "reverted") {
-            setListTokenStatus(ListTokenStatus.ERROR);
+            setListTokenStatus(ListTokenStatus.ERROR_LIST_TOKEN);
 
             const ninetyEightPercent = (gasToUse * BigInt(98)) / BigInt(100);
 
@@ -379,6 +377,7 @@ export default function useListToken() {
         }
       } catch (e) {
         console.log(e);
+        closeConfirmInWalletAlert();
         setListTokenStatus(ListTokenStatus.INITIAL);
       }
     },

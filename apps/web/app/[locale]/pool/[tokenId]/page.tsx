@@ -391,7 +391,7 @@ export default function PoolPage({
 
   return (
     <Container>
-      <div className="w-full md:w-[800px] md:mx-auto md:mt-[40px] mb-5 bg-primary-bg px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
+      <div className="w-full md:w-[800px] md:mt-10 mt-4 md:mx-auto mb-5 bg-primary-bg px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
         <SkeletonTheme
           baseColor="#272727"
           highlightColor="#1D1E1E"
@@ -399,16 +399,16 @@ export default function PoolPage({
           enableAnimation={false}
           // duration={5}
         >
-          <div className="flex justify-between items-center py-1.5 -mx-3">
+          <div className="flex justify-between items-center py-1 lg:py-2.5 -mx-3">
             <IconButton
-              buttonSize={IconButtonSize.LARGE}
+              buttonSize={IconButtonSize.REGULAR}
               variant={IconButtonVariant.BACK}
               // iconName="back"
               onClick={() => router.push("/pools/positions")}
             />
             <h2 className="text-18 lg:text-20 font-bold">{t("liquidity_position")}</h2>
             <IconButton
-              buttonSize={IconButtonSize.LARGE}
+              buttonSize={IconButtonSize.REGULAR}
               iconName="recent-transactions"
               onClick={() => setShowRecentTransactions(!showRecentTransactions)}
               active={showRecentTransactions}
@@ -877,7 +877,7 @@ export default function PoolPage({
       </div>
 
       {/* Tokens Info & Recent transactions block */}
-      <div className="lg:w-[800px] mx-auto lg:mb-[40px] gap-5 flex flex-col">
+      <div className="lg:w-[800px] mx-auto gap-5 flex flex-col mb-4 md:mb-10">
         <SelectedTokensInfo tokenA={token0} tokenB={token1} />
         <RecentTransactions
           showRecentTransactions={showRecentTransactions}

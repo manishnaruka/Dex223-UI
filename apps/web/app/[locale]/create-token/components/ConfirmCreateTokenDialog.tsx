@@ -126,7 +126,7 @@ function Card({ title, value }: { title: string; value: string }) {
   return (
     <div className="bg-tertiary-bg rounded-3 flex flex-col gap-1 px-5 py-4 text-14">
       <span className="text-secondary-text">{title}</span>
-      <span className="font-bold">{value}</span>
+      <span className="font-medium">{value}</span>
     </div>
   );
 }
@@ -174,7 +174,7 @@ export default function ConfirmCreateTokenDialog({
   return (
     <DrawerDialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <DialogHeader onClose={() => setIsOpen(false)} title="Create a token" />
-      <div className="w-[600px] card-spacing-x card-spacing-b">
+      <div className="md:w-[600px] card-spacing-x card-spacing-b">
         {isInitialStatus && (
           <div>
             <div className="grid grid-cols-2 gap-3 mb-3">
@@ -182,11 +182,11 @@ export default function ConfirmCreateTokenDialog({
               <Card title="Symbol" value={createTokenSettings.symbol} />
             </div>
 
-            <div className="rounded-3 bg-tertiary-bg px-5 py-4 flex justify-between">
+            <div className="rounded-3 bg-tertiary-bg px-5 py-3 flex justify-between items-center">
               <span className="text-14 text-secondary-text">Total supply</span>
 
               <div className="flex items-center gap-1">
-                <span>{createTokenSettings.totalSupply}</span>
+                <span>{+createTokenSettings.totalSupply}</span>
                 <span className="text-14 text-secondary-text">{createTokenSettings.symbol}</span>
               </div>
             </div>
@@ -208,11 +208,20 @@ export default function ConfirmCreateTokenDialog({
               <Alert
                 className="ui-bg-tertiary-bg"
                 text={
-                  <span className="flex items-center gap-2">
-                    You are deploying to{" "}
-                    <Image width={18} height={18} src={network?.logo || ""} alt="" />{" "}
-                    <span className="text-primary-text">{network?.name}</span>network
-                  </span>
+                  <p className="">
+                    You are deploying the token to{" "}
+                    <span className="text-primary-text relative inline-block pl-6 ml-0.5">
+                      <Image
+                        className="absolute -left-0" // Next/Image is block by default
+                        width={20}
+                        height={20}
+                        src={network?.logo || ""}
+                        alt=""
+                      />
+                      {network?.name}
+                    </span>{" "}
+                    network
+                  </p>
                 }
                 type={"info-border"}
               />

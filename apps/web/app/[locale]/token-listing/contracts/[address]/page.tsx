@@ -27,6 +27,7 @@ import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import { filterTokens } from "@/functions/searchTokens";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useNativeCurrency } from "@/hooks/useNativeCurrency";
 import { useTokenLists } from "@/hooks/useTokenLists";
 import { Link } from "@/i18n/routing";
 import { CONVERTER_ADDRESS } from "@/sdk_bi/addresses";
@@ -67,6 +68,7 @@ function TableRow({ children, className }: HTMLAttributes<HTMLDivElement>) {
 
 function TokenSymbolButton({ tokenToPay }: { tokenToPay: SingleAddressToken }) {
   const { handleOpen } = useTokenPortfolioDialogStore();
+  const nativeCurrency = useNativeCurrency();
 
   const { data: standard } = useReadContract({
     abi: ERC223_ABI,
@@ -164,33 +166,42 @@ function TokenSymbolButton({ tokenToPay }: { tokenToPay: SingleAddressToken }) {
 
   return (
     <>
-      <button
-        className="rounded-2 bg-quaternary-bg py-1 flex items-center justify-center hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200"
-        onClick={() =>
-          handleOpen(
-            new Token(
-              tokenToPay.chainId,
-              erc20AddressToImport || tokenToPay.address,
-              erc223AddressToImport || tokenToPay.address,
-              tokenToPay.decimals,
-              tokenToPay.symbol,
-              tokenToPay.name,
-              "/images/tokens/placeholder.svg",
-              tokenLists
-                ?.filter((tokenList) => {
-                  return !!tokenList.list.tokens.find(
-                    (t) =>
-                      t.address0.toLowerCase() === tokenToPay.address.toLowerCase() ||
-                      t.address1.toLowerCase() === tokenToPay.address.toLowerCase(),
-                  );
-                })
-                .map((t) => t.id),
-            ),
-          )
-        }
-      >
-        {tokenToPay.symbol}
-      </button>
+      {!isZeroAddress(tokenToPay.address) ? (
+        <button
+          className="rounded-2 bg-quaternary-bg py-1 flex items-center justify-center hocus:bg-green-bg hocus:text-primary-text text-secondary-text duration-200"
+          onClick={() =>
+            handleOpen(
+              new Token(
+                tokenToPay.chainId,
+                erc20AddressToImport || tokenToPay.address,
+                erc223AddressToImport || tokenToPay.address,
+                tokenToPay.decimals,
+                tokenToPay.symbol,
+                tokenToPay.name,
+                "/images/tokens/placeholder.svg",
+                tokenLists
+                  ?.filter((tokenList) => {
+                    return !!tokenList.list.tokens.find(
+                      (t) =>
+                        t.address0.toLowerCase() === tokenToPay.address.toLowerCase() ||
+                        t.address1.toLowerCase() === tokenToPay.address.toLowerCase(),
+                    );
+                  })
+                  .map((t) => t.id),
+              ),
+            )
+          }
+        >
+          {isZeroAddress(tokenToPay.address) ? nativeCurrency.symbol : tokenToPay.symbol}
+        </button>
+      ) : (
+        <div
+          key={tokenToPay.address}
+          className="rounded-2 text-secondary-text border border-secondary-border px-2 flex items-center py-1"
+        >
+          {nativeCurrency.symbol}
+        </div>
+      )}
       <div className="flex items-center">
         <Badge
           variant={BadgeVariant.COLORED}
@@ -299,7 +310,7 @@ export default function AutoListingContractDetails({
                       charsFromEnd: 3,
                       charsFromStart: 4,
                     })}
-                    href="#"
+                    href={getExplorerLink(ExplorerLinkType.ADDRESS, use(params).address, chainId)}
                   />{" "}
                   <IconButton variant={IconButtonVariant.COPY} text={use(params).address} />{" "}
                 </span>

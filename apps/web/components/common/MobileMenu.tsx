@@ -29,6 +29,7 @@ export function MobileLink({
   isActive,
   disabled = false,
   className = "",
+  linkClassName = "",
   handleClick,
   isMenu = false,
   isExternal = false,
@@ -41,6 +42,7 @@ export function MobileLink({
   isActive?: boolean;
   disabled?: boolean;
   className?: string;
+  linkClassName?: string;
   handleClick?: (e: any) => void;
   isMenu?: boolean;
   isExternal?: boolean;
@@ -90,6 +92,7 @@ export function MobileLink({
           isActive && !isMenu && "text-green pointer-events-none",
           isActive && isMenu && "bg-navigation-active-mobile text-green pointer-events-none",
           disabled && "pointer-events-none opacity-50",
+          linkClassName,
         )}
       >
         <Svg iconName={iconName} />

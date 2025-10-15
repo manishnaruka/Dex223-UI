@@ -8,13 +8,13 @@ import { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import Button from "@/components/buttons/Button";
 
 interface BuyOnrampProps {
-  apiId: number;
+  appId: number;
   userId?: string;
   flowType: string;
   walletAddress?: string;
 }
 
-export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: BuyOnrampProps) {
+export default function BuyOnramp({ appId, userId, flowType, walletAddress }: BuyOnrampProps) {
   const [onrampInstanceObj, setOnrampInstanceObj] = useState<any>(null);
   const { address } = useAccount();
   const [error, setError] = useState<string | null>(null);
@@ -33,32 +33,28 @@ export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: Bu
   }, [onrampInstanceObj]);
 
   useEffect(() => {
-    if (!effectiveWalletAddress && (flowType === "Sell Crypto" || flowType !== "Buy Crypto")) {
-      setError("Wallet address is required for this operation");
+    if (!effectiveWalletAddress && (flowType === "Sell Crypto" || flowType === "Buy Crypto" || flowType === "Swap Crypto")) {
+      setError("Please connect your wallet to proceed");
       return;
     }
 
     setError(null);
 
     try {
-      const flowTypeInNo = flowType === "Buy Crypto" ? 1 : flowType === "Sell Crypto" ? 2 : 1;
+      const flowTypeInNo = flowType === "Buy Crypto" ? 1 : flowType === "Sell Crypto" ? 2 : 4;
       let obj: any;
 
       if (flowType === "Buy Crypto") {
         obj = {
           merchantRecognitionId: userId || effectiveWalletAddress,
-          appId: apiId || 2,
+          appId: appId,
           flowType: flowTypeInNo,
           lang: "en",
           walletAddress: effectiveWalletAddress,
         };
       } else if (flowType === "Sell Crypto") {
         obj = {
-          appId: apiId || 2,
-          // coinCode: "usdt",
-          // network: "erc20",
-          // fiatAmount: 10,
-          // fiatType: 20,
+          appId: appId,
           flowType: flowTypeInNo,
           walletAddress: effectiveWalletAddress,
           lang: "en",
@@ -66,9 +62,9 @@ export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: Bu
       } else {
         obj = {
           merchantRecognitionId: userId || effectiveWalletAddress,
-          appId: apiId || 2,
+          appId: appId,
           walletAddress: effectiveWalletAddress,
-          flowType: 4,
+          flowType: flowTypeInNo,
           lang: "en",
         };
       }
@@ -87,7 +83,7 @@ export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: Bu
       console.error("Error initializing OnRamp SDK:", err);
       setError("Failed to initialize payment system");
     }
-  }, [flowType, apiId, userId, effectiveWalletAddress]);
+  }, [flowType, appId, userId, effectiveWalletAddress]);
 
   // Set up event listeners
   useEffect(() => {
@@ -181,7 +177,7 @@ export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: Bu
   }, [onrampInstanceObj, error]);
 
   return (
-    <div>
+    <div className="w-full flex flex-col items-center justify-center">
       {error && <div className="text-red-500 text-sm mb-2 p-2 bg-red-50 rounded">{error}</div>}
       <Button
         onClick={handleClick}

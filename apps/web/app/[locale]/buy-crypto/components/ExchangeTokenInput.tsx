@@ -1,3 +1,4 @@
+import Skeleton from "@repo/ui/skeleton";
 import clsx from "clsx";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -5,7 +6,6 @@ import { NumericFormat } from "react-number-format";
 
 import { ExchangeToken } from "@/app/[locale]/buy-crypto/types";
 import SelectButton from "@/components/atoms/SelectButton";
-import Skeleton from "@repo/ui/skeleton";
 import { formatFloat } from "@/functions/formatFloat";
 
 function ceilWithDynamicPrecision(minAmount: number): number {

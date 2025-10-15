@@ -79,7 +79,7 @@ const menuItems: Array<
         <MobileLink
           isActive={pathname === "/buy-crypto"}
           href="/buy-crypto"
-          iconName="wallet"
+          iconName="fiat"
           title={t("buy_crypto")}
           handleClose={handleClose}
           className="min-w-[238px]"
@@ -209,11 +209,11 @@ function NavigationMoreDropdown() {
               iconName="star"
               title="Feedback"
               handleClose={() => setSubmenuOpened(false)}
-              className="pr-5"
               handleClick={(e) => {
                 e.preventDefault();
                 setIsOpen(true);
               }}
+              linkClassName="pr-10"
             />
             <MobileLink
               href="#"
@@ -228,7 +228,7 @@ function NavigationMoreDropdown() {
               iconName="list-tokens"
               title="Create a new token"
               handleClose={() => setSubmenuOpened(false)}
-              className="pr-5"
+              linkClassName="pr-10"
             />
             <MobileLink
               isExternal

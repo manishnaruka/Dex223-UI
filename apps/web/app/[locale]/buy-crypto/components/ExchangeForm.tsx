@@ -1,16 +1,16 @@
+import Alert from "@repo/ui/alert";
+import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
 
+import ExchangeTokenInput from "@/app/[locale]/buy-crypto/components/ExchangeTokenInput";
 import PickTokenDialog from "@/app/[locale]/buy-crypto/components/PickTokenDialog";
 import { OutputAmountError } from "@/app/[locale]/buy-crypto/hooks/useOutputAmount";
 import { ExchangeToken } from "@/app/[locale]/buy-crypto/types";
-import Alert from "@repo/ui/alert";
 import Svg from "@/components/atoms/Svg";
 import TextField from "@/components/atoms/TextField";
-import Tooltip from "@repo/ui/tooltip";
 import Button from "@/components/buttons/Button";
 import SwapButton from "@/components/buttons/SwapButton";
-import ExchangeTokenInput from "@/app/[locale]/buy-crypto/components/ExchangeTokenInput";
 
 interface Props {
   recipient: string;
@@ -145,13 +145,13 @@ export default function ExchangeForm({
             <Tooltip iconSize={16} text="Tooltip floating rate" />
           </div>
 
-            <SwapButton
-              onClick={() => {
-                setTokenB(tokenA);
-                setTokenA(tokenB);
-                setInputAmount(outputAmount || "");
-              }}
-            />
+          <SwapButton
+            onClick={() => {
+              setTokenB(tokenA);
+              setTokenA(tokenB);
+              setInputAmount(outputAmount || "");
+            }}
+          />
         </div>
         <ExchangeTokenInput
           handleClick={() => {
