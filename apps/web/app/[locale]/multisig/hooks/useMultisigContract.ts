@@ -4,12 +4,17 @@ import { Address, encodeFunctionData, Log } from "viem";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
-import { useRecentTransactionsStore, stringifyObject, RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
+import explorerMap, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { getGasSettings } from "@/functions/gasSettings";
 import { GasOption } from "@/stores/factories/createGasPriceStore";
+import { DexChainId } from "@/sdk_bi/chains";
+import addToast from "@/other/toast";
+import getExplorerLink from "@/functions/getExplorerLink";
+import { addNotification } from "@/other/notification";
+import { RecentTransactionStatus, RecentTransactionTitleTemplate } from "@/stores/useRecentTransactionsStore";
 
 export interface MultisigTransaction {
   to: Address;
@@ -38,7 +43,6 @@ export default function useMultisigContract() {
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
-  const { addRecentTransaction } = useRecentTransactionsStore();
   const { baseFee, gasPrice, priorityFee } = useGlobalFees();
   const currentChainId = useCurrentChainId();
   const {
@@ -54,6 +58,17 @@ export default function useMultisigContract() {
     onLogs(logs) {
        console.log('New transactions proposed!', logs);
        setSendingTransaction(false);
+       
+       // Update dialog to success when event is received
+       if (logs.length > 0) {
+         const log = logs[0] as any;
+         const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, log.args?.txId?.toString() || "proposed", currentChainId as DexChainId);  
+         updateStatus("success", {
+           transactionId: log.args?.txId?.toString() || "proposed",
+           transactionHash: log.transactionHash || undefined,
+           explorerUrl,
+         });
+       }
     },
   });
 
@@ -128,28 +143,6 @@ export default function useMultisigContract() {
 
       if (transaction) {
         const nonce = transaction.nonce;
-        
-        addRecentTransaction(
-          {
-            hash,
-            nonce,
-            chainId: chainId!,
-            gas: {
-              ...stringifyObject({ ...gasSettings }),
-              gas: gasToUse.toString(),
-            },
-            params: {
-              ...stringifyObject(params),
-            },
-            title: {
-              template: RecentTransactionTitleTemplate.TRANSFER,
-              symbol: "MULTISIG",
-              amount: "0",
-              logoURI: "/images/tokens/placeholder.svg",
-            },
-          },
-          address,
-        );
       }
 
       onReceiptReceive?.(transaction);
@@ -157,7 +150,7 @@ export default function useMultisigContract() {
     } catch (error) {
       throw error;
     }
-  }, [publicClient, walletClient, address, baseFee, currentChainId, gasPrice, priorityFee, addRecentTransaction, chainId]);
+  }, [publicClient, walletClient, address, baseFee, currentChainId, gasPrice, priorityFee, chainId]);
 
   const getTransaction = useCallback(async (txId: bigint): Promise<MultisigTransaction | null> => {
     const result = await readContract("txs", [txId]);
@@ -220,7 +213,11 @@ export default function useMultisigContract() {
   }, [readContract]);
 
   const approveTransaction = useCallback(async (txId: bigint) => {
-    openDialog("sending", { transactionId: txId.toString() });
+    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, txId.toString(), currentChainId as DexChainId);
+    openDialog("sending", { 
+      transactionId: txId.toString(),
+      explorerUrl,
+    });
     
     let txHash: string | undefined;
     try {
@@ -233,12 +230,14 @@ export default function useMultisigContract() {
           updateStatus("success", {
             transactionId: txId.toString(),
             transactionHash: hash,
+            explorerUrl,
           });
         },
         (receipt) => {
           updateStatus("success", {
             transactionId: txId.toString(),
             transactionHash: txHash!,
+            explorerUrl,
           });
         }
       );
@@ -248,13 +247,18 @@ export default function useMultisigContract() {
       updateStatus("failed", {
         transactionId: txId.toString(),
         errorMessage,
+        explorerUrl,
       });
       throw new Error(errorMessage);
     }
-  }, [writeContract, openDialog, updateStatus]);
+  }, [writeContract, openDialog, updateStatus, currentChainId]);
 
   const declineTransaction = useCallback(async (txId: bigint) => {
-    openDialog("sending", { transactionId: txId.toString() });
+    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, txId.toString(), currentChainId as DexChainId);
+    openDialog("sending", { 
+      transactionId: txId.toString(),
+      explorerUrl,
+    });
     
     let txHash: string | undefined;
     try {
@@ -267,12 +271,14 @@ export default function useMultisigContract() {
           updateStatus("success", {
             transactionId: txId.toString(),
             transactionHash: hash,
+            explorerUrl,
           });
         },
         (receipt) => {
           updateStatus("success", {
             transactionId: txId.toString(),
             transactionHash: txHash!,
+            explorerUrl,
           });
         }
       );
@@ -281,13 +287,18 @@ export default function useMultisigContract() {
       updateStatus("failed", {
         transactionId: txId.toString(),
         errorMessage: error instanceof Error ? error.message : "Unknown error",
+        explorerUrl,
       });
       throw error;
     }
-  }, [writeContract, openDialog, updateStatus]);
+  }, [writeContract, openDialog, updateStatus, currentChainId]);
 
   const executeTransaction = useCallback(async (txId: bigint) => {
-    openDialog("sending", { transactionId: txId.toString() });
+    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, txId.toString(), currentChainId as DexChainId);
+    openDialog("sending", { 
+      transactionId: txId.toString(),
+      explorerUrl,
+    });
     
     let txHash: string | undefined;
     try {
@@ -300,12 +311,14 @@ export default function useMultisigContract() {
           updateStatus("success", {
             transactionId: txId.toString(),
             transactionHash: hash,
+            explorerUrl,
           });
         },
         (receipt) => {
           updateStatus("success", {
             transactionId: txId.toString(),
             transactionHash: txHash!,
+            explorerUrl,
           });
         }
       );
@@ -314,19 +327,23 @@ export default function useMultisigContract() {
       updateStatus("failed", {
         transactionId: txId.toString(),
         errorMessage: error instanceof Error ? error.message : "Unknown error",
+        explorerUrl,
       });
       throw error;
     }
-  }, [writeContract, openDialog, updateStatus]);
+  }, [writeContract, openDialog, updateStatus, currentChainId]);
 
   const proposeTransaction = useCallback(async (
     to: Address,
     value: bigint,
     data: `0x${string}`
   ) => {
-    openDialog("sending", { transactionId: "proposing" });
+    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, "proposing", currentChainId as DexChainId);
+    openDialog("sending", { 
+      transactionId: "proposing",
+      explorerUrl,
+    });
     
-    let txHash: string | undefined;
     try {
       setSendingTransaction(true);
       const hash = await writeContract(
@@ -334,28 +351,33 @@ export default function useMultisigContract() {
         [to, value, data],
         "Propose Transaction",
         (hash) => {
-          updateStatus("success", {
-            transactionId: "proposed",
+          updateStatus("sending", {
+            transactionId: "proposing",
             transactionHash: hash,
-          });
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: "proposed",
-            transactionHash: txHash!,
+            explorerUrl,
           });
         }
       );
+       publicClient?.waitForTransactionReceipt({ hash }).then((data) => {
+       console.log("Transaction executed", data);
+       addNotification({
+        template: RecentTransactionTitleTemplate.APPROVE,
+        symbol: "MULTISIG",
+        amount: "0",
+        logoURI: "/images/tokens/placeholder.svg",
+       }, RecentTransactionStatus.SUCCESS);
+       });
       return hash;
     } catch (error) {
+      setSendingTransaction(false);
       updateStatus("failed", {
         transactionId: "proposed",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
+        explorerUrl,
       });
       throw error;
-      setSendingTransaction(false);
     }
-  }, [writeContract, openDialog, updateStatus]);
+  }, [writeContract, openDialog, updateStatus, currentChainId]);
 
   // Add owner
   const addOwner = useCallback(async (newOwner: Address) => {

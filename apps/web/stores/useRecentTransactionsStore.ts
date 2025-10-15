@@ -251,6 +251,7 @@ export const useRecentTransactionsStore = create<RecentTransactions>()(
         }),
       updateTransactionStatus: (id, status, account) =>
         set((state) => {
+          console.log("updateTransactionStatus", id, status, account);
           const updatedTransactions = { ...state.transactions };
           const accountTransactions = updatedTransactions[account];
           const transactionIndex = accountTransactions.findIndex((t) => t.id === id);

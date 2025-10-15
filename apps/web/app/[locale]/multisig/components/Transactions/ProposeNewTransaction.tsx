@@ -19,6 +19,8 @@ import SelectOption from "@/components/atoms/SelectOption";
 import Popover from "@/components/atoms/Popover";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
 import type { FormikProps } from "formik";
+import TransactionSendDialog from "@/components/dialogs/TransactionSendDialog";
+import addToast from "@/other/toast";
 
 
 const initialValues = {
@@ -61,6 +63,10 @@ export default function ProposeNewTransaction() {
     const {
         isOpen: isTransactionDialogOpen,
         status: transactionStatus,
+        transactionId: dialogTransactionId,
+        transactionHash,
+        explorerUrl,
+        closeDialog,
     } = useTransactionSendDialogStore();
 
     const getTokenBySymbol = useCallback((symbol: string) => {
@@ -114,6 +120,7 @@ export default function ProposeNewTransaction() {
             return;
         }
         setLoading(true);
+        
         try {
             const token = getTokenBySymbol(values.asset);
             if (!token) {
@@ -320,6 +327,15 @@ export default function ProposeNewTransaction() {
                     );
                 }}
             </Formik>
+
+            <TransactionSendDialog
+                isOpen={isTransactionDialogOpen}
+                setIsOpen={closeDialog}
+                status={transactionStatus}
+                transactionId={dialogTransactionId}
+                transactionHash={transactionHash}
+                explorerUrl={explorerUrl}
+            />
         </div>
     );
 }
