@@ -39,6 +39,8 @@ const MULTISIG_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_MSIG_CONTRACT_ADDRESS 
 
 export default function useMultisigContract() {
   const [sendingTransaction, setSendingTransaction] = useState(false);
+  const [estimatedDeadline, setEstimatedDeadline] = useState<string>("");
+  const [estimatedDeadlineLoading, setEstimatedDeadlineLoading] = useState(false);
 
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
@@ -155,8 +157,6 @@ export default function useMultisigContract() {
     const result = await readContract("txs", [txId]);
     if (!result) return null;
     const [to, value, data, proposed_timestamp, executed, num_approvals, num_votes, required_approvals] = result as any[];
-
-    console.log('getTransaction', to, value, data, proposed_timestamp, executed, num_approvals, num_votes, required_approvals);
     
     return {
       to,
@@ -212,321 +212,178 @@ export default function useMultisigContract() {
     return Boolean(result);
   }, [readContract]);
 
-  const approveTransaction = useCallback(async (txId: bigint) => {
-    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, txId.toString(), currentChainId as DexChainId);
-    openDialog("sending", { 
-      transactionId: txId.toString(),
-      explorerUrl,
-    });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "approveTx",
-        [txId],
-        "Approve Transaction",
-        (hash) => {
-          // txHash = hash;
-          updateStatus("success", {
-            transactionId: txId.toString(),
-            transactionHash: hash,
-            explorerUrl,
-          });
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: txId.toString(),
-            transactionHash: txHash!,
-            explorerUrl,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      updateStatus("failed", {
-        transactionId: txId.toString(),
-        errorMessage,
-        explorerUrl,
-      });
-      throw new Error(errorMessage);
-    }
-  }, [writeContract, openDialog, updateStatus, currentChainId]);
-
-  const declineTransaction = useCallback(async (txId: bigint) => {
-    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, txId.toString(), currentChainId as DexChainId);
-    openDialog("sending", { 
-      transactionId: txId.toString(),
-      explorerUrl,
-    });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "declineTx",
-        [txId],
-        "Decline Transaction",
-        (hash) => {
-          // txHash = hash;
-          updateStatus("success", {
-            transactionId: txId.toString(),
-            transactionHash: hash,
-            explorerUrl,
-          });
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: txId.toString(),
-            transactionHash: txHash!,
-            explorerUrl,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      updateStatus("failed", {
-        transactionId: txId.toString(),
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-        explorerUrl,
-      });
-      throw error;
-    }
-  }, [writeContract, openDialog, updateStatus, currentChainId]);
-
-  const executeTransaction = useCallback(async (txId: bigint) => {
-    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, txId.toString(), currentChainId as DexChainId);
-    openDialog("sending", { 
-      transactionId: txId.toString(),
-      explorerUrl,
-    });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "executeTx",
-        [txId],
-        "Execute Transaction",
-        (hash) => {
-          // txHash = hash;
-          updateStatus("success", {
-            transactionId: txId.toString(),
-            transactionHash: hash,
-            explorerUrl,
-          });
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: txId.toString(),
-            transactionHash: txHash!,
-            explorerUrl,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      updateStatus("failed", {
-        transactionId: txId.toString(),
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-        explorerUrl,
-      });
-      throw error;
-    }
-  }, [writeContract, openDialog, updateStatus, currentChainId]);
-
-  const proposeTransaction = useCallback(async (
-    to: Address,
-    value: bigint,
-    data: `0x${string}`
-  ) => {
-    openDialog("sending", { 
-      transactionId: "proposing",
-    });
-    
+  const handleMultisigAction = useCallback(async ({
+    txId,
+    args = [],
+    functionName,
+    title,
+    transactionId,
+    notificationTemplate,
+  }: {
+    txId?: bigint;
+    args?: unknown[];
+    functionName: string;
+    title: string;
+    transactionId: string;
+    notificationTemplate: RecentTransactionTitleTemplate;
+  }) => {
+    openDialog("sending", { transactionId });
+  
     try {
       setSendingTransaction(true);
-      updateStatus("sending", {
-        transactionId: "proposing",
-        canClose: false,
-      });
-      const hash = await writeContract(
-        "proposeTx",
-        [to, value, data],
-        "Propose Transaction",
-      );
+      updateStatus("sending", { transactionId, canClose: false });
+  
+      const hash = await writeContract(functionName, args, title);
       const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, hash, currentChainId as DexChainId);
+  
       updateStatus("confirming", {
-        transactionId: "proposing",
+        transactionId,
         transactionHash: hash,
         explorerUrl,
         canClose: true,
       });
-       publicClient?.waitForTransactionReceipt({ hash }).then(() => {
-             addNotification({
-              template: RecentTransactionTitleTemplate.TRANSACTION_CONFIRMED,
-              chainId: currentChainId,
-              hash,
-             }, RecentTransactionStatus.SUCCESS);
-       });
+  
+      await publicClient?.waitForTransactionReceipt({ hash });
+  
+      setSendingTransaction(false);
+      updateStatus("success", {
+        transactionId,
+        transactionHash: hash,
+        explorerUrl,
+        canClose: true,
+      });
+  
+      addNotification(
+        {
+          template: notificationTemplate as any,
+          chainId: currentChainId as DexChainId,
+          hash,
+        },
+        RecentTransactionStatus.SUCCESS
+      );
+  
       return hash;
     } catch (error) {
       setSendingTransaction(false);
-      updateStatus("failed", {
-        transactionId: "proposed",
+      updateStatus("error", {
+        transactionId,
         errorMessage: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
-  }, [writeContract, openDialog, updateStatus, currentChainId]);
+  }, [openDialog, updateStatus, currentChainId, publicClient, writeContract]);
 
-  // Add owner
-  const addOwner = useCallback(async (newOwner: Address) => {
-    openDialog("sending", { transactionId: "adding_owner" });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "addOwner",
-        [newOwner],
-        "Add Owner",
-        (hash) => {
-          txHash = hash;
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: "owner_added",
-            transactionHash: txHash!,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      updateStatus("failed", {
-        transactionId: "owner_added",
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
-  }, [writeContract, openDialog, updateStatus]);
+ const approveTransaction = useCallback(
+  (txId: bigint) =>
+    handleMultisigAction({
+      txId,
+      args: [txId],
+      functionName: "approveTx",
+      title: "Approve Transaction",
+      transactionId: "approving",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_APPROVE,
+    }),
+  [handleMultisigAction]
+);
 
-  // Remove owner
-  const removeOwner = useCallback(async (owner: Address) => {
-    openDialog("sending", { transactionId: "removing_owner" });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "removeOwner",
-        [owner],
-        "Remove Owner",
-        (hash) => {
-          txHash = hash;
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: "owner_removed",
-            transactionHash: txHash!,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      updateStatus("failed", {
-        transactionId: "owner_removed",
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
-  }, [writeContract, openDialog, updateStatus]);
+const declineTransaction = useCallback(
+  (txId: bigint) =>
+    handleMultisigAction({
+      txId,
+      args: [txId],
+      functionName: "declineTx",
+      title: "Decline Transaction",
+      transactionId: "declining",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_DECLINE,
+    }),
+  [handleMultisigAction]
+);
 
-  // Setup delay
-  const setupDelay = useCallback(async (newDelay: bigint) => {
-    openDialog("sending", { transactionId: "setting_delay" });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "setupDelay",
-        [newDelay],
-        "Setup Delay",
-        (hash) => {
-          txHash = hash;
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: "delay_set",
-            transactionHash: txHash!,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      updateStatus("failed", {
-        transactionId: "delay_set",
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
-  }, [writeContract, openDialog, updateStatus]);
+const executeTransaction = useCallback(
+  (txId: bigint) =>
+    handleMultisigAction({
+      txId,
+      args: [txId],
+      functionName: "executeTx",
+      title: "Execute Transaction",
+      transactionId: "executing",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED,
+    }),
+  [handleMultisigAction]
+);
 
-  // Setup threshold
-  const setupThreshold = useCallback(async (newThreshold: bigint) => {
-    openDialog("sending", { transactionId: "setting_threshold" });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "setupThreshold",
-        [newThreshold],
-        "Setup Threshold",
-        (hash) => {
-          txHash = hash;
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: "threshold_set",
-            transactionHash: txHash!,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      updateStatus("failed", {
-        transactionId: "threshold_set",
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
-  }, [writeContract, openDialog, updateStatus]);
+const proposeTransaction = useCallback(
+  (to: Address, value: bigint, data: `0x${string}`) =>
+    handleMultisigAction({
+      args: [to, value, data],
+      functionName: "proposeTx",
+      title: "Propose Transaction",
+      transactionId: "proposing",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED,
+    }),
+  [handleMultisigAction]
+);
 
-  // Reduce approvals threshold
-  const reduceApprovalsThreshold = useCallback(async (txId: bigint) => {
-    openDialog("sending", { transactionId: txId.toString() });
-    
-    let txHash: string | undefined;
-    try {
-      const hash = await writeContract(
-        "reduceApprovalsThreshold",
-        [txId],
-        "Reduce Approvals Threshold",
-        (hash) => {
-          txHash = hash;
-        },
-        (receipt) => {
-          updateStatus("success", {
-            transactionId: txId.toString(),
-            transactionHash: txHash!,
-          });
-        }
-      );
-      return hash;
-    } catch (error) {
-      updateStatus("failed", {
-        transactionId: txId.toString(),
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw error;
-    }
-  }, [writeContract, openDialog, updateStatus]);
+const addOwner = useCallback(
+  (newOwner: Address) =>
+    handleMultisigAction({
+      args: [newOwner],
+      functionName: "addOwner",
+      title: "Add Owner",
+      transactionId: "adding_owner",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_ADD_OWNER,
+    }),
+  [handleMultisigAction]
+);
+
+const removeOwner = useCallback(
+  (owner: Address) =>
+    handleMultisigAction({
+      args: [owner],
+      functionName: "removeOwner",
+      title: "Remove Owner",
+      transactionId: "removing_owner",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_REMOVE_OWNER,
+    }),
+  [handleMultisigAction]
+);
+
+const setupDelay = useCallback(
+  (newDelay: bigint) =>
+    handleMultisigAction({
+      args: [newDelay],
+      functionName: "setupDelay",
+      title: "Setup Delay",
+      transactionId: "setting_delay",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_SET_DELAY,
+    }),
+  [handleMultisigAction]
+);
+
+const setupThreshold = useCallback(
+  (newThreshold: bigint) =>
+    handleMultisigAction({
+      args: [newThreshold],
+      functionName: "setupThreshold",
+      title: "Setup Threshold",
+      transactionId: "setting_threshold",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD,
+    }),
+  [handleMultisigAction]
+);
+
+const reduceApprovalsThreshold = useCallback(
+  (txId: bigint) =>
+    handleMultisigAction({
+      txId,
+      args: [txId],
+      functionName: "reduceApprovalsThreshold",
+      title: "Reduce Approvals Threshold",
+      transactionId: "reducing_threshold",
+      notificationTemplate: RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD,
+    }),
+  [handleMultisigAction]
+);
 
   // Get token transfer data
   const getTokenTransferData = useCallback(async (destination: Address, amount: bigint): Promise<`0x${string}`> => {
@@ -551,6 +408,24 @@ export default function useMultisigContract() {
     return transaction.proposed_timestamp + config.executionDelay;
   }, [getTransaction, getConfig]);
 
+  const fetchEstimatedDeadline = useCallback(async () => {
+    if (!publicClient) return;
+    try {
+      setEstimatedDeadlineLoading(true);
+        const config = await getConfig();
+        if (!config) return;
+
+        const currentBlock = await publicClient.getBlock({ blockTag: 'latest' });
+        const estimatedDeadlineTimestamp = currentBlock.timestamp + config.executionDelay;
+        const deadlineDate = new Date(Number(estimatedDeadlineTimestamp) * 1000);
+        setEstimatedDeadline(deadlineDate.toLocaleString());
+    } catch (error) {
+        console.error(error);
+    } finally {
+      setEstimatedDeadlineLoading(false);
+    }
+}, [publicClient, getConfig]);
+
 
   return {
     getTransaction,
@@ -571,5 +446,8 @@ export default function useMultisigContract() {
     generateTransactionData,
     getTransactionDeadline,
     sendingTransaction,
+    fetchEstimatedDeadline,
+    estimatedDeadline,
+    estimatedDeadlineLoading
   };
 }

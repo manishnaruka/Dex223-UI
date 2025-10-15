@@ -30,7 +30,6 @@ export enum RecentTransactionTitleTemplate {
   EDIT_LENDING_ORDER,
   OPEN_LENDING_ORDER,
   CLOSE_LENDING_ORDER,
-  TRANSACTION_CONFIRMED,
   CREATE_MARGIN_POSITION,
   CLOSE_MARGIN_POSITION,
   TRANSFER,
@@ -38,8 +37,14 @@ export enum RecentTransactionTitleTemplate {
   LIQUIDATE_MARGIN_POSITION,
   MARGIN_SWAP,
   WITHDRAW_FROM_CLOSED_POSITION,
-
   DEPLOY_TOKEN,
+  MSIG_ADD_OWNER,
+  MSIG_REMOVE_OWNER,
+  MSIG_SET_DELAY,
+  MSIG_SET_THRESHOLD,
+  MSIG_APPROVE,
+  MSIG_TRANSACTION_CONFIRMED,
+  MSIG_DECLINE,
 }
 
 type RecentTransactionGasLimit =
@@ -174,9 +179,26 @@ export type IRecentTransactionTitle =
       template: RecentTransactionTitleTemplate.MARGIN_SWAP;
     } & TwoTokensTransactionTitle)
   | ({
-      template: RecentTransactionTitleTemplate.TRANSACTION_CONFIRMED;
-    } & MultisigTransactionConfirmedTitle);
-
+      template: RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED;
+    } & MultisigTransactionConfirmedTitle)
+  | ({
+    template: RecentTransactionTitleTemplate.MSIG_ADD_OWNER;
+  } & MultisigTransactionConfirmedTitle)
+  | ({
+    template: RecentTransactionTitleTemplate.MSIG_REMOVE_OWNER;
+  } & MultisigTransactionConfirmedTitle)
+  | ({
+    template: RecentTransactionTitleTemplate.MSIG_SET_DELAY;
+  } & MultisigTransactionConfirmedTitle)
+  | ({
+    template: RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD;
+  } & MultisigTransactionConfirmedTitle)
+  | ({
+    template: RecentTransactionTitleTemplate.MSIG_APPROVE;
+  } & MultisigTransactionConfirmedTitle)
+  | ({
+    template: RecentTransactionTitleTemplate.MSIG_DECLINE;
+  } & MultisigTransactionConfirmedTitle)
 export type IRecentTransaction = {
   id: Address;
   status: RecentTransactionStatus;

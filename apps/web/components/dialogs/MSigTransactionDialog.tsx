@@ -5,7 +5,7 @@ import Preloader from "@repo/ui/preloader";
 import ExternalTextLink from "@repo/ui/external-text-link";
 import Svg from "../atoms/Svg";
 
-export type TransactionSendStatus = "sending" | "confirming" | "success" | "failed";
+export type TransactionSendStatus = "sending" | "confirming" | "success" | "failed" | "error";
 
 interface MSigTransactionDialogProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface MSigTransactionDialogProps {
   transactionHash?: string;
   explorerUrl?: string;
   canClose?: boolean;
+  errorMessage?: string;
 }
 
 export default function MSigTransactionDialog({
@@ -25,6 +26,7 @@ export default function MSigTransactionDialog({
   transactionHash,
   explorerUrl,
   canClose = true,
+  errorMessage,
 }: MSigTransactionDialogProps) {
   const handleClose = () => {
     setIsOpen(false);
@@ -113,6 +115,24 @@ export default function MSigTransactionDialog({
               {transactionId && (
                 <p className="text-14 text-secondary-text mb-2">
                   Transaction ID: {transactionId}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      case "error":
+        return (
+          <div className="flex flex-col items-center justify-center gap-4 p-6">
+            <div className="w-16 h-16 bg-red rounded-full flex items-center justify-center">
+              <Svg className="text-white" iconName="warning" size={70} />
+            </div>
+            <div className="text-center">
+              <h3 className="text-18 font-semibold text-red mb-2">
+                Error
+              </h3>
+              {errorMessage && (
+                <p className="text-14 text-secondary-text mb-2">
+                  {errorMessage}
                 </p>
               )}
             </div>

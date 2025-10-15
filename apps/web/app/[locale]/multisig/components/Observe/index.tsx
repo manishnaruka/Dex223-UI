@@ -4,10 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import useMultisigTransactions, { TransactionDisplayData } from "../../hooks/useMultisigTransactions";
 import useMultisigContract from "../../hooks/useMultisigContract";
 import { TransactionInfoCard } from "../shared";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Observe() {
     const [transactionId, setTransactionId] = useState("");
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionDisplayData | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     
     const {
         loading,
@@ -22,6 +24,7 @@ export default function Observe() {
             setSelectedTransaction(null);
             return;
         }
+        setIsLoading(true);
         try {
             const tx = await loadTransaction(txId);
             if (tx) {
@@ -29,16 +32,20 @@ export default function Observe() {
             }
         } catch (err) {
             console.error(err);
+        } finally {
+            setIsLoading(false);
         }
     }, [loadTransaction]);
+    
+    const debouncedTransactionId = useDebounce(transactionId, 500);
 
     useEffect(() => {
-        if (transactionId) {
-            loadTransactionData(transactionId);
+        if (debouncedTransactionId) {
+            loadTransactionData(debouncedTransactionId);
         } else {
             setSelectedTransaction(null);
         }
-    }, [transactionId, loadTransactionData]);
+    }, [debouncedTransactionId, loadTransactionData]);
 
     useEffect(() => {
         refreshTransactions();
@@ -69,12 +76,12 @@ export default function Observe() {
                     </div>
 
                 <div className="flex flex-col gap-6">
-                    {loading && (
+                    {isLoading && (
                         <div className="flex items-center justify-center min-h-[400px]">
                             <Preloader size={80} />
                         </div>
                     )}
-                    {!loading && selectedTransaction && transactionId && (
+                    {!isLoading && selectedTransaction && debouncedTransactionId && (
                         <div className="flex flex-col gap-6">
                             <div className="flex flex-col gap-4">
                                 <h3 className="text-18 font-bold text-primary-text">Information</h3>
@@ -91,7 +98,7 @@ export default function Observe() {
                             </div>
                         </div>
                     )}
-                    {!loading && !selectedTransaction && transactionId && (
+                    {!isLoading && !selectedTransaction && debouncedTransactionId && (
                         <div className="flex flex-col justify-center items-center h-full min-h-[300px] bg-primary-bg rounded-5 gap-1 bg-empty-not-found-token bg-no-repeat bg-right-top max-md:bg-size-180">
                             <span className="text-secondary-text">Transaction not found</span>
                         </div>

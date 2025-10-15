@@ -8,7 +8,7 @@ import { useAccount, usePublicClient } from "wagmi";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import useMultisigContract from "../../hooks/useMultisigContract";
 import { parseUnits, encodeFunctionData } from "viem";
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 import { Currency } from "@/sdk_bi/entities/currency";
 import SelectButton from "@/components/atoms/SelectButton";
@@ -20,6 +20,16 @@ import Popover from "@/components/atoms/Popover";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
 import type { FormikProps } from "formik";
 import MSigTransactionDialog from "@/components/dialogs/MSigTransactionDialog";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import Preloader from "@repo/ui/preloader";
+import { GasFeeBlock } from "../shared";
+import { formatEther, formatGwei } from "viem";
+import { formatFloat } from "@/functions/formatFloat";
+import { GasOption } from "@/stores/factories/createGasPriceStore";
+import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useMultisigGasModeStore, useMultisigGasLimitStore, useMultisigGasPriceStore } from "../stores/useMultisigGasSettingsStore";
 
 
 const initialValues = {
@@ -49,13 +59,13 @@ export default function ProposeNewTransaction() {
     const publicClient = usePublicClient();
     const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
     const [isOpenedAssetSelect, setIsOpenedAssetSelect] = useState(false);
-    const { proposeTransaction, generateTransactionData, getConfig, sendingTransaction } = useMultisigContract();
+    const { proposeTransaction, generateTransactionData, getConfig, sendingTransaction, fetchEstimatedDeadline, estimatedDeadline, estimatedDeadlineLoading } = useMultisigContract();
     const [loading, setLoading] = useState(false);
     const tokens = useTokens();
     const [selectedToken, setSelectedToken] = useState<Currency | null>(null);
     const [proposeData, setProposeData] = useState<string>("");
-    const [estimatedDeadline, setEstimatedDeadline] = useState<string>("");
     const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [isOpenedFee, setIsOpenedFee] = useState(false);
     const formikRef = useRef<FormikProps<typeof initialValues> | null>(null);
     const t = useTranslations("Swap");
 
@@ -68,6 +78,89 @@ export default function ProposeNewTransaction() {
         closeDialog,
         canClose,
     } = useTransactionSendDialogStore();
+
+    const {
+        gasPriceOption,
+        gasPriceSettings,
+        setGasPriceOption,
+        setGasPriceSettings,
+        updateDefaultState,
+    } = useMultisigGasPriceStore();
+    const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+        useMultisigGasLimitStore();
+    const { isAdvanced, setIsAdvanced } = useMultisigGasModeStore();
+    const { baseFee, priorityFee, gasPrice } = useGlobalFees();
+    const chainId = useCurrentChainId();
+
+    useEffect(() => {
+        updateDefaultState(chainId);
+      }, [chainId, updateDefaultState]);
+
+      const computedGasSpending = useMemo(() => {
+        if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
+          return formatFloat(formatGwei(gasPriceSettings.gasPrice));
+        }
+    
+        if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPrice) {
+          return formatFloat(formatGwei(gasPrice));
+        }
+    
+        if (
+          gasPriceSettings.model === GasFeeModel.EIP1559 &&
+          gasPriceSettings.maxFeePerGas &&
+          gasPriceSettings.maxPriorityFeePerGas &&
+          baseFee &&
+          gasPriceOption === GasOption.CUSTOM
+        ) {
+          const lowerFeePerGas =
+            gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
+    
+          return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
+        }
+    
+        if (
+          gasPriceSettings.model === GasFeeModel.EIP1559 &&
+          baseFee &&
+          priorityFee &&
+          gasPriceOption !== GasOption.CUSTOM
+        ) {
+          return formatFloat(formatGwei(baseFee + priorityFee));
+        }
+    
+        return undefined;
+      }, [baseFee, gasPrice, gasPriceOption, gasPriceSettings, priorityFee]);
+    
+      const computedGasSpendingETH = useMemo(() => {
+        if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
+          return formatFloat(formatEther(gasPriceSettings.gasPrice * estimatedGas));
+        }
+    
+        if (
+          gasPriceSettings.model === GasFeeModel.EIP1559 &&
+          gasPriceSettings.maxFeePerGas &&
+          gasPriceSettings.maxPriorityFeePerGas &&
+          baseFee &&
+          gasPriceOption === GasOption.CUSTOM
+        ) {
+          const lowerFeePerGas =
+            gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
+    
+          return formatFloat(
+            formatEther((lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas) * estimatedGas),
+          );
+        }
+    
+        if (
+          gasPriceSettings.model === GasFeeModel.EIP1559 &&
+          baseFee &&
+          priorityFee &&
+          gasPriceOption !== GasOption.CUSTOM
+        ) {
+          return formatFloat(formatEther((baseFee + priorityFee) * estimatedGas));
+        }
+    
+        return undefined;
+      }, [baseFee, estimatedGas, gasPriceOption, gasPriceSettings, priorityFee]);
 
     const getTokenBySymbol = useCallback((symbol: string) => {
         return tokens.find(token => token.symbol === symbol) || null;
@@ -110,17 +203,17 @@ export default function ProposeNewTransaction() {
     }, [getTokenBySymbol, generateTransactionDataForForm, generateTransactionData]);
 
     const handleSubmit = async (values: typeof initialValues) => {
-        if(!schema.isValidSync(values)) {
+        if (!schema.isValidSync(values)) {
             return;
         }
         setHasSubmitted(true);
-        
+
         if (!isConnected) {
             setWalletConnectOpened(true);
             return;
         }
         setLoading(true);
-        
+
         try {
             const token = getTokenBySymbol(values.asset);
             if (!token) {
@@ -137,22 +230,6 @@ export default function ProposeNewTransaction() {
             setLoading(false);
         }
     };
-
-    const fetchEstimatedDeadline = useCallback(async () => {
-        if (!publicClient) return;
-
-        try {
-            const config = await getConfig();
-            if (!config) return;
-
-            const currentBlock = await publicClient.getBlock({ blockTag: 'latest' });
-            const estimatedDeadlineTimestamp = currentBlock.timestamp + config.executionDelay;
-            const deadlineDate = new Date(Number(estimatedDeadlineTimestamp) * 1000);
-            setEstimatedDeadline(deadlineDate.toLocaleString());
-        } catch (error) {
-            console.error(error);
-        }
-    }, [publicClient, getConfig]);
 
     useEffect(() => {
         fetchEstimatedDeadline();
@@ -175,17 +252,14 @@ export default function ProposeNewTransaction() {
                 initialValues={initialValues}
                 onSubmit={handleSubmit}
                 validationSchema={schema}
-                validateOnBlur={false}
-                validateOnChange={false}
-                validateOnMount={false}
             >
                 {(props) => {
-                    formikRef.current = props;
-                    
-                    const newProposeData = generateProposeData(props.values);
-                    if (newProposeData !== proposeData) {
-                        setProposeData(newProposeData);
-                    }
+                    useEffect(() => {
+                        const newProposeData = generateProposeData(props.values);
+                        if (newProposeData !== proposeData) {
+                            setProposeData(newProposeData);
+                        }
+                    }, [props.values]);
 
                     return (
                         <>
@@ -280,14 +354,17 @@ export default function ProposeNewTransaction() {
                                         error={hasSubmitted && props.errors.sendTo ? props.errors.sendTo : ""}
                                         onChange={(e) => props.setFieldValue("sendTo", e.target.value)}
                                     />
+                                    <div className="relative">
+                                        {estimatedDeadlineLoading ? <Preloader className="absolute right-2 top-0" size={24} type="linear" /> : null}
+                                        <TextField
+                                            label="Deadline"
+                                            tooltipText="Set transaction deadline"
+                                            placeholder="DD.MM.YYYY HH:MM:ss aa"
+                                            value={estimatedDeadline}
+                                            readOnly={true}
+                                        />
 
-                                    <TextField
-                                        label="Deadline"
-                                        tooltipText="Set transaction deadline"
-                                        placeholder="DD.MM.YYYY HH:MM:ss aa"
-                                        value={estimatedDeadline}
-                                        readOnly={true}
-                                    />
+                                    </div>
 
                                     <div className="flex flex-col gap-4">
                                         <h3 className="text-18 font-bold text-primary-text">Data</h3>
@@ -299,9 +376,12 @@ export default function ProposeNewTransaction() {
                                     </div>
                                 </div>
 
-                                <div className="border-t border-secondary-border pt-6 mt-4">
-                                    <GasSettingsBlock />
-                                </div>
+                                <GasFeeBlock
+                            computedGasSpending={computedGasSpending}
+                            computedGasSpendingETH={computedGasSpendingETH}
+                            gasPriceOption={gasPriceOption}
+                            onEditClick={() => setIsOpenedFee(true)}
+                        />
 
                                 {!isConnected ? (
                                     <Button
@@ -318,6 +398,16 @@ export default function ProposeNewTransaction() {
                                         variant={ButtonVariant.CONTAINED}
                                         fullWidth
                                         disabled={loading || (hasSubmitted && Object.keys(props.errors).length > 0)}
+                                        onClick={async () => {
+                                            setHasSubmitted(true);
+                                            const errors = await props.validateForm();
+                                        
+                                            if (Object.keys(errors).length > 0) {
+                                              return;
+                                            }
+                                        
+                                            props.handleSubmit();
+                                          }}
                                     >
                                         {loading || sendingTransaction ? "Proposing..." : "Propose Transaction"}
                                     </Button>
@@ -336,6 +426,21 @@ export default function ProposeNewTransaction() {
                 transactionHash={transactionHash}
                 explorerUrl={explorerUrl}
                 canClose={canClose}
+            />
+
+            <NetworkFeeConfigDialog
+                isAdvanced={isAdvanced}
+                setIsAdvanced={setIsAdvanced}
+                estimatedGas={estimatedGas}
+                setEstimatedGas={setEstimatedGas}
+                gasPriceSettings={gasPriceSettings}
+                gasPriceOption={gasPriceOption}
+                customGasLimit={customGasLimit}
+                setCustomGasLimit={setCustomGasLimit}
+                setGasPriceOption={setGasPriceOption}
+                setGasPriceSettings={setGasPriceSettings}
+                isOpen={isOpenedFee}
+                setIsOpen={setIsOpenedFee}
             />
         </div>
     );

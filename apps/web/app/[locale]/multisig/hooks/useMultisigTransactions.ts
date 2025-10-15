@@ -11,7 +11,6 @@ export interface TransactionDisplayData {
   amount: string;
   symbol: string;
   to: Address;
-  creator: Address;
   numberOfVotes: string;
   requiredVotes: string;
   deadline: string;
@@ -167,7 +166,6 @@ export default function useMultisigTransactions() {
       amount,
       symbol,
       to: tx.to,
-      creator: "0x0000000000000000000000000000000000000000",
       numberOfVotes: tx.num_approvals.toString(),
       requiredVotes: tx.required_approvals.toString(),
       deadline: deadlineString,

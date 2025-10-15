@@ -19,10 +19,6 @@ export default function TransactionInfoCard({ transaction }: TransactionInfoCard
                 <span className="text-14 text-secondary-text">To</span>
                 <span className="text-12 text-primary-text font-mono text-right max-w-[200px] break-all">{transaction.to}</span>
             </div>
-            <div className="flex justify-between items-start">
-                <span className="text-14 text-secondary-text">Creator</span>
-                <span className="text-12 text-primary-text font-mono text-right max-w-[200px] break-all">{transaction.creator}</span>
-            </div>
             <div className="flex justify-between items-center">
                 <span className="text-14 text-secondary-text">Current votes</span>
                 <span className="text-14 text-primary-text font-medium">{transaction.numberOfVotes} / {transaction.requiredVotes}</span>
