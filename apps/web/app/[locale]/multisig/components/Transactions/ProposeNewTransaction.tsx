@@ -19,8 +19,7 @@ import SelectOption from "@/components/atoms/SelectOption";
 import Popover from "@/components/atoms/Popover";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
 import type { FormikProps } from "formik";
-import TransactionSendDialog from "@/components/dialogs/TransactionSendDialog";
-import addToast from "@/other/toast";
+import MSigTransactionDialog from "@/components/dialogs/MSigTransactionDialog";
 
 
 const initialValues = {
@@ -67,6 +66,7 @@ export default function ProposeNewTransaction() {
         transactionHash,
         explorerUrl,
         closeDialog,
+        canClose,
     } = useTransactionSendDialogStore();
 
     const getTokenBySymbol = useCallback((symbol: string) => {
@@ -159,7 +159,7 @@ export default function ProposeNewTransaction() {
     }, [fetchEstimatedDeadline]);
 
     useEffect(() => {
-        if ((transactionStatus === "success" || transactionStatus === "failed") && isTransactionDialogOpen) {
+        if ((transactionStatus === "confirming" || transactionStatus === "success" || transactionStatus === "failed") && isTransactionDialogOpen) {
             setSelectedToken(null);
             setProposeData("");
             setHasSubmitted(false);
@@ -328,13 +328,14 @@ export default function ProposeNewTransaction() {
                 }}
             </Formik>
 
-            <TransactionSendDialog
+            <MSigTransactionDialog
                 isOpen={isTransactionDialogOpen}
                 setIsOpen={closeDialog}
                 status={transactionStatus}
                 transactionId={dialogTransactionId}
                 transactionHash={transactionHash}
                 explorerUrl={explorerUrl}
+                canClose={canClose}
             />
         </div>
     );

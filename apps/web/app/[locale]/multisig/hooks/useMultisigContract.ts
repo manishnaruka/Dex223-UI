@@ -56,17 +56,16 @@ export default function useMultisigContract() {
     abi: MULTISIG_ABI,
     eventName: 'TransactionProposed',
     onLogs(logs) {
-       console.log('New transactions proposed!', logs);
        setSendingTransaction(false);
-       
-       // Update dialog to success when event is received
-       if (logs.length > 0) {
+       console.log('TransactionProposed', logs);
+        if (logs.length > 0) {
          const log = logs[0] as any;
-         const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, log.args?.txId?.toString() || "proposed", currentChainId as DexChainId);  
+         const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, log.transactionHash || "proposed", currentChainId as DexChainId);  
          updateStatus("success", {
            transactionId: log.args?.txId?.toString() || "proposed",
            transactionHash: log.transactionHash || undefined,
            explorerUrl,
+           canClose: true,
          });
        }
     },
@@ -155,8 +154,9 @@ export default function useMultisigContract() {
   const getTransaction = useCallback(async (txId: bigint): Promise<MultisigTransaction | null> => {
     const result = await readContract("txs", [txId]);
     if (!result) return null;
-
     const [to, value, data, proposed_timestamp, executed, num_approvals, num_votes, required_approvals] = result as any[];
+
+    console.log('getTransaction', to, value, data, proposed_timestamp, executed, num_approvals, num_votes, required_approvals);
     
     return {
       to,
@@ -168,7 +168,7 @@ export default function useMultisigContract() {
       num_votes,
       required_approvals,
     };
-  }, [readContract]);
+  }, []);
 
   const getAllTransactions = useCallback(async (): Promise<MultisigTransaction[]> => {
     const numTxs = await readContract("num_TXs");
@@ -338,34 +338,34 @@ export default function useMultisigContract() {
     value: bigint,
     data: `0x${string}`
   ) => {
-    const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, "proposing", currentChainId as DexChainId);
     openDialog("sending", { 
       transactionId: "proposing",
-      explorerUrl,
     });
     
     try {
       setSendingTransaction(true);
+      updateStatus("sending", {
+        transactionId: "proposing",
+        canClose: false,
+      });
       const hash = await writeContract(
         "proposeTx",
         [to, value, data],
         "Propose Transaction",
-        (hash) => {
-          updateStatus("sending", {
-            transactionId: "proposing",
-            transactionHash: hash,
-            explorerUrl,
-          });
-        }
       );
-       publicClient?.waitForTransactionReceipt({ hash }).then((data) => {
-       console.log("Transaction executed", data);
-       addNotification({
-        template: RecentTransactionTitleTemplate.APPROVE,
-        symbol: "MULTISIG",
-        amount: "0",
-        logoURI: "/images/tokens/placeholder.svg",
-       }, RecentTransactionStatus.SUCCESS);
+      const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, hash, currentChainId as DexChainId);
+      updateStatus("confirming", {
+        transactionId: "proposing",
+        transactionHash: hash,
+        explorerUrl,
+        canClose: true,
+      });
+       publicClient?.waitForTransactionReceipt({ hash }).then(() => {
+             addNotification({
+              template: RecentTransactionTitleTemplate.TRANSACTION_CONFIRMED,
+              chainId: currentChainId,
+              hash,
+             }, RecentTransactionStatus.SUCCESS);
        });
       return hash;
     } catch (error) {
@@ -373,7 +373,6 @@ export default function useMultisigContract() {
       updateStatus("failed", {
         transactionId: "proposed",
         errorMessage: error instanceof Error ? error.message : "Unknown error",
-        explorerUrl,
       });
       throw error;
     }

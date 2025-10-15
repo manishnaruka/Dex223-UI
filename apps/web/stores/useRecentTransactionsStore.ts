@@ -30,7 +30,7 @@ export enum RecentTransactionTitleTemplate {
   EDIT_LENDING_ORDER,
   OPEN_LENDING_ORDER,
   CLOSE_LENDING_ORDER,
-
+  TRANSACTION_CONFIRMED,
   CREATE_MARGIN_POSITION,
   CLOSE_MARGIN_POSITION,
   TRANSFER,
@@ -88,6 +88,11 @@ type TwoTokensTransactionTitle = {
   amount1: string;
   logoURI0: string;
   logoURI1: string;
+};
+
+type MultisigTransactionConfirmedTitle = {
+  hash: string;
+  chainId: number;
 };
 
 type IncreaseLiquidityParams = any;
@@ -167,7 +172,10 @@ export type IRecentTransactionTitle =
     } & MarginPositionTitle)
   | ({
       template: RecentTransactionTitleTemplate.MARGIN_SWAP;
-    } & TwoTokensTransactionTitle);
+    } & TwoTokensTransactionTitle)
+  | ({
+      template: RecentTransactionTitleTemplate.TRANSACTION_CONFIRMED;
+    } & MultisigTransactionConfirmedTitle);
 
 export type IRecentTransaction = {
   id: Address;

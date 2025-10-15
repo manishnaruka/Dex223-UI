@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { TransactionSendStatus } from "@/components/dialogs/TransactionSendDialog";
+import { TransactionSendStatus } from "@/components/dialogs/MSigTransactionDialog";
 
 interface TransactionSendDialogStore {
   isOpen: boolean;
@@ -8,7 +8,7 @@ interface TransactionSendDialogStore {
   transactionHash?: string;
   explorerUrl?: string;
   errorMessage?: string;
-
+  canClose?: boolean;
   // Actions
   openDialog: (status: TransactionSendStatus, data?: {
     transactionId?: string;
@@ -22,6 +22,7 @@ interface TransactionSendDialogStore {
     transactionHash?: string;
     explorerUrl?: string;
     errorMessage?: string;
+    canClose?: boolean;
   }) => void;
 }
 
@@ -57,5 +58,6 @@ export const useTransactionSendDialogStore = create<TransactionSendDialogStore>(
     transactionHash: data?.transactionHash,
     explorerUrl: data?.explorerUrl,
     errorMessage: data?.errorMessage,
+    canClose: data?.canClose,
   }),
 }));

@@ -5,7 +5,7 @@ import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import { useAccount } from "wagmi";
 import Preloader from "@repo/ui/preloader";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
-import TransactionSendDialog from "@/components/dialogs/TransactionSendDialog";
+import TransactionSendDialog from "@/components/dialogs/MSigTransactionDialog";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 import useMultisigContract from "../../hooks/useMultisigContract";
 import useMultisigTransactions, { TransactionDisplayData } from "../../hooks/useMultisigTransactions";

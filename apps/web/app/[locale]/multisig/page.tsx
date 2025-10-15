@@ -25,7 +25,7 @@ export default function MultisigPage() {
                     <div className="w-full max-w-[640px]">
                         <div className="text-center mb-8">
                             <h1 className="mb-3 text-24 lg:text-40">Dex223 Multi-sig</h1>
-                        </div>
+                         </div>
                         <div className="w-full flex bg-primary-bg p-1 gap-1 rounded-3 overflow-x-auto mb-8">
                             {platforms.map((platform) => (
                                 <TabButton 

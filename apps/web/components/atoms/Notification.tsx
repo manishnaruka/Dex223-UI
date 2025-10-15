@@ -15,6 +15,7 @@ import {
   RecentTransactionStatus,
   RecentTransactionTitleTemplate,
 } from "@/stores/useRecentTransactionsStore";
+import Svg from "./Svg";
 
 export type NotificationTransactionStatus =
   | RecentTransactionStatus.ERROR
@@ -99,6 +100,13 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
       return (
         <NotificationSubtitleText>{`${title.symbol} (ID: ${title.positionId})`}</NotificationSubtitleText>
       );
+    case RecentTransactionTitleTemplate.TRANSACTION_CONFIRMED:
+        return (
+          <ExternalTextLink
+            href={getExplorerLink(ExplorerLinkType.TRANSACTION, title.hash, title.chainId)}
+            text={'Transaction Link'}
+          />
+        );
   }
 }
 
@@ -303,6 +311,14 @@ function NotificationTitle({
             : "Failed to close margin position"}
         </NotificationTitleText>
       );
+    case RecentTransactionTitleTemplate.TRANSACTION_CONFIRMED:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully sent"
+            : "Failed to send transaction"}
+        </NotificationTitleText>
+      );
   }
 }
 
@@ -315,6 +331,11 @@ export default function Notification({ onDismiss, transactionTitle, transactionS
         ) : (
           <div className="flex-shrink-0">
             <EmptyStateIcon size={48} iconName="warning" />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.TRANSACTION_CONFIRMED && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
           </div>
         )}
         <div className="grid">

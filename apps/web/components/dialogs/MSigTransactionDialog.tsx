@@ -5,25 +5,27 @@ import Preloader from "@repo/ui/preloader";
 import ExternalTextLink from "@repo/ui/external-text-link";
 import Svg from "../atoms/Svg";
 
-export type TransactionSendStatus = "sending" | "success" | "failed";
+export type TransactionSendStatus = "sending" | "confirming" | "success" | "failed";
 
-interface TransactionSendDialogProps {
+interface MSigTransactionDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   status: TransactionSendStatus;
   transactionId?: string;
   transactionHash?: string;
   explorerUrl?: string;
+  canClose?: boolean;
 }
 
-export default function TransactionSendDialog({
+export default function MSigTransactionDialog({
   isOpen,
   setIsOpen,
   status,
   transactionId,
   transactionHash,
   explorerUrl,
-}: TransactionSendDialogProps) {
+  canClose = true,
+}: MSigTransactionDialogProps) {
   const handleClose = () => {
     setIsOpen(false);
   };
@@ -47,25 +49,48 @@ export default function TransactionSendDialog({
           </div>
         );
 
+      case "confirming":
+          return (
+            <div className="flex flex-col items-center justify-center gap-4 p-6">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <Preloader size={48} type="linear" />
+              </div>
+              <div className="flex flex-col items-center justify-center gap-2">
+              <h3 className="text-18 font-semibold text-primary-text">
+                Confirming transaction
+              </h3>
+              {transactionHash && explorerUrl && (
+                <ExternalTextLink
+                  text="Transaction link"
+                  href={explorerUrl}
+                  className="text-green hover:text-green-hover"
+                >
+                  Transaction link
+                </ExternalTextLink>
+              )}
+            </div>
+            </div>
+      );
+  
       case "success":
         return (
           <div className="flex flex-col items-center justify-center gap-4 p-6">
             <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
               <Svg className="text-white" iconName="check" size={70} />
             </div>
-            <div className="text-center">
-              <h3 className="text-18 font-semibold text-primary-text mb-2">
+            <div className="flex flex-col items-center justify-center gap-2">
+              <h3 className="text-18 font-semibold text-primary-text">
                 Successfully sent
               </h3>
               {transactionId && (
-                <p className="text-14 text-secondary-text mb-2">
+                <span className="text-14 text-secondary-text">
                   Transaction ID: {transactionId}
-                </p>
+                </span>
               )}
               {transactionHash && explorerUrl && (
                 <ExternalTextLink
                   text="Transaction link"
-                  href={`${explorerUrl}/tx/${transactionHash}`}
+                  href={explorerUrl}
                   className="text-green hover:text-green-hover"
                 >
                   Transaction link
@@ -102,15 +127,13 @@ export default function TransactionSendDialog({
   return (
     <Dialog isOpen={isOpen} setIsOpen={setIsOpen}>
       <div className="w-[500px] relative">
-        <div className="flex items-center justify-between p-4 border-secondary-border">
-          <h2 className="text-18 font-semibold text-primary-text">
-            Transaction send
-          </h2>
+        {canClose && (
           <IconButton
             variant={IconButtonVariant.CLOSE}
             handleClose={handleClose}
+            className="absolute top-4 right-4"
           />
-        </div>
+        )}
         {renderContent()}
       </div>
     </Dialog>
