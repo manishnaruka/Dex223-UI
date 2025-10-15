@@ -85,11 +85,7 @@ export default function BuyCryptoPageClient({ tokens, initialExchange }: Props) 
                   <div className="flex items-center justify-center py-8">
                     <BuyOnramp
                       userId={address}
-                      appId={
-                        process.env.NEXT_PUBLIC_ONRAMP_APP_ID
-                          ? +process.env.NEXT_PUBLIC_ONRAMP_APP_ID
-                          : 0
-                      }
+                      appId={Number(process.env.NEXT_PUBLIC_ONRAMP_APP_ID)}
                       flowType={selectedTab}
                     />
                   </div>
