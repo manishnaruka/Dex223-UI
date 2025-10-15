@@ -1,4 +1,4 @@
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient, useWatchContractEvent } from "wagmi";
 import { useCallback, useEffect, useState } from "react";
 import { Address, encodeFunctionData, Log } from "viem";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
@@ -22,14 +22,6 @@ export interface MultisigTransaction {
   required_approvals: bigint;
 }
 
-export interface TransactionProposedEvent {
-  txId: bigint;
-  proposer: Address;
-  to: Address;
-  value: bigint;
-  data: `0x${string}`;
-}
-
 export interface MultisigConfig {
   numOwners: bigint;
   votePassThreshold: bigint;
@@ -41,6 +33,8 @@ const MULTISIG_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_MSIG_CONTRACT_ADDRESS 
 // const MULTISIG_CONTRACT_ADDRESS = "0xE0CbccaBB9a7987bC94287D555A1Aa440Efa30bf" as Address;
 
 export default function useMultisigContract() {
+  const [sendingTransaction, setSendingTransaction] = useState(false);
+
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -52,7 +46,16 @@ export default function useMultisigContract() {
     closeDialog,
     updateStatus,
   } = useTransactionSendDialogStore();
-  const [latestEvent, setLatestEvent] = useState<TransactionProposedEvent | null>(null);
+
+  useWatchContractEvent({
+    address: MULTISIG_CONTRACT_ADDRESS,
+    abi: MULTISIG_ABI,
+    eventName: 'TransactionProposed',
+    onLogs(logs) {
+       console.log('New transactions proposed!', logs);
+       setSendingTransaction(false);
+    },
+  });
 
   const readContract = useCallback(async (functionName: string, args: unknown[] = []) => {
     if (!publicClient) return null;
@@ -325,6 +328,7 @@ export default function useMultisigContract() {
     
     let txHash: string | undefined;
     try {
+      setSendingTransaction(true);
       const hash = await writeContract(
         "proposeTx",
         [to, value, data],
@@ -349,6 +353,7 @@ export default function useMultisigContract() {
         errorMessage: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
+      setSendingTransaction(false);
     }
   }, [writeContract, openDialog, updateStatus]);
 
@@ -525,82 +530,6 @@ export default function useMultisigContract() {
     return transaction.proposed_timestamp + config.executionDelay;
   }, [getTransaction, getConfig]);
 
-  // Watch for TransactionProposed events
-  useEffect(() => {
-    if (!publicClient) return;
-
-    let unwatch: (() => void) | undefined;
-
-    const watchEvents = async () => {
-      try {
-        unwatch = publicClient.watchContractEvent({
-          address: MULTISIG_CONTRACT_ADDRESS,
-          abi: MULTISIG_ABI,
-          eventName: "TransactionProposed",
-          onLogs: (logs) => {
-            logs.forEach((log) => {
-              const { args } = log as any;
-              if (args) {
-                const event: TransactionProposedEvent = {
-                  txId: args.txId,
-                  proposer: args.proposer,
-                  to: args.to,
-                  value: args.value,
-                  data: args.data,
-                };
-                setLatestEvent(event);
-              }
-            });
-          },
-        });
-      } catch (error) {
-        console.error("Error watching TransactionProposed event:", error);
-      }
-    };
-
-    watchEvents();
-
-    return () => {
-      if (unwatch) {
-        unwatch();
-      }
-    };
-  }, [publicClient]);
-
-  const getProposerFromEvents = useCallback(async (txId: bigint): Promise<Address | null> => {
-    if (!publicClient) return null;
-
-    try {
-      const logs = await publicClient.getLogs({
-        address: MULTISIG_CONTRACT_ADDRESS,
-        event: {
-          type: "event",
-          name: "TransactionProposed",
-          inputs: [
-            { type: "uint256", indexed: true, name: "txId" },
-            { type: "address", indexed: true, name: "proposer" },
-            { type: "address", indexed: true, name: "to" },
-            { type: "uint256", indexed: false, name: "value" },
-            { type: "bytes", indexed: false, name: "data" },
-          ],
-        },
-        args: {
-          txId: txId,
-        },
-        fromBlock: 'earliest',
-        toBlock: 'latest',
-      });
-
-      if (logs.length > 0) {
-        const log = logs[0] as any;
-        return log.args?.proposer || null;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error fetching proposer from events:", error);
-      return null;
-    }
-  }, [publicClient]);
 
   return {
     getTransaction,
@@ -620,7 +549,6 @@ export default function useMultisigContract() {
     getTokenTransferData,
     generateTransactionData,
     getTransactionDeadline,
-    getProposerFromEvents,
-    latestEvent,
+    sendingTransaction,
   };
 }

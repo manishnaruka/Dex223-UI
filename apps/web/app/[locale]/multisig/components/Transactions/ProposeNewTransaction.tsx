@@ -48,7 +48,7 @@ export default function ProposeNewTransaction() {
     const publicClient = usePublicClient();
     const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
     const [isOpenedAssetSelect, setIsOpenedAssetSelect] = useState(false);
-    const { proposeTransaction, generateTransactionData, getConfig } = useMultisigContract();
+    const { proposeTransaction, generateTransactionData, getConfig, sendingTransaction } = useMultisigContract();
     const [loading, setLoading] = useState(false);
     const tokens = useTokens();
     const [selectedToken, setSelectedToken] = useState<Currency | null>(null);
@@ -312,7 +312,7 @@ export default function ProposeNewTransaction() {
                                         fullWidth
                                         disabled={loading || (hasSubmitted && Object.keys(props.errors).length > 0)}
                                     >
-                                        {loading ? "Proposing..." : "Propose Transaction"}
+                                        {loading || sendingTransaction ? "Proposing..." : "Propose Transaction"}
                                     </Button>
                                 )}
                             </form>

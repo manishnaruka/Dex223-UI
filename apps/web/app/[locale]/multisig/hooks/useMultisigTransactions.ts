@@ -30,8 +30,6 @@ export default function useMultisigTransactions() {
     isOwner,
     isTransactionAllowed,
     getTransactionDeadline,
-    getProposerFromEvents,
-    latestEvent,
   } = useMultisigContract();
 
   const tokens = useTokens();
@@ -162,7 +160,6 @@ export default function useMultisigTransactions() {
       : new Date(Number(tx.proposed_timestamp) * 1000).toLocaleString();
 
     // Fetch proposer from events
-    const proposer = await getProposerFromEvents(BigInt(txId));
 
     return {
       id: txId.toString(),
@@ -170,7 +167,7 @@ export default function useMultisigTransactions() {
       amount,
       symbol,
       to: tx.to,
-      creator: proposer || "0x0000000000000000000000000000000000000000",
+      creator: "0x0000000000000000000000000000000000000000",
       numberOfVotes: tx.num_approvals.toString(),
       requiredVotes: tx.required_approvals.toString(),
       deadline: deadlineString,
@@ -180,7 +177,7 @@ export default function useMultisigTransactions() {
       canExecute,
       canVote,
     };
-  }, [isTransactionAllowed, isOwner, address, getTokenInfo, getTransactionDeadline, getProposerFromEvents]);
+  }, [isTransactionAllowed, isOwner, address, getTokenInfo, getTransactionDeadline ]);
 
   const loadTransactions = useCallback(async () => {
     if (!getAllTransactions) return;
@@ -229,18 +226,6 @@ export default function useMultisigTransactions() {
     refreshTransactions();
   }, [refreshTransactions]);
 
-  // Auto-refresh when a new transaction is proposed
-  useEffect(() => {
-    if (latestEvent) {
-      console.log("New transaction proposed:", latestEvent);
-      // Delay refresh slightly to ensure blockchain state is updated
-      const timer = setTimeout(() => {
-        refreshTransactions();
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [latestEvent, refreshTransactions]);
 
   return {
     transactions,
@@ -250,6 +235,5 @@ export default function useMultisigTransactions() {
     refreshTransactions,
     getTokenInfo,
     cacheTokenInfo,
-    latestEvent,
   };
 }
