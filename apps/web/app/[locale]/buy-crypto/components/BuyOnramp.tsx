@@ -8,13 +8,13 @@ import { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import Button from "@/components/buttons/Button";
 
 interface BuyOnrampProps {
-  apiId: number;
+  appId: number;
   userId?: string;
   flowType: string;
   walletAddress?: string;
 }
 
-export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: BuyOnrampProps) {
+export default function BuyOnramp({ appId, userId, flowType, walletAddress }: BuyOnrampProps) {
   const [onrampInstanceObj, setOnrampInstanceObj] = useState<any>(null);
   const { address } = useAccount();
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export default function BuyOnramp({ apiId, userId, flowType, walletAddress }: Bu
       console.error("Error initializing OnRamp SDK:", err);
       setError("Failed to initialize payment system");
     }
-  }, [flowType, apiId, userId, effectiveWalletAddress]);
+  }, [flowType, appId, userId, effectiveWalletAddress]);
 
   // Set up event listeners
   useEffect(() => {

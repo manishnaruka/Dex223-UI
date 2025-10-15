@@ -1,15 +1,17 @@
-import { Address } from "viem";
-import { create } from "zustand";
+import { createOperationStatusStore } from "@/stores/factories/createOperationStatusStore";
 
 export enum ListTokenStatus {
   INITIAL,
+
   PENDING_APPROVE,
   LOADING_APPROVE,
-  PENDING,
-  LOADING,
+  ERROR_APPROVE,
+
+  PENDING_LIST_TOKEN,
+  LOADING_LIST_TOKEN,
+  ERROR_LIST_TOKEN,
+
   SUCCESS,
-  ERROR,
-  APPROVE_ERROR,
 }
 
 export enum ListError {
@@ -17,31 +19,8 @@ export enum ListError {
   UNKNOWN,
 }
 
-interface ListTokenStatusStore {
-  status: ListTokenStatus;
-  approveHash: Address | undefined;
-  listTokenHash: Address | undefined;
-  errorType: ListError;
-
-  setStatus: (status: ListTokenStatus) => void;
-  setApproveHash: (hash: Address) => void;
-  setListTokenHash: (hash: Address) => void;
-  setErrorType: (errorType: ListError) => void;
-}
-
-export const useListTokenStatusStore = create<ListTokenStatusStore>((set, get) => ({
-  status: ListTokenStatus.INITIAL,
-  approveHash: undefined,
-  listTokenHash: undefined,
+export const useListTokenStatusStore = createOperationStatusStore({
+  initialStatus: ListTokenStatus.INITIAL,
+  operations: ["approve", "listToken"],
   errorType: ListError.UNKNOWN,
-  setStatus: (status) => {
-    if (status === ListTokenStatus.INITIAL) {
-      set({ status, listTokenHash: undefined, approveHash: undefined });
-    }
-
-    set({ status });
-  },
-  setErrorType: (errorType) => set({ errorType }),
-  setListTokenHash: (hash) => set({ listTokenHash: hash }),
-  setApproveHash: (hash) => set({ approveHash: hash }),
-}));
+});

@@ -374,7 +374,7 @@ const MintDialog = ({
   return (
     <>
       <DialogHeader onClose={() => setIsOpen(false)} title="Add liquidity" />
-      <div className="card-spacing-x md:pb-0 h-[60dvh] md:h-auto flex flex-col">
+      <div className="card-spacing-x md:pb-0 max-h-[60dvh] md:h-auto flex flex-col">
         <div className="flex-grow overflow-y-auto max-md:pb-4 -mr-2 pr-2">
           <div
             className={clsxMerge(
@@ -557,7 +557,7 @@ const MintDialog = ({
       {/* divider line */}
       <div className="h-[1px] border-transparent md:hidden w-full bg-quaternary-bg" />
 
-      <div className="px-4 md:px-10 md:pb-10 h-[30dvh] md:h-auto flex flex-col">
+      <div className="px-4 pb-4 md:px-10 md:pb-10 md:h-auto flex flex-col">
         {/* GAS */}
         <div className="flex flex-col md:flex-row items-center gap-2 px-5 py-2 bg-tertiary-bg rounded-3 mb-2 md:mb-5 mt-4 md:mt-5">
           {/* First row container with custom 66.67% width */}

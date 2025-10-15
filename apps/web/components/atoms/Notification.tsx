@@ -79,7 +79,7 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
       );
     case RecentTransactionTitleTemplate.LIST_DOUBLE:
       return (
-        <NotificationSubtitleText>{`${title.symbol0} and ${title.symbol0} in "${title.autoListing}" list`}</NotificationSubtitleText>
+        <NotificationSubtitleText>{`${title.symbol0} and ${title.symbol1} in "${title.autoListing}" list`}</NotificationSubtitleText>
       );
     case RecentTransactionTitleTemplate.CLOSE_LENDING_ORDER:
     case RecentTransactionTitleTemplate.OPEN_LENDING_ORDER:

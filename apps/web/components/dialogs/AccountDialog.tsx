@@ -2,12 +2,11 @@ import ExternalTextLink from "@repo/ui/external-text-link";
 import Tooltip from "@repo/ui/tooltip";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Address, formatUnits } from "viem";
 import { useAccount, useDisconnect } from "wagmi";
 
-import DialogHeader from "@/components/atoms/DialogHeader";
 import Drawer from "@/components/atoms/Drawer";
 import Popover from "@/components/atoms/Popover";
 import ScrollbarContainer from "@/components/atoms/ScrollbarContainer";
@@ -26,20 +25,13 @@ import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import useTokenBalances from "@/hooks/useTokenBalances";
 import { useTokens } from "@/hooks/useTokenLists";
-import { useUSDPrice } from "@/hooks/useUSDPrice";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { Standard } from "@/sdk_bi/standard";
 import { useManageTokensDialogStore } from "@/stores/useManageTokensDialogStore";
 import { usePinnedTokensStore } from "@/stores/usePinnedTokensStore";
 import { useRecentTransactionsStore } from "@/stores/useRecentTransactionsStore";
 
-function PinnedTokenRow({
-  token,
-  onPriceUpdate,
-}: {
-  token: Currency;
-  onPriceUpdate: (address: Address, price: number) => void;
-}) {
+function PinnedTokenRow({ token }: { token: Currency }) {
   const t = useTranslations("Swap");
 
   const {
@@ -60,96 +52,71 @@ function PinnedTokenRow({
     return formatFloat(formatUnits(_erc20Balance + _erc223Balance, token.decimals));
   }, [erc20Balance, erc223Balance, token]);
 
-  const { price, isLoading } = useUSDPrice(token.wrapped.address0);
-
-  useEffect(() => {
-    if (!isLoading && price) {
-      onPriceUpdate(token.wrapped.address0, price * +totalBalance);
-    }
-  }, [price, totalBalance, isLoading, token, onPriceUpdate]);
-
   return (
-    <div key={token.symbol} className="p-5 bg-tertiary-bg flex flex-col gap-3 rounded-3">
+    <div key={token.symbol} className="px-5 py-2 bg-tertiary-bg rounded-3">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Image
-            width={40}
-            height={40}
+            width={24}
+            height={24}
             src={token.logoURI || "/images/tokens/placeholder.svg"}
             alt=""
           />
-          <div className="flex flex-col">
-            <span>{token.name}</span>
-            <span className="text-secondary-text text-12">
-              {totalBalance} {token.symbol?.toUpperCase()}
-            </span>
-          </div>
+          <span>{token.name}</span>
         </div>
-        <span>{price && `$${formatFloat(price * +totalBalance)}`}</span>
+        <span className="font-medium">
+          {totalBalance} {token.isToken ? token.symbol?.toUpperCase() : token.symbol}
+        </span>
       </div>
+
       {token.isToken ? (
-        <div className="flex flex-col gap-1">
-          <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
-            <div className="flex items-center gap-2">
-              <span className="text-12 text-tertiary-text">Balance</span>
-              <span className="block min-w-[58px]">
-                <Badge
-                  // className="w-fit"
-                  size="small"
-                  variant={BadgeVariant.STANDARD}
-                  standard={Standard.ERC20}
-                />
+        <>
+          <div className="h-px my-2 bg-secondary-border" />
+          <div className="flex flex-col gap-0.5">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-14 text-tertiary-text">Balance</span>
+                <span className="block min-w-[62px]">
+                  <Badge
+                    // className="w-fit"
+                    size="small"
+                    variant={BadgeVariant.STANDARD}
+                    standard={Standard.ERC20}
+                  />
+                </span>
+                <Tooltip iconSize={16} text={t("erc20_tooltip")} />
+              </div>
+
+              <span className="text-secondary-text text-12">
+                {formatFloat(erc20Balance?.formatted || "0")} {token.symbol}
               </span>
-              <Tooltip iconSize={16} text={t("erc20_tooltip")} />
             </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-14 text-tertiary-text">Balance</span>
+                <span className="block min-w-[62px]">
+                  <Badge
+                    // className="w-fit"
+                    size="small"
+                    variant={BadgeVariant.STANDARD}
+                    standard={Standard.ERC223}
+                  />
+                </span>
+                <Tooltip iconSize={16} text={t("erc223_tooltip")} />
+              </div>
 
-            <span className="text-secondary-text text-12">
-              {formatFloat(erc20Balance?.formatted || "0")} {token.symbol}
-            </span>
-          </div>
-          <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
-            <div className="flex items-center gap-2">
-              <span className="text-12 text-tertiary-text">Balance</span>
-              <span className="block min-w-[58px]">
-                <Badge
-                  // className="w-fit"
-                  size="small"
-                  variant={BadgeVariant.STANDARD}
-                  standard={Standard.ERC223}
-                />
+              <span className="text-secondary-text text-12">
+                {formatFloat(erc223Balance?.formatted || "0")} {token.symbol}
               </span>
-              <Tooltip iconSize={16} text={t("erc223_tooltip")} />
             </div>
-
-            <span className="text-secondary-text text-12">
-              {formatFloat(erc223Balance?.formatted || "0")} {token.symbol}
-            </span>
           </div>
-        </div>
-      ) : (
-        <div className="flex justify-between items-center bg-quaternary-bg py-1 px-3 rounded-2">
-          <div className="flex items-center gap-2">
-            <span className="text-12 text-tertiary-text">Balance</span>
-            <span className="block min-w-[58px]">
-              <Badge className="w-fit" size="small" text="Native" />
-            </span>
-            <Tooltip
-              iconSize={16}
-              text="Native currency of the network you are using (e.g. ETH on Ethereum). On most networks gas fees are paid with native currency."
-            />
-          </div>
-
-          <span className="text-secondary-text text-12">
-            {formatFloat(erc20Balance?.formatted || "0")} {token.symbol}
-          </span>
-        </div>
-      )}
+        </>
+      ) : null}
     </div>
   );
 }
 
 function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: any) {
-  const tToast = useTranslations("Toast");
   const tRecentTransactions = useTranslations("RecentTransactions");
   const t = useTranslations("Wallet");
 
@@ -180,30 +147,14 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
     return pinnedTokensAddresses[chainId]?.map((id) => lookupMap.get(id)) || [];
   }, [chainId, pinnedTokensAddresses, tokens]);
 
-  const [childPrices, setChildPrices] = useState({});
-
-  const handleChildPriceUpdate = useCallback((tokenAddress: Address, price: number) => {
-    setChildPrices((prev) => ({
-      ...prev,
-      [tokenAddress]: price,
-    }));
-  }, []);
-
-  const totalUSD = useMemo(() => {
-    return formatFloat(
-      Object.values(childPrices).reduce((sum: number, price) => sum + Number(price || 0), 0),
-    );
-  }, [childPrices]);
-
   const { setActiveTab: setManageTokensActiveTab, setIsOpen } = useManageTokensDialogStore();
 
   return (
     <>
-      <DialogHeader onClose={() => setIsOpenedAccount(false)} title={t("my_wallet")} />
-      <div className="card-spacing-x md:w-[600px] w-full max-h-[calc(100dvh_-_70px)]">
-        <div className="flex justify-between items-center mb-5">
+      <div className="px-5 md:w-[460px] w-full max-h-[calc(100dvh_-_70px)]">
+        <div className="flex justify-between items-center my-3">
           <div className="flex items-center gap-2">
-            <Image src={wallets.metamask.image} alt="" width={48} height={48} />
+            <Image src={wallets.metamask.image} alt="" width={40} height={40} />
             <div></div>
 
             <div className="flex gap-1">
@@ -227,15 +178,6 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
             <Svg iconName="logout" />
           </button>
         </div>
-        <div className="relative bg-gradient-card-account rounded-2">
-          <div className="absolute right-0 top-0 bottom-0 bg-account-card-pattern mix-blend-screen bg-no-repeat bg-right w-full h-full" />
-          <div className="relative mb-5 px-5 py-6 grid gap-3 z-10">
-            <div>
-              <div className="text-16 text-secondary-text">{t("total_balance")}</div>
-              <div className="text-32 text-primary-text font-medium">${totalUSD}</div>
-            </div>
-          </div>
-        </div>
         <div className="grid grid-cols-2 bg-secondary-bg p-1 gap-1 rounded-3 mb-3">
           {[t("pinned_tokens"), t("transactions")].map((title, index) => {
             return (
@@ -255,16 +197,16 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
         {activeTab == 0 && (
           <>
             {pinnedTokens.length ? (
-              <div className="h-[376px] -mt-3 pt-3">
+              <div className="h-[476px] -mt-3 pt-3">
                 <button
                   onClick={() => {
                     console.log("clicked");
                     setIsOpen(true);
                     setManageTokensActiveTab(1);
                   }}
-                  className="h-12 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group"
+                  className="h-10 items-center w-full duration-200 text-secondary-text mb-3 bg-tertiary-bg flex justify-between rounded-2 border-l-4 border-green pl-4 pr-3 hocus:bg-green-bg hocus:text-primary-text group"
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 text-secondary-text">
                     <Svg
                       className="text-tertiary-text group-hocus:text-green duration-200 "
                       iconName="pin-fill"
@@ -278,7 +220,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     />
                   </div>
                 </button>
-                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={304}>
+                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-3.5 md:pr-3.5" height={404}>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {pinnedTokens.map((pinnedToken) => {
                       if (!pinnedToken) {
@@ -289,7 +231,6 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                         <PinnedTokenRow
                           key={pinnedToken.symbol + pinnedToken.wrapped.address0}
                           token={pinnedToken}
-                          onPriceUpdate={handleChildPriceUpdate}
                         />
                       );
                     })}
@@ -297,7 +238,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                 </ScrollbarContainer>
               </div>
             ) : (
-              <div className="flex flex-col justify-center h-[376px] overflow-auto gap-2 bg-empty-no-pinned-tokens bg-no-repeat bg-right-top -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+              <div className="flex flex-col justify-center h-[476px] overflow-auto gap-2 bg-empty-no-pinned-tokens bg-no-repeat bg-right-top -mx-4 px-4 lg:px-5 -mx-4 lg:-mx-5 -mt-3 pt-3 max-md:bg-size-180">
                 <button
                   onClick={() => {
                     console.log("clicked");
@@ -344,7 +285,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                     <Svg iconName="delete" />
                   </button>
                 </div>
-                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-8 md:pr-8" height={314}>
+                <ScrollbarContainer className="pb-3 -mr-3 pr-3 md:-mr-3.5 md:pr-3.5" height={414}>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {_transactions.map((transaction) => {
                       return <RecentTransaction transaction={transaction} key={transaction.hash} />;

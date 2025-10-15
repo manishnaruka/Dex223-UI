@@ -5,6 +5,7 @@ import { PropsWithChildren, useState } from "react";
 import { WagmiProvider } from "wagmi";
 
 import { config } from "@/config/wagmi/config";
+
 import NuqsProvider from "./providers/NuqsAdapter";
 
 export default function Providers({

@@ -245,12 +245,12 @@ export default function DecreaseLiquidityPage({
 
         <div>
           <div className="lg:w-[600px] bg-primary-bg mx-auto mb-4 lg:mb-5 px-4 lg:px-10 pb-4 lg:pb-10 rounded-5">
-            <div className="grid grid-cols-3 py-1.5 -mx-3">
+            <div className="grid grid-cols-3 py-1 lg:py-2.5 -mx-3">
               <IconButton
                 onClick={() => router.push(`/pool/${_tokenId}`)}
-                buttonSize={IconButtonSize.LARGE}
+                buttonSize={IconButtonSize.REGULAR}
                 variant={IconButtonVariant.BACK}
-                iconSize={IconSize.LARGE}
+                iconSize={IconSize.REGULAR}
               />
               <h2 className="text-18 lg:text-20 font-bold flex justify-center items-center text-nowrap">
                 {t("remove_liquidity_title")}
@@ -258,7 +258,7 @@ export default function DecreaseLiquidityPage({
               <div className="flex items-center gap-2 justify-end">
                 <IconButton
                   onClick={() => setShowRecentTransactions(!showRecentTransactions)}
-                  buttonSize={IconButtonSize.LARGE}
+                  buttonSize={IconButtonSize.REGULAR}
                   iconName="recent-transactions"
                   active={showRecentTransactions}
                 />

@@ -38,7 +38,7 @@ export default function DecreaseLiquidityPage() {
         </div>
 
         <div>
-          <div className="lg:w-[600px] bg-primary-bg mx-auto mb-4 lg:mb-5 px-4 lg:px-10 rounded-5">
+          <div className="lg:w-[600px] bg-primary-bg mx-auto card-spacing rounded-5">
             <div className="flex justify-between py-1.5 -mr-3">
               <h2 className="text-18 lg:text-20 font-bold flex justify-center items-center text-nowrap">
                 Create a new ERC-223 token
