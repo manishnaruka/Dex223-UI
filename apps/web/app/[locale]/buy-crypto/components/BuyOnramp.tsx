@@ -33,15 +33,15 @@ export default function BuyOnramp({ appId, userId, flowType, walletAddress }: Bu
   }, [onrampInstanceObj]);
 
   useEffect(() => {
-    if (!effectiveWalletAddress && (flowType === "Sell Crypto" || flowType !== "Buy Crypto")) {
-      setError("Wallet address is required for this operation");
+    if (!effectiveWalletAddress && (flowType === "Sell Crypto" || flowType === "Buy Crypto" || flowType === "Swap Crypto")) {
+      setError("Please connect your wallet to proceed");
       return;
     }
 
     setError(null);
 
     try {
-      const flowTypeInNo = flowType === "Buy Crypto" ? 1 : flowType === "Sell Crypto" ? 2 : 1;
+      const flowTypeInNo = flowType === "Buy Crypto" ? 1 : flowType === "Sell Crypto" ? 2 : 4;
       let obj: any;
 
       if (flowType === "Buy Crypto") {
@@ -55,10 +55,6 @@ export default function BuyOnramp({ appId, userId, flowType, walletAddress }: Bu
       } else if (flowType === "Sell Crypto") {
         obj = {
           appId: appId,
-          // coinCode: "usdt",
-          // network: "erc20",
-          // fiatAmount: 10,
-          // fiatType: 20,
           flowType: flowTypeInNo,
           walletAddress: effectiveWalletAddress,
           lang: "en",
@@ -68,7 +64,7 @@ export default function BuyOnramp({ appId, userId, flowType, walletAddress }: Bu
           merchantRecognitionId: userId || effectiveWalletAddress,
           appId: appId,
           walletAddress: effectiveWalletAddress,
-          flowType: 4,
+          flowType: flowTypeInNo,
           lang: "en",
         };
       }
