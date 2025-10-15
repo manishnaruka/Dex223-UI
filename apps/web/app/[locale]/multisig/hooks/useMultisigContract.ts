@@ -1,6 +1,6 @@
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
-import { useCallback } from "react";
-import { Address, encodeFunctionData } from "viem";
+import { useCallback, useEffect, useState } from "react";
+import { Address, encodeFunctionData, Log } from "viem";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 import { getTransactionWithRetries } from "@/functions/getTransactionWithRetries";
@@ -22,6 +22,14 @@ export interface MultisigTransaction {
   required_approvals: bigint;
 }
 
+export interface TransactionProposedEvent {
+  txId: bigint;
+  proposer: Address;
+  to: Address;
+  value: bigint;
+  data: `0x${string}`;
+}
+
 export interface MultisigConfig {
   numOwners: bigint;
   votePassThreshold: bigint;
@@ -30,7 +38,7 @@ export interface MultisigConfig {
 }
 
 // const MULTISIG_CONTRACT_ADDRESS = process.env.MSIG_CONTRACT_ADDRESS as Address;
-const MULTISIG_CONTRACT_ADDRESS = "0x70Bd62719a6ebECeF19314950a7E92EC65DA9cC0" as Address;
+const MULTISIG_CONTRACT_ADDRESS = "0xE0CbccaBB9a7987bC94287D555A1Aa440Efa30bf" as Address;
 
 export default function useMultisigContract() {
   const { address, chainId } = useAccount();
@@ -44,6 +52,7 @@ export default function useMultisigContract() {
     closeDialog,
     updateStatus,
   } = useTransactionSendDialogStore();
+  const [latestEvent, setLatestEvent] = useState<TransactionProposedEvent | null>(null);
 
   const readContract = useCallback(async (functionName: string, args: unknown[] = []) => {
     if (!publicClient) return null;
@@ -516,6 +525,83 @@ export default function useMultisigContract() {
     return transaction.proposed_timestamp + config.executionDelay;
   }, [getTransaction, getConfig]);
 
+  // Watch for TransactionProposed events
+  useEffect(() => {
+    if (!publicClient) return;
+
+    let unwatch: (() => void) | undefined;
+
+    const watchEvents = async () => {
+      try {
+        unwatch = publicClient.watchContractEvent({
+          address: MULTISIG_CONTRACT_ADDRESS,
+          abi: MULTISIG_ABI,
+          eventName: "TransactionProposed",
+          onLogs: (logs) => {
+            logs.forEach((log) => {
+              const { args } = log as any;
+              if (args) {
+                const event: TransactionProposedEvent = {
+                  txId: args.txId,
+                  proposer: args.proposer,
+                  to: args.to,
+                  value: args.value,
+                  data: args.data,
+                };
+                setLatestEvent(event);
+              }
+            });
+          },
+        });
+      } catch (error) {
+        console.error("Error watching TransactionProposed event:", error);
+      }
+    };
+
+    watchEvents();
+
+    return () => {
+      if (unwatch) {
+        unwatch();
+      }
+    };
+  }, [publicClient]);
+
+  const getProposerFromEvents = useCallback(async (txId: bigint): Promise<Address | null> => {
+    if (!publicClient) return null;
+
+    try {
+      const logs = await publicClient.getLogs({
+        address: MULTISIG_CONTRACT_ADDRESS,
+        event: {
+          type: "event",
+          name: "TransactionProposed",
+          inputs: [
+            { type: "uint256", indexed: true, name: "txId" },
+            { type: "address", indexed: true, name: "proposer" },
+            { type: "address", indexed: true, name: "to" },
+            { type: "uint256", indexed: false, name: "value" },
+            { type: "bytes", indexed: false, name: "data" },
+          ],
+        },
+        args: {
+          txId: txId,
+        },
+        fromBlock: 'earliest',
+        toBlock: 'latest',
+      });
+
+      if (logs.length > 0) {
+        const log = logs[0] as any;
+        return log.args?.proposer || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching proposer from events:", error);
+      return null;
+    }
+  }, [publicClient]);
+
   return {
     getTransaction,
     getAllTransactions,
@@ -534,5 +620,7 @@ export default function useMultisigContract() {
     getTokenTransferData,
     generateTransactionData,
     getTransactionDeadline,
+    getProposerFromEvents,
+    latestEvent,
   };
 }
