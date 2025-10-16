@@ -272,13 +272,15 @@ export default function Configure() {
                                     <div>
                                         <InputLabel label="Select Type" tooltipText="Select the type of configuration change" />
                                         <Select
+                                            buttonType="button"
                                             value={props.values.type}
                                             onChange={(e) => {
-                                                console.log("e", e);
                                                 props.setFieldValue("type", e);
                                                 props.setFieldValue("newOwnerAddress", "");
                                                 props.setFieldValue("newThreshold", "");
                                                 props.setFieldValue("newDelay", "");
+                                                props.setFieldTouched("type", false);
+                                                props.validateField("type");
                                             }}
                                             placeholder="Select Type"
                                             extendWidth
@@ -367,7 +369,6 @@ export default function Configure() {
                                         onClick={async () => {
                                             setHasSubmitted(true);
                                             const errors = await props.validateForm();
-                                        
                                             if (Object.keys(errors).length > 0) {
                                               return;
                                             }
