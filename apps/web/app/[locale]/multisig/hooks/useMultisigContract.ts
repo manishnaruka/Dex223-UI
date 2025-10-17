@@ -62,9 +62,9 @@ export default function useMultisigContract() {
        console.log('TransactionProposed', logs);
         if (logs.length > 0) {
          const log = logs[0] as any;
-         const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, log.transactionHash || "proposed", currentChainId as DexChainId);  
+         const explorerUrl = getExplorerLink(ExplorerLinkType.TRANSACTION, log.transactionHash, currentChainId as DexChainId);  
          updateStatus("success", {
-           transactionId: log.args?.txId?.toString() || "proposed",
+           transactionId: log.args?.txId?.toString(),
            transactionHash: log.transactionHash || undefined,
            explorerUrl,
            canClose: true,
@@ -245,13 +245,13 @@ export default function useMultisigContract() {
   
       await publicClient?.waitForTransactionReceipt({ hash });
   
-      setSendingTransaction(false);
-      updateStatus("success", {
-        transactionId,
-        transactionHash: hash,
-        explorerUrl,
-        canClose: true,
-      });
+      // setSendingTransaction(false);
+      // updateStatus("success", {
+      //   transactionId,
+      //   transactionHash: hash,
+      //   explorerUrl,
+      //   canClose: true,
+      // });
   
       addNotification(
         {

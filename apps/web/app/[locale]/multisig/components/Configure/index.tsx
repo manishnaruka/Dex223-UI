@@ -247,6 +247,7 @@ export default function Configure() {
         <div className="bg-primary-bg rounded-3 p-6">
             <div className="flex flex-col gap-6">
                 <Formik
+                    innerRef={formikRef}
                     initialValues={initialValues}
                     onSubmit={handleSubmit}
                     validationSchema={schema}

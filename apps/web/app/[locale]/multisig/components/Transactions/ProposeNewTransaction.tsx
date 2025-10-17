@@ -249,6 +249,7 @@ export default function ProposeNewTransaction() {
     return (
         <div className="flex flex-col gap-6">
             <Formik
+                innerRef={formikRef}
                 initialValues={initialValues}
                 onSubmit={handleSubmit}
                 validationSchema={schema}
