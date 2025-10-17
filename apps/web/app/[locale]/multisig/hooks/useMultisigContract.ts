@@ -317,13 +317,15 @@ const executeTransaction = useCallback(
 
 const proposeTransaction = useCallback(
   (to: Address, value: bigint, data: `0x${string}`) =>
-    handleMultisigAction({
+    {
+    return handleMultisigAction({
       args: [to, value, data],
       functionName: "proposeTx",
-      title: "Propose Transaction",
-      transactionId: "proposing",
-      notificationTemplate: RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED,
-    }),
+        title: "Propose Transaction",
+        transactionId: "proposing",
+        notificationTemplate: RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED,
+      });
+  },
   [handleMultisigAction]
 );
 
