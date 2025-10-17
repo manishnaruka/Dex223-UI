@@ -131,7 +131,7 @@ export default function MSigTransactionDialog({
                 Error
               </h3>
               {errorMessage && (
-                <p className="text-14 text-secondary-text mb-2">
+                <p className="text-14 text-secondary-text mb-2 break-all">
                   {errorMessage}
                 </p>
               )}
