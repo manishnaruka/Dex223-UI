@@ -84,7 +84,7 @@ export default function MSigTransactionDialog({
               <h3 className="text-18 font-semibold text-primary-text">
                 Successfully sent
               </h3>
-              {transactionId && (
+              {transactionId && !transactionId.startsWith("proposing") && !transactionId.startsWith("approving") && !transactionId.startsWith("declining") && !transactionId.startsWith("executing") && (
                 <span className="text-14 text-secondary-text">
                   Transaction ID: {transactionId}
                 </span>
@@ -112,7 +112,7 @@ export default function MSigTransactionDialog({
               <h3 className="text-18 font-semibold text-red mb-2">
                 Failed to send
               </h3>
-              {transactionId && (
+              {transactionId && !transactionId.startsWith("proposing") && !transactionId.startsWith("approving") && !transactionId.startsWith("declining") && !transactionId.startsWith("executing") && (
                 <p className="text-14 text-secondary-text mb-2">
                   Transaction ID: {transactionId}
                 </p>
@@ -131,7 +131,7 @@ export default function MSigTransactionDialog({
                 Error
               </h3>
               {errorMessage && (
-                <p className="text-14 text-secondary-text mb-2">
+                <p className="text-14 text-secondary-text mb-2 break-all">
                   {errorMessage}
                 </p>
               )}

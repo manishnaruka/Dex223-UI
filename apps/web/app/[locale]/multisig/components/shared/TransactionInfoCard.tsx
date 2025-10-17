@@ -13,7 +13,7 @@ export default function TransactionInfoCard({ transaction }: TransactionInfoCard
             </div>
             <div className="flex justify-between items-center">
                 <span className="text-14 text-secondary-text">Amount</span>
-                <span className="text-14 text-primary-text font-medium">{transaction.amount} {transaction.symbol}</span>
+                <span className="text-14 text-primary-text font-medium">{transaction?.amount && transaction?.amount !== 'Unknown' ? `${transaction.amount} ${transaction.symbol}`: '0'} </span>
             </div>
             <div className="flex justify-between items-start">
                 <span className="text-14 text-secondary-text">To</span>
