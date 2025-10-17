@@ -248,13 +248,16 @@ export default function VoteExisting() {
                                 </div>
                             </div>
                         </div>
-
-                        <GasFeeBlock
-                            computedGasSpending={computedGasSpending}
-                            computedGasSpendingETH={computedGasSpendingETH}
-                            gasPriceOption={gasPriceOption}
-                            onEditClick={() => setIsOpenedFee(true)}
-                        />
+                        {
+                        currentTransaction.status !== "approved" && (
+                            <GasFeeBlock
+                                computedGasSpending={computedGasSpending}
+                                computedGasSpendingETH={computedGasSpendingETH}
+                                gasPriceOption={gasPriceOption}
+                                onEditClick={() => setIsOpenedFee(true)}
+                            />
+                            )
+                        }
 
                         {!isConnected ? (
                             <Button
