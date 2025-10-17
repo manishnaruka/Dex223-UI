@@ -3,11 +3,10 @@ import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonVariant } from "@/components/buttons/Button";
 import { Formik, FormikProps } from "formik";
 import * as Yup from "yup";
-import TextAreaField from "@/components/atoms/TextAreaField";
 import { useAccount, usePublicClient } from "wagmi";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import useMultisigContract from "../../hooks/useMultisigContract";
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 import MSigTransactionDialog from "@/components/dialogs/MSigTransactionDialog";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
@@ -67,7 +66,7 @@ const configurationOptions = [
 export default function Configure() {
     const { isConnected } = useAccount();
     const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
-    const { addOwner, removeOwner, setupThreshold, setupDelay, generateTransactionData, getConfig, fetchEstimatedDeadline, estimatedDeadline, estimatedDeadlineLoading } = useMultisigContract();
+    const { addOwner, removeOwner, setupThreshold, setupDelay, generateTransactionData, fetchEstimatedDeadline, estimatedDeadline, estimatedDeadlineLoading } = useMultisigContract();
     const [transactionData, setTransactionData] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const publicClient = usePublicClient();
@@ -272,13 +271,15 @@ export default function Configure() {
                                     <div>
                                         <InputLabel label="Select Type" tooltipText="Select the type of configuration change" />
                                         <Select
+                                            buttonType="button"
                                             value={props.values.type}
                                             onChange={(e) => {
-                                                console.log("e", e);
                                                 props.setFieldValue("type", e);
                                                 props.setFieldValue("newOwnerAddress", "");
                                                 props.setFieldValue("newThreshold", "");
                                                 props.setFieldValue("newDelay", "");
+                                                props.setFieldTouched("type", false);
+                                                props.validateField("type");
                                             }}
                                             placeholder="Select Type"
                                             extendWidth
@@ -367,7 +368,6 @@ export default function Configure() {
                                         onClick={async () => {
                                             setHasSubmitted(true);
                                             const errors = await props.validateForm();
-                                        
                                             if (Object.keys(errors).length > 0) {
                                               return;
                                             }

@@ -278,6 +278,7 @@ export default function ProposeNewTransaction() {
                                             placement="bottom-start"
                                             trigger={
                                                 <SelectButton
+                                                   type="button"
                                                     className="pl-2 pr-1 py-1 xl:py-2 gap-0 md:gap-2 xl:px-3 text-secondary-text w-full h-12 border"
                                                     isOpen={isOpenedAssetSelect}
                                                     onClick={() => setIsOpenedAssetSelect(!isOpenedAssetSelect)}
@@ -401,11 +402,9 @@ export default function ProposeNewTransaction() {
                                         onClick={async () => {
                                             setHasSubmitted(true);
                                             const errors = await props.validateForm();
-                                        
                                             if (Object.keys(errors).length > 0) {
                                               return;
                                             }
-                                        
                                             props.handleSubmit();
                                           }}
                                     >

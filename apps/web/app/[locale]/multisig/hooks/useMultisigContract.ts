@@ -274,41 +274,44 @@ export default function useMultisigContract() {
   }, [openDialog, updateStatus, currentChainId, publicClient, writeContract]);
 
  const approveTransaction = useCallback(
-  (txId: bigint) =>
-    handleMultisigAction({
-      txId,
-      args: [txId],
-      functionName: "approveTx",
+  (txId: bigint) => {
+    const data = generateTransactionData("approveTx", [txId]);
+    return handleMultisigAction({
+      args: [MULTISIG_CONTRACT_ADDRESS, BigInt(0), data],
+      functionName: "proposeTx",
       title: "Approve Transaction",
       transactionId: "approving",
       notificationTemplate: RecentTransactionTitleTemplate.MSIG_APPROVE,
-    }),
+    });
+  },
   [handleMultisigAction]
 );
 
 const declineTransaction = useCallback(
-  (txId: bigint) =>
-    handleMultisigAction({
-      txId,
-      args: [txId],
-      functionName: "declineTx",
+  (txId: bigint) => {
+    const data = generateTransactionData("declineTx", [txId]);
+   return handleMultisigAction({
+      args: [MULTISIG_CONTRACT_ADDRESS, BigInt(0), data],
+      functionName: "proposeTx",
       title: "Decline Transaction",
       transactionId: "declining",
       notificationTemplate: RecentTransactionTitleTemplate.MSIG_DECLINE,
-    }),
+    });
+  },
   [handleMultisigAction]
 );
 
 const executeTransaction = useCallback(
-  (txId: bigint) =>
-    handleMultisigAction({
-      txId,
-      args: [txId],
-      functionName: "executeTx",
+  (txId: bigint) => {
+    const data = generateTransactionData("executeTx", [txId]);
+    return handleMultisigAction({
+      args: [MULTISIG_CONTRACT_ADDRESS, BigInt(0), data],
+      functionName: "proposeTx",
       title: "Execute Transaction",
       transactionId: "executing",
       notificationTemplate: RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED,
-    }),
+    });
+  },
   [handleMultisigAction]
 );
 
@@ -325,50 +328,58 @@ const proposeTransaction = useCallback(
 );
 
 const addOwner = useCallback(
-  (newOwner: Address) =>
-    handleMultisigAction({
-      args: [newOwner],
-      functionName: "addOwner",
-      title: "Add Owner",
-      transactionId: "adding_owner",
+  (newOwner: Address) => {
+    const data = generateTransactionData("addOwner", [newOwner]);
+    return handleMultisigAction({
+      args: [MULTISIG_CONTRACT_ADDRESS, BigInt(0), data],
+      functionName: "proposeTx",
+      title: "Propose Add Owner",
+      transactionId: "proposing_add_owner",
       notificationTemplate: RecentTransactionTitleTemplate.MSIG_ADD_OWNER,
-    }),
+    });
+  },
   [handleMultisigAction]
 );
 
 const removeOwner = useCallback(
-  (owner: Address) =>
-    handleMultisigAction({
-      args: [owner],
-      functionName: "removeOwner",
-      title: "Remove Owner",
-      transactionId: "removing_owner",
+  (owner: Address) => {
+    const data = generateTransactionData("removeOwner", [owner]);
+    return handleMultisigAction({
+      args: [MULTISIG_CONTRACT_ADDRESS, BigInt(0), data],
+      functionName: "proposeTx",
+      title: "Propose Remove Owner",
+      transactionId: "proposing_remove_owner",
       notificationTemplate: RecentTransactionTitleTemplate.MSIG_REMOVE_OWNER,
-    }),
+    });
+  },
   [handleMultisigAction]
 );
 
 const setupDelay = useCallback(
-  (newDelay: bigint) =>
-    handleMultisigAction({
-      args: [newDelay],
-      functionName: "setupDelay",
-      title: "Setup Delay",
-      transactionId: "setting_delay",
+  (newDelay: bigint) => {
+    const data = generateTransactionData("setupDelay", [newDelay]);
+    return handleMultisigAction({
+      args: [MULTISIG_CONTRACT_ADDRESS, BigInt(0), data],
+      functionName: "proposeTx",
+      title: "Propose Setup Delay",
+      transactionId: "proposing_delay",
       notificationTemplate: RecentTransactionTitleTemplate.MSIG_SET_DELAY,
-    }),
+    });
+  },
   [handleMultisigAction]
 );
 
 const setupThreshold = useCallback(
-  (newThreshold: bigint) =>
-    handleMultisigAction({
-      args: [newThreshold],
-      functionName: "setupThreshold",
-      title: "Setup Threshold",
-      transactionId: "setting_threshold",
+  (newThreshold: bigint) => {
+    const data = generateTransactionData("setupThreshold", [newThreshold]);
+    return handleMultisigAction({
+      args: [MULTISIG_CONTRACT_ADDRESS, BigInt(0), data],
+      functionName: "proposeTx",
+      title: "Propose Setup Threshold",
+      transactionId: "proposing_threshold",
       notificationTemplate: RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD,
-    }),
+    });
+  },
   [handleMultisigAction]
 );
 
@@ -448,6 +459,7 @@ const reduceApprovalsThreshold = useCallback(
     sendingTransaction,
     fetchEstimatedDeadline,
     estimatedDeadline,
-    estimatedDeadlineLoading
+    estimatedDeadlineLoading,
+    handleMultisigAction
   };
 }

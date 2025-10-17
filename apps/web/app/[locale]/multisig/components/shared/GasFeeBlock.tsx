@@ -77,6 +77,7 @@ export default function GasFeeBlock({
                                 {gasOptionTitle[gasPriceOption]}
                             </span>
                             <Button
+                                type="button"
                                 size={ButtonSize.EXTRA_SMALL}
                                 colorScheme={ButtonColor.LIGHT_GREEN}
                                 onClick={(e) => {
