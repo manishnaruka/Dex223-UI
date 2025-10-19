@@ -69,6 +69,12 @@ export default function useMultisigContract() {
            explorerUrl,
            canClose: true,
          });
+         /*
+         get threshold from contract
+         if(threshold === 1){
+          call executeTx(log.args?.txId?)
+         }
+         */
        }
     },
   });
