@@ -15,6 +15,7 @@ import {
   RecentTransactionStatus,
   RecentTransactionTitleTemplate,
 } from "@/stores/useRecentTransactionsStore";
+import Svg from "./Svg";
 
 export type NotificationTransactionStatus =
   | RecentTransactionStatus.ERROR
@@ -99,6 +100,13 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
       return (
         <NotificationSubtitleText>{`${title.symbol} (ID: ${title.positionId})`}</NotificationSubtitleText>
       );
+    case RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED:
+        return (
+          <ExternalTextLink
+            href={getExplorerLink(ExplorerLinkType.TRANSACTION, title.hash, title.chainId)}
+            text={'Transaction Link'}
+          />
+        );
   }
 }
 
@@ -303,6 +311,62 @@ function NotificationTitle({
             : "Failed to close margin position"}
         </NotificationTitleText>
       );
+    case RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully sent"
+            : "Failed to send transaction"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.MSIG_ADD_OWNER:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully added owner"
+            : "Failed to add owner"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.MSIG_REMOVE_OWNER:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully removed owner"
+            : "Failed to remove owner"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.MSIG_SET_DELAY:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully set delay"
+            : "Failed to set delay"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully set threshold"
+            : "Failed to set threshold"}
+        </NotificationTitleText>
+      );
+      case RecentTransactionTitleTemplate.MSIG_APPROVE:
+        return (
+          <NotificationTitleText>
+            {status === RecentTransactionStatus.SUCCESS
+              ? "Successfully approved transaction"
+              : "Failed to approve transaction"}
+          </NotificationTitleText>
+        );
+      case RecentTransactionTitleTemplate.MSIG_DECLINE:
+        return (
+          <NotificationTitleText>
+            {status === RecentTransactionStatus.SUCCESS
+              ? "Successfully declined transaction"
+              : "Failed to decline transaction"}
+          </NotificationTitleText>
+        );
   }
 }
 
@@ -315,6 +379,41 @@ export default function Notification({ onDismiss, transactionTitle, transactionS
         ) : (
           <div className="flex-shrink-0">
             <EmptyStateIcon size={48} iconName="warning" />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_ADD_OWNER && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_REMOVE_OWNER && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_SET_DELAY && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+         {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_APPROVE && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_DECLINE && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
           </div>
         )}
         <div className="grid">
