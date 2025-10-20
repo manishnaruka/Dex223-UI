@@ -57,7 +57,7 @@ export default function useMultisigContract() {
     address: MULTISIG_CONTRACT_ADDRESS,
     abi: MULTISIG_ABI,
     eventName: 'TransactionProposed',
-    onLogs(logs) {
+    async onLogs(logs) {
        setSendingTransaction(false);
        console.log('TransactionProposed', logs);
         if (logs.length > 0) {
@@ -69,6 +69,11 @@ export default function useMultisigContract() {
            explorerUrl,
            canClose: true,
          });
+         const threshold = await readContract("vote_pass_threshold");
+         console.log('threshold', threshold);
+         if(threshold && BigInt(threshold as string) === BigInt(1)){
+          await executeTransaction(log.args?.txId as bigint);
+         }
        }
     },
   });

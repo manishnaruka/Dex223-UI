@@ -351,6 +351,22 @@ function NotificationTitle({
             : "Failed to set threshold"}
         </NotificationTitleText>
       );
+      case RecentTransactionTitleTemplate.MSIG_APPROVE:
+        return (
+          <NotificationTitleText>
+            {status === RecentTransactionStatus.SUCCESS
+              ? "Successfully approved transaction"
+              : "Failed to approve transaction"}
+          </NotificationTitleText>
+        );
+      case RecentTransactionTitleTemplate.MSIG_DECLINE:
+        return (
+          <NotificationTitleText>
+            {status === RecentTransactionStatus.SUCCESS
+              ? "Successfully declined transaction"
+              : "Failed to decline transaction"}
+          </NotificationTitleText>
+        );
   }
 }
 
@@ -386,6 +402,16 @@ export default function Notification({ onDismiss, transactionTitle, transactionS
           </div>
         )}
         {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+         {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_APPROVE && (
+          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
+            <Svg className="text-white" iconName="check" size={48} />
+          </div>
+        )}
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_DECLINE && (
           <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
             <Svg className="text-white" iconName="check" size={48} />
           </div>
