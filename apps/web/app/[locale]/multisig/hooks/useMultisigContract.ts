@@ -70,7 +70,6 @@ export default function useMultisigContract() {
            canClose: true,
          });
          const threshold = await readContract("vote_pass_threshold");
-         console.log('threshold', threshold);
          if(threshold && BigInt(threshold as string) === BigInt(1)){
           await executeTransaction(log.args?.txId as bigint);
          }
