@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { flip } from "@floating-ui/core";
 import {
     autoUpdate,
@@ -18,27 +18,30 @@ import { SearchInput } from "@/components/atoms/Input";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { useAddNewListDialogStore } from "../stores/useAddNewListDialogStore";
 import AddNewList from "./AddNewList";
+import { useTokenLists } from "@/hooks/useTokenLists";
+import { TokenListId } from "@/db/db";
+import { CORE_AUTO_LISTING_ADDRESS, FREE_AUTO_LISTING_ADDRESS } from "@/sdk_bi/addresses";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 export interface TokenListOption {
-    id: string;
+    id: TokenListId;
     name: string;
     icon?: string;
     isDefault?: boolean;
     isPaid?: boolean;
     isFree?: boolean;
+    enabled?: boolean;
 }
 
 interface TokenListDropdownProps {
-    options: TokenListOption[];
-    selectedOptions: Set<string>;
-    onSelectionChange: (selectedIds: Set<string>) => void;
+    selectedOptions: Set<TokenListId>;
+    onSelectionChange: (selectedIds: Set<TokenListId>) => void;
     placeholder?: string;
     className?: string;
     searchPlaceholder?: string;
 }
 
 export default function TokenListDropdown({
-    options,
     selectedOptions,
     onSelectionChange,
     placeholder = "Select lists",
@@ -50,6 +53,31 @@ export default function TokenListDropdown({
     const ref = useRef<HTMLButtonElement>(null);
     const { isOpen, setIsOpen, content, setContent } = useAddNewListDialogStore();
     const { setActiveTab } = useAddNewListDialogStore();
+    
+    const tokenLists = useTokenLists();
+    const chainId = useCurrentChainId();
+
+    console.log(tokenLists, "tokenLists");
+    const options = useMemo<TokenListOption[]>(() => {
+        if (!tokenLists) return [];
+        
+        return tokenLists.map((list) => {
+            console.log(list, "list");
+            const isDefault = list.id === `default-${chainId}`;
+            const isPaid = list.autoListingContract?.toLowerCase() === CORE_AUTO_LISTING_ADDRESS[chainId]?.toLowerCase();
+            const isFree = list.autoListingContract?.toLowerCase() === FREE_AUTO_LISTING_ADDRESS[chainId]?.toLowerCase();
+            
+            return {
+                id: list.id,
+                name: list.list.name,
+                icon: list.list.logoURI,
+                isDefault,
+                isPaid,
+                isFree,
+                enabled: list.enabled,
+            };
+        });
+    }, [tokenLists, chainId]);
 
     const handleClose = useCallback(() => {
         setIsOpen(false);
@@ -82,16 +110,17 @@ export default function TokenListDropdown({
     const handleSelectAll = () => {
         if (selectedOptions.size === filteredOptions.length) {
             const newSelection = new Set(selectedOptions);
-            filteredOptions.forEach(option => newSelection.delete(option.id));
+            filteredOptions.forEach(option => option.id && newSelection.delete(option.id));
             onSelectionChange(newSelection);
         } else {
             const newSelection = new Set(selectedOptions);
-            filteredOptions.forEach(option => newSelection.add(option.id));
+            filteredOptions.forEach(option => option.id && newSelection.add(option.id));
             onSelectionChange(newSelection);
         }
     };
 
-    const handleOptionSelect = (optionId: string) => {
+    const handleOptionSelect = (optionId: TokenListId) => {
+        if (!optionId) return;
         const newSelection = new Set(selectedOptions);
         if (newSelection.has(optionId)) {
             newSelection.delete(optionId);
@@ -101,10 +130,10 @@ export default function TokenListDropdown({
         onSelectionChange(newSelection);
     };
 
-    const allFilteredSelected = filteredOptions.every(option => selectedOptions.has(option.id));
+    const allFilteredSelected = filteredOptions.every(option => option.id && selectedOptions.has(option.id));
 
     const getSelectedOptions = () => {
-        return options.filter(option => selectedOptions.has(option.id));
+        return options.filter(option => option.id && selectedOptions.has(option.id));
     };
 
     const getOptionIcon = (option: TokenListOption) => {

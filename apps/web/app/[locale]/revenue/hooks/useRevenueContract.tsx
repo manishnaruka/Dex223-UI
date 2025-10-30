@@ -17,13 +17,14 @@ import {
   RecentTransactionTitleTemplate,
   stringifyObject,
 } from '@/stores/useRecentTransactionsStore';
+import { Token } from '@/sdk_bi/entities/token';
 
 // Contract addresses on Sepolia testnet
 export const REVENUE_CONTRACT_ADDRESS = '0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2' as Address;
 export const RED_ERC20_ADDRESS = '0x1DEf777468F76ed1E74fC87bD32334d3Ccb520d0' as Address;
 export const RED_ERC223_ADDRESS = '0x0a67Cc4D3Ac29a133a597b5Bef3fe9A6028ACad2' as Address;
 export const BLU_ADDRESS = '0x3E0fc36a6EE84a34F8F985c66e94c845df46f6D9' as Address;
-export const FOO_ADDRESS = '0x2a5A93fA091Fca3ECb4ad792Ff0C72aF3dD39556b' as Address;
+export const FOO_ADDRESS = '0x2a5A93fA091Fca3ECb4ad792Ff0C72aF3dD39556' as Address;
 
 export const RED_BLU_POOL = '0x0BE7bb0927Bb3cBD4075EE20BC46F44B57dC43b3' as Address;
 export const RED_FOO_POOL = '0x82e9131d84428d98E098cFAE153aa7FD579e438C' as Address;
@@ -33,17 +34,8 @@ export enum TokenType {
   ERC223 = 'ERC-223',
 }
 
-export interface RewardToken {
-  address: Address;
-  symbol: string;
-  name: string;
-  decimals: number;
-  erc223Address?: Address;
-  logoURI?: string;
-}
-
 export interface ClaimableReward {
-  token: RewardToken;
+  token: Token;
   amount: bigint;
   amountFormatted: string;
   amountUSD?: string;
@@ -84,10 +76,10 @@ export default function useRevenueContract({
   // Check if user is on the correct network
   const isCorrectNetwork = walletChainId === chainId;
 
-  const [rewardTokens, setRewardTokens] = useState<RewardToken[]>([
-    { address: RED_ERC20_ADDRESS, symbol: 'RED', name: 'Red Token', decimals: 18, erc223Address: RED_ERC223_ADDRESS, logoURI: '/images/tokens/red.svg' },
-    { address: BLU_ADDRESS, symbol: 'BLU', name: 'Blue Token', decimals: 18, logoURI: '/images/tokens/blue.svg' },
-    { address: FOO_ADDRESS, symbol: 'FOO', name: 'Foo Token', decimals: 18, logoURI: '/images/tokens/foo.svg' },
+  const [rewardTokens, setRewardTokens] = useState<Token[]>([
+    new Token(chainId, RED_ERC20_ADDRESS, RED_ERC223_ADDRESS, 18, 'RED', 'Red Token', '/images/tokens/red.svg'),
+    new Token(chainId, BLU_ADDRESS, BLU_ADDRESS, 18, 'BLU', 'Blue Token', '/images/tokens/blue.svg'),
+    new Token(chainId, FOO_ADDRESS, FOO_ADDRESS, 18, 'FOO', 'Foo Token', '/images/tokens/foo.svg'),
   ]);
 
   const { data: userStaked, refetch: refetchUserStaked, isLoading: isLoadingUserStaked } = useReadContract({
@@ -208,7 +200,7 @@ export default function useRevenueContract({
   // Read token balances in revenue contract
   const tokenBalanceContracts = rewardTokens.map(token => ({
     abi: ERC20_ABI,
-    address: token.address,
+    address: token.address0,
     functionName: 'balanceOf' as const,
     args: [contractAddress],
     chainId: chainId,
@@ -225,7 +217,7 @@ export default function useRevenueContract({
     abi: revenueABI,
     address: contractAddress,
     functionName: 'spentContribution' as const,
-    args: targetAddress ? [targetAddress, token.address] : undefined,
+    args: targetAddress ? [targetAddress, token.address0] : undefined,
     chainId: chainId,
   }));
 
@@ -240,7 +232,7 @@ export default function useRevenueContract({
     abi: revenueABI,
     address: contractAddress,
     functionName: 'spentTotalContribution' as const,
-    args: [token.address],
+    args: [token.address0],
     chainId: chainId,
   }));
 
@@ -394,9 +386,9 @@ export default function useRevenueContract({
     return rewardTokens;
   }, [rewardTokens]);
 
-  const addRewardToken = useCallback((token: RewardToken) => {
+  const addRewardToken = useCallback((token: Token) => {
     setRewardTokens(prev => {
-      if (prev.some(t => t.address.toLowerCase() === token.address.toLowerCase())) {
+      if (prev.some(t => t.address0.toLowerCase() === token.address0.toLowerCase())) {
         return prev;
       }
       return [...prev, token];
@@ -404,7 +396,7 @@ export default function useRevenueContract({
   }, []);
 
   const removeRewardToken = useCallback((tokenAddress: Address) => {
-    setRewardTokens(prev => prev.filter(t => t.address.toLowerCase() !== tokenAddress.toLowerCase()));
+    setRewardTokens(prev => prev.filter(t => t.address0.toLowerCase() !== tokenAddress.toLowerCase()));
   }, []);
 
   const refetchUserData = useCallback(() => {

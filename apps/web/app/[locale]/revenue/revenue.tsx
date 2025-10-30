@@ -2,7 +2,7 @@
 
 import Container from "@/components/atoms/Container";
 import { Address, isAddress } from "viem";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import clsx from "clsx";
 import { SearchInput } from "@/components/atoms/Input";
 import { useRevenueStore } from "@/app/[locale]/revenue/stores/useRevenueStore";
@@ -11,7 +11,7 @@ import Image from "next/image";
 import { Claims } from "./components/Claims";
 import { useAccount, useSwitchChain } from "wagmi";
 import { DexChainId } from "@/sdk_bi/chains";
-import TokenListDropdown, { TokenListOption } from "./dialogs/TokenListDropdown";
+import TokenListDropdown from "./dialogs/TokenListDropdown";
 import StakeDialog from "./dialogs/StakeDialog";
 import { useStakeDialogStore } from "./stores/useStakeDialogStore";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
@@ -20,6 +20,8 @@ import useRevenueContract from "./hooks/useRevenueContract";
 import truncateMiddle from "@/functions/truncateMiddle";
 import Alert from "@repo/ui/alert";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
+import { TokenListId } from "@/db/db";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 const claimsData = [
   {
     id: 1,
@@ -127,32 +129,6 @@ const claimsData = [
   },
 ];
 
-const tokenListOptions: TokenListOption[] = [
-  {
-    id: "default",
-    name: "DEX223 Ethereum Default",
-    isDefault: true,
-  },
-  {
-    id: "paid-auto",
-    name: "Paid auto-listing",
-    isPaid: true,
-  },
-  {
-    id: "free-auto",
-    name: "Free auto-listing",
-    isFree: true,
-  },
-  {
-    id: "coingecko",
-    name: "CoinGecko",
-  },
-  {
-    id: "pancakeswap",
-    name: "PancakeSwap Ethereum MM",
-  },
-];
-
 const WalletSearchInput = ({
   searchValue,
   setSearchValue,
@@ -198,7 +174,10 @@ export function Revenue() {
   const [error, setError] = useState<string | null>(null);
   const { address } = useAccount();
   const [selectedTokens, setSelectedTokens] = useState<Set<number>>(new Set());
-  const [selectedTokenLists, setSelectedTokenLists] = useState<Set<string>>(new Set(["default", "paid-auto", "coingecko"]));
+  const chainId = useCurrentChainId();
+  const [selectedTokenLists, setSelectedTokenLists] = useState<Set<TokenListId>>(
+    new Set([`default-${chainId}` as TokenListId])
+  );
   const { openDialog } = useStakeDialogStore();
   const { switchChain } = useSwitchChain();
   
@@ -211,7 +190,27 @@ export function Revenue() {
     redTotalSupply,
     isCorrectNetwork,
     requiredChainId,
+    claimableRewards,
   } = useRevenueContract({ searchAddress });
+  
+  const mappedClaimsData = useMemo(() => {
+    console.log(claimableRewards, "claimableRewards");
+    return claimableRewards.map((reward, index) => ({
+      id: index + 1,
+      name: reward.token.name || "Unknown",
+      symbol: reward.token.symbol || "???",
+      logoURI: reward.token.logoURI || "/images/tokens/placeholder.svg",
+      erc20Address: truncateMiddle(reward.token.address0, { charsFromStart: 3, charsFromEnd: 3 }),
+      erc223Address: truncateMiddle(reward.token.address1, { charsFromStart: 3, charsFromEnd: 3 }),
+      amount: reward.amountFormatted,
+      amountUSD: reward.amountUSD || "$0.00",
+      fullErc20Address: reward.token.address0,
+      fullErc223Address: reward.token.address1,
+      chainId: reward.token.chainId,
+      token: reward.token,
+    }));
+  }, [claimableRewards]);
+  
   const handleSelectedTokens = (tokenId: number) => {
     if (tokenId === 0) {
       setSelectedTokens(new Set());
@@ -279,7 +278,10 @@ export function Revenue() {
     return quotientStr;
   };
 
-  const filteredClaimsData = claimsData.filter(claim => {
+  // Use mapped claims data or fallback to hardcoded data for demo
+  const dataToUse = mappedClaimsData.length > 0 ? mappedClaimsData : claimsData;
+  
+  const filteredClaimsData = dataToUse.filter(claim => {
     const searchLower = claimRewardsSearchValue.toLowerCase();
     return (
       claim.name.toLowerCase().includes(searchLower) ||
@@ -419,7 +421,7 @@ export function Revenue() {
                 </div>
 
                 <span className="text-24 lg:text-32 font-medium mb-2 z-10">
-                  ${claimsData.reduce((sum, claim) => {
+                  ${dataToUse.reduce((sum, claim) => {
                     const usdValue = parseFloat(claim.amountUSD.replace(/[$,]/g, ''));
                     return sum + usdValue;
                   }, 0).toFixed(2)}
@@ -446,7 +448,6 @@ export function Revenue() {
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <div className="w-full sm:w-auto">
               <TokenListDropdown
-                options={tokenListOptions}
                 selectedOptions={selectedTokenLists}
                 onSelectionChange={setSelectedTokenLists}
                 placeholder="Select token lists"
