@@ -57,7 +57,6 @@ export default function TokenListDropdown({
     const tokenLists = useTokenLists();
     const chainId = useCurrentChainId();
 
-    console.log(tokenLists, "tokenLists");
     const options = useMemo<TokenListOption[]>(() => {
         if (!tokenLists) return [];
         

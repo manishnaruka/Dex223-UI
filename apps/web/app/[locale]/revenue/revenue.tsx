@@ -22,6 +22,8 @@ import Alert from "@repo/ui/alert";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { TokenListId } from "@/db/db";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useTokens } from "@/hooks/useTokenLists";
+import { Token } from "@/sdk_bi/entities/token";
 const claimsData = [
   {
     id: 1,
@@ -181,6 +183,19 @@ export function Revenue() {
   const { openDialog } = useStakeDialogStore();
   const { switchChain } = useSwitchChain();
   
+  // Get all available tokens from the DEX
+  const allAvailableTokens = useTokens();
+  
+  // Filter tokens based on selected token lists
+  const tokensFromSelectedLists = useMemo(() => {
+    return allAvailableTokens.filter((token) => {
+      if (!token.isToken) return false; // Filter out native coins
+      
+      // Check if token is in any of the selected lists
+      return token.lists?.some((listId) => selectedTokenLists.has(listId));
+    });
+  }, [allAvailableTokens, selectedTokenLists]);
+  
   // Use real contract data
   const searchAddress = searchValue && isAddress(searchValue) ? searchValue as Address : undefined;
   const {
@@ -191,10 +206,16 @@ export function Revenue() {
     isCorrectNetwork,
     requiredChainId,
     claimableRewards,
+    setRewardTokens,
   } = useRevenueContract({ searchAddress });
   
+  useEffect(() => {
+    if (tokensFromSelectedLists.length > 0) {
+      setRewardTokens(tokensFromSelectedLists as unknown as Token[]);
+    }
+  }, [tokensFromSelectedLists]);
+  
   const mappedClaimsData = useMemo(() => {
-    console.log(claimableRewards, "claimableRewards");
     return claimableRewards.map((reward, index) => ({
       id: index + 1,
       name: reward.token.name || "Unknown",

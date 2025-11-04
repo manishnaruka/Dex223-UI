@@ -169,24 +169,6 @@ export default function useRevenueContract({
     },
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log('useRevenueContract Debug:', {
-      targetAddress,
-      connectedAddress,
-      walletChainId,
-      isCorrectNetwork,
-      RED_ERC20_ADDRESS,
-      RED_ERC223_ADDRESS,
-      redErc20Balance,
-      redErc223Balance,
-      isErc20Error,
-      erc20Error: erc20Error?.message,
-      isErc223Error,
-      erc223Error: erc223Error?.message,
-    });
-  }, [targetAddress, connectedAddress, walletChainId, isCorrectNetwork, redErc20Balance, redErc223Balance, isErc20Error, erc20Error, isErc223Error, erc223Error]);
-
   const { data: redTotalSupply } = useReadContract({
     abi: ERC20_ABI,
     address: RED_ERC20_ADDRESS,
@@ -666,6 +648,7 @@ export default function useRevenueContract({
     rewardTokens,
     addRewardToken,
     removeRewardToken,
+    setRewardTokens,
     getAvailableRewardTokens,
     formatTimeRemaining,
     formatCountdown,

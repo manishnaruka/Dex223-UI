@@ -88,7 +88,6 @@ export const Claims = ({
             return sum;
         }, 0);
 
-        // Initialize token standards for all selected tokens (default to ERC-223)
         const tokenStandards: Record<number, "ERC-20" | "ERC-223"> = {};
         selectedTokensData.forEach((token: any) => {
             tokenStandards[token.id] = "ERC-223";
