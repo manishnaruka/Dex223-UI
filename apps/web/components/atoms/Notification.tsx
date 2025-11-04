@@ -44,6 +44,7 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
     case RecentTransactionTitleTemplate.WITHDRAW:
     case RecentTransactionTitleTemplate.CONVERT:
     case RecentTransactionTitleTemplate.UNWRAP:
+    case RecentTransactionTitleTemplate.TRANSFER:
       return (
         <NotificationSubtitleText>
           {t("single_subtitle", {
@@ -131,6 +132,14 @@ function NotificationTitle({
         </div>
       );
     case RecentTransactionTitleTemplate.DEPOSIT:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? t("deposit_success_notification", { symbol: title.symbol })
+            : t("deposit_revert_notification", { symbol: title.symbol })}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.TRANSFER:
       return (
         <NotificationTitleText>
           {status === RecentTransactionStatus.SUCCESS
