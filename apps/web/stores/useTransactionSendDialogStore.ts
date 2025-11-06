@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { TransactionSendStatus } from "@/components/dialogs/MSigTransactionDialog";
 
 interface TransactionSendDialogStore {
@@ -10,20 +11,26 @@ interface TransactionSendDialogStore {
   errorMessage?: string;
   canClose?: boolean;
   // Actions
-  openDialog: (status: TransactionSendStatus, data?: {
-    transactionId?: string;
-    transactionHash?: string;
-    explorerUrl?: string;
-    errorMessage?: string;
-  }) => void;
+  openDialog: (
+    status: TransactionSendStatus,
+    data?: {
+      transactionId?: string;
+      transactionHash?: string;
+      explorerUrl?: string;
+      errorMessage?: string;
+    },
+  ) => void;
   closeDialog: () => void;
-  updateStatus: (status: TransactionSendStatus, data?: {
-    transactionId?: string;
-    transactionHash?: string;
-    explorerUrl?: string;
-    errorMessage?: string;
-    canClose?: boolean;
-  }) => void;
+  updateStatus: (
+    status: TransactionSendStatus,
+    data?: {
+      transactionId?: string;
+      transactionHash?: string;
+      explorerUrl?: string;
+      errorMessage?: string;
+      canClose?: boolean;
+    },
+  ) => void;
 }
 
 export const useTransactionSendDialogStore = create<TransactionSendDialogStore>((set) => ({
@@ -34,30 +41,33 @@ export const useTransactionSendDialogStore = create<TransactionSendDialogStore>(
   explorerUrl: undefined,
   errorMessage: undefined,
 
-  openDialog: (status, data) => set({
-    isOpen: true,
-    status,
-    transactionId: data?.transactionId,
-    transactionHash: data?.transactionHash,
-    explorerUrl: data?.explorerUrl,
-    errorMessage: data?.errorMessage,
-  }),
+  openDialog: (status, data) =>
+    set({
+      isOpen: true,
+      status,
+      transactionId: data?.transactionId,
+      transactionHash: data?.transactionHash,
+      explorerUrl: data?.explorerUrl,
+      errorMessage: data?.errorMessage,
+    }),
 
-  closeDialog: () => set({
-    isOpen: false,
-    status: "sending",
-    transactionId: undefined,
-    transactionHash: undefined,
-    explorerUrl: undefined,
-    errorMessage: undefined,
-  }),
+  closeDialog: () =>
+    set({
+      isOpen: false,
+      status: "sending",
+      transactionId: undefined,
+      transactionHash: undefined,
+      explorerUrl: undefined,
+      errorMessage: undefined,
+    }),
 
-  updateStatus: (status, data) => set({
-    status,
-    transactionId: data?.transactionId,
-    transactionHash: data?.transactionHash,
-    explorerUrl: data?.explorerUrl,
-    errorMessage: data?.errorMessage,
-    canClose: data?.canClose,
-  }),
+  updateStatus: (status, data) =>
+    set({
+      status,
+      transactionId: data?.transactionId,
+      transactionHash: data?.transactionHash,
+      explorerUrl: data?.explorerUrl,
+      errorMessage: data?.errorMessage,
+      canClose: data?.canClose,
+    }),
 }));

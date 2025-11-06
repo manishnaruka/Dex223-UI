@@ -1,30 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import DrawerDialog from "@/components/atoms/DrawerDialog";
+import React, { useEffect, useState } from "react";
+
 import DialogHeader from "@/components/atoms/DialogHeader";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import { useClaimDialogStore } from "../stores/useClaimDialogStore";
-import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import { Standard } from "@/sdk_bi/standard";
+import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import { StandardButton } from "@/components/common/TokenStandardSelector";
 import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { Standard } from "@/sdk_bi/standard";
+
+import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 
 const MultipleClaimDialog = () => {
-  const {
-    isOpen,
-    state,
-    data,
-    closeDialog,
-    setState,
-    setError,
-    setData,
-    setTokenStandard
-  } = useClaimDialogStore();
+  const { isOpen, state, data, closeDialog, setState, setError, setData, setTokenStandard } =
+    useClaimDialogStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [globalStandard, setGlobalStandard] = useState<Standard>(Standard.ERC223);
@@ -36,11 +30,12 @@ const MultipleClaimDialog = () => {
   const tokenCount = tokens.length;
 
   // Filter tokens based on search query
-  const filteredTokens = tokens.filter(token =>
-    token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    token.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    token.erc20Address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    token.erc223Address.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTokens = tokens.filter(
+    (token) =>
+      token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.erc20Address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.erc223Address.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleClaim = async () => {
@@ -49,19 +44,21 @@ const MultipleClaimDialog = () => {
       setState("confirming");
 
       // Simulate wallet confirmation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Set executing state
       setState("executing");
 
       // Simulate transaction execution
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       // Simulate success (90% success rate for demo)
       if (Math.random() > 0.1) {
         setState("success");
       } else {
-        setError("Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click common errors");
+        setError(
+          "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click common errors",
+        );
       }
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
@@ -74,7 +71,7 @@ const MultipleClaimDialog = () => {
 
   const handleStandardChange = (standard: Standard) => {
     setGlobalStandard(standard);
-    tokens.forEach(token => {
+    tokens.forEach((token) => {
       setTokenStandard(token.id, standard);
     });
   };
@@ -90,9 +87,7 @@ const MultipleClaimDialog = () => {
           <span className="text-primary-text text-14">
             Rewards to receive: <span className="font-bold">{tokenCount} tokens</span>
           </span>
-          <span className="text-primary-text">
-            (${data.totalReward.toFixed(2)})
-          </span>
+          <span className="text-primary-text">(${data.totalReward.toFixed(2)})</span>
         </div>
       </div>
 
@@ -167,9 +162,7 @@ const MultipleClaimDialog = () => {
                 </div>
 
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-primary-text text-14 font-medium">
-                    {token.amountUSD}
-                  </span>
+                  <span className="text-primary-text text-14 font-medium">{token.amountUSD}</span>
                   <div
                     className={clsxMerge(
                       "mx-auto z-10 text-10 w-[calc(100%-24px)] h-[32px] rounded-20 border p-1 flex gap-1 items-center md:w-auto",
@@ -215,24 +208,12 @@ const MultipleClaimDialog = () => {
         <div className="text-secondary-text text-14 mb-1">Claim amount</div>
         <div className="flex items-center gap-2">
           <div>
-            <div className="text-24 font-bold text-primary-text mb-1">
-              {tokenCount} tokens
-            </div>
-            <div className="text-14 text-secondary-text">
-              (${data.totalReward.toFixed(2)})
-            </div>
+            <div className="text-24 font-bold text-primary-text mb-1">{tokenCount} tokens</div>
+            <div className="text-14 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
           </div>
           <div className="flex items-center gap-1">
-            <Badge
-              variant={BadgeVariant.STANDARD}
-              standard={Standard.ERC20}
-              size="small"
-            />
-            <Badge
-              variant={BadgeVariant.STANDARD}
-              standard={Standard.ERC223}
-              size="small"
-            />
+            <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} size="small" />
+            <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} size="small" />
           </div>
         </div>
       </div>
@@ -262,24 +243,12 @@ const MultipleClaimDialog = () => {
         <div className="text-secondary-text text-14 mb-1">Claim amount</div>
         <div className="flex items-center gap-2">
           <div>
-            <div className="text-24 font-bold text-primary-text mb-1">
-              {tokenCount} tokens
-            </div>
-            <div className="text-14 text-secondary-text">
-              (${data.totalReward.toFixed(2)})
-            </div>
+            <div className="text-24 font-bold text-primary-text mb-1">{tokenCount} tokens</div>
+            <div className="text-14 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
           </div>
           <div className="flex items-center gap-1">
-            <Badge
-              variant={BadgeVariant.STANDARD}
-              standard={Standard.ERC20}
-              size="small"
-            />
-            <Badge
-              variant={BadgeVariant.STANDARD}
-              standard={Standard.ERC223}
-              size="small"
-            />
+            <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} size="small" />
+            <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} size="small" />
           </div>
         </div>
       </div>
@@ -378,9 +347,7 @@ const MultipleClaimDialog = () => {
 
         {/* Error message */}
         <div className="bg-red-500/10 border border-red-500/20 rounded-3 p-4">
-          <p className="text-14 text-red-500">
-            {data?.errorMessage}
-          </p>
+          <p className="text-14 text-red-500">{data?.errorMessage}</p>
         </div>
       </div>
 
@@ -417,12 +384,9 @@ const MultipleClaimDialog = () => {
     <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
       <DialogHeader onClose={closeDialog} title="Claim" />
 
-      <div className="w-full md:w-[600px] p-5 md:p-6">
-        {renderContent()}
-      </div>
+      <div className="w-full md:w-[600px] p-5 md:p-6">{renderContent()}</div>
     </DrawerDialog>
   );
 };
 
 export default MultipleClaimDialog;
-

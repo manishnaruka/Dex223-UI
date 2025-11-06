@@ -1,8 +1,10 @@
+import ExternalTextLink from "@repo/ui/external-text-link";
+import Preloader from "@repo/ui/preloader";
 import React from "react";
+
 import Dialog from "@/components/atoms/Dialog";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
-import Preloader from "@repo/ui/preloader";
-import ExternalTextLink from "@repo/ui/external-text-link";
+
 import Svg from "../atoms/Svg";
 
 export type TransactionSendStatus = "sending" | "confirming" | "success" | "failed" | "error";
@@ -41,26 +43,20 @@ export default function MSigTransactionDialog({
               <Preloader size={48} />
             </div>
             <div className="text-center">
-              <h3 className="text-18 font-semibold text-primary-text mb-2">
-                Transaction sending
-              </h3>
-              <p className="text-14 text-secondary-text">
-                The transaction is in progress
-              </p>
+              <h3 className="text-18 font-semibold text-primary-text mb-2">Transaction sending</h3>
+              <p className="text-14 text-secondary-text">The transaction is in progress</p>
             </div>
           </div>
         );
 
       case "confirming":
-          return (
-            <div className="flex flex-col items-center justify-center gap-4 p-6">
-              <div className="w-16 h-16 flex items-center justify-center">
-                <Preloader size={48} type="linear" />
-              </div>
-              <div className="flex flex-col items-center justify-center gap-2">
-              <h3 className="text-18 font-semibold text-primary-text">
-                Confirming transaction
-              </h3>
+        return (
+          <div className="flex flex-col items-center justify-center gap-4 p-6">
+            <div className="w-16 h-16 flex items-center justify-center">
+              <Preloader size={48} type="linear" />
+            </div>
+            <div className="flex flex-col items-center justify-center gap-2">
+              <h3 className="text-18 font-semibold text-primary-text">Confirming transaction</h3>
               {transactionHash && explorerUrl && (
                 <ExternalTextLink
                   text="Transaction link"
@@ -71,9 +67,9 @@ export default function MSigTransactionDialog({
                 </ExternalTextLink>
               )}
             </div>
-            </div>
-      );
-  
+          </div>
+        );
+
       case "success":
         return (
           <div className="flex flex-col items-center justify-center gap-4 p-6">
@@ -81,14 +77,16 @@ export default function MSigTransactionDialog({
               <Svg className="text-white" iconName="check" size={70} />
             </div>
             <div className="flex flex-col items-center justify-center gap-2">
-              <h3 className="text-18 font-semibold text-primary-text">
-                Successfully sent
-              </h3>
-              {transactionId && !transactionId.startsWith("proposing") && !transactionId.startsWith("approving") && !transactionId.startsWith("declining") && !transactionId.startsWith("executing") && (
-                <span className="text-14 text-secondary-text">
-                  Transaction ID: {transactionId}
-                </span>
-              )}
+              <h3 className="text-18 font-semibold text-primary-text">Successfully sent</h3>
+              {transactionId &&
+                !transactionId.startsWith("proposing") &&
+                !transactionId.startsWith("approving") &&
+                !transactionId.startsWith("declining") &&
+                !transactionId.startsWith("executing") && (
+                  <span className="text-14 text-secondary-text">
+                    Transaction ID: {transactionId}
+                  </span>
+                )}
               {transactionHash && explorerUrl && (
                 <ExternalTextLink
                   text="Transaction link"
@@ -109,14 +107,16 @@ export default function MSigTransactionDialog({
               <Svg className="text-white" iconName="warning" size={70} />
             </div>
             <div className="text-center">
-              <h3 className="text-18 font-semibold text-red mb-2">
-                Failed to send
-              </h3>
-              {transactionId && !transactionId.startsWith("proposing") && !transactionId.startsWith("approving") && !transactionId.startsWith("declining") && !transactionId.startsWith("executing") && (
-                <p className="text-14 text-secondary-text mb-2">
-                  Transaction ID: {transactionId}
-                </p>
-              )}
+              <h3 className="text-18 font-semibold text-red mb-2">Failed to send</h3>
+              {transactionId &&
+                !transactionId.startsWith("proposing") &&
+                !transactionId.startsWith("approving") &&
+                !transactionId.startsWith("declining") &&
+                !transactionId.startsWith("executing") && (
+                  <p className="text-14 text-secondary-text mb-2">
+                    Transaction ID: {transactionId}
+                  </p>
+                )}
             </div>
           </div>
         );
@@ -127,13 +127,9 @@ export default function MSigTransactionDialog({
               <Svg className="text-white" iconName="warning" size={70} />
             </div>
             <div className="text-center">
-              <h3 className="text-18 font-semibold text-red mb-2">
-                Error
-              </h3>
+              <h3 className="text-18 font-semibold text-red mb-2">Error</h3>
               {errorMessage && (
-                <p className="text-14 text-secondary-text mb-2 break-all">
-                  {errorMessage}
-                </p>
+                <p className="text-14 text-secondary-text mb-2 break-all">{errorMessage}</p>
               )}
             </div>
           </div>

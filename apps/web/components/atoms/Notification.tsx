@@ -15,6 +15,7 @@ import {
   RecentTransactionStatus,
   RecentTransactionTitleTemplate,
 } from "@/stores/useRecentTransactionsStore";
+
 import Svg from "./Svg";
 
 export type NotificationTransactionStatus =
@@ -102,12 +103,12 @@ export function NotificationSubTitle({ title }: { title: IRecentTransactionTitle
         <NotificationSubtitleText>{`${title.symbol} (ID: ${title.positionId})`}</NotificationSubtitleText>
       );
     case RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED:
-        return (
-          <ExternalTextLink
-            href={getExplorerLink(ExplorerLinkType.TRANSACTION, title.hash, title.chainId)}
-            text={'Transaction Link'}
-          />
-        );
+      return (
+        <ExternalTextLink
+          href={getExplorerLink(ExplorerLinkType.TRANSACTION, title.hash, title.chainId)}
+          text={"Transaction Link"}
+        />
+      );
   }
 }
 
@@ -360,22 +361,22 @@ function NotificationTitle({
             : "Failed to set threshold"}
         </NotificationTitleText>
       );
-      case RecentTransactionTitleTemplate.MSIG_APPROVE:
-        return (
-          <NotificationTitleText>
-            {status === RecentTransactionStatus.SUCCESS
-              ? "Successfully approved transaction"
-              : "Failed to approve transaction"}
-          </NotificationTitleText>
-        );
-      case RecentTransactionTitleTemplate.MSIG_DECLINE:
-        return (
-          <NotificationTitleText>
-            {status === RecentTransactionStatus.SUCCESS
-              ? "Successfully declined transaction"
-              : "Failed to decline transaction"}
-          </NotificationTitleText>
-        );
+    case RecentTransactionTitleTemplate.MSIG_APPROVE:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully approved transaction"
+            : "Failed to approve transaction"}
+        </NotificationTitleText>
+      );
+    case RecentTransactionTitleTemplate.MSIG_DECLINE:
+      return (
+        <NotificationTitleText>
+          {status === RecentTransactionStatus.SUCCESS
+            ? "Successfully declined transaction"
+            : "Failed to decline transaction"}
+        </NotificationTitleText>
+      );
   }
 }
 
@@ -390,7 +391,8 @@ export default function Notification({ onDismiss, transactionTitle, transactionS
             <EmptyStateIcon size={48} iconName="warning" />
           </div>
         )}
-        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED && (
+        {transactionTitle.template ===
+          RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED && (
           <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
             <Svg className="text-white" iconName="check" size={48} />
           </div>
@@ -415,7 +417,7 @@ export default function Notification({ onDismiss, transactionTitle, transactionS
             <Svg className="text-white" iconName="check" size={48} />
           </div>
         )}
-         {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_APPROVE && (
+        {transactionTitle.template === RecentTransactionTitleTemplate.MSIG_APPROVE && (
           <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center">
             <Svg className="text-white" iconName="check" size={48} />
           </div>

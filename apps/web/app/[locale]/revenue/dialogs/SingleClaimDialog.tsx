@@ -1,27 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import clsx from "clsx";
-import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+
 import DialogHeader from "@/components/atoms/DialogHeader";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import { useClaimDialogStore } from "../stores/useClaimDialogStore";
-import Badge, { BadgeVariant } from "@/components/badges/Badge";
-import { Standard } from "@/sdk_bi/standard";
+import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Svg from "@/components/atoms/Svg";
+import Badge, { BadgeVariant } from "@/components/badges/Badge";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
+import { Standard } from "@/sdk_bi/standard";
+
+import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 
 const SingleClaimDialog = () => {
-  const {
-    isOpen,
-    state,
-    data,
-    closeDialog,
-    setState,
-    setError,
-    setData
-  } = useClaimDialogStore();
+  const { isOpen, state, data, closeDialog, setState, setError, setData } = useClaimDialogStore();
 
   const [selectedStandard, setSelectedStandard] = useState<"ERC-20" | "ERC-223">("ERC-223");
 
@@ -46,19 +40,21 @@ const SingleClaimDialog = () => {
       setState("confirming");
 
       // Simulate wallet confirmation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Set executing state
       setState("executing");
 
       // Simulate transaction execution
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       // Simulate success (90% success rate for demo)
       if (Math.random() > 0.1) {
         setState("success");
       } else {
-        setError("Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click common errors");
+        setError(
+          "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click common errors",
+        );
       }
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
@@ -87,7 +83,7 @@ const SingleClaimDialog = () => {
               {token.amount} {token.symbol}
             </span>
             <span className="text-secondary-text text-14">
-              (${parseFloat(token.amountUSD.replace(/[$,]/g, '')).toFixed(3)})
+              (${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)})
             </span>
           </div>
         </div>
@@ -97,7 +93,10 @@ const SingleClaimDialog = () => {
       <div className="bg-tertiary-bg rounded-3 p-4">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-primary-text text-14">Standard for {token.symbol}</span>
-          <div className="w-4 h-4 bg-secondary-border rounded-full flex items-center justify-center cursor-help" title="Select the token standard for claiming">
+          <div
+            className="w-4 h-4 bg-secondary-border rounded-full flex items-center justify-center cursor-help"
+            title="Select the token standard for claiming"
+          >
             <Svg iconName="info" size={12} className="text-secondary-text" />
           </div>
         </div>
@@ -110,18 +109,18 @@ const SingleClaimDialog = () => {
                 "flex-1 h-10 px-4 rounded-2 text-14 font-medium transition-all duration-200 flex items-center justify-center gap-2",
                 selectedStandard === standard
                   ? "bg-green-bg border border-green text-green"
-                  : "bg-quaternary-bg border border-secondary-border text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
+                  : "bg-quaternary-bg border border-secondary-border text-secondary-text hover:bg-tertiary-bg hover:text-primary-text",
               )}
             >
-              <div className={clsx(
-                "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                selectedStandard === standard
-                  ? "border-green bg-green"
-                  : "border-secondary-border"
-              )}>
-                {selectedStandard === standard && (
-                  <div className="w-2 h-2 rounded-full bg-white" />
+              <div
+                className={clsx(
+                  "w-4 h-4 rounded-full border-2 flex items-center justify-center",
+                  selectedStandard === standard
+                    ? "border-green bg-green"
+                    : "border-secondary-border",
                 )}
+              >
+                {selectedStandard === standard && <div className="w-2 h-2 rounded-full bg-white" />}
               </div>
               {standard}
             </button>
@@ -150,11 +149,9 @@ const SingleClaimDialog = () => {
         <div className="text-secondary-text text-14 mb-1">Claim amount</div>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-24 font-bold text-primary-text mb-1">
-              {token.amount}
-            </div>
+            <div className="text-24 font-bold text-primary-text mb-1">{token.amount}</div>
             <div className="text-14 text-secondary-text">
-              ${parseFloat(token.amountUSD.replace(/[$,]/g, '')).toFixed(3)}
+              ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -202,11 +199,9 @@ const SingleClaimDialog = () => {
         <div className="text-secondary-text text-14 mb-1">Claim amount</div>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-24 font-bold text-primary-text mb-1">
-              {token.amount}
-            </div>
+            <div className="text-24 font-bold text-primary-text mb-1">{token.amount}</div>
             <div className="text-14 text-secondary-text">
-              ${parseFloat(token.amountUSD.replace(/[$,]/g, '')).toFixed(3)}
+              ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -323,9 +318,7 @@ const SingleClaimDialog = () => {
 
         {/* Error message */}
         <div className="bg-red-500/10 border border-red-500/20 rounded-3 p-4">
-          <p className="text-14 text-red-500">
-            {data?.errorMessage}
-          </p>
+          <p className="text-14 text-red-500">{data?.errorMessage}</p>
         </div>
       </div>
 
@@ -362,12 +355,9 @@ const SingleClaimDialog = () => {
     <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
       <DialogHeader onClose={closeDialog} title="Claim" />
 
-      <div className="w-full md:w-[500px] p-5 md:p-6">
-        {renderContent()}
-      </div>
+      <div className="w-full md:w-[500px] p-5 md:p-6">{renderContent()}</div>
     </DrawerDialog>
   );
 };
 
 export default SingleClaimDialog;
-

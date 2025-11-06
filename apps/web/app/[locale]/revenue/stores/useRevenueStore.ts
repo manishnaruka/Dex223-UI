@@ -61,7 +61,9 @@ export const useRevenueStore = create<RevenueStore>()(
           revenues: uniqby([...state.revenues, { address, isActive: true }], "address"),
         })),
       removeRevenue: (address) =>
-        set((state) => ({ revenues: state.revenues.filter((revenue) => revenue.address !== address) })),
+        set((state) => ({
+          revenues: state.revenues.filter((revenue) => revenue.address !== address),
+        })),
       setIsRevenueActive: (address, isActive) =>
         set((state) => {
           const revenues = uniqby(

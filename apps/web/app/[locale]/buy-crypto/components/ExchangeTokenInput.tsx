@@ -131,7 +131,9 @@ export default function ExchangeTokenInput({
               </span>
             </span>
           ) : (
-            <span className="whitespace-nowrap text-tertiary-text pl-2 text-14 md:text-16">{t("select_token")}</span>
+            <span className="whitespace-nowrap text-tertiary-text pl-2 text-14 md:text-16">
+              {t("select_token")}
+            </span>
           )}
         </SelectButton>
       </div>

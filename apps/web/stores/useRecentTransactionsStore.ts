@@ -182,23 +182,23 @@ export type IRecentTransactionTitle =
       template: RecentTransactionTitleTemplate.MSIG_TRANSACTION_CONFIRMED;
     } & MultisigTransactionConfirmedTitle)
   | ({
-    template: RecentTransactionTitleTemplate.MSIG_ADD_OWNER;
-  } & MultisigTransactionConfirmedTitle)
+      template: RecentTransactionTitleTemplate.MSIG_ADD_OWNER;
+    } & MultisigTransactionConfirmedTitle)
   | ({
-    template: RecentTransactionTitleTemplate.MSIG_REMOVE_OWNER;
-  } & MultisigTransactionConfirmedTitle)
+      template: RecentTransactionTitleTemplate.MSIG_REMOVE_OWNER;
+    } & MultisigTransactionConfirmedTitle)
   | ({
-    template: RecentTransactionTitleTemplate.MSIG_SET_DELAY;
-  } & MultisigTransactionConfirmedTitle)
+      template: RecentTransactionTitleTemplate.MSIG_SET_DELAY;
+    } & MultisigTransactionConfirmedTitle)
   | ({
-    template: RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD;
-  } & MultisigTransactionConfirmedTitle)
+      template: RecentTransactionTitleTemplate.MSIG_SET_THRESHOLD;
+    } & MultisigTransactionConfirmedTitle)
   | ({
-    template: RecentTransactionTitleTemplate.MSIG_APPROVE;
-  } & MultisigTransactionConfirmedTitle)
+      template: RecentTransactionTitleTemplate.MSIG_APPROVE;
+    } & MultisigTransactionConfirmedTitle)
   | ({
-    template: RecentTransactionTitleTemplate.MSIG_DECLINE;
-  } & MultisigTransactionConfirmedTitle)
+      template: RecentTransactionTitleTemplate.MSIG_DECLINE;
+    } & MultisigTransactionConfirmedTitle);
 export type IRecentTransaction = {
   id: Address;
   status: RecentTransactionStatus;

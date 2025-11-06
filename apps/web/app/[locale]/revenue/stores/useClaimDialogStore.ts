@@ -2,12 +2,7 @@
 
 import { create } from "zustand";
 
-export type ClaimDialogState = 
-  | "initial" 
-  | "confirming" 
-  | "executing" 
-  | "success" 
-  | "error";
+export type ClaimDialogState = "initial" | "confirming" | "executing" | "success" | "error";
 
 export interface ClaimToken {
   id: number;
@@ -39,7 +34,7 @@ interface ClaimDialogStore {
   isOpen: boolean;
   state: ClaimDialogState;
   data: ClaimDialogData | null;
-  
+
   // Actions
   openDialog: (data: ClaimDialogData) => void;
   closeDialog: () => void;
@@ -54,46 +49,52 @@ export const useClaimDialogStore = create<ClaimDialogStore>((set) => ({
   isOpen: false,
   state: "initial",
   data: null,
-  
-  openDialog: (data) => set({ 
-    isOpen: true, 
-    state: "initial", 
-    data 
-  }),
-  
-  closeDialog: () => set({ 
-    isOpen: false, 
-    state: "initial", 
-    data: null 
-  }),
-  
-  setState: (state) => set({ state }),
-  
-  setData: (newData) => set((state) => ({
-    data: state.data ? { ...state.data, ...newData } : null
-  })),
-  
-  setError: (errorMessage) => set((state) => ({
-    data: state.data ? { ...state.data, errorMessage } : null,
-    state: "error"
-  })),
-  
-  setTransactionHash: (transactionHash) => set((state) => ({
-    data: state.data ? { ...state.data, transactionHash } : null
-  })),
 
-  setTokenStandard: (tokenId, standard) => set((state) => {
-    if (!state.data) return state;
-    
-    const tokenStandards = state.data.tokenStandards || {};
-    return {
-      data: {
-        ...state.data,
-        tokenStandards: {
-          ...tokenStandards,
-          [tokenId]: standard
-        }
-      }
-    };
-  })
+  openDialog: (data) =>
+    set({
+      isOpen: true,
+      state: "initial",
+      data,
+    }),
+
+  closeDialog: () =>
+    set({
+      isOpen: false,
+      state: "initial",
+      data: null,
+    }),
+
+  setState: (state) => set({ state }),
+
+  setData: (newData) =>
+    set((state) => ({
+      data: state.data ? { ...state.data, ...newData } : null,
+    })),
+
+  setError: (errorMessage) =>
+    set((state) => ({
+      data: state.data ? { ...state.data, errorMessage } : null,
+      state: "error",
+    })),
+
+  setTransactionHash: (transactionHash) =>
+    set((state) => ({
+      data: state.data ? { ...state.data, transactionHash } : null,
+    })),
+
+  setTokenStandard: (tokenId, standard) =>
+    set((state) => {
+      if (!state.data) return state;
+
+      const tokenStandards = state.data.tokenStandards || {};
+      return {
+        data: {
+          ...state.data,
+          tokenStandards: {
+            ...tokenStandards,
+            [tokenId]: standard,
+          },
+        },
+      };
+    }),
 }));

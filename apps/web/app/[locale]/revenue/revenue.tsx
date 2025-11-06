@@ -1,29 +1,32 @@
 "use client";
 
-import Container from "@/components/atoms/Container";
-import { Address, isAddress } from "viem";
-import { useEffect, useState, useMemo } from "react";
-import clsx from "clsx";
-import { SearchInput } from "@/components/atoms/Input";
-import { useRevenueStore } from "@/app/[locale]/revenue/stores/useRevenueStore";
-import Tooltip from "@repo/ui/tooltip";
-import Image from "next/image";
-import { Claims } from "./components/Claims";
-import { useAccount, useSwitchChain } from "wagmi";
-import { DexChainId } from "@/sdk_bi/chains";
-import TokenListDropdown from "./dialogs/TokenListDropdown";
-import StakeDialog from "./dialogs/StakeDialog";
-import { useStakeDialogStore } from "./stores/useStakeDialogStore";
-import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import useRevenueContract from "./hooks/useRevenueContract";
-import truncateMiddle from "@/functions/truncateMiddle";
+
 import Alert from "@repo/ui/alert";
+import Tooltip from "@repo/ui/tooltip";
+import clsx from "clsx";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { Address, isAddress } from "viem";
+import { useAccount, useSwitchChain } from "wagmi";
+
+import { useRevenueStore } from "@/app/[locale]/revenue/stores/useRevenueStore";
+import Container from "@/components/atoms/Container";
+import { SearchInput } from "@/components/atoms/Input";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { TokenListId } from "@/db/db";
+import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokens } from "@/hooks/useTokenLists";
+import { DexChainId } from "@/sdk_bi/chains";
 import { Token } from "@/sdk_bi/entities/token";
+
+import { Claims } from "./components/Claims";
+import StakeDialog from "./dialogs/StakeDialog";
+import TokenListDropdown from "./dialogs/TokenListDropdown";
+import useRevenueContract from "./hooks/useRevenueContract";
+import { useStakeDialogStore } from "./stores/useStakeDialogStore";
 const claimsData = [
   {
     id: 1,
@@ -138,9 +141,7 @@ const WalletSearchInput = ({
   searchValue: string;
   setSearchValue: (value: string) => void;
 }) => {
-
-  const error =
-    Boolean(searchValue) && !isAddress(searchValue) ? "Enter a valid address" : "";
+  const error = Boolean(searchValue) && !isAddress(searchValue) ? "Enter a valid address" : "";
 
   const { hasRevenue, hasSearchRevenue } = useRevenueStore();
 
@@ -178,26 +179,27 @@ export function Revenue() {
   const [selectedTokens, setSelectedTokens] = useState<Set<number>>(new Set());
   const chainId = useCurrentChainId();
   const [selectedTokenLists, setSelectedTokenLists] = useState<Set<TokenListId>>(
-    new Set([`default-${chainId}` as TokenListId])
+    new Set([`default-${chainId}` as TokenListId]),
   );
   const { openDialog } = useStakeDialogStore();
   const { switchChain } = useSwitchChain();
-  
+
   // Get all available tokens from the DEX
   const allAvailableTokens = useTokens();
-  
+
   // Filter tokens based on selected token lists
   const tokensFromSelectedLists = useMemo(() => {
     return allAvailableTokens.filter((token) => {
       if (!token.isToken) return false; // Filter out native coins
-      
+
       // Check if token is in any of the selected lists
       return token.lists?.some((listId) => selectedTokenLists.has(listId));
     });
   }, [allAvailableTokens, selectedTokenLists]);
-  
+
   // Use real contract data
-  const searchAddress = searchValue && isAddress(searchValue) ? searchValue as Address : undefined;
+  const searchAddress =
+    searchValue && isAddress(searchValue) ? (searchValue as Address) : undefined;
   const {
     userStaked,
     stakingPercentage,
@@ -208,13 +210,13 @@ export function Revenue() {
     claimableRewards,
     setRewardTokens,
   } = useRevenueContract({ searchAddress });
-  
+
   useEffect(() => {
     if (tokensFromSelectedLists.length > 0) {
       setRewardTokens(tokensFromSelectedLists as unknown as Token[]);
     }
   }, [tokensFromSelectedLists]);
-  
+
   const mappedClaimsData = useMemo(() => {
     return claimableRewards.map((reward, index) => ({
       id: index + 1,
@@ -231,12 +233,12 @@ export function Revenue() {
       token: reward.token,
     }));
   }, [claimableRewards]);
-  
+
   const handleSelectedTokens = (tokenId: number) => {
     if (tokenId === 0) {
       setSelectedTokens(new Set());
     } else {
-      setSelectedTokens(prev => {
+      setSelectedTokens((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(tokenId)) {
           newSet.delete(tokenId);
@@ -249,19 +251,19 @@ export function Revenue() {
   };
 
   const handleStakeClick = () => {
-    openDialog('stake', {
-      amount: '',
-      amountUSD: '0',
-      selectedStandard: 'ERC-20',
+    openDialog("stake", {
+      amount: "",
+      amountUSD: "0",
+      selectedStandard: "ERC-20",
       requiresApproval: true,
     });
   };
 
   const handleUnstakeClick = () => {
-    openDialog('unstake', {
-      amount: '',
-      amountUSD: '0',
-      selectedStandard: 'ERC-20',
+    openDialog("unstake", {
+      amount: "",
+      amountUSD: "0",
+      selectedStandard: "ERC-20",
     });
   };
 
@@ -271,27 +273,27 @@ export function Revenue() {
     }
   }, [searchValue, claimRewardsSearchValue]);
   const formatStakedAmount = (amount: unknown) => {
-    if (!amount || typeof amount !== 'bigint') return "0";
+    if (!amount || typeof amount !== "bigint") return "0";
     const divisor = BigInt(10 ** 18);
     const quotient = amount / divisor;
     const remainder = amount % divisor;
-    
+
     if (remainder === 0n) {
       return quotient.toString();
     }
-    
+
     const decimalPart = (remainder * BigInt(100)) / divisor;
-    return `${quotient.toString()}.${decimalPart.toString().padStart(2, '0')}`;
+    return `${quotient.toString()}.${decimalPart.toString().padStart(2, "0")}`;
   };
 
   const formatTotalSupply = (amount: unknown) => {
-    if (!amount || typeof amount !== 'bigint') return "0";
-    
+    if (!amount || typeof amount !== "bigint") return "0";
+
     const divisor = BigInt(10 ** 18);
     const quotient = amount / divisor;
     const quotientStr = quotient.toString();
     const quotientNum = Number(quotient);
-    
+
     if (quotientNum >= 1000000) {
       const millions = quotientNum / 1000000;
       return `${millions}M`;
@@ -301,8 +303,8 @@ export function Revenue() {
 
   // Use mapped claims data or fallback to hardcoded data for demo
   const dataToUse = mappedClaimsData.length > 0 ? mappedClaimsData : claimsData;
-  
-  const filteredClaimsData = dataToUse.filter(claim => {
+
+  const filteredClaimsData = dataToUse.filter((claim) => {
     const searchLower = claimRewardsSearchValue.toLowerCase();
     return (
       claim.name.toLowerCase().includes(searchLower) ||
@@ -333,7 +335,8 @@ export function Revenue() {
               text={
                 <div className="flex items-center justify-between gap-4 w-full">
                   <span className="text-14">
-                    Please switch to Sepolia testnet to use the Revenue feature. Your balances are only available on Sepolia.
+                    Please switch to Sepolia testnet to use the Revenue feature. Your balances are
+                    only available on Sepolia.
                   </span>
                   <Button
                     size={ButtonSize.SMALL}
@@ -352,7 +355,12 @@ export function Revenue() {
           {isLoadingUserData ? (
             <>
               <div className="relative flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-6 w-full overflow-hidden">
-                <SkeletonTheme baseColor="#1D1E1E" highlightColor="#272727" borderRadius="20px" enableAnimation={false}>
+                <SkeletonTheme
+                  baseColor="#1D1E1E"
+                  highlightColor="#272727"
+                  borderRadius="20px"
+                  enableAnimation={false}
+                >
                   <div className="flex items-center gap-1 mb-auto z-10">
                     <Skeleton width={80} height={16} />
                     <Skeleton circle width={20} height={20} />
@@ -373,7 +381,12 @@ export function Revenue() {
               </div>
 
               <div className="relative flex flex-col bg-gradient-card-blue-light-fill rounded-3 px-4 md:px-5 py-2.5 md:py-6 w-full overflow-hidden">
-                <SkeletonTheme baseColor="#1D1E1E" highlightColor="#272727" borderRadius="20px" enableAnimation={false}>
+                <SkeletonTheme
+                  baseColor="#1D1E1E"
+                  highlightColor="#272727"
+                  borderRadius="20px"
+                  enableAnimation={false}
+                >
                   <div className="flex items-center gap-1 z-10">
                     <Skeleton width={90} height={16} />
                     <Skeleton circle width={20} height={20} />
@@ -402,7 +415,9 @@ export function Revenue() {
                     <span className="text-24 lg:text-32 font-medium">
                       {formatStakedAmount(userStaked)} / {formatTotalSupply(redTotalSupply)}
                     </span>
-                    <span className="text-12 lg:text-14 text-secondary-text">{stakingPercentage}%</span>
+                    <span className="text-12 lg:text-14 text-secondary-text">
+                      {stakingPercentage}%
+                    </span>
                   </div>
 
                   <div className="flex gap-2 w-full lg:w-auto justify-end">
@@ -442,13 +457,18 @@ export function Revenue() {
                 </div>
 
                 <span className="text-24 lg:text-32 font-medium mb-2 z-10">
-                  ${dataToUse.reduce((sum, claim) => {
-                    const usdValue = parseFloat(claim.amountUSD.replace(/[$,]/g, ''));
-                    return sum + usdValue;
-                  }, 0).toFixed(2)}
+                  $
+                  {dataToUse
+                    .reduce((sum, claim) => {
+                      const usdValue = parseFloat(claim.amountUSD.replace(/[$,]/g, ""));
+                      return sum + usdValue;
+                    }, 0)
+                    .toFixed(2)}
                 </span>
                 <span className="text-12 lg:text-14 text-secondary-text z-10">
-                  {userStaked && typeof userStaked === 'bigint' && userStaked > 0n ? "Staking active" : "Not staked yet"}
+                  {userStaked && typeof userStaked === "bigint" && userStaked > 0n
+                    ? "Staking active"
+                    : "Not staked yet"}
                 </span>
 
                 <Image
@@ -462,7 +482,6 @@ export function Revenue() {
             </>
           )}
         </div>
-
 
         <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-4 lg:gap-0">
           <h1 className="text-18 lg:text-32 font-medium">Claim rewards</h1>
@@ -489,7 +508,9 @@ export function Revenue() {
         <div className="mt-6 min-h-[340px] w-full">
           {!address ? (
             <div className="flex flex-col items-center justify-center min-h-[340px] w-full bg-[#1A1A1A] rounded-3 p-8 relative overflow-hidden">
-              <p className="text-14 lg:text-16 text-gray-400 text-center z-10">Connect wallet to see your rewards</p>
+              <p className="text-14 lg:text-16 text-gray-400 text-center z-10">
+                Connect wallet to see your rewards
+              </p>
               <div className="absolute top-0 right-0 flex items-end justify-end p-4 pointer-events-none">
                 <Image
                   src="/images/state.svg"

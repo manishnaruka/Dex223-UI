@@ -135,7 +135,10 @@ export default function ExchangeForm({
                 )}
               </span>
               <span
-                className={clsx("text-10 md:text-12 whitespace-nowrap", isFixed ? "text-primary-text" : "text-tertiary-text")}
+                className={clsx(
+                  "text-10 md:text-12 whitespace-nowrap",
+                  isFixed ? "text-primary-text" : "text-tertiary-text",
+                )}
               >
                 {isFixed ? "Fixed rate" : "Floating rate"}
                 {isFiat && " only"}

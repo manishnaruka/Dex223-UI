@@ -198,7 +198,10 @@ export default function ExchangePageClient({
                 <span className="truncate">{exchange.id}</span>
                 <IconButton variant={IconButtonVariant.COPY} text={exchange.id} />
               </div>
-              <a className="flex items-center justify-center w-10 h-10 text-tertiary-text flex-shrink-0" href="#">
+              <a
+                className="flex items-center justify-center w-10 h-10 text-tertiary-text flex-shrink-0"
+                href="#"
+              >
                 <Svg iconName="help-outline" />
               </a>
             </div>
@@ -373,7 +376,9 @@ export default function ExchangePageClient({
                     />
                     <span className="font-medium">
                       {inputAmount} {tokenA?.symbol}{" "}
-                      <span className="text-secondary-text text-12 md:text-14">(Network: {tokenA?.network})</span>
+                      <span className="text-secondary-text text-12 md:text-14">
+                        (Network: {tokenA?.network})
+                      </span>
                     </span>
                   </div>
                 )}
@@ -385,7 +390,9 @@ export default function ExchangePageClient({
                     </div>
                     <div className="flex-grow min-w-0">
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-secondary-text font-bold text-12 md:text-14 whitespace-nowrap">Deposit address:</span>
+                        <span className="text-secondary-text font-bold text-12 md:text-14 whitespace-nowrap">
+                          Deposit address:
+                        </span>
                         <div className="flex items-center flex-shrink-0">
                           <a
                             target="_blank"
@@ -400,7 +407,9 @@ export default function ExchangePageClient({
                           />
                         </div>
                       </div>
-                      <span className="text-12 md:text-14 font-medium break-all">{exchange.address_from}</span>
+                      <span className="text-12 md:text-14 font-medium break-all">
+                        {exchange.address_from}
+                      </span>
                     </div>
                   </div>
                 )}

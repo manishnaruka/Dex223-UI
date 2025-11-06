@@ -1,22 +1,28 @@
-import React, { useEffect, useRef, memo, useMemo } from 'react';
-import Svg from '@/components/atoms/Svg';
-import { Currency } from '@/sdk_bi/entities/currency';
-import Image from 'next/image';
+import Image from "next/image";
+import React, { memo, useEffect, useMemo, useRef } from "react";
 
-function TradingViewWidget({ tokenA, tokenB }: { tokenA: Currency | undefined; tokenB: Currency | undefined }) {
+import Svg from "@/components/atoms/Svg";
+import { Currency } from "@/sdk_bi/entities/currency";
 
+function TradingViewWidget({
+  tokenA,
+  tokenB,
+}: {
+  tokenA: Currency | undefined;
+  tokenB: Currency | undefined;
+}) {
   const symbol = useMemo(() => {
     if (!tokenA?.symbol || !tokenB?.symbol) return null;
     return `BINANCE:${tokenA.symbol.toUpperCase()}${tokenB.symbol.toUpperCase()}`;
   }, [tokenA?.symbol, tokenB?.symbol]);
-  
+
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!container.current || !symbol) return;
 
     // Clear any existing content and scripts
-    container.current.innerHTML = '';
+    container.current.innerHTML = "";
 
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
@@ -54,13 +60,13 @@ function TradingViewWidget({ tokenA, tokenB }: { tokenA: Currency | undefined; t
 
     return () => {
       if (container.current) {
-        const scripts = container.current.querySelectorAll('script');
-        scripts.forEach(s => {
+        const scripts = container.current.querySelectorAll("script");
+        scripts.forEach((s) => {
           if (s.parentNode) {
             s.parentNode.removeChild(s);
           }
         });
-        container.current.innerHTML = '';
+        container.current.innerHTML = "";
       }
     };
   }, [symbol]);
@@ -68,24 +74,26 @@ function TradingViewWidget({ tokenA, tokenB }: { tokenA: Currency | undefined; t
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 bg-tertiary-bg border-b border-secondary-border rounded-t-2 flex-shrink-0">
-        <div className="flex items-center -space-x-2">   
+        <div className="flex items-center -space-x-2">
           <Image
-          src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
-          alt={tokenA?.symbol || ""}
-          width={32}
-          height={32}
-          className="h-[24px] w-[24px] md:h-[32px] md:w-[32px] rounded-full border-2 border-tertiary-bg relative z-10"
-        />
+            src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
+            alt={tokenA?.symbol || ""}
+            width={32}
+            height={32}
+            className="h-[24px] w-[24px] md:h-[32px] md:w-[32px] rounded-full border-2 border-tertiary-bg relative z-10"
+          />
           <Image
-          src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
-          alt={tokenB?.symbol || ""}
-          width={32}
-          height={32}
-          className="h-[24px] w-[24px] md:h-[32px] md:w-[32px] rounded-full border-2 border-tertiary-bg relative z-0"
-        /> 
+            src={tokenB?.logoURI || "/images/tokens/placeholder.svg"}
+            alt={tokenB?.symbol || ""}
+            width={32}
+            height={32}
+            className="h-[24px] w-[24px] md:h-[32px] md:w-[32px] rounded-full border-2 border-tertiary-bg relative z-0"
+          />
         </div>
-        
-        <span className="text-primary-text text-14 sm:text-16 font-medium uppercase">{tokenA?.symbol} / {tokenB?.symbol}</span>
+
+        <span className="text-primary-text text-14 sm:text-16 font-medium uppercase">
+          {tokenA?.symbol} / {tokenB?.symbol}
+        </span>
         <Svg iconName="swap" size={16} className="text-tertiary-text" />
       </div>
 
@@ -94,10 +102,9 @@ function TradingViewWidget({ tokenA, tokenB }: { tokenA: Currency | undefined; t
         ref={container}
         style={{
           width: "100%",
-          overflow: "hidden"
+          overflow: "hidden",
         }}
-      >
-      </div>
+      ></div>
     </div>
   );
 }

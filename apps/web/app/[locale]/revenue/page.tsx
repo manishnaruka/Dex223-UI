@@ -1,9 +1,9 @@
 "use client";
 
-import { Revenue } from "./revenue";
 import React from "react";
+
+import { Revenue } from "./revenue";
 
 export default function RevenuePage() {
   return <Revenue />;
 }
-

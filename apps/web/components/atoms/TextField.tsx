@@ -97,7 +97,7 @@ export default function TextField({
   isError = false,
   isWarning = false,
   inputSize = InputSize.LARGE,
-  rightIcon,  
+  rightIcon,
   ...props
 }: Props) {
   return (
