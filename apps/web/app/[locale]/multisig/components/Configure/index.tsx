@@ -1,6 +1,6 @@
 import Preloader from "@repo/ui/preloader";
-import { Formik, FormikProps } from "formik";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormik } from "formik";
+import { useEffect, useMemo, useState } from "react";
 import { formatEther, formatGwei } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import * as Yup from "yup";
@@ -91,10 +91,8 @@ export default function Configure() {
     estimatedDeadline,
     estimatedDeadlineLoading,
   } = useMultisigContract();
-  const [transactionData, setTransactionData] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const publicClient = usePublicClient();
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isOpenedFee, setIsOpenedFee] = useState(false);
   const {
     isOpen: isTransactionDialogOpen,
@@ -105,7 +103,6 @@ export default function Configure() {
     closeDialog,
     errorMessage,
   } = useTransactionSendDialogStore();
-  const formikRef = useRef<FormikProps<typeof initialValues>>(null);
 
   const chainId = useCurrentChainId();
 
@@ -218,8 +215,6 @@ export default function Configure() {
   };
 
   const handleSubmit = async (values: typeof initialValues) => {
-    setHasSubmitted(true);
-
     if (!isConnected) {
       setWalletConnectOpened(true);
       return;
@@ -254,6 +249,14 @@ export default function Configure() {
     }
   };
 
+  const formik = useFormik({
+    initialValues,
+    validationSchema: schema,
+    onSubmit: handleSubmit,
+  });
+
+  const { resetForm } = formik;
+
   useEffect(() => {
     fetchEstimatedDeadline();
   }, [fetchEstimatedDeadline]);
@@ -266,164 +269,141 @@ export default function Configure() {
         transactionStatus === "error") &&
       isTransactionDialogOpen
     ) {
-      setTransactionData("");
-      setHasSubmitted(false);
+      resetForm();
       fetchEstimatedDeadline();
-      formikRef.current?.resetForm();
     }
-  }, [transactionStatus, isTransactionDialogOpen, fetchEstimatedDeadline]);
+  }, [transactionStatus, isTransactionDialogOpen, fetchEstimatedDeadline, resetForm]);
 
   return (
     <div className="bg-primary-bg rounded-3 p-6">
       <div className="flex flex-col gap-6">
-        <Formik
-          innerRef={formikRef}
-          initialValues={initialValues}
-          onSubmit={handleSubmit}
-          validationSchema={schema}
-        >
-          {(props) => {
-            // useEffect(() => {
-            //   const newData = generateTransactionDataForForm(props.values);
-            //   if (newData !== transactionData) {
-            //     setTransactionData(newData);
-            //   }
-            // }, [props.values]);
-
-            return (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  props.handleSubmit();
+        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
+            <div>
+              <InputLabel
+                label="Select Type"
+                tooltipText="Select the type of configuration change"
+              />
+              <Select
+                buttonType="button"
+                value={formik.values.type}
+                onChange={(e) => {
+                  formik.setFieldValue("type", e);
+                  formik.setFieldValue("newOwnerAddress", "");
+                  formik.setFieldValue("newThreshold", "");
+                  formik.setFieldValue("newDelay", "");
+                  formik.setFieldTouched("type", false);
+                  formik.validateField("type");
                 }}
-                className="flex flex-col gap-6"
-              >
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <InputLabel
-                      label="Select Type"
-                      tooltipText="Select the type of configuration change"
-                    />
-                    <Select
-                      buttonType="button"
-                      value={props.values.type}
-                      onChange={(e) => {
-                        props.setFieldValue("type", e);
-                        props.setFieldValue("newOwnerAddress", "");
-                        props.setFieldValue("newThreshold", "");
-                        props.setFieldValue("newDelay", "");
-                        props.setFieldTouched("type", false);
-                        props.validateField("type");
-                      }}
-                      placeholder="Select Type"
-                      extendWidth
-                      optionsHeight={200}
-                      options={configurationOptions}
-                    />
-                    {hasSubmitted && props.errors.type && (
-                      <div className="text-red-light text-12 mt-1">{props.errors.type}</div>
-                    )}
-                  </div>
+                placeholder="Select Type"
+                extendWidth
+                optionsHeight={200}
+                options={configurationOptions}
+              />
+              {formik.touched.type && formik.errors.type && (
+                <div className="text-red-light text-12 mt-1">{formik.errors.type}</div>
+              )}
+            </div>
 
-                  {(props.values.type === "addOwner" || props.values.type === "removeOwner") && (
-                    <TextField
-                      label="Owner Address"
-                      tooltipText="Enter the owner address"
-                      placeholder="Enter owner address"
-                      value={props.values.newOwnerAddress}
-                      error={
-                        hasSubmitted && props.errors.newOwnerAddress
-                          ? props.errors.newOwnerAddress
-                          : ""
-                      }
-                      onChange={(e) => props.setFieldValue("newOwnerAddress", e.target.value)}
-                    />
-                  )}
+            {(formik.values.type === "addOwner" || formik.values.type === "removeOwner") && (
+              <TextField
+                label="Owner Address"
+                tooltipText="Enter the owner address"
+                placeholder="Enter owner address"
+                value={formik.values.newOwnerAddress}
+                error={
+                  formik.touched.newOwnerAddress && formik.errors.newOwnerAddress
+                    ? formik.errors.newOwnerAddress
+                    : ""
+                }
+                onChange={(e) => formik.setFieldValue("newOwnerAddress", e.target.value)}
+                onBlur={formik.handleBlur}
+                name="newOwnerAddress"
+              />
+            )}
 
-                  {props.values.type === "setupThreshold" && (
-                    <TextField
-                      label="New Threshold"
-                      tooltipText="Enter the new vote threshold"
-                      placeholder="Enter threshold number"
-                      value={props.values.newThreshold}
-                      error={
-                        hasSubmitted && props.errors.newThreshold ? props.errors.newThreshold : ""
-                      }
-                      onChange={(e) => props.setFieldValue("newThreshold", e.target.value)}
-                    />
-                  )}
+            {formik.values.type === "setupThreshold" && (
+              <TextField
+                label="New Threshold"
+                tooltipText="Enter the new vote threshold"
+                placeholder="Enter threshold number"
+                value={formik.values.newThreshold}
+                error={
+                  formik.touched.newThreshold && formik.errors.newThreshold
+                    ? formik.errors.newThreshold
+                    : ""
+                }
+                onChange={(e) => formik.setFieldValue("newThreshold", e.target.value)}
+                onBlur={formik.handleBlur}
+                name="newThreshold"
+              />
+            )}
 
-                  {props.values.type === "setupDelay" && (
-                    <TextField
-                      label="New Delay (seconds)"
-                      tooltipText="Enter the new execution delay in seconds"
-                      placeholder="Enter delay in seconds"
-                      value={props.values.newDelay}
-                      error={hasSubmitted && props.errors.newDelay ? props.errors.newDelay : ""}
-                      onChange={(e) => props.setFieldValue("newDelay", e.target.value)}
-                    />
-                  )}
+            {formik.values.type === "setupDelay" && (
+              <TextField
+                label="New Delay (seconds)"
+                tooltipText="Enter the new execution delay in seconds"
+                placeholder="Enter delay in seconds"
+                value={formik.values.newDelay}
+                error={
+                  formik.touched.newDelay && formik.errors.newDelay ? formik.errors.newDelay : ""
+                }
+                onChange={(e) => formik.setFieldValue("newDelay", e.target.value)}
+                onBlur={formik.handleBlur}
+                name="newDelay"
+              />
+            )}
 
-                  <div className="relative">
-                    {estimatedDeadlineLoading ? (
-                      <Preloader className="absolute right-2 top-0" size={24} type="linear" />
-                    ) : null}
-                    <TextField
-                      label="Deadline"
-                      tooltipText="Set transaction deadline"
-                      placeholder="DD.MM.YYYY HH:MM:ss aa"
-                      value={estimatedDeadline}
-                      readOnly={true}
-                    />
-                  </div>
+            <div className="relative">
+              {estimatedDeadlineLoading ? (
+                <Preloader className="absolute right-2 top-0" size={24} type="linear" />
+              ) : null}
+              <TextField
+                label="Deadline"
+                tooltipText="Set transaction deadline"
+                placeholder="DD.MM.YYYY HH:MM:ss aa"
+                value={estimatedDeadline}
+                readOnly={true}
+              />
+            </div>
 
-                  <div className="flex flex-col gap-4">
-                    <h3 className="text-18 font-bold text-primary-text">Data</h3>
-                    <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
-                      <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
-                        {transactionData || "Data will be displayed here"}
-                      </div>
-                    </div>
-                  </div>
+            <div className="flex flex-col gap-4">
+              <h3 className="text-18 font-bold text-primary-text">Data</h3>
+              <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
+                <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
+                  {generateTransactionDataForForm(formik.values) || "Data will be displayed here"}
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <GasFeeBlock
-                  computedGasSpending={computedGasSpending}
-                  computedGasSpendingETH={computedGasSpendingETH}
-                  gasPriceOption={gasPriceOption}
-                  onEditClick={() => setIsOpenedFee(true)}
-                />
+          <GasFeeBlock
+            computedGasSpending={computedGasSpending}
+            computedGasSpendingETH={computedGasSpendingETH}
+            gasPriceOption={gasPriceOption}
+            onEditClick={() => setIsOpenedFee(true)}
+          />
 
-                {!isConnected ? (
-                  <Button
-                    variant={ButtonVariant.CONTAINED}
-                    fullWidth
-                    onClick={() => setWalletConnectOpened(true)}
-                  >
-                    Connect wallet
-                  </Button>
-                ) : (
-                  <Button
-                    variant={ButtonVariant.CONTAINED}
-                    fullWidth
-                    disabled={loading || (hasSubmitted && Object.keys(props.errors).length > 0)}
-                    onClick={async () => {
-                      setHasSubmitted(true);
-                      const errors = await props.validateForm();
-                      if (Object.keys(errors).length > 0) {
-                        return;
-                      }
-
-                      props.handleSubmit();
-                    }}
-                  >
-                    {loading ? "Confirming..." : "Confirm"}
-                  </Button>
-                )}
-              </form>
-            );
-          }}
-        </Formik>
+          {!isConnected ? (
+            <Button
+              type="button"
+              variant={ButtonVariant.CONTAINED}
+              fullWidth
+              onClick={() => setWalletConnectOpened(true)}
+            >
+              Connect wallet
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              variant={ButtonVariant.CONTAINED}
+              fullWidth
+              disabled={loading || (formik.dirty && !formik.isValid)}
+            >
+              {loading ? "Confirming..." : "Confirm"}
+            </Button>
+          )}
+        </form>
       </div>
       <MSigTransactionDialog
         isOpen={isTransactionDialogOpen}

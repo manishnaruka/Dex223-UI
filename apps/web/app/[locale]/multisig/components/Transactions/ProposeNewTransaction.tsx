@@ -1,9 +1,8 @@
 import Preloader from "@repo/ui/preloader";
-import type { FormikProps } from "formik";
-import { Formik } from "formik";
+import { useFormik } from "formik";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { encodeFunctionData, parseUnits } from "viem";
 import { formatEther, formatGwei } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
@@ -12,10 +11,8 @@ import * as Yup from "yup";
 import Popover from "@/components/atoms/Popover";
 import SelectButton from "@/components/atoms/SelectButton";
 import SelectOption from "@/components/atoms/SelectOption";
-import TextAreaField from "@/components/atoms/TextAreaField";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonVariant } from "@/components/buttons/Button";
-import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import MSigTransactionDialog from "@/components/dialogs/MSigTransactionDialog";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
@@ -76,10 +73,7 @@ export default function ProposeNewTransaction() {
   const [loading, setLoading] = useState(false);
   const tokens = useTokens();
   const [selectedToken, setSelectedToken] = useState<Currency | null>(null);
-  const [proposeData, setProposeData] = useState<string>("");
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isOpenedFee, setIsOpenedFee] = useState(false);
-  const formikRef = useRef<FormikProps<typeof initialValues> | null>(null);
   const t = useTranslations("Swap");
 
   const {
@@ -182,26 +176,29 @@ export default function ProposeNewTransaction() {
     [tokens],
   );
 
-  const generateTransactionDataForForm = (values: typeof initialValues): string => {
-    const token = getTokenBySymbol(values.asset);
-    if (!token || !values.amount || !values.sendTo) return "";
+  const generateTransactionDataForForm = useCallback(
+    (values: typeof initialValues): string => {
+      const token = getTokenBySymbol(values.asset);
+      if (!token || !values.amount || !values.sendTo) return "";
 
-    try {
-      const amount = parseUnits(values.amount, token.decimals);
+      try {
+        const amount = parseUnits(values.amount, token.decimals);
 
-      if (token.isNative) {
-        return "0x";
-      } else {
-        return encodeFunctionData({
-          abi: MULTISIG_ABI,
-          functionName: "transfer",
-          args: [values.sendTo as `0x${string}`, amount],
-        });
+        if (token.isNative) {
+          return "0x";
+        } else {
+          return encodeFunctionData({
+            abi: MULTISIG_ABI,
+            functionName: "transfer",
+            args: [values.sendTo as `0x${string}`, amount],
+          });
+        }
+      } catch (error) {
+        return "";
       }
-    } catch (error) {
-      return "";
-    }
-  };
+    },
+    [getTokenBySymbol],
+  );
 
   const generateProposeData = useCallback(
     (values: typeof initialValues): string => {
@@ -218,15 +215,10 @@ export default function ProposeNewTransaction() {
         return "";
       }
     },
-    [getTokenBySymbol, generateTransactionDataForForm, generateTransactionData],
+    [getTokenBySymbol, generateTransactionData, generateTransactionDataForForm],
   );
 
   const handleSubmit = async (values: typeof initialValues) => {
-    if (!schema.isValidSync(values)) {
-      return;
-    }
-    setHasSubmitted(true);
-
     if (!isConnected) {
       setWalletConnectOpened(true);
       return;
@@ -250,6 +242,14 @@ export default function ProposeNewTransaction() {
     }
   };
 
+  const formik = useFormik({
+    initialValues,
+    validationSchema: schema,
+    onSubmit: handleSubmit,
+  });
+
+  const { resetForm } = formik;
+
   useEffect(() => {
     fetchEstimatedDeadline();
   }, [fetchEstimatedDeadline]);
@@ -262,195 +262,162 @@ export default function ProposeNewTransaction() {
       isTransactionDialogOpen
     ) {
       setSelectedToken(null);
-      setProposeData("");
-      setHasSubmitted(false);
-      formikRef.current?.resetForm();
+      resetForm();
       fetchEstimatedDeadline();
     }
-  }, [transactionStatus, isTransactionDialogOpen, fetchEstimatedDeadline]);
+  }, [transactionStatus, isTransactionDialogOpen, fetchEstimatedDeadline, resetForm]);
 
   return (
     <div className="flex flex-col gap-6">
-      <Formik
-        innerRef={formikRef}
-        initialValues={initialValues}
-        onSubmit={handleSubmit}
-        validationSchema={schema}
-      >
-        {(props) => {
-          // useEffect(() => {
-          //   const newProposeData = generateProposeData(props.values);
-          //   if (newProposeData !== proposeData) {
-          //     setProposeData(newProposeData);
-          //   }
-          // }, [props.values]);
-
-          return (
-            <>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  props.handleSubmit();
-                }}
-              >
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <InputLabel
-                      className="font-bold flex items-center gap-1 text-secondary-text text-16 mb-1"
-                      label="Select Asset"
-                      tooltipText="Select the asset to transfer"
-                    />
-                    <Popover
-                      isOpened={isOpenedAssetSelect}
-                      setIsOpened={setIsOpenedAssetSelect}
-                      placement="bottom-start"
-                      trigger={
-                        <SelectButton
-                          type="button"
-                          className="pl-2 pr-1 py-1 xl:py-2 gap-0 md:gap-2 xl:px-3 text-secondary-text w-full h-12 border"
-                          isOpen={isOpenedAssetSelect}
-                          onClick={() => setIsOpenedAssetSelect(!isOpenedAssetSelect)}
-                          withArrow={true}
-                          fullWidth={true}
-                        >
-                          {selectedToken ? (
-                            <span className="flex items-center gap-2 xl:min-w-[110px]">
-                              {selectedToken.logoURI && (
-                                <Image
-                                  src={selectedToken.logoURI}
-                                  alt={selectedToken.symbol || "Token"}
-                                  width={24}
-                                  height={24}
-                                />
-                              )}
-                              <span className="hidden xl:inline">{selectedToken.symbol}</span>
-                            </span>
-                          ) : (
-                            "Select asset"
-                          )}
-                        </SelectButton>
-                      }
-                    >
-                      <div className="py-1 text-16 bg-primary-bg rounded-2 min-w-[560px] shadow-popover shadow-black/70 overflow-y-auto max-h-[300px]">
-                        <div>
-                          {tokens.map((token: Currency) => {
-                            const tokenKey = token.isToken
-                              ? token.address0
-                              : token.symbol || "native";
-                            const selectedKey = selectedToken
-                              ? selectedToken.isToken
-                                ? selectedToken.address0
-                                : selectedToken.symbol || "native"
-                              : null;
-                            return (
-                              <SelectOption
-                                key={tokenKey}
-                                onClick={() => {
-                                  setSelectedToken(token);
-                                  props.setFieldValue("asset", token.symbol || "");
-                                  setIsOpenedAssetSelect(false);
-                                }}
-                                isActive={selectedKey === tokenKey}
-                              >
-                                {token.logoURI && (
-                                  <Image
-                                    src={token.logoURI}
-                                    alt={token.symbol || "Token"}
-                                    width={24}
-                                    height={24}
-                                  />
-                                )}
-                                {token.symbol} {token.name && `(${token.name})`}
-                              </SelectOption>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </Popover>
-                    {hasSubmitted && props.errors.asset && (
-                      <div className="text-red-light text-12 mt-1">{props.errors.asset}</div>
-                    )}
-                  </div>
-
-                  <TextField
-                    label="Amount"
-                    tooltipText="Enter the amount to transfer"
-                    placeholder="Enter amount"
-                    value={props.values.amount}
-                    error={hasSubmitted && props.errors.amount ? props.errors.amount : ""}
-                    onChange={(e) => props.setFieldValue("amount", e.target.value)}
-                  />
-
-                  <TextField
-                    label="Send to"
-                    tooltipText="Enter the recipient wallet address"
-                    placeholder="Enter wallet address"
-                    value={props.values.sendTo}
-                    error={hasSubmitted && props.errors.sendTo ? props.errors.sendTo : ""}
-                    onChange={(e) => props.setFieldValue("sendTo", e.target.value)}
-                  />
-                  <div className="relative">
-                    {estimatedDeadlineLoading ? (
-                      <Preloader className="absolute right-2 top-0" size={24} type="linear" />
-                    ) : null}
-                    <TextField
-                      label="Deadline"
-                      tooltipText="Set transaction deadline"
-                      placeholder="DD.MM.YYYY HH:MM:ss aa"
-                      value={estimatedDeadline}
-                      readOnly={true}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-4">
-                    <h3 className="text-18 font-bold text-primary-text">Data</h3>
-                    <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
-                      <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
-                        {generateProposeData(props.values) || "Data will be displayed here"}
-                      </div>
-                    </div>
-                  </div>
+      <form onSubmit={formik.handleSubmit}>
+        <div className="flex flex-col gap-4">
+          <div>
+            <InputLabel
+              className="font-bold flex items-center gap-1 text-secondary-text text-16 mb-1"
+              label="Select Asset"
+              tooltipText="Select the asset to transfer"
+            />
+            <Popover
+              isOpened={isOpenedAssetSelect}
+              setIsOpened={setIsOpenedAssetSelect}
+              placement="bottom-start"
+              trigger={
+                <SelectButton
+                  type="button"
+                  className="pl-2 pr-1 py-1 xl:py-2 gap-0 md:gap-2 xl:px-3 text-secondary-text w-full h-12 border"
+                  isOpen={isOpenedAssetSelect}
+                  onClick={() => setIsOpenedAssetSelect(!isOpenedAssetSelect)}
+                  withArrow={true}
+                  fullWidth={true}
+                >
+                  {selectedToken ? (
+                    <span className="flex items-center gap-2 xl:min-w-[110px]">
+                      {selectedToken.logoURI && (
+                        <Image
+                          src={selectedToken.logoURI}
+                          alt={selectedToken.symbol || "Token"}
+                          width={24}
+                          height={24}
+                        />
+                      )}
+                      <span className="hidden xl:inline">{selectedToken.symbol}</span>
+                    </span>
+                  ) : (
+                    "Select asset"
+                  )}
+                </SelectButton>
+              }
+            >
+              <div className="py-1 text-16 bg-primary-bg rounded-2 min-w-[560px] shadow-popover shadow-black/70 overflow-y-auto max-h-[300px]">
+                <div>
+                  {tokens.map((token: Currency) => {
+                    const tokenKey = token.isToken ? token.address0 : token.symbol || "native";
+                    const selectedKey = selectedToken
+                      ? selectedToken.isToken
+                        ? selectedToken.address0
+                        : selectedToken.symbol || "native"
+                      : null;
+                    return (
+                      <SelectOption
+                        key={tokenKey}
+                        onClick={() => {
+                          setSelectedToken(token);
+                          formik.setFieldValue("asset", token.symbol || "");
+                          setIsOpenedAssetSelect(false);
+                        }}
+                        isActive={selectedKey === tokenKey}
+                      >
+                        {token.logoURI && (
+                          <Image
+                            src={token.logoURI}
+                            alt={token.symbol || "Token"}
+                            width={24}
+                            height={24}
+                          />
+                        )}
+                        {token.symbol} {token.name && `(${token.name})`}
+                      </SelectOption>
+                    );
+                  })}
                 </div>
+              </div>
+            </Popover>
+            {formik.touched.asset && formik.errors.asset && (
+              <div className="text-red-light text-12 mt-1">{formik.errors.asset}</div>
+            )}
+          </div>
 
-                <GasFeeBlock
-                  computedGasSpending={computedGasSpending}
-                  computedGasSpendingETH={computedGasSpendingETH}
-                  gasPriceOption={gasPriceOption}
-                  onEditClick={() => setIsOpenedFee(true)}
-                />
+          <TextField
+            label="Amount"
+            tooltipText="Enter the amount to transfer"
+            placeholder="Enter amount"
+            value={formik.values.amount}
+            error={formik.touched.amount && formik.errors.amount ? formik.errors.amount : ""}
+            onChange={(e) => formik.setFieldValue("amount", e.target.value)}
+            onBlur={formik.handleBlur}
+            name="amount"
+          />
 
-                {!isConnected ? (
-                  <Button
-                    type="button"
-                    variant={ButtonVariant.CONTAINED}
-                    fullWidth
-                    onClick={() => setWalletConnectOpened(true)}
-                  >
-                    Connect wallet
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    variant={ButtonVariant.CONTAINED}
-                    fullWidth
-                    disabled={loading || (hasSubmitted && Object.keys(props.errors).length > 0)}
-                    onClick={async () => {
-                      setHasSubmitted(true);
-                      const errors = await props.validateForm();
-                      if (Object.keys(errors).length > 0) {
-                        return;
-                      }
-                      props.handleSubmit();
-                    }}
-                  >
-                    {loading || sendingTransaction ? "Proposing..." : "Propose Transaction"}
-                  </Button>
-                )}
-              </form>
-            </>
-          );
-        }}
-      </Formik>
+          <TextField
+            label="Send to"
+            tooltipText="Enter the recipient wallet address"
+            placeholder="Enter wallet address"
+            value={formik.values.sendTo}
+            error={formik.touched.sendTo && formik.errors.sendTo ? formik.errors.sendTo : ""}
+            onChange={(e) => formik.setFieldValue("sendTo", e.target.value)}
+            onBlur={formik.handleBlur}
+            name="sendTo"
+          />
+          <div className="relative">
+            {estimatedDeadlineLoading ? (
+              <Preloader className="absolute right-2 top-0" size={24} type="linear" />
+            ) : null}
+            <TextField
+              label="Deadline"
+              tooltipText="Set transaction deadline"
+              placeholder="DD.MM.YYYY HH:MM:ss aa"
+              value={estimatedDeadline}
+              readOnly={true}
+            />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <h3 className="text-18 font-bold text-primary-text">Data</h3>
+            <div className="bg-tertiary-bg px-5 py-4 h-[150px] flex justify-between items-center rounded-3 flex-col xs:flex-row overflow-y-auto">
+              <div className="flex flex-col text-tertiary-text break-all whitespace-pre-wrap h-full">
+                {generateProposeData(formik.values) || "Data will be displayed here"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <GasFeeBlock
+          computedGasSpending={computedGasSpending}
+          computedGasSpendingETH={computedGasSpendingETH}
+          gasPriceOption={gasPriceOption}
+          onEditClick={() => setIsOpenedFee(true)}
+        />
+
+        {!isConnected ? (
+          <Button
+            type="button"
+            variant={ButtonVariant.CONTAINED}
+            fullWidth
+            onClick={() => setWalletConnectOpened(true)}
+          >
+            Connect wallet
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            variant={ButtonVariant.CONTAINED}
+            fullWidth
+            disabled={loading || (formik.dirty && !formik.isValid)}
+          >
+            {loading || sendingTransaction ? "Proposing..." : "Propose Transaction"}
+          </Button>
+        )}
+      </form>
 
       <MSigTransactionDialog
         isOpen={isTransactionDialogOpen}
