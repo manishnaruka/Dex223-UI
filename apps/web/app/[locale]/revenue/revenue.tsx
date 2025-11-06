@@ -149,7 +149,7 @@ const WalletSearchInput = ({
     if (searchValue) {
       hasRevenue(searchValue as Address);
     }
-  }, [error, hasSearchRevenue, hasRevenue, searchValue]);
+  }, [hasRevenue, searchValue]);
 
   return (
     <div className="relative">
@@ -215,7 +215,7 @@ export function Revenue() {
     if (tokensFromSelectedLists.length > 0) {
       setRewardTokens(tokensFromSelectedLists as unknown as Token[]);
     }
-  }, [tokensFromSelectedLists]);
+  }, [tokensFromSelectedLists, setRewardTokens]);
 
   const mappedClaimsData = useMemo(() => {
     return claimableRewards.map((reward, index) => ({
@@ -271,7 +271,8 @@ export function Revenue() {
     if (error) {
       setError(null);
     }
-  }, [searchValue, claimRewardsSearchValue]);
+  }, [searchValue, claimRewardsSearchValue, error]);
+
   const formatStakedAmount = (amount: unknown) => {
     if (!amount || typeof amount !== "bigint") return "0";
     const divisor = BigInt(10 ** 18);

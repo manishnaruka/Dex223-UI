@@ -40,6 +40,14 @@ export interface MultisigConfig {
 const MULTISIG_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_MSIG_CONTRACT_ADDRESS as Address;
 // const MULTISIG_CONTRACT_ADDRESS = "0xE0CbccaBB9a7987bC94287D555A1Aa440Efa30bf" as Address;
 
+const generateTransactionData = (functionName: string, args: unknown[]): `0x${string}` => {
+  return encodeFunctionData({
+    abi: MULTISIG_ABI,
+    functionName: functionName as any,
+    args,
+  });
+};
+
 export default function useMultisigContract() {
   const [sendingTransaction, setSendingTransaction] = useState(false);
   const [estimatedDeadline, setEstimatedDeadline] = useState<string>("");
@@ -162,34 +170,37 @@ export default function useMultisigContract() {
         throw error;
       }
     },
-    [publicClient, walletClient, address, baseFee, currentChainId, gasPrice, priorityFee, chainId],
+    [publicClient, walletClient, address, baseFee, currentChainId, gasPrice, priorityFee],
   );
 
-  const getTransaction = useCallback(async (txId: bigint): Promise<MultisigTransaction | null> => {
-    const result = await readContract("txs", [txId]);
-    if (!result) return null;
-    const [
-      to,
-      value,
-      data,
-      proposed_timestamp,
-      executed,
-      num_approvals,
-      num_votes,
-      required_approvals,
-    ] = result as any[];
+  const getTransaction = useCallback(
+    async (txId: bigint): Promise<MultisigTransaction | null> => {
+      const result = await readContract("txs", [txId]);
+      if (!result) return null;
+      const [
+        to,
+        value,
+        data,
+        proposed_timestamp,
+        executed,
+        num_approvals,
+        num_votes,
+        required_approvals,
+      ] = result as any[];
 
-    return {
-      to,
-      value,
-      data,
-      proposed_timestamp,
-      executed,
-      num_approvals,
-      num_votes,
-      required_approvals,
-    };
-  }, []);
+      return {
+        to,
+        value,
+        data,
+        proposed_timestamp,
+        executed,
+        num_approvals,
+        num_votes,
+        required_approvals,
+      };
+    },
+    [readContract],
+  );
 
   const getAllTransactions = useCallback(async (): Promise<MultisigTransaction[]> => {
     const numTxs = await readContract("num_TXs");
@@ -438,17 +449,6 @@ export default function useMultisigContract() {
       return result as `0x${string}`;
     },
     [readContract],
-  );
-
-  const generateTransactionData = useCallback(
-    (functionName: string, args: unknown[]): `0x${string}` => {
-      return encodeFunctionData({
-        abi: MULTISIG_ABI,
-        functionName: functionName as any,
-        args,
-      });
-    },
-    [],
   );
 
   const getTransactionDeadline = useCallback(
