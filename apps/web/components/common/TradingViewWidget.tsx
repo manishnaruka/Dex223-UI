@@ -12,7 +12,7 @@ function TradingViewWidget({
   tokenB: Currency | undefined;
 }) {
   const symbol = useMemo(() => {
-    if (!tokenA?.symbol || !tokenB?.symbol) return null;
+    if (!tokenA?.symbol || !tokenB?.symbol) return "BTC";
     return `BINANCE:${tokenA.symbol.toUpperCase()}${tokenB.symbol.toUpperCase()}`;
   }, [tokenA?.symbol, tokenB?.symbol]);
 
@@ -74,7 +74,9 @@ function TradingViewWidget({
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 bg-tertiary-bg border-b border-secondary-border rounded-t-2 flex-shrink-0">
-        <div className="flex items-center -space-x-2">
+        
+        {tokenA && tokenB && (
+          <div className="flex items-center -space-x-2">  
           <Image
             src={tokenA?.logoURI || "/images/tokens/placeholder.svg"}
             alt={tokenA?.symbol || ""}
@@ -90,11 +92,12 @@ function TradingViewWidget({
             className="h-[24px] w-[24px] md:h-[32px] md:w-[32px] rounded-full border-2 border-tertiary-bg relative z-0"
           />
         </div>
-
+        )}
         <span className="text-primary-text text-14 sm:text-16 font-medium uppercase">
-          {tokenA?.symbol} / {tokenB?.symbol}
+          {tokenA && tokenB ? `${tokenA?.symbol} / ${tokenB?.symbol}` : "BTC"}
         </span>
         <Svg iconName="swap" size={16} className="text-tertiary-text" />
+
       </div>
 
       <div
