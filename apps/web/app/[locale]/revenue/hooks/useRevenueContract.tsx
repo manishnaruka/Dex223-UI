@@ -593,7 +593,7 @@ export default function useRevenueContract({
         },
       });
     },
-    [connectedAddress, executeTransaction, contractAddress],
+    [executeTransaction, contractAddress],
   );
 
   const stakeERC20 = useCallback(
@@ -609,7 +609,7 @@ export default function useRevenueContract({
         },
       });
     },
-    [connectedAddress, executeTransaction],
+    [executeTransaction],
   );
 
   const depositAndStakeERC223 = useCallback(
@@ -640,7 +640,7 @@ export default function useRevenueContract({
         },
       });
     },
-    [connectedAddress, executeTransaction, contractAddress],
+    [executeTransaction, contractAddress],
   );
 
   const unstake = useCallback(
@@ -657,7 +657,7 @@ export default function useRevenueContract({
         },
       });
     },
-    [connectedAddress, executeTransaction],
+    [executeTransaction],
   );
 
   const claimRewards = useCallback(
@@ -676,7 +676,7 @@ export default function useRevenueContract({
         },
       });
     },
-    [connectedAddress, executeTransaction],
+    [executeTransaction],
   );
 
   return {
