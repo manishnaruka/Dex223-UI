@@ -326,7 +326,6 @@ export const Claims = ({
               <div className="h-[20px] w-[2px] bg-secondary-border"></div>
               <div className="flex items-center gap-5">
                 <div className="flex items-center gap-2">
-
               <Svg iconName="power" size={24} className="text-secondary-text" />
                 <span className="text-secondary-text text-16 font-light">
                   Total reward: ${totalReward.toFixed(2)}
