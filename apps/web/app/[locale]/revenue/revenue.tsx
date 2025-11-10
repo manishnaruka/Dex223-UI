@@ -432,7 +432,7 @@ export function Revenue() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between z-10">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between z-10">
                   <div className="flex flex-col">
                     <span className="text-24 lg:text-32 font-medium">
                       {formatStakedAmount(userStaked)} / {formatTotalSupply(redTotalSupply)}
@@ -442,7 +442,7 @@ export function Revenue() {
                     </span>
                   </div>
 
-                  <div className="flex gap-2 w-full lg:w-auto justify-end">
+                  <div className="flex gap-2 justify-end">
                     <button
                       type="button"
                       onClick={handleStakeClick}
@@ -508,7 +508,7 @@ export function Revenue() {
         <div className="mt-10 flex flex-col lg:flex-row w-full justify-between gap-4 lg:gap-0">
           <h1 className="text-18 lg:text-32 font-medium">Claim rewards</h1>
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <div className="w-full sm:w-auto">
+            <div className="w-full">
               <TokenListDropdown
                 selectedOptions={selectedTokenLists}
                 onSelectionChange={setSelectedTokenLists}
@@ -517,7 +517,7 @@ export function Revenue() {
                 className="w-full sm:w-auto"
               />
             </div>
-            <div className="w-full sm:w-auto">
+            <div className="w-full">
               <SearchInput
                 value={claimRewardsSearchValue}
                 onChange={(e) => setClaimRewardsSearchValue(e.target.value)}
