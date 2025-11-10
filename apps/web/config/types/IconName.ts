@@ -153,6 +153,7 @@ export const svgIconsNames = [
   "token-version",
   "list-tokens",
   "fiat",
+  "toggle-trading-view",
 ] as const;
 
 export const socialIconNames = [""] as const;

@@ -24,6 +24,7 @@ import { Standard } from "@/sdk_bi/standard";
 import MultipleClaimDialog from "../../dialogs/MultipleClaimDialog";
 import SingleClaimDialog from "../../dialogs/SingleClaimDialog";
 import { useClaimDialogStore } from "../../stores/useClaimDialogStore";
+import Svg from "@/components/atoms/Svg";
 
 export const Claims = ({
   tableData,
@@ -185,18 +186,17 @@ export const Claims = ({
             ))}
           </SkeletonTheme>
         ) : (
-          <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative">
+          <>
             {tableData.map((o: any, index: number) => {
               const key = o?.token?.address0 ? o.token.address0 : `item-${index}`;
               const isSelected = selectedTokens.has(o.id);
 
               return (
-                <React.Fragment key={key}>
-                  <div
-                    className={clsx(
-                      "min-h-[30px] flex text-secondary-text items-center gap-3 pl-5 border-b border-quaternary-bg",
-                    )}
-                  >
+                <div
+                  key={key}
+                  className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative duration-200 rounded-2"
+                >
+                  <div className={clsx("min-h-[72px] flex text-secondary-text items-center gap-3")}>
                     <div className="flex items-center gap-3">
                       <Checkbox
                         checked={isSelected}
@@ -217,59 +217,58 @@ export const Claims = ({
                       </div>
                     </div>
                   </div>
-                  <div
-                    className={clsx("min-h-[30px] flex items-center border-b border-quaternary-bg")}
-                  >
-                    <div className="flex flex-col w-full">
-                      <div className="flex items-center gap-2">
-                        <ExternalTextLink
-                          text={truncateMiddle(o.erc20Address || "", {
-                            charsFromStart: 5,
-                            charsFromEnd: 3,
-                          })}
-                          href={getExplorerLink(
-                            ExplorerLinkType.ADDRESS,
-                            o.erc20Address,
-                            o.chainId,
-                          )}
-                        />
-                        <IconButton variant={IconButtonVariant.COPY} text={o.erc20Address} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <ExternalTextLink
-                          text={truncateMiddle(o.erc223Address || "", {
-                            charsFromStart: 5,
-                            charsFromEnd: 3,
-                          })}
-                          href={getExplorerLink(
-                            ExplorerLinkType.ADDRESS,
-                            o.erc223Address,
-                            o.chainId,
-                          )}
-                        />
-                        <IconButton variant={IconButtonVariant.COPY} text={o.erc223Address} />
-                      </div>
+                  <div className={clsx("min-h-[72px] flex items-center")}>
+                    <div className="grid grid-cols-[1fr_auto] gap-x-2 gap-y-2 items-center">
+                      <ExternalTextLink
+                        text={truncateMiddle(o.erc20Address || "", {
+                          charsFromStart: 3,
+                          charsFromEnd: 3,
+                        })}
+                        href={getExplorerLink(
+                          ExplorerLinkType.ADDRESS,
+                          o.erc20Address,
+                          o.chainId,
+                        )}
+                      />
+                      <IconButton
+                        variant={IconButtonVariant.COPY}
+                        text={o.erc20Address}
+                        buttonSize={IconButtonSize.EXTRA_SMALL}
+                      />
+                      <ExternalTextLink
+                        text={truncateMiddle(o.erc223Address || "", {
+                          charsFromStart: 3,
+                          charsFromEnd: 3,
+                        })}
+                        href={getExplorerLink(
+                          ExplorerLinkType.ADDRESS,
+                          o.erc223Address,
+                          o.chainId,
+                        )}
+                      />
+                      <IconButton
+                        variant={IconButtonVariant.COPY}
+                        text={o.erc223Address}
+                        buttonSize={IconButtonSize.EXTRA_SMALL}
+                      />
                     </div>
                   </div>
                   <div
                     className={clsx(
-                      "min-h-[30px] flex text-primary-text text-14 items-center justify-end pr-4 border-b border-quaternary-bg",
+                      "min-h-[72px] flex text-14 items-center justify-center",
                     )}
                   >
-                    {o.amount} {o.symbol}
+                    <span className="text-primary-text">{o.amount}</span>
+                    <span className="text-secondary-text ml-1">{o.symbol}</span>
                   </div>
                   <div
                     className={clsx(
-                      "min-h-[30px] flex text-primary-text text-14 font-medium items-center justify-end pr-4 border-b border-quaternary-bg",
+                      "min-h-[72px] flex text-secondary-text text-14 items-center justify-center",
                     )}
                   >
                     {o.amountUSD}
                   </div>
-                  <div
-                    className={clsx(
-                      "min-h-[30px] flex items-center justify-center border-b border-quaternary-bg",
-                    )}
-                  >
+                  <div className={clsx("min-h-[72px] flex items-center justify-center")}>
                     <Button
                       variant={ButtonVariantType.CONTAINED}
                       colorScheme={ButtonColor.GREEN}
@@ -280,28 +279,29 @@ export const Claims = ({
                       Claim
                     </Button>
                   </div>
-                </React.Fragment>
+                </div>
               );
             })}
-          </div>
+          </>
         )}
 
         {selectedCount > 0 && !isLoading && (
           <div className="mt-4 p-4 bg-tertiary-bg rounded-3 flex items-center justify-between gap-4 border border-quaternary-bg">
             <div className="flex items-center gap-4">
-              <span className="text-primary-text text-14">
+              <span className="text-secondary-text">
                 Total claim: {selectedCount} token{selectedCount !== 1 ? "s" : ""}
               </span>
               <button
                 onClick={handleUnselectAll}
-                className="text-tertiary-text hover:text-primary-text transition-colors underline text-14"
+                className="text-secondary-text hover:text-primary-text transition-colors text-16 font-medium"
               >
                 Unselect all
               </button>
             </div>
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <span className="text-primary-text text-14">Gas price: $12.23</span>
+                <Svg iconName="gas-edit" size={24} className="text-secondary-text" />
+                <span className="text-secondary-text">Gas price: $12.23</span>
                 <Button
                   variant={ButtonVariantType.OUTLINED}
                   colorScheme={ButtonColor.GREEN}
@@ -311,7 +311,7 @@ export const Claims = ({
                 </Button>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-primary-text text-14">
+                <span className="text-secondary-text">
                   Total reward: ${totalReward.toFixed(2)}
                 </span>
                 <Button
@@ -415,7 +415,7 @@ export const Claims = ({
                       <div className="flex items-center gap-2">
                         <ExternalTextLink
                           text={truncateMiddle(o.erc20Address || "", {
-                            charsFromStart: 5,
+                            charsFromStart: 3,
                             charsFromEnd: 3,
                           })}
                           href={getExplorerLink(
@@ -424,7 +424,11 @@ export const Claims = ({
                             o.chainId,
                           )}
                         />
-                        <IconButton variant={IconButtonVariant.COPY} text={o.erc20Address} />
+                        <IconButton
+                          variant={IconButtonVariant.COPY}
+                          text={o.erc20Address}
+                          buttonSize={IconButtonSize.EXTRA_SMALL}
+                        />
                       </div>
                     </div>
 
@@ -433,7 +437,7 @@ export const Claims = ({
                       <div className="flex items-center gap-2">
                         <ExternalTextLink
                           text={truncateMiddle(o.erc223Address || "", {
-                            charsFromStart: 5,
+                            charsFromStart: 3,
                             charsFromEnd: 3,
                           })}
                           href={getExplorerLink(
@@ -442,20 +446,25 @@ export const Claims = ({
                             o.chainId,
                           )}
                         />
-                        <IconButton variant={IconButtonVariant.COPY} text={o.erc223Address} />
+                        <IconButton
+                          variant={IconButtonVariant.COPY}
+                          text={o.erc223Address}
+                          buttonSize={IconButtonSize.EXTRA_SMALL}
+                        />
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <span className="text-tertiary-text text-12">Amount</span>
-                      <span className="text-primary-text text-14">
-                        {o.amount} {o.symbol}
+                      <span className="text-14">
+                        <span className="text-primary-text">{o.amount}</span>
+                        <span className="text-secondary-text ml-1">{o.symbol}</span>
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <span className="text-tertiary-text text-12">USD Value</span>
-                      <span className="text-primary-text text-14">{o.amountUSD}</span>
+                      <span className="text-secondary-text text-14">{o.amountUSD}</span>
                     </div>
                   </div>
                 </div>
