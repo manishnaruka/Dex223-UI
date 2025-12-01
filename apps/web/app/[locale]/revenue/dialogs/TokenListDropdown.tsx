@@ -20,7 +20,7 @@ import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
-import Button, { ButtonColor } from "@/components/buttons/Button";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { db, TokenListId } from "@/db/db";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokenLists } from "@/hooks/useTokenLists";
@@ -59,6 +59,7 @@ export default function TokenListDropdown({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [listToDelete, setListToDelete] = useState<TokenListOption | null>(null);
+  const [initialSelection, setInitialSelection] = useState<Set<TokenListId>>(new Set());
   const ref = useRef<HTMLButtonElement>(null);
   const { isOpen, setIsOpen, content, setContent } = useAddNewListDialogStore();
   const { setActiveTab } = useAddNewListDialogStore();
@@ -216,7 +217,7 @@ export default function TokenListDropdown({
             <div
               ref={refs.setFloating}
               style={floatingStyles}
-              className="absolute z-[101] bg-primary-bg overflow-hidden rounded-3 min-w-[450px] shadow-lg border border-secondary-border"
+              className="absolute z-[101] bg-primary-bg overflow-hidden rounded-3 min-w-[400px] shadow-lg border border-secondary-border"
               {...getFloatingProps()}
             >
               <div className="px-5 py-5">
@@ -270,20 +271,20 @@ export default function TokenListDropdown({
                           {option.name}
                         </span>
                         <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                console.log(e);
-                              }}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-light/20 rounded-2 flex items-center justify-center"
-                              title="Delete"
-                            >
-                              <Svg
-                                iconName="delete"
-                                size={16}
-                                className="text-tertiary-text hover:text-tertiary-text-hover"
-                              />
-                            </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log(e);
+                            }}
+                            className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-light/20 rounded-2 flex items-center justify-center"
+                            title="Delete"
+                          >
+                            <Svg
+                              iconName="delete"
+                              size={16}
+                              className="text-tertiary-text hover:text-tertiary-text-hover"
+                            />
+                          </button>
                           <Checkbox
                             checked={isSelected}
                             handleChange={() => handleOptionSelect(option.id)}
@@ -297,19 +298,35 @@ export default function TokenListDropdown({
                 )}
               </div>
 
-              <div className="border-t border-secondary-border px-4 py-3 bg-tertiary-bg">
-                <button
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    setIsOpen(true);
-                    setContent("import-list");
-                  }}
-                  className="w-full flex items-center justify-center gap-2 text-primary-text text-16 hover:text-green transition-colors duration-200"
-                >
-                  <span className="text-16">Add new list</span>
-                  <Svg iconName="import-list" size={24} />
-                </button>
+              <div className="border-t border-secondary-border px-4 py-3 bg-primary-bg mt-4">
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <Button
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                    size={ButtonSize.MEDIUM}
+                    fullWidth
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    colorScheme={ButtonColor.GREEN}
+                    size={ButtonSize.MEDIUM}
+                    fullWidth
+                  >
+                    Apply
+                  </Button>
+                </div>
               </div>
+              <button
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  setIsOpen(true);
+                  setContent("import-list");
+                }}
+                className="w-full bg-tertiary-bg p-2 flex items-center justify-center gap-2 text-primary-text text-16 hover:text-green transition-colors duration-200"
+              >
+                <span className="text-16">Add new list</span>
+                <Svg iconName="import-list" size={24} />
+              </button>
             </div>
           </FloatingFocusManager>
         )}

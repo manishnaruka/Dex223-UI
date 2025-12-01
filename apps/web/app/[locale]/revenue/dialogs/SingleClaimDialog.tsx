@@ -165,21 +165,21 @@ const SingleClaimDialog = () => {
 
     return (
       <div className="space-y-4">
-        <div className="bg-tertiary-bg rounded-3 px-4 h-12 flex items-center">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-tertiary-text text-14">Rewards to receive:</span>
+        <div className="bg-tertiary-bg rounded-3 px-4 py-3 sm:h-12 sm:py-0 flex items-center min-h-[48px]">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <span className="text-tertiary-text text-14 whitespace-nowrap">Rewards to receive:</span>
             <div className="flex items-center gap-2 flex-wrap">
               <Image
                 src={token.logoURI || "/images/tokens/placeholder.svg"}
                 width={24}
                 height={24}
                 alt={token.symbol}
-                className="w-6 h-6"
+                className="w-6 h-6 flex-shrink-0"
               />
-              <span className="text-primary-text text-16 font-medium">
+              <span className="text-primary-text text-16 font-medium whitespace-nowrap">
                 {token.amount} {token.symbol}
               </span>
-              <span className="text-secondary-text text-14">
+              <span className="text-secondary-text text-14 whitespace-nowrap">
                 (${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)})
               </span>
             </div>
@@ -242,23 +242,24 @@ const SingleClaimDialog = () => {
   const renderConfirmingState = () => (
     <div className="space-y-5">
       {/* Claim amount display */}
-      <div className="rounded-3 bg-tertiary-bg py-4 px-5 flex flex-col gap-1 h-[88px] justify-center">
-        <p className="text-secondary-text text-14">Claim amount</p>
-        <div className="flex justify-between items-center">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 sm:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+        <p className="text-secondary-text text-14 mb-2">Claim amount</p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
           <div className="flex flex-col">
             <span className="text-20 font-normal text-primary-text">{token.amount}</span>
             <p className="text-secondary-text text-14">
               ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Image
               src={token.logoURI || "/images/tokens/placeholder.svg"}
               width={32}
               height={32}
               alt={token.symbol}
+              className="w-8 h-8 flex-shrink-0"
             />
-            <span className="text-primary-text text-16 font-medium">{token.symbol}</span>
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
             <Badge
               variant={BadgeVariant.STANDARD}
               standard={selectedStandard}
@@ -268,19 +269,19 @@ const SingleClaimDialog = () => {
         </div>
       </div>
 
-      <div className="h-px w-full bg-secondary-border" style={{ marginTop: '20px' }} />
+      <div className="h-px w-full bg-secondary-border" />
 
       {/* Confirmation section */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-quaternary-bg rounded-full flex items-center justify-center">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="w-10 h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-16">Confirm claim</span>
+          <span className="text-primary-text text-16 whitespace-nowrap">Confirm claim</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Preloader type="linear" />
-          <span className="text-secondary-text text-14">Proceed in your wallet</span>
+          <span className="text-secondary-text text-14 whitespace-nowrap">Proceed in your wallet</span>
         </div>
       </div>
     </div>
@@ -289,25 +290,25 @@ const SingleClaimDialog = () => {
   const renderExecutingState = () => (
     <div className="space-y-5">
       {/* Claim amount display */}
-      <div className="rounded-3 bg-tertiary-bg py-4 px-5 flex flex-col gap-1 h-[88px] justify-center">
-        <p className="text-secondary-text text-14">Claim amount</p>
-        <div className="flex justify-between items-center">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 sm:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+        <p className="text-secondary-text text-14 mb-2">Claim amount</p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
           <div className="flex flex-col">
             <span className="text-20 font-normal text-primary-text">{token.amount}</span>
             <p className="text-secondary-text text-14">
               ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Image
               src={token.logoURI || "/images/tokens/placeholder.svg"}
               width={32}
               height={32}
               alt={token.symbol}
-              className="w-8 h-8"
+              className="w-8 h-8 flex-shrink-0"
             />
             <div className="flex flex-row items-center gap-2">
-              <span className="text-primary-text text-16 font-medium">{token.symbol}</span>
+              <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
               <Badge
                 variant={BadgeVariant.STANDARD}
                 standard={selectedStandard}
@@ -318,20 +319,20 @@ const SingleClaimDialog = () => {
         </div>
       </div>
 
-      <div className="h-px w-full bg-secondary-border" style={{ marginTop: '20px' }} />
+      <div className="h-px w-full bg-secondary-border" />
 
       {/* Executing claim section */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-quaternary-bg rounded-full flex items-center justify-center">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="w-10 h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-16">Executing claim</span>
+          <span className="text-primary-text text-16 whitespace-nowrap">Executing claim</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button
-             size={ButtonSize.EXTRA_SMALL}
-             colorScheme={ButtonColor.LIGHT_GREEN}
+            size={ButtonSize.EXTRA_SMALL}
+            colorScheme={ButtonColor.LIGHT_GREEN}
           >
             Speed up
           </Button>
@@ -360,21 +361,21 @@ const SingleClaimDialog = () => {
         </p>
       </div>
 
-      <div className="h-px w-full bg-secondary-border mb-2" style={{ marginTop: '20px' }} />
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-bg rounded-full flex items-center justify-center">
-              <Svg iconName="arrow-left-down" size={20} className="text-green" />
-            </div>
-            <span className="text-primary-text text-16">Successfully claimed</span>
+      <div className="h-px w-full bg-secondary-border mb-2" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="w-10 h-10 bg-green-bg rounded-full flex items-center justify-center flex-shrink-0">
+            <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <div className="flex items-center gap-2">
-            <IconButton iconName="forward" />
-            <div className="w-5 h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
-              <Svg className="text-primary-bg" iconName="check" size={14} />
-            </div>
+          <span className="text-primary-text text-16 whitespace-nowrap">Successfully claimed</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <IconButton iconName="forward" />
+          <div className="w-5 h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
+            <Svg className="text-primary-bg" iconName="check" size={14} />
           </div>
         </div>
+      </div>
     </div>
   );
 
@@ -391,17 +392,17 @@ const SingleClaimDialog = () => {
         </p>
       </div>
 
-      <div className="h-px w-full bg-secondary-border mb-5" style={{ marginTop: '20px' }} />
+      <div className="h-px w-full bg-secondary-border mb-5" />
 
       {/* Error details */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-red-light/20 rounded-full flex items-center justify-center">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="w-10 h-10 bg-red-light/20 rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-red-light" />
           </div>
-          <span className="text-primary-text text-16">Claim failed</span>
+          <span className="text-primary-text text-16 whitespace-nowrap">Claim failed</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <IconButton iconName="forward" />
           <Svg className="text-red-light" iconName="warning" size={20} />
         </div>
@@ -409,10 +410,10 @@ const SingleClaimDialog = () => {
 
       {/* Error message */}
       <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-4 mb-4">
-        <p className="text-14 text-secondary-text">
+        <p className="text-14 text-secondary-text break-words">
           {data?.errorMessage || "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
           {!data?.errorMessage && (
-            <a href="#" className="text-secondary-text underline">
+            <a href="#" className="text-secondary-text underline break-words">
               common errors
             </a>
           )}
