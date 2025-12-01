@@ -333,7 +333,7 @@ export function Revenue() {
   return (
     <Container>
       <div className="p-4 sm:p-6 lg:p-10 flex flex-col max-w-[100dvw]">
-        <div className="flex flex-col lg:flex-row w-full justify-between items-start lg:items-center gap-4 lg:gap-0 mb-5 lg:mb-0">
+        <div className="flex flex-col lg:flex-row w-full justify-between items-start lg:items-center gap-4 lg:gap-0 lg:mb-0">
           <h1 className="text-24 sm:text-32 lg:text-40 font-medium">Revenue</h1>
           <div className="flex flex-col w-full sm:w-auto lg:flex-row gap-y-2 lg:gap-x-3">
             <WalletSearchInput searchValue={searchValue} setSearchValue={setSearchValue} />
@@ -445,19 +445,19 @@ export function Revenue() {
                     </span>
                   </div>
 
-                  <div className="flex gap-2 justify-start sm:justify-end mt-2 sm:mt-0">
+                  <div className="flex gap-2 justify-start sm:justify-end mt-2 sm:mt-0 w-full sm:w-auto">
                     <button
                       type="button"
                       onClick={handleStakeClick}
                       className={clsx(
-                        "border px-3 sm:px-4 h-[40px] sm:h-[48px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
+                        "border px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
                         "border-yellow-light bg-[#4C483C] text-white cursor-pointer",
                       )}
                     >
                       Stake
                     </button>
                     {unstakeCountdown ? (
-                      <div className="border border-yellow-light bg-primary-bg text-secondary-text px-3 sm:px-4 h-[40px] sm:h-[48px] rounded-3 text-12 sm:text-14 font-medium flex items-center">
+                      <div className="border border-yellow-light bg-primary-bg text-secondary-text px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] rounded-3 text-12 sm:text-14 font-medium flex items-center justify-center">
                         <span className="text-10 sm:text-12">{unstakeCountdown}</span>
                       </div>
                     ) : (
@@ -466,7 +466,7 @@ export function Revenue() {
                         onClick={handleUnstakeClick}
                         disabled={!canUnstake || !hasStaked}
                         className={clsx(
-                          "border px-3 sm:px-4 h-[40px] sm:h-[48px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
+                          "border px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
                           "border-yellow-light bg-[#4C483C] text-white",
                           !canUnstake || !hasStaked
                             ? "opacity-50 cursor-not-allowed"
