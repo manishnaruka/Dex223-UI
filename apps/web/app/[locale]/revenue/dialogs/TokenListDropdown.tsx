@@ -65,7 +65,7 @@ export default function TokenListDropdown({
   const { isOpen, setIsOpen, content, setContent } = useAddNewListDialogStore();
   const { setActiveTab } = useAddNewListDialogStore();
 
-  const isMobile = useMediaQuery({ query: "(max-width: 640px)" });
+  const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
   const tokenLists = useTokenLists();
   const chainId = useCurrentChainId();
 
@@ -346,7 +346,7 @@ export default function TokenListDropdown({
 
       {/* Mobile modal */}
       <DrawerDialog isOpen={isMobile && isDropdownOpen} setIsOpen={setIsDropdownOpen}>
-        <div className="w-full">
+        <div className="w-full md:w-[600px]">
           <DialogHeader onClose={() => setIsDropdownOpen(false)} title="Token lists" />
           <div className="pb-4">
             {renderDropdownContent()}
