@@ -165,8 +165,8 @@ const SingleClaimDialog = () => {
 
     return (
       <div className="space-y-4">
-        <div className="bg-tertiary-bg rounded-3 px-4 py-3 sm:h-12 sm:py-0 flex items-center min-h-[48px]">
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="bg-tertiary-bg rounded-3 px-4 py-3 md:h-12 md:py-0 flex items-center min-h-[48px]">
+          <div className="flex items-center gap-2 md:gap-3 flex-wrap">
             <span className="text-tertiary-text text-14 whitespace-nowrap">Rewards to receive:</span>
             <div className="flex items-center gap-2 flex-wrap">
               <Image
@@ -242,9 +242,9 @@ const SingleClaimDialog = () => {
   const renderConfirmingState = () => (
     <div className="space-y-5">
       {/* Claim amount display */}
-      <div className="rounded-3 bg-tertiary-bg py-4 px-4 sm:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
         <p className="text-secondary-text text-14 mb-2">Claim amount</p>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
           <div className="flex flex-col">
             <span className="text-20 font-normal text-primary-text">{token.amount}</span>
             <p className="text-secondary-text text-14">
@@ -290,9 +290,9 @@ const SingleClaimDialog = () => {
   const renderExecutingState = () => (
     <div className="space-y-5">
       {/* Claim amount display */}
-      <div className="rounded-3 bg-tertiary-bg py-4 px-4 sm:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
         <p className="text-secondary-text text-14 mb-2">Claim amount</p>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
           <div className="flex flex-col">
             <span className="text-20 font-normal text-primary-text">{token.amount}</span>
             <p className="text-secondary-text text-14">
@@ -409,8 +409,8 @@ const SingleClaimDialog = () => {
       </div>
 
       {/* Error message */}
-      <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-4 mb-4">
-        <p className="text-14 text-secondary-text break-words">
+      <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 md:p-4 mb-4">
+        <p className="text-12 md:text-14 text-secondary-text break-words">
           {data?.errorMessage || "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
           {!data?.errorMessage && (
             <a href="#" className="text-secondary-text underline break-words">
@@ -452,9 +452,9 @@ const SingleClaimDialog = () => {
   return (
     <>
       <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
-        <div className="bg-primary-bg rounded-5 w-full sm:w-[600px]">
+        <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
           <DialogHeader onClose={closeDialog} title="Claim" />
-          <div className="card-spacing">{renderContent()}</div>
+          <div className="card-spacing max-md:px-4 max-md:pb-6">{renderContent()}</div>
         </div>
       </DrawerDialog>
       <NetworkFeeConfigDialog

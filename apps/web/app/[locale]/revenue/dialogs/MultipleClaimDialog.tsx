@@ -535,8 +535,9 @@ const MultipleClaimDialog = () => {
         <DialogHeader onClose={closeDialog} title="Claim" />
 
         <div className={clsxMerge(
-          "w-full p-5 md:p-6",
-          state === "initial" ? "md:w-[800px]" : "md:w-[600px]"
+         "w-full p-4 md:p-5 lg:p-6",
+          "md:w-full",
+          state === "initial" ? "md:max-w-[800px]" : "md:w-[600px]"
         )}>{renderContent()}</div>
       </DrawerDialog>
       <NetworkFeeConfigDialog

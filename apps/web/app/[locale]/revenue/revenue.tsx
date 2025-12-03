@@ -162,7 +162,7 @@ const WalletSearchInput = ({
           searchValue && !hasSearchRevenue ? { paddingRight: "100px" } : { paddingRight: "60px" }
         }
         className={clsx(
-          "bg-primary-bg w-full sm:w-[300px] lg:w-[540px] h-[40px] sm:h-[48px]",
+          "bg-primary-bg w-full sm:w-[300px] md:w-full lg:w-[540px] h-[40px] sm:h-[48px]",
           searchValue && "pr-[100px]",
         )}
       />
@@ -332,10 +332,10 @@ export function Revenue() {
 
   return (
     <Container>
-      <div className="p-4 sm:p-6 lg:p-10 flex flex-col max-w-[100dvw]">
+      <div className="p-4 sm:p-6 md:p-8 lg:p-10 flex flex-col max-w-[100dvw]">
         <div className="flex flex-col lg:flex-row w-full justify-between items-start lg:items-center gap-4 lg:gap-0 lg:mb-0">
-          <h1 className="text-24 sm:text-32 lg:text-40 font-medium">Revenue</h1>
-          <div className="flex flex-col w-full sm:w-auto lg:flex-row gap-y-2 lg:gap-x-3">
+          <h1 className="text-24 sm:text-28 md:text-32 lg:text-40 font-medium">Revenue</h1>
+          <div className="flex flex-col w-full sm:w-full md:w-full lg:flex-row lg:w-auto gap-y-2 lg:gap-x-3">
             <WalletSearchInput searchValue={searchValue} setSearchValue={setSearchValue} />
           </div>
         </div>
@@ -364,10 +364,10 @@ export function Revenue() {
             />
           </div>
         )}
-        <div className="mt-4 sm:mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+        <div className="mt-4 sm:mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5">
           {isLoadingUserData ? (
             <>
-              <div className="relative flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full lg:col-span-7 overflow-hidden min-h-[140px] sm:h-[120px]">
+              <div className="relative flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full md:col-span-2 lg:col-span-7 overflow-hidden min-h-[140px] sm:h-[120px] md:h-[140px]">
                 <SkeletonTheme
                   baseColor="#1D1E1E"
                   highlightColor="#272727"
@@ -399,7 +399,7 @@ export function Revenue() {
                 />
               </div>
 
-              <div className="relative flex flex-col bg-primary-bg rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full lg:col-span-5 overflow-hidden min-h-[140px] sm:h-[120px]">
+              <div className="relative flex flex-col bg-primary-bg rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full md:col-span-2 lg:col-span-5 overflow-hidden min-h-[140px] sm:h-[120px] md:h-[140px]">
                 <SkeletonTheme
                   baseColor="#1D1E1E"
                   highlightColor="#272727"
@@ -426,7 +426,7 @@ export function Revenue() {
             </>
           ) : (
             <>
-              <div className="relative flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full lg:col-span-7 overflow-hidden min-h-[140px] sm:h-[120px]">
+              <div className="relative flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full md:col-span-2 lg:col-span-7 overflow-hidden min-h-[140px] sm:h-[120px] md:h-[140px]">
                 <div className="flex items-center z-10">
                   <span className="text-14 sm:text-16 text-secondary-text">D223 staked</span>
                   <Tooltip
@@ -445,19 +445,19 @@ export function Revenue() {
                     </span>
                   </div>
 
-                  <div className="flex gap-2 justify-start sm:justify-end mt-2 sm:mt-0 w-full sm:w-auto">
+                  <div className="flex gap-2 justify-start sm:justify-end mt-2 sm:mt-0 w-full sm:w-auto md:w-auto">
                     <button
                       type="button"
                       onClick={handleStakeClick}
                       className={clsx(
-                        "border px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
+                        "border px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] md:min-w-[100px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
                         "border-yellow-light bg-[#4C483C] text-white cursor-pointer",
                       )}
                     >
                       Stake
                     </button>
                     {unstakeCountdown ? (
-                      <div className="border border-yellow-light bg-primary-bg text-secondary-text px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] rounded-3 text-12 sm:text-14 font-medium flex items-center justify-center">
+                      <div className="border border-yellow-light bg-primary-bg text-secondary-text px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] md:min-w-[100px] rounded-3 text-12 sm:text-14 font-medium flex items-center justify-center">
                         <span className="text-10 sm:text-12">{unstakeCountdown}</span>
                       </div>
                     ) : (
@@ -466,7 +466,7 @@ export function Revenue() {
                         onClick={handleUnstakeClick}
                         disabled={!canUnstake || !hasStaked}
                         className={clsx(
-                          "border px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
+                          "border px-3 sm:px-4 h-[40px] sm:h-[48px] flex-1 sm:flex-none sm:min-w-[120px] md:min-w-[100px] rounded-3 text-12 sm:text-14 font-medium transition-colors active:scale-95",
                           "border-yellow-light bg-[#4C483C] text-white",
                           !canUnstake || !hasStaked
                             ? "opacity-50 cursor-not-allowed"
@@ -488,7 +488,7 @@ export function Revenue() {
                 />
               </div>
 
-              <div className="relative flex flex-col bg-primary-bg rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full lg:col-span-5 overflow-hidden min-h-[140px] sm:h-[120px]">
+              <div className="relative flex flex-col bg-primary-bg rounded-3 px-4 sm:px-5 py-3 sm:py-4 w-full md:col-span-2 lg:col-span-5 overflow-hidden min-h-[140px] sm:h-[120px] md:h-[140px]">
                 <div className="flex items-center z-10">
                   <span className="text-14 sm:text-16 text-secondary-text">Total reward</span>
                   <Tooltip
@@ -527,23 +527,23 @@ export function Revenue() {
         </div>
 
         <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-col lg:flex-row w-full justify-between items-start lg:items-center gap-4 lg:gap-0">
-          <h1 className="text-20 sm:text-24 lg:text-32 font-medium">Claim rewards</h1>
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <div className="w-full sm:w-auto">
+          <h1 className="text-20 sm:text-24 md:text-28 lg:text-32 font-medium">Claim rewards</h1>
+          <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-3 w-full md:w-full lg:w-auto">
+            <div className="w-full sm:w-full md:w-full">
               <TokenListDropdown
                 selectedOptions={selectedTokenLists}
                 onSelectionChange={setSelectedTokenLists}
                 placeholder="Select token lists"
                 searchPlaceholder="Search list name"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-full md:w-full"
               />
             </div>
-            <div className="w-full sm:w-auto">
+            <div className="w-full sm:w-full md:w-full">
               <SearchInput
                 value={claimRewardsSearchValue}
                 onChange={(e) => setClaimRewardsSearchValue(e.target.value)}
                 placeholder="Search name or paste address"
-                className="h-[40px] sm:h-[48px] bg-primary-bg w-full sm:w-[300px] lg:w-[540px]"
+                className="h-[40px] sm:h-[48px] bg-primary-bg w-full sm:w-[300px] md:w-full lg:w-[540px]"
               />
             </div>
           </div>
