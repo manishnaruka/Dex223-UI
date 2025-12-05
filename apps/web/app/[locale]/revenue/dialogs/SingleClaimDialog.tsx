@@ -272,16 +272,17 @@ const SingleClaimDialog = () => {
       <div className="h-px w-full bg-secondary-border" />
 
       {/* Confirmation section */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="w-10 h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-16 whitespace-nowrap">Confirm claim</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm claim</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Preloader type="linear" />
-          <span className="text-secondary-text text-14 whitespace-nowrap">Proceed in your wallet</span>
+          <Preloader type="linear" className="max-md:hidden" />
+          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
+          <Preloader size={16} className="md:hidden" />
         </div>
       </div>
     </div>
@@ -322,17 +323,18 @@ const SingleClaimDialog = () => {
       <div className="h-px w-full bg-secondary-border" />
 
       {/* Executing claim section */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="w-10 h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-16 whitespace-nowrap">Executing claim</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing claim</span>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           <Button
             size={ButtonSize.EXTRA_SMALL}
             colorScheme={ButtonColor.LIGHT_GREEN}
+            className="max-md:text-10 max-md:px-2 max-md:py-1"
           >
             Speed up
           </Button>
@@ -346,33 +348,33 @@ const SingleClaimDialog = () => {
   const renderSuccessState = () => (
     <div className="space-y-5">
       {/* Success confirmation */}
-      <div className="flex flex-col items-center py-3">
-        <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
-          <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
+      <div className="flex flex-col items-center py-3 md:py-4">
+        <div className="mx-auto w-[64px] h-[64px] md:w-[80px] md:h-[80px] flex items-center justify-center relative mb-4 md:mb-5">
+          <div className="w-[40px] h-[40px] md:w-[54px] md:h-[54px] rounded-full border-[5px] md:border-[7px] blur-[6px] md:blur-[8px] opacity-80 border-green" />
           <Svg
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
             iconName="success"
-            size={65}
+            size={52}
           />
         </div>
-        <h3 className="text-20 font-bold text-primary-text mb-2">Successfully claimed</h3>
-        <p className="text-16 text-primary-text mb-6">
+        <h3 className="text-16 md:text-20 font-bold text-primary-text mb-2">Successfully claimed</h3>
+        <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">
           {token.amount} {token.symbol}
         </p>
       </div>
 
-      <div className="h-px w-full bg-secondary-border mb-2" />
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="w-10 h-10 bg-green-bg rounded-full flex items-center justify-center flex-shrink-0">
+      <div className="h-px w-full bg-secondary-border" />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-green-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-16 whitespace-nowrap">Successfully claimed</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Successfully claimed</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <IconButton iconName="forward" />
-          <div className="w-5 h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
-            <Svg className="text-primary-bg" iconName="check" size={14} />
+          <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
+            <Svg className="text-primary-bg" iconName="check" size={12} />
           </div>
         </div>
       </div>
@@ -380,31 +382,31 @@ const SingleClaimDialog = () => {
   );
 
   const renderErrorState = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 md:space-y-5">
       {/* Error display */}
-      <div className="flex flex-col items-center py-3">
-        <div className="flex items-center justify-center mx-auto mb-5">
-          <Svg className="text-red-light" iconName="warning" size={64} />
+      <div className="flex flex-col items-center py-3 md:py-4">
+        <div className="flex items-center justify-center mx-auto mb-4 md:mb-5">
+          <Svg className="text-red-light" iconName="warning" size={52} />
         </div>
-        <h3 className="text-20 font-bold text-red-light mb-2">Claim failed</h3>
-        <p className="text-16 text-primary-text mb-6">
+        <h3 className="text-16 md:text-20 font-bold text-red-light mb-2">Claim failed</h3>
+        <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">
           {token.amount} {token.symbol}
         </p>
       </div>
 
-      <div className="h-px w-full bg-secondary-border mb-5" />
+      <div className="h-px w-full bg-secondary-border" />
 
       {/* Error details */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="w-10 h-10 bg-red-light/20 rounded-full flex items-center justify-center flex-shrink-0">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-red-light/20 rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-red-light" />
           </div>
-          <span className="text-primary-text text-16 whitespace-nowrap">Claim failed</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Claim failed</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <IconButton iconName="forward" />
-          <Svg className="text-red-light" iconName="warning" size={20} />
+          <Svg className="text-red-light" iconName="warning" size={18} />
         </div>
       </div>
 
@@ -452,7 +454,7 @@ const SingleClaimDialog = () => {
   return (
     <>
       <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
-        <div className="bg-primary-bg rounded-5 w-full md:w-[600px]">
+        <div className="bg-primary-bg rounded-5 w-full md:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
           <DialogHeader onClose={closeDialog} title="Claim" />
           <div className="card-spacing max-md:px-4 max-md:pb-6">{renderContent()}</div>
         </div>

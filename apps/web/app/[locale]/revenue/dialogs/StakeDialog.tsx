@@ -73,7 +73,7 @@ function ApproveRow({
   return (
     <div
       className={clsx(
-        "relative grid grid-cols-[32px_1fr_auto] gap-2 sm:gap-3 min-h-10 pb-5 before:absolute before:left-[15px] before:top-10 before:w-0.5 before:h-4 before:rounded-1",
+        "relative grid grid-cols-[32px_1fr_auto] gap-2 md:gap-3 min-h-10 pb-5 before:absolute before:left-[15px] before:top-10 before:w-0.5 before:h-4 before:rounded-1",
         isSuccess || isSuccessStake ? "before:bg-green" : "before:bg-tertiary-bg",
       )}
     >
@@ -127,22 +127,22 @@ function ApproveRow({
           {isReverted && "Approve failed"}
         </span>
         {!isSuccess && !isSuccessStake && !isReverted && (
-          <span className="text-green text-12 max-sm:hidden">Why do I have to approve a token?</span>
+          <span className="text-green text-12 max-md:hidden">Why do I have to approve a token?</span>
         )}
         {isPending && (
-          <span className="text-secondary-text text-12 sm:hidden mt-0.5">Proceed in your wallet</span>
+          <span className="text-secondary-text text-12 md:hidden mt-0.5">Proceed in your wallet</span>
         )}
       </div>
-      <div className="relative flex items-center gap-1 sm:gap-2 justify-end flex-shrink-0">
+      <div className="relative flex items-center gap-1 md:gap-2 justify-end flex-shrink-0">
         {isPending && (
           <>
-            <Preloader type="linear" className="max-sm:hidden" />
-            <span className="text-secondary-text text-12 sm:text-14 whitespace-nowrap max-sm:hidden">Proceed in your wallet</span>
+            <Preloader type="linear" className="max-md:hidden" />
+            <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
           </>
         )}
         {isLoading && (
           <>
-            <button className="px-2 sm:px-3 py-1 sm:py-1.5 bg-tertiary-bg text-secondary-text text-10 sm:text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal whitespace-nowrap">
+            <button className="px-2 md:px-3 py-1 md:py-1.5 bg-tertiary-bg text-secondary-text text-10 md:text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal whitespace-nowrap">
               Speed up
             </button>
             <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
@@ -152,7 +152,7 @@ function ApproveRow({
         {(isSuccess || isSuccessStake) && (
           <>
             <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
-            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
+            <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
               <Svg className="text-primary-bg" iconName="check" size={12} />
             </div>
           </>
@@ -198,7 +198,7 @@ function StakeRow({
   const chainId = useCurrentChainId();
 
   return (
-    <div className="relative grid grid-cols-[32px_1fr_auto] gap-2 sm:gap-3 min-h-10">
+    <div className="relative grid grid-cols-[32px_1fr_auto] gap-2 md:gap-3 min-h-10">
       <div className="flex items-center h-full">
         <div
           className={clsx(
@@ -232,19 +232,19 @@ function StakeRow({
           {isSuccess && `Successfully ${isStaking ? "staked" : "unstaked"}`}
         </span>
         {isPending && (
-          <span className="text-secondary-text text-12 sm:hidden mt-0.5">Proceed in your wallet</span>
+          <span className="text-secondary-text text-12 md:hidden mt-0.5">Proceed in your wallet</span>
         )}
       </div>
-      <div className="relative flex items-center gap-1 sm:gap-2 justify-end flex-shrink-0">
+      <div className="relative flex items-center gap-1 md:gap-2 justify-end flex-shrink-0">
         {isPending && (
           <>
-            <Preloader type="linear" className="max-sm:hidden" />
-            <span className="text-secondary-text text-12 sm:text-14 whitespace-nowrap max-sm:hidden">Proceed in your wallet</span>
+            <Preloader type="linear" className="max-md:hidden" />
+            <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
           </>
         )}
         {isLoading && (
           <>
-            <button className="px-2 sm:px-3 py-1 sm:py-1.5 bg-tertiary-bg text-secondary-text text-10 sm:text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal whitespace-nowrap">
+            <button className="px-2 md:px-3 py-1 md:py-1.5 bg-tertiary-bg text-secondary-text text-10 md:text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal whitespace-nowrap">
               Speed up
             </button>
             <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
@@ -254,7 +254,7 @@ function StakeRow({
         {isSuccess && (
           <>
             <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
-            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
+            <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
               <Svg className="text-primary-bg" iconName="check" size={12} />
             </div>
           </>
@@ -596,9 +596,9 @@ const StakeDialog = () => {
             <ApproveRow hash={approveHash} isReverted />
             <StakeRow isDisabled isStaking={isStaking} />
           </Rows>
-          <div className="flex flex-col gap-4 mt-4 sm:mt-5">
-            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 sm:p-4">
-              <p className="text-12 sm:text-14 text-secondary-text">
+          <div className="flex flex-col gap-4 mt-4 md:mt-5">
+            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 md:p-4">
+              <p className="text-12 md:text-14 text-secondary-text">
                 Transaction failed because the gas limit is too low. Adjust your wallet settings. If
                 you still have issues, click{" "}
                 <a href="#" className="text-secondary-text underline">
@@ -663,9 +663,9 @@ const StakeDialog = () => {
             )}
             <StakeRow hash={stakeHash} isSettled isReverted isStaking={isStaking} />
           </Rows>
-          <div className="flex flex-col gap-4 mt-4 sm:mt-5">
-            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 sm:p-4">
-              <p className="text-12 sm:text-14 text-secondary-text">
+          <div className="flex flex-col gap-4 mt-4 md:mt-5">
+            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 md:p-4">
+              <p className="text-12 md:text-14 text-secondary-text">
                 {errorMessage ||
                   "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
                 {!errorMessage && (
@@ -740,7 +740,7 @@ const StakeDialog = () => {
         )}
 
         {/* Stake amount section */}
-        <div className="bg-tertiary-bg rounded-3 p-4 sm:p-5">
+        <div className="bg-tertiary-bg rounded-3 p-4 md:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1">
               <span className="text-14 text-secondary-text">
@@ -765,7 +765,7 @@ const StakeDialog = () => {
                   decimalScale={18}
                   inputMode="decimal"
                   placeholder="0"
-                  className="h-12 bg-transparent outline-0 border-0 text-24 sm:text-32 w-full placeholder:text-tertiary-text relative z-10"
+                  className="h-12 bg-transparent outline-0 border-0 text-24 md:text-32 w-full placeholder:text-tertiary-text relative z-10"
                   type="text"
                   value={amount}
                   onValueChange={(values) => {
@@ -775,7 +775,7 @@ const StakeDialog = () => {
                 />
                 <span className="text-12 block -mt-1 text-tertiary-text">$50.00</span>
               </div>
-              <div className="group flex items-center gap-1.5 sm:gap-2 duration-200 text-base text-primary-text bg-primary-bg hocus:text-primary-text rounded-[80px] border border-transparent hocus:bg-green-bg hocus:shadow shadow-green/60 hocus:border-green p-2 lg:px-5 lg:py-2.5 lg:text-24 min-h-12 flex-shrink-0">
+              <div className="group flex items-center gap-1.5 md:gap-2 duration-200 text-base text-primary-text bg-primary-bg hocus:text-primary-text rounded-[80px] border border-transparent hocus:bg-green-bg hocus:shadow shadow-green/60 hocus:border-green p-2 xl:px-5 xl:py-2.5 xl:text-24 min-h-12 flex-shrink-0">
                 <Image
                   src="/images/logo-short.svg"
                   width={32}
@@ -783,7 +783,7 @@ const StakeDialog = () => {
                   alt="D223"
                   className="w-8 h-8 flex-shrink-0"
                 />
-                <span className="text-14 sm:text-16 font-medium whitespace-nowrap">D223</span>
+                <span className="text-14 md:text-16 font-medium whitespace-nowrap">D223</span>
               </div>
             </div>
 
@@ -793,13 +793,13 @@ const StakeDialog = () => {
                 type="button"
                 onClick={() => setSelectedStandard(Standard.ERC20)}
                 className={clsx(
-                  "*:z-10 flex flex-col gap-1 px-2 sm:px-3 py-2 sm:py-2.5 rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 text-12 group bg-gradient-to-r from-primary-bg md:rounded-b-0 md:before:rounded-b-0",
+                  "*:z-10 flex flex-col gap-1 px-2 md:px-3 py-2 md:py-2.5 rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 text-12 group bg-gradient-to-r from-primary-bg md:rounded-b-0 md:before:rounded-b-0",
                   selectedStandard === Standard.ERC20
                     ? "before:opacity-100"
                     : "before:opacity-0 hocus:before:opacity-100",
                 )}
               >
-                <div className="max-md:hidden flex items-center gap-1 cursor-default">
+                <div className="max-[640px]:hidden flex items-center gap-1 cursor-default">
                   <span
                     className={clsx(
                       "text-12",
@@ -824,7 +824,7 @@ const StakeDialog = () => {
                 </div>
                 <span
                   className={clsx(
-                    "block text-left mt-10 md:mt-0 text-11 sm:text-12",
+                    "block text-left mt-10 sm:mt-0 text-11 md:text-12",
                     selectedStandard === Standard.ERC20 ? "text-primary-text" : "text-tertiary-text",
                   )}
                 >
@@ -840,7 +840,7 @@ const StakeDialog = () => {
               </button>
 
               {/* Center selector buttons */}
-              <div className="mx-auto z-10 text-10 w-[calc(100%-24px)] h-[32px] top-1 left-1/2 -translate-x-1/2 rounded-20 border border-green p-1 flex gap-1 items-center absolute md:w-auto md:top-[14px] md:left-1/2 md:-translate-x-1/2">
+              <div className="mx-auto z-10 text-10 w-[calc(100%-24px)] h-[32px] top-1 left-1/2 -translate-x-1/2 rounded-20 border border-green p-1 flex gap-1 items-center absolute sm:w-auto sm:top-[14px] sm:left-1/2 sm:-translate-x-1/2">
                 {[Standard.ERC20, Standard.ERC223].map((standard) => {
                   return (
                     <StandardButton
@@ -860,13 +860,13 @@ const StakeDialog = () => {
                 type="button"
                 onClick={() => setSelectedStandard(Standard.ERC223)}
                 className={clsx(
-                  "*:z-10 flex flex-col gap-1 px-2 sm:px-3 py-2 sm:py-2.5 rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 text-12 group before:rotate-180 items-end bg-gradient-to-l from-primary-bg md:rounded-b-0 md:before:rounded-t-0",
+                  "*:z-10 flex flex-col gap-1 px-2 md:px-3 py-2 md:py-2.5 rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 text-12 group before:rotate-180 items-end bg-gradient-to-l from-primary-bg md:rounded-b-0 md:before:rounded-t-0",
                   selectedStandard === Standard.ERC223
                     ? "before:opacity-100"
                     : "before:opacity-0 hocus:before:opacity-100",
                 )}
               >
-                <div className="max-md:hidden flex items-center gap-1 cursor-default">
+                <div className="max-[640px]:hidden flex items-center gap-1 cursor-default">
                   <Tooltip iconSize={16} text="ERC-223 is an improved token standard with lower fees" />
                   <span
                     className={clsx(
@@ -891,7 +891,7 @@ const StakeDialog = () => {
                 </div>
                 <span
                   className={clsx(
-                    "block text-right mt-10 md:mt-0 text-11 sm:text-12",
+                    "block text-right mt-10 sm:mt-0 text-11 md:text-12",
                     selectedStandard === Standard.ERC223 ? "text-primary-text" : "text-tertiary-text",
                   )}
                 >
@@ -909,10 +909,10 @@ const StakeDialog = () => {
               </button>
 
               {/* Gas info */}
-              <div className="py-1 px-3 text-12 bg-gradient-to-r from-primary-bg rounded-bl-2 text-tertiary-text max-md:hidden">
+              <div className="py-1 px-3 text-12 bg-gradient-to-r from-primary-bg rounded-bl-2 text-tertiary-text max-[640px]:hidden">
                 ~{gasLimitERC20.toLocaleString()} gas
               </div>
-              <div className="py-1 px-3 text-12 bg-gradient-to-l from-primary-bg rounded-br-2 text-right text-tertiary-text max-md:hidden ml-auto">
+              <div className="py-1 px-3 text-12 bg-gradient-to-l from-primary-bg rounded-br-2 text-right text-tertiary-text max-[640px]:hidden ml-auto">
                 ~{gasLimitERC223.toLocaleString()} gas
               </div>
             </div>
@@ -922,20 +922,21 @@ const StakeDialog = () => {
               <HelperText error="Insufficient balance" />
             </div>
           )}
+        
         </div>
 
         {/* Approve amount section - only show for ERC-20 staking */}
         {isStaking && (selectedStandard === Standard.ERC20 || selectedStandard === Standard.ERC223) && (
-          <div className="bg-tertiary-bg rounded-3 flex justify-between items-center px-4 sm:px-5 py-2.5 min-h-12 gap-2 sm:gap-3">
-            <div className="flex items-center gap-1 sm:gap-1.5 text-secondary-text">
+          <div className="bg-tertiary-bg rounded-3 flex justify-between items-center px-4 md:px-5 py-2.5 min-h-12 gap-2 md:gap-3">
+                  <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text">
               <Tooltip
                 iconSize={16}
                 text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
               />
-              <span className="text-12 sm:text-14 whitespace-nowrap">Approve amount</span>
+              <span className="text-12 md:text-14 whitespace-nowrap">Approve amount</span>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-grow justify-end min-w-0">
-              <span className="text-12 sm:text-14 truncate">{amount || "0"} D223</span>
+            <div className="flex items-center gap-1.5 md:gap-2 flex-grow justify-end min-w-0">
+              <span className="text-12 md:text-14 truncate">{amount || "0"} D223</span>
               <Button
                 size={ButtonSize.EXTRA_SMALL}
                 colorScheme={ButtonColor.LIGHT_GREEN}
@@ -963,40 +964,40 @@ const StakeDialog = () => {
   return (
     <>
       <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
-        <div className="bg-primary-bg rounded-5 w-full sm:w-[600px] max-sm:rounded-t-5 max-sm:rounded-b-none">
+        <div className="bg-primary-bg rounded-5 w-full md:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
           <DialogHeader onClose={closeDialog} title={title} />
-          <div className="card-spacing max-sm:px-4 max-sm:pb-6">
+          <div className="card-spacing max-md:px-4 max-md:pb-6">
             {!isSettledStake && !isRevertedApprove && !isProcessing && renderInitialState()}
 
             {isProcessing && !isSettledStake && !isRevertedApprove && (
               <>
-                <div className="flex flex-col gap-3">
-                  <div className="rounded-3 bg-tertiary-bg py-4 px-4 sm:px-5 flex flex-col gap-1">
+                  <div className="flex flex-col gap-3">
+                  <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1">
                     <p className="text-secondary-text text-14">
                       {isStaking ? "Stake" : "Unstake"} amount
                     </p>
-                    <div className="flex justify-between items-start sm:items-center gap-2">
+                    <div className="flex justify-between items-start md:items-center gap-2">
                       <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-24 sm:text-32 text-primary-text break-words">{amount || "0"}</span>
-                        <p className="text-secondary-text text-12 sm:text-14">$50.00</p>
+                        <span className="text-24 md:text-32 text-primary-text break-words">{amount || "0"}</span>
+                        <p className="text-secondary-text text-12 md:text-14">$50.00</p>
                       </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-bg rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+                        <div className="w-7 h-7 md:w-8 md:h-8 bg-primary-bg rounded-full flex items-center justify-center flex-shrink-0">
                           <Image
                             src="/images/logo-short.svg"
                             alt="D223"
                             width={14}
                             height={14}
-                            className="sm:w-4 sm:h-4"
+                            className="md:w-4 md:h-4"
                           />
                         </div>
-                        <span className="text-14 sm:text-16 font-medium text-primary-text whitespace-nowrap">D223</span>
+                        <span className="text-14 md:text-16 font-medium text-primary-text whitespace-nowrap">D223</span>
                         <Image
                           src={selectedStandard === Standard.ERC20 ? "/images/badges/erc-20-green-small.svg" : "/images/badges/erc-223-green-small.svg"}
                           alt="Standard"
                           width={40}
                           height={40}
-                          className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12"
+                          className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12"
                         />
                       </div>
                     </div>
@@ -1006,13 +1007,13 @@ const StakeDialog = () => {
               </>
             )}
 
-            {(isSettledStake || isRevertedApprove) && (
+              {(isSettledStake || isRevertedApprove) && (
               <div>
-                <div className="flex flex-col items-center py-4 sm:py-6">
+                <div className="flex flex-col items-center py-3 md:py-4">
                   {/* Success Icon */}
                   {isSuccessStake && (
-                    <div className="mx-auto w-[64px] h-[64px] sm:w-[80px] sm:h-[80px] flex items-center justify-center relative mb-4 sm:mb-5">
-                      <div className="w-[40px] h-[40px] sm:w-[54px] sm:h-[54px] rounded-full border-[5px] sm:border-[7px] blur-[6px] sm:blur-[8px] opacity-80 border-green" />
+                    <div className="mx-auto w-[64px] h-[64px] md:w-[80px] md:h-[80px] flex items-center justify-center relative mb-4 md:mb-5">
+                      <div className="w-[40px] h-[40px] md:w-[54px] md:h-[54px] rounded-full border-[5px] md:border-[7px] blur-[6px] md:blur-[8px] opacity-80 border-green" />
                       <Svg
                         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
                         iconName="success"
@@ -1023,7 +1024,7 @@ const StakeDialog = () => {
 
                   {/* Error Icon */}
                   {(isRevertedStake || isRevertedApprove) && (
-                    <div className="flex items-center justify-center mb-4 sm:mb-5">
+                    <div className="flex items-center justify-center mb-4 md:mb-5">
                       <Svg className="text-red-light" iconName="warning" size={52} />
                     </div>
                   )}
@@ -1031,7 +1032,7 @@ const StakeDialog = () => {
                   {/* Status Text */}
                   <h3
                     className={clsx(
-                      "text-16 sm:text-18 md:text-20 font-bold mb-2 text-center px-2",
+                      "text-16 md:text-18 xl:text-20 font-bold mb-2 text-center px-2",
                       isSuccessStake && "text-primary-text",
                       (isRevertedStake || isRevertedApprove) && "text-red-light",
                     )}
@@ -1042,15 +1043,15 @@ const StakeDialog = () => {
                   </h3>
 
                   {/* Amount */}
-                  <p className="text-14 sm:text-16 text-primary-text mb-4 sm:mb-6">
+                  <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">
                     {amount} D223
                   </p>
                 </div>
 
-                <div className="h-px w-full bg-secondary-border mb-4 sm:mb-5" />
+                <div className="h-px w-full bg-secondary-border" />
               </div>
             )}
-            <div className="mt-4 sm:mt-5">
+            <div className="mt-4 md:mt-5">
               <StakeActionButton />
             </div>
           </div>

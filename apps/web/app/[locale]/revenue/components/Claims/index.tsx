@@ -169,8 +169,8 @@ export const Claims = ({
       <SingleClaimDialog />
       <MultipleClaimDialog />
       {/* Desktop version */}
-      <div className="hidden lg:block rounded-3 overflow-hidden bg-table-gradient">
-        <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative pr-5 pl-5">
+      <div className="hidden xl:block rounded-3 overflow-x-auto bg-table-gradient">
+        <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative pr-5 pl-5 min-w-[1000px]">
           <div className="text-tertiary-text text-13 pl-5 h-[60px] flex items-center">Token</div>
           <div className="text-tertiary-text text-13 h-[60px] flex items-center">
             <div className="flex flex-col gap-1">
@@ -415,7 +415,7 @@ export const Claims = ({
       </div>
 
       {/* Mobile and Tablet version */}
-      <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+      <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 overflow-x-hidden w-full">
         {isLoading ? (
           <SkeletonTheme
             baseColor="#272727"
@@ -449,7 +449,7 @@ export const Claims = ({
         ) : (
           <>
             {selectedCount > 0 && !isLoading && (
-              <div className="bg-tertiary-bg rounded-3 p-4 md:col-span-2">
+              <div className="bg-tertiary-bg rounded-3 p-4 xl:col-span-2">
                 <div className="flex items-center mb-3 gap-2">
                   <div className="flex items-center gap-1.5">
                     <Svg iconName="gas-edit" size={16} className="text-tertiary-text" />
@@ -512,12 +512,12 @@ export const Claims = ({
                   <div
                     key={key}
                     className={clsx(
-                      "bg-primary-bg rounded-3 p-4 flex flex-col",
+                      "bg-primary-bg rounded-3 p-4 flex flex-col overflow-hidden w-full",
                       isTokenBeingClaimed(o.id) && "opacity-60 pointer-events-none",
                     )}
                   >
                     {/* Header with token info */}
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-2 overflow-hidden w-full">
                       <Checkbox
                         checked={isSelected}
                         handleChange={() => handleTokenSelect(o.id)}
@@ -547,8 +547,8 @@ export const Claims = ({
                     </div>
 
                     {/* Addresses section */}
-                    <div className="flex flex-row justify-between gap-2 md:gap-3 mb-3 overflow-hidden">
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <div className="flex flex-row justify-between gap-2 md:gap-3 mb-3 overflow-hidden w-full">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
                         <span className="text-tertiary-text text-13 flex-shrink-0">ERC-20</span>
                         <a
                           target="_blank"
@@ -557,7 +557,7 @@ export const Claims = ({
                             o.fullErc20Address || o.erc20Address,
                             o.chainId,
                           )}
-                          className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0"
+                          className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0 overflow-hidden"
                         >
                           <span className="text-13 truncate">
                             {truncateMiddle(o.fullErc20Address || o.erc20Address || "", {
@@ -569,7 +569,7 @@ export const Claims = ({
                         </a>
                       </div>
 
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
                         <span className="text-tertiary-text text-13 flex-shrink-0">ERC-223</span>
                         <a
                           target="_blank"
@@ -578,7 +578,7 @@ export const Claims = ({
                             o.fullErc223Address || o.erc223Address,
                             o.chainId,
                           )}
-                          className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0"
+                          className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0 overflow-hidden"
                         >
                           <span className="text-13 truncate">
                             {truncateMiddle(o.fullErc223Address || o.erc223Address || "", {
