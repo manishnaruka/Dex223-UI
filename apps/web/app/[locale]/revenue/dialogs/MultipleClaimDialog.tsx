@@ -191,14 +191,16 @@ const MultipleClaimDialog = () => {
             >
               {[Standard.ERC20, Standard.ERC223].map((standard) => {
                 return (
-                  <StandardButton
-                    colorScheme={ThemeColors.GREEN}
-                    key={standard}
-                    handleStandardSelect={() => handleStandardChange(standard)}
-                    standard={standard}
-                    selectedStandard={globalStandard}
-                    disabled={false}
-                  />
+                  <div key={standard} className="[&>button]:!w-auto">
+                    <StandardButton
+                      colorScheme={ThemeColors.GREEN}
+                      key={standard}
+                      handleStandardSelect={() => handleStandardChange(standard)}
+                      standard={standard}
+                      selectedStandard={globalStandard}
+                      disabled={false}
+                    />
+                  </div>
                 );
               })}
             </div>
@@ -270,7 +272,7 @@ const MultipleClaimDialog = () => {
                     {/* Token info row */}
                     <div className="flex items-start justify-between mb-3">
                       {/* Left: Token icon, name, and amount */}
-                      <div className="flex items-start gap-2 flex-1 min-w-0">
+                      <div className="flex items-start gap-2 flex-1 min-w-0 pr-2">
                         <Image
                           src={token.logoURI || "/images/tokens/placeholder.svg"}
                           width={24}
@@ -278,40 +280,41 @@ const MultipleClaimDialog = () => {
                           alt={token.symbol}
                           className="w-6 h-6 flex-shrink-0"
                         />
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-primary-text text-14 font-medium truncate">
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span className="text-primary-text text-14 font-medium truncate mb-0.5">
                             {token.name}
                           </span>
-                          <span className="text-secondary-text text-12">
+                          <span className="text-primary-text text-14">
                             {token.amount} {token.symbol}
                           </span>
                         </div>
                       </div>
 
                       {/* Right: USD value */}
-                      <div className="flex-shrink-0 ml-2">
-                        <span className="text-primary-text text-16 font-bold">{token.amountUSD}</span>
+                      <div className="flex-shrink-0">
+                        <span className="text-primary-text text-14 font-medium">{token.amountUSD}</span>
                       </div>
                     </div>
 
                     {/* Standard toggle - centered */}
-                    <div className="flex justify-center">
+                    <div className="flex justify-center mt-3">
                       <div
                         className={clsxMerge(
-                          "z-10 text-10 h-[32px] rounded-20 border p-1 flex gap-1 items-center",
+                          "z-10 text-10 h-[32px] rounded-20 border p-1 flex gap-1 items-center w-fit",
                           ThemeColors.GREEN ? "border-green" : "border-purple",
                         )}
                       >
                         {[Standard.ERC20, Standard.ERC223].map((standard) => {
                           return (
-                            <StandardButton
-                              colorScheme={ThemeColors.GREEN}
-                              key={standard}
-                              handleStandardSelect={() => handleTokenStandardChange(token.id, standard)}
-                              standard={standard}
-                              selectedStandard={tokenStandard as Standard}
-                              disabled={false}
-                            />
+                            <div key={standard} className="[&>button]:!w-auto">
+                              <StandardButton
+                                colorScheme={ThemeColors.GREEN}
+                                handleStandardSelect={() => handleTokenStandardChange(token.id, standard)}
+                                standard={standard}
+                                selectedStandard={tokenStandard as Standard}
+                                disabled={false}
+                              />
+                            </div>
                           );
                         })}
                       </div>

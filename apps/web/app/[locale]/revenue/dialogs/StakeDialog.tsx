@@ -712,19 +712,6 @@ const StakeDialog = () => {
 
     return (
       <div className="space-y-4">
-        {!isCorrectNetwork && (
-          <Alert
-            type="warning"
-            text={
-              <div className="flex items-start gap-2">
-                <span className="text-14">
-                  You are not connected to Sepolia testnet. Please switch networks to see your
-                  balances and {isStaking ? "stake" : "unstake"}.
-                </span>
-              </div>
-            }
-          />
-        )}
         {isStaking && (
           <Alert
             type="warning"
@@ -799,7 +786,7 @@ const StakeDialog = () => {
                     : "before:opacity-0 hocus:before:opacity-100",
                 )}
               >
-                <div className="max-[640px]:hidden flex items-center gap-1 cursor-default">
+                <div className="max-md:hidden flex items-center gap-1 cursor-default">
                   <span
                     className={clsx(
                       "text-12",
@@ -824,7 +811,7 @@ const StakeDialog = () => {
                 </div>
                 <span
                   className={clsx(
-                    "block text-left mt-10 sm:mt-0 text-11 md:text-12",
+                    "block text-left mt-10 md:mt-0 text-11 md:text-12",
                     selectedStandard === Standard.ERC20 ? "text-primary-text" : "text-tertiary-text",
                   )}
                 >
@@ -840,7 +827,7 @@ const StakeDialog = () => {
               </button>
 
               {/* Center selector buttons */}
-              <div className="mx-auto z-10 text-10 w-[calc(100%-24px)] h-[32px] top-1 left-1/2 -translate-x-1/2 rounded-20 border border-green p-1 flex gap-1 items-center absolute sm:w-auto sm:top-[14px] sm:left-1/2 sm:-translate-x-1/2">
+              <div className="mx-auto z-10 text-10 w-[calc(100%-24px)] h-[32px] top-1 left-1/2 -translate-x-1/2 rounded-20 border border-green p-1 flex gap-1 items-center absolute md:w-auto md:top-[14px] md:left-1/2 md:-translate-x-1/2">
                 {[Standard.ERC20, Standard.ERC223].map((standard) => {
                   return (
                     <StandardButton
@@ -866,7 +853,7 @@ const StakeDialog = () => {
                     : "before:opacity-0 hocus:before:opacity-100",
                 )}
               >
-                <div className="max-[640px]:hidden flex items-center gap-1 cursor-default">
+                <div className="max-md:hidden flex items-center gap-1 cursor-default">
                   <Tooltip iconSize={16} text="ERC-223 is an improved token standard with lower fees" />
                   <span
                     className={clsx(
@@ -891,7 +878,7 @@ const StakeDialog = () => {
                 </div>
                 <span
                   className={clsx(
-                    "block text-right mt-10 sm:mt-0 text-11 md:text-12",
+                    "block text-right mt-10 md:mt-0 text-11 md:text-12",
                     selectedStandard === Standard.ERC223 ? "text-primary-text" : "text-tertiary-text",
                   )}
                 >
@@ -909,10 +896,10 @@ const StakeDialog = () => {
               </button>
 
               {/* Gas info */}
-              <div className="py-1 px-3 text-12 bg-gradient-to-r from-primary-bg rounded-bl-2 text-tertiary-text max-[640px]:hidden">
+              <div className="py-1 px-3 text-12 bg-gradient-to-r from-primary-bg rounded-bl-2 text-tertiary-text max-md:hidden">
                 ~{gasLimitERC20.toLocaleString()} gas
               </div>
-              <div className="py-1 px-3 text-12 bg-gradient-to-l from-primary-bg rounded-br-2 text-right text-tertiary-text max-[640px]:hidden ml-auto">
+              <div className="py-1 px-3 text-12 bg-gradient-to-l from-primary-bg rounded-br-2 text-right text-tertiary-text max-md:hidden ml-auto">
                 ~{gasLimitERC223.toLocaleString()} gas
               </div>
             </div>
@@ -922,13 +909,13 @@ const StakeDialog = () => {
               <HelperText error="Insufficient balance" />
             </div>
           )}
-        
+
         </div>
 
         {/* Approve amount section - only show for ERC-20 staking */}
         {isStaking && (selectedStandard === Standard.ERC20 || selectedStandard === Standard.ERC223) && (
           <div className="bg-tertiary-bg rounded-3 flex justify-between items-center px-4 md:px-5 py-2.5 min-h-12 gap-2 md:gap-3">
-                  <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text">
+            <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text">
               <Tooltip
                 iconSize={16}
                 text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
@@ -971,7 +958,7 @@ const StakeDialog = () => {
 
             {isProcessing && !isSettledStake && !isRevertedApprove && (
               <>
-                  <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3">
                   <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1">
                     <p className="text-secondary-text text-14">
                       {isStaking ? "Stake" : "Unstake"} amount
@@ -1007,7 +994,7 @@ const StakeDialog = () => {
               </>
             )}
 
-              {(isSettledStake || isRevertedApprove) && (
+            {(isSettledStake || isRevertedApprove) && (
               <div>
                 <div className="flex flex-col items-center py-3 md:py-4">
                   {/* Success Icon */}
