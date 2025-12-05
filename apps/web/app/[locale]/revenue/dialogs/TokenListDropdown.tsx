@@ -345,7 +345,7 @@ export default function TokenListDropdown({
       </div>
 
       {/* Mobile modal */}
-      <DrawerDialog isOpen={isMobile && isDropdownOpen} setIsOpen={setIsDropdownOpen}>
+      <DrawerDialog isOpen={isMobile && isDropdownOpen} setIsOpen={setIsDropdownOpen} maxMobileWidth="767px">
         <div className="w-full md:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
           <DialogHeader onClose={() => setIsDropdownOpen(false)} title="Token lists" />
           <div className="pb-4">
@@ -354,11 +354,11 @@ export default function TokenListDropdown({
         </div>
       </DrawerDialog>
 
-      <DrawerDialog isOpen={content === "import-list"} setIsOpen={handleClose}>
+      <DrawerDialog isOpen={content === "import-list"} setIsOpen={handleClose} maxMobileWidth="767px">
         <AddNewList setContent={setContent} handleClose={handleClose} />
       </DrawerDialog>
 
-      <DrawerDialog isOpen={deleteDialogOpen} setIsOpen={setDeleteDialogOpen}>
+      <DrawerDialog isOpen={deleteDialogOpen} setIsOpen={setDeleteDialogOpen} maxMobileWidth="767px">
         <div className="w-full sm:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
           <DialogHeader
             onClose={() => {

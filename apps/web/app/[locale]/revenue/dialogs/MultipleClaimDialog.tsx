@@ -527,7 +527,7 @@ const MultipleClaimDialog = () => {
 
   return (
     <>
-      <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
+      <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog} maxMobileWidth="767px">
         <div className={clsxMerge(
           "bg-primary-bg rounded-5 w-full max-md:rounded-t-5 max-md:rounded-b-none",
           state === "initial" ? "md:max-w-[800px]" : "md:w-[600px]"

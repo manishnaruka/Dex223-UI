@@ -453,7 +453,7 @@ const SingleClaimDialog = () => {
 
   return (
     <>
-      <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
+      <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog} maxMobileWidth="767px">
         <div className="bg-primary-bg rounded-5 w-full md:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
           <DialogHeader onClose={closeDialog} title="Claim" />
           <div className="card-spacing max-md:px-4 max-md:pb-6">{renderContent()}</div>
