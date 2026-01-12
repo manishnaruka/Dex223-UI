@@ -260,17 +260,25 @@ export default function useRevenueContract({
       },
     });
 
+  const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Math.floor(Date.now() / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const canUnstake = useMemo(() => {
     if (!userStakingTimestamp || !claimDelay)
       return { canUnstake: false, timeRemaining: 0, unlockTime: 0 };
 
-    const currentTime = Math.floor(Date.now() / 1000);
     const unlockTime = Number(userStakingTimestamp) + Number(claimDelay);
     const canUnstakeNow = currentTime >= unlockTime;
     const timeRemaining = Math.max(0, unlockTime - currentTime);
 
     return { canUnstake: canUnstakeNow, timeRemaining, unlockTime };
-  }, [userStakingTimestamp, claimDelay]);
+  }, [userStakingTimestamp, claimDelay, currentTime]);
 
   const hasStaked = useMemo(() => {
     return Boolean(userStaked && typeof userStaked === "bigint" && userStaked > 0n);
@@ -311,15 +319,6 @@ export default function useRevenueContract({
     } else {
       return `${secs}s`;
     }
-  }, []);
-
-  const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Math.floor(Date.now() / 1000));
-    }, 1000);
-    return () => clearInterval(interval);
   }, []);
 
   const unstakeCountdown = useMemo(() => {
@@ -580,12 +579,14 @@ export default function useRevenueContract({
   );
 
   const approveERC20 = useCallback(
-    async (amount: bigint) => {
+    async (amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       return executeTransaction({
         functionName: "approve",
         args: [contractAddress, amount],
         abi: ERC20_ABI,
         address: RED_ERC20_ADDRESS,
+        gasSettings,
+        customGasLimit,
         transactionTitle: {
           template: RecentTransactionTitleTemplate.APPROVE,
           symbol: "D223",
@@ -598,10 +599,12 @@ export default function useRevenueContract({
   );
 
   const stakeERC20 = useCallback(
-    async (amount: bigint) => {
+    async (amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       return executeTransaction({
         functionName: "stake",
         args: [RED_ERC20_ADDRESS, amount],
+        gasSettings,
+        customGasLimit,
         transactionTitle: {
           template: RecentTransactionTitleTemplate.DEPOSIT,
           symbol: "D223",
@@ -614,13 +617,15 @@ export default function useRevenueContract({
   );
 
   const depositAndStakeERC223 = useCallback(
-    async (amount: bigint) => {
+    async (amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       // First transfer ERC223 tokens to revenue contract
       await executeTransaction({
         functionName: "transfer",
         args: [contractAddress, amount],
         abi: ERC20_ABI,
         address: RED_ERC223_ADDRESS,
+        gasSettings,
+        customGasLimit,
         transactionTitle: {
           template: RecentTransactionTitleTemplate.TRANSFER,
           symbol: "D223",
@@ -633,6 +638,8 @@ export default function useRevenueContract({
       return executeTransaction({
         functionName: "stake",
         args: [RED_ERC223_ADDRESS, amount],
+        gasSettings,
+        customGasLimit,
         transactionTitle: {
           template: RecentTransactionTitleTemplate.DEPOSIT,
           symbol: "D223",
@@ -645,10 +652,12 @@ export default function useRevenueContract({
   );
 
   const unstake = useCallback(
-    async (tokenAddress: Address, amount: bigint) => {
+    async (tokenAddress: Address, amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       return executeTransaction({
         functionName: "withdraw",
         args: [tokenAddress, amount],
+        gasSettings,
+        customGasLimit,
         transactionTitle: {
           template: RecentTransactionTitleTemplate.WITHDRAW,
           symbol: "D223",
@@ -662,10 +671,12 @@ export default function useRevenueContract({
   );
 
   const claimRewards = useCallback(
-    async (tokenAddresses: Address[]) => {
+    async (tokenAddresses: Address[], gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       return executeTransaction({
         functionName: "claim",
         args: [tokenAddresses],
+        gasSettings,
+        customGasLimit,
         transactionTitle: {
           template: RecentTransactionTitleTemplate.COLLECT,
           symbol0: "REWARDS",

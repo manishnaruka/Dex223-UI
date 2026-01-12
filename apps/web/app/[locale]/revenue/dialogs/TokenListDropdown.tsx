@@ -107,7 +107,11 @@ export default function TokenListDropdown({
     },
     strategy: 'fixed',
     middleware: [offset(8), flip()],
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: (reference, floating, update) =>
+      autoUpdate(reference, floating, update, {
+        elementResize: false,
+        layoutShift: false,
+      }),
     open: isDropdownOpen,
     onOpenChange: setIsDropdownOpen,
   });
