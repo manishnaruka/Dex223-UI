@@ -18,9 +18,11 @@ import {
   RecentTransactionTitleTemplate,
   stringifyObject,
 } from "@/stores/useRecentTransactionsStore";
+import { useRevenueTokens } from "./useRevenueTokens";
 
 // Contract addresses on Sepolia testnet
-export const REVENUE_CONTRACT_ADDRESS = "0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2" as Address;
+// 0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2
+export const REVENUE_CONTRACT_ADDRESS = "0xfC029Cf6cE231432eca21b99De53bcAF1E4D037B" as Address;
 export const RED_ERC20_ADDRESS = "0x1DEf777468F76ed1E74fC87bD32334d3Ccb520d0" as Address;
 export const RED_ERC223_ADDRESS = "0x0a67Cc4D3Ac29a133a597b5Bef3fe9A6028ACad2" as Address;
 export const BLU_ADDRESS = "0x3E0fc36a6EE84a34F8F985c66e94c845df46f6D9" as Address;
@@ -72,31 +74,30 @@ export default function useRevenueContract({
 
   const [isTransactionPending, setIsTransactionPending] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
+  const { data: revenueTokensData } = useRevenueTokens();
 
   // Check if user is on the correct network
   const isCorrectNetwork = walletChainId === chainId;
 
-  const [rewardTokens, setRewardTokens] = useState<Token[]>([
-    new Token(
-      chainId,
-      RED_ERC20_ADDRESS,
-      RED_ERC223_ADDRESS,
-      18,
-      "RED",
-      "Red Token",
-      "/images/tokens/red.svg",
-    ),
-    new Token(
-      chainId,
-      BLU_ADDRESS,
-      BLU_ADDRESS,
-      18,
-      "BLU",
-      "Blue Token",
-      "/images/tokens/blue.svg",
-    ),
-    new Token(chainId, FOO_ADDRESS, FOO_ADDRESS, 18, "FOO", "Foo Token", "/images/tokens/foo.svg"),
-  ]);
+  const [rewardTokens, setRewardTokens] = useState<Token[]>([]);
+
+  useEffect(() => {
+    if (revenueTokensData?.items) {
+      const tokens = revenueTokensData.items.map(
+        (item) =>
+          new Token(
+            chainId,
+            item.token.addressERC20,
+            item.token.addressERC223,
+            parseInt(item.token.decimals),
+            item.token.symbol,
+            item.token.name,
+            "/images/tokens/placeholder.svg",
+          ),
+      );
+      setRewardTokens(tokens);
+    }
+  }, [revenueTokensData, chainId]);
 
   const {
     data: userStaked,

@@ -414,7 +414,7 @@ export const Claims = ({
         </div>
 
         {selectedCount > 0 && !isLoading && (
-          <div className="mt-[225px] p-4 bg-tertiary-bg rounded-b-3 flex items-center justify-between gap-4 border border-quaternary-bg">
+          <div className="relative top-[370px] z-20 p-4 bg-tertiary-bg rounded-b-3 flex items-center justify-between gap-4 border border-quaternary-bg">
             <div className="flex items-center gap-4">
               <span className="text-tertiary-text text-14">
                 Total claim: {selectedCount} token{selectedCount !== 1 ? "s" : ""}

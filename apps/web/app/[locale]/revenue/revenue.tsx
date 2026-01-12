@@ -26,6 +26,7 @@ import { Claims } from "./components/Claims";
 import StakeDialog from "./dialogs/StakeDialog";
 import TokenListDropdown from "./dialogs/TokenListDropdown";
 import useRevenueContract from "./hooks/useRevenueContract";
+import { useRevenueTokens } from "./hooks/useRevenueTokens";
 import { StakeStatus, useStakeDialogStore } from "./stores/useStakeDialogStore";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
@@ -81,6 +82,7 @@ export function Revenue() {
   const { switchChain } = useSwitchChain();
 
   const allAvailableTokens = useTokens();
+  const { data: revenueTokensData } = useRevenueTokens();
 
   const tokensFromSelectedLists = useMemo(() => {
     return allAvailableTokens.filter((token) => {
@@ -114,21 +116,44 @@ export function Revenue() {
   }, [tokensFromSelectedLists, setRewardTokens]);
 
   const mappedClaimsData = useMemo(() => {
-    return claimableRewards.map((reward, index) => ({
-      id: index + 1,
-      name: reward.token.name || "Unknown",
-      symbol: reward.token.symbol || "???",
-      logoURI: reward.token.logoURI || "/images/tokens/placeholder.svg",
-      erc20Address: truncateMiddle(reward.token.address0, { charsFromStart: 3, charsFromEnd: 3 }),
-      erc223Address: truncateMiddle(reward.token.address1, { charsFromStart: 3, charsFromEnd: 3 }),
-      amount: reward.amountFormatted,
-      amountUSD: reward.amountUSD || "$0.00",
-      fullErc20Address: reward.token.address0,
-      fullErc223Address: reward.token.address1,
-      chainId: reward.token.chainId,
-      token: reward.token,
-    }));
-  }, [claimableRewards]);
+    if (!revenueTokensData?.items) {
+      return claimableRewards.map((reward, index) => ({
+        id: index + 1,
+        name: reward.token.name || "Unknown",
+        symbol: reward.token.symbol || "???",
+        logoURI: reward.token.logoURI || "/images/tokens/placeholder.svg",
+        erc20Address: truncateMiddle(reward.token.address0, { charsFromStart: 3, charsFromEnd: 3 }),
+        erc223Address: truncateMiddle(reward.token.address1, { charsFromStart: 3, charsFromEnd: 3 }),
+        amount: reward.amountFormatted,
+        amountUSD: reward.amountUSD || "$0.00",
+        fullErc20Address: reward.token.address0,
+        fullErc223Address: reward.token.address1,
+        chainId: reward.token.chainId,
+        token: reward.token,
+      }));
+    }
+
+    return revenueTokensData.items.map((item, index) => {
+      const reward = claimableRewards.find(
+        (r) => r.token.address0.toLowerCase() === item.token.addressERC20.toLowerCase()
+      );
+
+      return {
+        id: index + 1,
+        name: item.token.name,
+        symbol: item.token.symbol,
+        logoURI: "/images/tokens/placeholder.svg",
+        erc20Address: truncateMiddle(item.token.addressERC20, { charsFromStart: 3, charsFromEnd: 3 }),
+        erc223Address: truncateMiddle(item.token.addressERC223, { charsFromStart: 3, charsFromEnd: 3 }),
+        amount: item.accruedInPoolsNow || "0",
+        amountUSD: item.accruedInPoolsNow || "$0.00",
+        fullErc20Address: item.token.addressERC20,
+        fullErc223Address: item.token.addressERC223,
+        chainId: chainId,
+        token: reward?.token,
+      };
+    });
+  }, [revenueTokensData, claimableRewards, chainId]);
 
   const handleSelectedTokens = (tokenId: number) => {
     if (tokenId === 0) {
