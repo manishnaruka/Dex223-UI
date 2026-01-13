@@ -24,6 +24,7 @@ import {
   useClaimGasModeStore,
   useClaimGasPrice,
   useClaimGasPriceStore,
+  useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
 import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import { SearchInput } from "@/components/atoms/Input";
@@ -32,11 +33,17 @@ import {
   RecentTransactionStatus,
   RecentTransactionTitleTemplate,
 } from "@/stores/useRecentTransactionsStore";
+import useRevenueContract from "../hooks/useRevenueContract";
+import { Address, isAddress } from "viem";
+import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const MultipleClaimDialog = () => {
-  const { isOpen, state, data, closeDialog, setState, setError, setData, setTokenStandard } =
+  const { isOpen, state, data, closeDialog, setState, setError, setData, setTokenStandard, setClaimTransactionHash } =
     useClaimDialogStore();
   const chainId = useCurrentChainId();
+  const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
+  const { claim, refetchUserData } = useRevenueContract();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [globalStandard, setGlobalStandard] = useState<Standard>(Standard.ERC223);
@@ -56,7 +63,8 @@ const MultipleClaimDialog = () => {
   const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
   const gasPrice = useClaimGasPrice();
-  const gasToUse = customGasLimit || estimatedGas || BigInt(115000); // Default gas limit
+  const { gasSettings } = useClaimGasSettings();
+  const gasToUse = customGasLimit || estimatedGas || BigInt(115000);
   const notificationShownRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -64,6 +72,18 @@ const MultipleClaimDialog = () => {
       updateDefaultState(chainId);
     }
   }, [chainId, isOpen, updateDefaultState]);
+
+  useEffect(() => {
+    if (state === "confirming-claim" && isOpen) {
+      openConfirmInWalletAlert("Please confirm action in your wallet");
+    } else {
+      closeConfirmInWalletAlert();
+    }
+
+    return () => {
+      closeConfirmInWalletAlert();
+    };
+  }, [state, isOpen, openConfirmInWalletAlert, closeConfirmInWalletAlert]);
 
   // Show notifications for success/error states
   useEffect(() => {
@@ -119,34 +139,60 @@ const MultipleClaimDialog = () => {
 
   const handleClaim = async () => {
     try {
-      // Set confirming state
-      setState("confirming");
+      const tokenAddresses: Address[] = [];
 
-      // Simulate wallet confirmation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      for (const token of tokens) {
+        const tokenStandard = data.tokenStandards?.[token.id] || globalStandard;
+        const rawTokenAddress = tokenStandard === Standard.ERC20
+          ? ((token as any).fullErc20Address || token.erc20Address)
+          : ((token as any).fullErc223Address || token.erc223Address);
 
-      // Set executing state
-      setState("executing");
+        if (!rawTokenAddress || !isAddress(rawTokenAddress)) {
+          setError(`Invalid token address for ${token.symbol}. Please try again.`);
+          return;
+        }
 
-      // Simulate transaction execution
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Simulate success (90% success rate for demo)
-      if (Math.random() > 0.1) {
-        setState("success");
-      } else {
-        setError(
-          "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click common errors",
-        );
+        tokenAddresses.push(rawTokenAddress as Address);
       }
-    } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
+
+      setState("confirming-claim");
+
+      const claimResult = await claim(
+        tokenAddresses,
+        gasSettings,
+        customGasLimit || estimatedGas
+      );
+
+      setState("executing-claim");
+
+      if (claimResult?.hash) {
+        setClaimTransactionHash(claimResult.hash);
+      }
+
+      setState("success");
+      await refetchUserData();
+    } catch (error: any) {
+      console.error("Claim error:", error);
+      const errorMessage = error?.message || "An unexpected error occurred. Please try again.";
+      setError(errorMessage);
     }
   };
 
   const handleTryAgain = () => {
     setState("initial");
   };
+
+  const getEffectiveGlobalStandard = (): Standard | null => {
+    if (tokens.length === 0) return globalStandard;
+    const firstStandard: any = data.tokenStandards?.[tokens[0].id] || globalStandard;
+    const allMatch = tokens.every(
+      (token) => (data.tokenStandards?.[token.id] || globalStandard) === firstStandard
+    );
+
+    return allMatch ? firstStandard : null;
+  };
+
+  const effectiveGlobalStandard = getEffectiveGlobalStandard();
 
   const handleStandardChange = (standard: Standard) => {
     setGlobalStandard(standard);
@@ -157,6 +203,13 @@ const MultipleClaimDialog = () => {
 
   const handleTokenStandardChange = (tokenId: number, standard: Standard) => {
     setTokenStandard(tokenId, standard);
+    const updatedTokenStandards = { ...data.tokenStandards, [tokenId]: standard };
+    const allMatch = tokens.every(
+      (token) => (updatedTokenStandards[token.id] || globalStandard) === standard
+    );
+    if (!allMatch) {
+      setGlobalStandard(null as any);
+    }
   };
 
   const renderInitialState = () => (
@@ -197,7 +250,7 @@ const MultipleClaimDialog = () => {
                       key={standard}
                       handleStandardSelect={() => handleStandardChange(standard)}
                       standard={standard}
-                      selectedStandard={globalStandard}
+                      selectedStandard={effectiveGlobalStandard as Standard}
                       disabled={false}
                     />
                   </div>
@@ -414,7 +467,12 @@ const MultipleClaimDialog = () => {
           >
             Speed up
           </Button>
-          <IconButton iconName="forward" />
+          <a
+            target="_blank"
+            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
           <Preloader size={20} />
         </div>
       </div>
@@ -449,7 +507,12 @@ const MultipleClaimDialog = () => {
           <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Successfully claimed</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <IconButton iconName="forward" />
+          <a
+            target="_blank"
+            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
           <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
             <Svg className="text-primary-bg" iconName="check" size={12} />
           </div>
@@ -515,9 +578,9 @@ const MultipleClaimDialog = () => {
     switch (state) {
       case "initial":
         return renderInitialState();
-      case "confirming":
+      case "confirming-claim":
         return renderConfirmingState();
-      case "executing":
+      case "executing-claim":
         return renderExecutingState();
       case "success":
         return renderSuccessState();

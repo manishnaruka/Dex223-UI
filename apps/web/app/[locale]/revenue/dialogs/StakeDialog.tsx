@@ -23,7 +23,7 @@ import useCurrentChainId from "@/hooks/useCurrentChainId";
 import addToast from "@/other/toast";
 import { Standard } from "@/sdk_bi/standard";
 
-import useRevenueContract from "../hooks/useRevenueContract";
+import useRevenueContract, { RED_ERC20_ADDRESS, RED_ERC223_ADDRESS } from "../hooks/useRevenueContract";
 import {
   StakeError,
   StakeStatus,
@@ -317,12 +317,11 @@ const StakeDialog = () => {
   const {
     redErc20Balance,
     redErc223Balance,
-    approveERC20,
-    stakeERC20,
-    depositAndStakeERC223,
+    approve,
+    stake,
+    stakeERC223,
     unstake,
     refetchUserData,
-    getTokenInfo,
     canUnstake,
     userStaked,
     isCorrectNetwork,
@@ -461,7 +460,6 @@ const StakeDialog = () => {
       }
 
       const amountBigInt = parseUnits(amount, 18);
-      const tokenInfo = getTokenInfo(selectedStandard as any);
 
       if (isStaking) {
         const currentBalance =
@@ -477,7 +475,7 @@ const StakeDialog = () => {
         if (selectedStandard === Standard.ERC20) {
           setStatus(StakeStatus.PENDING_APPROVE);
           try {
-            const approveResult = await approveERC20(amountBigInt, gasSettings, gasToUse);
+            const approveResult = await approve(amountBigInt, gasSettings, gasToUse);
             if (approveResult?.hash) {
               setApproveHash(approveResult.hash);
               setStatus(StakeStatus.LOADING_APPROVE);
@@ -502,9 +500,9 @@ const StakeDialog = () => {
         try {
           let stakeResult;
           if (selectedStandard === Standard.ERC20) {
-            stakeResult = await stakeERC20(amountBigInt, gasSettings, gasToUse);
+            stakeResult = await stake(amountBigInt, gasSettings, gasToUse);
           } else {
-            stakeResult = await depositAndStakeERC223(amountBigInt, gasSettings, gasToUse);
+            stakeResult = await stakeERC223(amountBigInt, gasSettings, gasToUse);
           }
 
           if (stakeResult?.hash) {
@@ -542,7 +540,8 @@ const StakeDialog = () => {
 
         setStatus(StakeStatus.PENDING);
         try {
-          const unstakeResult = await unstake(tokenInfo.address, amountBigInt, gasSettings, gasToUse);
+          // Always use ERC-20 address for withdraw - the contract tracks all stakes under ERC-20 address
+          const unstakeResult = await unstake(RED_ERC20_ADDRESS, amountBigInt, gasSettings, gasToUse);
           if (unstakeResult?.hash) {
             setStakeHash(unstakeResult.hash);
             setStatus(StakeStatus.LOADING);
@@ -576,11 +575,10 @@ const StakeDialog = () => {
     redErc223Balance,
     canUnstake,
     userStaked,
-    approveERC20,
-    stakeERC20,
-    depositAndStakeERC223,
+    approve,
+    stake,
+    stakeERC223,
     unstake,
-    getTokenInfo,
     refetchUserData,
     setStatus,
     setErrorType,

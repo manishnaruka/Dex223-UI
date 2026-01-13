@@ -82,13 +82,13 @@ export const Claims = ({
   // Check if a specific token is being claimed
   const isTokenBeingClaimed = (tokenId: number) => {
     if (!claimData) return false;
-    if (claimState !== "confirming" && claimState !== "executing") return false;
+    if (claimState !== "confirming-claim" && claimState !== "executing-claim") return false;
     if (isClaimDialogOpen) return false;
     return claimData.selectedTokens?.some((token) => token.id === tokenId) || false;
   };
 
   const hasClaimInProgress =
-    (claimState === "confirming" || claimState === "executing") && !isClaimDialogOpen;
+    (claimState === "confirming-claim" || claimState === "executing-claim") && !isClaimDialogOpen;
 
   useEffect(() => {
     if ((claimState === "success" || claimState === "error") && !isClaimDialogOpen) {
@@ -119,6 +119,8 @@ export const Claims = ({
         amountUSD: token.amountUSD,
         erc20Address: token.erc20Address,
         erc223Address: token.erc223Address,
+        fullErc20Address: token.fullErc20Address,
+        fullErc223Address: token.fullErc223Address,
         chainId: token.chainId,
       },
     ];
@@ -151,6 +153,8 @@ export const Claims = ({
         amountUSD: item.amountUSD,
         erc20Address: item.erc20Address,
         erc223Address: item.erc223Address,
+        fullErc20Address: item.fullErc20Address,
+        fullErc223Address: item.fullErc223Address,
         chainId: item.chainId,
       }));
 

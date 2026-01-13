@@ -21,15 +21,9 @@ import {
 import { useRevenueTokens } from "./useRevenueTokens";
 
 // Contract addresses on Sepolia testnet
-// 0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2
-export const REVENUE_CONTRACT_ADDRESS = "0xfC029Cf6cE231432eca21b99De53bcAF1E4D037B" as Address;
+export const REVENUE_CONTRACT_ADDRESS = "0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2" as Address;
 export const RED_ERC20_ADDRESS = "0x1DEf777468F76ed1E74fC87bD32334d3Ccb520d0" as Address;
 export const RED_ERC223_ADDRESS = "0x0a67Cc4D3Ac29a133a597b5Bef3fe9A6028ACad2" as Address;
-export const BLU_ADDRESS = "0x3E0fc36a6EE84a34F8F985c66e94c845df46f6D9" as Address;
-export const FOO_ADDRESS = "0x2a5A93fA091Fca3ECb4ad792Ff0C72aF3dD39556" as Address;
-
-export const RED_BLU_POOL = "0x0BE7bb0927Bb3cBD4075EE20BC46F44B57dC43b3" as Address;
-export const RED_FOO_POOL = "0x82e9131d84428d98E098cFAE153aa7FD579e438C" as Address;
 
 export enum TokenType {
   ERC20 = "ERC-20",
@@ -73,7 +67,6 @@ export default function useRevenueContract({
   const { addRecentTransaction } = useRecentTransactionsStore();
 
   const [isTransactionPending, setIsTransactionPending] = useState(false);
-  const [lastError, setLastError] = useState<string | null>(null);
   const { data: revenueTokensData } = useRevenueTokens();
 
   // Check if user is on the correct network
@@ -174,9 +167,6 @@ export default function useRevenueContract({
 
   const {
     data: redErc20Balance,
-    refetch: refetchRedErc20Balance,
-    isError: isErc20Error,
-    error: erc20Error,
   } = useReadContract({
     abi: ERC20_ABI,
     address: RED_ERC20_ADDRESS,
@@ -190,9 +180,6 @@ export default function useRevenueContract({
 
   const {
     data: redErc223Balance,
-    refetch: refetchRedErc223Balance,
-    isError: isErc223Error,
-    error: erc223Error,
   } = useReadContract({
     abi: ERC20_ABI,
     address: RED_ERC223_ADDRESS,
@@ -291,20 +278,6 @@ export default function useRevenueContract({
     );
   }, [userContribution]);
 
-  const formatTimeRemaining = useCallback((seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${remainingSeconds}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${remainingSeconds}s`;
-    } else {
-      return `${remainingSeconds}s`;
-    }
-  }, []);
-
   const formatCountdown = useCallback((seconds: number) => {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
@@ -381,12 +354,6 @@ export default function useRevenueContract({
     rewardTokens,
   ]);
 
-  const totalRewardUSD = useMemo(() => {
-    return claimableRewards.reduce((sum, reward) => {
-      return sum;
-    }, 0);
-  }, [claimableRewards]);
-
   // Calculate staking percentage
   const stakingPercentage = useMemo(() => {
     if (
@@ -409,37 +376,6 @@ export default function useRevenueContract({
     return `${wholePercentage.toString()}.${decimalPart.toString().padStart(5, "0")}`;
   }, [userStaked, redTotalSupply]);
 
-  const getTokenInfo = useCallback((tokenType: TokenType) => {
-    return {
-      address: tokenType === TokenType.ERC20 ? RED_ERC20_ADDRESS : RED_ERC223_ADDRESS,
-      name: tokenType === TokenType.ERC20 ? "RED (ERC20)" : "RED (ERC223)",
-      type: tokenType,
-    };
-  }, []);
-
-  const getAvailablePools = useCallback(() => {
-    return [RED_BLU_POOL, RED_FOO_POOL];
-  }, []);
-
-  const getAvailableRewardTokens = useCallback(() => {
-    return rewardTokens;
-  }, [rewardTokens]);
-
-  const addRewardToken = useCallback((token: Token) => {
-    setRewardTokens((prev) => {
-      if (prev.some((t) => t.address0.toLowerCase() === token.address0.toLowerCase())) {
-        return prev;
-      }
-      return [...prev, token];
-    });
-  }, []);
-
-  const removeRewardToken = useCallback((tokenAddress: Address) => {
-    setRewardTokens((prev) =>
-      prev.filter((t) => t.address0.toLowerCase() !== tokenAddress.toLowerCase()),
-    );
-  }, []);
-
   const refetchUserData = useCallback(() => {
     refetchUserStaked();
     refetchUserContribution();
@@ -447,8 +383,6 @@ export default function useRevenueContract({
     refetchUserLastUpdate();
     refetchUserStakingTimestamp();
     refetchClaimDelay();
-    refetchRedErc20Balance();
-    refetchRedErc223Balance();
     refetchTokenBalances();
     refetchSpentContributions();
     refetchSpentTotalContributions();
@@ -459,8 +393,6 @@ export default function useRevenueContract({
     refetchUserLastUpdate,
     refetchUserStakingTimestamp,
     refetchClaimDelay,
-    refetchRedErc20Balance,
-    refetchRedErc223Balance,
     refetchTokenBalances,
     refetchSpentContributions,
     refetchSpentTotalContributions,
@@ -489,13 +421,10 @@ export default function useRevenueContract({
       transactionTitle?: any;
     }) => {
       if (!publicClient || !walletClient || !connectedAddress) {
-        const error = "Wallet not connected";
-        setLastError(error);
-        throw new Error(error);
+        throw new Error("Wallet not connected");
       }
 
       setIsTransactionPending(true);
-      setLastError(null);
 
       const params = {
         abi: abi || revenueABI,
@@ -503,6 +432,9 @@ export default function useRevenueContract({
         functionName,
         args: args || [],
       };
+
+      console.log("executeTransaction params:", params);
+      console.log("Function:", functionName, "Args:", args);
 
       try {
         const estimatedGas = await publicClient.estimateContractGas({
@@ -572,14 +504,13 @@ export default function useRevenueContract({
       } catch (error: any) {
         console.error("Transaction execution error:", error);
         setIsTransactionPending(false);
-        setLastError(error.message || "Transaction failed");
         throw error;
       }
     },
     [publicClient, walletClient, connectedAddress, chainId, addRecentTransaction, contractAddress],
   );
 
-  const approveERC20 = useCallback(
+  const approve = useCallback(
     async (amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       return executeTransaction({
         functionName: "approve",
@@ -599,7 +530,7 @@ export default function useRevenueContract({
     [executeTransaction, contractAddress],
   );
 
-  const stakeERC20 = useCallback(
+  const stake = useCallback(
     async (amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       return executeTransaction({
         functionName: "stake",
@@ -617,28 +548,13 @@ export default function useRevenueContract({
     [executeTransaction],
   );
 
-  const depositAndStakeERC223 = useCallback(
+  const stakeERC223 = useCallback(
     async (amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
-      // First transfer ERC223 tokens to revenue contract
-      await executeTransaction({
+      return executeTransaction({
         functionName: "transfer",
         args: [contractAddress, amount],
         abi: ERC20_ABI,
         address: RED_ERC223_ADDRESS,
-        gasSettings,
-        customGasLimit,
-        transactionTitle: {
-          template: RecentTransactionTitleTemplate.TRANSFER,
-          symbol: "D223",
-          amount: formatUnits(amount, 18),
-          logoURI: "/images/tokens/red.svg",
-        },
-      });
-
-      // Then stake
-      return executeTransaction({
-        functionName: "stake",
-        args: [RED_ERC223_ADDRESS, amount],
         gasSettings,
         customGasLimit,
         transactionTitle: {
@@ -663,15 +579,26 @@ export default function useRevenueContract({
           template: RecentTransactionTitleTemplate.WITHDRAW,
           symbol: "D223",
           amount: formatUnits(amount, 18),
-          logoURI: "/images/tokens/red.svg",
-          standard: "ERC20" as any,
+          logoURI: "/images/tokens/red.svg"
         },
       });
     },
     [executeTransaction],
   );
 
-  const claimRewards = useCallback(
+  const delivery = useCallback(
+    async (poolAddresses: Address[], gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
+      return executeTransaction({
+        functionName: "delivery",
+        args: [poolAddresses],
+        gasSettings,
+        customGasLimit
+      });
+    },
+    [executeTransaction],
+  );
+
+  const claim = useCallback(
     async (tokenAddresses: Address[], gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
       return executeTransaction({
         functionName: "claim",
@@ -680,12 +607,9 @@ export default function useRevenueContract({
         customGasLimit,
         transactionTitle: {
           template: RecentTransactionTitleTemplate.COLLECT,
-          symbol0: "REWARDS",
-          symbol1: "TOKENS",
-          amount0: "1",
-          amount1: tokenAddresses.length.toString(),
-          logoURI0: "/images/revenue-reward.svg",
-          logoURI1: "/images/tokens/placeholder.svg",
+          symbol: "REWARDS",
+          amount: tokenAddresses.length.toString(),
+          logoURI: "/images/tokens/placeholder.svg",
         },
       });
     },
@@ -696,7 +620,7 @@ export default function useRevenueContract({
     contractAddress,
     chainId,
     requiredChainId: chainId,
-    isCorrectNetwork,
+    isCorrectNetwork: walletChainId === chainId,
     userStaked,
     userContribution,
     userContributionValue,
@@ -714,25 +638,16 @@ export default function useRevenueContract({
     stakingPercentage,
     unstakeCountdown,
     claimableRewards,
-    totalRewardUSD,
-    rewardTokens,
-    addRewardToken,
-    removeRewardToken,
     setRewardTokens,
-    getAvailableRewardTokens,
-    formatTimeRemaining,
     formatCountdown,
-    getTokenInfo,
-    getAvailablePools,
-    approveERC20,
-    stakeERC20,
-    depositAndStakeERC223,
+    approve,
+    stake,
+    stakeERC223,
     unstake,
-    claimRewards,
+    delivery,
+    claim,
     refetchUserData,
     isLoadingUserData: isLoadingUserStaked || isLoadingUserContribution,
     isTransactionPending,
-    lastError,
-    clearError: () => setLastError(null),
   };
 }

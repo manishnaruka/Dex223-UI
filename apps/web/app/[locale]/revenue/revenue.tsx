@@ -2,7 +2,6 @@
 
 import "react-loading-skeleton/dist/skeleton.css";
 
-import Alert from "@repo/ui/alert";
 import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
@@ -19,7 +18,6 @@ import { TokenListId } from "@/db/db";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokens } from "@/hooks/useTokenLists";
-import { DexChainId } from "@/sdk_bi/chains";
 import { Token } from "@/sdk_bi/entities/token";
 
 import { Claims } from "./components/Claims";
@@ -146,7 +144,7 @@ export function Revenue() {
         erc20Address: truncateMiddle(item.token.addressERC20, { charsFromStart: 3, charsFromEnd: 3 }),
         erc223Address: truncateMiddle(item.token.addressERC223, { charsFromStart: 3, charsFromEnd: 3 }),
         amount: item.accruedInPoolsNow || "0",
-        amountUSD: item.accruedInPoolsNow || "$0.00",
+        amountUSD: item.accruedInPoolsNowUSD || "$0.00",
         fullErc20Address: item.token.addressERC20,
         fullErc223Address: item.token.addressERC223,
         chainId: chainId,
