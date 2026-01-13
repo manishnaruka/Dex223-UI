@@ -11,6 +11,7 @@ import { Address, formatUnits, parseUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import { HelperText } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
@@ -312,6 +313,8 @@ const StakeDialog = () => {
   const [amount, setAmount] = useState("");
   const [selectedStandard, setSelectedStandard] = useState<Standard>(Standard.ERC20);
   const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
+  const [isEditApproveActive, setIsEditApproveActive] = useState(false);
+  const [amountToApprove, setAmountToApprove] = useState("");
   const chainId = useCurrentChainId();
 
   const {
@@ -380,9 +383,16 @@ const StakeDialog = () => {
   useEffect(() => {
     if (isOpen && storeAmount) {
       setAmount(storeAmount);
+      setAmountToApprove(storeAmount);
       setSelectedStandard(storeStandard === "ERC-223" ? Standard.ERC223 : Standard.ERC20);
     }
   }, [isOpen, storeAmount, storeStandard]);
+
+  useEffect(() => {
+    if (amount) {
+      setAmountToApprove(amount);
+    }
+  }, [amount]);
 
   useEffect(() => {
     if (isOpen) {
@@ -460,6 +470,7 @@ const StakeDialog = () => {
       }
 
       const amountBigInt = parseUnits(amount, 18);
+      const amountToApproveBigInt = parseUnits(amountToApprove || amount, 18);
 
       if (isStaking) {
         const currentBalance =
@@ -475,7 +486,7 @@ const StakeDialog = () => {
         if (selectedStandard === Standard.ERC20) {
           setStatus(StakeStatus.PENDING_APPROVE);
           try {
-            const approveResult = await approve(amountBigInt, gasSettings, gasToUse);
+            const approveResult = await approve(amountToApproveBigInt, gasSettings, gasToUse);
             if (approveResult?.hash) {
               setApproveHash(approveResult.hash);
               setStatus(StakeStatus.LOADING_APPROVE);
@@ -739,7 +750,7 @@ const StakeDialog = () => {
         size={ButtonSize.LARGE}
         colorScheme={ButtonColor.GREEN}
         onClick={handleStakeUnstake}
-        disabled={!amount || parseFloat(amount) === 0 || (!isStaking && !canUnstake) || isInsufficientBalance}
+        disabled={!amount || parseFloat(amount) === 0 || (!isStaking && !canUnstake) || isInsufficientBalance || isEditApproveActive}
       >
         {title}
       </Button>
@@ -831,23 +842,77 @@ const StakeDialog = () => {
 
         {/* Approve amount section - only show for ERC-20 staking */}
         {isStaking && (selectedStandard === Standard.ERC20 || selectedStandard === Standard.ERC223) && (
-          <div className="bg-tertiary-bg rounded-3 flex justify-between items-center px-4 md:px-5 py-2.5 min-h-12 gap-2 md:gap-3">
-            <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text">
-              <Tooltip
-                iconSize={16}
-                text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
-              />
-              <span className="text-12 md:text-14 whitespace-nowrap">Approve amount</span>
+          <div
+            className={clsx(
+              "bg-tertiary-bg rounded-3 flex items-center px-4 md:px-5 py-2 min-h-12 gap-2 md:gap-3",
+              +amountToApprove < +amount && "md:pb-[26px]",
+            )}
+          >
+            <div className="md:items-center md:justify-between md:gap-5 flex-grow flex flex-col gap-1 md:flex-row">
+              <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text whitespace-nowrap md:flex-row-reverse">
+                <span className="text-12 md:text-14">Approve amount</span>
+                <Tooltip
+                  iconSize={16}
+                  text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
+                />
+              </div>
+
+              {!isEditApproveActive ? (
+                <span className="text-12 md:text-14">
+                  {amountToApprove || "0"} D223
+                </span>
+              ) : (
+                <div className="flex-grow">
+                  <div className="relative w-full flex-grow">
+                    <NumericFormat
+                      inputMode="decimal"
+                      allowedDecimalSeparators={[","]}
+                      className={clsx(
+                        "h-8 pl-3 pr-14 text-14",
+                        +amountToApprove < +amount && "border-red-light focus:border-red-light"
+                      )}
+                      value={amountToApprove}
+                      onValueChange={(values) => {
+                        setAmountToApprove(values.value);
+                      }}
+                      customInput={Input}
+                      allowNegative={false}
+                      type="text"
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text text-14">
+                      D223
+                    </span>
+                  </div>
+                  {+amountToApprove < +amount && (
+                    <span className="text-red-light md:absolute text-12 md:translate-y-0.5">
+                      Must be higher or equal {amount}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-1.5 md:gap-2 flex-grow justify-end min-w-0">
-              <span className="text-12 md:text-14 truncate">{amount || "0"} D223</span>
-              <Button
-                size={ButtonSize.EXTRA_SMALL}
-                colorScheme={ButtonColor.LIGHT_GREEN}
-                onClick={() => { }}
-              >
-                Edit
-              </Button>
+
+            <div className="flex items-center flex-shrink-0">
+              {!isEditApproveActive ? (
+                <Button
+                  size={ButtonSize.EXTRA_SMALL}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  onClick={() => setIsEditApproveActive(true)}
+                  className="!rounded-20"
+                >
+                  Edit
+                </Button>
+              ) : (
+                <Button
+                  disabled={+amountToApprove < +amount}
+                  size={ButtonSize.EXTRA_SMALL}
+                  colorScheme={ButtonColor.LIGHT_GREEN}
+                  onClick={() => setIsEditApproveActive(false)}
+                  className="!rounded-20 disabled:bg-quaternary-bg"
+                >
+                  Save
+                </Button>
+              )}
             </div>
           </div>
         )}

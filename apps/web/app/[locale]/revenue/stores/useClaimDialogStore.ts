@@ -22,6 +22,7 @@ export interface ClaimToken {
   erc223Address: string;
   fullErc20Address?: string; // Full address for ERC20 token
   fullErc223Address?: string; // Full address for ERC223 token
+  tokenId?: string; // Identifier for getting pools
   chainId: number;
   selectedStandard?: "ERC-20" | "ERC-223";
 }

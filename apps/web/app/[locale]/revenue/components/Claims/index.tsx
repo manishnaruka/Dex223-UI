@@ -121,6 +121,7 @@ export const Claims = ({
         erc223Address: token.erc223Address,
         fullErc20Address: token.fullErc20Address,
         fullErc223Address: token.fullErc223Address,
+        tokenId: token.tokenId,
         chainId: token.chainId,
       },
     ];
@@ -155,6 +156,7 @@ export const Claims = ({
         erc223Address: item.erc223Address,
         fullErc20Address: item.fullErc20Address,
         fullErc223Address: item.fullErc223Address,
+        tokenId: item.tokenId,
         chainId: item.chainId,
       }));
 
@@ -453,23 +455,28 @@ export const Claims = ({
                     Total reward: ${totalReward.toFixed(2)}
                   </span>
                 </div>
-                <Button
-                  variant={ButtonVariantType.CONTAINED}
-                  colorScheme={ButtonColor.GREEN}
-                  size={ButtonSize.SMALL}
-                  onClick={handleClaimSelected}
-                  className="!rounded-[8px]"
-                  disabled={hasClaimInProgress}
-                >
-                  {hasClaimInProgress ? (
-                    <div className="flex items-center gap-2">
-                      <Preloader size={16} />
-                      Claiming...
-                    </div>
-                  ) : (
-                    "Claim selected tokens"
+                <div className="flex flex-col items-end gap-1">
+                  <Button
+                    variant={ButtonVariantType.CONTAINED}
+                    colorScheme={ButtonColor.GREEN}
+                    size={ButtonSize.SMALL}
+                    onClick={handleClaimSelected}
+                    className="!rounded-[8px]"
+                    disabled={hasClaimInProgress || selectedCount > 15}
+                  >
+                    {hasClaimInProgress ? (
+                      <div className="flex items-center gap-2">
+                        <Preloader size={16} />
+                        Claiming...
+                      </div>
+                    ) : (
+                      "Claim selected tokens"
+                    )}
+                  </Button>
+                  {selectedCount > 15 && (
+                    <span className="text-10 text-red-light">Max 15 tokens at once</span>
                   )}
-                </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -552,23 +559,28 @@ export const Claims = ({
                   >
                     Unselect all
                   </Button>
-                  <Button
-                    variant={ButtonVariantType.CONTAINED}
-                    colorScheme={ButtonColor.GREEN}
-                    size={ButtonSize.MEDIUM}
-                    onClick={handleClaimSelected}
-                    disabled={hasClaimInProgress}
-                    className="flex-1 h-10 !px-0"
-                  >
-                    {hasClaimInProgress ? (
-                      <div className="flex items-center gap-2">
-                        <Preloader size={16} />
-                        Claiming...
-                      </div>
-                    ) : (
-                      `Claim ${selectedCount} token${selectedCount !== 1 ? "s" : ""}`
+                  <div className="flex flex-col flex-1 gap-1">
+                    <Button
+                      variant={ButtonVariantType.CONTAINED}
+                      colorScheme={ButtonColor.GREEN}
+                      size={ButtonSize.MEDIUM}
+                      onClick={handleClaimSelected}
+                      disabled={hasClaimInProgress || selectedCount > 15}
+                      className="w-full h-10 !px-0"
+                    >
+                      {hasClaimInProgress ? (
+                        <div className="flex items-center gap-2">
+                          <Preloader size={16} />
+                          Claiming...
+                        </div>
+                      ) : (
+                        `Claim ${selectedCount} token${selectedCount !== 1 ? "s" : ""}`
+                      )}
+                    </Button>
+                    {selectedCount > 15 && (
+                      <span className="text-10 text-red-light text-center">Max 15 tokens at once</span>
                     )}
-                  </Button>
+                  </div>
                 </div>
               </div>
             )}

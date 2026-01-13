@@ -33,6 +33,16 @@ export interface RevenueBalancesResponse {
     items: RevenueTokenItem[];
 }
 
+export interface RevenuePoolItem {
+    id?: Address;
+    poolId: Address;
+    accruedProtocolFeesToken: string;
+}
+
+export interface RevenuePoolsResponse {
+    pools: RevenuePoolItem[];
+}
+
 export function useRevenueTokens(limit: number = 50, offset: number = 0) {
     return useQuery<RevenueBalancesResponse>({
         queryKey: ["revenue-balances", limit, offset],
@@ -50,6 +60,29 @@ export function useRevenueTokens(limit: number = 50, offset: number = 0) {
             }
             return response.json();
         },
+        staleTime: 60000,
+    });
+}
+
+export function useRevenuePools(tokenId: string) {
+    return useQuery<RevenuePoolsResponse>({
+        queryKey: ["revenue-pools", tokenId],
+        queryFn: async () => {
+            if (!tokenId) return { items: [] };
+            const response = await fetch(
+                `https://api.dex223.io/v1/cache/revenue/pools/summary?token_id=${tokenId}`,
+                {
+                    headers: {
+                        accept: "application/json",
+                    },
+                },
+            );
+            if (!response.ok) {
+                throw new Error("Failed to fetch revenue pools");
+            }
+            return response.json();
+        },
+        enabled: Boolean(tokenId),
         staleTime: 60000,
     });
 }

@@ -122,8 +122,8 @@ export function Revenue() {
         logoURI: reward.token.logoURI || "/images/tokens/placeholder.svg",
         erc20Address: truncateMiddle(reward.token.address0, { charsFromStart: 3, charsFromEnd: 3 }),
         erc223Address: truncateMiddle(reward.token.address1, { charsFromStart: 3, charsFromEnd: 3 }),
-        amount: reward.amountFormatted,
-        amountUSD: reward.amountUSD || "$0.00",
+        amount: reward.amountFormatted || "-",
+        amountUSD: reward.amountUSD || "-",
         fullErc20Address: reward.token.address0,
         fullErc223Address: reward.token.address1,
         chainId: reward.token.chainId,
@@ -147,6 +147,7 @@ export function Revenue() {
         amountUSD: item.accruedInPoolsNowUSD || "$0.00",
         fullErc20Address: item.token.addressERC20,
         fullErc223Address: item.token.addressERC223,
+        tokenId: item.token.id,
         chainId: chainId,
         token: reward?.token,
       };

@@ -32,6 +32,7 @@ import {
   RecentTransactionTitleTemplate,
 } from "@/stores/useRecentTransactionsStore";
 import useRevenueContract from "../hooks/useRevenueContract";
+import { useRevenuePools } from "../hooks/useRevenueTokens";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const SingleClaimDialog = () => {
@@ -48,7 +49,7 @@ const SingleClaimDialog = () => {
   } = useClaimDialogStore();
   const chainId = useCurrentChainId();
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
-  const { claim, refetchUserData } = useRevenueContract();
+  const { claim, delivery, refetchUserData } = useRevenueContract();
 
   const [selectedStandard, setSelectedStandard] = useState<Standard>(Standard.ERC223);
   const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
@@ -74,6 +75,8 @@ const SingleClaimDialog = () => {
   // Get token from data
   const token = data?.selectedTokens[0];
 
+  const { data: poolsData } = useRevenuePools(token?.tokenId || "");
+
   useEffect(() => {
     if (data?.selectedStandard) {
       console.log("useEffect syncing selectedStandard from data:", data.selectedStandard);
@@ -89,7 +92,7 @@ const SingleClaimDialog = () => {
 
   // Show/hide bottom alert for confirming states
   useEffect(() => {
-    if (state === "confirming-claim" && isOpen) {
+    if ((state === "confirming-claim" || state === "confirming-delivery") && isOpen) {
       openConfirmInWalletAlert("Please confirm action in your wallet");
     } else {
       closeConfirmInWalletAlert();
@@ -151,8 +154,8 @@ const SingleClaimDialog = () => {
 
       // Get the correct token address based on selected standard
       const rawTokenAddress = selectedStandard === Standard.ERC20
-        ? ((token as any).fullErc20Address || token.erc20Address)
-        : ((token as any).fullErc223Address || token.erc223Address);
+        ? ((token as any).fullErc20Address)
+        : ((token as any).fullErc223Address);
 
 
       // Validate the token address
@@ -163,7 +166,24 @@ const SingleClaimDialog = () => {
 
       const tokenAddress = rawTokenAddress as Address;
 
-      // STEP 1: CLAIM - Claim rewards from revenue contract to user wallet
+      // STEP 1: DELIVERY - Move rewards from pools to revenue contract
+      const poolAddresses = poolsData?.pools?.map(p => p.id) || [];
+      if (poolAddresses.length > 0) {
+        setState("confirming-delivery");
+
+        const deliveryResult = await delivery(
+          poolAddresses as Address[],
+          gasSettings,
+          customGasLimit || estimatedGas
+        );
+       
+        if (deliveryResult?.hash) {
+          setDeliveryTransactionHash(deliveryResult.hash);
+          setState("executing-delivery");
+        }
+      }
+
+      // STEP 2: CLAIM - Claim rewards from revenue contract to user wallet
       setState("confirming-claim");
 
       const claimResult = await claim(
@@ -275,6 +295,96 @@ const SingleClaimDialog = () => {
       </div>
     );
   };
+
+  const renderDeliveryConfirmingState = () => (
+    <div className="space-y-5">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+        <p className="text-secondary-text text-14 mb-2">Delivering rewards from pools</p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
+          <div className="flex flex-col">
+            <span className="text-20 font-normal text-primary-text">{token.amount}</span>
+            <p className="text-secondary-text text-14">
+              ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Image
+              src={token.logoURI || "/images/tokens/placeholder.svg"}
+              width={32}
+              height={32}
+              alt={token.symbol}
+              className="w-8 h-8 flex-shrink-0"
+            />
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="h-px w-full bg-secondary-border" />
+
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+            <Svg iconName="swap" size={20} className="text-green" />
+          </div>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm delivery</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Preloader type="linear" className="max-md:hidden" />
+          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+            Proceed in your wallet
+          </span>
+          <Preloader size={16} className="md:hidden" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDeliveryExecutingState = () => (
+    <div className="space-y-5">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+        <p className="text-secondary-text text-14 mb-2">Delivering rewards from pools</p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
+          <div className="flex flex-col">
+            <span className="text-20 font-normal text-primary-text">{token.amount}</span>
+            <p className="text-secondary-text text-14">
+              ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Image
+              src={token.logoURI || "/images/tokens/placeholder.svg"}
+              width={32}
+              height={32}
+              alt={token.symbol}
+              className="w-8 h-8 flex-shrink-0"
+            />
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="h-px w-full bg-secondary-border" />
+
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+            <Svg iconName="swap" size={20} className="text-green" />
+          </div>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing delivery</span>
+        </div>
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+          <a
+            target="_blank"
+            href={data?.deliveryTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.deliveryTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
+          <Preloader size={20} />
+        </div>
+      </div>
+    </div>
+  );
 
   const renderClaimConfirmingState = () => (
     <div className="space-y-5">
@@ -466,6 +576,10 @@ const SingleClaimDialog = () => {
     switch (state) {
       case "initial":
         return renderInitialState();
+      case "confirming-delivery":
+        return renderDeliveryConfirmingState();
+      case "executing-delivery":
+        return renderDeliveryExecutingState();
       case "confirming-claim":
         return renderClaimConfirmingState();
       case "executing-claim":

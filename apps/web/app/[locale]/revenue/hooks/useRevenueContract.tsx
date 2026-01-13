@@ -21,6 +21,7 @@ import {
 import { useRevenueTokens } from "./useRevenueTokens";
 
 // Contract addresses on Sepolia testnet
+// 0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2
 export const REVENUE_CONTRACT_ADDRESS = "0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2" as Address;
 export const RED_ERC20_ADDRESS = "0x1DEf777468F76ed1E74fC87bD32334d3Ccb520d0" as Address;
 export const RED_ERC223_ADDRESS = "0x0a67Cc4D3Ac29a133a597b5Bef3fe9A6028ACad2" as Address;
@@ -356,24 +357,12 @@ export default function useRevenueContract({
 
   // Calculate staking percentage
   const stakingPercentage = useMemo(() => {
-    if (
-      !userStaked ||
-      typeof userStaked !== "bigint" ||
-      !redTotalSupply ||
-      typeof redTotalSupply !== "bigint" ||
-      redTotalSupply === 0n
-    )
-      return "0";
-    const scaledPercentage = (userStaked * BigInt(10 ** 7)) / redTotalSupply;
-
-    const wholePercentage = scaledPercentage / BigInt(100000);
-    const decimalPart = scaledPercentage % BigInt(100000);
-
-    if (decimalPart === 0n) {
-      return `${wholePercentage.toString()}`;
+    if (!userStaked || !redTotalSupply || redTotalSupply === 0n) {
+      return 0;
     }
-
-    return `${wholePercentage.toString()}.${decimalPart.toString().padStart(5, "0")}`;
+    const percentage = (Number(userStaked) / Number(redTotalSupply)) * 100;
+    console.log(percentage, "percentage");
+    return percentage;
   }, [userStaked, redTotalSupply]);
 
   const refetchUserData = useCallback(() => {
