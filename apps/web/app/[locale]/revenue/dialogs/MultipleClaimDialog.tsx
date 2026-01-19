@@ -24,6 +24,7 @@ import {
   useClaimGasModeStore,
   useClaimGasPrice,
   useClaimGasPriceStore,
+  useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
 import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import { SearchInput } from "@/components/atoms/Input";
@@ -32,11 +33,17 @@ import {
   RecentTransactionStatus,
   RecentTransactionTitleTemplate,
 } from "@/stores/useRecentTransactionsStore";
+import useRevenueContract from "../hooks/useRevenueContract";
+import { Address, isAddress } from "viem";
+import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const MultipleClaimDialog = () => {
-  const { isOpen, state, data, closeDialog, setState, setError, setData, setTokenStandard } =
+  const { isOpen, state, data, closeDialog, setState, setError, setData, setTokenStandard, setDeliveryTransactionHash, setClaimTransactionHash } =
     useClaimDialogStore();
   const chainId = useCurrentChainId();
+  const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
+  const { claim, delivery, refetchUserData } = useRevenueContract();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [globalStandard, setGlobalStandard] = useState<Standard>(Standard.ERC223);
@@ -56,7 +63,8 @@ const MultipleClaimDialog = () => {
   const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
   const gasPrice = useClaimGasPrice();
-  const gasToUse = customGasLimit || estimatedGas || BigInt(115000); // Default gas limit
+  const { gasSettings } = useClaimGasSettings();
+  const gasToUse = customGasLimit || estimatedGas || BigInt(115000);
   const notificationShownRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -64,6 +72,18 @@ const MultipleClaimDialog = () => {
       updateDefaultState(chainId);
     }
   }, [chainId, isOpen, updateDefaultState]);
+
+  useEffect(() => {
+    if ((state === "confirming-claim" || state === "confirming-delivery") && isOpen) {
+      openConfirmInWalletAlert("Please confirm action in your wallet");
+    } else {
+      closeConfirmInWalletAlert();
+    }
+
+    return () => {
+      closeConfirmInWalletAlert();
+    };
+  }, [state, isOpen, openConfirmInWalletAlert, closeConfirmInWalletAlert]);
 
   // Show notifications for success/error states
   useEffect(() => {
@@ -119,34 +139,102 @@ const MultipleClaimDialog = () => {
 
   const handleClaim = async () => {
     try {
-      // Set confirming state
-      setState("confirming");
+      const tokenAddresses: Address[] = [];
+      const poolAddressesSet = new Set<Address>();
 
-      // Simulate wallet confirmation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Collect all tokens and their pool addresses
+      for (const token of tokens) {
+        const tokenStandard = data.tokenStandards?.[token.id] || globalStandard;
+        const rawTokenAddress = tokenStandard === Standard.ERC20
+          ? ((token as any).fullErc20Address)
+          : ((token as any).fullErc223Address);
 
-      // Set executing state
-      setState("executing");
+        if (!rawTokenAddress || !isAddress(rawTokenAddress)) {
+          setError(`Invalid token address for ${token.symbol}. Please try again.`);
+          return;
+        }
 
-      // Simulate transaction execution
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+        tokenAddresses.push(rawTokenAddress as Address);
 
-      // Simulate success (90% success rate for demo)
-      if (Math.random() > 0.1) {
-        setState("success");
-      } else {
-        setError(
-          "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click common errors",
-        );
+        // Fetch pools for this token to deliver
+        if (token.tokenId) {
+          try {
+            const response = await fetch(
+              `https://api.dex223.io/v1/cache/revenue/pools/summary?token_id=${token.tokenId}`,
+              {
+                headers: {
+                  accept: "application/json",
+                },
+              },
+            );
+            if (response.ok) {
+              const poolData = await response.json();
+              poolData.pools?.forEach((p: any) => poolAddressesSet.add(p.id));
+            }
+          } catch (e) {
+            console.error(`Error fetching pools for token ${token.symbol}:`, e);
+          }
+        }
       }
-    } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
+
+      const poolAddresses = Array.from(poolAddressesSet);
+
+      // STEP 1: DELIVERY
+      if (poolAddresses.length > 0) {
+        setState("confirming-delivery");
+
+        const deliveryResult = await delivery(
+          poolAddresses,
+          gasSettings,
+          customGasLimit || estimatedGas
+        );
+
+        if (deliveryResult?.hash) {
+          setDeliveryTransactionHash(deliveryResult.hash);
+          setState("executing-delivery");
+          // Wait for delivery to complete is handled by executeTransaction returning after receipt
+        }
+      }
+
+      // STEP 2: CLAIM
+      setState("confirming-claim");
+
+      const claimResult = await claim(
+        tokenAddresses,
+        gasSettings,
+        customGasLimit || estimatedGas
+      );
+
+      setState("executing-claim");
+
+      if (claimResult?.hash) {
+        setClaimTransactionHash(claimResult.hash);
+      }
+
+      setState("success");
+      await refetchUserData();
+    } catch (error: any) {
+      console.error("Claim error:", error);
+      const errorMessage = error?.message || "An unexpected error occurred. Please try again.";
+      setError(errorMessage);
     }
   };
 
   const handleTryAgain = () => {
     setState("initial");
   };
+
+  const getEffectiveGlobalStandard = (): Standard | null => {
+    if (tokens.length === 0) return globalStandard;
+    const firstStandard: any = data.tokenStandards?.[tokens[0].id] || globalStandard;
+    const allMatch = tokens.every(
+      (token) => (data.tokenStandards?.[token.id] || globalStandard) === firstStandard
+    );
+
+    return allMatch ? firstStandard : null;
+  };
+
+  const effectiveGlobalStandard = getEffectiveGlobalStandard();
 
   const handleStandardChange = (standard: Standard) => {
     setGlobalStandard(standard);
@@ -157,6 +245,13 @@ const MultipleClaimDialog = () => {
 
   const handleTokenStandardChange = (tokenId: number, standard: Standard) => {
     setTokenStandard(tokenId, standard);
+    const updatedTokenStandards = { ...data.tokenStandards, [tokenId]: standard };
+    const allMatch = tokens.every(
+      (token) => (updatedTokenStandards[token.id] || globalStandard) === standard
+    );
+    if (!allMatch) {
+      setGlobalStandard(null as any);
+    }
   };
 
   const renderInitialState = () => (
@@ -197,7 +292,7 @@ const MultipleClaimDialog = () => {
                       key={standard}
                       handleStandardSelect={() => handleStandardChange(standard)}
                       standard={standard}
-                      selectedStandard={globalStandard}
+                      selectedStandard={effectiveGlobalStandard as Standard}
                       disabled={false}
                     />
                   </div>
@@ -348,6 +443,66 @@ const MultipleClaimDialog = () => {
     </div>
   );
 
+  const renderDeliveryConfirmingState = () => (
+    <div className="space-y-5">
+      <div className="bg-tertiary-bg rounded-3 p-4 md:p-5 min-h-[88px] flex flex-col justify-center">
+        <div className="text-secondary-text text-14 mb-1">Delivering rewards from pools</div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="text-20 font-normal text-primary-text">{tokenCount} tokens</div>
+          <div className="text-14 md:text-16 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
+        </div>
+      </div>
+
+      <div className="h-px w-full bg-secondary-border" />
+
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+            <Svg iconName="swap" size={20} className="text-green" />
+          </div>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm delivery</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Preloader type="linear" className="max-md:hidden" />
+          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
+          <Preloader size={16} className="md:hidden" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDeliveryExecutingState = () => (
+    <div className="space-y-5">
+      <div className="bg-tertiary-bg rounded-3 p-4 md:p-5 min-h-[88px] flex flex-col justify-center">
+        <div className="text-secondary-text text-14 mb-1">Delivering rewards from pools</div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="text-20 font-normal text-primary-text">{tokenCount} tokens</div>
+          <div className="text-14 md:text-16 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
+        </div>
+      </div>
+
+      <div className="h-px w-full bg-secondary-border" />
+
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+            <Svg iconName="swap" size={20} className="text-green" />
+          </div>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing delivery</span>
+        </div>
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+          <a
+            target="_blank"
+            href={data?.deliveryTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.deliveryTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
+          <Preloader size={20} />
+        </div>
+      </div>
+    </div>
+  );
+
   const renderConfirmingState = () => (
     <div className="space-y-5">
       <div className="bg-tertiary-bg rounded-3 p-4 md:p-5 min-h-[88px] flex flex-col justify-center">
@@ -414,7 +569,12 @@ const MultipleClaimDialog = () => {
           >
             Speed up
           </Button>
-          <IconButton iconName="forward" />
+          <a
+            target="_blank"
+            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
           <Preloader size={20} />
         </div>
       </div>
@@ -449,7 +609,12 @@ const MultipleClaimDialog = () => {
           <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Successfully claimed</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <IconButton iconName="forward" />
+          <a
+            target="_blank"
+            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
           <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
             <Svg className="text-primary-bg" iconName="check" size={12} />
           </div>
@@ -515,9 +680,13 @@ const MultipleClaimDialog = () => {
     switch (state) {
       case "initial":
         return renderInitialState();
-      case "confirming":
+      case "confirming-delivery":
+        return renderDeliveryConfirmingState();
+      case "executing-delivery":
+        return renderDeliveryExecutingState();
+      case "confirming-claim":
         return renderConfirmingState();
-      case "executing":
+      case "executing-claim":
         return renderExecutingState();
       case "success":
         return renderSuccessState();

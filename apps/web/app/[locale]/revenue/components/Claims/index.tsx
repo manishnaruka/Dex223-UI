@@ -19,11 +19,21 @@ import {
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
+import { formatFloat } from "@/functions/formatFloat";
 import { Standard } from "@/sdk_bi/standard";
+import { formatGwei } from "viem";
 
 import MultipleClaimDialog from "../../dialogs/MultipleClaimDialog";
 import SingleClaimDialog from "../../dialogs/SingleClaimDialog";
 import { useClaimDialogStore } from "../../stores/useClaimDialogStore";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import {
+  useClaimGasLimitStore,
+  useClaimGasModeStore,
+  useClaimGasPrice,
+  useClaimGasPriceStore,
+} from "../../stores/useClaimGasSettingsStore";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import Svg from "@/components/atoms/Svg";
 import ForwardIcon from "../../../../../../../packages/ui/src/icons/ForwardIcon";
 
@@ -38,6 +48,9 @@ export const Claims = ({
   setSelectedTokens: (tokenId: number) => void;
   isLoading?: boolean;
 }) => {
+  const [isGasSettingsOpen, setIsGasSettingsOpen] = React.useState(false);
+  const chainId = useCurrentChainId();
+
   const {
     openDialog,
     state: claimState,
@@ -46,16 +59,36 @@ export const Claims = ({
     resetClaim,
   } = useClaimDialogStore();
 
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useClaimGasPriceStore();
+
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useClaimGasLimitStore();
+
+  const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
+
+  const gasPrice = useClaimGasPrice();
+  const gasToUse = customGasLimit || estimatedGas || BigInt(115000);
+
+  React.useEffect(() => {
+    updateDefaultState(chainId);
+  }, [chainId, updateDefaultState]);
+
   // Check if a specific token is being claimed
   const isTokenBeingClaimed = (tokenId: number) => {
     if (!claimData) return false;
-    if (claimState !== "confirming" && claimState !== "executing") return false;
+    if (claimState !== "confirming-claim" && claimState !== "executing-claim") return false;
     if (isClaimDialogOpen) return false;
     return claimData.selectedTokens?.some((token) => token.id === tokenId) || false;
   };
 
   const hasClaimInProgress =
-    (claimState === "confirming" || claimState === "executing") && !isClaimDialogOpen;
+    (claimState === "confirming-claim" || claimState === "executing-claim") && !isClaimDialogOpen;
 
   useEffect(() => {
     if ((claimState === "success" || claimState === "error") && !isClaimDialogOpen) {
@@ -86,18 +119,24 @@ export const Claims = ({
         amountUSD: token.amountUSD,
         erc20Address: token.erc20Address,
         erc223Address: token.erc223Address,
+        fullErc20Address: token.fullErc20Address,
+        fullErc223Address: token.fullErc223Address,
+        tokenId: token.tokenId,
         chainId: token.chainId,
       },
     ];
 
     const totalReward = parseFloat(token.amountUSD.replace(/[$,]/g, ""));
+    const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
+    const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
+    const networkFeeEth = gasPrice ? parseFloat(((gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) / BigInt(10) ** BigInt(18)).toString()) : 0;
 
     openDialog({
       selectedTokens: selectedTokensData,
       totalReward,
-      gasPrice: "33.53",
-      gasLimit: "329000",
-      networkFee: "0.0031",
+      gasPrice: gasPriceGwei.toString(),
+      gasLimit: gasLimitValue,
+      networkFee: networkFeeEth.toString(),
       selectedStandard: "ERC-223",
       isMultiple: false,
     });
@@ -115,6 +154,9 @@ export const Claims = ({
         amountUSD: item.amountUSD,
         erc20Address: item.erc20Address,
         erc223Address: item.erc223Address,
+        fullErc20Address: item.fullErc20Address,
+        fullErc223Address: item.fullErc223Address,
+        tokenId: item.tokenId,
         chainId: item.chainId,
       }));
 
@@ -128,12 +170,15 @@ export const Claims = ({
 
     if (selectedTokens.size === 1) {
       const token = selectedTokensData[0];
+      const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
+      const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
+      const networkFeeEth = gasPrice ? parseFloat(((gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) / BigInt(10) ** BigInt(18)).toString()) : 0;
       openDialog({
         selectedTokens: selectedTokensData,
         totalReward,
-        gasPrice: "33.53",
-        gasLimit: "329000",
-        networkFee: "0.0031",
+        gasPrice: gasPriceGwei.toString(),
+        gasLimit: gasLimitValue,
+        networkFee: networkFeeEth.toString(),
         selectedStandard: "ERC-223",
         isMultiple: false,
       });
@@ -143,12 +188,15 @@ export const Claims = ({
         tokenStandards[token.id] = "ERC-223";
       });
 
+      const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
+      const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
+      const networkFeeEth = gasPrice ? parseFloat(((gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) / BigInt(10) ** BigInt(18)).toString()) : 0;
       openDialog({
         selectedTokens: selectedTokensData,
         totalReward,
-        gasPrice: "33.53",
-        gasLimit: "329000",
-        networkFee: "0.0031",
+        gasPrice: gasPriceGwei.toString(),
+        gasLimit: gasLimitValue,
+        networkFee: networkFeeEth.toString(),
         isMultiple: true,
         tokenStandards,
       });
@@ -163,14 +211,16 @@ export const Claims = ({
     }
     return sum;
   }, 0);
+  const showClaimingOverlay = hasClaimInProgress && !isLoading;
 
   return (
     <>
       <SingleClaimDialog />
       <MultipleClaimDialog />
+      
       {/* Desktop version */}
-      <div className="hidden xl:block rounded-3 overflow-x-auto bg-table-gradient">
-        <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative pr-5 pl-5 min-w-[1000px]">
+      <div className="hidden xl:block rounded-3 h-[640px] bg-table-gradient flex flex-col">
+        <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative pr-5 pl-5 min-w-[1000px] flex-shrink-0">
           <div className="text-tertiary-text text-13 pl-5 h-[60px] flex items-center">Token</div>
           <div className="text-tertiary-text text-13 h-[60px] flex items-center">
             <div className="flex flex-col gap-1">
@@ -189,6 +239,10 @@ export const Claims = ({
           </div>
         </div>
 
+        <div
+          className="overflow-y-auto overflow-x-auto flex-1 relative"
+          aria-busy={isLoading || showClaimingOverlay}
+        >
         {isLoading ? (
           <SkeletonTheme
             baseColor="#272727"
@@ -227,8 +281,7 @@ export const Claims = ({
             ))}
           </SkeletonTheme>
         ) : (
-          <>
-            {tableData.map((o: any, index: number) => {
+            tableData.map((o: any, index: number) => {
               const key = o?.token?.address0 ? o.token.address0 : `item-${index}`;
               const isSelected = selectedTokens.has(o.id);
 
@@ -262,7 +315,7 @@ export const Claims = ({
                         className="flex-shrink-0"
                       />
                       <div className="flex min-w-0 justify-center gap-2 items-center">
-                        <span className="truncate text-secondary-text text-14 font-medium">
+                        <span className="truncate text-secondary-text text-16 font-medium">
                           {o.name}
                         </span>
                         <span className="text-13 text-tertiary-text">{o.symbol}</span>
@@ -354,12 +407,20 @@ export const Claims = ({
                   </div>
                 </div>
               );
-            })}
-          </>
+            })
         )}
+        {showClaimingOverlay && (
+          <div className="absolute inset-0 bg-[#0F0F0F]/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+            <div className="flex items-center gap-2 rounded-2 bg-primary-bg/90 border border-quaternary-bg px-4 py-2">
+              <Preloader size={20} />
+              <span className="text-secondary-text text-14">Claim in progress...</span>
+            </div>
+          </div>
+        )}
+        </div>
 
         {selectedCount > 0 && !isLoading && (
-          <div className="mt-4 p-4 bg-tertiary-bg rounded-b-3 flex items-center justify-between gap-4 border border-quaternary-bg">
+          <div className="relative top-[370px] z-20 p-4 bg-tertiary-bg rounded-b-3 flex items-center justify-between gap-4 border border-quaternary-bg">
             <div className="flex items-center gap-4">
               <span className="text-tertiary-text text-14">
                 Total claim: {selectedCount} token{selectedCount !== 1 ? "s" : ""}
@@ -374,11 +435,14 @@ export const Claims = ({
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <Svg iconName="gas-edit" size={20} className="text-tertiary-text" />
-                <span className="text-tertiary-text text-14">Gas price: $12.23</span>
+                <span className="text-tertiary-text text-14">
+                  Gas price: {gasPrice ? `${formatFloat(formatGwei(gasPrice))} GWEI` : "—"}
+                </span>
                 <Button
                   variant={ButtonVariantType.CONTAINED}
                   colorScheme={ButtonColor.LIGHT_GREEN}
                   size={ButtonSize.EXTRA_SMALL}
+                  onClick={() => setIsGasSettingsOpen(true)}
                 >
                   Edit
                 </Button>
@@ -391,23 +455,28 @@ export const Claims = ({
                     Total reward: ${totalReward.toFixed(2)}
                   </span>
                 </div>
-                <Button
-                  variant={ButtonVariantType.CONTAINED}
-                  colorScheme={ButtonColor.GREEN}
-                  size={ButtonSize.SMALL}
-                  onClick={handleClaimSelected}
-                  className="!rounded-[8px]"
-                  disabled={hasClaimInProgress}
-                >
-                  {hasClaimInProgress ? (
-                    <div className="flex items-center gap-2">
-                      <Preloader size={16} />
-                      Claiming...
-                    </div>
-                  ) : (
-                    "Claim selected tokens"
+                <div className="flex flex-col items-end gap-1">
+                  <Button
+                    variant={ButtonVariantType.CONTAINED}
+                    colorScheme={ButtonColor.GREEN}
+                    size={ButtonSize.SMALL}
+                    onClick={handleClaimSelected}
+                    className="!rounded-[8px]"
+                    disabled={hasClaimInProgress || selectedCount > 15}
+                  >
+                    {hasClaimInProgress ? (
+                      <div className="flex items-center gap-2">
+                        <Preloader size={16} />
+                        Claiming...
+                      </div>
+                    ) : (
+                      "Claim selected tokens"
+                    )}
+                  </Button>
+                  {selectedCount > 15 && (
+                    <span className="text-10 text-red-light">Max 15 tokens at once</span>
                   )}
-                </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -415,7 +484,10 @@ export const Claims = ({
       </div>
 
       {/* Mobile and Tablet version */}
-      <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 overflow-x-hidden w-full">
+      <div
+        className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 overflow-x-hidden w-full relative"
+        aria-busy={isLoading || showClaimingOverlay}
+      >
         {isLoading ? (
           <SkeletonTheme
             baseColor="#272727"
@@ -453,12 +525,15 @@ export const Claims = ({
                 <div className="flex items-center mb-3 gap-2">
                   <div className="flex items-center gap-1.5">
                     <Svg iconName="gas-edit" size={16} className="text-tertiary-text" />
-                    <span className="text-secondary-text text-14">Gas price: $12.23</span>
+                    <span className="text-secondary-text text-14">
+                      Gas price: {gasPrice ? `${formatFloat(formatGwei(gasPrice))} GWEI` : "—"}
+                    </span>
                   </div>
                   <Button
                     variant={ButtonVariantType.OUTLINED}
                     colorScheme={ButtonColor.LIGHT_GREEN}
                     size={ButtonSize.EXTRA_SMALL}
+                    onClick={() => setIsGasSettingsOpen(true)}
                     className="!h-6 !px-2 !text-12"
                   >
                     Edit
@@ -484,23 +559,28 @@ export const Claims = ({
                   >
                     Unselect all
                   </Button>
-                  <Button
-                    variant={ButtonVariantType.CONTAINED}
-                    colorScheme={ButtonColor.GREEN}
-                    size={ButtonSize.MEDIUM}
-                    onClick={handleClaimSelected}
-                    disabled={hasClaimInProgress}
-                    className="flex-1 h-10 !px-0"
-                  >
-                    {hasClaimInProgress ? (
-                      <div className="flex items-center gap-2">
-                        <Preloader size={16} />
-                        Claiming...
-                      </div>
-                    ) : (
-                      `Claim ${selectedCount} token${selectedCount !== 1 ? "s" : ""}`
+                  <div className="flex flex-col flex-1 gap-1">
+                    <Button
+                      variant={ButtonVariantType.CONTAINED}
+                      colorScheme={ButtonColor.GREEN}
+                      size={ButtonSize.MEDIUM}
+                      onClick={handleClaimSelected}
+                      disabled={hasClaimInProgress || selectedCount > 15}
+                      className="w-full h-10 !px-0"
+                    >
+                      {hasClaimInProgress ? (
+                        <div className="flex items-center gap-2">
+                          <Preloader size={16} />
+                          Claiming...
+                        </div>
+                      ) : (
+                        `Claim ${selectedCount} token${selectedCount !== 1 ? "s" : ""}`
+                      )}
+                    </Button>
+                    {selectedCount > 15 && (
+                      <span className="text-10 text-red-light text-center">Max 15 tokens at once</span>
                     )}
-                  </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -613,7 +693,32 @@ export const Claims = ({
             })}
           </>
         )}
+        {showClaimingOverlay && (
+          <div className="absolute inset-0 bg-[#0F0F0F]/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+            <div className="flex items-center gap-2 rounded-2 bg-primary-bg/90 border border-quaternary-bg px-4 py-2">
+              <Preloader size={18} />
+              <span className="text-secondary-text text-14">Claim in progress...</span>
+            </div>
+          </div>
+        )}
       </div>
+
+      <NetworkFeeConfigDialog
+        isAdvanced={isAdvanced}
+        setIsAdvanced={setIsAdvanced}
+        estimatedGas={estimatedGas > BigInt(0) ? estimatedGas : gasToUse}
+        setEstimatedGas={setEstimatedGas}
+        gasPriceSettings={gasPriceSettings}
+        gasPriceOption={gasPriceOption}
+        customGasLimit={customGasLimit}
+        setCustomGasLimit={setCustomGasLimit}
+        setGasPriceOption={setGasPriceOption}
+        setGasPriceSettings={setGasPriceSettings}
+        isOpen={isGasSettingsOpen}
+        setIsOpen={setIsGasSettingsOpen}
+      />
     </>
   );
 };
+
+export default Claims;

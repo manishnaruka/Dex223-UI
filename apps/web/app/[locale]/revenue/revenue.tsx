@@ -2,7 +2,7 @@
 
 import "react-loading-skeleton/dist/skeleton.css";
 
-import Alert from "@repo/ui/alert";
+import Preloader from "@repo/ui/preloader";
 import Tooltip from "@repo/ui/tooltip";
 import clsx from "clsx";
 import Image from "next/image";
@@ -14,125 +14,19 @@ import { useAccount, useSwitchChain } from "wagmi";
 import { useRevenueStore } from "@/app/[locale]/revenue/stores/useRevenueStore";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { TokenListId } from "@/db/db";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokens } from "@/hooks/useTokenLists";
-import { DexChainId } from "@/sdk_bi/chains";
 import { Token } from "@/sdk_bi/entities/token";
 
 import { Claims } from "./components/Claims";
 import StakeDialog from "./dialogs/StakeDialog";
 import TokenListDropdown from "./dialogs/TokenListDropdown";
 import useRevenueContract from "./hooks/useRevenueContract";
-import { useStakeDialogStore } from "./stores/useStakeDialogStore";
-const claimsData = [
-  {
-    id: 1,
-    name: "Aave Token",
-    symbol: "AAVE",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0x5...B3C",
-    erc223Address: "0xD...C93",
-    amount: "0.34",
-    amountUSD: "$23.13",
-    fullErc20Address: "0x5B3C1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0xD1234567890ABCDEF1234567890ABCDEF1234567",
-    chainId: DexChainId.MAINNET,
-  },
-  {
-    id: 2,
-    name: "Basic Attention Token",
-    symbol: "BAT",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0x3...B7D",
-    erc223Address: "0x7...U1A",
-    amount: "4.25",
-    amountUSD: "$3,048.88",
-    fullErc20Address: "0x3B7D1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0x7U1A1234567890ABCDEF1234567890ABCDEF1234",
-    chainId: DexChainId.MAINNET,
-  },
-  {
-    id: 3,
-    name: "Binance USD",
-    symbol: "BUSD",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0x5...C9E",
-    erc223Address: "0x5...T9E",
-    amount: "245.24",
-    amountUSD: "$2,047.39",
-    fullErc20Address: "0x5C9E1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0x5T9E1234567890ABCDEF1234567890ABCDEF1234",
-    chainId: DexChainId.MAINNET,
-  },
-  {
-    id: 4,
-    name: "Dai Stablecoin",
-    symbol: "DAI",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0x7...D1A",
-    erc223Address: "0x3...S7D",
-    amount: "73.2",
-    amountUSD: "$1,534.68",
-    fullErc20Address: "0x7D1A1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0x3S7D1234567890ABCDEF1234567890ABCDEF1234",
-    chainId: DexChainId.MAINNET,
-  },
-  {
-    id: 5,
-    name: "Enjin Coin",
-    symbol: "ENJ",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0x9...E3B",
-    erc223Address: "0x1...R5C",
-    amount: "23.2",
-    amountUSD: "$1,208.53",
-    fullErc20Address: "0x9E3B1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0x1R5C1234567890ABCDEF1234567890ABCDEF1234",
-    chainId: DexChainId.MAINNET,
-  },
-  {
-    id: 6,
-    name: "Kyber Network Crystal",
-    symbol: "KNC",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0xB...F5C",
-    erc223Address: "0xE...Q3B",
-    amount: "3.24",
-    amountUSD: "$853.27",
-    fullErc20Address: "0xBF5C1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0xEQ3B1234567890ABCDEF1234567890ABCDEF1234",
-    chainId: DexChainId.MAINNET,
-  },
-  {
-    id: 7,
-    name: "Lend",
-    symbol: "LEND",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0xD...G7D",
-    erc223Address: "0xC...P1A",
-    amount: "12.3",
-    amountUSD: "$351.46",
-    fullErc20Address: "0xDG7D1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0xCP1A1234567890ABCDEF1234567890ABCDEF1234",
-    chainId: DexChainId.MAINNET,
-  },
-  {
-    id: 8,
-    name: "ChainLink Token",
-    symbol: "LINK",
-    logoURI: "/images/tokens/placeholder.svg",
-    erc20Address: "0x2...A1B",
-    erc223Address: "0x4...C2D",
-    amount: "0.3",
-    amountUSD: "$203.58",
-    fullErc20Address: "0x2A1B1234567890ABCDEF1234567890ABCDEF1234",
-    fullErc223Address: "0x4C2D1234567890ABCDEF1234567890ABCDEF1234",
-    chainId: DexChainId.MAINNET,
-  },
-];
+import { useRevenueTokens, useTotalReward } from "./hooks/useRevenueTokens";
+import { StakeStatus, useStakeDialogStore } from "./stores/useStakeDialogStore";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
 const WalletSearchInput = ({
   searchValue,
@@ -181,10 +75,13 @@ export function Revenue() {
   const [selectedTokenLists, setSelectedTokenLists] = useState<Set<TokenListId>>(
     new Set([`default-${chainId}` as TokenListId]),
   );
-  const { openDialog } = useStakeDialogStore();
+  const { openDialog, status: stakeStatus, isOpen: isStakeDialogOpen, dialogType } =
+    useStakeDialogStore();
   const { switchChain } = useSwitchChain();
 
   const allAvailableTokens = useTokens();
+  const { data: revenueTokensData } = useRevenueTokens();
+  const { data: totalRewardData } = useTotalReward();
 
   const tokensFromSelectedLists = useMemo(() => {
     return allAvailableTokens.filter((token) => {
@@ -218,21 +115,45 @@ export function Revenue() {
   }, [tokensFromSelectedLists, setRewardTokens]);
 
   const mappedClaimsData = useMemo(() => {
-    return claimableRewards.map((reward, index) => ({
-      id: index + 1,
-      name: reward.token.name || "Unknown",
-      symbol: reward.token.symbol || "???",
-      logoURI: reward.token.logoURI || "/images/tokens/placeholder.svg",
-      erc20Address: truncateMiddle(reward.token.address0, { charsFromStart: 3, charsFromEnd: 3 }),
-      erc223Address: truncateMiddle(reward.token.address1, { charsFromStart: 3, charsFromEnd: 3 }),
-      amount: reward.amountFormatted,
-      amountUSD: reward.amountUSD || "$0.00",
-      fullErc20Address: reward.token.address0,
-      fullErc223Address: reward.token.address1,
-      chainId: reward.token.chainId,
-      token: reward.token,
-    }));
-  }, [claimableRewards]);
+    if (!revenueTokensData?.items) {
+      return claimableRewards.map((reward, index) => ({
+        id: index + 1,
+        name: reward.token.name || "Unknown",
+        symbol: reward.token.symbol || "???",
+        logoURI: reward.token.logoURI || "/images/tokens/placeholder.svg",
+        erc20Address: truncateMiddle(reward.token.address0, { charsFromStart: 3, charsFromEnd: 3 }),
+        erc223Address: truncateMiddle(reward.token.address1, { charsFromStart: 3, charsFromEnd: 3 }),
+        amount: reward.amountFormatted || "-",
+        amountUSD: reward.amountUSD || "-",
+        fullErc20Address: reward.token.address0,
+        fullErc223Address: reward.token.address1,
+        chainId: reward.token.chainId,
+        token: reward.token,
+      }));
+    }
+
+    return revenueTokensData.items.map((item, index) => {
+      const reward = claimableRewards.find(
+        (r) => r.token.address0.toLowerCase() === item.token.addressERC20.toLowerCase()
+      );
+
+      return {
+        id: index + 1,
+        name: item.token.name,
+        symbol: item.token.symbol,
+        logoURI: "/images/tokens/placeholder.svg",
+        erc20Address: truncateMiddle(item.token.addressERC20, { charsFromStart: 3, charsFromEnd: 3 }),
+        erc223Address: truncateMiddle(item.token.addressERC223, { charsFromStart: 3, charsFromEnd: 3 }),
+        amount: item.accruedInPoolsNow || "0",
+        amountUSD: item.accruedInPoolsNowUSD || "$0.00",
+        fullErc20Address: item.token.addressERC20,
+        fullErc223Address: item.token.addressERC223,
+        tokenId: item.token.id,
+        chainId: chainId,
+        token: reward?.token,
+      };
+    });
+  }, [revenueTokensData, claimableRewards, chainId]);
 
   const handleSelectedTokens = (tokenId: number) => {
     if (tokenId === 0) {
@@ -250,7 +171,19 @@ export function Revenue() {
     }
   };
 
+  const isStakeActionLocked = useMemo(() => {
+    const isStakeTxInFlight = [
+      StakeStatus.PENDING_APPROVE,
+      StakeStatus.LOADING_APPROVE,
+      StakeStatus.PENDING,
+      StakeStatus.LOADING,
+    ].includes(stakeStatus);
+
+    return !isStakeDialogOpen && dialogType === "stake" && isStakeTxInFlight;
+  }, [dialogType, isStakeDialogOpen, stakeStatus]);
+
   const handleStakeClick = () => {
+    if (isStakeActionLocked) return;
     openDialog("stake", "", "ERC-20");
   };
 
@@ -315,7 +248,7 @@ export function Revenue() {
   };
 
   // Use mapped claims data or fallback to hardcoded data for demo
-  const dataToUse = mappedClaimsData.length > 0 ? mappedClaimsData : claimsData;
+  const dataToUse = mappedClaimsData.length > 0 ? mappedClaimsData : [];
 
   const filteredClaimsData = dataToUse.filter((claim) => {
     const searchLower = claimRewardsSearchValue.toLowerCase();
@@ -403,12 +336,25 @@ export function Revenue() {
           ) : (
             <>
               <div className="relative flex flex-col bg-gradient-card-green-light-fill rounded-3 px-4 md:px-5 py-3 md:py-4 w-full md:col-span-2 xl:col-span-7 overflow-hidden min-h-[140px] md:h-[120px] min-w-0 max-w-full">
-                <div className="flex items-center z-10">
-                  <span className="text-14 md:text-16 text-secondary-text">D223 staked</span>
-                  <Tooltip
-                    iconSize={16}
-                    text="This shows your staked D223 tokens and the percentage of total supply you represent"
-                  />
+                <div className="flex items-center justify-between z-10">
+                  <div className="flex items-center gap-1">
+                    <span className="text-14 md:text-16 text-secondary-text">D223 staked</span>
+                    <Tooltip
+                      iconSize={16}
+                      text="This shows your staked D223 tokens and the percentage of total supply you represent"
+                    />
+                  </div>
+                  {unstakeCountdown && (
+                    <div className="flex items-center gap-1 ml-4">
+                      <span className="text-14 md:text-16 text-secondary-text">
+                        Time to unstake
+                      </span>
+                      <Tooltip
+                        iconSize={16}
+                        text="Time remaining until you can unstake your D223 tokens"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 z-10 mt-2">
@@ -425,26 +371,35 @@ export function Revenue() {
                     <button
                       type="button"
                       onClick={handleStakeClick}
+                      disabled={isStakeActionLocked || !!searchAddress}
                       className={clsx(
                         "border px-3 md:px-4 h-[40px] md:h-[48px] flex-1 md:flex-none md:min-w-[100px] rounded-3 text-12 md:text-14 font-medium transition-colors active:scale-95",
-                        "border-yellow-light bg-[#4C483C] text-white cursor-pointer",
+                        hasStaked
+                          ? "border-yellow-light bg-[#4C483C] text-white cursor-pointer"
+                          : "border-secondary-border bg-green text-black cursor-pointer hover:bg-green",
+                        (isStakeActionLocked || searchAddress) && "opacity-50 cursor-not-allowed hover:bg-tertiary-bg",
                       )}
                     >
                       Stake
                     </button>
+                    
                     {unstakeCountdown ? (
-                      <div className="border border-yellow-light bg-primary-bg text-secondary-text px-3 md:px-4 h-[40px] md:h-[48px] flex-1 md:flex-none md:min-w-[100px] rounded-3 text-12 md:text-14 font-medium flex items-center justify-center">
-                        <span className="text-10 md:text-12">{unstakeCountdown}</span>
+                      <div className="flex flex-col items-end gap-1 min-w-[100px]">
+                        <div className="border border-yellow-light bg-primary-bg text-secondary-text px-3 md:px-4 h-[40px] md:h-[48px] min-w-[100px] rounded-3 text-12 md:text-14 font-medium flex items-center justify-center">
+                          <span className="text-10 md:text-12">{unstakeCountdown}</span>
+                        </div>
                       </div>
                     ) : (
                       <button
                         type="button"
                         onClick={handleUnstakeClick}
-                        disabled={!canUnstake || !hasStaked}
+                        disabled={!canUnstake || !hasStaked || !!searchAddress}
                         className={clsx(
                           "border px-3 md:px-4 h-[40px] md:h-[48px] flex-1 md:flex-none md:min-w-[100px] rounded-3 text-12 md:text-14 font-medium transition-colors active:scale-95",
-                          "border-yellow-light bg-[#4C483C] text-white",
-                          !canUnstake || !hasStaked
+                          hasStaked
+                            ? "border-yellow-light bg-[#4C483C] text-white"
+                            : "border border-green bg-transparent-bg text-secondary-text",
+                          (!canUnstake || !hasStaked || searchAddress)
                             ? "opacity-50 cursor-not-allowed"
                             : "cursor-pointer",
                         )}
@@ -465,7 +420,7 @@ export function Revenue() {
               </div>
 
               <div className="relative flex flex-col bg-primary-bg rounded-3 px-4 md:px-5 py-3 md:py-4 w-full md:col-span-2 xl:col-span-5 overflow-hidden min-h-[140px] md:h-[120px] min-w-0 max-w-full">
-                <div className="flex items-center z-10">
+                <div className="flex items-center z-10 gap-1">
                   <span className="text-14 md:text-16 text-secondary-text">Total reward</span>
                   <Tooltip
                     iconSize={16}
@@ -475,17 +430,11 @@ export function Revenue() {
 
                 <div className="flex flex-col z-10 mt-2">
                   <span className="text-20 md:text-24 xl:text-32 font-medium">
-                    $
-                    {mappedClaimsData
-                      .reduce((sum, claim) => {
-                        const usdValue = parseFloat(claim.amountUSD.replace(/[$,]/g, ""));
-                        return sum + usdValue;
-                      }, 0)
-                      .toFixed(2)}
+                    ${totalRewardData?.totalValueUSD || "0"}
                   </span>
                   <span className="text-12 md:text-14 xl:text-16 text-secondary-text mt-1">
-                    {userStaked && typeof userStaked === "bigint" && userStaked > 0n
-                      ? "Staking active"
+                    {totalRewardData?.created_at 
+                      ? `Staked since: ${new Date(totalRewardData.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.')}` 
                       : "Not staked yet"}
                   </span>
                 </div>
@@ -501,6 +450,21 @@ export function Revenue() {
             </>
           )}
         </div>
+        {isStakeActionLocked && (
+          <div className="mt-4 md:mt-5 w-full rounded-3 bg-primary-bg/90 border border-quaternary-bg px-4 md:px-5 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Preloader size={16} />
+              <span className="text-secondary-text text-12 md:text-14">Staking in progress</span>
+            </div>
+            <Button
+              size={ButtonSize.EXTRA_SMALL}
+              colorScheme={ButtonColor.LIGHT_GREEN}
+              onClick={() => {}}
+            >
+              Details
+            </Button>
+          </div>
+        )}
 
         <div className="mt-6 md:mt-8 xl:mt-10 flex flex-col xl:flex-row w-full justify-between items-start xl:items-center gap-4 xl:gap-0 overflow-x-hidden">
           <h1 className="text-20 md:text-24 xl:text-32 font-medium">Claim rewards</h1>
@@ -542,7 +506,9 @@ export function Revenue() {
             </div>
           ) : !hasFilteredResults ? (
             <div className="flex flex-col items-center justify-center min-h-[280px] md:min-h-[340px] w-full bg-[#1A1A1A] rounded-3 p-6 md:p-8 relative overflow-hidden">
-              <p className="text-12 md:text-14 xl:text-16 text-secondary-text text-center z-10 mb-4">Reward not found</p>
+              <p className="text-12 md:text-14 xl:text-16 text-secondary-text text-center z-10 mb-4">
+                Reward not found
+              </p>
               <div className="absolute top-0 right-0 flex items-center justify-center pointer-events-none">
                 <Image
                   src="/images/empty-state.svg"

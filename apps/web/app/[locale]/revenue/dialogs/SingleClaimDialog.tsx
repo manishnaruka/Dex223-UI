@@ -4,6 +4,7 @@ import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
+import { Address, isAddress } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
@@ -22,6 +23,7 @@ import {
   useClaimGasModeStore,
   useClaimGasPrice,
   useClaimGasPriceStore,
+  useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
 import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import { addNotification } from "@/other/notification";
@@ -29,11 +31,25 @@ import {
   RecentTransactionStatus,
   RecentTransactionTitleTemplate,
 } from "@/stores/useRecentTransactionsStore";
+import useRevenueContract from "../hooks/useRevenueContract";
+import { useRevenuePools } from "../hooks/useRevenueTokens";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const SingleClaimDialog = () => {
-  const { isOpen, state, data, closeDialog, setState, setError, setData } = useClaimDialogStore();
+  const {
+    isOpen,
+    state,
+    data,
+    closeDialog,
+    setState,
+    setError,
+    setData,
+    setDeliveryTransactionHash,
+    setClaimTransactionHash,
+  } = useClaimDialogStore();
   const chainId = useCurrentChainId();
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
+  const { claim, delivery, refetchUserData } = useRevenueContract();
 
   const [selectedStandard, setSelectedStandard] = useState<Standard>(Standard.ERC223);
   const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
@@ -52,11 +68,18 @@ const SingleClaimDialog = () => {
   const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
   const gasPrice = useClaimGasPrice();
-  const gasToUse = customGasLimit || estimatedGas || BigInt(115000); // Default gas limit for ERC223
+  const { gasSettings } = useClaimGasSettings();
+  const gasToUse = customGasLimit || estimatedGas || BigInt(115000);
   const notificationShownRef = useRef<string | null>(null);
+
+  // Get token from data
+  const token = data?.selectedTokens[0];
+
+  const { data: poolsData } = useRevenuePools(token?.tokenId || "");
 
   useEffect(() => {
     if (data?.selectedStandard) {
+      console.log("useEffect syncing selectedStandard from data:", data.selectedStandard);
       setSelectedStandard(data.selectedStandard === "ERC-20" ? Standard.ERC20 : Standard.ERC223);
     }
   }, [data?.selectedStandard]);
@@ -67,9 +90,9 @@ const SingleClaimDialog = () => {
     }
   }, [chainId, isOpen, updateDefaultState]);
 
-  // Show/hide bottom alert for confirming state
+  // Show/hide bottom alert for confirming states
   useEffect(() => {
-    if (state === "confirming" && isOpen) {
+    if ((state === "confirming-claim" || state === "confirming-delivery") && isOpen) {
       openConfirmInWalletAlert("Please confirm action in your wallet");
     } else {
       closeConfirmInWalletAlert();
@@ -117,36 +140,75 @@ const SingleClaimDialog = () => {
   // Only show this dialog for single token claims
   if (!isOpen || !data || data.isMultiple) return null;
 
-  const token = data.selectedTokens[0];
   if (!token) return null;
 
   const handleClaim = async () => {
+    if (!token) {
+      setError("Token information is missing. Please try again.");
+      return;
+    }
+
     try {
       // Update the selected standard in the store
       setData({ selectedStandard: selectedStandard === Standard.ERC20 ? "ERC-20" : "ERC-223" });
 
-      // Set confirming state
-      setState("confirming");
+      // Get the correct token address based on selected standard
+      const rawTokenAddress = selectedStandard === Standard.ERC20
+        ? ((token as any).fullErc20Address)
+        : ((token as any).fullErc223Address);
 
-      // Simulate wallet confirmation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Set executing state
-      setState("executing");
-
-      // Simulate transaction execution
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Simulate success (90% success rate for demo)
-      if (Math.random() > 0.1) {
-        setState("success");
-      } else {
-        setError(
-          "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click common errors",
-        );
+      // Validate the token address
+      if (!rawTokenAddress || !isAddress(rawTokenAddress)) {
+        setError("Invalid token address. Please try again.");
+        return;
       }
-    } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
+
+      const tokenAddress = rawTokenAddress as Address;
+
+      // STEP 1: DELIVERY - Move rewards from pools to revenue contract
+      const poolAddresses = poolsData?.pools?.map(p => p.id) || [];
+      if (poolAddresses.length > 0) {
+        setState("confirming-delivery");
+
+        const deliveryResult = await delivery(
+          poolAddresses as Address[],
+          gasSettings,
+          customGasLimit || estimatedGas
+        );
+       
+        if (deliveryResult?.hash) {
+          setDeliveryTransactionHash(deliveryResult.hash);
+          setState("executing-delivery");
+        }
+      }
+
+      // STEP 2: CLAIM - Claim rewards from revenue contract to user wallet
+      setState("confirming-claim");
+
+      const claimResult = await claim(
+        [tokenAddress],
+        gasSettings,
+        customGasLimit || estimatedGas
+      );
+
+      console.log("Claim result:", claimResult);
+
+      setState("executing-claim");
+
+      if (claimResult?.hash) {
+        setClaimTransactionHash(claimResult.hash);
+      }
+
+      // Success!
+      setState("success");
+
+      // Refetch user data to update balances
+      await refetchUserData();
+    } catch (error: any) {
+      console.error("Claim error:", error);
+      const errorMessage = error?.message || "An unexpected error occurred. Please try again.";
+      setError(errorMessage);
     }
   };
 
@@ -155,14 +217,6 @@ const SingleClaimDialog = () => {
   };
 
   const renderInitialState = () => {
-    const gasLimitERC20 = 329000;
-    const gasLimitERC223 = 115000;
-    const gasPriceGwei = 33.53;
-    const networkFeeERC20 = 0.0031;
-    const networkFeeERC223 = 0.0011;
-    const currentGasLimit = selectedStandard === Standard.ERC20 ? gasLimitERC20 : gasLimitERC223;
-    const currentNetworkFee = selectedStandard === Standard.ERC20 ? networkFeeERC20 : networkFeeERC223;
-
     return (
       <div className="space-y-4">
         <div className="bg-tertiary-bg rounded-3 px-4 py-3 md:h-12 md:py-0 flex items-center min-h-[48px]">
@@ -197,7 +251,10 @@ const SingleClaimDialog = () => {
               return (
                 <button
                   key={standard}
-                  onClick={() => setSelectedStandard(standard)}
+                  onClick={() => {
+                    console.log("Standard button clicked:", standard);
+                    setSelectedStandard(standard);
+                  }}
                   className={clsx(
                     "flex-1 h-10 px-4 rounded-2 text-14 font-medium transition-all duration-200 flex items-center justify-center gap-2 group",
                     isSelected
@@ -239,11 +296,10 @@ const SingleClaimDialog = () => {
     );
   };
 
-  const renderConfirmingState = () => (
+  const renderDeliveryConfirmingState = () => (
     <div className="space-y-5">
-      {/* Claim amount display */}
       <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
-        <p className="text-secondary-text text-14 mb-2">Claim amount</p>
+        <p className="text-secondary-text text-14 mb-2">Delivering rewards from pools</p>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
           <div className="flex flex-col">
             <span className="text-20 font-normal text-primary-text">{token.amount}</span>
@@ -260,18 +316,103 @@ const SingleClaimDialog = () => {
               className="w-8 h-8 flex-shrink-0"
             />
             <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
-            <Badge
-              variant={BadgeVariant.STANDARD}
-              standard={selectedStandard}
-              size="small"
-            />
           </div>
         </div>
       </div>
 
       <div className="h-px w-full bg-secondary-border" />
 
-      {/* Confirmation section */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+            <Svg iconName="swap" size={20} className="text-green" />
+          </div>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm delivery</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Preloader type="linear" className="max-md:hidden" />
+          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+            Proceed in your wallet
+          </span>
+          <Preloader size={16} className="md:hidden" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDeliveryExecutingState = () => (
+    <div className="space-y-5">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+        <p className="text-secondary-text text-14 mb-2">Delivering rewards from pools</p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
+          <div className="flex flex-col">
+            <span className="text-20 font-normal text-primary-text">{token.amount}</span>
+            <p className="text-secondary-text text-14">
+              ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Image
+              src={token.logoURI || "/images/tokens/placeholder.svg"}
+              width={32}
+              height={32}
+              alt={token.symbol}
+              className="w-8 h-8 flex-shrink-0"
+            />
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="h-px w-full bg-secondary-border" />
+
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
+            <Svg iconName="swap" size={20} className="text-green" />
+          </div>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing delivery</span>
+        </div>
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+          <a
+            target="_blank"
+            href={data?.deliveryTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.deliveryTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
+          <Preloader size={20} />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderClaimConfirmingState = () => (
+    <div className="space-y-5">
+      <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
+        <p className="text-secondary-text text-14 mb-2">Claiming rewards</p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
+          <div className="flex flex-col">
+            <span className="text-20 font-normal text-primary-text">{token.amount}</span>
+            <p className="text-secondary-text text-14">
+              ${parseFloat(token.amountUSD.replace(/[$,]/g, "")).toFixed(3)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Image
+              src={token.logoURI || "/images/tokens/placeholder.svg"}
+              width={32}
+              height={32}
+              alt={token.symbol}
+              className="w-8 h-8 flex-shrink-0"
+            />
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+            <Badge variant={BadgeVariant.STANDARD} standard={selectedStandard} size="small" />
+          </div>
+        </div>
+      </div>
+
+      <div className="h-px w-full bg-secondary-border" />
+
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
@@ -281,18 +422,19 @@ const SingleClaimDialog = () => {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Preloader type="linear" className="max-md:hidden" />
-          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
+          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+            Proceed in your wallet
+          </span>
           <Preloader size={16} className="md:hidden" />
         </div>
       </div>
     </div>
   );
 
-  const renderExecutingState = () => (
+  const renderClaimExecutingState = () => (
     <div className="space-y-5">
-      {/* Claim amount display */}
       <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1 min-h-[88px] justify-center">
-        <p className="text-secondary-text text-14 mb-2">Claim amount</p>
+        <p className="text-secondary-text text-14 mb-2">Claiming rewards</p>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-0">
           <div className="flex flex-col">
             <span className="text-20 font-normal text-primary-text">{token.amount}</span>
@@ -310,11 +452,7 @@ const SingleClaimDialog = () => {
             />
             <div className="flex flex-row items-center gap-2">
               <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
-              <Badge
-                variant={BadgeVariant.STANDARD}
-                standard={selectedStandard}
-                size="small"
-              />
+              <Badge variant={BadgeVariant.STANDARD} standard={selectedStandard} size="small" />
             </div>
           </div>
         </div>
@@ -322,7 +460,6 @@ const SingleClaimDialog = () => {
 
       <div className="h-px w-full bg-secondary-border" />
 
-      {/* Executing claim section */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
@@ -338,7 +475,12 @@ const SingleClaimDialog = () => {
           >
             Speed up
           </Button>
-          <IconButton iconName="forward" />
+          <a
+            target="_blank"
+            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
           <Preloader size={20} />
         </div>
       </div>
@@ -347,7 +489,6 @@ const SingleClaimDialog = () => {
 
   const renderSuccessState = () => (
     <div className="space-y-5">
-      {/* Success confirmation */}
       <div className="flex flex-col items-center py-3 md:py-4">
         <div className="mx-auto w-[64px] h-[64px] md:w-[80px] md:h-[80px] flex items-center justify-center relative mb-4 md:mb-5">
           <div className="w-[40px] h-[40px] md:w-[54px] md:h-[54px] rounded-full border-[5px] md:border-[7px] blur-[6px] md:blur-[8px] opacity-80 border-green" />
@@ -372,7 +513,12 @@ const SingleClaimDialog = () => {
           <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Successfully claimed</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <IconButton iconName="forward" />
+          <a
+            target="_blank"
+            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+          >
+            <IconButton iconName="forward" />
+          </a>
           <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
             <Svg className="text-primary-bg" iconName="check" size={12} />
           </div>
@@ -383,7 +529,6 @@ const SingleClaimDialog = () => {
 
   const renderErrorState = () => (
     <div className="space-y-4 md:space-y-5">
-      {/* Error display */}
       <div className="flex flex-col items-center py-3 md:py-4">
         <div className="flex items-center justify-center mx-auto mb-4 md:mb-5">
           <Svg className="text-red-light" iconName="warning" size={52} />
@@ -396,7 +541,6 @@ const SingleClaimDialog = () => {
 
       <div className="h-px w-full bg-secondary-border" />
 
-      {/* Error details */}
       <div className="flex items-center justify-between mb-4 gap-2">
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
           <div className="w-8 h-8 md:w-10 md:h-10 bg-red-light/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -410,10 +554,10 @@ const SingleClaimDialog = () => {
         </div>
       </div>
 
-      {/* Error message */}
       <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 md:p-4 mb-4">
         <p className="text-12 md:text-14 text-secondary-text break-words">
-          {data?.errorMessage || "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
+          {data?.errorMessage ||
+            "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
           {!data?.errorMessage && (
             <a href="#" className="text-secondary-text underline break-words">
               common errors
@@ -422,13 +566,7 @@ const SingleClaimDialog = () => {
         </p>
       </div>
 
-      {/* Try again button */}
-      <Button
-        fullWidth
-        size={ButtonSize.LARGE}
-        colorScheme={ButtonColor.GREEN}
-        onClick={handleTryAgain}
-      >
+      <Button fullWidth size={ButtonSize.LARGE} colorScheme={ButtonColor.GREEN} onClick={handleTryAgain}>
         Try again
       </Button>
     </div>
@@ -438,10 +576,14 @@ const SingleClaimDialog = () => {
     switch (state) {
       case "initial":
         return renderInitialState();
-      case "confirming":
-        return renderConfirmingState();
-      case "executing":
-        return renderExecutingState();
+      case "confirming-delivery":
+        return renderDeliveryConfirmingState();
+      case "executing-delivery":
+        return renderDeliveryExecutingState();
+      case "confirming-claim":
+        return renderClaimConfirmingState();
+      case "executing-claim":
+        return renderClaimExecutingState();
       case "success":
         return renderSuccessState();
       case "error":
