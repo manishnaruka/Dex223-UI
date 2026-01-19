@@ -60,7 +60,6 @@ export default function TokenListDropdown({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [listToDelete, setListToDelete] = useState<TokenListOption | null>(null);
-  const [initialSelection, setInitialSelection] = useState<Set<TokenListId>>(new Set());
   const ref = useRef<HTMLButtonElement>(null);
   const { isOpen, setIsOpen, content, setContent } = useAddNewListDialogStore();
   const { setActiveTab } = useAddNewListDialogStore();
@@ -230,20 +229,23 @@ export default function TokenListDropdown({
                   {option.name}
                 </span>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log(e);
-                    }}
-                    className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-light/20 rounded-2 flex items-center justify-center"
-                    title="Delete"
-                  >
-                    <Svg
-                      iconName="delete"
-                      size={16}
-                      className="text-tertiary-text hover:text-tertiary-text-hover"
-                    />
-                  </button>
+                  {/* {!option.isDefault && !option.isPaid && !option.isFree && ( */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setListToDelete(option);
+                        setDeleteDialogOpen(true);
+                      }}
+                      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-light/20 rounded-2 flex items-center justify-center"
+                      title="Delete"
+                    >
+                      <Svg
+                        iconName="delete"
+                        size={16}
+                        className="text-tertiary-text hover:text-tertiary-text-hover"
+                      />
+                    </button>
+                  {/* )} */}
                   <Checkbox
                     checked={isSelected}
                     handleChange={() => handleOptionSelect(option.id)}
@@ -394,7 +396,17 @@ export default function TokenListDropdown({
               >
                 Cancel
               </Button>
-              <Button colorScheme={ButtonColor.RED} onClick={() => console.log("confirm deleting")}>
+              <Button 
+                colorScheme={ButtonColor.RED} 
+                onClick={async () => {
+                  if (listToDelete) {
+                    await db.tokenLists.delete(listToDelete.id);
+                    addToast("Token list successfully deleted");
+                    setDeleteDialogOpen(false);
+                    setListToDelete(null);
+                  }
+                }}
+              >
                 Confirm removing
               </Button>
             </div>

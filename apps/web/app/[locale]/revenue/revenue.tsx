@@ -24,7 +24,7 @@ import { Claims } from "./components/Claims";
 import StakeDialog from "./dialogs/StakeDialog";
 import TokenListDropdown from "./dialogs/TokenListDropdown";
 import useRevenueContract from "./hooks/useRevenueContract";
-import { useRevenueTokens } from "./hooks/useRevenueTokens";
+import { useRevenueTokens, useTotalReward } from "./hooks/useRevenueTokens";
 import { StakeStatus, useStakeDialogStore } from "./stores/useStakeDialogStore";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
@@ -81,6 +81,7 @@ export function Revenue() {
 
   const allAvailableTokens = useTokens();
   const { data: revenueTokensData } = useRevenueTokens();
+  const { data: totalRewardData } = useTotalReward();
 
   const tokensFromSelectedLists = useMemo(() => {
     return allAvailableTokens.filter((token) => {
@@ -419,7 +420,7 @@ export function Revenue() {
               </div>
 
               <div className="relative flex flex-col bg-primary-bg rounded-3 px-4 md:px-5 py-3 md:py-4 w-full md:col-span-2 xl:col-span-5 overflow-hidden min-h-[140px] md:h-[120px] min-w-0 max-w-full">
-                <div className="flex items-center z-10">
+                <div className="flex items-center z-10 gap-1">
                   <span className="text-14 md:text-16 text-secondary-text">Total reward</span>
                   <Tooltip
                     iconSize={16}
@@ -429,17 +430,11 @@ export function Revenue() {
 
                 <div className="flex flex-col z-10 mt-2">
                   <span className="text-20 md:text-24 xl:text-32 font-medium">
-                    $
-                    {mappedClaimsData
-                      .reduce((sum, claim) => {
-                        const usdValue = parseFloat(claim.amountUSD.replace(/[$,]/g, ""));
-                        return sum + usdValue;
-                      }, 0)
-                      .toFixed(2)}
+                    ${totalRewardData?.totalValueUSD || "0"}
                   </span>
                   <span className="text-12 md:text-14 xl:text-16 text-secondary-text mt-1">
-                    {userStaked && typeof userStaked === "bigint" && userStaked > 0n
-                      ? "Staking active"
+                    {totalRewardData?.created_at 
+                      ? `Staked since: ${new Date(totalRewardData.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.')}` 
                       : "Not staked yet"}
                   </span>
                 </div>

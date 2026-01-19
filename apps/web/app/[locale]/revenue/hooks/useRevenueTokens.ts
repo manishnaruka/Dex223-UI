@@ -9,7 +9,6 @@ export interface RevenueTokenInfo {
     name: string;
     symbol: string;
 }
-
 export interface RevenueTokenItem {
     accruedInPoolsNow: string;
     accruedInPoolsNowUSD: string | null;
@@ -24,7 +23,6 @@ export interface RevenueTokenItem {
     priceUSD: string | null;
     totalValueUSD: string | null;
 }
-
 export interface RevenueBalancesResponse {
     updated_at: number;
     total: number;
@@ -32,15 +30,21 @@ export interface RevenueBalancesResponse {
     offset: number;
     items: RevenueTokenItem[];
 }
-
 export interface RevenuePoolItem {
     id?: Address;
     poolId: Address;
     accruedProtocolFeesToken: string;
 }
-
 export interface RevenuePoolsResponse {
     pools: RevenuePoolItem[];
+}
+export interface TotalRewardResponse {
+    created_at: string;
+    updated_at: number;
+    accruedInPoolsNowUSD: string;
+    totalValueUSD: string;
+    status?: string;
+    stakedSince?: string;
 }
 
 export function useRevenueTokens(limit: number = 50, offset: number = 0) {
@@ -83,6 +87,20 @@ export function useRevenuePools(tokenId: string) {
             return response.json();
         },
         enabled: Boolean(tokenId),
+        staleTime: 60000,
+    });
+}
+
+export function useTotalReward() {
+    return useQuery<TotalRewardResponse>({
+        queryKey: ["total-reward"],
+        queryFn: async () => {
+            const response = await fetch("https://api.dex223.io/v1/cache/revenue/total-reward");
+            if (!response.ok) {
+                throw new Error("Failed to fetch total reward");
+            }
+            return response.json();
+        },
         staleTime: 60000,
     });
 }

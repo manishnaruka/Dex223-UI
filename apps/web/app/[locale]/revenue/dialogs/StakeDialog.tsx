@@ -32,6 +32,7 @@ import {
 } from "../stores/useStakeDialogStore";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 
 import {
   useClaimGasLimitStore,
@@ -608,13 +609,15 @@ const StakeDialog = () => {
     }
   }, [isSuccessStake, isRevertedStake, isRevertedApprove, isOpen, setStatus]);
 
-  // Calculate USD value (you can integrate with price oracle later)
+  const { price } = useUSDPrice(
+    selectedStandard === Standard.ERC20 ? RED_ERC20_ADDRESS : RED_ERC223_ADDRESS,
+  );
+
   const calculateUSDValue = useMemo(() => {
     if (!amount || parseFloat(amount) === 0) return "0.00";
-    // TODO: Replace with actual token price from price oracle
-    const tokenPriceUSD = 0.50; // Placeholder price
-    return (parseFloat(amount) * tokenPriceUSD).toFixed(2);
-  }, [amount]);
+    const tokenPrice = price || 0;
+    return (parseFloat(amount) * tokenPrice).toFixed(2);
+  }, [amount, price]);
 
   function StakeActionButton() {
     if (!amount || parseFloat(amount) === 0) {
