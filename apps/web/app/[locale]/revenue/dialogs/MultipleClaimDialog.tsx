@@ -39,8 +39,18 @@ import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertSt
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const MultipleClaimDialog = () => {
-  const { isOpen, state, data, closeDialog, setState, setError, setData, setTokenStandard, setDeliveryTransactionHash, setClaimTransactionHash } =
-    useClaimDialogStore();
+  const {
+    isOpen,
+    state,
+    data,
+    closeDialog,
+    setState,
+    setError,
+    setData,
+    setTokenStandard,
+    setDeliveryTransactionHash,
+    setClaimTransactionHash,
+  } = useClaimDialogStore();
   const chainId = useCurrentChainId();
   const { openConfirmInWalletAlert, closeConfirmInWalletAlert } = useConfirmInWalletAlertStore();
   const { claim, delivery, refetchUserData } = useRevenueContract();
@@ -145,9 +155,10 @@ const MultipleClaimDialog = () => {
       // Collect all tokens and their pool addresses
       for (const token of tokens) {
         const tokenStandard = data.tokenStandards?.[token.id] || globalStandard;
-        const rawTokenAddress = tokenStandard === Standard.ERC20
-          ? ((token as any).fullErc20Address)
-          : ((token as any).fullErc223Address);
+        const rawTokenAddress =
+          tokenStandard === Standard.ERC20
+            ? (token as any).fullErc20Address
+            : (token as any).fullErc223Address;
 
         if (!rawTokenAddress || !isAddress(rawTokenAddress)) {
           setError(`Invalid token address for ${token.symbol}. Please try again.`);
@@ -186,7 +197,7 @@ const MultipleClaimDialog = () => {
         const deliveryResult = await delivery(
           poolAddresses,
           gasSettings,
-          customGasLimit || estimatedGas
+          customGasLimit || estimatedGas,
         );
 
         if (deliveryResult?.hash) {
@@ -199,11 +210,7 @@ const MultipleClaimDialog = () => {
       // STEP 2: CLAIM
       setState("confirming-claim");
 
-      const claimResult = await claim(
-        tokenAddresses,
-        gasSettings,
-        customGasLimit || estimatedGas
-      );
+      const claimResult = await claim(tokenAddresses, gasSettings, customGasLimit || estimatedGas);
 
       setState("executing-claim");
 
@@ -228,7 +235,7 @@ const MultipleClaimDialog = () => {
     if (tokens.length === 0) return globalStandard;
     const firstStandard: any = data.tokenStandards?.[tokens[0].id] || globalStandard;
     const allMatch = tokens.every(
-      (token) => (data.tokenStandards?.[token.id] || globalStandard) === firstStandard
+      (token) => (data.tokenStandards?.[token.id] || globalStandard) === firstStandard,
     );
 
     return allMatch ? firstStandard : null;
@@ -247,7 +254,7 @@ const MultipleClaimDialog = () => {
     setTokenStandard(tokenId, standard);
     const updatedTokenStandards = { ...data.tokenStandards, [tokenId]: standard };
     const allMatch = tokens.every(
-      (token) => (updatedTokenStandards[token.id] || globalStandard) === standard
+      (token) => (updatedTokenStandards[token.id] || globalStandard) === standard,
     );
     if (!allMatch) {
       setGlobalStandard(null as any);
@@ -313,7 +320,10 @@ const MultipleClaimDialog = () => {
                   {/* Desktop layout */}
                   <div className="hidden md:flex items-center gap-3">
                     {/* Token icon and name */}
-                    <div className="flex items-center gap-2 min-w-0 flex-shrink-0" style={{ width: '160px' }}>
+                    <div
+                      className="flex items-center gap-2 min-w-0 flex-shrink-0"
+                      style={{ width: "160px" }}
+                    >
                       <Image
                         src={token.logoURI || "/images/tokens/placeholder.svg"}
                         width={24}
@@ -334,8 +344,10 @@ const MultipleClaimDialog = () => {
                     </div>
 
                     {/* USD value */}
-                    <div className="flex-shrink-0" style={{ width: '120px' }}>
-                      <span className="text-primary-text text-14 font-medium">{token.amountUSD}</span>
+                    <div className="flex-shrink-0" style={{ width: "120px" }}>
+                      <span className="text-primary-text text-14 font-medium">
+                        {token.amountUSD}
+                      </span>
                     </div>
 
                     {/* Standard toggle */}
@@ -351,7 +363,9 @@ const MultipleClaimDialog = () => {
                             <StandardButton
                               colorScheme={ThemeColors.GREEN}
                               key={standard}
-                              handleStandardSelect={() => handleTokenStandardChange(token.id, standard)}
+                              handleStandardSelect={() =>
+                                handleTokenStandardChange(token.id, standard)
+                              }
                               standard={standard}
                               selectedStandard={tokenStandard as Standard}
                               disabled={false}
@@ -387,7 +401,9 @@ const MultipleClaimDialog = () => {
 
                       {/* Right: USD value */}
                       <div className="flex-shrink-0">
-                        <span className="text-primary-text text-14 font-medium">{token.amountUSD}</span>
+                        <span className="text-primary-text text-14 font-medium">
+                          {token.amountUSD}
+                        </span>
                       </div>
                     </div>
 
@@ -404,7 +420,9 @@ const MultipleClaimDialog = () => {
                             <div key={standard} className="[&>button]:!w-auto">
                               <StandardButton
                                 colorScheme={ThemeColors.GREEN}
-                                handleStandardSelect={() => handleTokenStandardChange(token.id, standard)}
+                                handleStandardSelect={() =>
+                                  handleTokenStandardChange(token.id, standard)
+                                }
                                 standard={standard}
                                 selectedStandard={tokenStandard as Standard}
                                 disabled={false}
@@ -449,7 +467,9 @@ const MultipleClaimDialog = () => {
         <div className="text-secondary-text text-14 mb-1">Delivering rewards from pools</div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="text-20 font-normal text-primary-text">{tokenCount} tokens</div>
-          <div className="text-14 md:text-16 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
+          <div className="text-14 md:text-16 text-secondary-text">
+            (${data.totalReward.toFixed(2)})
+          </div>
         </div>
       </div>
 
@@ -460,11 +480,15 @@ const MultipleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="swap" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm delivery</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Confirm delivery
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Preloader type="linear" className="max-md:hidden" />
-          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
+          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+            Proceed in your wallet
+          </span>
           <Preloader size={16} className="md:hidden" />
         </div>
       </div>
@@ -477,7 +501,9 @@ const MultipleClaimDialog = () => {
         <div className="text-secondary-text text-14 mb-1">Delivering rewards from pools</div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="text-20 font-normal text-primary-text">{tokenCount} tokens</div>
-          <div className="text-14 md:text-16 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
+          <div className="text-14 md:text-16 text-secondary-text">
+            (${data.totalReward.toFixed(2)})
+          </div>
         </div>
       </div>
 
@@ -488,12 +514,22 @@ const MultipleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="swap" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing delivery</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Executing delivery
+          </span>
         </div>
         <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           <a
             target="_blank"
-            href={data?.deliveryTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.deliveryTransactionHash, chainId) : "#"}
+            href={
+              data?.deliveryTransactionHash
+                ? getExplorerLink(
+                    ExplorerLinkType.TRANSACTION,
+                    data.deliveryTransactionHash,
+                    chainId,
+                  )
+                : "#"
+            }
           >
             <IconButton iconName="forward" />
           </a>
@@ -513,7 +549,9 @@ const MultipleClaimDialog = () => {
             <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} size="small" />
             <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} size="small" />
           </div>
-          <div className="text-14 md:text-16 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
+          <div className="text-14 md:text-16 text-secondary-text">
+            (${data.totalReward.toFixed(2)})
+          </div>
         </div>
       </div>
 
@@ -525,11 +563,15 @@ const MultipleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm claim</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Confirm claim
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Preloader type="linear" className="max-md:hidden" />
-          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
+          <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+            Proceed in your wallet
+          </span>
           <Preloader size={16} className="md:hidden" />
         </div>
       </div>
@@ -547,7 +589,9 @@ const MultipleClaimDialog = () => {
             <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC20} size="small" />
             <Badge variant={BadgeVariant.STANDARD} standard={Standard.ERC223} size="small" />
           </div>
-          <div className="text-14 md:text-16 text-secondary-text">(${data.totalReward.toFixed(2)})</div>
+          <div className="text-14 md:text-16 text-secondary-text">
+            (${data.totalReward.toFixed(2)})
+          </div>
         </div>
       </div>
 
@@ -559,7 +603,9 @@ const MultipleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing claim</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Executing claim
+          </span>
         </div>
         <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           <Button
@@ -571,7 +617,11 @@ const MultipleClaimDialog = () => {
           </Button>
           <a
             target="_blank"
-            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+            href={
+              data?.claimTransactionHash
+                ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId)
+                : "#"
+            }
           >
             <IconButton iconName="forward" />
           </a>
@@ -593,7 +643,9 @@ const MultipleClaimDialog = () => {
             size={52}
           />
         </div>
-        <h3 className="text-16 md:text-20 font-bold text-primary-text mb-2">Successfully claimed</h3>
+        <h3 className="text-16 md:text-20 font-bold text-primary-text mb-2">
+          Successfully claimed
+        </h3>
         <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">
           {tokenCount} tokens (${data.totalReward.toFixed(2)})
         </p>
@@ -606,12 +658,18 @@ const MultipleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-green-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Successfully claimed</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Successfully claimed
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <a
             target="_blank"
-            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+            href={
+              data?.claimTransactionHash
+                ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId)
+                : "#"
+            }
           >
             <IconButton iconName="forward" />
           </a>
@@ -644,7 +702,9 @@ const MultipleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-red-light/20 rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-red-light" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Claim failed</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Claim failed
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <IconButton iconName="forward" />
@@ -655,7 +715,8 @@ const MultipleClaimDialog = () => {
       {/* Error message */}
       <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 md:p-4">
         <p className="text-12 md:text-14 text-secondary-text break-words">
-          {data?.errorMessage || "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
+          {data?.errorMessage ||
+            "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
           {!data?.errorMessage && (
             <a href="#" className="text-secondary-text underline break-words">
               common errors
@@ -700,10 +761,12 @@ const MultipleClaimDialog = () => {
   return (
     <>
       <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog} maxMobileWidth="767px">
-        <div className={clsxMerge(
-          "bg-primary-bg rounded-5 w-full max-md:rounded-t-5 max-md:rounded-b-none",
-          state === "initial" ? "md:max-w-[800px]" : "md:w-[600px]"
-        )}>
+        <div
+          className={clsxMerge(
+            "bg-primary-bg rounded-5 w-full max-md:rounded-t-5 max-md:rounded-b-none",
+            state === "initial" ? "md:max-w-[800px]" : "md:w-[600px]",
+          )}
+        >
           <DialogHeader onClose={closeDialog} title="Claim" />
           <div className="card-spacing max-md:px-4 max-md:pb-6">{renderContent()}</div>
         </div>

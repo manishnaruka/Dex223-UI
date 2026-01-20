@@ -166,9 +166,7 @@ export default function useRevenueContract({
     },
   });
 
-  const {
-    data: redErc20Balance,
-  } = useReadContract({
+  const { data: redErc20Balance } = useReadContract({
     abi: ERC20_ABI,
     address: RED_ERC20_ADDRESS,
     functionName: "balanceOf",
@@ -179,9 +177,7 @@ export default function useRevenueContract({
     },
   });
 
-  const {
-    data: redErc223Balance,
-  } = useReadContract({
+  const { data: redErc223Balance } = useReadContract({
     abi: ERC20_ABI,
     address: RED_ERC223_ADDRESS,
     functionName: "balanceOf",
@@ -558,7 +554,12 @@ export default function useRevenueContract({
   );
 
   const unstake = useCallback(
-    async (tokenAddress: Address, amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
+    async (
+      tokenAddress: Address,
+      amount: bigint,
+      gasSettings?: CustomGasSettings,
+      customGasLimit?: bigint,
+    ) => {
       return executeTransaction({
         functionName: "withdraw",
         args: [tokenAddress, amount],
@@ -568,7 +569,7 @@ export default function useRevenueContract({
           template: RecentTransactionTitleTemplate.WITHDRAW,
           symbol: "D223",
           amount: formatUnits(amount, 18),
-          logoURI: "/images/tokens/red.svg"
+          logoURI: "/images/tokens/red.svg",
         },
       });
     },
@@ -581,7 +582,7 @@ export default function useRevenueContract({
         functionName: "delivery",
         args: [poolAddresses],
         gasSettings,
-        customGasLimit
+        customGasLimit,
       });
     },
     [executeTransaction],

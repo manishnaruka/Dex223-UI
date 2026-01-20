@@ -10,7 +10,12 @@ interface Props {
   setIsOpen: (isOpen: boolean) => void;
   maxMobileWidth?: string;
 }
-export default function DrawerDialog({ isOpen, children, setIsOpen, maxMobileWidth = '640px' }: PropsWithChildren<Props>) {
+export default function DrawerDialog({
+  isOpen,
+  children,
+  setIsOpen,
+  maxMobileWidth = "640px",
+}: PropsWithChildren<Props>) {
   const isMobile = useMediaQuery({ query: `(max-width: ${maxMobileWidth})` });
 
   const handlers = useSwipeable({

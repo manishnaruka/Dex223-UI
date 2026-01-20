@@ -47,4 +47,3 @@ export const useClaimGasSettings = () => {
 
   return { gasSettings, gasModel: gasPriceSettings.model, customGasLimit };
 };
-
