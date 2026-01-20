@@ -8,7 +8,9 @@ import clsx from "clsx";
 import Image from "next/image";
 import React, { useEffect } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { formatGwei } from "viem";
 
+import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import {
@@ -17,25 +19,23 @@ import {
   ButtonVariant as ButtonVariantType,
 } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
-import { formatFloat } from "@/functions/formatFloat";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Standard } from "@/sdk_bi/standard";
-import { formatGwei } from "viem";
 
+import ForwardIcon from "../../../../../../../packages/ui/src/icons/ForwardIcon";
 import MultipleClaimDialog from "../../dialogs/MultipleClaimDialog";
 import SingleClaimDialog from "../../dialogs/SingleClaimDialog";
 import { useClaimDialogStore } from "../../stores/useClaimDialogStore";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
   useClaimGasPrice,
   useClaimGasPriceStore,
 } from "../../stores/useClaimGasSettingsStore";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
-import Svg from "@/components/atoms/Svg";
-import ForwardIcon from "../../../../../../../packages/ui/src/icons/ForwardIcon";
 
 export const Claims = ({
   tableData,

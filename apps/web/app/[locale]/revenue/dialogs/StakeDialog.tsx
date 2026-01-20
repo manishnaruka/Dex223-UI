@@ -16,11 +16,14 @@ import Svg from "@/components/atoms/Svg";
 import { HelperText } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import TokenStandardSelector from "@/components/common/TokenStandardSelector";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { Standard } from "@/sdk_bi/standard";
 
@@ -28,11 +31,6 @@ import useRevenueContract, {
   RED_ERC20_ADDRESS,
   RED_ERC223_ADDRESS,
 } from "../hooks/useRevenueContract";
-import { StakeError, StakeStatus, useStakeDialogStore } from "../stores/useStakeDialogStore";
-import GasSettingsBlock from "@/components/common/GasSettingsBlock";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
-import { useUSDPrice } from "@/hooks/useUSDPrice";
-
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
@@ -40,6 +38,7 @@ import {
   useClaimGasPriceStore,
   useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
+import { StakeError, StakeStatus, useStakeDialogStore } from "../stores/useStakeDialogStore";
 
 export function useStakeStatus() {
   const { status: stakeStatus } = useStakeDialogStore();

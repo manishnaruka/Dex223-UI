@@ -12,9 +12,10 @@ import { MarginPosition } from "@/app/[locale]/margin-trading/types";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
+import TradingViewWidget from "@/components/common/TradingViewWidget";
 import { ThemeColors } from "@/config/theme/colors";
 import { ColorSchemeProvider } from "@/lib/color-scheme";
-import TradingViewWidget from "@/components/common/TradingViewWidget";
+
 import { Field, useMarginSwapAmountsStore } from "./stores/useMarginSwapAmountsStore";
 
 export default function MarginSwapPage() {

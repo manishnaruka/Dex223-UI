@@ -14,6 +14,7 @@ import { useAccount, useSwitchChain } from "wagmi";
 import { useRevenueStore } from "@/app/[locale]/revenue/stores/useRevenueStore";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { TokenListId } from "@/db/db";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -26,7 +27,6 @@ import TokenListDropdown from "./dialogs/TokenListDropdown";
 import useRevenueContract from "./hooks/useRevenueContract";
 import { useRevenueTokens, useTotalReward } from "./hooks/useRevenueTokens";
 import { StakeStatus, useStakeDialogStore } from "./stores/useStakeDialogStore";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
 const WalletSearchInput = ({
   searchValue,

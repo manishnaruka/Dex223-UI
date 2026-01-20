@@ -14,10 +14,19 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import IconButton from "@/components/buttons/IconButton";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { addNotification } from "@/other/notification";
 import { Standard } from "@/sdk_bi/standard";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
+import {
+  RecentTransactionStatus,
+  RecentTransactionTitleTemplate,
+} from "@/stores/useRecentTransactionsStore";
 
+import useRevenueContract from "../hooks/useRevenueContract";
+import { useRevenuePools } from "../hooks/useRevenueTokens";
+import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
@@ -25,15 +34,6 @@ import {
   useClaimGasPriceStore,
   useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
-import { useClaimDialogStore } from "../stores/useClaimDialogStore";
-import { addNotification } from "@/other/notification";
-import {
-  RecentTransactionStatus,
-  RecentTransactionTitleTemplate,
-} from "@/stores/useRecentTransactionsStore";
-import useRevenueContract from "../hooks/useRevenueContract";
-import { useRevenuePools } from "../hooks/useRevenueTokens";
-import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const SingleClaimDialog = () => {
   const {

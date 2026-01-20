@@ -1,24 +1,34 @@
 "use client";
 
+import Preloader from "@repo/ui/preloader";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
-
-import Preloader from "@repo/ui/preloader";
+import { Address, isAddress } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import { SearchInput } from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton from "@/components/buttons/IconButton";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { StandardButton } from "@/components/common/TokenStandardSelector";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { addNotification } from "@/other/notification";
 import { Standard } from "@/sdk_bi/standard";
+import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
+import {
+  RecentTransactionStatus,
+  RecentTransactionTitleTemplate,
+} from "@/stores/useRecentTransactionsStore";
 
+import useRevenueContract from "../hooks/useRevenueContract";
+import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
@@ -26,17 +36,6 @@ import {
   useClaimGasPriceStore,
   useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
-import { useClaimDialogStore } from "../stores/useClaimDialogStore";
-import { SearchInput } from "@/components/atoms/Input";
-import { addNotification } from "@/other/notification";
-import {
-  RecentTransactionStatus,
-  RecentTransactionTitleTemplate,
-} from "@/stores/useRecentTransactionsStore";
-import useRevenueContract from "../hooks/useRevenueContract";
-import { Address, isAddress } from "viem";
-import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
-import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const MultipleClaimDialog = () => {
   const {

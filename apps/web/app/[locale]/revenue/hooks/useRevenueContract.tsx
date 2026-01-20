@@ -18,6 +18,7 @@ import {
   RecentTransactionTitleTemplate,
   stringifyObject,
 } from "@/stores/useRecentTransactionsStore";
+
 import { useRevenueTokens } from "./useRevenueTokens";
 
 // Contract addresses on Sepolia testnet

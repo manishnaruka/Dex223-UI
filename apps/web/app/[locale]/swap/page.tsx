@@ -3,13 +3,13 @@ import React, { useEffect, useState } from "react";
 
 import ConfirmConvertDialog from "@/app/[locale]/swap/components/ConfirmConvertDialog";
 import TradeForm from "@/app/[locale]/swap/components/TradeForm";
-import TradingViewWidget from "@/components/common/TradingViewWidget";
 import TwoVersionsInfo from "@/app/[locale]/swap/components/TwoVersionsInfo";
 import { Field, useSwapAmountsStore } from "@/app/[locale]/swap/stores/useSwapAmountsStore";
 import { useSwapRecentTransactionsStore } from "@/app/[locale]/swap/stores/useSwapRecentTransactions";
 import { useSwapTokensStore } from "@/app/[locale]/swap/stores/useSwapTokensStore";
 import RecentTransactions from "@/components/common/RecentTransactions";
 import SelectedTokensInfo from "@/components/common/SelectedTokensInfo";
+import TradingViewWidget from "@/components/common/TradingViewWidget";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useSwapSearchParams } from "@/hooks/useSwapSearchParams";
 
