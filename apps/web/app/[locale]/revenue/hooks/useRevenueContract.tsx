@@ -18,11 +18,13 @@ import {
   RecentTransactionTitleTemplate,
   stringifyObject,
 } from "@/stores/useRecentTransactionsStore";
+
 import { useRevenueTokens } from "./useRevenueTokens";
 
 // Contract addresses on Sepolia testnet
 // 0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2
-export const REVENUE_CONTRACT_ADDRESS = "0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2" as Address;
+// export const REVENUE_CONTRACT_ADDRESS = "0x4e38fB6f9243d2aC91C490230375FeDE1E0aD7F2" as Address;
+const REVENUE_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_REVENUE_CONTRACT_ADDRESS as Address;
 export const RED_ERC20_ADDRESS = "0x1DEf777468F76ed1E74fC87bD32334d3Ccb520d0" as Address;
 export const RED_ERC223_ADDRESS = "0x0a67Cc4D3Ac29a133a597b5Bef3fe9A6028ACad2" as Address;
 
@@ -166,9 +168,7 @@ export default function useRevenueContract({
     },
   });
 
-  const {
-    data: redErc20Balance,
-  } = useReadContract({
+  const { data: redErc20Balance } = useReadContract({
     abi: ERC20_ABI,
     address: RED_ERC20_ADDRESS,
     functionName: "balanceOf",
@@ -179,9 +179,7 @@ export default function useRevenueContract({
     },
   });
 
-  const {
-    data: redErc223Balance,
-  } = useReadContract({
+  const { data: redErc223Balance } = useReadContract({
     abi: ERC20_ABI,
     address: RED_ERC223_ADDRESS,
     functionName: "balanceOf",
@@ -558,7 +556,12 @@ export default function useRevenueContract({
   );
 
   const unstake = useCallback(
-    async (tokenAddress: Address, amount: bigint, gasSettings?: CustomGasSettings, customGasLimit?: bigint) => {
+    async (
+      tokenAddress: Address,
+      amount: bigint,
+      gasSettings?: CustomGasSettings,
+      customGasLimit?: bigint,
+    ) => {
       return executeTransaction({
         functionName: "withdraw",
         args: [tokenAddress, amount],
@@ -568,7 +571,7 @@ export default function useRevenueContract({
           template: RecentTransactionTitleTemplate.WITHDRAW,
           symbol: "D223",
           amount: formatUnits(amount, 18),
-          logoURI: "/images/tokens/red.svg"
+          logoURI: "/images/tokens/red.svg",
         },
       });
     },
@@ -581,7 +584,7 @@ export default function useRevenueContract({
         functionName: "delivery",
         args: [poolAddresses],
         gasSettings,
-        customGasLimit
+        customGasLimit,
       });
     },
     [executeTransaction],

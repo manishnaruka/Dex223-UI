@@ -16,24 +16,21 @@ import Svg from "@/components/atoms/Svg";
 import { HelperText } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
+import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import TokenStandardSelector from "@/components/common/TokenStandardSelector";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { Standard } from "@/sdk_bi/standard";
 
-import useRevenueContract, { RED_ERC20_ADDRESS, RED_ERC223_ADDRESS } from "../hooks/useRevenueContract";
-import {
-  StakeError,
-  StakeStatus,
-  useStakeDialogStore,
-} from "../stores/useStakeDialogStore";
-import GasSettingsBlock from "@/components/common/GasSettingsBlock";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
-import { useUSDPrice } from "@/hooks/useUSDPrice";
-
+import useRevenueContract, {
+  RED_ERC20_ADDRESS,
+  RED_ERC223_ADDRESS,
+} from "../hooks/useRevenueContract";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
@@ -41,6 +38,7 @@ import {
   useClaimGasPriceStore,
   useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
+import { StakeError, StakeStatus, useStakeDialogStore } from "../stores/useStakeDialogStore";
 
 export function useStakeStatus() {
   const { status: stakeStatus } = useStakeDialogStore();
@@ -242,14 +240,18 @@ function StakeRow({
           {isSuccess && `Successfully ${isStaking ? "staked" : "unstaked"}`}
         </span>
         {isPending && (
-          <span className="text-secondary-text text-12 md:hidden mt-0.5">Proceed in your wallet</span>
+          <span className="text-secondary-text text-12 md:hidden mt-0.5">
+            Proceed in your wallet
+          </span>
         )}
       </div>
       <div className="relative flex items-center gap-1 md:gap-2 justify-end flex-shrink-0">
         {isPending && (
           <>
             <Preloader type="linear" className="max-md:hidden" />
-            <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">Proceed in your wallet</span>
+            <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+              Proceed in your wallet
+            </span>
           </>
         )}
         {isLoading && (
@@ -361,7 +363,8 @@ const StakeDialog = () => {
   // Dynamic gas limit estimation based on selected standard
   const defaultGasLimitERC20 = BigInt(329000);
   const defaultGasLimitERC223 = BigInt(115000);
-  const defaultGasLimit = selectedStandard === Standard.ERC20 ? defaultGasLimitERC20 : defaultGasLimitERC223;
+  const defaultGasLimit =
+    selectedStandard === Standard.ERC20 ? defaultGasLimitERC20 : defaultGasLimitERC223;
   const gasToUse = customGasLimit || estimatedGas || defaultGasLimit;
 
   // Dynamic gas display values (similar to swap module pattern)
@@ -553,7 +556,12 @@ const StakeDialog = () => {
         setStatus(StakeStatus.PENDING);
         try {
           // Always use ERC-20 address for withdraw - the contract tracks all stakes under ERC-20 address
-          const unstakeResult = await unstake(RED_ERC20_ADDRESS, amountBigInt, gasSettings, gasToUse);
+          const unstakeResult = await unstake(
+            RED_ERC20_ADDRESS,
+            amountBigInt,
+            gasSettings,
+            gasToUse,
+          );
           if (unstakeResult?.hash) {
             setStakeHash(unstakeResult.hash);
             setStatus(StakeStatus.LOADING);
@@ -753,7 +761,13 @@ const StakeDialog = () => {
         size={ButtonSize.LARGE}
         colorScheme={ButtonColor.GREEN}
         onClick={handleStakeUnstake}
-        disabled={!amount || parseFloat(amount) === 0 || (!isStaking && !canUnstake) || isInsufficientBalance || isEditApproveActive}
+        disabled={
+          !amount ||
+          parseFloat(amount) === 0 ||
+          (!isStaking && !canUnstake) ||
+          isInsufficientBalance ||
+          isEditApproveActive
+        }
       >
         {title}
       </Button>
@@ -844,81 +858,80 @@ const StakeDialog = () => {
         )}
 
         {/* Approve amount section - only show for ERC-20 staking */}
-        {isStaking && (selectedStandard === Standard.ERC20 || selectedStandard === Standard.ERC223) && (
-          <div
-            className={clsx(
-              "bg-tertiary-bg rounded-3 flex items-center px-4 md:px-5 py-2 min-h-12 gap-2 md:gap-3",
-              +amountToApprove < +amount && "md:pb-[26px]",
-            )}
-          >
-            <div className="md:items-center md:justify-between md:gap-5 flex-grow flex flex-col gap-1 md:flex-row">
-              <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text whitespace-nowrap md:flex-row-reverse">
-                <span className="text-12 md:text-14">Approve amount</span>
-                <Tooltip
-                  iconSize={16}
-                  text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
-                />
+        {isStaking &&
+          (selectedStandard === Standard.ERC20 || selectedStandard === Standard.ERC223) && (
+            <div
+              className={clsx(
+                "bg-tertiary-bg rounded-3 flex items-center px-4 md:px-5 py-2 min-h-12 gap-2 md:gap-3",
+                +amountToApprove < +amount && "md:pb-[26px]",
+              )}
+            >
+              <div className="md:items-center md:justify-between md:gap-5 flex-grow flex flex-col gap-1 md:flex-row">
+                <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text whitespace-nowrap md:flex-row-reverse">
+                  <span className="text-12 md:text-14">Approve amount</span>
+                  <Tooltip
+                    iconSize={16}
+                    text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
+                  />
+                </div>
+
+                {!isEditApproveActive ? (
+                  <span className="text-12 md:text-14">{amountToApprove || "0"} D223</span>
+                ) : (
+                  <div className="flex-grow">
+                    <div className="relative w-full flex-grow">
+                      <NumericFormat
+                        inputMode="decimal"
+                        allowedDecimalSeparators={[","]}
+                        className={clsx(
+                          "h-8 pl-3 pr-14 text-14",
+                          +amountToApprove < +amount && "border-red-light focus:border-red-light",
+                        )}
+                        value={amountToApprove}
+                        onValueChange={(values) => {
+                          setAmountToApprove(values.value);
+                        }}
+                        customInput={Input}
+                        allowNegative={false}
+                        type="text"
+                      />
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text text-14">
+                        D223
+                      </span>
+                    </div>
+                    {+amountToApprove < +amount && (
+                      <span className="text-red-light md:absolute text-12 md:translate-y-0.5">
+                        Must be higher or equal {amount}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {!isEditApproveActive ? (
-                <span className="text-12 md:text-14">
-                  {amountToApprove || "0"} D223
-                </span>
-              ) : (
-                <div className="flex-grow">
-                  <div className="relative w-full flex-grow">
-                    <NumericFormat
-                      inputMode="decimal"
-                      allowedDecimalSeparators={[","]}
-                      className={clsx(
-                        "h-8 pl-3 pr-14 text-14",
-                        +amountToApprove < +amount && "border-red-light focus:border-red-light"
-                      )}
-                      value={amountToApprove}
-                      onValueChange={(values) => {
-                        setAmountToApprove(values.value);
-                      }}
-                      customInput={Input}
-                      allowNegative={false}
-                      type="text"
-                    />
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text text-14">
-                      D223
-                    </span>
-                  </div>
-                  {+amountToApprove < +amount && (
-                    <span className="text-red-light md:absolute text-12 md:translate-y-0.5">
-                      Must be higher or equal {amount}
-                    </span>
-                  )}
-                </div>
-              )}
+              <div className="flex items-center flex-shrink-0">
+                {!isEditApproveActive ? (
+                  <Button
+                    size={ButtonSize.EXTRA_SMALL}
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                    onClick={() => setIsEditApproveActive(true)}
+                    className="!rounded-20"
+                  >
+                    Edit
+                  </Button>
+                ) : (
+                  <Button
+                    disabled={+amountToApprove < +amount}
+                    size={ButtonSize.EXTRA_SMALL}
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                    onClick={() => setIsEditApproveActive(false)}
+                    className="!rounded-20 disabled:bg-quaternary-bg"
+                  >
+                    Save
+                  </Button>
+                )}
+              </div>
             </div>
-
-            <div className="flex items-center flex-shrink-0">
-              {!isEditApproveActive ? (
-                <Button
-                  size={ButtonSize.EXTRA_SMALL}
-                  colorScheme={ButtonColor.LIGHT_GREEN}
-                  onClick={() => setIsEditApproveActive(true)}
-                  className="!rounded-20"
-                >
-                  Edit
-                </Button>
-              ) : (
-                <Button
-                  disabled={+amountToApprove < +amount}
-                  size={ButtonSize.EXTRA_SMALL}
-                  colorScheme={ButtonColor.LIGHT_GREEN}
-                  onClick={() => setIsEditApproveActive(false)}
-                  className="!rounded-20 disabled:bg-quaternary-bg"
-                >
-                  Save
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+          )}
 
         {/* Gas price and network fee section */}
         <GasSettingsBlock
@@ -950,8 +963,12 @@ const StakeDialog = () => {
                     </p>
                     <div className="flex justify-between items-start md:items-center gap-2">
                       <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-24 md:text-32 text-primary-text break-words">{amount || "0"}</span>
-                        <p className="text-secondary-text text-12 md:text-14">${calculateUSDValue}</p>
+                        <span className="text-24 md:text-32 text-primary-text break-words">
+                          {amount || "0"}
+                        </span>
+                        <p className="text-secondary-text text-12 md:text-14">
+                          ${calculateUSDValue}
+                        </p>
                       </div>
                       <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
                         <div className="w-7 h-7 md:w-8 md:h-8 bg-primary-bg rounded-full flex items-center justify-center flex-shrink-0">
@@ -963,9 +980,15 @@ const StakeDialog = () => {
                             className="md:w-4 md:h-4"
                           />
                         </div>
-                        <span className="text-14 md:text-16 font-medium text-primary-text whitespace-nowrap">D223</span>
+                        <span className="text-14 md:text-16 font-medium text-primary-text whitespace-nowrap">
+                          D223
+                        </span>
                         <Image
-                          src={selectedStandard === Standard.ERC20 ? "/images/badges/erc-20-green-small.svg" : "/images/badges/erc-223-green-small.svg"}
+                          src={
+                            selectedStandard === Standard.ERC20
+                              ? "/images/badges/erc-20-green-small.svg"
+                              : "/images/badges/erc-223-green-small.svg"
+                          }
                           alt="Standard"
                           width={40}
                           height={40}
@@ -1015,9 +1038,7 @@ const StakeDialog = () => {
                   </h3>
 
                   {/* Amount */}
-                  <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">
-                    {amount} D223
-                  </p>
+                  <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">{amount} D223</p>
                 </div>
 
                 <div className="h-px w-full bg-secondary-border" />

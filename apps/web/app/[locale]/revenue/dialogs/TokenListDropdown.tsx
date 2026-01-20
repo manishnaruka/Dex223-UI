@@ -104,7 +104,7 @@ export default function TokenListDropdown({
     elements: {
       reference: ref.current,
     },
-    strategy: 'fixed',
+    strategy: "fixed",
     middleware: [offset(8), flip()],
     whileElementsMounted: (reference, floating, update) =>
       autoUpdate(reference, floating, update, {
@@ -225,26 +225,24 @@ export default function TokenListDropdown({
                 className="cursor-pointer h-12 bg-primary-bg flex items-center gap-3 px-5 group relative hover:bg-tertiary-bg transition-colors duration-200"
               >
                 {getOptionIcon(option)}
-                <span className="text-primary-text flex-1 truncate text-16">
-                  {option.name}
-                </span>
+                <span className="text-primary-text flex-1 truncate text-16">{option.name}</span>
                 <div className="flex items-center gap-2">
                   {/* {!option.isDefault && !option.isPaid && !option.isFree && ( */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setListToDelete(option);
-                        setDeleteDialogOpen(true);
-                      }}
-                      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-light/20 rounded-2 flex items-center justify-center"
-                      title="Delete"
-                    >
-                      <Svg
-                        iconName="delete"
-                        size={16}
-                        className="text-tertiary-text hover:text-tertiary-text-hover"
-                      />
-                    </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setListToDelete(option);
+                      setDeleteDialogOpen(true);
+                    }}
+                    className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-light/20 rounded-2 flex items-center justify-center"
+                    title="Delete"
+                  >
+                    <Svg
+                      iconName="delete"
+                      size={16}
+                      className="text-tertiary-text hover:text-tertiary-text-hover"
+                    />
+                  </button>
                   {/* )} */}
                   <Checkbox
                     checked={isSelected}
@@ -351,20 +349,30 @@ export default function TokenListDropdown({
       </div>
 
       {/* Mobile modal */}
-      <DrawerDialog isOpen={isMobile && isDropdownOpen} setIsOpen={setIsDropdownOpen} maxMobileWidth="767px">
+      <DrawerDialog
+        isOpen={isMobile && isDropdownOpen}
+        setIsOpen={setIsDropdownOpen}
+        maxMobileWidth="767px"
+      >
         <div className="w-full md:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
           <DialogHeader onClose={() => setIsDropdownOpen(false)} title="Token lists" />
-          <div className="pb-4">
-            {renderDropdownContent()}
-          </div>
+          <div className="pb-4">{renderDropdownContent()}</div>
         </div>
       </DrawerDialog>
 
-      <DrawerDialog isOpen={content === "import-list"} setIsOpen={handleClose} maxMobileWidth="767px">
+      <DrawerDialog
+        isOpen={content === "import-list"}
+        setIsOpen={handleClose}
+        maxMobileWidth="767px"
+      >
         <AddNewList setContent={setContent} handleClose={handleClose} />
       </DrawerDialog>
 
-      <DrawerDialog isOpen={deleteDialogOpen} setIsOpen={setDeleteDialogOpen} maxMobileWidth="767px">
+      <DrawerDialog
+        isOpen={deleteDialogOpen}
+        setIsOpen={setDeleteDialogOpen}
+        maxMobileWidth="767px"
+      >
         <div className="w-full sm:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
           <DialogHeader
             onClose={() => {
@@ -384,7 +392,8 @@ export default function TokenListDropdown({
               />
             )}
             <p className="mb-5 text-center text-primary-text text-16">
-              Please confirm that you would like to remove the <b className="whitespace-nowrap">«{listToDelete?.name}»</b> list
+              Please confirm that you would like to remove the{" "}
+              <b className="whitespace-nowrap">«{listToDelete?.name}»</b> list
             </p>
             <div className="grid grid-cols-2 gap-2">
               <Button
@@ -396,8 +405,8 @@ export default function TokenListDropdown({
               >
                 Cancel
               </Button>
-              <Button 
-                colorScheme={ButtonColor.RED} 
+              <Button
+                colorScheme={ButtonColor.RED}
                 onClick={async () => {
                   if (listToDelete) {
                     await db.tokenLists.delete(listToDelete.id);

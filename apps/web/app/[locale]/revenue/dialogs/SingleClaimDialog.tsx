@@ -14,10 +14,19 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import IconButton from "@/components/buttons/IconButton";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { addNotification } from "@/other/notification";
 import { Standard } from "@/sdk_bi/standard";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
+import {
+  RecentTransactionStatus,
+  RecentTransactionTitleTemplate,
+} from "@/stores/useRecentTransactionsStore";
 
+import useRevenueContract from "../hooks/useRevenueContract";
+import { useRevenuePools } from "../hooks/useRevenueTokens";
+import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
@@ -25,15 +34,6 @@ import {
   useClaimGasPriceStore,
   useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
-import { useClaimDialogStore } from "../stores/useClaimDialogStore";
-import { addNotification } from "@/other/notification";
-import {
-  RecentTransactionStatus,
-  RecentTransactionTitleTemplate,
-} from "@/stores/useRecentTransactionsStore";
-import useRevenueContract from "../hooks/useRevenueContract";
-import { useRevenuePools } from "../hooks/useRevenueTokens";
-import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 
 const SingleClaimDialog = () => {
   const {
@@ -153,10 +153,10 @@ const SingleClaimDialog = () => {
       setData({ selectedStandard: selectedStandard === Standard.ERC20 ? "ERC-20" : "ERC-223" });
 
       // Get the correct token address based on selected standard
-      const rawTokenAddress = selectedStandard === Standard.ERC20
-        ? ((token as any).fullErc20Address)
-        : ((token as any).fullErc223Address);
-
+      const rawTokenAddress =
+        selectedStandard === Standard.ERC20
+          ? (token as any).fullErc20Address
+          : (token as any).fullErc223Address;
 
       // Validate the token address
       if (!rawTokenAddress || !isAddress(rawTokenAddress)) {
@@ -167,16 +167,16 @@ const SingleClaimDialog = () => {
       const tokenAddress = rawTokenAddress as Address;
 
       // STEP 1: DELIVERY - Move rewards from pools to revenue contract
-      const poolAddresses = poolsData?.pools?.map(p => p.id) || [];
+      const poolAddresses = poolsData?.pools?.map((p) => p.id) || [];
       if (poolAddresses.length > 0) {
         setState("confirming-delivery");
 
         const deliveryResult = await delivery(
           poolAddresses as Address[],
           gasSettings,
-          customGasLimit || estimatedGas
+          customGasLimit || estimatedGas,
         );
-       
+
         if (deliveryResult?.hash) {
           setDeliveryTransactionHash(deliveryResult.hash);
           setState("executing-delivery");
@@ -186,11 +186,7 @@ const SingleClaimDialog = () => {
       // STEP 2: CLAIM - Claim rewards from revenue contract to user wallet
       setState("confirming-claim");
 
-      const claimResult = await claim(
-        [tokenAddress],
-        gasSettings,
-        customGasLimit || estimatedGas
-      );
+      const claimResult = await claim([tokenAddress], gasSettings, customGasLimit || estimatedGas);
 
       console.log("Claim result:", claimResult);
 
@@ -221,7 +217,9 @@ const SingleClaimDialog = () => {
       <div className="space-y-4">
         <div className="bg-tertiary-bg rounded-3 px-4 py-3 md:h-12 md:py-0 flex items-center min-h-[48px]">
           <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-            <span className="text-tertiary-text text-14 whitespace-nowrap">Rewards to receive:</span>
+            <span className="text-tertiary-text text-14 whitespace-nowrap">
+              Rewards to receive:
+            </span>
             <div className="flex items-center gap-2 flex-wrap">
               <Image
                 src={token.logoURI || "/images/tokens/placeholder.svg"}
@@ -315,7 +313,9 @@ const SingleClaimDialog = () => {
               alt={token.symbol}
               className="w-8 h-8 flex-shrink-0"
             />
-            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">
+              {token.symbol}
+            </span>
           </div>
         </div>
       </div>
@@ -327,7 +327,9 @@ const SingleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="swap" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm delivery</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Confirm delivery
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Preloader type="linear" className="max-md:hidden" />
@@ -359,7 +361,9 @@ const SingleClaimDialog = () => {
               alt={token.symbol}
               className="w-8 h-8 flex-shrink-0"
             />
-            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">
+              {token.symbol}
+            </span>
           </div>
         </div>
       </div>
@@ -371,12 +375,22 @@ const SingleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="swap" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing delivery</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Executing delivery
+          </span>
         </div>
         <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           <a
             target="_blank"
-            href={data?.deliveryTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.deliveryTransactionHash, chainId) : "#"}
+            href={
+              data?.deliveryTransactionHash
+                ? getExplorerLink(
+                    ExplorerLinkType.TRANSACTION,
+                    data.deliveryTransactionHash,
+                    chainId,
+                  )
+                : "#"
+            }
           >
             <IconButton iconName="forward" />
           </a>
@@ -405,7 +419,9 @@ const SingleClaimDialog = () => {
               alt={token.symbol}
               className="w-8 h-8 flex-shrink-0"
             />
-            <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+            <span className="text-primary-text text-16 font-medium whitespace-nowrap">
+              {token.symbol}
+            </span>
             <Badge variant={BadgeVariant.STANDARD} standard={selectedStandard} size="small" />
           </div>
         </div>
@@ -418,7 +434,9 @@ const SingleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Confirm claim</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Confirm claim
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Preloader type="linear" className="max-md:hidden" />
@@ -451,7 +469,9 @@ const SingleClaimDialog = () => {
               className="w-8 h-8 flex-shrink-0"
             />
             <div className="flex flex-row items-center gap-2">
-              <span className="text-primary-text text-16 font-medium whitespace-nowrap">{token.symbol}</span>
+              <span className="text-primary-text text-16 font-medium whitespace-nowrap">
+                {token.symbol}
+              </span>
               <Badge variant={BadgeVariant.STANDARD} standard={selectedStandard} size="small" />
             </div>
           </div>
@@ -465,7 +485,9 @@ const SingleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-quaternary-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Executing claim</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Executing claim
+          </span>
         </div>
         <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           <Button
@@ -477,7 +499,11 @@ const SingleClaimDialog = () => {
           </Button>
           <a
             target="_blank"
-            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+            href={
+              data?.claimTransactionHash
+                ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId)
+                : "#"
+            }
           >
             <IconButton iconName="forward" />
           </a>
@@ -498,7 +524,9 @@ const SingleClaimDialog = () => {
             size={52}
           />
         </div>
-        <h3 className="text-16 md:text-20 font-bold text-primary-text mb-2">Successfully claimed</h3>
+        <h3 className="text-16 md:text-20 font-bold text-primary-text mb-2">
+          Successfully claimed
+        </h3>
         <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">
           {token.amount} {token.symbol}
         </p>
@@ -510,12 +538,18 @@ const SingleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-green-bg rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-green" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Successfully claimed</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Successfully claimed
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <a
             target="_blank"
-            href={data?.claimTransactionHash ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId) : "#"}
+            href={
+              data?.claimTransactionHash
+                ? getExplorerLink(ExplorerLinkType.TRANSACTION, data.claimTransactionHash, chainId)
+                : "#"
+            }
           >
             <IconButton iconName="forward" />
           </a>
@@ -546,7 +580,9 @@ const SingleClaimDialog = () => {
           <div className="w-8 h-8 md:w-10 md:h-10 bg-red-light/20 rounded-full flex items-center justify-center flex-shrink-0">
             <Svg iconName="arrow-left-down" size={20} className="text-red-light" />
           </div>
-          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">Claim failed</span>
+          <span className="text-primary-text text-14 md:text-16 whitespace-nowrap">
+            Claim failed
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <IconButton iconName="forward" />
@@ -566,7 +602,12 @@ const SingleClaimDialog = () => {
         </p>
       </div>
 
-      <Button fullWidth size={ButtonSize.LARGE} colorScheme={ButtonColor.GREEN} onClick={handleTryAgain}>
+      <Button
+        fullWidth
+        size={ButtonSize.LARGE}
+        colorScheme={ButtonColor.GREEN}
+        onClick={handleTryAgain}
+      >
         Try again
       </Button>
     </div>

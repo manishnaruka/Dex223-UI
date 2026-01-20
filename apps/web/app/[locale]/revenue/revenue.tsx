@@ -14,6 +14,7 @@ import { useAccount, useSwitchChain } from "wagmi";
 import { useRevenueStore } from "@/app/[locale]/revenue/stores/useRevenueStore";
 import Container from "@/components/atoms/Container";
 import { SearchInput } from "@/components/atoms/Input";
+import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 import { TokenListId } from "@/db/db";
 import truncateMiddle from "@/functions/truncateMiddle";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
@@ -26,7 +27,6 @@ import TokenListDropdown from "./dialogs/TokenListDropdown";
 import useRevenueContract from "./hooks/useRevenueContract";
 import { useRevenueTokens, useTotalReward } from "./hooks/useRevenueTokens";
 import { StakeStatus, useStakeDialogStore } from "./stores/useStakeDialogStore";
-import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
 
 const WalletSearchInput = ({
   searchValue,
@@ -75,8 +75,12 @@ export function Revenue() {
   const [selectedTokenLists, setSelectedTokenLists] = useState<Set<TokenListId>>(
     new Set([`default-${chainId}` as TokenListId]),
   );
-  const { openDialog, status: stakeStatus, isOpen: isStakeDialogOpen, dialogType } =
-    useStakeDialogStore();
+  const {
+    openDialog,
+    status: stakeStatus,
+    isOpen: isStakeDialogOpen,
+    dialogType,
+  } = useStakeDialogStore();
   const { switchChain } = useSwitchChain();
 
   const allAvailableTokens = useTokens();
@@ -122,7 +126,10 @@ export function Revenue() {
         symbol: reward.token.symbol || "???",
         logoURI: reward.token.logoURI || "/images/tokens/placeholder.svg",
         erc20Address: truncateMiddle(reward.token.address0, { charsFromStart: 3, charsFromEnd: 3 }),
-        erc223Address: truncateMiddle(reward.token.address1, { charsFromStart: 3, charsFromEnd: 3 }),
+        erc223Address: truncateMiddle(reward.token.address1, {
+          charsFromStart: 3,
+          charsFromEnd: 3,
+        }),
         amount: reward.amountFormatted || "-",
         amountUSD: reward.amountUSD || "-",
         fullErc20Address: reward.token.address0,
@@ -134,7 +141,7 @@ export function Revenue() {
 
     return revenueTokensData.items.map((item, index) => {
       const reward = claimableRewards.find(
-        (r) => r.token.address0.toLowerCase() === item.token.addressERC20.toLowerCase()
+        (r) => r.token.address0.toLowerCase() === item.token.addressERC20.toLowerCase(),
       );
 
       return {
@@ -142,8 +149,14 @@ export function Revenue() {
         name: item.token.name,
         symbol: item.token.symbol,
         logoURI: "/images/tokens/placeholder.svg",
-        erc20Address: truncateMiddle(item.token.addressERC20, { charsFromStart: 3, charsFromEnd: 3 }),
-        erc223Address: truncateMiddle(item.token.addressERC223, { charsFromStart: 3, charsFromEnd: 3 }),
+        erc20Address: truncateMiddle(item.token.addressERC20, {
+          charsFromStart: 3,
+          charsFromEnd: 3,
+        }),
+        erc223Address: truncateMiddle(item.token.addressERC223, {
+          charsFromStart: 3,
+          charsFromEnd: 3,
+        }),
         amount: item.accruedInPoolsNow || "0",
         amountUSD: item.accruedInPoolsNowUSD || "$0.00",
         fullErc20Address: item.token.addressERC20,
@@ -377,12 +390,13 @@ export function Revenue() {
                         hasStaked
                           ? "border-yellow-light bg-[#4C483C] text-white cursor-pointer"
                           : "border-secondary-border bg-green text-black cursor-pointer hover:bg-green",
-                        (isStakeActionLocked || searchAddress) && "opacity-50 cursor-not-allowed hover:bg-tertiary-bg",
+                        (isStakeActionLocked || searchAddress) &&
+                          "opacity-50 cursor-not-allowed hover:bg-tertiary-bg",
                       )}
                     >
                       Stake
                     </button>
-                    
+
                     {unstakeCountdown ? (
                       <div className="flex flex-col items-end gap-1 min-w-[100px]">
                         <div className="border border-yellow-light bg-primary-bg text-secondary-text px-3 md:px-4 h-[40px] md:h-[48px] min-w-[100px] rounded-3 text-12 md:text-14 font-medium flex items-center justify-center">
@@ -399,7 +413,7 @@ export function Revenue() {
                           hasStaked
                             ? "border-yellow-light bg-[#4C483C] text-white"
                             : "border border-green bg-transparent-bg text-secondary-text",
-                          (!canUnstake || !hasStaked || searchAddress)
+                          !canUnstake || !hasStaked || searchAddress
                             ? "opacity-50 cursor-not-allowed"
                             : "cursor-pointer",
                         )}
@@ -433,8 +447,8 @@ export function Revenue() {
                     ${totalRewardData?.totalValueUSD || "0"}
                   </span>
                   <span className="text-12 md:text-14 xl:text-16 text-secondary-text mt-1">
-                    {totalRewardData?.created_at 
-                      ? `Staked since: ${new Date(totalRewardData.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.')}` 
+                    {totalRewardData?.created_at
+                      ? `Staked since: ${new Date(totalRewardData.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, ".")}`
                       : "Not staked yet"}
                   </span>
                 </div>

@@ -193,9 +193,7 @@ function NotificationTitle({
     case RecentTransactionTitleTemplate.CLAIM:
       return (
         <NotificationTitleText>
-          {status === RecentTransactionStatus.SUCCESS
-            ? "Successfully claimed"
-            : "Claim failed"}
+          {status === RecentTransactionStatus.SUCCESS ? "Successfully claimed" : "Claim failed"}
         </NotificationTitleText>
       );
     case RecentTransactionTitleTemplate.SWAP:

@@ -8,7 +8,9 @@ import clsx from "clsx";
 import Image from "next/image";
 import React, { useEffect } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { formatGwei } from "viem";
 
+import Svg from "@/components/atoms/Svg";
 import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import {
@@ -17,25 +19,23 @@ import {
   ButtonVariant as ButtonVariantType,
 } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
-import { formatFloat } from "@/functions/formatFloat";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { Standard } from "@/sdk_bi/standard";
-import { formatGwei } from "viem";
 
+import ForwardIcon from "../../../../../../../packages/ui/src/icons/ForwardIcon";
 import MultipleClaimDialog from "../../dialogs/MultipleClaimDialog";
 import SingleClaimDialog from "../../dialogs/SingleClaimDialog";
 import { useClaimDialogStore } from "../../stores/useClaimDialogStore";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
   useClaimGasPrice,
   useClaimGasPriceStore,
 } from "../../stores/useClaimGasSettingsStore";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
-import Svg from "@/components/atoms/Svg";
-import ForwardIcon from "../../../../../../../packages/ui/src/icons/ForwardIcon";
 
 export const Claims = ({
   tableData,
@@ -129,7 +129,14 @@ export const Claims = ({
     const totalReward = parseFloat(token.amountUSD.replace(/[$,]/g, ""));
     const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
     const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
-    const networkFeeEth = gasPrice ? parseFloat(((gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) / BigInt(10) ** BigInt(18)).toString()) : 0;
+    const networkFeeEth = gasPrice
+      ? parseFloat(
+          (
+            (gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) /
+            BigInt(10) ** BigInt(18)
+          ).toString(),
+        )
+      : 0;
 
     openDialog({
       selectedTokens: selectedTokensData,
@@ -172,7 +179,14 @@ export const Claims = ({
       const token = selectedTokensData[0];
       const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
       const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
-      const networkFeeEth = gasPrice ? parseFloat(((gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) / BigInt(10) ** BigInt(18)).toString()) : 0;
+      const networkFeeEth = gasPrice
+        ? parseFloat(
+            (
+              (gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) /
+              BigInt(10) ** BigInt(18)
+            ).toString(),
+          )
+        : 0;
       openDialog({
         selectedTokens: selectedTokensData,
         totalReward,
@@ -190,7 +204,14 @@ export const Claims = ({
 
       const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
       const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
-      const networkFeeEth = gasPrice ? parseFloat(((gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) / BigInt(10) ** BigInt(18)).toString()) : 0;
+      const networkFeeEth = gasPrice
+        ? parseFloat(
+            (
+              (gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) /
+              BigInt(10) ** BigInt(18)
+            ).toString(),
+          )
+        : 0;
       openDialog({
         selectedTokens: selectedTokensData,
         totalReward,
@@ -217,7 +238,7 @@ export const Claims = ({
     <>
       <SingleClaimDialog />
       <MultipleClaimDialog />
-      
+
       {/* Desktop version */}
       <div className="hidden xl:block rounded-3 h-[640px] bg-table-gradient flex flex-col">
         <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative pr-5 pl-5 min-w-[1000px] flex-shrink-0">
@@ -243,44 +264,44 @@ export const Claims = ({
           className="overflow-y-auto overflow-x-auto flex-1 relative"
           aria-busy={isLoading || showClaimingOverlay}
         >
-        {isLoading ? (
-          <SkeletonTheme
-            baseColor="#272727"
-            highlightColor="#2E2F2F"
-            borderRadius="0.5rem"
-            enableAnimation={false}
-          >
-            {[...Array(8)].map((_, index) => (
-              <React.Fragment key={index}>
-                <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative">
-                  <div className="min-h-[30px] flex items-center gap-3 pl-5 border-b border-quaternary-bg">
-                    <Skeleton circle width={16} height={16} />
-                    <Skeleton circle width={32} height={32} />
-                    <div className="flex flex-col gap-1">
+          {isLoading ? (
+            <SkeletonTheme
+              baseColor="#272727"
+              highlightColor="#2E2F2F"
+              borderRadius="0.5rem"
+              enableAnimation={false}
+            >
+              {[...Array(8)].map((_, index) => (
+                <React.Fragment key={index}>
+                  <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative">
+                    <div className="min-h-[30px] flex items-center gap-3 pl-5 border-b border-quaternary-bg">
+                      <Skeleton circle width={16} height={16} />
+                      <Skeleton circle width={32} height={32} />
+                      <div className="flex flex-col gap-1">
+                        <Skeleton width={80} height={14} />
+                        <Skeleton width={40} height={12} />
+                      </div>
+                    </div>
+                    <div className="min-h-[30px] flex items-center border-b border-quaternary-bg">
+                      <div className="flex flex-col gap-2 w-full">
+                        <Skeleton width={100} height={14} />
+                        <Skeleton width={100} height={14} />
+                      </div>
+                    </div>
+                    <div className="min-h-[30px] flex items-center justify-end pr-4 border-b border-quaternary-bg">
+                      <Skeleton width={60} height={14} />
+                    </div>
+                    <div className="min-h-[30px] flex items-center justify-end pr-4 border-b border-quaternary-bg">
                       <Skeleton width={80} height={14} />
-                      <Skeleton width={40} height={12} />
+                    </div>
+                    <div className="min-h-[30px] flex items-center justify-center border-b border-quaternary-bg">
+                      <Skeleton width={60} height={32} />
                     </div>
                   </div>
-                  <div className="min-h-[30px] flex items-center border-b border-quaternary-bg">
-                    <div className="flex flex-col gap-2 w-full">
-                      <Skeleton width={100} height={14} />
-                      <Skeleton width={100} height={14} />
-                    </div>
-                  </div>
-                  <div className="min-h-[30px] flex items-center justify-end pr-4 border-b border-quaternary-bg">
-                    <Skeleton width={60} height={14} />
-                  </div>
-                  <div className="min-h-[30px] flex items-center justify-end pr-4 border-b border-quaternary-bg">
-                    <Skeleton width={80} height={14} />
-                  </div>
-                  <div className="min-h-[30px] flex items-center justify-center border-b border-quaternary-bg">
-                    <Skeleton width={60} height={32} />
-                  </div>
-                </div>
-              </React.Fragment>
-            ))}
-          </SkeletonTheme>
-        ) : (
+                </React.Fragment>
+              ))}
+            </SkeletonTheme>
+          ) : (
             tableData.map((o: any, index: number) => {
               const key = o?.token?.address0 ? o.token.address0 : `item-${index}`;
               const isSelected = selectedTokens.has(o.id);
@@ -408,15 +429,15 @@ export const Claims = ({
                 </div>
               );
             })
-        )}
-        {showClaimingOverlay && (
-          <div className="absolute inset-0 bg-[#0F0F0F]/60 backdrop-blur-[2px] flex items-center justify-center z-10">
-            <div className="flex items-center gap-2 rounded-2 bg-primary-bg/90 border border-quaternary-bg px-4 py-2">
-              <Preloader size={20} />
-              <span className="text-secondary-text text-14">Claim in progress...</span>
+          )}
+          {showClaimingOverlay && (
+            <div className="absolute inset-0 bg-[#0F0F0F]/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+              <div className="flex items-center gap-2 rounded-2 bg-primary-bg/90 border border-quaternary-bg px-4 py-2">
+                <Preloader size={20} />
+                <span className="text-secondary-text text-14">Claim in progress...</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
 
         {selectedCount > 0 && !isLoading && (
@@ -578,7 +599,9 @@ export const Claims = ({
                       )}
                     </Button>
                     {selectedCount > 15 && (
-                      <span className="text-10 text-red-light text-center">Max 15 tokens at once</span>
+                      <span className="text-10 text-red-light text-center">
+                        Max 15 tokens at once
+                      </span>
                     )}
                   </div>
                 </div>
@@ -589,106 +612,106 @@ export const Claims = ({
               const isSelected = selectedTokens.has(o.id);
 
               return (
-                  <div
-                    key={key}
-                    className={clsx(
-                      "bg-primary-bg rounded-3 p-4 flex flex-col overflow-hidden w-full",
-                      isTokenBeingClaimed(o.id) && "opacity-60 pointer-events-none",
-                    )}
-                  >
-                    {/* Header with token info */}
-                    <div className="flex items-center gap-3 mb-2 overflow-hidden w-full">
-                      <Checkbox
-                        checked={isSelected}
-                        handleChange={() => handleTokenSelect(o.id)}
-                        id={`claim-token-mobile-${o.id}`}
-                        disabled={hasClaimInProgress || isTokenBeingClaimed(o.id)}
-                      />
-                      <Image
-                        src={o.logoURI || "/images/tokens/placeholder.svg"}
-                        width={32}
-                        height={32}
-                        alt=""
-                        className="flex-shrink-0"
-                      />
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-0.5">
-                          <span className="text-primary-text text-14 font-medium truncate">
-                            {o.name}
-                          </span>
-                          <span className="text-primary-text text-14 font-medium flex-shrink-0">
-                            {o.amountUSD}
-                          </span>
-                        </div>
-                        <div className="text-13 text-secondary-text">
-                          {o.amount} {o.symbol}
-                        </div>
+                <div
+                  key={key}
+                  className={clsx(
+                    "bg-primary-bg rounded-3 p-4 flex flex-col overflow-hidden w-full",
+                    isTokenBeingClaimed(o.id) && "opacity-60 pointer-events-none",
+                  )}
+                >
+                  {/* Header with token info */}
+                  <div className="flex items-center gap-3 mb-2 overflow-hidden w-full">
+                    <Checkbox
+                      checked={isSelected}
+                      handleChange={() => handleTokenSelect(o.id)}
+                      id={`claim-token-mobile-${o.id}`}
+                      disabled={hasClaimInProgress || isTokenBeingClaimed(o.id)}
+                    />
+                    <Image
+                      src={o.logoURI || "/images/tokens/placeholder.svg"}
+                      width={32}
+                      height={32}
+                      alt=""
+                      className="flex-shrink-0"
+                    />
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <span className="text-primary-text text-14 font-medium truncate">
+                          {o.name}
+                        </span>
+                        <span className="text-primary-text text-14 font-medium flex-shrink-0">
+                          {o.amountUSD}
+                        </span>
+                      </div>
+                      <div className="text-13 text-secondary-text">
+                        {o.amount} {o.symbol}
                       </div>
                     </div>
-
-                    {/* Addresses section */}
-                    <div className="flex flex-row justify-between gap-2 md:gap-3 mb-3 overflow-hidden w-full">
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
-                        <span className="text-tertiary-text text-13 flex-shrink-0">ERC-20</span>
-                        <a
-                          target="_blank"
-                          href={getExplorerLink(
-                            ExplorerLinkType.ADDRESS,
-                            o.fullErc20Address || o.erc20Address,
-                            o.chainId,
-                          )}
-                          className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0 overflow-hidden"
-                        >
-                          <span className="text-13 truncate">
-                            {truncateMiddle(o.fullErc20Address || o.erc20Address || "", {
-                              charsFromStart: 3,
-                              charsFromEnd: 3,
-                            })}
-                          </span>
-                          <Svg iconName="forward" size={16} className="flex-shrink-0" />
-                        </a>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
-                        <span className="text-tertiary-text text-13 flex-shrink-0">ERC-223</span>
-                        <a
-                          target="_blank"
-                          href={getExplorerLink(
-                            ExplorerLinkType.ADDRESS,
-                            o.fullErc223Address || o.erc223Address,
-                            o.chainId,
-                          )}
-                          className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0 overflow-hidden"
-                        >
-                          <span className="text-13 truncate">
-                            {truncateMiddle(o.fullErc223Address || o.erc223Address || "", {
-                              charsFromStart: 3,
-                              charsFromEnd: 3,
-                            })}
-                          </span>
-                          <Svg iconName="forward" size={16} className="flex-shrink-0" />
-                        </a>
-                      </div>
-                    </div>
-
-                    {isTokenBeingClaimed(o.id) ? (
-                      <div className="flex items-center justify-center gap-2 h-10 bg-quaternary-bg rounded-2">
-                        <Preloader size={16} />
-                        <span className="text-secondary-text text-14">Claiming...</span>
-                      </div>
-                    ) : (
-                      <Button
-                        className="w-full h-10"
-                        variant={ButtonVariantType.CONTAINED}
-                        colorScheme={ButtonColor.GREEN}
-                        size={ButtonSize.MEDIUM}
-                        disabled={selectedTokens.size > 0 || hasClaimInProgress}
-                        onClick={() => handleClaimSingle(o)}
-                      >
-                        Claim
-                      </Button>
-                    )}
                   </div>
+
+                  {/* Addresses section */}
+                  <div className="flex flex-row justify-between gap-2 md:gap-3 mb-3 overflow-hidden w-full">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
+                      <span className="text-tertiary-text text-13 flex-shrink-0">ERC-20</span>
+                      <a
+                        target="_blank"
+                        href={getExplorerLink(
+                          ExplorerLinkType.ADDRESS,
+                          o.fullErc20Address || o.erc20Address,
+                          o.chainId,
+                        )}
+                        className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0 overflow-hidden"
+                      >
+                        <span className="text-13 truncate">
+                          {truncateMiddle(o.fullErc20Address || o.erc20Address || "", {
+                            charsFromStart: 3,
+                            charsFromEnd: 3,
+                          })}
+                        </span>
+                        <Svg iconName="forward" size={16} className="flex-shrink-0" />
+                      </a>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
+                      <span className="text-tertiary-text text-13 flex-shrink-0">ERC-223</span>
+                      <a
+                        target="_blank"
+                        href={getExplorerLink(
+                          ExplorerLinkType.ADDRESS,
+                          o.fullErc223Address || o.erc223Address,
+                          o.chainId,
+                        )}
+                        className="flex items-center gap-0.5 text-green hocus:text-green-hover duration-200 min-w-0 overflow-hidden"
+                      >
+                        <span className="text-13 truncate">
+                          {truncateMiddle(o.fullErc223Address || o.erc223Address || "", {
+                            charsFromStart: 3,
+                            charsFromEnd: 3,
+                          })}
+                        </span>
+                        <Svg iconName="forward" size={16} className="flex-shrink-0" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {isTokenBeingClaimed(o.id) ? (
+                    <div className="flex items-center justify-center gap-2 h-10 bg-quaternary-bg rounded-2">
+                      <Preloader size={16} />
+                      <span className="text-secondary-text text-14">Claiming...</span>
+                    </div>
+                  ) : (
+                    <Button
+                      className="w-full h-10"
+                      variant={ButtonVariantType.CONTAINED}
+                      colorScheme={ButtonColor.GREEN}
+                      size={ButtonSize.MEDIUM}
+                      disabled={selectedTokens.size > 0 || hasClaimInProgress}
+                      onClick={() => handleClaimSingle(o)}
+                    >
+                      Claim
+                    </Button>
+                  )}
+                </div>
               );
             })}
           </>
