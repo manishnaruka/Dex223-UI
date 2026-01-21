@@ -4,7 +4,7 @@ import "@repo/ui/styles.css";
 import clsx from "clsx";
 import { Golos_Text } from "next/font/google";
 import { headers } from "next/headers";
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { cookieToInitialState } from "wagmi";
 
 import Providers from "@/app/providers";
@@ -17,19 +17,11 @@ const golos_text = Golos_Text({
   adjustFontFallback: false,
 });
 
-interface Props {
-  params: Promise<{
-    locale: "es" | "en" | "zh";
-  }>;
-}
-
-export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
+export default async function RootLayout({ children }: PropsWithChildren) {
   const initialState = cookieToInitialState(config, (await headers()).get("cookie"));
 
-  const locale = (await params).locale;
-
   return (
-    <html suppressHydrationWarning lang={locale}>
+    <html suppressHydrationWarning>
       <body className={clsx(golos_text.className)}>
         <Providers initialState={initialState}>{children}</Providers>
       </body>

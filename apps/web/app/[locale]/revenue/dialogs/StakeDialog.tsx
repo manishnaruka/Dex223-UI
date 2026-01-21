@@ -39,6 +39,7 @@ import {
   useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
 import { StakeError, StakeStatus, useStakeDialogStore } from "../stores/useStakeDialogStore";
+import { isError } from "util";
 
 export function useStakeStatus() {
   const { status: stakeStatus } = useStakeDialogStore();

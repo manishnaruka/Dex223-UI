@@ -833,7 +833,7 @@ export default function TradeForm({
                   <Tooltip
                     iconSize={_isMobile ? 16 : 24}
                     text={t("network_fee_tooltip", {
-                      networkName: networks.find((n) => n.chainId === chainId)?.name,
+                      networkName: networks.find((n) => n.chainId === chainId)?.name || "",
                     })}
                   />
                   <div className="text-secondary-text text-12 md:text-14 flex items-center ">

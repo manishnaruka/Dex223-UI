@@ -2,7 +2,7 @@ import isEqual from "lodash.isequal";
 import { useRef } from "react";
 
 const useDeepMemo = <T>(factory: () => T, deps: any[]): T => {
-  const ref = useRef<{ deps: any[]; value: T }>();
+  const ref = useRef<{ deps: any[]; value: T }>(undefined);
 
   if (!ref.current || !isEqual(deps, ref.current.deps)) {
     ref.current = {

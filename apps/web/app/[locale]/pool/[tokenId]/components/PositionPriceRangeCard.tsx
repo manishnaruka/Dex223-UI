@@ -48,7 +48,7 @@ export default function PositionPriceRangeCard({
         </div>
       </div>
       <div className="lg:min-h-[50%] min-h-[50%] flex-grow overflow-hidden text-12 lg:text-14 bg-quaternary-bg py-2 lg:py-3 px-2 lg:px-5 border-t-2 border-tertiary-bg text-tertiary-text text-center">
-        {t("position_100_price", { symbol })}
+        {t("position_100_price", { symbol: symbol || "" })}
       </div>
     </div>
   );

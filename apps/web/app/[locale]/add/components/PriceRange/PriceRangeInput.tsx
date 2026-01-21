@@ -77,8 +77,8 @@ export default function PriceRangeInput({
         <span className="text-12 text-tertiary-text">
           {tokenA && tokenB
             ? t("price_per", {
-                symbol0: tokenB.symbol,
-                symbol1: tokenA.symbol,
+                symbol0: tokenB.symbol || "",
+                symbol1: tokenA.symbol || "",
               })
             : ""}
         </span>
