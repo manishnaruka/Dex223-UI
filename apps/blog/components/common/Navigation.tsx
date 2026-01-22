@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
 import NavigationItem, { NavigationItemWithSubmenu } from "@/components/atoms/NavigationItem";
@@ -140,13 +140,10 @@ function NavigationMoreDropdown() {
   const t = useTranslations("Navigation");
 
   const router = useRouter();
-  const pathname = usePathname();
 
   const { setIsOpen } = useFeedbackDialogStore();
 
-  const active = useMemo(() => {
-    return true;
-  }, [pathname]);
+  const active = true;
 
   const isSmallScreen = useMediaQuery({ query: "(max-width: 1280px)" });
 

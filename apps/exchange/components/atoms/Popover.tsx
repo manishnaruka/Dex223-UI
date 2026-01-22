@@ -59,7 +59,7 @@ export default function Popover({
 
   return (
     <>
-      {React.cloneElement(trigger, { ...getReferenceProps, ref: refs.setReference })}
+      {React.cloneElement(trigger, getReferenceProps({ ref: refs.setReference }))}
       {isMounted && (
         <FloatingPortal>
           <FloatingFocusManager context={context} modal={false} initialFocus={-1}>

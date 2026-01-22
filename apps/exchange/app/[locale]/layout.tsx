@@ -5,28 +5,30 @@ import { PropsWithChildren } from "react";
 import { Providers } from "@/app/[locale]/providers";
 import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
-import { Locale, routing } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing"
 interface Props {
   params: Promise<{
-    locale: Locale;
+    locale: string;
   }>;
 }
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
-  const { locale } = await params;
+  const locale = (await params).locale;
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
 
+  const safeLocale = locale as Locale;
+  setRequestLocale(safeLocale);
   // Providing all messages to the client
   // side is the easiest way to get started
-  const messages = await getMessages();
-  setRequestLocale(locale);
+  // const messages = await getMessages();
+  const messages = (await import(`../../messages/${safeLocale}.json`)).default;
 
   return (
     <>
-      <Providers messages={messages} locale={locale}>
+      <Providers messages={messages} locale={safeLocale}>
         <div className="grid h-[100svh] grid-rows-layout">
           <Header />
           <div className="pb-4 lg:pb-[80px]">

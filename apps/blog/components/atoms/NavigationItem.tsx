@@ -7,6 +7,7 @@ import Svg from "@/components/atoms/Svg";
 import { Link, usePathname } from "@/i18n/routing";
 
 interface Props {
+  id?: string;
   href: string;
   title: string;
   flag: string;

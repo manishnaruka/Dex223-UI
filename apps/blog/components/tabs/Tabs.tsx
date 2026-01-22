@@ -1,9 +1,12 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, ReactNode, useState } from "react";
 
 import TabTitle from "./TabTitle";
-
+interface TabProps {
+  title: string;
+  children?: ReactNode;
+}
 interface Props {
-  children: ReactElement[];
+  children: ReactElement<TabProps>[];
   defaultTab?: number;
   activeTab?: number;
   setActiveTab?: any;

@@ -4,7 +4,7 @@ import "@repo/ui/styles.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import clsx from "clsx";
 import { Golos_Text } from "next/font/google";
-import { PropsWithChildren } from "react";
+import type { ReactNode } from "react";
 
 import Providers from "@/app/providers";
 import ClientOnly from "@/components/common/ClientOnly";
@@ -19,16 +19,9 @@ const golos_text = Golos_Text({
   adjustFontFallback: false,
 });
 
-interface Props {
-  params: Promise<{
-    locale: "es" | "en" | "zh";
-  }>;
-}
-
-export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
-  const locale = (await params).locale;
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html suppressHydrationWarning lang={locale}>
+    <html suppressHydrationWarning lang="en">
       <head>
         {isProd ? (
           <ClientOnly>

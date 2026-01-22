@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { InputHTMLAttributes, ReactNode } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import { NumericFormat } from "react-number-format";
 
 import Input, { InputSize, SearchInput } from "@/components/atoms/Input";
@@ -39,6 +40,8 @@ const inputLabelSizeMap: Record<InputSize, string> = {
   [InputSize.DEFAULT]: "text-14",
   [InputSize.LARGE]: "text-16",
 };
+
+const NumericInput = (props: ComponentPropsWithoutRef<typeof Input>) => <Input {...props} />;
 export function InputLabel({
   label,
   tooltipText,
@@ -105,7 +108,7 @@ export default function TextField({
                   allowedDecimalSeparators={[","]}
                   isError={Boolean(error) || isError}
                   isWarning={Boolean(warning) || isWarning}
-                  customInput={Input}
+                  customInput={NumericInput}
                   inputSize={inputSize}
                   {...rest}
                 />

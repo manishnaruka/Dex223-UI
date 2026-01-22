@@ -7,7 +7,7 @@ interface Props extends SVGProps<SVGSVGElement> {
 export default function ForwardIcon({ size, ...props }: Props) {
     return (
       <svg
-        {...props}
+        {...props as any}
         width={size}
         height={size}
         viewBox="0 0 24 24"

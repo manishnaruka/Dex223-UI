@@ -1,7 +1,7 @@
 "use client";
 
 import debounce from "lodash.debounce";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import PostsContent from "@/app/[locale]/components/PostsContent";
 import { ContentType, Post } from "@/app/[locale]/types/Post";
@@ -139,41 +139,46 @@ function useAllPosts({
     return () => window.removeEventListener("scroll", checkAndGetMore);
   }, [getMorePosts]);
 
-  const getPostsDebounced = useCallback(
-    debounce(async (searchValue, contentType, tag) => {
-      setIsLoading(true);
-      setInternalSearchValue(searchValue);
-      try {
-        const postsResponse = await getPosts({
-          page: 1,
-          limit: INITAL_LOAD,
-          skip: 0,
-          search: searchValue,
-          contentType: contentType,
-          tags: tag,
-        });
+  const getPostsDebounced = useMemo(
+    () =>
+      debounce(async (searchValue, contentType, tag) => {
+        setIsLoading(true);
+        setInternalSearchValue(searchValue);
+        try {
+          const postsResponse = await getPosts({
+            page: 1,
+            limit: INITAL_LOAD,
+            skip: 0,
+            search: searchValue,
+            contentType: contentType,
+            tags: tag,
+          });
 
-        if (postsResponse.data) {
-          setPosts(postsResponse.data);
+          if (postsResponse.data) {
+            setPosts(postsResponse.data);
 
-          if (postsResponse.total < INITAL_LOAD + pageRef.current * POSTS_LIMIT) {
-            setAllLoaded(true);
-          } else {
-            setAllLoaded(false);
+            if (postsResponse.total < INITAL_LOAD + pageRef.current * POSTS_LIMIT) {
+              setAllLoaded(true);
+            } else {
+              setAllLoaded(false);
+            }
           }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 500), // Debounce time of 500ms
-    [], // Empty dependency array means this debounced function will stay stable across renders
+      }, 500),
+    [pageRef, setAllLoaded, setInternalSearchValue, setIsLoading, setPosts],
   );
 
   useEffect(() => {
     getPostsDebounced(searchValue, contentType, tag);
   }, [searchValue, contentType, tag, getPostsDebounced]);
+
+  useEffect(() => {
+    return () => getPostsDebounced.cancel();
+  }, [getPostsDebounced]);
 
   return {
     posts,

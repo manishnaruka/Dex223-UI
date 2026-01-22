@@ -8,16 +8,16 @@ import Header from "@/components/common/Header";
 import { Locale, routing } from "@/i18n/routing";
 interface Props {
   params: Promise<{
-    locale: Locale;
+    locale: string;
   }>;
 }
 
 export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
-  const { locale } = await params;
+  const locale = (await params).locale;
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
-
+  const safeLocale = locale as Locale;
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
@@ -25,7 +25,7 @@ export default async function RootLayout({ children, params }: PropsWithChildren
 
   return (
     <>
-      <Providers messages={messages} locale={locale}>
+      <Providers messages={messages} locale={safeLocale}>
         <div className="grid h-[100svh] grid-rows-layout">
           <Header />
           <div className="pb-4 lg:pb-[80px]">{children}</div>
