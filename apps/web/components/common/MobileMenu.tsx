@@ -153,6 +153,11 @@ const mobileLinks: {
     title: "margin_trading",
   },
   {
+    href: "/buy-crypto",
+    iconName: "fiat",
+    title: "buy_crypto",
+  },
+  {
     href: "/pools",
     iconName: "pools",
     title: "pools",
