@@ -17,11 +17,19 @@ const golos_text = Golos_Text({
   adjustFontFallback: false,
 });
 
-export default async function RootLayout({ children }: PropsWithChildren) {
+interface Props {
+  params: Promise<{
+    locale?: "es" | "en" | "zh";
+  }>;
+}
+
+
+export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
   const initialState = cookieToInitialState(config, (await headers()).get("cookie"));
+  const locale = (await params).locale || 'en' 
 
   return (
-    <html suppressHydrationWarning>
+    <html suppressHydrationWarning lang={locale}>
       <body className={clsx(golos_text.className)}>
         <Providers initialState={initialState}>{children}</Providers>
       </body>

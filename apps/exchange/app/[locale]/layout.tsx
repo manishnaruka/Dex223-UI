@@ -5,7 +5,7 @@ import { PropsWithChildren } from "react";
 import { Providers } from "@/app/[locale]/providers";
 import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
-import { routing, type Locale } from "@/i18n/routing"
+import { type Locale, routing } from "@/i18n/routing";
 interface Props {
   params: Promise<{
     locale: string;
@@ -23,8 +23,7 @@ export default async function RootLayout({ children, params }: PropsWithChildren
   setRequestLocale(safeLocale);
   // Providing all messages to the client
   // side is the easiest way to get started
-  // const messages = await getMessages();
-  const messages = (await import(`../../messages/${safeLocale}.json`)).default;
+  const messages = await getMessages();
 
   return (
     <>

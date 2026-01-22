@@ -16,17 +16,16 @@ const golos_text = Golos_Text({
   display: "swap",
   adjustFontFallback: false,
 });
+interface Props {
+  params: Promise<{
+    locale?: "es" | "en" | "zh";
+  }>;
+}
 
-// interface Props {
-//   params: Promise<{
-//     locale: "es" | "en" | "zh";
-//   }>;
-// }
-
-export default async function RootLayout({ children }: PropsWithChildren) {
-  // const locale = (await params).locale;
+export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
+  const locale = (await params).locale || 'en' 
   return (
-    <html suppressHydrationWarning>
+    <html suppressHydrationWarning lang={locale}>
       <head>{/*<script src="https://unpkg.com/react-scan/dist/auto.global.js" async />*/}</head>
 
       <body className={clsx(golos_text.className)}>

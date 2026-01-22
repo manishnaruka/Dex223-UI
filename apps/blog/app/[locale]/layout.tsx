@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default async function RootLayout({ children, params }: PropsWithChildren<Props>) {
-  const locale = (await params).locale;
+  const { locale } = await params;
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
