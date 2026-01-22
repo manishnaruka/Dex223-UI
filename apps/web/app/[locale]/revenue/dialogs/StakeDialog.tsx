@@ -11,18 +11,33 @@ import { Address, formatUnits, parseUnits } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
 import DrawerDialog from "@/components/atoms/DrawerDialog";
+import Input from "@/components/atoms/Input";
 import Svg from "@/components/atoms/Svg";
+import { HelperText } from "@/components/atoms/TextField";
 import Button, { ButtonColor, ButtonSize } from "@/components/buttons/Button";
-import IconButton from "@/components/buttons/IconButton";
+import IconButton, { IconButtonSize } from "@/components/buttons/IconButton";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
-import { StandardButton } from "@/components/common/TokenStandardSelector";
+import TokenStandardSelector from "@/components/common/TokenStandardSelector";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { ThemeColors } from "@/config/theme/colors";
+import { clsxMerge } from "@/functions/clsxMerge";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
+import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { Standard } from "@/sdk_bi/standard";
 
-import useRevenueContract from "../hooks/useRevenueContract";
+import useRevenueContract, {
+  RED_ERC20_ADDRESS,
+  RED_ERC223_ADDRESS,
+} from "../hooks/useRevenueContract";
+import {
+  useClaimGasLimitStore,
+  useClaimGasModeStore,
+  useClaimGasPrice,
+  useClaimGasPriceStore,
+  useClaimGasSettings,
+} from "../stores/useClaimGasSettingsStore";
 import { StakeError, StakeStatus, useStakeDialogStore } from "../stores/useStakeDialogStore";
 
 export function useStakeStatus() {
@@ -60,47 +75,47 @@ function ApproveRow({
   return (
     <div
       className={clsx(
-        "relative grid grid-cols-[32px_auto_1fr] gap-3 h-10 pb-5 before:absolute before:left-[15px] before:top-10 before:w-0.5 before:h-4 before:rounded-1",
+        "relative grid grid-cols-[32px_1fr_auto] gap-2 md:gap-3 min-h-10 pb-5 before:absolute before:left-[15px] before:top-10 before:w-0.5 before:h-4 before:rounded-1",
         isSuccess || isSuccessStake ? "before:bg-green" : "before:bg-tertiary-bg",
       )}
     >
       <div className="flex items-center">
         <div
           className={clsx(
-            "w-8 h-8 rounded-full flex items-center justify-center",
+            "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
             isSuccess || isSuccessStake ? "bg-tertiary-bg" : "bg-tertiary-bg",
             isReverted && "bg-red-bg",
           )}
         >
           {isSuccess || isSuccessStake ? (
             <Image
-              className="rounded-full"
               src="/images/logo-short.svg"
               alt="D223"
-              width={20}
-              height={20}
+              width={14}
+              height={14}
+              className="md:w-4 md:h-4"
             />
           ) : isReverted ? (
             <Image
-              className="rounded-full"
               src="/images/logo-short.svg"
               alt="D223"
-              width={20}
-              height={20}
+              width={14}
+              height={14}
+              className="md:w-4 md:h-4"
             />
           ) : (
             <Image
-              className="rounded-full"
               src="/images/logo-short.svg"
               alt="D223"
-              width={20}
-              height={20}
+              width={14}
+              height={14}
+              className="md:w-4 md:h-4"
             />
           )}
         </div>
       </div>
 
-      <div className="flex flex-col justify-center">
+      <div className="flex flex-col justify-center min-w-0 pr-2">
         <span
           className={clsx(
             "text-14",
@@ -114,44 +129,53 @@ function ApproveRow({
           {isReverted && "Approve failed"}
         </span>
         {!isSuccess && !isSuccessStake && !isReverted && (
-          <span className="text-green text-12">Why do I have to approve a token?</span>
+          <span className="text-green text-12 max-md:hidden">
+            Why do I have to approve a token?
+          </span>
+        )}
+        {isPending && (
+          <span className="text-secondary-text text-12 md:hidden mt-0.5">
+            Proceed in your wallet
+          </span>
         )}
       </div>
-      <div className="relative flex items-center gap-2 justify-end">
+      <div className="relative flex items-center gap-1 md:gap-2 justify-end flex-shrink-0">
         {isPending && (
           <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">Proceed in your wallet</span>
+            <Preloader type="linear" className="max-md:hidden" />
+            <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+              Proceed in your wallet
+            </span>
           </>
         )}
         {isLoading && (
           <>
-            <button className="px-3 py-1.5 bg-tertiary-bg text-secondary-text text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal">
+            <button className="px-2 md:px-3 py-1 md:py-1.5 bg-tertiary-bg text-secondary-text text-10 md:text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal whitespace-nowrap">
               Speed up
             </button>
-            <IconButton iconName="forward" />
-            <Preloader size={20} />
+            <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
+            <Preloader size={16} />
           </>
         )}
         {(isSuccess || isSuccessStake) && (
           <>
-            <IconButton iconName="forward" />
-            <div className="w-5 h-5 rounded-full bg-green flex items-center justify-center">
-              <Svg className="text-primary-bg" iconName="check" size={14} />
+            <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
+            <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
+              <Svg className="text-primary-bg" iconName="check" size={12} />
             </div>
           </>
         )}
         {isReverted && (
           <>
-            <IconButton iconName="forward" />
-            <Svg className="text-red-light" iconName="warning" size={20} />
+            <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
+            <Svg className="text-red-light" iconName="warning" size={18} />
           </>
         )}
         {hash && (
           <a
             target="_blank"
             href={getExplorerLink(ExplorerLinkType.TRANSACTION, hash, chainId)}
-            className="absolute inset-0 z-10"
+            className="absolute z-10"
             aria-label="View transaction"
           />
         )}
@@ -182,7 +206,7 @@ function StakeRow({
   const chainId = useCurrentChainId();
 
   return (
-    <div className="relative grid grid-cols-[32px_auto_1fr] gap-3 h-10">
+    <div className="relative grid grid-cols-[32px_1fr_auto] gap-2 md:gap-3 min-h-10">
       <div className="flex items-center h-full">
         <div
           className={clsx(
@@ -207,7 +231,7 @@ function StakeRow({
         </div>
       </div>
 
-      <div className="flex flex-col justify-center min-w-0">
+      <div className="flex flex-col justify-center min-w-0 pr-2">
         <span className={clsx("text-14", isDisabled ? "text-tertiary-text" : "text-primary-text")}>
           {isDisabled && (isStaking ? "Stake" : "Unstake")}
           {isPending && `Confirm ${isStaking ? "stake" : "unstaking"}`}
@@ -215,35 +239,42 @@ function StakeRow({
           {isReverted && `Failed to ${isStaking ? "stake" : "unstake"}`}
           {isSuccess && `Successfully ${isStaking ? "staked" : "unstaked"}`}
         </span>
+        {isPending && (
+          <span className="text-secondary-text text-12 md:hidden mt-0.5">
+            Proceed in your wallet
+          </span>
+        )}
       </div>
-      <div className="relative flex items-center gap-2 justify-end">
+      <div className="relative flex items-center gap-1 md:gap-2 justify-end flex-shrink-0">
         {isPending && (
           <>
-            <Preloader type="linear" />
-            <span className="text-secondary-text text-14">Proceed in your wallet</span>
+            <Preloader type="linear" className="max-md:hidden" />
+            <span className="text-secondary-text text-12 md:text-14 whitespace-nowrap max-md:hidden">
+              Proceed in your wallet
+            </span>
           </>
         )}
         {isLoading && (
           <>
-            <button className="px-3 py-1.5 bg-tertiary-bg text-secondary-text text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal">
+            <button className="px-2 md:px-3 py-1 md:py-1.5 bg-tertiary-bg text-secondary-text text-10 md:text-12 rounded-2 hover:bg-quaternary-bg transition-colors font-normal whitespace-nowrap">
               Speed up
             </button>
-            <IconButton iconName="forward" />
-            <Preloader size={20} />
+            <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
+            <Preloader size={16} />
           </>
         )}
         {isSuccess && (
           <>
-            <IconButton iconName="forward" />
-            <div className="w-5 h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
-              <Svg className="text-primary-bg" iconName="check" size={14} />
+            <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
+            <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-green flex items-center justify-center flex-shrink-0">
+              <Svg className="text-primary-bg" iconName="check" size={12} />
             </div>
           </>
         )}
         {isReverted && (
           <>
-            <IconButton iconName="forward" />
-            <Svg className="text-red-light" iconName="warning" size={20} />
+            <IconButton iconName="forward" buttonSize={IconButtonSize.EXTRA_SMALL} />
+            <Svg className="text-red-light" iconName="warning" size={18} />
           </>
         )}
         {hash && (
@@ -260,7 +291,7 @@ function StakeRow({
 }
 
 function Rows({ children }: PropsWithChildren<{}>) {
-  return <div className="flex flex-col gap-5">{children}</div>;
+  return <div className="flex flex-col gap-2">{children}</div>;
 }
 
 const StakeDialog = () => {
@@ -284,17 +315,19 @@ const StakeDialog = () => {
 
   const [amount, setAmount] = useState("");
   const [selectedStandard, setSelectedStandard] = useState<Standard>(Standard.ERC20);
+  const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
+  const [isEditApproveActive, setIsEditApproveActive] = useState(false);
+  const [amountToApprove, setAmountToApprove] = useState("");
   const chainId = useCurrentChainId();
 
   const {
     redErc20Balance,
     redErc223Balance,
-    approveERC20,
-    stakeERC20,
-    depositAndStakeERC223,
+    approve,
+    stake,
+    stakeERC223,
     unstake,
     refetchUserData,
-    getTokenInfo,
     canUnstake,
     userStaked,
     isCorrectNetwork,
@@ -311,12 +344,71 @@ const StakeDialog = () => {
     isRevertedApprove,
   } = useStakeStatus();
 
+  const {
+    gasPriceOption,
+    gasPriceSettings,
+    setGasPriceOption,
+    setGasPriceSettings,
+    updateDefaultState,
+  } = useClaimGasPriceStore();
+
+  const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
+    useClaimGasLimitStore();
+
+  const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
+
+  const gasPrice = useClaimGasPrice();
+  const { gasSettings } = useClaimGasSettings();
+
+  // Dynamic gas limit estimation based on selected standard
+  const defaultGasLimitERC20 = BigInt(329000);
+  const defaultGasLimitERC223 = BigInt(115000);
+  const defaultGasLimit =
+    selectedStandard === Standard.ERC20 ? defaultGasLimitERC20 : defaultGasLimitERC223;
+  const gasToUse = customGasLimit || estimatedGas || defaultGasLimit;
+
+  // Dynamic gas display values (similar to swap module pattern)
+  const gasERC20Display = useMemo(() => {
+    if (!amount || parseFloat(amount) === 0) {
+      return "—";
+    }
+    const gasInK = Math.round(Number(defaultGasLimitERC20) / 1000);
+    return `~${gasInK}K gas`;
+  }, [amount, defaultGasLimitERC20]);
+
+  const gasERC223Display = useMemo(() => {
+    if (!amount || parseFloat(amount) === 0) {
+      return "—";
+    }
+    const gasInK = Math.round(Number(defaultGasLimitERC223) / 1000);
+    return `~${gasInK}K gas`;
+  }, [amount, defaultGasLimitERC223]);
+
   useEffect(() => {
     if (isOpen && storeAmount) {
       setAmount(storeAmount);
+      setAmountToApprove(storeAmount);
       setSelectedStandard(storeStandard === "ERC-223" ? Standard.ERC223 : Standard.ERC20);
     }
   }, [isOpen, storeAmount, storeStandard]);
+
+  useEffect(() => {
+    if (amount) {
+      setAmountToApprove(amount);
+    }
+  }, [amount]);
+
+  useEffect(() => {
+    if (isOpen) {
+      updateDefaultState(chainId);
+    }
+  }, [chainId, isOpen, updateDefaultState]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setAmount("");
+    }
+  }, [isOpen]);
 
   const isStaking = dialogType === "stake";
   const title = isStaking ? "Stake" : "Unstake";
@@ -325,6 +417,27 @@ const StakeDialog = () => {
   const balance1 = redErc223Balance ? formatUnits(redErc223Balance, 18) : "0";
 
   const computedBalance = selectedStandard === Standard.ERC20 ? balance0 : balance1;
+
+  // Check if balance is insufficient for staking
+  const isInsufficientBalance = useMemo(() => {
+    if (!isStaking || !amount || parseFloat(amount) <= 0) {
+      return false;
+    }
+
+    try {
+      const amountBigInt = parseUnits(amount, 18);
+      const currentBalance =
+        selectedStandard === Standard.ERC20 ? redErc20Balance : redErc223Balance;
+
+      if (!currentBalance) {
+        return true;
+      }
+
+      return amountBigInt > currentBalance;
+    } catch {
+      return false;
+    }
+  }, [amount, isStaking, selectedStandard, redErc20Balance, redErc223Balance]);
 
   const isProcessing = useMemo(() => {
     return (
@@ -361,7 +474,7 @@ const StakeDialog = () => {
       }
 
       const amountBigInt = parseUnits(amount, 18);
-      const tokenInfo = getTokenInfo(selectedStandard as any);
+      const amountToApproveBigInt = parseUnits(amountToApprove || amount, 18);
 
       if (isStaking) {
         const currentBalance =
@@ -377,7 +490,7 @@ const StakeDialog = () => {
         if (selectedStandard === Standard.ERC20) {
           setStatus(StakeStatus.PENDING_APPROVE);
           try {
-            const approveResult = await approveERC20(amountBigInt);
+            const approveResult = await approve(amountToApproveBigInt, gasSettings, gasToUse);
             if (approveResult?.hash) {
               setApproveHash(approveResult.hash);
               setStatus(StakeStatus.LOADING_APPROVE);
@@ -402,9 +515,9 @@ const StakeDialog = () => {
         try {
           let stakeResult;
           if (selectedStandard === Standard.ERC20) {
-            stakeResult = await stakeERC20(amountBigInt);
+            stakeResult = await stake(amountBigInt, gasSettings, gasToUse);
           } else {
-            stakeResult = await depositAndStakeERC223(amountBigInt);
+            stakeResult = await stakeERC223(amountBigInt, gasSettings, gasToUse);
           }
 
           if (stakeResult?.hash) {
@@ -442,7 +555,13 @@ const StakeDialog = () => {
 
         setStatus(StakeStatus.PENDING);
         try {
-          const unstakeResult = await unstake(tokenInfo.address, amountBigInt);
+          // Always use ERC-20 address for withdraw - the contract tracks all stakes under ERC-20 address
+          const unstakeResult = await unstake(
+            RED_ERC20_ADDRESS,
+            amountBigInt,
+            gasSettings,
+            gasToUse,
+          );
           if (unstakeResult?.hash) {
             setStakeHash(unstakeResult.hash);
             setStatus(StakeStatus.LOADING);
@@ -476,17 +595,18 @@ const StakeDialog = () => {
     redErc223Balance,
     canUnstake,
     userStaked,
-    approveERC20,
-    stakeERC20,
-    depositAndStakeERC223,
+    approve,
+    stake,
+    stakeERC223,
     unstake,
-    getTokenInfo,
     refetchUserData,
     setStatus,
     setErrorType,
     setErrorMessage,
     setApproveHash,
     setStakeHash,
+    gasSettings,
+    gasToUse,
   ]);
 
   useEffect(() => {
@@ -496,6 +616,16 @@ const StakeDialog = () => {
       }, 400);
     }
   }, [isSuccessStake, isRevertedStake, isRevertedApprove, isOpen, setStatus]);
+
+  const { price } = useUSDPrice(
+    selectedStandard === Standard.ERC20 ? RED_ERC20_ADDRESS : RED_ERC223_ADDRESS,
+  );
+
+  const calculateUSDValue = useMemo(() => {
+    if (!amount || parseFloat(amount) === 0) return "0.00";
+    const tokenPrice = price || 0;
+    return (parseFloat(amount) * tokenPrice).toFixed(2);
+  }, [amount, price]);
 
   function StakeActionButton() {
     if (!amount || parseFloat(amount) === 0) {
@@ -531,9 +661,9 @@ const StakeDialog = () => {
             <ApproveRow hash={approveHash} isReverted />
             <StakeRow isDisabled isStaking={isStaking} />
           </Rows>
-          <div className="flex flex-col gap-4 mt-5">
-            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-4">
-              <p className="text-14 text-secondary-text">
+          <div className="flex flex-col gap-4 mt-4 md:mt-5">
+            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 md:p-4">
+              <p className="text-12 md:text-14 text-secondary-text">
                 Transaction failed because the gas limit is too low. Adjust your wallet settings. If
                 you still have issues, click{" "}
                 <a href="#" className="text-secondary-text underline">
@@ -598,9 +728,9 @@ const StakeDialog = () => {
             )}
             <StakeRow hash={stakeHash} isSettled isReverted isStaking={isStaking} />
           </Rows>
-          <div className="flex flex-col gap-4 mt-5">
-            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-4">
-              <p className="text-14 text-secondary-text">
+          <div className="flex flex-col gap-4 mt-4 md:mt-5">
+            <div className="bg-red-light/10 border border-red-light/30 rounded-3 p-3 md:p-4 overflow-hidden">
+              <p className="text-12 md:text-14 text-secondary-text break-words overflow-wrap break-all">
                 {errorMessage ||
                   "Transaction failed because the gas limit is too low. Adjust your wallet settings. If you still have issues, click "}
                 {!errorMessage && (
@@ -631,7 +761,13 @@ const StakeDialog = () => {
         size={ButtonSize.LARGE}
         colorScheme={ButtonColor.GREEN}
         onClick={handleStakeUnstake}
-        disabled={!amount || parseFloat(amount) === 0 || (!isStaking && !canUnstake)}
+        disabled={
+          !amount ||
+          parseFloat(amount) === 0 ||
+          (!isStaking && !canUnstake) ||
+          isInsufficientBalance ||
+          isEditApproveActive
+        }
       >
         {title}
       </Button>
@@ -639,27 +775,8 @@ const StakeDialog = () => {
   }
 
   const renderInitialState = () => {
-    const gasLimitERC20 = 329000;
-    const gasLimitERC223 = 115000;
-    const gasPriceGwei = 33.53;
-    const networkFeeERC20 = 0.0031;
-    const networkFeeERC223 = 0.0011;
-
     return (
       <div className="space-y-4">
-        {!isCorrectNetwork && (
-          <Alert
-            type="warning"
-            text={
-              <div className="flex items-start gap-2">
-                <span className="text-14">
-                  You are not connected to Sepolia testnet. Please switch networks to see your
-                  balances and {isStaking ? "stake" : "unstake"}.
-                </span>
-              </div>
-            }
-          />
-        )}
         {isStaking && (
           <Alert
             type="warning"
@@ -675,27 +792,23 @@ const StakeDialog = () => {
         )}
 
         {/* Stake amount section */}
-        <div className="bg-tertiary-bg rounded-3 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1">
-              <span className="text-14 text-secondary-text">
-                {isStaking ? "Stake" : "Unstake"} amount
-              </span>
-              <Tooltip
-                iconSize={16}
-                text={`Enter the amount of D223 tokens you want to ${isStaking ? "stake" : "unstake"}`}
-              />
-            </div>
+        <div className="p-5 bg-secondary-bg rounded-3 relative">
+          <div className="flex justify-between items-center mb-5 h-[22px]">
+            <span className="text-14 block text-secondary-text">
+              {isStaking ? "Stake" : "Unstake"} amount
+            </span>
           </div>
 
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex-1">
+          <div className="flex items-center mb-5 justify-between">
+            <div>
               <NumericFormat
                 allowedDecimalSeparators={[","]}
                 decimalScale={18}
                 inputMode="decimal"
                 placeholder="0"
-                className="h-12 bg-transparent outline-0 border-0 text-32 w-full placeholder:text-tertiary-text"
+                className={clsx(
+                  "h-12 bg-transparent outline-0 border-0 text-32 w-full peer placeholder:text-tertiary-text",
+                )}
                 type="text"
                 value={amount}
                 onValueChange={(values) => {
@@ -703,9 +816,17 @@ const StakeDialog = () => {
                 }}
                 allowNegative={false}
               />
-              <span className="text-12 block -mt-1 text-tertiary-text">$50.00</span>
+              <span className="text-12 block -mt-1 text-tertiary-text">${calculateUSDValue}</span>
+              <div
+                className={clsxMerge(
+                  "duration-200 rounded-3 pointer-events-none absolute w-full h-full border border-transparent peer-hocus:shadow peer-focus:shadow top-0 left-0",
+                  "peer-hocus:shadow-green/60 peer-focus:shadow-green/60 peer-focus:border-green",
+                  isInsufficientBalance &&
+                    "shadow-red-light/60 border-red-light shadow peer-hocus:shadow-red-light/60 peer-focus:shadow peer-focus:shadow-red-light/60 peer-focus:border-red-light",
+                )}
+              />
             </div>
-            <div className="group flex items-center gap-2 duration-200 text-base text-primary-text bg-primary-bg hocus:text-primary-text rounded-[80px] border border-transparent hocus:bg-green-bg hocus:shadow shadow-green/60 hocus:border-green p-2 lg:px-5 lg:py-2.5 lg:text-24 min-h-12 flex-shrink-0 ml-2">
+            <div className="group flex items-center gap-2 duration-200 text-base text-primary-text bg-primary-bg rounded-[80px] border border-transparent px-3 py-2 min-h-12 flex-shrink-0">
               <Image
                 src="/images/logo-short.svg"
                 width={32}
@@ -717,168 +838,108 @@ const StakeDialog = () => {
             </div>
           </div>
 
-          {/* Standard selector */}
-          <div className="gap-1 md:gap-3 relative md:pb-2 grid grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setSelectedStandard(Standard.ERC20)}
-              className={clsx(
-                "*:z-10 flex flex-col gap-1 px-3 py-2.5 rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 text-12 group bg-gradient-to-r from-primary-bg md:rounded-b-0 md:before:rounded-b-0",
-                selectedStandard === Standard.ERC20
-                  ? "before:opacity-100"
-                  : "before:opacity-0 hocus:before:opacity-100",
-              )}
-            >
-              <div className="max-md:hidden flex items-center gap-1 cursor-default">
-                <span
-                  className={clsx(
-                    "text-12",
-                    selectedStandard === Standard.ERC20
-                      ? "text-secondary-text"
-                      : "text-tertiary-text",
-                  )}
-                >
-                  Standard
-                </span>
-                <span
-                  className={clsx(
-                    "px-2 py-0.5 rounded-2 text-10 font-medium",
-                    selectedStandard === Standard.ERC20
-                      ? "bg-green text-black"
-                      : "bg-tertiary-bg text-secondary-text",
-                  )}
-                >
-                  {Standard.ERC20}
-                </span>
-                <Tooltip iconSize={16} text="ERC-20 is the classic Ethereum token standard" />
-              </div>
-              <span
-                className={clsx(
-                  "block text-left",
-                  selectedStandard === Standard.ERC20 ? "text-primary-text" : "text-tertiary-text",
-                )}
-              >
-                <span
-                  className={
-                    selectedStandard === Standard.ERC20
-                      ? "text-secondary-text"
-                      : "text-tertiary-text"
-                  }
-                >
-                  Balance
-                </span>{" "}
-                {parseFloat(balance0).toFixed(2)} D223
-              </span>
-            </button>
-
-            {/* Center selector buttons */}
-            <div className="mx-auto z-10 text-10 w-[calc(100%-24px)] h-[32px] top-1 left-1/2 -translate-x-1/2 rounded-20 border border-green p-1 flex gap-1 items-center absolute md:w-auto md:top-[14px] md:left-1/2 md:-translate-x-1/2">
-              {[Standard.ERC20, Standard.ERC223].map((standard) => {
-                return (
-                  <StandardButton
-                    colorScheme={ThemeColors.GREEN}
-                    key={standard}
-                    handleStandardSelect={() => setSelectedStandard(standard)}
-                    standard={standard}
-                    selectedStandard={selectedStandard}
-                    disabled={false}
-                  />
-                );
-              })}
-            </div>
-
-            {/* ERC-223 Option */}
-            <button
-              type="button"
-              onClick={() => setSelectedStandard(Standard.ERC223)}
-              className={clsx(
-                "*:z-10 flex flex-col gap-1 px-3 py-2.5 rounded-2 before:absolute before:rounded-3 before:w-full before:h-full before:left-0 before:top-0 before:duration-200 relative before:bg-gradient-to-r before:from-green-bg before:to-green-bg/0 text-12 group before:rotate-180 items-end bg-gradient-to-l from-primary-bg md:rounded-b-0 md:before:rounded-t-0",
-                selectedStandard === Standard.ERC223
-                  ? "before:opacity-100"
-                  : "before:opacity-0 hocus:before:opacity-100",
-              )}
-            >
-              <div className="max-md:hidden flex items-center gap-1 cursor-default">
-                <Tooltip
-                  iconSize={16}
-                  text="ERC-223 is an improved token standard with lower fees"
-                />
-                <span
-                  className={clsx(
-                    "px-2 py-0.5 rounded-2 text-10 font-medium",
-                    selectedStandard === Standard.ERC223
-                      ? "bg-green text-black"
-                      : "bg-tertiary-bg text-secondary-text",
-                  )}
-                >
-                  {Standard.ERC223}
-                </span>
-                <span
-                  className={clsx(
-                    "text-12",
-                    selectedStandard === Standard.ERC223
-                      ? "text-secondary-text"
-                      : "text-tertiary-text",
-                  )}
-                >
-                  Standard
-                </span>
-              </div>
-              <span
-                className={clsx(
-                  "block text-right",
-                  selectedStandard === Standard.ERC223 ? "text-primary-text" : "text-tertiary-text",
-                )}
-              >
-                <span
-                  className={
-                    selectedStandard === Standard.ERC223
-                      ? "text-secondary-text"
-                      : "text-tertiary-text"
-                  }
-                >
-                  Balance
-                </span>{" "}
-                {parseFloat(balance1).toFixed(2)} D223
-              </span>
-            </button>
-
-            {/* Gas info */}
-            <div className="py-1 px-3 text-12 bg-gradient-to-r from-primary-bg rounded-bl-2 text-tertiary-text max-md:hidden">
-              ~{gasLimitERC20.toLocaleString()} gas
-            </div>
-            <div className="py-1 px-3 text-12 bg-gradient-to-l from-primary-bg rounded-br-2 text-right text-tertiary-text max-md:hidden ml-auto">
-              ~{gasLimitERC223.toLocaleString()} gas
-            </div>
-          </div>
+          <TokenStandardSelector
+            selectedStandard={selectedStandard}
+            handleStandardSelect={setSelectedStandard}
+            disabled={false}
+            symbol="D223"
+            balance0={balance0}
+            balance1={balance1}
+            gasERC20={gasERC20Display}
+            gasERC223={gasERC223Display}
+            colorScheme={ThemeColors.GREEN}
+            allowedErc223={true}
+          />
         </div>
+        {isInsufficientBalance && (
+          <div className="mt-3">
+            <HelperText error="Insufficient balance" />
+          </div>
+        )}
 
         {/* Approve amount section - only show for ERC-20 staking */}
         {isStaking &&
           (selectedStandard === Standard.ERC20 || selectedStandard === Standard.ERC223) && (
-            <div className="bg-tertiary-bg rounded-3 flex justify-between items-center px-5 py-2.5 min-h-12 gap-3">
-              <div className="flex items-center gap-1.5 text-secondary-text whitespace-nowrap">
-                <Tooltip
-                  iconSize={16}
-                  text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
-                />
-                <span className="text-14">Approve amount</span>
+            <div
+              className={clsx(
+                "bg-tertiary-bg rounded-3 flex items-center px-4 md:px-5 py-2 min-h-12 gap-2 md:gap-3",
+                +amountToApprove < +amount && "md:pb-[26px]",
+              )}
+            >
+              <div className="md:items-center md:justify-between md:gap-5 flex-grow flex flex-col gap-1 md:flex-row">
+                <div className="flex items-center gap-1 md:gap-1.5 text-secondary-text whitespace-nowrap md:flex-row-reverse">
+                  <span className="text-12 md:text-14">Approve amount</span>
+                  <Tooltip
+                    iconSize={16}
+                    text="In order to stake ERC-20 tokens, you need to give the contract permission to withdraw your tokens. This amount never expires."
+                  />
+                </div>
+
+                {!isEditApproveActive ? (
+                  <span className="text-12 md:text-14">{amountToApprove || "0"} D223</span>
+                ) : (
+                  <div className="flex-grow">
+                    <div className="relative w-full flex-grow">
+                      <NumericFormat
+                        inputMode="decimal"
+                        allowedDecimalSeparators={[","]}
+                        className={clsx(
+                          "h-8 pl-3 pr-14 text-14",
+                          +amountToApprove < +amount && "border-red-light focus:border-red-light",
+                        )}
+                        value={amountToApprove}
+                        onValueChange={(values) => {
+                          setAmountToApprove(values.value);
+                        }}
+                        customInput={Input}
+                        allowNegative={false}
+                        type="text"
+                      />
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-tertiary-text text-14">
+                        D223
+                      </span>
+                    </div>
+                    {+amountToApprove < +amount && (
+                      <span className="text-red-light md:absolute text-12 md:translate-y-0.5">
+                        Must be higher or equal {amount}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2 flex-grow justify-end min-w-0">
-                <span className="text-14 truncate">{amount || "0"} D223</span>
-                <Button
-                  size={ButtonSize.EXTRA_SMALL}
-                  colorScheme={ButtonColor.LIGHT_GREEN}
-                  onClick={() => {}}
-                >
-                  Edit
-                </Button>
+
+              <div className="flex items-center flex-shrink-0">
+                {!isEditApproveActive ? (
+                  <Button
+                    size={ButtonSize.EXTRA_SMALL}
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                    onClick={() => setIsEditApproveActive(true)}
+                    className="!rounded-20"
+                  >
+                    Edit
+                  </Button>
+                ) : (
+                  <Button
+                    disabled={+amountToApprove < +amount}
+                    size={ButtonSize.EXTRA_SMALL}
+                    colorScheme={ButtonColor.LIGHT_GREEN}
+                    onClick={() => setIsEditApproveActive(false)}
+                    className="!rounded-20 disabled:bg-quaternary-bg"
+                  >
+                    Save
+                  </Button>
+                )}
               </div>
             </div>
           )}
 
         {/* Gas price and network fee section */}
-        <GasSettingsBlock />
+        <GasSettingsBlock
+          gasPrice={gasPrice}
+          gasLimit={gasToUse}
+          gasPriceOption={gasPriceOption}
+          onEditClick={() => setIsGasSettingsOpen(true)}
+        />
       </div>
     );
   };
@@ -886,98 +947,124 @@ const StakeDialog = () => {
   if (!isOpen) return null;
 
   return (
-    <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog}>
-      <div className="bg-primary-bg rounded-5 w-full sm:w-[600px]">
-        <DialogHeader onClose={closeDialog} title={title} />
-        <div className="card-spacing ">
-          {!isSettledStake && !isRevertedApprove && !isProcessing && renderInitialState()}
+    <>
+      <DrawerDialog isOpen={isOpen} setIsOpen={closeDialog} maxMobileWidth="767px">
+        <div className="bg-primary-bg rounded-5 w-full md:w-[600px] max-md:rounded-t-5 max-md:rounded-b-none">
+          <DialogHeader onClose={closeDialog} title={title} />
+          <div className="card-spacing max-md:px-4 max-md:pb-6">
+            {!isSettledStake && !isRevertedApprove && !isProcessing && renderInitialState()}
 
-          {isProcessing && !isSettledStake && !isRevertedApprove && (
-            <>
-              <div className="flex flex-col gap-3">
-                <div className="rounded-3 bg-tertiary-bg py-4 px-5 flex flex-col gap-1">
-                  <p className="text-secondary-text text-14">
-                    {isStaking ? "Stake" : "Unstake"} amount
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <div className="flex flex-col">
-                      <span className="text-32 text-primary-text">{amount || "0"}</span>
-                      <p className="text-secondary-text text-14">$50.00</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-primary-bg rounded-full flex items-center justify-center flex-shrink-0">
-                        <Image src="/images/logo-short.svg" alt="D223" width={16} height={16} />
+            {isProcessing && !isSettledStake && !isRevertedApprove && (
+              <>
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-3 bg-tertiary-bg py-4 px-4 md:px-5 flex flex-col gap-1">
+                    <p className="text-secondary-text text-14">
+                      {isStaking ? "Stake" : "Unstake"} amount
+                    </p>
+                    <div className="flex justify-between items-start md:items-center gap-2">
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-24 md:text-32 text-primary-text break-words">
+                          {amount || "0"}
+                        </span>
+                        <p className="text-secondary-text text-12 md:text-14">
+                          ${calculateUSDValue}
+                        </p>
                       </div>
-                      <span className="text-16 font-medium text-primary-text whitespace-nowrap">
-                        D223
-                      </span>
-                      <Image
-                        src={
-                          selectedStandard === Standard.ERC20
-                            ? "/images/badges/erc-20-green-small.svg"
-                            : "/images/badges/erc-223-green-small.svg"
-                        }
-                        alt="Standard"
-                        width={48}
-                        height={48}
-                        className="flex-shrink-0"
-                      />
+                      <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+                        <div className="w-7 h-7 md:w-8 md:h-8 bg-primary-bg rounded-full flex items-center justify-center flex-shrink-0">
+                          <Image
+                            src="/images/logo-short.svg"
+                            alt="D223"
+                            width={14}
+                            height={14}
+                            className="md:w-4 md:h-4"
+                          />
+                        </div>
+                        <span className="text-14 md:text-16 font-medium text-primary-text whitespace-nowrap">
+                          D223
+                        </span>
+                        <Image
+                          src={
+                            selectedStandard === Standard.ERC20
+                              ? "/images/badges/erc-20-green-small.svg"
+                              : "/images/badges/erc-223-green-small.svg"
+                          }
+                          alt="Standard"
+                          width={40}
+                          height={40}
+                          className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="h-px w-full bg-secondary-border mb-4 mt-5" />
-            </>
-          )}
+                <div className="h-px w-full bg-secondary-border mb-4 mt-5" />
+              </>
+            )}
 
-          {(isSettledStake || isRevertedApprove) && (
-            <div>
-              <div className="flex flex-col items-center py-6">
-                {/* Success Icon */}
-                {isSuccessStake && (
-                  <div className="mx-auto w-[80px] h-[80px] flex items-center justify-center relative mb-5">
-                    <div className="w-[54px] h-[54px] rounded-full border-[7px] blur-[8px] opacity-80 border-green" />
-                    <Svg
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
-                      iconName="success"
-                      size={65}
-                    />
-                  </div>
-                )}
-
-                {/* Error Icon */}
-                {(isRevertedStake || isRevertedApprove) && (
-                  <div className="flex items-center justify-center mb-5">
-                    <Svg className="text-red-light" iconName="warning" size={64} />
-                  </div>
-                )}
-
-                {/* Status Text */}
-                <h3
-                  className={clsx(
-                    "text-20 font-bold mb-2",
-                    isSuccessStake && "text-primary-text",
-                    (isRevertedStake || isRevertedApprove) && "text-red-light",
+            {(isSettledStake || isRevertedApprove) && (
+              <div>
+                <div className="flex flex-col items-center py-3 md:py-4">
+                  {/* Success Icon */}
+                  {isSuccessStake && (
+                    <div className="mx-auto w-[64px] h-[64px] md:w-[80px] md:h-[80px] flex items-center justify-center relative mb-4 md:mb-5">
+                      <div className="w-[40px] h-[40px] md:w-[54px] md:h-[54px] rounded-full border-[5px] md:border-[7px] blur-[6px] md:blur-[8px] opacity-80 border-green" />
+                      <Svg
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green"
+                        iconName="success"
+                        size={52}
+                      />
+                    </div>
                   )}
-                >
-                  {isSuccessStake && `Successfully ${isStaking ? "staked" : "unstaked"}`}
-                  {isRevertedStake && `Failed to ${isStaking ? "stake" : "unstake"}`}
-                  {isRevertedApprove && "Approve failed"}
-                </h3>
 
-                {/* Amount */}
-                <p className="text-16 text-primary-text mb-6">{amount} D223</p>
+                  {/* Error Icon */}
+                  {(isRevertedStake || isRevertedApprove) && (
+                    <div className="flex items-center justify-center mb-4 md:mb-5">
+                      <Svg className="text-red-light" iconName="warning" size={52} />
+                    </div>
+                  )}
+
+                  {/* Status Text */}
+                  <h3
+                    className={clsx(
+                      "text-16 md:text-18 xl:text-20 font-bold mb-2 text-center px-2",
+                      isSuccessStake && "text-primary-text",
+                      (isRevertedStake || isRevertedApprove) && "text-red-light",
+                    )}
+                  >
+                    {isSuccessStake && `Successfully ${isStaking ? "staked" : "unstaked"}`}
+                    {isRevertedStake && `Failed to ${isStaking ? "stake" : "unstake"}`}
+                    {isRevertedApprove && "Approve failed"}
+                  </h3>
+
+                  {/* Amount */}
+                  <p className="text-14 md:text-16 text-primary-text mb-4 md:mb-6">{amount} D223</p>
+                </div>
+
+                <div className="h-px w-full bg-secondary-border" />
               </div>
-
-              <div className="h-px w-full bg-secondary-border mb-5" />
+            )}
+            <div className="mt-4 md:mt-5">
+              <StakeActionButton />
             </div>
-          )}
-          <div className="mt-4">
-            <StakeActionButton />
           </div>
         </div>
-      </div>
-    </DrawerDialog>
+      </DrawerDialog>
+      <NetworkFeeConfigDialog
+        isAdvanced={isAdvanced}
+        setIsAdvanced={setIsAdvanced}
+        estimatedGas={estimatedGas > BigInt(0) ? estimatedGas : gasToUse}
+        setEstimatedGas={setEstimatedGas}
+        gasPriceSettings={gasPriceSettings}
+        gasPriceOption={gasPriceOption}
+        customGasLimit={customGasLimit}
+        setCustomGasLimit={setCustomGasLimit}
+        setGasPriceOption={setGasPriceOption}
+        setGasPriceSettings={setGasPriceSettings}
+        isOpen={isGasSettingsOpen}
+        setIsOpen={setIsGasSettingsOpen}
+      />
+    </>
   );
 };
 

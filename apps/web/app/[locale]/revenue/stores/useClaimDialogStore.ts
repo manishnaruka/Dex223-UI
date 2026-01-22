@@ -2,7 +2,14 @@
 
 import { create } from "zustand";
 
-export type ClaimDialogState = "initial" | "confirming" | "executing" | "success" | "error";
+export type ClaimDialogState =
+  | "initial"
+  | "confirming-delivery"
+  | "executing-delivery"
+  | "confirming-claim"
+  | "executing-claim"
+  | "success"
+  | "error";
 
 export interface ClaimToken {
   id: number;
@@ -13,6 +20,9 @@ export interface ClaimToken {
   amountUSD: string;
   erc20Address: string;
   erc223Address: string;
+  fullErc20Address?: string; // Full address for ERC20 token
+  fullErc223Address?: string; // Full address for ERC223 token
+  tokenId?: string; // Identifier for getting pools
   chainId: number;
   selectedStandard?: "ERC-20" | "ERC-223";
 }
@@ -26,7 +36,8 @@ export interface ClaimDialogData {
   selectedStandard?: "ERC-20" | "ERC-223"; // Global standard for single token
   tokenStandards?: Record<number, "ERC-20" | "ERC-223">; // Per-token standards for multiple tokens
   errorMessage?: string;
-  transactionHash?: string;
+  deliveryTransactionHash?: string;
+  claimTransactionHash?: string;
   isMultiple?: boolean; // Flag to determine if it's single or multiple claim
 }
 
@@ -41,8 +52,10 @@ interface ClaimDialogStore {
   setState: (state: ClaimDialogState) => void;
   setData: (data: Partial<ClaimDialogData>) => void;
   setError: (errorMessage: string) => void;
-  setTransactionHash: (hash: string) => void;
+  setDeliveryTransactionHash: (hash: string) => void;
+  setClaimTransactionHash: (hash: string) => void;
   setTokenStandard: (tokenId: number, standard: "ERC-20" | "ERC-223") => void;
+  resetClaim: () => void;
 }
 
 export const useClaimDialogStore = create<ClaimDialogStore>((set) => ({
@@ -58,13 +71,31 @@ export const useClaimDialogStore = create<ClaimDialogStore>((set) => ({
     }),
 
   closeDialog: () =>
-    set({
-      isOpen: false,
-      state: "initial",
-      data: null,
+    set((state) => {
+      if (
+        state.state === "confirming-delivery" ||
+        state.state === "executing-delivery" ||
+        state.state === "confirming-claim" ||
+        state.state === "executing-claim"
+      ) {
+        return {
+          isOpen: false,
+        };
+      }
+      return {
+        isOpen: false,
+        state: "initial",
+        data: null,
+      };
     }),
 
-  setState: (state) => set({ state }),
+  setState: (state) =>
+    set((currentState) => {
+      if (state === "success" || state === "error") {
+        return { state };
+      }
+      return { state };
+    }),
 
   setData: (newData) =>
     set((state) => ({
@@ -77,9 +108,14 @@ export const useClaimDialogStore = create<ClaimDialogStore>((set) => ({
       state: "error",
     })),
 
-  setTransactionHash: (transactionHash) =>
+  setDeliveryTransactionHash: (deliveryTransactionHash) =>
     set((state) => ({
-      data: state.data ? { ...state.data, transactionHash } : null,
+      data: state.data ? { ...state.data, deliveryTransactionHash } : null,
+    })),
+
+  setClaimTransactionHash: (claimTransactionHash) =>
+    set((state) => ({
+      data: state.data ? { ...state.data, claimTransactionHash } : null,
     })),
 
   setTokenStandard: (tokenId, standard) =>
@@ -96,5 +132,12 @@ export const useClaimDialogStore = create<ClaimDialogStore>((set) => ({
           },
         },
       };
+    }),
+
+  resetClaim: () =>
+    set({
+      isOpen: false,
+      state: "initial",
+      data: null,
     }),
 }));
