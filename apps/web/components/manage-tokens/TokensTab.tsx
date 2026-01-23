@@ -285,7 +285,7 @@ export default function TokensTab({
             >
               {alreadyImported
                 ? t("already_imported")
-                : t("import_symbol", { symbol: derivedToken.symbol })}
+                : t("import_symbol", { symbol: derivedToken.symbol || "" })}
             </Button>
           </div>
         </div>

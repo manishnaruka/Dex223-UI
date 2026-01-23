@@ -30,9 +30,6 @@ export interface ClaimToken {
 export interface ClaimDialogData {
   selectedTokens: ClaimToken[];
   totalReward: number;
-  gasPrice: string;
-  gasLimit: string;
-  networkFee: string;
   selectedStandard?: "ERC-20" | "ERC-223"; // Global standard for single token
   tokenStandards?: Record<number, "ERC-20" | "ERC-223">; // Per-token standards for multiple tokens
   errorMessage?: string;

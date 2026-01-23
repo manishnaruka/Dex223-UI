@@ -346,7 +346,7 @@ export const PriceRange = ({
               }}
             />
             <div className="flex justify-between text-12 text-tertiary-text">
-              <span>{`${t("token_starting_price", { symbol: baseToken?.symbol })}:`}</span>
+              <span>{`${t("token_starting_price", { symbol: baseToken?.symbol ?? "" })}:`}</span>
               <span>
                 {formattedPrice !== "-" && baseToken && quoteToken
                   ? `${formattedPrice} ${quoteToken.symbol} = 1 ${baseToken.symbol}`

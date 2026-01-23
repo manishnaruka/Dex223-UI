@@ -21,11 +21,13 @@ import TokenStandardSelector from "@/components/common/TokenStandardSelector";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { getFormattedGasPrice } from "@/functions/gasSettings";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useUSDPrice } from "@/hooks/useUSDPrice";
 import addToast from "@/other/toast";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 
 import useRevenueContract, {
   RED_ERC20_ADDRESS,
@@ -34,9 +36,7 @@ import useRevenueContract, {
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
-  useClaimGasPrice,
   useClaimGasPriceStore,
-  useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
 import { StakeError, StakeStatus, useStakeDialogStore } from "../stores/useStakeDialogStore";
 
@@ -315,7 +315,7 @@ const StakeDialog = () => {
 
   const [amount, setAmount] = useState("");
   const [selectedStandard, setSelectedStandard] = useState<Standard>(Standard.ERC20);
-  const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
+  const [isOpenedFee, setIsOpenedFee] = useState(false);
   const [isEditApproveActive, setIsEditApproveActive] = useState(false);
   const [amountToApprove, setAmountToApprove] = useState("");
   const chainId = useCurrentChainId();
@@ -357,32 +357,38 @@ const StakeDialog = () => {
 
   const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
-  const gasPrice = useClaimGasPrice();
-  const { gasSettings } = useClaimGasSettings();
+  const { baseFee, gasPrice } = useGlobalFees();
 
   // Dynamic gas limit estimation based on selected standard
-  const defaultGasLimitERC20 = BigInt(329000);
-  const defaultGasLimitERC223 = BigInt(115000);
-  const defaultGasLimit =
-    selectedStandard === Standard.ERC20 ? defaultGasLimitERC20 : defaultGasLimitERC223;
-  const gasToUse = customGasLimit || estimatedGas || defaultGasLimit;
+
+  const gasToUse = customGasLimit || estimatedGas;
+
+  const formattedGasPrice = useMemo(() => {
+    return getFormattedGasPrice({
+      baseFee,
+      chainId,
+      gasPrice,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
 
   // Dynamic gas display values (similar to swap module pattern)
   const gasERC20Display = useMemo(() => {
     if (!amount || parseFloat(amount) === 0) {
       return "—";
     }
-    const gasInK = Math.round(Number(defaultGasLimitERC20) / 1000);
+    const gasInK = Math.round(Number(estimatedGas) / 1000);
     return `~${gasInK}K gas`;
-  }, [amount, defaultGasLimitERC20]);
+  }, [amount, estimatedGas]);
 
   const gasERC223Display = useMemo(() => {
     if (!amount || parseFloat(amount) === 0) {
       return "—";
     }
-    const gasInK = Math.round(Number(defaultGasLimitERC223) / 1000);
+    const gasInK = Math.round(Number(estimatedGas) / 1000);
     return `~${gasInK}K gas`;
-  }, [amount, defaultGasLimitERC223]);
+  }, [amount, estimatedGas]);
 
   useEffect(() => {
     if (isOpen && storeAmount) {
@@ -490,7 +496,7 @@ const StakeDialog = () => {
         if (selectedStandard === Standard.ERC20) {
           setStatus(StakeStatus.PENDING_APPROVE);
           try {
-            const approveResult = await approve(amountToApproveBigInt, gasSettings, gasToUse);
+            const approveResult = await approve(amountToApproveBigInt, gasPriceSettings, gasToUse);
             if (approveResult?.hash) {
               setApproveHash(approveResult.hash);
               setStatus(StakeStatus.LOADING_APPROVE);
@@ -515,9 +521,9 @@ const StakeDialog = () => {
         try {
           let stakeResult;
           if (selectedStandard === Standard.ERC20) {
-            stakeResult = await stake(amountBigInt, gasSettings, gasToUse);
+            stakeResult = await stake(amountBigInt, gasPriceSettings, gasToUse);
           } else {
-            stakeResult = await stakeERC223(amountBigInt, gasSettings, gasToUse);
+            stakeResult = await stakeERC223(amountBigInt, gasPriceSettings, gasToUse);
           }
 
           if (stakeResult?.hash) {
@@ -559,7 +565,7 @@ const StakeDialog = () => {
           const unstakeResult = await unstake(
             RED_ERC20_ADDRESS,
             amountBigInt,
-            gasSettings,
+            gasPriceSettings,
             gasToUse,
           );
           if (unstakeResult?.hash) {
@@ -605,7 +611,7 @@ const StakeDialog = () => {
     setErrorMessage,
     setApproveHash,
     setStakeHash,
-    gasSettings,
+    gasPriceSettings,
     gasToUse,
   ]);
 
@@ -935,10 +941,10 @@ const StakeDialog = () => {
 
         {/* Gas price and network fee section */}
         <GasSettingsBlock
-          gasPrice={gasPrice}
-          gasLimit={gasToUse}
-          gasPriceOption={gasPriceOption}
-          onEditClick={() => setIsGasSettingsOpen(true)}
+          customGasLimit={customGasLimit}
+          estimatedGas={estimatedGas}
+          formattedGasPrice={formattedGasPrice}
+          handleClick={() => setIsOpenedFee(true)}
         />
       </div>
     );
@@ -1061,8 +1067,8 @@ const StakeDialog = () => {
         setCustomGasLimit={setCustomGasLimit}
         setGasPriceOption={setGasPriceOption}
         setGasPriceSettings={setGasPriceSettings}
-        isOpen={isGasSettingsOpen}
-        setIsOpen={setIsGasSettingsOpen}
+        isOpen={isOpenedFee}
+        setIsOpen={setIsOpenedFee}
       />
     </>
   );

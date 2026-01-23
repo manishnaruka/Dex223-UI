@@ -2,7 +2,7 @@
 
 import Preloader from "@repo/ui/preloader";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Address, isAddress } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -17,10 +17,12 @@ import { StandardButton } from "@/components/common/TokenStandardSelector";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { ThemeColors } from "@/config/theme/colors";
 import { clsxMerge } from "@/functions/clsxMerge";
+import { getFormattedGasPrice } from "@/functions/gasSettings";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { addNotification } from "@/other/notification";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   RecentTransactionStatus,
@@ -32,9 +34,7 @@ import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
-  useClaimGasPrice,
   useClaimGasPriceStore,
-  useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
 
 const MultipleClaimDialog = () => {
@@ -56,7 +56,7 @@ const MultipleClaimDialog = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [globalStandard, setGlobalStandard] = useState<Standard>(Standard.ERC223);
-  const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
+   const [isOpenedFee, setIsOpenedFee] = useState(false);
 
   const {
     gasPriceOption,
@@ -71,10 +71,19 @@ const MultipleClaimDialog = () => {
 
   const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
-  const gasPrice = useClaimGasPrice();
-  const { gasSettings } = useClaimGasSettings();
+  const { baseFee, gasPrice } = useGlobalFees();
   const gasToUse = customGasLimit || estimatedGas || BigInt(115000);
   const notificationShownRef = useRef<string | null>(null);
+
+  const formattedGasPrice = useMemo(() => {
+    return getFormattedGasPrice({
+      baseFee,
+      chainId,
+      gasPrice,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
 
   useEffect(() => {
     if (isOpen) {
@@ -195,7 +204,7 @@ const MultipleClaimDialog = () => {
 
         const deliveryResult = await delivery(
           poolAddresses,
-          gasSettings,
+          gasPriceSettings,
           customGasLimit || estimatedGas,
         );
 
@@ -209,7 +218,7 @@ const MultipleClaimDialog = () => {
       // STEP 2: CLAIM
       setState("confirming-claim");
 
-      const claimResult = await claim(tokenAddresses, gasSettings, customGasLimit || estimatedGas);
+      const claimResult = await claim(tokenAddresses, gasPriceSettings, customGasLimit || estimatedGas);
 
       setState("executing-claim");
 
@@ -443,10 +452,10 @@ const MultipleClaimDialog = () => {
         </div>
       )}
       <GasSettingsBlock
-        gasPrice={gasPrice}
-        gasLimit={gasToUse}
-        gasPriceOption={gasPriceOption}
-        onEditClick={() => setIsGasSettingsOpen(true)}
+        customGasLimit={customGasLimit}
+        estimatedGas={estimatedGas}
+        formattedGasPrice={formattedGasPrice}
+        handleClick={() => setIsOpenedFee(true)}
       />
 
       <Button
@@ -781,8 +790,8 @@ const MultipleClaimDialog = () => {
         setCustomGasLimit={setCustomGasLimit}
         setGasPriceOption={setGasPriceOption}
         setGasPriceSettings={setGasPriceSettings}
-        isOpen={isGasSettingsOpen}
-        setIsOpen={setIsGasSettingsOpen}
+        isOpen={isOpenedFee}
+        setIsOpen={setIsOpenedFee}
       />
     </>
   );

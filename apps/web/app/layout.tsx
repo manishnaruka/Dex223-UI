@@ -19,7 +19,7 @@ const golos_text = Golos_Text({
 
 interface Props {
   params: Promise<{
-    locale: "es" | "en" | "zh";
+    locale?: "es" | "en" | "zh";
   }>;
 }
 

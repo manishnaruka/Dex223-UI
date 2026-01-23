@@ -46,7 +46,7 @@ export default function GasFeeBlock({
               <div className="flex items-center gap-1">
                 <Tooltip
                   iconSize={_isMobile ? 16 : 24}
-                  text={`Network fee for ${networks.find((n) => n.chainId === chainId)?.name}`}
+                  text={`Network fee for ${networks.find((n) => n.chainId === chainId)?.name || ""}`}
                 />
                 <div className="text-secondary-text text-12 md:text-14 flex items-center ">
                   Network fee

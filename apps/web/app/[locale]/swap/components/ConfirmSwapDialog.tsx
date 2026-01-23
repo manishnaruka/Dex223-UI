@@ -694,7 +694,7 @@ export default function ConfirmSwapDialog({ trade }: { trade: Trade<any, any, an
                   </div>
                 }
                 tooltipText={t("network_fee_tooltip", {
-                  networkName: networks.find((n) => n.chainId === chainId)?.name,
+                  networkName: networks.find((n) => n.chainId === chainId)?.name || "network",
                 })}
               />
               <SwapDetailsRow

@@ -776,7 +776,7 @@ function PickTokenDialogContent({
                           addToast(t("imported_successfully"));
                         }}
                       >
-                        {t("import_symbol", { symbol: derivedToken.symbol })}
+                        {t("import_symbol", { symbol: derivedToken.symbol ?? "" })}
                       </Button>
                     </div>
                   </div>

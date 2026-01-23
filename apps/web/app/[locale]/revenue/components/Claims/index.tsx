@@ -6,12 +6,10 @@ import Checkbox from "@repo/ui/checkbox";
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import { formatGwei } from "viem";
 
 import Svg from "@/components/atoms/Svg";
-import Badge, { BadgeVariant } from "@/components/badges/Badge";
 import Button from "@/components/buttons/Button";
 import {
   ButtonColor,
@@ -19,23 +17,19 @@ import {
   ButtonVariant as ButtonVariantType,
 } from "@/components/buttons/Button";
 import IconButton, { IconButtonSize, IconButtonVariant } from "@/components/buttons/IconButton";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { formatFloat } from "@/functions/formatFloat";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import truncateMiddle from "@/functions/truncateMiddle";
-import useCurrentChainId from "@/hooks/useCurrentChainId";
-import { Standard } from "@/sdk_bi/standard";
 
 import ForwardIcon from "../../../../../../../packages/ui/src/icons/ForwardIcon";
 import MultipleClaimDialog from "../../dialogs/MultipleClaimDialog";
 import SingleClaimDialog from "../../dialogs/SingleClaimDialog";
 import { useClaimDialogStore } from "../../stores/useClaimDialogStore";
-import {
-  useClaimGasLimitStore,
-  useClaimGasModeStore,
-  useClaimGasPrice,
-  useClaimGasPriceStore,
-} from "../../stores/useClaimGasSettingsStore";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import { useClaimGasLimitStore, useClaimGasModeStore, useClaimGasPriceStore } from "../../stores/useClaimGasSettingsStore";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
+import { getFormattedGasPrice } from "@/functions/gasSettings";
+import useCurrentChainId from "@/hooks/useCurrentChainId";
 
 export const Claims = ({
   tableData,
@@ -48,8 +42,6 @@ export const Claims = ({
   setSelectedTokens: (tokenId: number) => void;
   isLoading?: boolean;
 }) => {
-  const [isGasSettingsOpen, setIsGasSettingsOpen] = React.useState(false);
-  const chainId = useCurrentChainId();
 
   const {
     openDialog,
@@ -59,25 +51,31 @@ export const Claims = ({
     resetClaim,
   } = useClaimDialogStore();
 
-  const {
-    gasPriceOption,
-    gasPriceSettings,
-    setGasPriceOption,
-    setGasPriceSettings,
-    updateDefaultState,
-  } = useClaimGasPriceStore();
-
+  const chainId = useCurrentChainId();
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
-    useClaimGasLimitStore();
-
-  const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
-
-  const gasPrice = useClaimGasPrice();
-  const gasToUse = customGasLimit || estimatedGas || BigInt(115000);
-
-  React.useEffect(() => {
-    updateDefaultState(chainId);
-  }, [chainId, updateDefaultState]);
+      useClaimGasLimitStore();
+      const [isOpenedFee, setIsOpenedFee] = useState(false);
+      
+        const {
+          gasPriceOption,
+          gasPriceSettings,
+          setGasPriceOption,
+          setGasPriceSettings,
+        } = useClaimGasPriceStore();
+  
+    const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
+  
+    const { baseFee, gasPrice } = useGlobalFees();
+  
+    const formattedGasPrice = useMemo(() => {
+        return getFormattedGasPrice({
+          baseFee,
+          chainId,
+          gasPrice,
+          gasPriceOption,
+          gasPriceSettings,
+        });
+      }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
 
   // Check if a specific token is being claimed
   const isTokenBeingClaimed = (tokenId: number) => {
@@ -127,23 +125,11 @@ export const Claims = ({
     ];
 
     const totalReward = parseFloat(token.amountUSD.replace(/[$,]/g, ""));
-    const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
-    const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
-    const networkFeeEth = gasPrice
-      ? parseFloat(
-          (
-            (gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) /
-            BigInt(10) ** BigInt(18)
-          ).toString(),
-        )
-      : 0;
+
 
     openDialog({
       selectedTokens: selectedTokensData,
       totalReward,
-      gasPrice: gasPriceGwei.toString(),
-      gasLimit: gasLimitValue,
-      networkFee: networkFeeEth.toString(),
       selectedStandard: "ERC-223",
       isMultiple: false,
     });
@@ -177,22 +163,9 @@ export const Claims = ({
 
     if (selectedTokens.size === 1) {
       const token = selectedTokensData[0];
-      const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
-      const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
-      const networkFeeEth = gasPrice
-        ? parseFloat(
-            (
-              (gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) /
-              BigInt(10) ** BigInt(18)
-            ).toString(),
-          )
-        : 0;
       openDialog({
         selectedTokens: selectedTokensData,
         totalReward,
-        gasPrice: gasPriceGwei.toString(),
-        gasLimit: gasLimitValue,
-        networkFee: networkFeeEth.toString(),
         selectedStandard: "ERC-223",
         isMultiple: false,
       });
@@ -202,22 +175,9 @@ export const Claims = ({
         tokenStandards[token.id] = "ERC-223";
       });
 
-      const gasPriceGwei = gasPrice ? parseFloat(formatGwei(gasPrice)) : 0;
-      const gasLimitValue = (customGasLimit || estimatedGas || BigInt(115000)).toString();
-      const networkFeeEth = gasPrice
-        ? parseFloat(
-            (
-              (gasPrice * (customGasLimit || estimatedGas || BigInt(115000))) /
-              BigInt(10) ** BigInt(18)
-            ).toString(),
-          )
-        : 0;
       openDialog({
         selectedTokens: selectedTokensData,
         totalReward,
-        gasPrice: gasPriceGwei.toString(),
-        gasLimit: gasLimitValue,
-        networkFee: networkFeeEth.toString(),
         isMultiple: true,
         tokenStandards,
       });
@@ -240,7 +200,7 @@ export const Claims = ({
       <MultipleClaimDialog />
 
       {/* Desktop version */}
-      <div className="hidden xl:block rounded-3 h-[640px] bg-table-gradient flex flex-col">
+      <div className="hidden xl:flex xl:flex-col rounded-3 h-[640px] bg-table-gradient">
         <div className="grid grid-cols-[minmax(200px,2.5fr),_minmax(200px,2fr),_minmax(150px,1.2fr),_minmax(150px,1.2fr),_minmax(120px,1fr)] relative pr-5 pl-5 min-w-[1000px] flex-shrink-0">
           <div className="text-tertiary-text text-13 pl-5 h-[60px] flex items-center">Token</div>
           <div className="text-tertiary-text text-13 h-[60px] flex items-center">
@@ -441,7 +401,7 @@ export const Claims = ({
         </div>
 
         {selectedCount > 0 && !isLoading && (
-          <div className="relative top-[370px] z-20 p-4 bg-tertiary-bg rounded-b-3 flex items-center justify-between gap-4 border border-quaternary-bg">
+          <div className="relative z-20 p-4 bg-tertiary-bg rounded-b-3 flex items-center justify-between gap-4 border border-quaternary-bg">
             <div className="flex items-center gap-4">
               <span className="text-tertiary-text text-14">
                 Total claim: {selectedCount} token{selectedCount !== 1 ? "s" : ""}
@@ -457,13 +417,13 @@ export const Claims = ({
               <div className="flex items-center gap-2">
                 <Svg iconName="gas-edit" size={20} className="text-tertiary-text" />
                 <span className="text-tertiary-text text-14">
-                  Gas price: {gasPrice ? `${formatFloat(formatGwei(gasPrice))} GWEI` : "—"}
+                  Gas price: {formattedGasPrice ? `${formatFloat((Number(formattedGasPrice) / 1e9).toString())} GWEI` : "—"}
                 </span>
                 <Button
                   variant={ButtonVariantType.CONTAINED}
                   colorScheme={ButtonColor.LIGHT_GREEN}
                   size={ButtonSize.EXTRA_SMALL}
-                  onClick={() => setIsGasSettingsOpen(true)}
+                  onClick={() => setIsOpenedFee(true)}
                 >
                   Edit
                 </Button>
@@ -547,14 +507,14 @@ export const Claims = ({
                   <div className="flex items-center gap-1.5">
                     <Svg iconName="gas-edit" size={16} className="text-tertiary-text" />
                     <span className="text-secondary-text text-14">
-                      Gas price: {gasPrice ? `${formatFloat(formatGwei(gasPrice))} GWEI` : "—"}
+                      Gas price: {formattedGasPrice ? `${formatFloat((Number(formattedGasPrice) / 1e9).toString())} GWEI` : "—"}
                     </span>
                   </div>
                   <Button
                     variant={ButtonVariantType.OUTLINED}
                     colorScheme={ButtonColor.LIGHT_GREEN}
                     size={ButtonSize.EXTRA_SMALL}
-                    onClick={() => setIsGasSettingsOpen(true)}
+                    onClick={() => setIsOpenedFee(true)}
                     className="!h-6 !px-2 !text-12"
                   >
                     Edit
@@ -729,7 +689,7 @@ export const Claims = ({
       <NetworkFeeConfigDialog
         isAdvanced={isAdvanced}
         setIsAdvanced={setIsAdvanced}
-        estimatedGas={estimatedGas > BigInt(0) ? estimatedGas : gasToUse}
+        estimatedGas={estimatedGas}
         setEstimatedGas={setEstimatedGas}
         gasPriceSettings={gasPriceSettings}
         gasPriceOption={gasPriceOption}
@@ -737,8 +697,8 @@ export const Claims = ({
         setCustomGasLimit={setCustomGasLimit}
         setGasPriceOption={setGasPriceOption}
         setGasPriceSettings={setGasPriceSettings}
-        isOpen={isGasSettingsOpen}
-        setIsOpen={setIsGasSettingsOpen}
+        isOpen={isOpenedFee}
+        setIsOpen={setIsOpenedFee}
       />
     </>
   );

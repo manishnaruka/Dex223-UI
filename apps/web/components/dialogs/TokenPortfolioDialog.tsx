@@ -62,7 +62,7 @@ function TokenListInfo({
             </span>
           </div>
           <div className="flex gap-1 items-cente text-secondary-text text-12 md:text-16">
-            {t("tokens_amount", { amount: tokenList?.list.tokens.length })}
+            {t("tokens_amount", { amount: tokenList?.list.tokens.length || 0 })}
           </div>
         </div>
       </div>
@@ -148,7 +148,7 @@ export function TokenPortfolioDialogContent({
       </div>
       <div className="mx-4 md:mx-10 bg-secondary-border h-px" />
       <p className="text-secondary-text card-spacing-x py-3">
-        {t("found_in", { amount: token.lists?.length })}
+        {t("found_in", { amount: token.lists?.length || 0 })}
       </p>
       {token.lists?.length ? (
         <ScrollbarContainer height="full" className="max-h-[340px] overflow-y-auto -pr-1 mr-1">
