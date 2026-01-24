@@ -10,7 +10,7 @@ export default function GasSettingsBlock({
   customGasLimit,
   estimatedGas,
 }: {
-  handleClick: () => void;
+  handleClick?: () => void;
   formattedGasPrice?: bigint;
   customGasLimit?: bigint;
   estimatedGas?: bigint;
