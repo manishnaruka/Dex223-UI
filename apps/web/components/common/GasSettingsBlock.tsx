@@ -7,8 +7,8 @@ import { formatFloat } from "@/functions/formatFloat";
 export default function GasSettingsBlock({
   handleClick,
   formattedGasPrice,
-  customGasLimit,
-  estimatedGas,
+  customGasLimit = BigInt(0),
+  estimatedGas = BigInt(0),
 }: {
   handleClick?: () => void;
   formattedGasPrice?: bigint;
@@ -32,7 +32,7 @@ export default function GasSettingsBlock({
           <span>
             {formatFloat(
               formatEther(
-                (formattedGasPrice || BigInt(0)) * (customGasLimit || estimatedGas || BigInt(0)),
+                (formattedGasPrice || BigInt(0)) * (customGasLimit ? customGasLimit : estimatedGas),
                 "wei",
               ),
             )}{" "}

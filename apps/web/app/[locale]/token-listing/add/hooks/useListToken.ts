@@ -378,7 +378,7 @@ export default function useListToken() {
       } catch (e) {
         console.log(e);
         closeConfirmInWalletAlert();
-        setListTokenStatus(ListTokenStatus.INITIAL);
+        setListTokenStatus(ListTokenStatus.ERROR_LIST_TOKEN);
       }
     },
     [
