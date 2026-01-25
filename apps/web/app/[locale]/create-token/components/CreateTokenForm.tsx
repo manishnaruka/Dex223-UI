@@ -22,17 +22,17 @@ import { useAccount } from "wagmi";
 import * as Yup from "yup";
 
 import { useCreateTokenEstimatedGas } from "@/app/[locale]/create-token/hooks/useCreateToken";
-import {
-  useCreateTokenGasLimitStore,
-  useCreateTokenGasModeStore,
-  useCreateTokenGasPriceStore,
-} from "../stores/useCreateTokenGasSettingsStore";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { getFormattedGasPrice } from "@/functions/gasSettings";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 
+import {
+  useCreateTokenGasLimitStore,
+  useCreateTokenGasModeStore,
+  useCreateTokenGasPriceStore,
+} from "../stores/useCreateTokenGasSettingsStore";
 
 const isValidHttpsUrl = (value?: string) => {
   try {
