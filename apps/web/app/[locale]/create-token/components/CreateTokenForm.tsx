@@ -32,11 +32,7 @@ import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/us
 import { getFormattedGasPrice } from "@/functions/gasSettings";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
-import ConnectWalletDialog from "@/components/dialogs/ConnectWalletDialog";
-import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
-import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
-import { baseFeeMultipliers, SCALING_FACTOR } from "@/config/constants/baseFeeMultipliers";
-import { GasFeeModel, GasOption } from "@/stores/factories/createGasPriceStore";
+
 
 const isValidHttpsUrl = (value?: string) => {
   try {
