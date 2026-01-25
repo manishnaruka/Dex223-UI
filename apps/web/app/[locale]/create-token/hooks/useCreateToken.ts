@@ -5,7 +5,7 @@ import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import {
   useCreateTokenGasLimitStore,
   useCreateTokenGasPriceStore,
-} from "@/app/[locale]/create-token/stores/useCreateTokenGasSettingsStore";
+} from "../stores/useCreateTokenGasSettingsStore";
 import {
   CreateTokenStatus,
   useCreateTokenStatusStore,

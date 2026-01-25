@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { encodeFunctionData, parseUnits } from "viem";
-import { formatEther, formatGwei } from "viem";
-import { useAccount, usePublicClient } from "wagmi";
+import { useAccount } from "wagmi";
 import * as Yup from "yup";
 
 import Popover from "@/components/atoms/Popover";
@@ -13,21 +12,19 @@ import SelectButton from "@/components/atoms/SelectButton";
 import SelectOption from "@/components/atoms/SelectOption";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonVariant } from "@/components/buttons/Button";
+import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import MSigTransactionDialog from "@/components/dialogs/MSigTransactionDialog";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
 import { MULTISIG_ABI } from "@/config/abis/Multisig";
-import { formatFloat } from "@/functions/formatFloat";
+import { getFormattedGasPrice } from "@/functions/gasSettings";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useTokens } from "@/hooks/useTokenLists";
 import { Currency } from "@/sdk_bi/entities/currency";
 import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
-import { GasOption } from "@/stores/factories/createGasPriceStore";
-import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 
 import useMultisigContract from "../../hooks/useMultisigContract";
-import { GasFeeBlock } from "../shared";
 import {
   useMultisigGasLimitStore,
   useMultisigGasModeStore,
@@ -58,7 +55,6 @@ const schema = Yup.object({
 
 export default function ProposeNewTransaction() {
   const { isConnected } = useAccount();
-  const publicClient = usePublicClient();
   const { setIsOpened: setWalletConnectOpened } = useConnectWalletDialogStateStore();
   const [isOpenedAssetSelect, setIsOpenedAssetSelect] = useState(false);
   const {
@@ -96,78 +92,22 @@ export default function ProposeNewTransaction() {
   const { estimatedGas, customGasLimit, setEstimatedGas, setCustomGasLimit } =
     useMultisigGasLimitStore();
   const { isAdvanced, setIsAdvanced } = useMultisigGasModeStore();
-  const { baseFee, priorityFee, gasPrice } = useGlobalFees();
+  const { baseFee, gasPrice } = useGlobalFees();
   const chainId = useCurrentChainId();
+
+  const formattedGasPrice = useMemo(() => {
+    return getFormattedGasPrice({
+      baseFee,
+      chainId,
+      gasPrice,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
 
   useEffect(() => {
     updateDefaultState(chainId);
   }, [chainId, updateDefaultState]);
-
-  const computedGasSpending = useMemo(() => {
-    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
-      return formatFloat(formatGwei(gasPriceSettings.gasPrice));
-    }
-
-    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPrice) {
-      return formatFloat(formatGwei(gasPrice));
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      gasPriceSettings.maxFeePerGas &&
-      gasPriceSettings.maxPriorityFeePerGas &&
-      baseFee &&
-      gasPriceOption === GasOption.CUSTOM
-    ) {
-      const lowerFeePerGas =
-        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
-
-      return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      baseFee &&
-      priorityFee &&
-      gasPriceOption !== GasOption.CUSTOM
-    ) {
-      return formatFloat(formatGwei(baseFee + priorityFee));
-    }
-
-    return undefined;
-  }, [baseFee, gasPrice, gasPriceOption, gasPriceSettings, priorityFee]);
-
-  const computedGasSpendingETH = useMemo(() => {
-    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
-      return formatFloat(formatEther(gasPriceSettings.gasPrice * estimatedGas));
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      gasPriceSettings.maxFeePerGas &&
-      gasPriceSettings.maxPriorityFeePerGas &&
-      baseFee &&
-      gasPriceOption === GasOption.CUSTOM
-    ) {
-      const lowerFeePerGas =
-        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
-
-      return formatFloat(
-        formatEther((lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas) * estimatedGas),
-      );
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      baseFee &&
-      priorityFee &&
-      gasPriceOption !== GasOption.CUSTOM
-    ) {
-      return formatFloat(formatEther((baseFee + priorityFee) * estimatedGas));
-    }
-
-    return undefined;
-  }, [baseFee, estimatedGas, gasPriceOption, gasPriceSettings, priorityFee]);
 
   const getTokenBySymbol = useCallback(
     (symbol: string) => {
@@ -270,7 +210,7 @@ export default function ProposeNewTransaction() {
   return (
     <div className="flex flex-col gap-6">
       <form onSubmit={formik.handleSubmit}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 mb-5">
           <div>
             <InputLabel
               className="font-bold flex items-center gap-1 text-secondary-text text-16 mb-1"
@@ -391,11 +331,18 @@ export default function ProposeNewTransaction() {
           </div>
         </div>
 
-        <GasFeeBlock
+        {/* <GasFeeBlock
           computedGasSpending={computedGasSpending}
           computedGasSpendingETH={computedGasSpendingETH}
           gasPriceOption={gasPriceOption}
           onEditClick={() => setIsOpenedFee(true)}
+        /> */}
+
+        <GasSettingsBlock
+          customGasLimit={customGasLimit}
+          estimatedGas={estimatedGas}
+          formattedGasPrice={formattedGasPrice}
+          handleClick={() => setIsOpenedFee(true)}
         />
 
         {!isConnected ? (
