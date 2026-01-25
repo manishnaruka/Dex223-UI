@@ -53,7 +53,7 @@ function PinnedTokenRow({ token }: { token: Currency }) {
   }, [erc20Balance, erc223Balance, token]);
 
   return (
-    <div key={token.symbol} className="px-5 py-2 bg-tertiary-bg rounded-3">
+    <div key={token.symbol} className="px-5 py-2 bg-tertiary-bg rounded-2">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Image
@@ -184,7 +184,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
               <TabButton
                 key={title}
                 inactiveBackground="bg-primary-bg"
-                size={48}
+                size={40}
                 active={index === activeTab}
                 onClick={() => setActiveTab(index)}
               >
@@ -294,7 +294,7 @@ function AccountDialogContent({ setIsOpenedAccount, activeTab, setActiveTab }: a
                 </ScrollbarContainer>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center gap-2 h-[376px] bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 card-spacing-x sm:-mx-6 lg:-mx-10 -mt-3 pt-3 max-md:bg-size-180">
+              <div className="flex flex-col items-center justify-center gap-2 h-[476px] bg-empty-no-transactions bg-right-top bg-no-repeat -mx-4 px-4 lg:px-5 -mx-4 lg:-mx-5 -mt-3 pt-3 max-md:bg-size-180">
                 <span className="text-secondary-text">
                   {tRecentTransactions("transactions_will_be_displayed_here")}
                 </span>
