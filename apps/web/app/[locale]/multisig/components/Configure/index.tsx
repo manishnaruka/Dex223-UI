@@ -1,25 +1,22 @@
 import Preloader from "@repo/ui/preloader";
 import { useFormik } from "formik";
 import { useEffect, useMemo, useState } from "react";
-import { formatEther, formatGwei } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import * as Yup from "yup";
 
 import Select from "@/components/atoms/Select";
 import TextField, { InputLabel } from "@/components/atoms/TextField";
 import Button, { ButtonVariant } from "@/components/buttons/Button";
+import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import MSigTransactionDialog from "@/components/dialogs/MSigTransactionDialog";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
 import { useConnectWalletDialogStateStore } from "@/components/dialogs/stores/useConnectWalletStore";
-import { formatFloat } from "@/functions/formatFloat";
+import { getFormattedGasPrice } from "@/functions/gasSettings";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
-import { GasOption } from "@/stores/factories/createGasPriceStore";
-import { GasFeeModel } from "@/stores/useRecentTransactionsStore";
 import { useTransactionSendDialogStore } from "@/stores/useTransactionSendDialogStore";
 
 import useMultisigContract from "../../hooks/useMultisigContract";
-import { GasFeeBlock } from "../shared";
 import {
   useMultisigGasLimitStore,
   useMultisigGasModeStore,
@@ -122,71 +119,15 @@ export default function Configure() {
     updateDefaultState(chainId);
   }, [chainId, updateDefaultState]);
 
-  const computedGasSpending = useMemo(() => {
-    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
-      return formatFloat(formatGwei(gasPriceSettings.gasPrice));
-    }
-
-    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPrice) {
-      return formatFloat(formatGwei(gasPrice));
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      gasPriceSettings.maxFeePerGas &&
-      gasPriceSettings.maxPriorityFeePerGas &&
-      baseFee &&
-      gasPriceOption === GasOption.CUSTOM
-    ) {
-      const lowerFeePerGas =
-        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
-
-      return formatFloat(formatGwei(lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas));
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      baseFee &&
-      priorityFee &&
-      gasPriceOption !== GasOption.CUSTOM
-    ) {
-      return formatFloat(formatGwei(baseFee + priorityFee));
-    }
-
-    return undefined;
-  }, [baseFee, gasPrice, gasPriceOption, gasPriceSettings, priorityFee]);
-
-  const computedGasSpendingETH = useMemo(() => {
-    if (gasPriceSettings.model === GasFeeModel.LEGACY && gasPriceSettings.gasPrice) {
-      return formatFloat(formatEther(gasPriceSettings.gasPrice * estimatedGas));
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      gasPriceSettings.maxFeePerGas &&
-      gasPriceSettings.maxPriorityFeePerGas &&
-      baseFee &&
-      gasPriceOption === GasOption.CUSTOM
-    ) {
-      const lowerFeePerGas =
-        gasPriceSettings.maxFeePerGas > baseFee ? baseFee : gasPriceSettings.maxFeePerGas;
-
-      return formatFloat(
-        formatEther((lowerFeePerGas + gasPriceSettings.maxPriorityFeePerGas) * estimatedGas),
-      );
-    }
-
-    if (
-      gasPriceSettings.model === GasFeeModel.EIP1559 &&
-      baseFee &&
-      priorityFee &&
-      gasPriceOption !== GasOption.CUSTOM
-    ) {
-      return formatFloat(formatEther((baseFee + priorityFee) * estimatedGas));
-    }
-
-    return undefined;
-  }, [baseFee, estimatedGas, gasPriceOption, gasPriceSettings, priorityFee]);
+  const formattedGasPrice = useMemo(() => {
+    return getFormattedGasPrice({
+      baseFee,
+      chainId,
+      gasPrice,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
 
   const generateTransactionDataForForm = (values: typeof initialValues): string => {
     if (!values.type) return "";
@@ -377,11 +318,18 @@ export default function Configure() {
             </div>
           </div>
 
-          <GasFeeBlock
+          {/* <GasFeeBlock
             computedGasSpending={computedGasSpending}
             computedGasSpendingETH={computedGasSpendingETH}
             gasPriceOption={gasPriceOption}
             onEditClick={() => setIsOpenedFee(true)}
+          /> */}
+
+          <GasSettingsBlock
+            customGasLimit={customGasLimit}
+            estimatedGas={estimatedGas}
+            formattedGasPrice={formattedGasPrice}
+            handleClick={() => setIsOpenedFee(true)}
           />
 
           {!isConnected ? (

@@ -67,13 +67,19 @@ export const useStakeDialogStore = create<StakeDialogStore>((set) => ({
     }),
 
   closeDialog: () =>
-    set({
-      isOpen: false,
-      status: StakeStatus.INITIAL,
-      amount: "",
-      approveHash: undefined,
-      stakeHash: undefined,
-      errorMessage: undefined,
+    set((state) => {
+      if (state.status !== StakeStatus.INITIAL) {
+        return { isOpen: false };
+      }
+
+      return {
+        isOpen: false,
+        status: StakeStatus.INITIAL,
+        amount: "",
+        approveHash: undefined,
+        stakeHash: undefined,
+        errorMessage: undefined,
+      };
     }),
 
   setStatus: (status) => {
