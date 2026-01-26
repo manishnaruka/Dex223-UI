@@ -3,7 +3,7 @@
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Address, isAddress } from "viem";
 
 import DialogHeader from "@/components/atoms/DialogHeader";
@@ -14,10 +14,12 @@ import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/but
 import IconButton from "@/components/buttons/IconButton";
 import GasSettingsBlock from "@/components/common/GasSettingsBlock";
 import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+import { getFormattedGasPrice } from "@/functions/gasSettings";
 import getExplorerLink, { ExplorerLinkType } from "@/functions/getExplorerLink";
 import useCurrentChainId from "@/hooks/useCurrentChainId";
 import { addNotification } from "@/other/notification";
 import { Standard } from "@/sdk_bi/standard";
+import { useGlobalFees } from "@/shared/hooks/useGlobalFees";
 import { useConfirmInWalletAlertStore } from "@/stores/useConfirmInWalletAlertStore";
 import {
   RecentTransactionStatus,
@@ -30,9 +32,7 @@ import { useClaimDialogStore } from "../stores/useClaimDialogStore";
 import {
   useClaimGasLimitStore,
   useClaimGasModeStore,
-  useClaimGasPrice,
   useClaimGasPriceStore,
-  useClaimGasSettings,
 } from "../stores/useClaimGasSettingsStore";
 
 const SingleClaimDialog = () => {
@@ -52,7 +52,7 @@ const SingleClaimDialog = () => {
   const { claim, delivery, refetchUserData } = useRevenueContract();
 
   const [selectedStandard, setSelectedStandard] = useState<Standard>(Standard.ERC223);
-  const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
+  const [isOpenedFee, setIsOpenedFee] = useState(false);
 
   const {
     gasPriceOption,
@@ -67,9 +67,18 @@ const SingleClaimDialog = () => {
 
   const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
-  const gasPrice = useClaimGasPrice();
-  const { gasSettings } = useClaimGasSettings();
-  const gasToUse = customGasLimit || estimatedGas || BigInt(115000);
+  const { baseFee, gasPrice } = useGlobalFees();
+
+  const formattedGasPrice = useMemo(() => {
+    return getFormattedGasPrice({
+      baseFee,
+      chainId,
+      gasPrice,
+      gasPriceOption,
+      gasPriceSettings,
+    });
+  }, [baseFee, chainId, gasPrice, gasPriceOption, gasPriceSettings]);
+
   const notificationShownRef = useRef<string | null>(null);
 
   // Get token from data
@@ -173,7 +182,7 @@ const SingleClaimDialog = () => {
 
         const deliveryResult = await delivery(
           poolAddresses as Address[],
-          gasSettings,
+          gasPriceSettings,
           customGasLimit || estimatedGas,
         );
 
@@ -186,7 +195,11 @@ const SingleClaimDialog = () => {
       // STEP 2: CLAIM - Claim rewards from revenue contract to user wallet
       setState("confirming-claim");
 
-      const claimResult = await claim([tokenAddress], gasSettings, customGasLimit || estimatedGas);
+      const claimResult = await claim(
+        [tokenAddress],
+        gasPriceSettings,
+        customGasLimit || estimatedGas,
+      );
 
       console.log("Claim result:", claimResult);
 
@@ -275,11 +288,18 @@ const SingleClaimDialog = () => {
           </div>
         </div>
 
-        <GasSettingsBlock
+        {/* <GasSettingsBlock
           gasPrice={gasPrice}
           gasLimit={gasToUse}
           gasPriceOption={gasPriceOption}
           onEditClick={() => setIsGasSettingsOpen(true)}
+        /> */}
+
+        <GasSettingsBlock
+          customGasLimit={customGasLimit}
+          estimatedGas={estimatedGas}
+          formattedGasPrice={formattedGasPrice}
+          handleClick={() => setIsOpenedFee(true)}
         />
 
         <Button
@@ -645,7 +665,7 @@ const SingleClaimDialog = () => {
       <NetworkFeeConfigDialog
         isAdvanced={isAdvanced}
         setIsAdvanced={setIsAdvanced}
-        estimatedGas={estimatedGas > BigInt(0) ? estimatedGas : gasToUse}
+        estimatedGas={estimatedGas}
         setEstimatedGas={setEstimatedGas}
         gasPriceSettings={gasPriceSettings}
         gasPriceOption={gasPriceOption}
@@ -653,8 +673,8 @@ const SingleClaimDialog = () => {
         setCustomGasLimit={setCustomGasLimit}
         setGasPriceOption={setGasPriceOption}
         setGasPriceSettings={setGasPriceSettings}
-        isOpen={isGasSettingsOpen}
-        setIsOpen={setIsGasSettingsOpen}
+        isOpen={isOpenedFee}
+        setIsOpen={setIsOpenedFee}
       />
     </>
   );
