@@ -94,7 +94,7 @@ export default function LootBoxesSection({ isConnected, lootBox, onOpenLoot }: P
         <span className="text-16 font-medium text-primary-text md:text-18">
           {lootBox.epochBonus}
         </span>
-        <div className="h-1 w-full rounded-20 bg-tertiary-bg">
+        <div className="h-1 w-full rounded-20 bg-quaternary-bg">
           <div
             className="h-1 rounded-20 bg-green"
             style={{

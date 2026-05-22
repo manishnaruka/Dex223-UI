@@ -6,5 +6,9 @@ export default function Container({
   className,
   children,
 }: PropsWithChildren<{ className?: string }>) {
-  return <div className={clsxMerge("max-w-[1680px] my-0 mx-auto", className)}>{children}</div>;
+  return (
+    <div className={clsxMerge("max-w-[1680px] w-full min-w-0 my-0 mx-auto", className)}>
+      {children}
+    </div>
+  );
 }

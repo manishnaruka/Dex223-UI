@@ -23,7 +23,7 @@ export default function LeaderboardTable({ rows }: { rows: LeaderboardRow[] }) {
         <span className="flex items-center gap-1">
           <Svg iconName="small-expand-arrow" className="h-3 w-3 rotate-180 text-tertiary-text" />
           Points
-          <Tooltip iconSize={14} text="Leaderboard points earned during the current epoch." />
+          <Tooltip iconSize={16} text="Leaderboard points earned during the current epoch." />
         </span>
         <span>NFT tier</span>
       </div>

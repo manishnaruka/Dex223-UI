@@ -32,7 +32,7 @@ const InfoRow = ({
 }) => (
   <div
     className={clsxMerge(
-      "flex flex-col gap-0.5 border-l-2 border-[#3C4B4A] pl-2.5 lg:gap-1 lg:pl-5",
+      "flex flex-col gap-0.5 border-l-2 border-secondary-border pl-2.5 lg:gap-1 lg:pl-5",
       className,
     )}
   >
@@ -72,7 +72,7 @@ export default function RewardProgramCard({
   ];
 
   return (
-    <div className="relative min-h-[156px] max-w-full overflow-hidden rounded-3 bg-gradient-card-green-light-fill lg:h-[156px]">
+    <div className="relative min-h-[156px] w-full max-w-full min-w-0 overflow-hidden rounded-3 bg-gradient-card-green-light-fill lg:h-[156px]">
       <Image
         src="/images/rewardProgramcard.svg"
         alt=""
@@ -80,8 +80,8 @@ export default function RewardProgramCard({
         height={156}
         className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-auto -translate-x-1/2 object-cover opacity-10 lg:block"
       />
-      <div className="relative flex min-w-0 flex-col gap-3 p-3 md:p-4 min-[900px]:h-full min-[900px]:flex-row min-[900px]:items-stretch min-[900px]:justify-between min-[900px]:gap-4 lg:gap-6 lg:px-6 lg:py-6">
-        <div className="flex min-w-0 flex-1 flex-col gap-2 min-[900px]:justify-center lg:gap-4">
+      <div className="relative flex min-w-0 flex-col gap-3 p-3 md:p-4 lg:h-full lg:flex-row lg:items-stretch lg:justify-between lg:gap-6 lg:px-6 lg:py-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 lg:justify-center lg:gap-4">
           <h2 className="text-18 font-medium leading-6 text-primary-text md:text-24 lg:text-28">
             {t("reward_program_title")}
           </h2>
@@ -105,13 +105,13 @@ export default function RewardProgramCard({
           </div>
         </div>
 
-        <div className="ml-auto grid w-full min-w-0 grid-cols-[1fr_auto] gap-2 sm:flex sm:flex-row sm:flex-wrap sm:gap-3 min-[900px]:w-auto min-[900px]:flex-none min-[900px]:flex-nowrap min-[900px]:items-stretch">
+        <div className="ml-auto grid w-full min-w-0 grid-cols-[1fr_auto] gap-2 sm:flex sm:flex-row sm:flex-wrap sm:gap-3 lg:w-auto lg:flex-none lg:flex-nowrap lg:items-stretch">
           {showSeasonNft ? (
             <button
               type="button"
               onClick={onSeasonNftClick}
               disabled={!onSeasonNftClick}
-              className="order-2 flex min-w-[68px] flex-shrink-0 flex-col gap-0.5 rounded-2 border border-secondary-border bg-tertiary-bg/80 px-2 py-2 text-left duration-200 enabled:cursor-pointer enabled:hocus:border-green disabled:cursor-default sm:min-w-0 sm:flex-1 min-[900px]:order-none min-[900px]:w-[118px] min-[900px]:min-w-[118px] min-[900px]:flex-none min-[900px]:justify-center min-[900px]:rounded-3 min-[900px]:px-3 min-[900px]:py-3 lg:w-[132px] lg:min-w-[132px] lg:px-4"
+              className="order-2 flex min-w-[68px] flex-shrink-0 flex-col gap-0.5 rounded-2 border border-secondary-border bg-tertiary-bg/80 px-2 py-2 text-left duration-200 enabled:cursor-pointer enabled:hocus:border-green disabled:cursor-default sm:min-w-0 sm:flex-1 lg:order-none lg:w-[118px] lg:min-w-[118px] lg:flex-none lg:justify-center lg:rounded-3 lg:px-3 lg:py-3 xl:w-[132px] xl:min-w-[132px] xl:px-4"
             >
               <span className="text-10 text-secondary-text lg:text-12">{t("season_nft")}</span>
               <div className="flex items-center gap-1">
@@ -126,7 +126,7 @@ export default function RewardProgramCard({
             </button>
           ) : null}
 
-          <div className="order-1 flex min-w-0 flex-1 flex-col gap-1.5 rounded-2 border border-secondary-border bg-tertiary-bg/80 px-2 py-2 sm:min-w-0 sm:flex-1 min-[900px]:order-none min-[900px]:w-[196px] min-[900px]:min-w-[196px] min-[900px]:flex-none min-[900px]:justify-center min-[900px]:rounded-3 min-[900px]:px-3 min-[900px]:py-3 lg:w-[224px] lg:min-w-[224px] lg:px-4">
+          <div className="order-1 flex min-w-0 flex-1 flex-col gap-1.5 rounded-2 border border-secondary-border bg-tertiary-bg/80 px-2 py-2 sm:min-w-0 sm:flex-1 lg:order-none lg:w-[196px] lg:min-w-[196px] lg:flex-none lg:justify-center lg:rounded-3 lg:px-3 lg:py-3 xl:w-[224px] xl:min-w-[224px] xl:px-4">
             <div className="flex items-center gap-1">
               <span className="text-10 text-secondary-text lg:text-12">{t("epoch_ends_in")}</span>
               <Tooltip iconSize={16} text={t("epoch_ends_in_tooltip")} />
@@ -148,7 +148,7 @@ export default function RewardProgramCard({
             </div>
           </div>
 
-          <div className="order-3 col-span-2 flex min-w-0 flex-col gap-2 rounded-2 border border-secondary-border bg-tertiary-bg/80 px-2 py-2 sm:min-w-0 sm:flex-1 min-[900px]:order-none min-[900px]:col-span-1 min-[900px]:w-[196px] min-[900px]:min-w-[196px] min-[900px]:flex-none min-[900px]:justify-center min-[900px]:rounded-3 min-[900px]:px-3 min-[900px]:py-3 lg:w-[224px] lg:min-w-[224px] lg:px-4">
+          <div className="order-3 col-span-2 flex min-w-0 flex-col gap-2 rounded-2 border border-secondary-border bg-tertiary-bg/80 px-2 py-2 sm:min-w-0 sm:flex-1 lg:order-none lg:col-span-1 lg:w-[196px] lg:min-w-[196px] lg:flex-none lg:justify-center lg:rounded-3 lg:px-3 lg:py-3 xl:w-[224px] xl:min-w-[224px] xl:px-4">
             <div className="flex items-center justify-between gap-2">
               <span className="rounded-20 border border-secondary-border px-2 py-0.5 text-10 font-medium text-primary-text lg:px-3 lg:py-1 lg:text-12">
                 {t("season_label", { n: season })}
@@ -157,9 +157,9 @@ export default function RewardProgramCard({
                 {t("epoch_label", { current: epochCurrent, total: epochTotal })}
               </span>
             </div>
-            <div className="rounded-20 h-2 bg-secondary-bg w-full">
+            <div className="rounded-20 h-2 bg-quaternary-bg w-full">
               <div
-                className="rounded-20 h-2 bg-[#95B1A4]"
+                className="rounded-20 h-2 bg-green"
                 style={{ width: `${Math.max(0, Math.min(100, progressPercent))}%` }}
               />
             </div>

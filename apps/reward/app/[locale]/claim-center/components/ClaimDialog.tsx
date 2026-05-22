@@ -2,8 +2,7 @@
 
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input, { InputSize } from "@/components/atoms/Input";
@@ -11,6 +10,19 @@ import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+
+import {
+  useClaimGasLimitStore,
+  useClaimGasModeStore,
+  useClaimGasPriceStore,
+} from "../stores/useClaimGasSettingsStore";
+import {
+  NetworkDetails,
+  ProofPanel,
+  TokenMark,
+  WalletAlert,
+} from "./_claim-shared";
 
 export type ClaimDialogStatus = "review" | "awaiting" | "executing" | "success" | "failed";
 
@@ -32,25 +44,6 @@ const proof = {
   ],
 };
 
-function TokenMark({ size = "default" }: { size?: "small" | "default" | "large" }) {
-  const imageSize = size === "large" ? 56 : size === "default" ? 32 : 20;
-
-  return (
-    <Image
-      src="/images/tokens/USDT.svg"
-      alt=""
-      width={imageSize}
-      height={imageSize}
-      className={clsx(
-        "shrink-0 rounded-full shadow-[0_0_18px_rgba(112,197,158,0.45)]",
-        size === "small" && "h-5 w-5",
-        size === "default" && "h-8 w-8",
-        size === "large" && "h-14 w-14",
-      )}
-    />
-  );
-}
-
 function ClaimSummary() {
   return (
     <div className="flex items-center justify-between rounded-3 bg-tertiary-bg p-4 md:p-5">
@@ -62,53 +55,6 @@ function ClaimSummary() {
       <div className="flex items-center gap-2 text-18 font-medium text-primary-text">
         <TokenMark />
         USDT
-      </div>
-    </div>
-  );
-}
-
-function NetworkDetails() {
-  return (
-    <div className="flex flex-col gap-2 text-12">
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-1 text-secondary-text">
-          <Svg iconName="info" size={14} />
-          Chain
-        </span>
-        <span className="text-primary-text">Ethereum</span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-1 text-secondary-text">
-          <Svg iconName="info" size={14} />
-          Contract
-        </span>
-        <span className="flex items-center gap-2 text-primary-text">
-          0xabf...71d0
-          <IconButton variant={IconButtonVariant.COPY} text="0xabf000000000000000000000000000000071d0" />
-        </span>
-      </div>
-      <div className="mt-2 grid grid-cols-[1fr_1fr_1fr_auto_auto] items-center gap-2 rounded-3 bg-tertiary-bg px-4 py-3 text-secondary-text max-sm:grid-cols-3 max-sm:px-3 max-sm:py-3">
-        <span>
-          Gas price
-          <span className="block text-primary-text">33.53 GWEI</span>
-        </span>
-        <span>
-          Gas limit
-          <span className="block text-primary-text">329000</span>
-        </span>
-        <span>
-          Total network fee
-          <span className="block text-primary-text">0.0031 ETH</span>
-        </span>
-        <span className="rounded-5 border border-secondary-border px-2 py-0.5 text-10 font-medium text-primary-text max-sm:col-start-1 max-sm:flex max-sm:h-9 max-sm:items-center max-sm:justify-center">
-          Cheaper
-        </span>
-        <button
-          type="button"
-          className="rounded-5 bg-green-bg px-3 py-1 text-10 font-medium text-primary-text max-sm:col-span-2 max-sm:h-9"
-        >
-          Edit
-        </button>
       </div>
     </div>
   );
@@ -138,7 +84,7 @@ function StatusRow({ status }: { status: ClaimDialogStatus }) {
         ) : null}
         {isExecuting ? (
           <>
-            <button className="rounded-5 bg-green-bg px-3 py-1 text-10 font-medium text-primary-text">
+            <button className="inline-flex h-6 items-center rounded-full bg-green-bg px-3 text-10 font-medium text-primary-text">
               Speed up
             </button>
             <Svg iconName="forward" size={18} className="text-green" />
@@ -188,40 +134,6 @@ function ResultHero({ status }: { status: "success" | "failed" }) {
   );
 }
 
-function ProofPanel({ defaultOpen = false }: { defaultOpen?: boolean }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const formattedProof = useMemo(() => JSON.stringify(proof, null, 2), []);
-
-  useEffect(() => {
-    setIsOpen(defaultOpen);
-  }, [defaultOpen]);
-
-  return (
-    <div className="rounded-3 bg-tertiary-bg">
-      <button
-        type="button"
-        onClick={() => setIsOpen((value) => !value)}
-        className="flex min-h-12 w-full items-center justify-between gap-3 px-4 text-left text-12 text-secondary-text"
-      >
-        <span className="flex items-center gap-2">
-          <Svg iconName="info" size={16} />
-          Merkle proof
-        </span>
-        <Svg
-          iconName="small-expand-arrow"
-          size={18}
-          className={clsx("duration-200", isOpen && "rotate-180")}
-        />
-      </button>
-      {isOpen ? (
-        <pre className="max-h-[260px] overflow-auto whitespace-pre-wrap px-4 pb-4 text-12 leading-5 text-secondary-text">
-          {formattedProof}
-        </pre>
-      ) : null}
-    </div>
-  );
-}
-
 function ClaimToast({
   status,
   onDismiss,
@@ -232,27 +144,15 @@ function ClaimToast({
   const isSuccess = status === "success";
 
   return (
-    <div className="fixed right-4 top-4 z-[1000] flex w-[330px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-3 border border-secondary-border bg-primary-bg p-4 shadow-2xl">
+    <div className="fixed right-4 top-4 z-[1000] flex w-[360px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-3 border border-secondary-border bg-primary-bg p-4 shadow-2xl">
       <TokenMark />
       <div className="min-w-0 flex-1">
-        <p className="font-bold text-primary-text">{isSuccess ? "Successfully claimed" : "Failed to claim"}</p>
+        <p className="font-bold text-primary-text">
+          {isSuccess ? "Successfully claimed" : "Failed to claim"}
+        </p>
         <p className="text-12 text-secondary-text">23 USDT</p>
       </div>
       <IconButton variant={IconButtonVariant.CLOSE} handleClose={onDismiss} />
-    </div>
-  );
-}
-
-function WalletAlert({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed bottom-0 left-0 z-[1000] w-full border-t border-green bg-green-bg shadow-notification">
-      <div className="mx-auto flex max-w-[1680px] items-center justify-between gap-3 px-4 py-4 text-14 text-primary-text md:px-8">
-        <div className="flex items-center gap-3">
-          <Preloader type="linear" />
-          <span>Please confirm action in your wallet</span>
-        </div>
-        <IconButton variant={IconButtonVariant.CLOSE} handleClose={onClose} />
-      </div>
     </div>
   );
 }
@@ -264,6 +164,13 @@ export default function ClaimDialog({ isOpen, onOpenChange, initialStatus = "rev
   const [showAddressError, setShowAddressError] = useState(false);
   const [toastStatus, setToastStatus] = useState<"success" | "failed" | null>(null);
   const [showWalletAlert, setShowWalletAlert] = useState(false);
+  const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
+
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useClaimGasPriceStore();
+  const { customGasLimit, estimatedGas, setCustomGasLimit, setEstimatedGas } =
+    useClaimGasLimitStore();
+  const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
   useEffect(() => {
     if (!isOpen) {
@@ -311,7 +218,7 @@ export default function ClaimDialog({ isOpen, onOpenChange, initialStatus = "rev
         <div className="flex flex-col gap-4">
           <ResultHero status={status} />
           <StatusRow status={status} />
-          <ProofPanel defaultOpen={status === "failed"} />
+          <ProofPanel proof={proof} defaultOpen={status === "failed"} />
         </div>
       );
     }
@@ -353,7 +260,9 @@ export default function ClaimDialog({ isOpen, onOpenChange, initialStatus = "rev
           </div>
           {recipient === "another" ? (
             <div className="mt-4">
-              <label className="mb-2 block text-14 font-bold text-secondary-text">Wallet address</label>
+              <label className="mb-2 block text-14 font-bold text-secondary-text">
+                Wallet address
+              </label>
               <Input
                 inputSize={InputSize.DEFAULT}
                 value={address}
@@ -371,7 +280,7 @@ export default function ClaimDialog({ isOpen, onOpenChange, initialStatus = "rev
             </div>
           ) : null}
         </div>
-        <NetworkDetails />
+        <NetworkDetails chainLabel="Ethereum" onEdit={() => setIsGasSettingsOpen(true)} />
         <div className="grid grid-cols-2 gap-3 pt-1">
           <Button
             variant={ButtonVariant.CONTAINED}
@@ -400,16 +309,32 @@ export default function ClaimDialog({ isOpen, onOpenChange, initialStatus = "rev
   return (
     <>
       <DrawerDialog isOpen={isOpen} setIsOpen={onOpenChange} maxMobileWidth="520px">
-        <div className="max-h-[calc(100vh-8px)] w-full max-w-[600px] overflow-y-auto rounded-t-3 bg-primary-bg p-4 shadow-2xl sm:w-[calc(100vw-24px)] sm:rounded-5 md:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-18 font-bold text-primary-text sm:text-20">Claim</h2>
+        <div className="flex max-h-[calc(100dvh-8px)] w-[calc(100vw-24px)] max-w-[600px] flex-col rounded-t-3 bg-primary-bg shadow-2xl sm:rounded-5">
+          <div className="flex flex-shrink-0 items-center justify-between px-4 pb-3 pt-4 md:px-6 md:pb-4 md:pt-6">
+            <h2 className="text-18 font-bold text-primary-text md:text-20">Claim</h2>
             <IconButton variant={IconButtonVariant.CLOSE} handleClose={() => onOpenChange(false)} />
           </div>
-          {renderBody()}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 md:px-6 md:pb-6">
+            {renderBody()}
+          </div>
         </div>
       </DrawerDialog>
       {showWalletAlert ? <WalletAlert onClose={() => setShowWalletAlert(false)} /> : null}
       {toastStatus ? <ClaimToast status={toastStatus} onDismiss={() => setToastStatus(null)} /> : null}
+      <NetworkFeeConfigDialog
+        isOpen={isGasSettingsOpen}
+        setIsOpen={setIsGasSettingsOpen}
+        isAdvanced={isAdvanced}
+        setIsAdvanced={setIsAdvanced}
+        gasPriceOption={gasPriceOption}
+        gasPriceSettings={gasPriceSettings}
+        setGasPriceOption={setGasPriceOption}
+        setGasPriceSettings={setGasPriceSettings}
+        customGasLimit={customGasLimit}
+        estimatedGas={estimatedGas}
+        setCustomGasLimit={setCustomGasLimit}
+        setEstimatedGas={setEstimatedGas}
+      />
     </>
   );
 }

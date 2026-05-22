@@ -53,8 +53,12 @@ export default function ReferralsSection({
     <section className="flex min-w-0 flex-col gap-4 overflow-hidden rounded-3 bg-primary-bg p-3 md:p-5 lg:p-6">
       <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="text-20 font-medium text-primary-text lg:text-24">{t("section_title")}</h3>
-          <p className="text-12 text-secondary-text lg:text-14">{t("decay_caps")}</p>
+          <h2 className="text-20 font-medium leading-7 text-primary-text md:text-24 lg:text-28">
+            {t("section_title")}
+          </h2>
+          <p className="break-words text-12 leading-5 text-secondary-text lg:text-14">
+            {t("decay_caps")}
+          </p>
         </div>
         <span className="inline-flex max-w-full self-start rounded-20 bg-green-bg px-3 py-1 text-12 font-medium text-green sm:whitespace-nowrap">
           {t("total_reward", {

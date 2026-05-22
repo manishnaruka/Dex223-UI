@@ -38,9 +38,11 @@ function SectionHeader({
   return (
     <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-start">
       <div className="flex min-w-0 flex-col gap-1">
-        <h2 className="text-20 font-medium text-primary-text md:text-24 lg:text-28">{title}</h2>
+        <h2 className="text-20 font-medium leading-7 text-primary-text md:text-24 lg:text-28">
+          {title}
+        </h2>
         {description ? (
-          <p className="text-12 text-secondary-text lg:text-14">{description}</p>
+          <p className="text-12 leading-5 text-secondary-text lg:text-14">{description}</p>
         ) : null}
       </div>
       {action ? <div className="shrink-0 sm:w-auto">{action}</div> : null}
@@ -65,7 +67,7 @@ export function Eligibility({ isConnected, stats }: EligibilityProps) {
   const t = useTranslations("SocialQuests");
 
   return (
-    <section className="rounded-3 bg-primary-bg p-4 md:p-5 lg:p-6">
+    <section className="rounded-3 bg-primary-bg p-3 md:p-5 lg:p-6">
       <SectionHeader
         title={t("eligibility_title")}
         description={t("eligibility_description")}
@@ -210,12 +212,12 @@ export function Tasks({
     : tasks;
 
   return (
-    <section className="rounded-3 bg-primary-bg p-4 md:p-5 lg:p-6">
+    <section className="rounded-3 bg-primary-bg p-3 md:p-5 lg:p-6">
       <div className="flex min-w-0 flex-col gap-1">
-        <h2 className="text-20 font-medium text-primary-text md:text-24 lg:text-28">
+        <h2 className="text-20 font-medium leading-7 text-primary-text md:text-24 lg:text-28">
           {t("tasks_title")}
         </h2>
-        <p className="text-12 text-secondary-text lg:text-14">{t("tasks_description")}</p>
+        <p className="text-12 leading-5 text-secondary-text lg:text-14">{t("tasks_description")}</p>
       </div>
 
       {filteredTasks.length > 0 ? (

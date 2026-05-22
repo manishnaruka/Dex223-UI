@@ -39,10 +39,10 @@ function SectionHeader({
   return (
     <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-start">
       <div className="flex min-w-0 flex-col gap-1">
-        <h2 className="text-16 font-medium leading-6 text-primary-text md:text-24 lg:text-28">
+        <h2 className="text-20 font-medium leading-7 text-primary-text md:text-24 lg:text-28">
           {title}
         </h2>
-        <p className="text-[11px] leading-4 text-secondary-text lg:text-14">{description}</p>
+        <p className="text-12 leading-5 text-secondary-text lg:text-14">{description}</p>
       </div>
       {action ? <div className="w-full shrink-0 sm:w-auto">{action}</div> : null}
     </div>

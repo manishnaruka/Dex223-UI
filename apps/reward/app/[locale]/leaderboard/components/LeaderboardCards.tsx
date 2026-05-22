@@ -17,11 +17,11 @@ export default function LeaderboardCards({ rows }: { rows: LeaderboardRow[] }) {
         <article
           key={`${row.rank}-${row.wallet}`}
           className={clsxMerge(
-            "min-w-0 rounded-3 bg-tertiary-bg/50 p-3 text-12 text-secondary-text md:p-4",
+            "min-w-0 overflow-hidden rounded-3 bg-tertiary-bg/50 p-3 text-12 text-secondary-text md:p-4",
             row.highlighted && "border border-green/70 shadow shadow-green/30",
           )}
         >
-          <div className="grid min-w-0 grid-cols-[minmax(68px,auto)_minmax(0,1fr)] gap-x-3 gap-y-1 md:grid-cols-[minmax(78px,auto)_minmax(0,1fr)]">
+          <div className="grid min-w-0 grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-3 gap-y-1 md:grid-cols-[minmax(0,auto)_minmax(0,1fr)]">
             <span>Rank</span>
             <span className="text-right text-primary-text">{row.rank}</span>
             <span>Wallet</span>
@@ -30,7 +30,7 @@ export default function LeaderboardCards({ rows }: { rows: LeaderboardRow[] }) {
             </button>
             <span className="flex items-center gap-1">
               Points
-              <Tooltip iconSize={14} text="Leaderboard points earned during the current epoch." />
+              <Tooltip iconSize={16} text="Leaderboard points earned during the current epoch." />
             </span>
             <span className="flex min-w-0 justify-end text-primary-text">
               <PointsMeter points={row.points} maxPoints={maxPoints} />

@@ -8,7 +8,7 @@ export default function SocialQuestsLoadingSkeleton() {
         <Skeleton className="h-8 w-20 rounded-2 md:h-10 md:w-24" />
       </div>
 
-      <div className="rounded-3 bg-primary-bg p-4 md:p-5 lg:p-6">
+      <div className="rounded-3 bg-primary-bg p-3 md:p-5 lg:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:justify-between">
           <div className="flex-1">
             <Skeleton className="h-8 w-56 rounded-2" />
@@ -25,7 +25,7 @@ export default function SocialQuestsLoadingSkeleton() {
         </div>
       </div>
 
-      <div className="rounded-3 bg-primary-bg p-4 md:p-5 lg:p-6">
+      <div className="rounded-3 bg-primary-bg p-3 md:p-5 lg:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
             <Skeleton className="h-7 w-36 rounded-2" />
@@ -40,7 +40,7 @@ export default function SocialQuestsLoadingSkeleton() {
         </div>
       </div>
 
-      <div className="rounded-3 bg-primary-bg p-4 md:p-5 lg:p-6">
+      <div className="rounded-3 bg-primary-bg p-3 md:p-5 lg:p-6">
         <Skeleton className="h-7 w-24 rounded-2" />
         <Skeleton className="mt-3 h-4 w-full max-w-[760px] rounded-2" />
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">

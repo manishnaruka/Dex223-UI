@@ -32,7 +32,7 @@ function DetailCard({
     <div className="min-w-0 rounded-3 bg-tertiary-bg p-3 md:p-4">
       <span className="flex items-center gap-1 text-12 text-secondary-text">
         {label}
-        <Tooltip iconSize={14} text={tooltip} />
+        <Tooltip iconSize={16} text={tooltip} />
       </span>
       <div className="mt-1 flex min-w-0 items-center gap-2 text-14 font-medium text-primary-text md:text-16">
         {children}

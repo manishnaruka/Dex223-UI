@@ -2,8 +2,7 @@
 
 import Preloader from "@repo/ui/preloader";
 import clsx from "clsx";
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import DrawerDialog from "@/components/atoms/DrawerDialog";
 import Input, { InputSize } from "@/components/atoms/Input";
@@ -11,9 +10,22 @@ import Svg from "@/components/atoms/Svg";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import IconButton, { IconButtonVariant } from "@/components/buttons/IconButton";
 import RadioButton from "@/components/buttons/RadioButton";
+import NetworkFeeConfigDialog from "@/components/dialogs/NetworkFeeConfigDialog";
+
+import {
+  useClaimGasLimitStore,
+  useClaimGasModeStore,
+  useClaimGasPriceStore,
+} from "../stores/useClaimGasSettingsStore";
+import {
+  NetworkDetails,
+  ProofPanel,
+  TokenMark,
+  WalletAlert,
+} from "./_claim-shared";
 
 type SmartClaimStatus = "review" | "awaiting" | "executing" | "success";
-type StepStatus = "idle" | "awaiting" | "executing" | "success";
+type StepStatus = "idle" | "next" | "awaiting" | "executing" | "success";
 
 interface Props {
   isOpen: boolean;
@@ -33,52 +45,42 @@ const proof = {
   ],
 };
 
-const steps = [
-  { chain: "Ethereum", accent: "bg-primary-text", badge: "E" },
-  { chain: "Base", accent: "bg-secondary-text", badge: "B" },
-  { chain: "BSC", accent: "bg-yellow-light", badge: "B" },
-];
+const chainSteps = ["Ethereum", "Base", "BSC"];
 
-function TokenMark({ size = "default", muted = false }: { size?: "small" | "default" | "large"; muted?: boolean }) {
-  const imageSize = size === "large" ? 56 : size === "default" ? 32 : 20;
+function StepStatusBadge({ status }: { status: StepStatus }) {
+  const config = (() => {
+    switch (status) {
+      case "success":
+        return { bg: "bg-green", icon: "done" as const, iconClass: "text-primary-bg" };
+      case "awaiting":
+      case "executing":
+        return { bg: "bg-green", icon: "arrow-bottom" as const, iconClass: "text-primary-bg" };
+      case "next":
+        return { bg: "bg-yellow-light", icon: "minus" as const, iconClass: "text-primary-bg" };
+      case "idle":
+      default:
+        return { bg: "bg-tertiary-text", icon: "minus" as const, iconClass: "text-primary-bg" };
+    }
+  })();
 
   return (
-    <Image
-      src="/images/tokens/USDT.svg"
-      alt=""
-      width={imageSize}
-      height={imageSize}
+    <span
       className={clsx(
-        "relative shrink-0 rounded-full",
-        muted ? "opacity-50 grayscale" : "shadow-[0_0_18px_rgba(112,197,158,0.45)]",
-        size === "small" && "h-5 w-5",
-        size === "default" && "h-8 w-8",
-        size === "large" && "h-14 w-14",
+        "absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full border border-primary-bg",
+        config.bg,
       )}
-    />
+    >
+      <Svg iconName={config.icon} size={10} className={config.iconClass} />
+    </span>
   );
 }
 
-function ChainMark({
-  badge,
-  accent,
-  muted,
-}: {
-  badge: string;
-  accent: string;
-  muted: boolean;
-}) {
+function ChainMark({ status }: { status: StepStatus }) {
+  const muted = status === "idle" || status === "next" || status === "success";
   return (
     <span className="relative">
       <TokenMark muted={muted} />
-      <span
-        className={clsx(
-          "absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full border border-primary-bg text-8 font-bold text-black",
-          accent,
-        )}
-      >
-        {badge}
-      </span>
+      <StepStatusBadge status={status} />
     </span>
   );
 }
@@ -99,67 +101,6 @@ function SmartClaimSummary() {
   );
 }
 
-function NetworkDetails() {
-  return (
-    <div className="flex flex-col gap-2 text-12">
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-1 text-secondary-text">
-          <Svg iconName="info" size={14} />
-          Chains
-        </span>
-        <span className="text-primary-text">Ethereum, Base, BSC</span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-1 text-secondary-text">
-          <Svg iconName="info" size={14} />
-          Contract
-        </span>
-        <span className="flex items-center gap-2 text-primary-text">
-          0xabf...71d0
-          <IconButton variant={IconButtonVariant.COPY} text="0xabf000000000000000000000000000000071d0" />
-        </span>
-      </div>
-      <div className="mt-2 grid grid-cols-[1fr_1fr_1fr_auto_auto] items-center gap-2 rounded-3 bg-tertiary-bg px-4 py-3 text-secondary-text max-sm:grid-cols-3 max-sm:px-3 max-sm:py-3">
-        <span>
-          Gas price
-          <span className="block text-primary-text">33.53 GWEI</span>
-        </span>
-        <span>
-          Gas limit
-          <span className="block text-primary-text">329000</span>
-        </span>
-        <span>
-          Total network fee
-          <span className="block text-primary-text">0.0031 ETH</span>
-        </span>
-        <span className="rounded-5 border border-secondary-border px-2 py-0.5 text-10 font-medium text-primary-text max-sm:col-start-1 max-sm:flex max-sm:h-9 max-sm:items-center max-sm:justify-center">
-          Cheaper
-        </span>
-        <button
-          type="button"
-          className="rounded-5 bg-green-bg px-3 py-1 text-10 font-medium text-primary-text max-sm:col-span-2 max-sm:h-9"
-        >
-          Edit
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function WalletAlert({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed bottom-0 left-0 z-[1000] w-full border-t border-green bg-green-bg shadow-notification">
-      <div className="mx-auto flex max-w-[1680px] items-center justify-between gap-3 px-4 py-4 text-14 text-primary-text md:px-8">
-        <div className="flex items-center gap-3">
-          <Preloader type="linear" />
-          <span>Please confirm action in your wallet</span>
-        </div>
-        <IconButton variant={IconButtonVariant.CLOSE} handleClose={onClose} />
-      </div>
-    </div>
-  );
-}
-
 function ClaimToast({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div className="fixed right-4 top-4 z-[1000] flex w-[360px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-3 border border-secondary-border bg-primary-bg p-4 shadow-2xl">
@@ -174,25 +115,22 @@ function ClaimToast({ onDismiss }: { onDismiss: () => void }) {
 }
 
 function SmartStepRow({
-  index,
-  step,
   status,
+  isLast,
 }: {
-  index: number;
-  step: (typeof steps)[number];
   status: StepStatus;
+  isLast: boolean;
 }) {
   const isActive = status === "awaiting" || status === "executing";
   const isSuccess = status === "success";
-  const isIdle = status === "idle";
 
   return (
-    <div className="grid min-h-12 grid-cols-[32px_auto_1fr] items-center gap-2 max-sm:grid-cols-[32px_1fr_auto]">
-      <div className="relative flex h-full items-center">
-        {index > 0 ? (
-          <span className="absolute -top-2 left-4 h-5 w-0.5 -translate-x-1/2 bg-green-bg" />
-        ) : null}
-        <ChainMark badge={step.badge} accent={step.accent} muted={isIdle || isSuccess} />
+    <div className="relative grid min-h-12 grid-cols-[32px_auto_1fr] items-center gap-2 max-sm:grid-cols-[32px_1fr_auto]">
+      {!isLast ? (
+        <span className="absolute left-4 top-1/2 h-full w-px -translate-x-1/2 bg-green-bg" />
+      ) : null}
+      <div className="relative z-10">
+        <ChainMark status={status} />
       </div>
       <span
         className={clsx(
@@ -200,7 +138,11 @@ function SmartStepRow({
           isActive ? "text-primary-text" : "text-secondary-text",
         )}
       >
-        {status === "executing" ? "Executing token claims" : isSuccess ? "Successfully claimed" : "Confirm claiming"}
+        {status === "executing"
+          ? "Executing token claims"
+          : isSuccess
+            ? "Successfully claimed"
+            : "Confirm claiming"}
       </span>
       <div className="flex items-center justify-end gap-3 text-12 text-secondary-text max-sm:col-start-2 max-sm:col-end-4 max-sm:justify-start">
         {status === "awaiting" ? (
@@ -211,7 +153,7 @@ function SmartStepRow({
         ) : null}
         {status === "executing" ? (
           <>
-            <button className="rounded-5 bg-green-bg px-3 py-1 text-10 font-medium text-primary-text max-sm:min-w-[220px]">
+            <button className="inline-flex h-6 items-center rounded-full bg-green-bg px-3 text-10 font-medium text-primary-text max-sm:min-w-[220px]">
               Speed up
             </button>
             <Svg iconName="forward" size={18} className="text-green" />
@@ -225,36 +167,6 @@ function SmartStepRow({
           </>
         ) : null}
       </div>
-    </div>
-  );
-}
-
-function ProofPanel() {
-  const [isOpen, setIsOpen] = useState(false);
-  const formattedProof = useMemo(() => JSON.stringify(proof, null, 2), []);
-
-  return (
-    <div className="rounded-3 bg-tertiary-bg">
-      <button
-        type="button"
-        onClick={() => setIsOpen((value) => !value)}
-        className="flex min-h-12 w-full items-center justify-between gap-3 px-4 text-left text-12 text-secondary-text"
-      >
-        <span className="flex items-center gap-2">
-          <Svg iconName="info" size={16} />
-          Merkle proof
-        </span>
-        <Svg
-          iconName="small-expand-arrow"
-          size={18}
-          className={clsx("duration-200", isOpen && "rotate-180")}
-        />
-      </button>
-      {isOpen ? (
-        <pre className="max-h-[260px] overflow-auto whitespace-pre-wrap px-4 pb-4 text-12 leading-5 text-secondary-text">
-          {formattedProof}
-        </pre>
-      ) : null}
     </div>
   );
 }
@@ -274,8 +186,8 @@ function SuccessBody() {
           </div>
         </div>
       </div>
-      <SmartStepRow index={0} step={steps[0]} status="success" />
-      <ProofPanel />
+      <SmartStepRow status="success" isLast />
+      <ProofPanel proof={proof} />
     </div>
   );
 }
@@ -288,6 +200,13 @@ export default function SmartClaimDialog({ isOpen, onOpenChange }: Props) {
   const [activeStep, setActiveStep] = useState(0);
   const [showWalletAlert, setShowWalletAlert] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [isGasSettingsOpen, setIsGasSettingsOpen] = useState(false);
+
+  const { gasPriceOption, gasPriceSettings, setGasPriceOption, setGasPriceSettings } =
+    useClaimGasPriceStore();
+  const { customGasLimit, estimatedGas, setCustomGasLimit, setEstimatedGas } =
+    useClaimGasLimitStore();
+  const { isAdvanced, setIsAdvanced } = useClaimGasModeStore();
 
   useEffect(() => {
     if (!isOpen) {
@@ -315,7 +234,7 @@ export default function SmartClaimDialog({ isOpen, onOpenChange }: Props) {
 
     if (status === "executing") {
       const id = setTimeout(() => {
-        if (activeStep < steps.length - 1) {
+        if (activeStep < chainSteps.length - 1) {
           setActiveStep((step) => step + 1);
           setStatus("awaiting");
           return;
@@ -334,7 +253,7 @@ export default function SmartClaimDialog({ isOpen, onOpenChange }: Props) {
     }
 
     if (index > activeStep) {
-      return "idle";
+      return index === activeStep + 1 ? "next" : "idle";
     }
 
     if (status === "executing") {
@@ -365,13 +284,12 @@ export default function SmartClaimDialog({ isOpen, onOpenChange }: Props) {
       return (
         <div className="flex flex-col gap-4">
           <SmartClaimSummary />
-          <div className="border-t border-secondary-border pt-4">
-            {steps.map((step, index) => (
+          <div className="flex flex-col gap-2 border-t border-secondary-border pt-4">
+            {chainSteps.map((chain, index) => (
               <SmartStepRow
-                key={step.chain}
-                index={index}
-                step={step}
+                key={chain}
                 status={getStepStatus(index)}
+                isLast={index === chainSteps.length - 1}
               />
             ))}
           </div>
@@ -407,7 +325,9 @@ export default function SmartClaimDialog({ isOpen, onOpenChange }: Props) {
           </div>
           {recipient === "another" ? (
             <div className="mt-4">
-              <label className="mb-2 block text-14 font-bold text-secondary-text">Wallet address</label>
+              <label className="mb-2 block text-14 font-bold text-secondary-text">
+                Wallet address
+              </label>
               <Input
                 inputSize={InputSize.DEFAULT}
                 value={address}
@@ -425,7 +345,11 @@ export default function SmartClaimDialog({ isOpen, onOpenChange }: Props) {
             </div>
           ) : null}
         </div>
-        <NetworkDetails />
+        <NetworkDetails
+          chainLabel="Ethereum"
+          chainsLabel="Ethereum, Base, BSC"
+          onEdit={() => setIsGasSettingsOpen(true)}
+        />
         <div className="grid grid-cols-2 gap-3 pt-1">
           <Button
             variant={ButtonVariant.CONTAINED}
@@ -454,16 +378,32 @@ export default function SmartClaimDialog({ isOpen, onOpenChange }: Props) {
   return (
     <>
       <DrawerDialog isOpen={isOpen} setIsOpen={onOpenChange} maxMobileWidth="520px">
-        <div className="max-h-[calc(100vh-8px)] w-full max-w-[600px] overflow-y-auto rounded-t-3 bg-primary-bg p-4 shadow-2xl sm:w-[calc(100vw-24px)] sm:rounded-5 md:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-18 font-bold text-primary-text sm:text-20">Smart claim</h2>
+        <div className="flex max-h-[calc(100dvh-8px)] w-[calc(100vw-24px)] max-w-[600px] flex-col rounded-t-3 bg-primary-bg shadow-2xl sm:rounded-5">
+          <div className="flex flex-shrink-0 items-center justify-between px-4 pb-3 pt-4 md:px-6 md:pb-4 md:pt-6">
+            <h2 className="text-18 font-bold text-primary-text md:text-20">Smart claim</h2>
             <IconButton variant={IconButtonVariant.CLOSE} handleClose={() => onOpenChange(false)} />
           </div>
-          {renderBody()}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 md:px-6 md:pb-6">
+            {renderBody()}
+          </div>
         </div>
       </DrawerDialog>
       {showWalletAlert ? <WalletAlert onClose={() => setShowWalletAlert(false)} /> : null}
       {showToast ? <ClaimToast onDismiss={() => setShowToast(false)} /> : null}
+      <NetworkFeeConfigDialog
+        isOpen={isGasSettingsOpen}
+        setIsOpen={setIsGasSettingsOpen}
+        isAdvanced={isAdvanced}
+        setIsAdvanced={setIsAdvanced}
+        gasPriceOption={gasPriceOption}
+        gasPriceSettings={gasPriceSettings}
+        setGasPriceOption={setGasPriceOption}
+        setGasPriceSettings={setGasPriceSettings}
+        customGasLimit={customGasLimit}
+        estimatedGas={estimatedGas}
+        setCustomGasLimit={setCustomGasLimit}
+        setEstimatedGas={setEstimatedGas}
+      />
     </>
   );
 }
