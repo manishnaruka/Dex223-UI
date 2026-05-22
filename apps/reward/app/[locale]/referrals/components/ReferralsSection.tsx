@@ -1,0 +1,106 @@
+"use client";
+
+import Tooltip from "@repo/ui/tooltip";
+import { useTranslations } from "next-intl";
+
+import {
+  ReferralsDesktopTable,
+  ReferralsMobileTable,
+} from "@/app/[locale]/referrals/components/ReferralsTable";
+import { RefereeRow } from "@/app/[locale]/referrals/data/referralData";
+import EmptyStateIcon from "@/components/atoms/EmptyStateIconNew";
+
+interface Props {
+  isConnected: boolean;
+  totalReferees: number | null;
+  combinedVolume: number | null;
+  totalRewards: number | null;
+  rows: RefereeRow[];
+}
+
+const formatCurrency = (value: number | null) =>
+  value === null ? "—" : `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+
+const SummaryRow = ({
+  label,
+  value,
+  tooltip,
+}: {
+  label: string;
+  value: string | number;
+  tooltip: string;
+}) => (
+  <div className="flex min-w-0 items-center justify-between gap-2 lg:justify-start">
+    <span className="flex min-w-0 items-center gap-1 text-12 text-secondary-text md:text-14">
+      <Tooltip iconSize={16} text={tooltip} />
+      <span className="min-w-0 truncate">{label}</span>
+    </span>
+    <span className="shrink-0 text-12 font-medium text-primary-text md:text-14">{value}</span>
+  </div>
+);
+
+export default function ReferralsSection({
+  isConnected,
+  totalReferees,
+  combinedVolume,
+  totalRewards,
+  rows,
+}: Props) {
+  const t = useTranslations("Referrals");
+  const hasRows = isConnected && rows.length > 0;
+
+  return (
+    <section className="flex min-w-0 flex-col gap-4 overflow-hidden rounded-3 bg-primary-bg p-3 md:p-5 lg:p-6">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-1 min-w-0">
+          <h3 className="text-20 font-medium text-primary-text lg:text-24">{t("section_title")}</h3>
+          <p className="text-12 text-secondary-text lg:text-14">{t("decay_caps")}</p>
+        </div>
+        <span className="inline-flex max-w-full self-start rounded-20 bg-green-bg px-3 py-1 text-12 font-medium text-green sm:whitespace-nowrap">
+          {t("total_reward", {
+            amount: totalRewards === null ? "—" : `$${totalRewards}`,
+          })}
+        </span>
+      </div>
+
+      <div className="flex min-w-0 flex-col gap-2 rounded-3 border border-secondary-border bg-tertiary-bg/40 px-3 py-3 md:px-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+        <span className="text-14 font-medium text-primary-text md:text-16">{t("summary")}</span>
+        <div className="flex min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:gap-6">
+          <SummaryRow
+            label={t("total_referees")}
+            value={totalReferees === null ? "—" : totalReferees}
+            tooltip={t("total_referees_tooltip")}
+          />
+          <SummaryRow
+            label={t("combined_volume")}
+            value={formatCurrency(combinedVolume)}
+            tooltip={t("combined_volume_tooltip")}
+          />
+          <SummaryRow
+            label={t("total_rewards")}
+            value={formatCurrency(totalRewards)}
+            tooltip={t("total_rewards_tooltip")}
+          />
+        </div>
+      </div>
+
+      {hasRows ? (
+        <>
+          <ReferralsDesktopTable rows={rows} />
+          <ReferralsMobileTable rows={rows} />
+        </>
+      ) : (
+        <div className="relative flex min-h-[200px] items-center justify-center overflow-hidden rounded-3 bg-tertiary-bg/30 px-4 text-center md:min-h-[220px]">
+          <EmptyStateIcon
+            iconName="wallet"
+            size={120}
+            className="absolute right-0 bottom-0 opacity-30 pointer-events-none md:size-[160px]"
+          />
+          <span className="relative z-10 max-w-[280px] text-14 text-secondary-text lg:text-16">
+            {isConnected ? t("share_link_to_earn") : t("connect_wallet_view_referrals")}
+          </span>
+        </div>
+      )}
+    </section>
+  );
+}
