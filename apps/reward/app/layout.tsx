@@ -38,7 +38,7 @@ export default async function RootLayout({ children, params }: PropsWithChildren
 }
 
 export const metadata = {
-  title: "Dex Exchange",
+  title: "Dex223 Reward",
   description:
     "Next generation decentralized exchange for ERC-223 & ERC-20 tokens with margin trading, 15% cheaper GAS fees and transparent auto-listings for any tokens.",
 };
