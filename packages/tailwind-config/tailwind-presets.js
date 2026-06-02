@@ -63,6 +63,7 @@ const config = {
         "empty-lock": `url('${emptyImagePath}/lock.svg')`,
         "empty-import-list": `url('${emptyImagePath}/import-list.svg')`,
         "empty-one-side-asset": `url('${emptyImagePath}/one-side-asset.svg')`,
+        "empty-reward": `url('${emptyImagePath}/empty-reward.svg')`,
 
         "account-card-pattern": "url('/images/account-bg.svg')",
         "drag-and-drop-dashed-pattern":

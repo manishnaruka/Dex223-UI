@@ -94,13 +94,8 @@ export default function ReferralsSection({
           <ReferralsMobileTable rows={rows} />
         </>
       ) : (
-        <div className="relative flex min-h-[200px] items-center justify-center overflow-hidden rounded-3 bg-tertiary-bg/30 px-4 text-center md:min-h-[220px]">
-          <EmptyStateIcon
-            iconName="wallet"
-            size={120}
-            className="absolute right-0 bottom-0 opacity-30 pointer-events-none md:size-[160px]"
-          />
-          <span className="relative z-10 max-w-[280px] text-14 text-secondary-text lg:text-16">
+       <div className="flex flex-col justify-center items-center h-full min-h-[340px] bg-primary-bg rounded-5 gap-1 bg-empty-reward bg-right-top bg-no-repeat max-md:bg-size-180 relative right-[-11px] md:right-[-23px]">
+          <span className="text-secondary-text">
             {isConnected ? t("share_link_to_earn") : t("connect_wallet_view_referrals")}
           </span>
         </div>

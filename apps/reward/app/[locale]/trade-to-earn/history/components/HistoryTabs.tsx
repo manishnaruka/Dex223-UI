@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { clsxMerge } from "@/functions/clsxMerge";
+import TabButton from "@/components/buttons/TabButton";
 
 const SECTION_IDS = ["overview", "streak-timeline", "claim-receipts", "drill-downs"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
@@ -45,21 +46,17 @@ export default function HistoryTabs() {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-1 rounded-3 bg-primary-bg p-1 sm:grid-cols-4">
+    <div className="mt-5 w-full flex lg:grid lg:grid-cols-4 bg-primary-bg p-1 gap-1 rounded-3 overflow-x-auto">
       {SECTION_IDS.map((id) => (
-        <button
+        <TabButton
           key={id}
-          type="button"
+          active={active === id}
           onClick={() => handleClick(id)}
-          className={clsxMerge(
-            "flex min-h-10 items-center justify-center rounded-2 px-2 py-2 text-center text-12 leading-4 duration-200 md:px-4 md:py-2.5 md:text-14",
-            active === id
-              ? "bg-green-bg text-primary-text border border-green"
-              : "border border-transparent text-secondary-text hocus:bg-secondary-bg hocus:text-primary-text",
-          )}
+          inactiveBackground="bg-secondary-bg"
+          size={48}
         >
           {t(LABEL_KEYS[id])}
-        </button>
+        </TabButton>
       ))}
     </div>
   );

@@ -28,6 +28,7 @@ import Svg from "@/components/atoms/Svg";
 import Pagination from "@/components/common/Pagination";
 import Button, { ButtonColor, ButtonSize, ButtonVariant } from "@/components/buttons/Button";
 import { clsxMerge } from "@/functions/clsxMerge";
+import TabButton from "@/components/buttons/TabButton";
 
 interface Props {
   trades: TradeRow[];
@@ -389,30 +390,22 @@ export default function DrillDownsSection({ trades, claims }: Props) {
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-1 rounded-3 bg-tertiary-bg p-1">
-        <button
-          type="button"
+        <TabButton
+          active={tab === "trades"}
           onClick={() => setTab("trades")}
-          className={clsxMerge(
-            "flex items-center justify-center rounded-2 px-4 py-2 text-12 duration-200 md:text-14",
-            tab === "trades"
-              ? "bg-green-bg text-primary-text border border-green"
-              : "text-secondary-text hocus:text-primary-text",
-          )}
+          inactiveBackground="bg-secondary-bg"
+          size={48}
         >
           {t("trades")}
-        </button>
-        <button
-          type="button"
+        </TabButton>
+        <TabButton
+          active={tab === "claims"}
           onClick={() => setTab("claims")}
-          className={clsxMerge(
-            "flex items-center justify-center rounded-2 px-4 py-2 text-12 duration-200 md:text-14",
-            tab === "claims"
-              ? "bg-green-bg text-primary-text border border-green"
-              : "text-secondary-text hocus:text-primary-text",
-          )}
+          inactiveBackground="bg-secondary-bg"
+          size={48}
         >
           {t("claims")}
-        </button>
+        </TabButton>
       </div>
 
       <div className="mt-3">

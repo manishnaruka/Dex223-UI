@@ -59,7 +59,7 @@ export const mockReferralData: ReferralData = {
     },
   ],
   referralLink:
-    "dex223.io/r/0x1234567890abcdef1234567890abcdef12345678",
+    "app.dex223.io/?reference_address=0x1234567890abcdef1234567890abcdef12345678",
   season: 3,
   epochCurrent: 4,
   epochTotal: 12,

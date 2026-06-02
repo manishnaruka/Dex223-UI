@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Season {
+  id       Int     @id @default(autoincrement())
+  index    Int     @unique
+  startsAt DateTime
+  endsAt   DateTime
+  epochs   Epoch[]
+  badges   SeasonBadge[]
+}
+
+model Epoch {
+  id        Int                @id @default(autoincrement())
+  season    Season             @relation(fields: [seasonId], references: [id])
+  seasonId  Int
+  index     Int
+  startsAt  DateTime
+  endsAt    DateTime
+  status    EpochStatus        @default(OPEN)
+  rewards   ReferralReward[]
+  joins     ReferralRelation[]
+  snapshots RefereeVolumeSnapshot[]
+
+  @@unique([seasonId, index])
+}
+
+enum EpochStatus {
+  OPEN
+  FINALIZING
+  CLOSED
+}
+
+model ReferralLink {
+  address   String   @id
+  slug      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model ReferralRelation {
+  id              Int      @id @default(autoincrement())
+  referrerAddress String
+  refereeAddress  String   @unique
+  joinedEpoch     Epoch    @relation(fields: [joinedEpochId], references: [id])
+  joinedEpochId   Int
+  joinedAt        DateTime @default(now())
+
+  @@index([referrerAddress])
+}
+
+model RefereeVolumeSnapshot {
+  id             Int     @id @default(autoincrement())
+  refereeAddress String
+  epoch          Epoch   @relation(fields: [epochId], references: [id])
+  epochId        Int
+  volumeUsd      Decimal @db.Decimal(20, 4)
+
+  @@unique([refereeAddress, epochId])
+}
+
+model ReferralReward {
+  id                Int        @id @default(autoincrement())
+  referrerAddress   String
+  refereeAddress    String
+  epoch             Epoch      @relation(fields: [epochId], references: [id])
+  epochId           Int
+  decayStage        Int
+  grossUsd          Decimal    @db.Decimal(20, 4)
+  perRefereeCapUsd  Decimal    @db.Decimal(20, 4)
+  clusterCapUsd     Decimal    @db.Decimal(20, 4)
+  finalUsd          Decimal    @db.Decimal(20, 4)
+  payoutKind        PayoutKind @default(USDT)
+
+  @@unique([referrerAddress, refereeAddress, epochId])
+  @@index([referrerAddress, epochId])
+}
+
+enum PayoutKind {
+  USDT
+  FEE_CREDIT
+  DEX_TOKEN
+}
+
+// Contributor Badges are permanent: never deleted, never downgraded after award.
+// One row per (address, season) preserves the historical record shown to the referee.
+model SeasonBadge {
+  id                        Int       @id @default(autoincrement())
+  address                   String
+  season                    Season    @relation(fields: [seasonId], references: [id])
+  seasonId                  Int
+  tier                      BadgeTier
+  topPercent                Int
+  totalVolumeContributedUsd Decimal   @db.Decimal(20, 4)
+  awardedAt                 DateTime  @default(now())
+
+  @@unique([address, seasonId])
+  @@index([address])
+}
+
+enum BadgeTier {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+model SiweNonce {
+  nonce     String   @id
+  address   String?
+  expiresAt DateTime
+}
